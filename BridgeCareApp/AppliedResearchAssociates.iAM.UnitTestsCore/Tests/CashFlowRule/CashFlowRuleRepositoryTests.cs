@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             {
                 Id = Guid.NewGuid(),
                 Name = "TestCashFlowRuleLibrary",
-                Description = ""
+                Description = "",
             };
             TestHelper.UnitOfWork.Context.AddEntity(_testCashFlowRuleLibrary);
 
@@ -120,17 +120,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void GetScenarioCashFlowRules_SimulationInDb_Gets()
-        {
-            // Arrange
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-
-            // Act and assert
-            TestHelper.UnitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulation.Id);
-        }
-
-        [Fact]
         public void UpsertLibrary_Does()
         {
             // Arrange
@@ -173,94 +162,85 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             TestHelper.UnitOfWork.CashFlowRuleRepo.DeleteCashFlowRuleLibrary(Guid.NewGuid());
         }
 
+        [Fact]
+        public void GetCashFlowRuleLibrariesNoChildren_DoesNotGetChildren()
+        {
+            // Arrange
+            Setup();
+            CreateLibraryTestData();
 
-        //[Fact]
-        //public async Task ShouldGetLibraryNoChildData()
-        //{
-        //    // Arrange
-        //    Setup();
-        //    CreateAuthorizedController();
-        //    CreateLibraryTestData();
+            // Act
+            var dtos = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibrariesNoChildren();
 
-        //    // Act
-        //    var result = await _controller.GetCashFlowRuleLibraries();
+            var relevantDto = dtos.Single(dto => dto.Id == _testCashFlowRuleLibrary.Id);
+            Assert.NotNull(relevantDto);
+            Assert.Empty(relevantDto.CashFlowRules);
+        }
 
-        //    // Assert
-        //    var okObjResult = result as OkObjectResult;
-        //    Assert.NotNull(okObjResult.Value);
+        [Fact]
+        public void GetScenarioCashFlowRules_SimulationInDb_Gets()
+        {
+            // Arrange
+            Setup();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            CreateScenarioTestData(simulation.Id);
 
-        //    var dtos = (List<CashFlowRuleLibraryDTO>)Convert.ChangeType(okObjResult.Value,
-        //        typeof(List<CashFlowRuleLibraryDTO>));
-        //    var relevantDto = dtos.Single(dto => dto.Id == _testCashFlowRuleLibrary.Id);
+            // Act
+            var dtos = TestHelper.UnitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulation.Id);
 
-        //    Assert.NotNull(relevantDto);
-        //    Assert.Empty(relevantDto.CashFlowRules);
-        //}
+            // Assert
+            var dto = dtos.Single();
+            Assert.Equal(_testScenarioCashFlowRule.Id, dto.Id);
+            Assert.Equal(_testScenarioCashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin.CriterionLibrary.Id,
+                dto.CriterionLibrary.Id);
+            Assert.Single(dto.CashFlowDistributionRules);
+            Assert.Equal(_testScenarioCashFlowDistributionRule.Id,
+                dto.CashFlowDistributionRules[0].Id);
+        }
 
-        //[Fact]
-        //public async Task ShouldGetScenarioData()
-        //{
-        //    // Arrange
-        //    Setup();
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-        //    CreateAuthorizedController();
-        //    CreateScenarioTestData(simulation.Id);
+        [Fact]
+        public void UpsertCashFlowRuleLibrary_LibraryInDb_Modifies()
+        {
+            // Arrange
+            Setup();
+            CreateLibraryTestData();
 
-        //    // Act
-        //    var result = await _controller.GetScenarioCashFlowRules(simulation.Id);
+            var dto = _testCashFlowRuleLibrary.ToDto();
+            dto.CashFlowRules[0].CriterionLibrary.MergedCriteriaExpression = null;
+            dto.Description = "Updated Description";
 
-        //    // Assert
-        //    var okObjResult = result as OkObjectResult;
-        //    Assert.NotNull(okObjResult.Value);
+            // Act
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);
 
-        //    var dtos = (List<CashFlowRuleDTO>)Convert.ChangeType(okObjResult.Value,
-        //        typeof(List<CashFlowRuleDTO>));
-        //    Assert.Single(dtos);
+            // Assert
+            var modifiedDto = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().Single(lib => lib.Id == dto.Id);
+            ObjectAssertions.EquivalentExcluding(dto, modifiedDto, x => x.CashFlowRules[0].CriterionLibrary);
+        }
 
-        //    Assert.Equal(_testScenarioCashFlowRule.Id, dtos[0].Id);
-        //    Assert.Equal(_testScenarioCashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin.CriterionLibrary.Id,
-        //        dtos[0].CriterionLibrary.Id);
-        //    Assert.Single(dtos[0].CashFlowDistributionRules);
+        [Fact]
+        public void UpsertOrDeleteCashFlowRules_RuleInDb_Modifies()
+        {
+            // Arrange
+            Setup();
+            CreateLibraryTestData();
 
-        //    Assert.Equal(_testScenarioCashFlowDistributionRule.Id,
-        //        dtos[0].CashFlowDistributionRules[0].Id);
-        //}
+            _testCashFlowRule.CashFlowDistributionRules.Add(_testCashFlowDistributionRule);
+            _testCashFlowRuleLibrary.CashFlowRules.Add(_testCashFlowRule);
+            
+            var dto = _testCashFlowRuleLibrary.ToDto();
+            var rule = dto.CashFlowRules[0];
+            rule.CriterionLibrary.MergedCriteriaExpression = null;
+            rule.Name = "Updated Name";
+            rule.CriterionLibrary.MergedCriteriaExpression = "Updated Expression";
+            rule.CashFlowDistributionRules[0].DurationInYears = 2;
 
-        //[Fact]
-        //public async Task ShouldModifyLibraryData()
-        //{
-        //    // Arrange
-        //    Setup();
-        //    CreateAuthorizedController();
-        //    CreateLibraryTestData();
+            // Act
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
 
-        //    _testCashFlowRule.CashFlowDistributionRules.Add(_testCashFlowDistributionRule);
-        //    _testCashFlowRuleLibrary.CashFlowRules.Add(_testCashFlowRule);
-
-        //    var dto = _testCashFlowRuleLibrary.ToDto();
-        //    dto.Description = "Updated Description";
-        //    dto.CashFlowRules[0].Name = "Updated Name";
-        //    dto.CashFlowRules[0].CriterionLibrary.MergedCriteriaExpression = "Updated Expression";
-        //    dto.CashFlowRules[0].CashFlowDistributionRules[0].DurationInYears = 2;
-
-        //    var sync = new PagingSyncModel<CashFlowRuleDTO>()
-        //    {
-        //        UpdateRows = new List<CashFlowRuleDTO>() { dto.CashFlowRules[0] }
-        //    };
-
-        //    var libraryRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>()
-        //    {
-        //        IsNewLibrary = false,
-        //        Library = dto,
-        //        PagingSync = sync
-        //    };
-
-        //    // Act
-        //    await _controller.UpsertCashFlowRuleLibrary(libraryRequest);
-
-        //    // Assert
-        //    var modifiedDto = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().Single(lib => lib.Id == dto.Id);
-        //}
+            // Assert
+            var modifiedDto = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().Single(lib => lib.Id == dto.Id);
+            ObjectAssertions.EquivalentExcluding(dto, modifiedDto, x => x.CashFlowRules[0].CriterionLibrary);
+        }
 
         //[Fact]
         //public async Task ShouldModifyScenarioData()

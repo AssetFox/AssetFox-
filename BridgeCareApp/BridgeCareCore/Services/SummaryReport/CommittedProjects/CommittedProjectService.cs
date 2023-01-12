@@ -477,7 +477,7 @@ namespace BridgeCareCore.Services
 
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
-
+        
         public double GetTreatmentCost(Guid treatmentLibraryId, string assetKeyData, string treatment, Guid networkId)
         {
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);

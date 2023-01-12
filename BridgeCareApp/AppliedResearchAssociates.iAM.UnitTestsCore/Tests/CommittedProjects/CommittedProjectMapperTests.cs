@@ -47,6 +47,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 testSimulation,
                 testAssetId,
                 true,
+                0,
                 noTreatment);
 
             // Assert
@@ -67,6 +68,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 testSimulation,
                 testAssetId,
                 false,
+                0,
                 TestDataForCommittedProjects.FourYearScenarioNoTreatment());
 
             // Assert
@@ -84,8 +86,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var noTreatment = TestDataForCommittedProjects.FourYearScenarioNoTreatment();
 
             // Act
-            firstCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, noTreatment);
-            secondCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, noTreatment);
+            firstCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, 0, noTreatment);
+            secondCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, 0, noTreatment);
 
             // Assert
             Assert.Equal(4, testSimulation.CommittedProjects.Count);
@@ -106,8 +108,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var noTreatment = TestDataForCommittedProjects.FourYearScenarioNoTreatment();
 
             // Act
-            firstCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, noTreatment);
-            secondCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, noTreatment);
+            firstCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, 0, noTreatment);
+            secondCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, 0, noTreatment);
 
             // Assert
             Assert.Equal(4, testSimulation.CommittedProjects.Count);

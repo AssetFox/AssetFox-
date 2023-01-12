@@ -1,34 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class CashFlowRuleRepositoryTests
     {
-        private CashFlowRuleLibraryEntity _testCashFlowRuleLibrary;
-        private CashFlowRuleEntity _testCashFlowRule;
-        private CashFlowDistributionRuleEntity _testCashFlowDistributionRule;
-        private ScenarioCashFlowRuleEntity _testScenarioCashFlowRule;
-        private ScenarioCashFlowDistributionRuleEntity _testScenarioCashFlowDistributionRule;
 
         private void Setup()
         {
@@ -37,51 +23,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             NetworkTestSetup.CreateNetwork(unitOfWork);
         }
 
-        private void CreateLibraryTestData()
+        private ScenarioCashFlowRuleEntity CreateScenarioTestData(Guid simulationId)
         {
-            _testCashFlowRuleLibrary = new CashFlowRuleLibraryEntity
-            {
-                Id = Guid.NewGuid(),
-                Name = "TestCashFlowRuleLibrary",
-                Description = "",
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(_testCashFlowRuleLibrary);
-
-
-            _testCashFlowRule = new CashFlowRuleEntity
-            {
-                Id = Guid.NewGuid(),
-                CashFlowRuleLibraryId = _testCashFlowRuleLibrary.Id,
-                Name = "TestCashFlowRule",
-                CriterionLibraryCashFlowRuleJoin = new CriterionLibraryCashFlowRuleEntity
-                {
-                    CriterionLibrary = new CriterionLibraryEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "TestCriterionLibrary",
-                        Description = "",
-                        MergedCriteriaExpression = "",
-                        IsSingleUse = true
-                    }
-                }
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(_testCashFlowRule);
-
-
-            _testCashFlowDistributionRule = new CashFlowDistributionRuleEntity
-            {
-                Id = Guid.NewGuid(),
-                CashFlowRuleId = _testCashFlowRule.Id,
-                DurationInYears = 1,
-                CostCeiling = 500000,
-                YearlyPercentages = "100"
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(_testCashFlowDistributionRule);
-        }
-
-        private void CreateScenarioTestData(Guid simulationId)
-        {
-            _testScenarioCashFlowRule = new ScenarioCashFlowRuleEntity
+            var testScenarioCashFlowRule = new ScenarioCashFlowRuleEntity
             {
                 Id = Guid.NewGuid(),
                 SimulationId = simulationId,
@@ -98,18 +42,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     }
                 }
             };
-            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioCashFlowRule);
+            TestHelper.UnitOfWork.Context.AddEntity(testScenarioCashFlowRule);
 
 
-            _testScenarioCashFlowDistributionRule = new ScenarioCashFlowDistributionRuleEntity
+            var testScenarioCashFlowDistributionRule = new ScenarioCashFlowDistributionRuleEntity
             {
                 Id = Guid.NewGuid(),
-                ScenarioCashFlowRuleId = _testScenarioCashFlowRule.Id,
+                ScenarioCashFlowRuleId = testScenarioCashFlowRule.Id,
                 DurationInYears = 1,
                 CostCeiling = 500000,
                 YearlyPercentages = "100"
             };
-            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioCashFlowDistributionRule);
+            TestHelper.UnitOfWork.Context.AddEntity(testScenarioCashFlowDistributionRule);
+            return testScenarioCashFlowRule;
         }
 
         [Fact]
@@ -123,13 +68,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public void UpsertLibrary_Does()
         {
             // Arrange
-            Setup();
-            var dto = new CashFlowRuleLibraryDTO
-            {
-                Id = Guid.NewGuid(),
-                Name = "library",
-                CashFlowRules = new List<CashFlowRuleDTO>()
-            };
+            var dto = CashFlowRuleLibraryDtos.Empty();
 
             // Act
             TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);
@@ -166,14 +105,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public void GetCashFlowRuleLibrariesNoChildren_DoesNotGetChildren()
         {
             // Arrange
-            Setup();
-            CreateLibraryTestData();
+            var library = CashFlowRuleLibraryDtos.Empty();
+            var rule = CashFlowRuleDtos.Rule();
+            var rules = new List<CashFlowRuleDTO> { rule };
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(library);
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(rules, library.Id);
 
             // Act
             var dtos = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibrariesNoChildren();
 
-            var relevantDto = dtos.Single(dto => dto.Id == _testCashFlowRuleLibrary.Id);
-            Assert.NotNull(relevantDto);
+            var relevantDto = dtos.Single(dto => dto.Id == library.Id);
             Assert.Empty(relevantDto.CashFlowRules);
         }
 
@@ -183,18 +124,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // Arrange
             Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            CreateScenarioTestData(simulation.Id);
+            var scenarioRule = CreateScenarioTestData(simulation.Id);
 
             // Act
             var dtos = TestHelper.UnitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulation.Id);
 
             // Assert
             var dto = dtos.Single();
-            Assert.Equal(_testScenarioCashFlowRule.Id, dto.Id);
-            Assert.Equal(_testScenarioCashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin.CriterionLibrary.Id,
+            Assert.Equal(scenarioRule.Id, dto.Id);
+            Assert.Equal(scenarioRule.CriterionLibraryScenarioCashFlowRuleJoin.CriterionLibrary.Id,
                 dto.CriterionLibrary.Id);
             Assert.Single(dto.CashFlowDistributionRules);
-            Assert.Equal(_testScenarioCashFlowDistributionRule.Id,
+            Assert.Equal(scenarioRule.ScenarioCashFlowDistributionRules.Single().Id,
                 dto.CashFlowDistributionRules[0].Id);
         }
 
@@ -202,11 +143,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public void UpsertCashFlowRuleLibrary_LibraryInDb_Modifies()
         {
             // Arrange
-            Setup();
-            CreateLibraryTestData();
-
-            var dto = _testCashFlowRuleLibrary.ToDto();
-            dto.CashFlowRules[0].CriterionLibrary.MergedCriteriaExpression = null;
+            var dto = CashFlowRuleLibraryDtos.Empty();
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);
             dto.Description = "Updated Description";
 
             // Act
@@ -222,24 +160,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            CreateLibraryTestData();
-
-            _testCashFlowRule.CashFlowDistributionRules.Add(_testCashFlowDistributionRule);
-            _testCashFlowRuleLibrary.CashFlowRules.Add(_testCashFlowRule);
-            
-            var dto = _testCashFlowRuleLibrary.ToDto();
-            var rule = dto.CashFlowRules[0];
+            var rule = CashFlowRuleDtos.Rule();
+            var rules = new List<CashFlowRuleDTO> { rule };
+            var library = CashFlowRuleLibraryDtos.Empty();
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(library);
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(rules, library.Id);
             rule.CriterionLibrary.MergedCriteriaExpression = null;
             rule.Name = "Updated Name";
             rule.CriterionLibrary.MergedCriteriaExpression = "Updated Expression";
             rule.CashFlowDistributionRules[0].DurationInYears = 2;
 
             // Act
-            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(rules, library.Id);
 
             // Assert
-            var modifiedDto = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().Single(lib => lib.Id == dto.Id);
-            ObjectAssertions.EquivalentExcluding(dto, modifiedDto, x => x.CashFlowRules[0].CriterionLibrary);
+            var modifiedDto = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().Single(lib => lib.Id == library.Id);
+            
+            ObjectAssertions.EquivalentExcluding(rule, modifiedDto.CashFlowRules[0], x => x.CriterionLibrary);
         }
 
         //[Fact]

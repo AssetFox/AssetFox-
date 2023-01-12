@@ -205,16 +205,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             try
             {
                 // Upsert(update/insert) all
-                _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);                             
-
-                // Remove the location and consequence records from the database
-                _unitOfWork.Context.DeleteAll<CommittedProjectLocationEntity>(_ => allExistingCommittedProjectIds.Contains(_.CommittedProjectId));
-                _unitOfWork.Context.DeleteAll<CommittedProjectConsequenceEntity>(_ => allExistingCommittedProjectIds.Contains(_.CommittedProjectId));
-                              
-                // Add the locations for all objects to the database
-                _unitOfWork.Context.AddAll(locations, _unitOfWork.UserEntity?.Id);
-                // Add the consequences for all objects to the database
-                _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
 
                 _unitOfWork.Commit();
             }

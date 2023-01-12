@@ -673,7 +673,6 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldOverwriteExistingLibraryBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange
-            // Currently based on a spreadsheet that hard codes the year 2023. Will therefore start failing in 2024.
             var year = 2022;
             var service = Setup();
             CreateLibraryTestData();

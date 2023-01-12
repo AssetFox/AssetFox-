@@ -17,8 +17,8 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class CalculatedAttributesTests
-   {
+    public class CalculatedAttributeAuthorizationTests
+    {
         private CalculatedAttributesController CreateTestController(List<string> userClaims)
         {
             var accessor = HttpContextAccessorMocks.Default();
@@ -52,9 +52,10 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly }));
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly });
+            var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCalculatedAttributesFromScenario);
+            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ModifyCalculatedAttributesFromScenario);
             // Assert
             Assert.False(allowed.Succeeded);
         }
@@ -74,9 +75,10 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator });
+            var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCalculatedAttributesFromLibrary);
+            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ModifyCalculatedAttributesFromLibrary);
             // Assert
             Assert.True(allowed.Succeeded);
         }
@@ -95,9 +97,10 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator });
+            var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCalculatedAttributesFromScenario);
+            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ModifyCalculatedAttributesFromScenario);
             // Assert
             Assert.True(allowed.Succeeded);
         }

@@ -639,13 +639,12 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldImportLibraryBudgetsFromFile()
         {
-            // Wjwjwj
             // Arrange
             var service = Setup();
             CreateLibraryTestData();
             var accessor = CreateRequestWithLibraryFormData();
             var controller = CreateAuthorizedController(service, accessor);
-            var year = DateTime.Now.Year;
+            var year = 2022;
 
 
             // Act
@@ -673,10 +672,9 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldOverwriteExistingLibraryBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
-            // WJWJWJ
             // Arrange
             // Currently based on a spreadsheet that hard codes the year 2023. Will therefore start failing in 2024.
-            var year = DateTime.Now.Year;
+            var year = 2022;
             var service = Setup();
             CreateLibraryTestData();
             var accessor = CreateRequestWithLibraryFormData();
@@ -850,9 +848,8 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldImportScenarioBudgetsFromFile()
         {
-            // WJWJWJ
             // Arrange
-            var year = DateTime.Now.Year;
+            var year = 2022;
             var service = Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
@@ -884,9 +881,8 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldOverwriteExistingScenarioBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
-            // WJWJWJ
             // Arrange
-            var year = DateTime.Now.Year;
+            var year = 2022;
             var service = Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);

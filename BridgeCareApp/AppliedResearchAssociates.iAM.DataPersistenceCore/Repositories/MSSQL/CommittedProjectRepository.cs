@@ -204,23 +204,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.BeginTransaction();
             try
             {
-                // UpsertAll does not work :(
-                // Use calculated attribute repository as an example
-                // TODO: Fix UpsertAll or remove
+                // TODO if works then make calls for committedProjectConsequenceEntities, locations
+                // Upsert(update/insert) all
+                _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);                             
 
                 // Remove the location and consequence records from the database
                 _unitOfWork.Context.DeleteAll<CommittedProjectLocationEntity>(_ => allExistingCommittedProjectIds.Contains(_.CommittedProjectId));
                 _unitOfWork.Context.DeleteAll<CommittedProjectConsequenceEntity>(_ => allExistingCommittedProjectIds.Contains(_.CommittedProjectId));
-
-                // Update each existing committed project
-                _unitOfWork.Context.UpdateAll(committedProjectEntities.Where(_ => allExistingCommittedProjectIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
-
-                // Add each new committed project
-                _unitOfWork.Context.AddAll(committedProjectEntities.Where(_ => !allExistingCommittedProjectIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
-
+                              
                 // Add the locations for all objects to the database
                 _unitOfWork.Context.AddAll(locations, _unitOfWork.UserEntity?.Id);
-
                 // Add the consequences for all objects to the database
                 _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
 

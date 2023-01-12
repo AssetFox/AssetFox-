@@ -46,7 +46,7 @@ namespace BridgeCareCore.Controllers
                 var result = new PagingPageModel<CashFlowRuleDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = _cashFlowService.GetLibraryCashFlowPage(libraryId, pageRequest);
+                    result = _cashFlowService.GetLibraryPage(libraryId, pageRequest);
                 });
 
                 return Ok(result);
@@ -69,7 +69,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
-                    result = _cashFlowService.GetCashFlowPage(simulationId, pageRequest);
+                    result = _cashFlowService.GetScenarioPage(simulationId, pageRequest);
                 });
 
                 return Ok(result);
@@ -154,27 +154,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var items = new List<CashFlowRuleDTO>();
-                    if (upsertRequest.ScenarioId != null)
-                        items = _cashFlowService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
-                    else if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
-                        items = _cashFlowService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
-                    else if (!upsertRequest.IsNewLibrary)
-                        items = _cashFlowService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
-                    else if (upsertRequest.IsNewLibrary && upsertRequest.PagingSync.LibraryId == Guid.Empty)
-                    {
-                        items = _cashFlowService.GetNewLibraryDataset(upsertRequest.PagingSync);
-                    }
-
-                    if (upsertRequest.IsNewLibrary)
-                    {
-                        items.ForEach(item =>
-                        {
-                            item.Id = Guid.NewGuid();
-                            item.CriterionLibrary.Id = Guid.NewGuid();
-                            item.CashFlowDistributionRules.ForEach(_ => _.Id = Guid.NewGuid());
-                        });
-                    }
+                    var items = _cashFlowService.GetSyncedLibraryDataset(upsertRequest);                  
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
@@ -213,7 +193,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var dtos = _cashFlowService.GetSyncedScenarioDataset(simulationId, pagingSync);
+                    var dtos = _cashFlowService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(dtos, simulationId);
                     UnitOfWork.Commit();

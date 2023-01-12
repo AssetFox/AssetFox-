@@ -2,14 +2,16 @@
 using BridgeCareCore.Models;
 using System.Collections.Generic;
 using System;
+using BridgeCareCore.Services.Paging.Generics;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface IRemainingLifeLimitPagingService
+    public interface IRemainingLifeLimitPagingService 
     {
-        PagingPageModel<RemainingLifeLimitDTO> GetRemainingLifeLimitPage(Guid simulationId, PagingRequestModel<RemainingLifeLimitDTO> request);
-        PagingPageModel<RemainingLifeLimitDTO> GetLibraryRemainingLifeLimitPage(Guid libraryId, PagingRequestModel<RemainingLifeLimitDTO> request);
-        List<RemainingLifeLimitDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<RemainingLifeLimitDTO> request);
-        List<RemainingLifeLimitDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<RemainingLifeLimitDTO> request);
+        PagingPageModel<RemainingLifeLimitDTO> GetScenarioPage(Guid scenarioId, PagingRequestModel<RemainingLifeLimitDTO> request);
+        PagingPageModel<RemainingLifeLimitDTO> GetLibraryPage(Guid libraryId, PagingRequestModel<RemainingLifeLimitDTO> request);
+        List<RemainingLifeLimitDTO> GetSyncedScenarioDataSet(Guid scenarioId, PagingSyncModel<RemainingLifeLimitDTO> syncModel);
+        List<RemainingLifeLimitDTO> GetSyncedLibraryDataset(LibraryUpsertPagingRequestModel<RemainingLifeLimitLibraryDTO, RemainingLifeLimitDTO> upsertRequest);
     }
 }

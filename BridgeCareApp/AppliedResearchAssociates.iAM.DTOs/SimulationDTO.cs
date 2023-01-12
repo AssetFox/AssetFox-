@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
-    public class SimulationDTO
+    public class SimulationDTO : BaseDTO
     {
-        public Guid Id { get; set; }
-
         public string Name { get; set; }
 
         public Guid NetworkId { get; set;}

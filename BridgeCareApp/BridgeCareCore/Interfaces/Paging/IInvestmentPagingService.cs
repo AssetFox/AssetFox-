@@ -7,11 +7,11 @@ namespace BridgeCareCore.Interfaces
 {
     public interface IInvestmentPagingService
     {
-        InvestmentPagingPageModel GetLibraryInvestmentPage(Guid libraryId, InvestmentPagingRequestModel request);
+        InvestmentPagingPageModel GetLibraryPage(Guid libraryId, InvestmentPagingRequestModel request);
 
-        InvestmentPagingPageModel GetScenarioInvestmentPage(Guid simulationId, InvestmentPagingRequestModel request);
+        InvestmentPagingPageModel GetScenarioPage(Guid simulationId, InvestmentPagingRequestModel request);
 
-        List<BudgetDTO> GetSyncedInvestmentDataset(Guid simulationId, InvestmentPagingSyncModel request);
+        List<BudgetDTO> GetSyncedScenarioDataSet(Guid simulationId, InvestmentPagingSyncModel request);
 
         List<BudgetDTO> GetSyncedLibraryDataset(Guid libraryId, InvestmentPagingSyncModel request);
         List<BudgetDTO> GetNewLibraryDataset(InvestmentPagingSyncModel request);

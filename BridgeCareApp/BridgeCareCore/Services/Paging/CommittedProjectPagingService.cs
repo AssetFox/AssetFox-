@@ -8,10 +8,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Services.Paging.Generics;
 
 namespace BridgeCareCore.Services
 {
-    public class CommittedProjectPagingService : ICommittedProjectPagingService
+    public class CommittedProjectPagingService :BasePagingService<SectionCommittedProjectDTO>,  ICommittedProjectPagingService
     {
         private static IUnitOfWork _unitOfWork;
         public const string UnknownBudgetName = "Unknown";
@@ -36,7 +37,7 @@ namespace BridgeCareCore.Services
 
 
 
-            committedProjects = SyncedDataset(committedProjects, request.PagingSync);
+            committedProjects = SyncDataset(committedProjects, request.SyncModel);
             committedProjects = committedProjects.OrderBy(_ => _.Id).ToList();
             totalItems = committedProjects.Count;
 
@@ -47,7 +48,7 @@ namespace BridgeCareCore.Services
             }
 
             if (request.search.Trim() != "")
-                committedProjects = SearchCurves(committedProjects, request.search, budgetdict);
+                committedProjects = SearchRows(committedProjects, request.search, budgetdict);
             if (request.sortColumn.Trim() != "")
                 committedProjects = OrderByColumn(committedProjects, request.sortColumn, request.isDescending, budgetdict);
 
@@ -77,7 +78,7 @@ namespace BridgeCareCore.Services
         public List<SectionCommittedProjectDTO> GetSyncedDataset(Guid simulationId, PagingSyncModel<SectionCommittedProjectDTO> request)
         {
             var committedProjects = _unitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
-            return SyncedDataset(committedProjects, request);
+            return SyncDataset(committedProjects, request);
         }
 
 
@@ -123,12 +124,12 @@ namespace BridgeCareCore.Services
             return committedProjects;
         }
 
-        private List<SectionCommittedProjectDTO> SearchCurves(List<SectionCommittedProjectDTO> committedProjects,
+        private List<SectionCommittedProjectDTO> SearchRows(List<SectionCommittedProjectDTO> rows,
             string search,
             Dictionary<Guid, string> budgetDict)
         {
             search = search.ToLower();
-            return committedProjects
+            return rows
                 .Where(_ => _.LocationKeys[_networkKeyField].ToLower().Contains(search) ||
                     _.Year.ToString().Contains(search) ||
                     _.Treatment.ToLower().Contains(search) ||
@@ -137,18 +138,5 @@ namespace BridgeCareCore.Services
                     _.Cost.ToString().Contains(search)).ToList();
         }
 
-        private List<SectionCommittedProjectDTO> SyncedDataset(List<SectionCommittedProjectDTO> committedProjects, PagingSyncModel<SectionCommittedProjectDTO> request)
-        {
-            committedProjects = committedProjects.Concat(request.AddedRows).Where(_ => !request.RowsForDeletion.Contains(_.Id)).ToList();
-
-            for (var i = 0; i < committedProjects.Count; i++)
-            {
-                var item = request.UpdateRows.FirstOrDefault(row => row.Id == committedProjects[i].Id);
-                if (item != null)
-                    committedProjects[i] = item;
-            }
-
-            return committedProjects;
-        }
     }
 }

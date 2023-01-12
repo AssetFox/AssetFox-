@@ -104,7 +104,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = library,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),
@@ -131,7 +131,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = library,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),
@@ -175,7 +175,7 @@ namespace BridgeCareCoreTests.Tests
                 isDescending = false,
                 Page = 1,
                 RowsPerPage = 5,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),
@@ -263,22 +263,23 @@ namespace BridgeCareCoreTests.Tests
             {
                 LibraryId = libraryId,
             };
-            pagingService.Setup(s => s.GetSyncedLibraryDataset(libraryId, pagingSync)).Returns(performanceCurves);
-            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repositoryMock.Object);
-            var controller = PerformanceCurveControllerTestSetup.Create(
-                esecSecurity,
-                unitOfWork.Object,
-                service.Object,
-                pagingService.Object);
             var library = new PerformanceCurveLibraryDTO
             {
                 Id = libraryId,
             };
             var pagingRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
-                PagingSync = pagingSync,
+                SyncModel = pagingSync,
                 Library = library,
             };
+            pagingService.Setup(s => s.GetSyncedLibraryDataset(pagingRequest)).Returns(performanceCurves);
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repositoryMock.Object);
+            var controller = PerformanceCurveControllerTestSetup.Create(
+                esecSecurity,
+                unitOfWork.Object,
+                service.Object,
+                pagingService.Object);
+            
 
             await controller.UpsertPerformanceCurveLibrary(pagingRequest);
 
@@ -301,7 +302,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 isDescending = false,
                 Page = 1,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),

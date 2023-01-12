@@ -19,23 +19,6 @@ namespace BridgeCareCoreTests.Tests
 {
     public class CalculatedAttributeAuthorizationTests
     {
-        private CalculatedAttributesController CreateTestController(List<string> userClaims)
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
-            var unitOfWork = UnitOfWorkMocks.New();
-            var userRepo = UserRepositoryMocks.EveryoneExists();
-            unitOfWork.Setup(u => u.UserRepo).Returns(userRepo.Object);
-            var controller = new CalculatedAttributesController(EsecSecurityMocks.DbeMock.Object,
-                unitOfWork.Object, hubService, accessor, null);
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = testUser }
-            };
-            return controller;
-        }
-
         [Fact]
         public async Task UserIsModifyCalculatedAttributesFromScenarioAuthorized()
         {
@@ -59,6 +42,7 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             Assert.False(allowed.Succeeded);
         }
+
         [Fact]
         public async Task UserIsModifyCalculatedAttributesFromLibraryAuthorized()
         {
@@ -82,6 +66,7 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             Assert.True(allowed.Succeeded);
         }
+
         [Fact]
         public async Task UserIsModifyCalculatedAttributesFromScenarioAuthorized_B2C()
         {

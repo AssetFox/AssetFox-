@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Services;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -58,37 +61,55 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnGet()
+        public async Task CriterionLibraries_CallsThroughToRepo()
         {
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.New();
+            UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var criterionLibraryRepo = CriterionLibraryRepositoryMocks.New(unitOfWork);
+            var controller = CreateController(unitOfWork);
+
             // Act
             var result = await controller.CriterionLibraries();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            ActionResultAssertions.OkObject(result);
+            criterionLibraryRepo.SingleInvocationWithName(nameof(ICriterionLibraryRepository.CriterionLibraries));
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnPost()
+        public async Task UpsertCriterionLibrary_CallsThroughToRepo()
         {
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.New();
+            UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var repo = CriterionLibraryRepositoryMocks.New(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var dto = CriterionLibraryTestSetup.TestCriterionLibrary();
+
             // Act
             var result = await controller
-                .UpsertCriterionLibrary(CriterionLibraryTestSetup.TestCriterionLibrary());
+                .UpsertCriterionLibrary(dto);
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            ActionResultAssertions.OkObject(result);
+            var invocation = repo.SingleInvocationWithName(nameof(ICriterionLibraryRepository.UpsertCriterionLibrary));
+            Assert.Equal(dto, invocation.Arguments[0]);
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnDelete()
+        public async Task DeleteCriterionLibrary_CallsThroughToRepo()
         {
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.New();
+            UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var repo = CriterionLibraryRepositoryMocks.New(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var libraryId = Guid.NewGuid();
             // Act
-            var result = await controller.DeleteCriterionLibrary(Guid.Empty);
+            var result = await controller.DeleteCriterionLibrary(libraryId);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var invocation = repo.SingleInvocationWithName(nameof(ICriterionLibraryRepository.DeleteCriterionLibrary));
+            Assert.Equal(libraryId, invocation.Arguments[0]);
         }
 
         [Fact]
@@ -108,24 +129,6 @@ namespace BridgeCareCoreTests.Tests
             var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<CriterionLibraryDTO>));
             Assert.Contains(dtos, cl => cl.Id == criterionLibrary.Id);
-        }
-
-        [Fact]
-        public async Task ShouldDeleteCriterionLibrary()
-        {
-            // Arrange
-            var controller = SetupController();
-            var criterionLibrary = Setup();
-
-            // Act
-            var result = await controller.DeleteCriterionLibrary(criterionLibrary.Id);
-
-            // Assert
-            Assert.IsType<OkResult>(result);
-
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.CriterionLibrary.Any(_ =>
-                    _.Id == criterionLibrary.Id));
         }
     }
 }

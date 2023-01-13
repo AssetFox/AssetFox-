@@ -12,8 +12,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
@@ -172,49 +174,53 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldGetLibraryTargetConditionGoalPageData()
         {
             // Paging service test
-            Setup();
-            CreateAuthorizedController();
             // Arrange
-            CreateLibraryTestData();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var userRepo = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var rule = CashFlowRuleDtos.Rule();
+            var rules = new List<CashFlowRuleDTO> { rule };
+            repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).Returns(rules);
+            var controller = CreateController(unitOfWork);
 
             // Act
             var request = new PagingRequestModel<CashFlowRuleDTO>();
-            var result = await _controller.GetLibraryCashFlowRulePage(_testCashFlowRuleLibrary.Id, request);
+            var result = await controller.GetLibraryCashFlowRulePage(libraryId, request);
 
             // Assert
             var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
             var page = (PagingPageModel<CashFlowRuleDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(PagingPageModel<CashFlowRuleDTO>));
             var dtos = page.Items;
             var dto = dtos.Single();
-            Assert.Equal(_testCashFlowRule.Id, dto.Id);
+            Assert.Equal(rule, dto);
         }
 
         [Fact]
-        public async Task ShouldGetScenarioTargetConditionGoalPageData()
+        public async Task GetScenarioCashFlowRulePage_GetsFromRepo()
         {
             // paging service test
-            Setup();
-            CreateAuthorizedController();
-            // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            CreateScenarioTestData(simulation.Id);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var userRepo = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var rule = CashFlowRuleDtos.Rule();
+            var rules = new List<CashFlowRuleDTO> { rule };
+            repo.Setup(r => r.GetScenarioCashFlowRules(simulationId)).Returns(rules);
 
             // Act
             var request = new PagingRequestModel<CashFlowRuleDTO>();
-            var result = await _controller.GetScenarioCashFlowRulePage(simulation.Id, request);
+            var result = await controller.GetScenarioCashFlowRulePage(simulationId, request);
 
             // Assert
             var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
             var page = (PagingPageModel<CashFlowRuleDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(PagingPageModel<CashFlowRuleDTO>));
             var dtos = page.Items;
             var dto = dtos.Single();
-            Assert.Equal(_testScenarioCashFlowRule.Id, dto.Id);
+            Assert.Equal(rule, dto);
         }
 
         [Fact]
@@ -237,18 +243,19 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnLibraryPost()
+        public async Task UpsertCashFlowRuleLibrary_CallsUpsertOnRepo()
         {
             // Arrange
-            Setup();
-            CreateAuthorizedController();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var userRepo = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var controller = CreateController(unitOfWork);
             var dto = new CashFlowRuleLibraryDTO
             {
                 Id = Guid.NewGuid(),
                 Name = "",
                 CashFlowRules = new List<CashFlowRuleDTO>()
             };
-
             var libraryRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>()
             {
                 IsNewLibrary = true,
@@ -256,26 +263,37 @@ namespace BridgeCareCoreTests.Tests
             };
 
             // Act
-            var result = await _controller.UpsertCashFlowRuleLibrary(libraryRequest);
+            var result = await controller.UpsertCashFlowRuleLibrary(libraryRequest);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var libraryInvocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.UpsertCashFlowRuleLibrary));
+            var ruleInvocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.UpsertOrDeleteCashFlowRules));
+            Assert.Equal(dto, libraryInvocation.Arguments[0]);
+            Assert.Equal(dto.CashFlowRules, ruleInvocation.Arguments[0]);
+            Assert.Equal(dto.Id, ruleInvocation.Arguments[1]);
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnScenarioPost()
+        public async Task UpsertOrDeleteScenarioCashFlowRules_CallsUpsertOrDeleteOnRepo()
         {
             // Arrange
-            Setup();
-            CreateAuthorizedController();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var userRepo = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var controller = CreateController(unitOfWork);
             var dtos = new List<CashFlowRuleDTO>();
             var sync = new PagingSyncModel<CashFlowRuleDTO>();
+            var simulationId = Guid.NewGuid();
+            repo.Setup(r => r.GetScenarioCashFlowRules(simulationId)).Returns(new List<CashFlowRuleDTO>());
             // Act
-            var result = await _controller.UpsertScenarioCashFlowRules(simulation.Id, sync);
+            var result = await controller.UpsertScenarioCashFlowRules(simulationId, sync);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var invocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.UpsertOrDeleteScenarioCashFlowRules));
+            Assert.Equal(simulationId, invocation.Arguments[1]);
+            
         }
 
         [Fact]

@@ -4,6 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
@@ -54,6 +55,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 YearlyPercentages = "100"
             };
             TestHelper.UnitOfWork.Context.AddEntity(testScenarioCashFlowDistributionRule);
+            testScenarioCashFlowRule.ScenarioCashFlowDistributionRules.Add(testScenarioCashFlowDistributionRule);
             return testScenarioCashFlowRule;
         }
 
@@ -179,153 +181,55 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.EquivalentExcluding(rule, modifiedDto.CashFlowRules[0], x => x.CriterionLibrary);
         }
 
-        //[Fact]
-        //public async Task ShouldModifyScenarioData()
-        //{
-        //    // Arrange
-        //    Setup();
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-        //    CreateAuthorizedController();
-        //    CreateScenarioTestData(simulation.Id);
+        [Fact]
+        public void UpsertOrDeleteScenarioCashFlowRules_RuleInDb_Modifies()
+        {
+            // Arrange
+            Setup();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var scenarioRule = CreateScenarioTestData(simulation.Id);
 
-        //    _testScenarioCashFlowRule.ScenarioCashFlowDistributionRules.Add(_testScenarioCashFlowDistributionRule);
+            var dtos = new List<CashFlowRuleDTO> { scenarioRule.ToDto() };
+            dtos[0].Name = "Updated Name";
+            dtos[0].CriterionLibrary.MergedCriteriaExpression = "Updated Expression";
+            dtos[0].CashFlowDistributionRules[0].DurationInYears = 2;
 
-        //    var dtos = new List<CashFlowRuleDTO> { _testScenarioCashFlowRule.ToDto() };
-        //    dtos[0].Name = "Updated Name";
-        //    dtos[0].CriterionLibrary.MergedCriteriaExpression = "Updated Expression";
-        //    dtos[0].CashFlowDistributionRules[0].DurationInYears = 2;
+            // Act
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(dtos, simulation.Id);
 
-        //    var sync = new PagingSyncModel<CashFlowRuleDTO>()
-        //    {
-        //        UpdateRows = new List<CashFlowRuleDTO>() { dtos[0] }
-        //    };
+            // Assert
+            var modifiedDtos = TestHelper.UnitOfWork.CashFlowRuleRepo
+                .GetScenarioCashFlowRules(simulation.Id);
+            Assert.Single(modifiedDtos);
 
-        //    // Act
-        //    await _controller.UpsertScenarioCashFlowRules(simulation.Id, sync);
+            Assert.Equal(dtos[0].Name, modifiedDtos[0].Name);
+            Assert.Equal(dtos[0].CriterionLibrary.MergedCriteriaExpression,
+                modifiedDtos[0].CriterionLibrary.MergedCriteriaExpression);
 
-        //    // Assert
-        //    var modifiedDtos = TestHelper.UnitOfWork.CashFlowRuleRepo
-        //        .GetScenarioCashFlowRules(simulation.Id);
-        //    Assert.Single(modifiedDtos);
+            Assert.Equal(dtos[0].CashFlowDistributionRules[0].DurationInYears,
+                modifiedDtos[0].CashFlowDistributionRules[0].DurationInYears);
+        }
 
-        //    Assert.Equal(dtos[0].Name, modifiedDtos[0].Name);
-        //    Assert.Equal(dtos[0].CriterionLibrary.MergedCriteriaExpression,
-        //        modifiedDtos[0].CriterionLibrary.MergedCriteriaExpression);
+        [Fact]
+        public void ShouldDeleteLibraryData()
+        {
+            // Arrange
+            var library = CashFlowRuleLibraryDtos.Empty();
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(library);
+            var rule = CashFlowRuleDtos.Rule();
+            var rules = new List<CashFlowRuleDTO> { rule };
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(rules, library.Id);
+            Assert.True(TestHelper.UnitOfWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == library.Id));
+            Assert.True(TestHelper.UnitOfWork.Context.CashFlowRule.Any(_ => _.Id == rule.Id));
+            Assert.True(TestHelper.UnitOfWork.Context.CashFlowDistributionRule.Any(_ =>
+                    _.Id == rule.CashFlowDistributionRules[0].Id));
+            // Act
+            TestHelper.UnitOfWork.CashFlowRuleRepo.DeleteCashFlowRuleLibrary(library.Id);
 
-        //    Assert.Equal(dtos[0].CashFlowDistributionRules[0].DurationInYears,
-        //        modifiedDtos[0].CashFlowDistributionRules[0].DurationInYears);
-        //}
-
-        //[Fact]
-        //public async Task ShouldDeleteLibraryData()
-        //{
-        //    // Arrange
-        //    Setup();
-        //    CreateAuthorizedController();
-        //    CreateLibraryTestData();
-
-        //    // Act
-        //    var result = await _controller.DeleteCashFlowRuleLibrary(_testCashFlowRuleLibrary.Id);
-
-        //    // Assert
-        //    Assert.IsType<OkResult>(result);
-
-        //    Assert.True(
-        //        !TestHelper.UnitOfWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == _testCashFlowRuleLibrary.Id));
-        //    Assert.True(!TestHelper.UnitOfWork.Context.CashFlowRule.Any(_ => _.Id == _testCashFlowRule.Id));
-        //    Assert.True(
-        //        !TestHelper.UnitOfWork.Context.CriterionLibraryCashFlowRule.Any(_ =>
-        //            _.CashFlowRuleId == _testCashFlowRule.Id));
-        //    Assert.True(
-        //        !TestHelper.UnitOfWork.Context.CashFlowDistributionRule.Any(_ =>
-        //            _.Id == _testCashFlowDistributionRule.Id));
-        //}
-
-        //[Fact]
-        //public async Task UserIsViewCashFlowFromLibraryAuthorized()
-        //{
-        //    // non-admin authorize test
-        //    // Arrange
-        //    var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-        //    {
-        //        services.AddAuthorization(options =>
-        //        {
-        //            options.AddPolicy(Policy.ViewCashFlowFromLibrary,
-        //                policy => policy.RequireClaim(ClaimTypes.Name,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.CashFlowViewAnyFromLibraryAccess,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.CashFlowViewPermittedFromLibraryAccess));
-        //        });
-        //    });
-        //    var roleClaimsMapper = new RoleClaimsMapper();
-        //    var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor }));
-        //    // Act
-        //    var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewCashFlowFromLibrary);
-        //    // Assert
-        //    Assert.True(allowed.Succeeded);
-        //}
-        //[Fact]
-        //public async Task UserIsModifyCashFlowFromScenarioAuthorized()
-        //{
-        //    // admin authorize test
-        //    // Arrange
-        //    var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-        //    {
-        //        services.AddAuthorization(options =>
-        //        {
-        //            options.AddPolicy(Policy.ModifyCashFlowFromScenario,
-        //                policy => policy.RequireClaim(ClaimTypes.Name,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.CashFlowModifyPermittedFromScenarioAccess,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.CashFlowModifyAnyFromScenarioAccess));
-        //        });
-        //    });
-        //    var roleClaimsMapper = new RoleClaimsMapper();
-        //    var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-        //    // Act
-        //    var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCashFlowFromScenario);
-        //    // Assert
-        //    Assert.True(allowed.Succeeded);
-        //}
-        //[Fact]
-        //public async Task UserIsModifyCashFlowFromLibraryAuthorized()
-        //{
-        //    // non-admin unauthorized test
-        //    // Arrange
-        //    var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-        //    {
-        //        services.AddAuthorization(options =>
-        //        {
-        //            options.AddPolicy(Policy.ModifyCashFlowFromLibrary,
-        //                policy => policy.RequireClaim(ClaimTypes.Name,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.CashFlowModifyAnyFromLibraryAccess));
-        //        });
-        //    });
-        //    var roleClaimsMapper = new RoleClaimsMapper();
-        //    var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor }));
-        //    // Act
-        //    var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCashFlowFromLibrary);
-        //    // Assert
-        //    Assert.False(allowed.Succeeded);
-        //}
-        //[Fact]
-        //public async Task UserIsViewCashFlowFromLibraryAuthorized_B2C()
-        //{
-        //    // Arrange
-        //    var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-        //    {
-        //        services.AddAuthorization(options =>
-        //        {
-        //            options.AddPolicy(Policy.ViewCashFlowFromLibrary,
-        //                policy => policy.RequireClaim(ClaimTypes.Name,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.CashFlowViewAnyFromLibraryAccess,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.CashFlowViewPermittedFromLibraryAccess));
-        //        });
-        //    });
-        //    var roleClaimsMapper = new RoleClaimsMapper();
-        //    var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-        //    // Act
-        //    var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewCashFlowFromLibrary);
-        //    // Assert
-        //    Assert.True(allowed.Succeeded);
-        //}
+            Assert.False(TestHelper.UnitOfWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == library.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.CashFlowRule.Any(_ => _.Id == rule.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.CashFlowDistributionRule.Any(_ =>
+                    _.Id == rule.CashFlowDistributionRules[0].Id));
+        }
     }
 }

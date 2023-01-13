@@ -463,7 +463,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new InvestmentLibraryUpsertPagingRequestModel();
 
             request.Library = dto;
-            request.PagingSync.UpdatedBudgets.Add(dto.Budgets[0]);
+            request.SyncModel.UpdatedBudgets.Add(dto.Budgets[0]);
 
             // Act
             await controller.UpsertBudgetLibrary(request);

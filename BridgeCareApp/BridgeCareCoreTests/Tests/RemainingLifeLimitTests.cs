@@ -206,7 +206,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 IsNewLibrary = false,
                 Library = dto,
-                PagingSync = sync
+                SyncModel = sync
             };
             // Act
             await controller.UpsertRemainingLifeLimitLibrary(libraryRequest);

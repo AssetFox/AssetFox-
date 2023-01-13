@@ -382,7 +382,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<BudgetPriorityLibraryDTO, BudgetPriorityDTO>()
             {
                 Library = dto,
-                PagingSync =new PagingSyncModel<BudgetPriorityDTO>(){
+                SyncModel =new PagingSyncModel<BudgetPriorityDTO>(){
                     UpdateRows = new List<BudgetPriorityDTO>() { updatedPriority}
                 }
             };

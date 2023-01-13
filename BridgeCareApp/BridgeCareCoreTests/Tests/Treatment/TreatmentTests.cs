@@ -450,7 +450,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 IsNewLibrary = false,
                 Library = dtoLibrary,
-                PagingSync = sync
+                SyncModel = sync
             };
 
             // Act

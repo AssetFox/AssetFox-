@@ -23,6 +23,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
                 IsCalculated = false,
                 IsAscending = true
             };
+
+
+        public static AttributeDTO Interstate
+            => new()
+            {
+                Id = Guid.Parse("5552b431-05ec-4ea9-92cd-4d663d657262"),
+                Name = TestAttributeNames.Interstate,
+                DefaultValue = "",
+                Type = "STRING",
+                Command = "",
+                AggregationRuleType = "PREDOMINANT",
+                IsCalculated = false,
+                IsAscending = true
+            };
+
+
+        public static AttributeDTO InternetReport
+            => new()
+            {
+                Id = Guid.Parse("4442b431-05ec-4ea9-92cd-4d663d657262"),
+                Name = TestAttributeNames.InternetReport,
+                DefaultValue = "",
+                Type = "STRING",
+                Command = "",
+                AggregationRuleType = "PREDOMINANT",
+                IsCalculated = false,
+                IsAscending = true
+            };
+
         public static AttributeDTO AdtTotal
             => new()
             {

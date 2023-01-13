@@ -4,12 +4,15 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -47,32 +50,30 @@ namespace BridgeCareCoreTests.Tests
             AttributeTestSetup.CreateAttributes(unitOfWork);
             NetworkTestSetup.CreateNetwork(unitOfWork);
         }
-        private CashFlowController CreateTestController(List<string> userClaims)
+
+        private CashFlowController CreateController(Mock<IUnitOfWork> unitOfWork)
         {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
-            var controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object, new CashFlowPagingService(TestHelper.UnitOfWork));
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = testUser }
-            };
+            var service = new CashFlowPagingService(unitOfWork.Object);
+            var security = EsecSecurityMocks.AdminMock;
+            var hubService = HubServiceMocks.DefaultMock();
+            var accessor = HttpContextAccessorMocks.DefaultMock();
+            var claimHelper = ClaimHelperMocks.New();
+            var controller = new CashFlowController(
+                security.Object,
+                unitOfWork.Object,
+                hubService.Object,
+                accessor.Object,
+                claimHelper.Object,
+                service
+                );
             return controller;
         }
+
         private void CreateAuthorizedController()
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             _controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object, new CashFlowPagingService(TestHelper.UnitOfWork));
-        }
-
-        private void CreateUnauthorizedController()
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            _controller = new CashFlowController(EsecSecurityMocks.DbeMock.Object, TestHelper.UnitOfWork,
                 hubService, accessor, _mockClaimHelper.Object, new CashFlowPagingService(TestHelper.UnitOfWork));
         }
 
@@ -151,17 +152,20 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnLibraryGet()
+        public async Task GetCashFlowRuleLibraries_CallsGetNoChildrenOnRepo()
         {
             // Arrange
-            Setup();
-            CreateAuthorizedController();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var userRepo = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var controller = CreateController(unitOfWork);
 
             // Act
-            var result = await _controller.GetCashFlowRuleLibraries();
+            var result = await controller.GetCashFlowRuleLibraries();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            ActionResultAssertions.OkObject(result);
+            repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.GetCashFlowRuleLibrariesNoChildren));
         }
 
         [Fact]
@@ -214,18 +218,22 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnScenarioGet()
+        public async Task GetScenarioCashFlowRules_GetsFromRepo()
         {
             // Arrange
-            Setup();
-            CreateAuthorizedController();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var userRepo = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulationId = Guid.NewGuid();
 
             // Act
-            var result = await _controller.GetScenarioCashFlowRules(simulation.Id);
+            var result = await controller.GetScenarioCashFlowRules(simulationId);
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            ActionResultAssertions.OkObject(result);
+            var invocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.GetScenarioCashFlowRules));
+            Assert.Equal(simulationId, invocation.Arguments[0]);
         }
 
         [Fact]

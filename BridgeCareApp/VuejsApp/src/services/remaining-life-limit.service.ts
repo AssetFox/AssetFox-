@@ -1,5 +1,6 @@
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { AxiosPromise } from 'axios';
+import { LibraryUser } from '@/shared/models/iAM/user';
 import {
     RemainingLifeLimit,
     RemainingLifeLimitLibrary,
@@ -52,6 +53,26 @@ export default class RemainingLifeLimitService {
         return coreAxiosInstance.post(
             `${API.RemainingLifeLimit}/UpsertScenarioRemainingLifeLimits/${scenarioId}`,
             data,
+        );
+    }
+    static getRemainingLifeLimitLibraryUsers(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.RemainingLifeLimit}/GetRemainingLifeLimitLibraryUsers/${libraryId}`);
+    }
+
+    static upsertOrDeleteRemainingLifeLimitLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.RemainingLifeLimit}/UpsertOrDeleteRemainingLifeLimitLibraryUsers/${libraryId}`
+            , proposedUsers
+        );
+    }
+    static getIsSharedLibrary(remainingLifeLimitLibraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.RemainingLifeLimit}/GetIsSharedLibrary/${remainingLifeLimitLibraryId}`
+        );
+    }
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.RemainingLifeLimit}/GetHasPermittedAccess`,
         );
     }
 }

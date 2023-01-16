@@ -17,6 +17,7 @@ import TargetConditionGoalService from '@/services/target-condition-goal.service
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
+import RemainingLifeLimitService from '@/services/remaining-life-limit.service';
 
 const state = {
     targetConditionGoalLibraries: [] as TargetConditionGoalLibrary[],
@@ -25,6 +26,7 @@ const state = {
     ) as TargetConditionGoalLibrary,
     scenarioTargetConditionGoals: [] as TargetConditionGoal[],
     hasPermittedAccess: false,
+    isSharedLibrary: false,
 };
 
 const mutations = {
@@ -90,6 +92,9 @@ const mutations = {
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
     },
+    IsSharedLibraryMutator(state: any, status: boolean) {
+        state.isSharedLibrary = status;
+    }
 };
 
 const actions = {
@@ -151,6 +156,17 @@ const actions = {
             ) {
                 const hasPermittedAccess: boolean = response.data as boolean;
                 commit('PermittedAccessMutator', hasPermittedAccess);
+            }
+        });
+    },
+    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
+        await RemainingLifeLimitService.getIsSharedLibrary(payload.id).then(
+            (response: AxiosResponse) => {
+                if (
+                hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                commit('IsSharedLibraryMutator', response.data as boolean);
             }
         });
     },

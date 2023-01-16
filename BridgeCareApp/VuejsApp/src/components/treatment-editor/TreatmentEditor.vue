@@ -1,6 +1,6 @@
 <template>
     <v-layout column>
-        <v-flex>
+        <v-flex style="margin-top: -15px;">
             <v-layout>
                 <v-flex>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
@@ -14,7 +14,7 @@
                     >
                     </v-select>
                 </v-flex>
-                <v-flex>                       
+                <!-- <v-flex>                       
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
                     <v-select
                         :items='treatmentSelectItems'
@@ -25,8 +25,8 @@
                         v-model='treatmentSelectItemValue'
                     >
                     </v-select>
-                </v-flex>
-                <v-flex style="padding-top:30px;">
+                </v-flex> -->
+                <!-- <v-flex style="padding-top:30px;">
                     <v-btn
                         @click='onShowConfirmDeleteTreatmentAlert'
                         depressed
@@ -35,7 +35,7 @@
                     >
                         Delete Treatment
                     </v-btn>
-                </v-flex>
+                </v-flex> -->
                 <v-flex xs4>
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 40px !important">
                         <div class="ghd-control-label" style="padding-top: 12px !important">
@@ -59,30 +59,20 @@
                         v-show='!hasScenario'
                     >
                         Create New Library
-                    </v-btn>                  
-                    <v-btn
-                        @click='showCreateTreatmentDialog = true'
-                        depressed
-                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'
-                        v-show='hasScenario'
-                    >
-                        Add Treatment
-                    </v-btn>
+                    </v-btn>                                                          
                 </v-flex>
             </v-layout>
         </v-flex>
         <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>        
-        <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top: -20px; margin-bottom: -25px;">
+        <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top: -20px; margin-bottom: -15px;">                
                <v-btn
                     @click='showCreateTreatmentDialog = true'
                     depressed
                     class='ghd-white-bg ghd-blue ghd-button-text ghd-text-padding'                              
-                    style='float:right;'
-                    v-show='!hasScenario'
+                    style='float:left;'
                 >
                     Add Treatment
-                </v-btn>
-                <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
+                </v-btn>                
                 <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
                     flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
@@ -104,86 +94,122 @@
                     Upload
                 </v-btn>
             </div>    
-        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>              
-            <div class='treatments-div'>
-                <v-layout column> 
-                    <v-flex xs12>               
-                        <div v-show='selectedTreatment.id !== uuidNIL'>                                                
-                            <v-tabs v-model='activeTab'>
-                                <v-tab
-                                    :key='index'
-                                    @click='activeTab = index'
-                                    ripple
-                                    v-for='(treatmentTab,
-                                    index) in treatmentTabs'
-                                >
-                                    {{ treatmentTab }}
-                                </v-tab>
-                                <v-tabs-items v-model='activeTab'>
-                                    <v-tab-item>
-                                        <v-card style="border:none;">
-                                            <v-card-text
-                                                class='card-tab-content'
-                                            >
-                                                <TreatmentDetailsTab
-                                                    :selectedTreatmentDetails='selectedTreatmentDetails'
-                                                    :rules='rules'
-                                                    :callFromScenario='hasScenario'
-                                                    :callFromLibrary='!hasScenario'
-                                                    @onModifyTreatmentDetails='modifySelectedTreatmentDetails'
-                                                />
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-tab-item>
-                                    <v-tab-item>
-                                        <v-card>
-                                            <v-card-text
-                                                class='card-tab-content'
-                                            >
-                                                <CostsTab
-                                                    :selectedTreatmentCosts='selectedTreatment.costs'
-                                                    :callFromScenario='hasScenario'
-                                                    :callFromLibrary='!hasScenario'
-                                                    @onAddCost='addSelectedTreatmentCost'
-                                                    @onModifyCost='modifySelectedTreatmentCost'
-                                                    @onRemoveCost='removeSelectedTreatmentCost'
-                                                />
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-tab-item>
-                                    <v-tab-item>
-                                        <v-card>
-                                            <v-card-text
-                                                class='card-tab-content'
-                                            >
-                                                <ConsequencesTab
-                                                    :selectedTreatmentConsequences='selectedTreatment.consequences'
-                                                    :rules='rules'
-                                                    :callFromScenario='hasScenario'
-                                                    :callFromLibrary='!hasScenario'
-                                                    @onAddConsequence='addSelectedTreatmentConsequence'
-                                                    @onModifyConsequence='modifySelectedTreatmentConsequence'
-                                                    @onRemoveConsequence='removeSelectedTreatmentConsequence'
-                                                />
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-tab-item>
-                                    <v-tab-item>
-                                        <v-card>
-                                            <v-card-text class='card-tab-content'>
-                                                <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
-                                                            :addTreatment='selectedTreatment.addTreatment'
-                                                            :fromLibrary='hasSelectedLibrary'
-                                                            @onModifyBudgets='modifySelectedTreatmentBudgets' />
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-tab-item>
-                                </v-tabs-items>
-                            </v-tabs>
-                        </div>                                             
-                    </v-flex>                    
-                </v-layout>
-            </div>            
+        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
+            <v-layout>
+                <div xs2> 
+                    <!-- TODO remove current drp dn list for Treatment, Delete Treatment button from top row.
+                        shift Add Treatment button link to left side same row and add New List box for treatment(s) below it, 
+                        switch other UI next to this listbox(less width than now)
+                    -->
+                    <v-flex>
+                        <v-list class='treatments-list'>
+                            <template v-for='treatmentSelectItem in treatmentSelectItems'>
+                                <v-list-tile :key='treatmentSelectItem.value' ripple :class="{'selected-treatment-item': isSelectedTreatmentItem(treatmentSelectItem.value)}"
+                                             avatar @click='onSetTreatmentSelectItemValue(treatmentSelectItem.value)'>
+                                    <v-list-tile-content>
+                                        <span>{{treatmentSelectItem.text}}</span>
+                                    </v-list-tile-content>
+                                    <v-list-tile-action>
+                                        <v-btn @click="onDeleteTreatment(treatmentSelectItem.value)" class="ara-orange" icon>
+                                            <v-icon>fas fa-trash</v-icon>
+                                        </v-btn>
+                                    </v-list-tile-action>
+                                </v-list-tile>
+                            </template>
+                        </v-list>
+                        <!-- <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
+                        <v-select
+                            :items='treatmentSelectItems'
+                            append-icon=$vuetify.icons.ghd-down
+                            class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
+                            label='Select'
+                            outline                        
+                            v-model='treatmentSelectItemValue'
+                        >
+                        </v-select>
+                        -->
+                    </v-flex>
+                </div>
+                <div class='treatments-div' xs10>
+                    <v-layout column> 
+                        <v-flex xs12>               
+                            <div v-show='selectedTreatment.id !== uuidNIL'>                                                
+                                <v-tabs v-model='activeTab'>
+                                    <v-tab
+                                        :key='index'
+                                        @click='activeTab = index'
+                                        ripple
+                                        v-for='(treatmentTab,
+                                        index) in treatmentTabs'
+                                    >
+                                        {{ treatmentTab }}
+                                    </v-tab>
+                                    <v-tabs-items v-model='activeTab'>
+                                        <v-tab-item>
+                                            <v-card style="border:none;">
+                                                <v-card-text
+                                                    class='card-tab-content'
+                                                >
+                                                    <TreatmentDetailsTab
+                                                        :selectedTreatmentDetails='selectedTreatmentDetails'
+                                                        :rules='rules'
+                                                        :callFromScenario='hasScenario'
+                                                        :callFromLibrary='!hasScenario'
+                                                        @onModifyTreatmentDetails='modifySelectedTreatmentDetails'
+                                                    />
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-tab-item>
+                                        <v-tab-item>
+                                            <v-card>
+                                                <v-card-text
+                                                    class='card-tab-content'
+                                                >
+                                                    <CostsTab
+                                                        :selectedTreatmentCosts='selectedTreatment.costs'
+                                                        :callFromScenario='hasScenario'
+                                                        :callFromLibrary='!hasScenario'
+                                                        @onAddCost='addSelectedTreatmentCost'
+                                                        @onModifyCost='modifySelectedTreatmentCost'
+                                                        @onRemoveCost='removeSelectedTreatmentCost'
+                                                    />
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-tab-item>
+                                        <v-tab-item>
+                                            <v-card>
+                                                <v-card-text
+                                                    class='card-tab-content'
+                                                >
+                                                    <ConsequencesTab
+                                                        :selectedTreatmentConsequences='selectedTreatment.consequences'
+                                                        :rules='rules'
+                                                        :callFromScenario='hasScenario'
+                                                        :callFromLibrary='!hasScenario'
+                                                        @onAddConsequence='addSelectedTreatmentConsequence'
+                                                        @onModifyConsequence='modifySelectedTreatmentConsequence'
+                                                        @onRemoveConsequence='removeSelectedTreatmentConsequence'
+                                                    />
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-tab-item>
+                                        <v-tab-item>
+                                            <v-card>
+                                                <v-card-text class='card-tab-content'>
+                                                    <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
+                                                                :addTreatment='selectedTreatment.addTreatment'
+                                                                :fromLibrary='hasSelectedLibrary'
+                                                                @onModifyBudgets='modifySelectedTreatmentBudgets' />
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-tab-item>
+                                    </v-tabs-items>
+                                </v-tabs>
+                            </div>                                             
+                        </v-flex>                    
+                    </v-layout>
+                </div>
+            </v-layout>
         </v-flex>        
         <v-flex xs12>
             <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>

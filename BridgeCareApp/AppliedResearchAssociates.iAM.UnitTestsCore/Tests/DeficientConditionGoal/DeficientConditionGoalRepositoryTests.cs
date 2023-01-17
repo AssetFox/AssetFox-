@@ -22,7 +22,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class DeficientConditionGoalTests
+    public class DeficientConditionGoalRepositoryTests
     {
         private static void Setup()
         {
@@ -61,7 +61,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var library = TestDeficientConditionGoalLibrary(libraryId);
             TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Add(library);
-            var goal = TestDeficientConditionGoal(libraryId);
+            var goal = TestDeficientConditionGoal(libraryId, goalId);
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
             goal.AttributeId = attribute.Id;
             TestHelper.UnitOfWork.Context.DeficientConditionGoal.Add(goal);
@@ -171,176 +171,52 @@ namespace BridgeCareCoreTests.Tests
             Assert.Empty(ourDto.DeficientConditionGoals);
         }
 
-        //[Fact]
-        //public async Task ShouldModifyDeficientConditionGoalData()
-        //{
-        //    // Arrange
-        //    Setup();
-        //    var libraryId = Guid.NewGuid();
-        //    var goalId = Guid.NewGuid();
-        //    var goalEntity = SetupLibraryForGet(libraryId, goalId);
-        //    var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-        //    var libraryDto = TestDeficientConditionGoalLibrary(libraryId).ToDto();
-        //    var goalDto = goalEntity.ToDto();
-        //    libraryDto.Description = "Updated Description";
-        //    goalDto.Name = "Updated Name";
-        //    goalDto.CriterionLibrary = criterionLibrary;
+        [Fact]
+        public void UpsertDeficientConditionGoals_LibraryInDbWithDeficientConditionGoal_Modifies()
+        {
+            var libraryId = Guid.NewGuid();
+            var goalId = Guid.NewGuid();
+            Setup();
+            SetupLibraryForGet(libraryId, goalId);
+            var library = TestDeficientConditionGoalLibrary(libraryId).ToDto();
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo
+                .UpsertDeficientConditionGoalLibrary(library);
+            var dto = DeficientConditionGoalDtos.CulvDurationN();
+            var dtos = new List<DeficientConditionGoalDTO> { dto };
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(dtos, libraryId);
+            var dto2 = DeficientConditionGoalDtos.CulvDurationN();
+            dto2.Id = dto.Id;
+            dto2.Name = "Updated name";
+            var dtos2 = new List<DeficientConditionGoalDTO> { dto2 };
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(dtos2, libraryId);
 
-        //    var sync = new PagingSyncModel<DeficientConditionGoalDTO>()
-        //    {
-        //        UpdateRows = new List<DeficientConditionGoalDTO>() { goalDto }
-        //    };
+            var dtosAfter2 = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalsByLibraryId(libraryId);
+            var dtoAfter2 = dtosAfter2.Single();
+            ObjectAssertions.EquivalentExcluding(dto2, dtoAfter2, dto => dto.CriterionLibrary);
+        }
 
-        //    var libraryRequest = new LibraryUpsertPagingRequestModel<DeficientConditionGoalLibraryDTO, DeficientConditionGoalDTO>()
-        //    {
-        //        IsNewLibrary = false,
-        //        Library = libraryDto,
-        //        PagingSync = sync
-        //    };
+        [Fact]
+        public void ShouldDeleteDeficientConditionGoalData()
+        {
+            // Arrange
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var goalId = Guid.NewGuid();
+            SetupLibraryForGet(libraryId, goalId);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
+            var getResult = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesNoChildren();
+            var deficientConditionGoalLibraryDTO = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
+            deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary = criterionLibrary;
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(deficientConditionGoalLibraryDTO.DeficientConditionGoals, deficientConditionGoalLibraryDTO.Id);
+            Assert.True(TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId));
+            Assert.True(TestHelper.UnitOfWork.Context.DeficientConditionGoal.Any(_ => _.Id == goalId));
 
-        //    // Act
-        //    await controller.UpsertDeficientConditionGoalLibrary(libraryRequest);
 
-        //    // Assert
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.DeleteDeficientConditionGoalLibrary(libraryId);
 
-        //    var modifiedDto = TestHelper.UnitOfWork.DeficientConditionGoalRepo
-        //        .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
-        //    Assert.Equal(libraryDto.Description, modifiedDto.Description);
-        //    Assert.Equal(goalDto.Attribute,
-        //        modifiedDto.DeficientConditionGoals[0].Attribute);
-        //    // below asserts all fail as of 6/6/2022:
-        //    //Assert.Single(modifiedDto.AppliedScenarioIds);
-        //    //  Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
-        //    // to fix the above, explicitly create a Simulation somewhere, perhaps in setup, then use its id and check against said id in the assert.
-
-        //    //Assert.Equal(dto.DeficientConditionGoals[0].Name, modifiedDto.DeficientConditionGoals[0].Name);
-        //    //Assert.Equal(dto.DeficientConditionGoals[0].CriterionLibrary.Id,
-        //    //   modifiedDto.DeficientConditionGoals[0].CriterionLibrary.Id);
-        //}
-
-        //[Fact]
-        //public async Task ShouldDeleteDeficientConditionGoalData()
-        //{
-        //    // Arrange
-        //    var controller = Setup();
-        //    var libraryId = Guid.NewGuid();
-        //    var goalId = Guid.NewGuid();
-        //    SetupLibraryForGet(libraryId, goalId);
-        //    var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-        //    var getResult = await controller.DeficientConditionGoalLibraries();
-        //    var deficientConditionGoalLibraryDTO = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
-        //    deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary = criterionLibrary;
-
-        //    var sync = new PagingSyncModel<DeficientConditionGoalDTO>()
-        //    {
-        //        UpdateRows = new List<DeficientConditionGoalDTO>() { deficientConditionGoalLibraryDTO.DeficientConditionGoals[0] }
-        //    };
-
-        //    var libraryRequest = new LibraryUpsertPagingRequestModel<DeficientConditionGoalLibraryDTO, DeficientConditionGoalDTO>()
-        //    {
-        //        IsNewLibrary = false,
-        //        Library = deficientConditionGoalLibraryDTO,
-        //        PagingSync = sync
-        //    };
-
-        //    await controller.UpsertDeficientConditionGoalLibrary(libraryRequest);
-
-        //    // Act
-        //    var result = await controller.DeleteDeficientConditionGoalLibrary(libraryId);
-
-        //    // Assert
-        //    Assert.IsType<OkResult>(result);
-
-        //    Assert.True(!TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId));
-        //    Assert.True(!TestHelper.UnitOfWork.Context.DeficientConditionGoal.Any(_ => _.Id == goalId));
-        //    Assert.True(
-        //        !TestHelper.UnitOfWork.Context.CriterionLibraryDeficientConditionGoal.Any(_ =>
-        //            _.DeficientConditionGoalId == goalId));
-        //}
-        //[Fact]
-        //public async Task UserIsDeficientConditionGoalViewFromLibraryAuthorized()
-        //{
-        //    // Arrange
-        //    var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-        //    {
-        //        services.AddAuthorization(options =>
-        //        {
-        //            options.AddPolicy(Policy.ViewDeficientConditionGoalFromlLibrary,
-        //                policy => policy.RequireClaim(ClaimTypes.Name,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalViewAnyFromLibraryAccess,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalViewPermittedFromLibraryAccess));
-        //        });
-        //    });
-        //    var roleClaimsMapper = new RoleClaimsMapper();
-        //    var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor }));
-        //    // Act
-        //    var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewDeficientConditionGoalFromlLibrary);
-        //    // Assert
-        //    Assert.True(allowed.Succeeded);
-        //}
-        //[Fact]
-        //public async Task UserIsDeficientConditionGoalModifyFromScenarioAuthorized()
-        //{
-        //    // Arrange
-        //    var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-        //    {
-        //        services.AddAuthorization(options =>
-        //        {
-        //            options.AddPolicy(Policy.ModifyDeficientConditionGoalFromScenario,
-        //                policy => policy.RequireClaim(ClaimTypes.Name,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalModifyAnyFromScenarioAccess,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalModifyPermittedFromScenarioAccess));
-        //        });
-        //    });
-        //    var roleClaimsMapper = new RoleClaimsMapper();
-        //    var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-        //    // Act
-        //    var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyDeficientConditionGoalFromScenario);
-        //    // Assert
-        //    Assert.True(allowed.Succeeded);
-        //}
-        //[Fact]
-        //public async Task UserIsDeficientConditionGoalModifyFromLibraryAuthorized()
-        //{
-        //    // Arrange
-        //    var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-        //    {
-        //        services.AddAuthorization(options =>
-        //        {
-        //            options.AddPolicy(Policy.ModifyDeficientConditionGoalFromLibrary,
-        //                policy => policy.RequireClaim(ClaimTypes.Name,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalModifyPermittedFromLibraryAccess,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalModifyAnyFromLibraryAccess));
-        //        });
-        //    });
-        //    var roleClaimsMapper = new RoleClaimsMapper();
-        //    var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly }));
-        //    // Act
-        //    var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyDeficientConditionGoalFromLibrary);
-        //    // Assert
-        //    Assert.False(allowed.Succeeded);
-        //}
-        //[Fact]
-        //public async Task UserIsDeficientConditionGoalViewFromLibraryAuthorized_B2C()
-        //{
-        //    // Arrange
-        //    var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-        //    {
-        //        services.AddAuthorization(options =>
-        //        {
-        //            options.AddPolicy(Policy.ViewDeficientConditionGoalFromlLibrary,
-        //                policy => policy.RequireClaim(ClaimTypes.Name,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalViewAnyFromLibraryAccess,
-        //                                              BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalViewPermittedFromLibraryAccess));
-        //        });
-        //    });
-        //    var roleClaimsMapper = new RoleClaimsMapper();
-        //    var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-        //    // Act
-        //    var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewDeficientConditionGoalFromlLibrary);
-        //    // Assert
-        //    Assert.True(allowed.Succeeded);
-        //}
+            Assert.False(TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId));
+            Assert.False(TestHelper.UnitOfWork.Context.DeficientConditionGoal.Any(_ => _.Id == goalId));
+        }
 
         ////Scenarios
         //[Fact]

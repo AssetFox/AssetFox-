@@ -376,10 +376,10 @@ namespace BridgeCareCoreTests.Tests
 
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
 
-            var deletedGoalId3 = Guid.NewGuid();
+            var deleteId = Guid.NewGuid();
             TestHelper.UnitOfWork.Context.ScenarioDeficientConditionGoal.Add(new ScenarioDeficientConditionGoalEntity
             {
-                Id = deletedGoalId3,
+                Id = deleteId,
                 SimulationId = simulationId,
                 AttributeId = attribute.Id,
                 Name = "Deleted"
@@ -387,8 +387,7 @@ namespace BridgeCareCoreTests.Tests
             TestHelper.UnitOfWork.Context.SaveChanges();
 
             var localScenarioDeficientGoals3 = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
-            var indexToDelete = localScenarioDeficientGoals3.FindIndex(g => g.Id == deletedGoalId3);
-            var deleteId = localScenarioDeficientGoals3[indexToDelete].Id;
+            var indexToDelete = localScenarioDeficientGoals3.FindIndex(g => g.Id == deleteId);
 
             var sync3 = new PagingSyncModel<DeficientConditionGoalDTO>()
             {
@@ -401,13 +400,12 @@ namespace BridgeCareCoreTests.Tests
             // Assert
 
             Assert.False(
-                TestHelper.UnitOfWork.Context.ScenarioDeficientConditionGoal.Any(_ => _.Id == deletedGoalId3));
+                TestHelper.UnitOfWork.Context.ScenarioDeficientConditionGoal.Any(_ => _.Id == deleteId));
         }
 
         [Fact]
         public async Task ShouldAddScenarioDeficientConditionGoalData()
         {
-            // wjwjwj deleting this test fixes the weird error
             var controller2 = Setup();
             var simulationId = Guid.NewGuid();
             var goalId = Guid.NewGuid();

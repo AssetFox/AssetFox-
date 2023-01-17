@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaRelational(context.SimulationId, simulationOutput);
-            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaRelation(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
             ObjectAssertions.EquivalentExcluding(simulationOutput, loadedOutput, so => so.LastModifiedDate);
         }
@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaRelational(context.SimulationId, simulationOutput);
-            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaRelation(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
             ObjectAssertions.EquivalentExcluding(simulationOutput, loadedOutput, so => so.LastModifiedDate);
         }
@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 );
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaRelational(context.SimulationId, simulationOutput);
-            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaRelation(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
             SimulationOutputAssertions.SameSimulationOutput(simulationOutput, loadedOutput);
         }
@@ -86,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var startDate = DateTime.Now;
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaRelational(context.SimulationId, simulationOutput);
             var endDate = DateTime.Now;
-            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaRelation(context.SimulationId);
             var lastModifiedDate = loadedOutput.LastModifiedDate;
             DateTimeAssertions.Between(startDate, endDate, lastModifiedDate, TimeSpan.FromMilliseconds(1));
         }
@@ -107,7 +107,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var updateStartDate = DateTime.Now;
             TestHelper.UnitOfWork.SimulationRepo.UpdateSimulation(oldSimulation);
             var updateEndDate = DateTime.Now;
-            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaRelation(context.SimulationId);
             var lastModifiedDate = loadedOutput.LastModifiedDate;
             DateTimeAssertions.Between(updateStartDate, updateEndDate, lastModifiedDate, TimeSpan.FromMilliseconds(1));
         }

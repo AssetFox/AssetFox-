@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public const string AssetDetailSaveOverrideBatchSizeKey = "AssetDetailBatchSizeOverrideForValueSave";
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        //
+        
         public void CreateSimulationOutputViaRelational(Guid simulationId, SimulationOutput simulationOutput, ILog loggerForUserInfo = null, ILog loggerForTechnicalInfo = null)
         {
             loggerForTechnicalInfo ??= new DoNotLog();
@@ -240,7 +240,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return null;
         }
 
-        public SimulationOutput GetSimulationOutput(Guid simulationId, ILog loggerForUserInfo = null, ILog loggerForTechinalInfo = null)
+        public SimulationOutput GetSimulationOutputViaRelation(Guid simulationId, ILog loggerForUserInfo = null, ILog loggerForTechinalInfo = null)
         {
             loggerForUserInfo ??= new DoNotLog();
             loggerForTechinalInfo ??= new DoNotLog();
@@ -382,6 +382,54 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 WriteTimingsToFile(memos, outputFilename);
             }
             return domain;
+        }
+        public SimulationOutput GetSimulationOutputViaJson(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"Found no simulation having id {simulationId}");
+            }
+
+            if (!_unitOfWork.Context.SimulationOutputJson.Any(_ => _.SimulationId == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation analysis results were found for simulation having id {simulationId}. Please ensure that the simulation analysis has been run.");
+            }
+
+            var simulationOutputObjects = _unitOfWork.Context.SimulationOutputJson.Where(_ => _.SimulationId == simulationId);
+
+            var simulationOutput = new SimulationOutput();
+            foreach (var item in simulationOutputObjects)
+            {
+                switch (item.OutputType)
+                {
+                case SimulationOutputEnum.YearlySection:
+                    var yearlySections = JsonConvert.DeserializeObject<SimulationYearDetail>(item.Output, new JsonSerializerSettings
+                    {
+                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+                    });
+                    simulationOutput.Years.Add(yearlySections);
+                    break;
+                case SimulationOutputEnum.InitialConditionNetwork:
+                    simulationOutput.InitialConditionOfNetwork = Convert.ToDouble(item.Output);
+                    break;
+                case SimulationOutputEnum.InitialSummary:
+                    var initialSummary = JsonConvert.DeserializeObject<List<AssetSummaryDetail>>(item.Output, new JsonSerializerSettings
+                    {
+                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+                    });
+                    simulationOutput.InitialAssetSummaries.AddRange(initialSummary);
+                    break;
+                }
+            }
+            simulationOutput.Years.Sort((a, b) => a.Year.CompareTo(b.Year));
+
+            return simulationOutput;
+        }
+
+        public void ConvertSimulationOutpuFromJsonTorelational(Guid simulationId)
+        {
+            var output = GetSimulationOutputViaJson(simulationId);
+            CreateSimulationOutputViaRelational(simulationId, output);
         }
 
         private static string GuidsToStringList(List<Guid> assetDetailIds)

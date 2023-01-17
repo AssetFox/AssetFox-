@@ -40,6 +40,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<SimulationOutputEntity> SimulationOutputs { get; set; }
 
+        public virtual ICollection<SimulationOutputJsonEntity> SimulationOutputJsons { get; set; }
+
         public virtual SimulationAnalysisDetailEntity SimulationAnalysisDetail { get; set; }
 
         public virtual SimulationReportDetailEntity SimulationReportDetail { get; set; }

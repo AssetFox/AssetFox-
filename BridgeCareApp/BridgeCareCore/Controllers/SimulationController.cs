@@ -445,5 +445,34 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpPost]
+        [Route("ConvertSimulationOutputToRelational/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> ConvertSimulationOutputToRelational(Guid simulationId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    var output = UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
+                    UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaRelational(simulationId, output);
+                    UnitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Removing NoTreatmentBeforeCommitted::{e.Message}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Removing NoTreatmentBeforeCommitted::{e.Message}");
+                throw;
+            }
+        }
     }
 }

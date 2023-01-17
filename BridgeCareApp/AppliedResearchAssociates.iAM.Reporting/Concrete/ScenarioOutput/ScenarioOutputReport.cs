@@ -77,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Analysis.Engine.SimulationOutput simulationOutput;
             try
             {
-                simulationOutput = _unitofwork.SimulationOutputRepo.GetSimulationOutput(simulationGuid);
+                simulationOutput = _unitofwork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationGuid);
             }
             catch(Exception e)
             {

@@ -135,7 +135,7 @@ namespace BridgeCareCore.Services
                     var hubServiceLogger = new HubServiceLogger(_hubService, HubConstant.BroadcastScenarioStatusUpdate, _unitOfWork.CurrentUser?.Username);
                     var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(message));
 
-                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutputViaRelational(simulationId, simulation.Results, updateSimulationAnalysisDetailLogger);
+                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutputViaJson(simulationId, simulation.Results);
                     simulationAnalysisDetail.Status = SimulationUserMessages.SimulationOutputSavedToDatabase;
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);

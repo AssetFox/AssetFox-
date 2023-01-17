@@ -104,61 +104,78 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public void Upsert_Does()
+        public void UpsertDeficientConditionGoalLibrary_Does()
         {
             var libraryId = Guid.NewGuid();
             var goalId = Guid.NewGuid();
             Setup();
             SetupLibraryForGet(libraryId, goalId);
             var library = TestDeficientConditionGoalLibrary(libraryId).ToDto();
+
             // Act
             TestHelper.UnitOfWork.DeficientConditionGoalRepo
                 .UpsertDeficientConditionGoalLibrary(library);
 
+            // Assert
             var libraryAfter = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesNoChildren()
                 .Single(l => l.Id == libraryId);
             ObjectAssertions.Equivalent(library, libraryAfter);
         }
 
-        //[Fact]
-        //public async Task ShouldReturnOkResultOnDelete()
-        //{
-        //    var controller = Setup();
+        [Fact]
+        public void UpsertDeficientConditionGoals_LibraryInDb_Does()
+        {
+            var libraryId = Guid.NewGuid();
+            var goalId = Guid.NewGuid();
+            Setup();
+            SetupLibraryForGet(libraryId, goalId);
+            var library = TestDeficientConditionGoalLibrary(libraryId).ToDto();
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo
+                .UpsertDeficientConditionGoalLibrary(library);
+            var dto = DeficientConditionGoalDtos.CulvDurationN();
+            var dtos = new List<DeficientConditionGoalDTO> { dto };
 
-        //    // Act
-        //    var result = await controller.DeleteDeficientConditionGoalLibrary(Guid.Empty);
+            // Act
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(dtos, libraryId);
 
-        //    // Assert
-        //    Assert.IsType<OkResult>(result);
-        //}
+            // Assert
+            var dtosAfter = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalsByLibraryId(libraryId);
+            var dtoAfter = dtosAfter.Single();
+            ObjectAssertions.EquivalentExcluding(dto, dtoAfter, x => x.CriterionLibrary);
+        }
 
-        //[Fact]
-        //public async Task ShouldGetAllDeficientConditionGoalLibraries()
-        //{
-        //    // Arrange
-        //    var controller = Setup();
-        //    var libraryId = Guid.NewGuid();
-        //    var goalId = Guid.NewGuid();
-        //    SetupLibraryForGet(libraryId, goalId);
+        [Fact]
+        public void Delete_LibraryDoesNotExist_DoesNotThrow()
+        {
+            Setup();
 
-        //    // Act
-        //    var result = await controller.DeficientConditionGoalLibraries();
+            // Act and assert
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.DeleteDeficientConditionGoalLibrary(Guid.NewGuid());
+        }
 
-        //    // Assert
-        //    var okObjResult = result as OkObjectResult;
-        //    Assert.NotNull(okObjResult.Value);
+        [Fact]
+        public void GetDeficientConditionGoalLibrariesNoChildren_DoesNotGetDeficientConditionGoals()
+        {
+            // Arrange
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var goalId = Guid.NewGuid();
+            SetupLibraryForGet(libraryId, goalId);
 
-        //    var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(okObjResult.Value,
-        //        typeof(List<DeficientConditionGoalLibraryDTO>));
-        //    var ourDto = dtos.Single(dto => dto.Id == libraryId);
-        //    Assert.Empty(ourDto.DeficientConditionGoals);
-        //}
+            // Act
+            var dtos = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesNoChildren();
+
+            // Assert
+
+            var ourDto = dtos.Single(dto => dto.Id == libraryId);
+            Assert.Empty(ourDto.DeficientConditionGoals);
+        }
 
         //[Fact]
         //public async Task ShouldModifyDeficientConditionGoalData()
         //{
         //    // Arrange
-        //    var controller = Setup();
+        //    Setup();
         //    var libraryId = Guid.NewGuid();
         //    var goalId = Guid.NewGuid();
         //    var goalEntity = SetupLibraryForGet(libraryId, goalId);

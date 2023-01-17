@@ -1,8 +1,8 @@
 <template>
     <v-layout column>
-        <v-flex style="margin-top: -15px;">
+        <v-flex style="margin-top: -20px;">
             <v-layout>
-                <v-flex>
+                <v-flex xs3>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
                         :items='librarySelectItems'
@@ -36,8 +36,8 @@
                         Delete Treatment
                     </v-btn>
                 </v-flex> -->
-                <v-flex xs4>
-                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 40px !important">
+                <v-flex xs7>
+                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 30px !important">
                         <div class="ghd-control-label" style="padding-top: 12px !important">
                         Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |                         
                         </div>  
@@ -55,7 +55,7 @@
                     <v-btn
                         @click='onShowCreateTreatmentLibraryDialog(false)'
                         depressed
-                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'
+                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'
                         v-show='!hasScenario'
                     >
                         Create New Library
@@ -63,8 +63,8 @@
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>        
-        <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top: -20px; margin-bottom: -15px;">                
+        <v-divider style="margin-top:-20px" v-show='hasSelectedLibrary || hasScenario'></v-divider>        
+        <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top:-20px;margin-bottom:-15px;">                
                <v-btn
                     @click='showCreateTreatmentDialog = true'
                     depressed
@@ -96,11 +96,7 @@
             </div>    
         <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
             <v-layout>
-                <div xs2> 
-                    <!-- TODO remove current drp dn list for Treatment, Delete Treatment button from top row.
-                        shift Add Treatment button link to left side same row and add New List box for treatment(s) below it, 
-                        switch other UI next to this listbox(less width than now)
-                    -->
+                <div xs2>
                     <v-flex>
                         <v-list class='treatments-list'>
                             <template v-for='treatmentSelectItem in treatmentSelectItems'>
@@ -110,24 +106,13 @@
                                         <span>{{treatmentSelectItem.text}}</span>
                                     </v-list-tile-content>
                                     <v-list-tile-action>
-                                        <v-btn @click="onDeleteTreatment(treatmentSelectItem.value)" class="ara-orange" icon>
+                                        <v-btn @click="onShowConfirmDeleteTreatmentAlert" class="ara-orange" icon>
                                             <v-icon>fas fa-trash</v-icon>
                                         </v-btn>
                                     </v-list-tile-action>
                                 </v-list-tile>
                             </template>
                         </v-list>
-                        <!-- <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
-                        <v-select
-                            :items='treatmentSelectItems'
-                            append-icon=$vuetify.icons.ghd-down
-                            class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
-                            label='Select'
-                            outline                        
-                            v-model='treatmentSelectItemValue'
-                        >
-                        </v-select>
-                        -->
                     </v-flex>
                 </div>
                 <div class='treatments-div' xs10>
@@ -674,11 +659,12 @@ export default class TreatmentEditor extends Vue {
         return this.getUserNameByIdGetter(this.selectedTreatmentLibrary.owner) == getUserName();
     }
 
-    onSetTreatmentSelectItemValue(treatmentId: string | number) {//this may be deprecated
+    onSetTreatmentSelectItemValue(treatmentId: string | number) {
         if (!isEqual(this.treatmentSelectItemValue, treatmentId.toString())) {
             this.treatmentSelectItemValue = treatmentId.toString();
         } else {
-            this.treatmentSelectItemValue = null;
+            // alert('in setting null');
+            // this.treatmentSelectItemValue = null;
         }
     }
     
@@ -694,7 +680,8 @@ export default class TreatmentEditor extends Vue {
     onSubmitConfirmDeleteTreatmentAlertResult(submit: boolean) {
         this.confirmBeforeDeleteTreatmentAlertData = clone(emptyAlertData);
 
-        if (submit) {
+        if (submit) { // check if isNoTreatmentSelected is false??
+        alert(this.selectedTreatment.id +"::"+ this.treatmentSelectItemValue);
             this.onDeleteTreatment(this.selectedTreatment.id);
         }
     }
@@ -1116,7 +1103,8 @@ export default class TreatmentEditor extends Vue {
 }
 
 .treatments-list {
-    height: 308px;
+    height: 470px;
+    width: 400px;
     overflow-y: auto;
 }
 

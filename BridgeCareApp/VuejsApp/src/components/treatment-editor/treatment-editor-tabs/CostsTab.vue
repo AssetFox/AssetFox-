@@ -278,7 +278,7 @@ export default class CostsTab extends Vue {
 <style>
 .costs-tab-content {
     height: 185px;
-    min-width: 1200px;
+    min-width: 1100px;
 }
 
 .costs-data-table {

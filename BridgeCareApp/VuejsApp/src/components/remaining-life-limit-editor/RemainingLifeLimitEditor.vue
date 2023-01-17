@@ -14,6 +14,29 @@
                     >
                     </v-select>
                 </v-flex>
+
+                <v-divider vertical 
+                    class="mx-3"
+                    v-if="hasSelectedLibrary && !hasScenario"
+                    >
+                    </v-divider>
+                    <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                    </div>
+                    <v-divider vertical 
+                        class="mx-3"
+                        v-if="hasSelectedLibrary && !hasScenario"
+                    >
+                    </v-divider>
+                    <v-badge v-show="isShared">
+                    <template v-slot: badge>
+                        <span>Shared</span>
+                        </template>
+                        </v-badge>
+                        <v-btn @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                            v-show='!hasScenario'>
+                            Share Library
+                    </v-btn>
                 <div>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" outline>Add Remaining Life Limit</v-btn>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" outline>Create New Library</v-btn>
@@ -231,9 +254,9 @@ import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditor
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
-import ShareRemainingLifeLimitLibraryDialog from 'remaining-life-limit-editor/remaining-life-limit-editor-dialogs/RemainingLifeLimitLibraryDialog.vue';
+import ShareRemainingLifeLimitLibraryDialog from '@/components/remaining-life-limit-editor/remaining-life-limit-editor-dialogs/ShareRemainingLifeLimitLibraryDialog.vue'; 
 import RemainingLifeLimitService from '@/services/remaining-life-limit.service';
-import { emptyShareRemainingLifeLimitLibraryDialogData } from '@/shared/models/modals/share-remaining-life-limit-data';
+import { emptyShareRemainingLifeLimitLibraryDialogData, ShareRemainingLifeLimitLibraryDialogData } from '@/shared/models/modals/share-remaining-life-limit-data';
 import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
 import { isNullOrUndefined } from 'util';
@@ -358,6 +381,8 @@ export default class RemainingLifeLimitEditor extends Vue {
     librarySelectItemValueAllowedChanged: boolean = true;
     librarySelectItemValue: string | null = null;
     isShared: boolean = false;
+
+    shareRemainingLifeLimitLibraryDialogData: ShareRemainingLifeLimitLibraryDialogData = clone(emptyShareRemainingLifeLimitLibraryDialogData);
 
     itemsPerPage:number = 5;
     dataPerPage: number = 0;
@@ -489,6 +514,7 @@ export default class RemainingLifeLimitEditor extends Vue {
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
         this.isShared = this.isSharedLibrary;
+        console.log("shared: " + this.isShared);
     }
     
     @Watch('stateNumericAttributes')
@@ -865,6 +891,13 @@ export default class RemainingLifeLimitEditor extends Vue {
             next();
         }
     };
+
+    onShowShareRemainingLifeLimitLibraryDialog(remainingLifeLimitLibrary: RemainingLifeLimitLibrary) {
+        this.shareRemainingLifeLimitLibraryDialogData = {
+            showDialog:true,
+            remainingLifeLimitLibrary: clone(remainingLifeLimitLibrary)
+        }
+    }
 
     onShareRemainingLifeLimitDialogSubmit(remainingLifeLimitLibraryUsers: RemainingLifeLimitLibraryUser[]) {
         this.shareRemainingLifeLimitLibraryDialogData = clone(emptyShareRemainingLifeLimitLibraryDialogData);

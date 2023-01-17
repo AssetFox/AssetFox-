@@ -30,6 +30,8 @@ const state = {
         emptyRemainingLifeLimitLibrary,
     ) as RemainingLifeLimitLibrary,
     scenarioRemainingLifeLimits: [] as RemainingLifeLimit[],
+    hasPermittedAccess: false,
+    isSharedLibrary: false,
 };
 
 const mutations = {
@@ -92,6 +94,12 @@ const mutations = {
     ) {
         state.scenarioRemainingLifeLimits = clone(remainingLifeLimits);
     },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
+    IsSharedLibraryMutator(state: any, status: boolean) {
+        state.isSharedLibrary = status;
+    }
 };
 
 const actions = {
@@ -191,6 +199,30 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Deleted remaining life limit library',
                 });
+            }
+        });
+    },
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await RemainingLifeLimitService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
+            }
+        });
+    },
+    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
+        await RemainingLifeLimitService.getIsSharedLibrary(payload.id).then(
+            (response: AxiosResponse) => {
+                if (
+                hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                commit('IsSharedLibraryMutator', response.data as boolean);
             }
         });
     },

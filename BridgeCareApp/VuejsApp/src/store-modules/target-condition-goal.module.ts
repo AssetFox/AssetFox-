@@ -17,7 +17,6 @@ import TargetConditionGoalService from '@/services/target-condition-goal.service
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
-import RemainingLifeLimitService from '@/services/remaining-life-limit.service';
 
 const state = {
     targetConditionGoalLibraries: [] as TargetConditionGoalLibrary[],
@@ -160,7 +159,7 @@ const actions = {
         });
     },
     async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
-        await RemainingLifeLimitService.getIsSharedLibrary(payload.id).then(
+        await TargetConditionGoalService.getIsSharedLibrary(payload.id).then(
             (response: AxiosResponse) => {
                 if (
                 hasValue(response, 'status') &&

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 using FluentAssertions;
 using FluentAssertions.Equivalency;  // Licensed under Apache 2.0. Seems to be compatible with AGPL 3.
 using Xunit;
@@ -31,18 +26,18 @@ namespace AppliedResearchAssociates.iAM.TestHelpers
             return assertionOptions;
         }
 
-        public static void Singleton<T>(T expected, object actual)
+        public static void Singleton<T>(T expectedSingleEntry, object actualEnumerable)
         {
-            var castActual = (List<T>)actual;
+            var castActual = (IEnumerable<T>)actualEnumerable;
             var actualSingle = castActual.Single();
-            Assert.Equal(expected, actualSingle);
+            Assert.Equal(expectedSingleEntry, actualSingle);
         }
 
-        public static void EquivalentSingleton<T>(T expected, object actual)
+        public static void EquivalentSingleton<T>(T expectedSingleEntry, object actualEnumerable)
         {
-            var castActual = (List<T>) actual;
+            var castActual = (List<T>)actualEnumerable;
             var singleton = castActual.Single();
-            Equivalent(expected, singleton);
+            Equivalent(expectedSingleEntry, singleton);
         }
     }
 }

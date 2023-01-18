@@ -1,6 +1,7 @@
 ﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
@@ -16,7 +17,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class DeficientConditionGoalTests
+    public class DeficientConditionGoalControllerTests
     {
         private static readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
@@ -249,8 +250,7 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var invocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertOrDeleteScenarioDeficientConditionGoals));
             Assert.Equal(simulationId, invocation.Arguments[1]);
-            var argumentZero = (List<DeficientConditionGoalDTO>) invocation.Arguments[0];
-            Assert.Equal(addedGoal2, argumentZero.Single());
+            ObjectAssertions.Singleton(addedGoal2, invocation.Arguments[0]);
         }
 
         [Fact]

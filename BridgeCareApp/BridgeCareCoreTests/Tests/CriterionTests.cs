@@ -21,7 +21,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class CriterionTests
+    public class CriterionLibraryControllerTests
     {
 
         private CriterionLibraryController CreateController(Mock<IUnitOfWork> unitOfWork)

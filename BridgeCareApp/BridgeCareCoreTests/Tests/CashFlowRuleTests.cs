@@ -14,7 +14,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class CashFlowRuleTests
+    public class CashFlowControllerTests
     {
         private CashFlowController CreateController(Mock<IUnitOfWork> unitOfWork)
         {

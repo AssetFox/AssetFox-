@@ -30,7 +30,7 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class BudgetPriorityTests
+    public class BudgetPriorityControllerTests
     {
         private ScenarioBudgetEntity _testScenarioBudget;
         private ScenarioBudgetPriorityEntity _testScenarioBudgetPriority;
@@ -227,7 +227,6 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
             // Arrange
-            Setup();
             var unitOfWork = UnitOfWorkMocks.New();
             var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);

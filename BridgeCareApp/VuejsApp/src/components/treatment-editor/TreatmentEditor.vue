@@ -14,28 +14,6 @@
                     >
                     </v-select>
                 </v-flex>
-                <!-- <v-flex>                       
-                    <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
-                    <v-select
-                        :items='treatmentSelectItems'
-                        append-icon=$vuetify.icons.ghd-down
-                        class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
-                        label='Select'
-                        outline                        
-                        v-model='treatmentSelectItemValue'
-                    >
-                    </v-select>
-                </v-flex> -->
-                <!-- <v-flex style="padding-top:30px;">
-                    <v-btn
-                        @click='onShowConfirmDeleteTreatmentAlert'
-                        depressed
-                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'                        
-                        v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
-                    >
-                        Delete Treatment
-                    </v-btn>
-                </v-flex> -->
                 <v-flex xs7>
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 30px !important">
                         <div class="ghd-control-label" style="padding-top: 12px !important">
@@ -71,7 +49,8 @@
                     class='ghd-white-bg ghd-blue ghd-button-text ghd-text-padding'                              
                     style='float:left;'
                 >
-                    Add Treatment
+                    <span class="ghd-right-padding">Add Treatment</span>
+                    <v-icon>fas fa-plus</v-icon>
                 </v-btn>                
                 <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
                     flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
@@ -105,9 +84,9 @@
                                     <v-list-tile-content>
                                         <span>{{treatmentSelectItem.text}}</span>
                                     </v-list-tile-content>
-                                    <v-list-tile-action>
-                                        <v-btn @click="onShowConfirmDeleteTreatmentAlert" class="ara-orange" icon>
-                                            <v-icon>fas fa-trash</v-icon>
+                                    <v-list-tile-action v-show="treatmentSelectItem.text!='No Treatment'">                                        
+                                        <v-btn @click="onShowConfirmDeleteTreatmentAlert" class="ghd-blue" icon>
+                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                         </v-btn>
                                     </v-list-tile-action>
                                 </v-list-tile>
@@ -662,9 +641,6 @@ export default class TreatmentEditor extends Vue {
     onSetTreatmentSelectItemValue(treatmentId: string | number) {
         if (!isEqual(this.treatmentSelectItemValue, treatmentId.toString())) {
             this.treatmentSelectItemValue = treatmentId.toString();
-        } else {
-            // alert('in setting null');
-            // this.treatmentSelectItemValue = null;
         }
     }
     
@@ -680,8 +656,7 @@ export default class TreatmentEditor extends Vue {
     onSubmitConfirmDeleteTreatmentAlertResult(submit: boolean) {
         this.confirmBeforeDeleteTreatmentAlertData = clone(emptyAlertData);
 
-        if (submit) { // check if isNoTreatmentSelected is false??
-        alert(this.selectedTreatment.id +"::"+ this.treatmentSelectItemValue);
+        if (submit) {       
             this.onDeleteTreatment(this.selectedTreatment.id);
         }
     }

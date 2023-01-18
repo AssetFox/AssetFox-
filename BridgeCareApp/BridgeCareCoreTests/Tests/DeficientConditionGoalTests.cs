@@ -19,6 +19,8 @@ using Moq;
 using Xunit;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -124,8 +126,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task GetDeficientConditionGoalLibrariesNoChildren_GetsFromRepo()
         {
-            var unitOfWork = UnitOfWorkMocks.New();
-            var users = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var repo = DeficientConditionGoalRepositoryMocks.DefaultMock(unitOfWork);
             var library = DeficientConditionGoalLibraryDtos.Empty();
             var libraries = new List<DeficientConditionGoalLibraryDTO> { library };
@@ -140,54 +141,63 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnPost()
+        public async Task UpsertDeficientConditionGoalLibrary_NewLibrary_Ok()
         {
-            var libraryId = Guid.NewGuid();
-            var goalId = Guid.NewGuid();
-            var controller = Setup();
-            SetupLibraryForGet(libraryId, goalId);
-            var request = new LibraryUpsertPagingRequestModel<DeficientConditionGoalLibraryDTO, DeficientConditionGoalDTO>();
-            request.Library = TestDeficientConditionGoalLibrary(libraryId).ToDto();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = DeficientConditionGoalRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var library = DeficientConditionGoalLibraryDtos.Empty();
+            var request = new LibraryUpsertPagingRequestModel<DeficientConditionGoalLibraryDTO, DeficientConditionGoalDTO>
+            {
+                Library = library,
+                IsNewLibrary = true,
+            };
             // Act
             var result = await controller
                 .UpsertDeficientConditionGoalLibrary(request);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var libraryInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertDeficientConditionGoalLibrary));
+            Assert.Equal(library, libraryInvocation.Arguments[0]);
+            var goalInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertOrDeleteDeficientConditionGoals));
+            var argument = goalInvocation.Arguments[0] as List<DeficientConditionGoalDTO>;
+            Assert.Empty(argument);
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnDelete()
+        public async Task DeleteDeficientConditionGoalLibrary_CallsThroughToRepo()
         {
-            var controller = Setup();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = DeficientConditionGoalRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var libraryId = Guid.NewGuid();
 
             // Act
-            var result = await controller.DeleteDeficientConditionGoalLibrary(Guid.Empty);
+            var result = await controller.DeleteDeficientConditionGoalLibrary(libraryId);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var invocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.DeleteDeficientConditionGoalLibrary));
+            Assert.Equal(libraryId, invocation.Arguments[0]);
         }
 
         [Fact]
         public async Task ShouldGetAllDeficientConditionGoalLibraries()
         {
             // Arrange
-            var controller = Setup();
-            var libraryId = Guid.NewGuid();
-            var goalId = Guid.NewGuid();
-            SetupLibraryForGet(libraryId, goalId);
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = DeficientConditionGoalRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var library = DeficientConditionGoalLibraryDtos.Empty();
+            var libaries = new List<DeficientConditionGoalLibraryDTO> { library };
+            repo.Setup(r => r.GetDeficientConditionGoalLibrariesNoChildren()).Returns(libaries);
 
             // Act
             var result = await controller.DeficientConditionGoalLibraries();
 
             // Assert
-            var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
-            var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(okObjResult.Value,
-                typeof(List<DeficientConditionGoalLibraryDTO>));
-            var ourDto = dtos.Single(dto => dto.Id == libraryId);
-            Assert.Empty(ourDto.DeficientConditionGoals);
+            ActionResultAssertions.Singleton(library, result);
         }
 
         [Fact]

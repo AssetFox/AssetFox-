@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -12,29 +6,43 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
-using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
-using MathNet.Numerics.Statistics.Mcmc;
-using Microsoft.AspNetCore.Authorization;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.CodeAnalysis.Operations;
 using Moq;
-using NUnit.Framework.Internal.Execution;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
-
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
-using BridgeCareCoreTests.Helpers;
+using AppliedResearchAssociates.iAM.Data.Aggregation;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
 
 namespace BridgeCareCoreTests.Tests
 {
     public class DeficientConditionGoalTests
     {
         private static readonly Mock<IClaimHelper> _mockClaimHelper = new();
+
+        private static DeficientConditionGoalController CreateController(Mock<IUnitOfWork> mockUnitOfWork = null)
+        {
+            var security = EsecSecurityMocks.AdminMock;
+            var hubService = HubServiceMocks.DefaultMock();
+            var contextAccessor = HttpContextAccessorMocks.DefaultMock();
+            var claimHelper = ClaimHelperMocks.New();
+            var deficientConditionGoalService = new DeficientConditionGoalPagingService(mockUnitOfWork.Object);
+            var controller = new DeficientConditionGoalController(
+                security.Object,
+                mockUnitOfWork.Object,
+                hubService.Object,
+                contextAccessor.Object,
+                claimHelper.Object,
+                deficientConditionGoalService
+                );
+            return controller;
+        }
 
         private static DeficientConditionGoalController Setup()
         {
@@ -49,21 +57,7 @@ namespace BridgeCareCoreTests.Tests
                 new DeficientConditionGoalPagingService(TestHelper.UnitOfWork));
             return controller;
         }
-        private DeficientConditionGoalController CreateTestController(List<string> uClaims)
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var testUser = ClaimsPrincipals.WithNameClaims(uClaims);
-            var controller = new DeficientConditionGoalController(EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-                hubService,
-                accessor, _mockClaimHelper.Object,
-                 new DeficientConditionGoalPagingService(TestHelper.UnitOfWork));
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = testUser }
-            };
-            return controller;
-        }
+
         public DeficientConditionGoalLibraryEntity TestDeficientConditionGoalLibrary(Guid? id = null)
         {
             var resolveId = id ?? Guid.NewGuid();
@@ -128,15 +122,21 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnGet()
+        public async Task GetDeficientConditionGoalLibrariesNoChildren_GetsFromRepo()
         {
-            var controller = Setup();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var users = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var repo = DeficientConditionGoalRepositoryMocks.DefaultMock(unitOfWork);
+            var library = DeficientConditionGoalLibraryDtos.Empty();
+            var libraries = new List<DeficientConditionGoalLibraryDTO> { library };
+            repo.Setup(r => r.GetDeficientConditionGoalLibrariesNoChildren()).Returns(libraries);
+            var controller = CreateController(unitOfWork);
 
             // Act
             var result = await controller.DeficientConditionGoalLibraries();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            ActionResultAssertions.Singleton(library, result);
         }
 
         [Fact]
@@ -270,10 +270,10 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             Assert.IsType<OkResult>(result);
 
-            Assert.True(!TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId));
-            Assert.True(!TestHelper.UnitOfWork.Context.DeficientConditionGoal.Any(_ => _.Id == goalId));
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.CriterionLibraryDeficientConditionGoal.Any(_ =>
+            Assert.False(TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId));
+            Assert.False(TestHelper.UnitOfWork.Context.DeficientConditionGoal.Any(_ => _.Id == goalId));
+            Assert.False(
+                TestHelper.UnitOfWork.Context.CriterionLibraryDeficientConditionGoal.Any(_ =>
                     _.DeficientConditionGoalId == goalId));
         }
 

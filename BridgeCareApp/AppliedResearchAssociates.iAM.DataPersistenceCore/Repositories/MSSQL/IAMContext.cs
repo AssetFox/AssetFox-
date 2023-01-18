@@ -1805,6 +1805,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithMany(p => p.SimulationOutputJsons)
                     .HasForeignKey(d => d.SimulationId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.SimulationOutput)
+                    .WithMany(p => p.SimulationOutputJsons)
+                    .HasForeignKey(d => d.SimulationOutputId);
             });
 
             modelBuilder.Entity<TargetConditionGoalEntity>(entity =>

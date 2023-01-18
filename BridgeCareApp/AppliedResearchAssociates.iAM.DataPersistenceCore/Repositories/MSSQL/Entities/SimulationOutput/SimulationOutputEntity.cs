@@ -18,5 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<AssetSummaryDetailEntity> InitialAssetSummaries { get; set; }
 
         public virtual ICollection<SimulationYearDetailEntity> Years { get; set; }
+
+        public virtual ICollection<SimulationOutputJsonEntity> SimulationOutputJsons { get; set; }
     }
 }

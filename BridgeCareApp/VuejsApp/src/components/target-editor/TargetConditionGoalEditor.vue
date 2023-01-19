@@ -39,6 +39,7 @@
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout align-end style="padding-top: 18px !important;">
+                        <v-spacer></v-spacer>
                         <v-btn outline
                             @click="showCreateTargetConditionGoalDialog = true"
                             class="ghd-control-border ghd-blue"

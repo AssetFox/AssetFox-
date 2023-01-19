@@ -215,8 +215,8 @@ const actions = {
             }
         });
     },
-    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
-        await RemainingLifeLimitService.getIsSharedLibrary(payload.id).then(
+    async getIsSharedRemainingLifeLimitLibrary({ dispatch, commit }: any, payload: any) {
+        await RemainingLifeLimitService.getIsSharedRemainingLifeLimitLibrary(payload.id).then(
             (response: AxiosResponse) => {
                 if (
                 hasValue(response, 'status') &&

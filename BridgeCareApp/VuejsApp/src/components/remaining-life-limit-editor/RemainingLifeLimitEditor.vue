@@ -1,42 +1,39 @@
 <template>
     <v-layout column>
-        <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
         <v-flex xs12>
             <v-layout justify-space-between>
-                <v-flex row xs6>
-                    <v-select
-                      class="ghd-select ghd-text-field ghd-text-field-border vs-style"
-                      :items="selectListItems"
-                      append-icon=$vuetify.icons.ghd-down
-                       v-model="librarySelectItemValue"
-                      outline
-                      outlined
-                    >
-                    </v-select>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout column>
+                        <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
+                        <v-select
+                          class="ghd-select ghd-text-field ghd-text-field-border vs-style"
+                          :items="selectListItems"
+                          append-icon=$vuetify.icons.ghd-down
+                           v-model="librarySelectItemValue"
+                          outline
+                        >
+                        </v-select>
+                    </v-layout>
                 </v-flex>
-
-                <v-divider vertical 
-                    class="mx-3"
-                    v-if="hasSelectedLibrary && !hasScenario"
-                    >
-                    </v-divider>
-                    <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
+                <v-flex xs4 class="ghd-constant-header">
+                <v-layout v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 10px; padding-left: 5px">
+                    <div class="header-text-content owner-padding" style="padding-top: 7px;">
                         Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
-                    <v-divider vertical 
-                        class="mx-3"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                    >
+                    <v-divider class="owner-shared-divider" vertical 
+                        v-if="hasSelectedLibrary && !hasScenario">
                     </v-divider>
-                    <v-badge v-show="isShared">
-                    <template v-slot: badge>
-                        <span>Shared</span>
+                    <v-badge v-show="isShared" style="padding: 10px">
+                        <template v-slot: badge>
+                            <span>Shared</span>
                         </template>
-                        </v-badge>
-                        <v-btn @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                            v-show='!hasScenario'>
-                            Share Library
+                    </v-badge>
+                    <v-btn @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        v-show='!hasScenario'>
+                        Share Library
                     </v-btn>
+                </v-layout>
+                </v-flex>
                 <div>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" outline>Add Remaining Life Limit</v-btn>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" outline>Create New Library</v-btn>
@@ -287,7 +284,7 @@ export default class RemainingLifeLimitEditor extends Vue {
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.remainingLifeLimitModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedLibrary') getIsSharedLibraryAction: any;
+    @Action('getIsSharedRemainingLifeLimitLibrary') getIsSharedLibraryAction: any;
 
     @Action('getRemainingLifeLimitLibraries')
     getRemainingLifeLimitLibrariesAction: any;

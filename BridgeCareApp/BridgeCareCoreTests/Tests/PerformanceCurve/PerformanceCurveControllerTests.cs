@@ -8,6 +8,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -82,13 +84,54 @@ namespace BridgeCareCoreTests.Tests
 
         [Fact]
 
-        public async Task UpsertPerformanceCurveLibrary_Ok()
+        public async Task UpsertPerformanceCurveLibrary_NewLibrary_Ok()
         {
-            Setup();
-            // Arrange
-            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = PerformanceCurveRepositoryMocks.New(unitOfWork);
             var libraryId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibrary(libraryId);
+            var dto = PerformanceCurveLibraryDtos.Empty(libraryId);
+            var dto2 = PerformanceCurveLibraryDtos.Empty(libraryId);
+            var controller = CreateController(unitOfWork);
+            var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
+            {
+                Library = dto,
+                IsNewLibrary = true,
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
+                {
+                    AddedRows = new List<PerformanceCurveDTO>(),
+                    RowsForDeletion = new List<Guid>(),
+                    UpdateRows = new List<PerformanceCurveDTO>()
+                }
+            };
+
+            // Act
+            var result = await controller
+                .UpsertPerformanceCurveLibrary(request);
+
+            // Assert
+            ActionResultAssertions.Ok(result);
+            var libraryCall = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertPerformanceCurveLibrary));
+            ObjectAssertions.Equivalent(dto2, libraryCall.Arguments[0]);
+            var curveCall = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeletePerformanceCurves));
+            ObjectAssertions.EmptyEnumerable<PerformanceCurveDTO>(curveCall.Arguments[0]);
+            Assert.Equal(libraryId, curveCall.Arguments[1]);
+        }
+
+        [Fact]
+
+        public async Task UpsertPerformanceCurveLibrary_NotNewLibrary_Ok()
+        {
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = PerformanceCurveRepositoryMocks.New(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var dto = PerformanceCurveLibraryDtos.Empty(libraryId);
+            var dto2 = PerformanceCurveLibraryDtos.Empty(libraryId);
+            var dto3 = PerformanceCurveLibraryDtos.Empty(libraryId);
+            dto.Name = "Updated name";
+            dto2.Name = "Updated name";
+            repo.Setup(r => r.GetPerformanceCurveLibrary(libraryId)).Returns(dto3);
+            repo.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(new List<PerformanceCurveDTO>());
+            var controller = CreateController(unitOfWork);
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = library,
@@ -105,59 +148,41 @@ namespace BridgeCareCoreTests.Tests
                 .UpsertPerformanceCurveLibrary(request);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var libraryCall = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertPerformanceCurveLibrary));
+            ObjectAssertions.Equivalent(dto2, libraryCall.Arguments[0]);
+            var curveCall = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeletePerformanceCurves));
+            ObjectAssertions.EmptyEnumerable<PerformanceCurveDTO>(curveCall.Arguments[0]);
+            Assert.Equal(libraryId, curveCall.Arguments[1]);
         }
 
         [Fact]
-        public async Task UpsertPerformanceCurveLibraryPage_Ok()
+        public async Task DeletePerformanceCurveLibrary_PassesRequestToRepo()
         {
-            Setup();
-            // Arrange
-            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = PerformanceCurveRepositoryMocks.New(unitOfWork);
             var libraryId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibrary(libraryId);
-            var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
-            {
-                Library = library,
-                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
-                {
-                    AddedRows = new List<PerformanceCurveDTO>(),
-                    RowsForDeletion = new List<Guid>(),
-                    UpdateRows = new List<PerformanceCurveDTO>()
-                }
-            };
-
+            var controller = CreateController(unitOfWork);
             // Act
-            var result = await controller
-                .UpsertPerformanceCurveLibrary(request);
+            var result = await controller.DeletePerformanceCurveLibrary(libraryId);
 
             // Assert
             Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
-        public async Task Delete_PerformanceCurveLibraryDoesNotExist_Ok()
-        {
-            Setup();
-
-            // Arrange
-            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-
-            // Act
-            var result = await controller.DeletePerformanceCurveLibrary(Guid.NewGuid());
-
-            // Assert
-            Assert.IsType<OkResult>(result);
+            var invocation = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.DeletePerformanceCurveLibrary));
+            Assert.Equal(libraryId, invocation.Arguments[0]);
         }
 
         [Fact]
         public async Task GetScenarioPerformanceCurves_SimulationExists_Ok()
         {
-            Setup();
-
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = PerformanceCurveRepositoryMocks.New(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var controller = CreateController(unitOfWork);
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var simulationId = Guid.NewGuid();
+            repo.Setup(r => r.GetScenarioPerformanceCurvesOrderedById(simulationId)).Returns(new List<PerformanceCurveDTO>());
+           
             var request = new PagingRequestModel<PerformanceCurveDTO>()
             {
                 isDescending = false,
@@ -173,34 +198,35 @@ namespace BridgeCareCoreTests.Tests
                 sortColumn = ""
             };
             // Act
-            var result = await controller.GetScenarioPerformanceCurvePage(simulation.Id, request);
+            var result = await controller.GetScenarioPerformanceCurvePage(simulationId, request);
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as PagingPageModel<PerformanceCurveDTO>;
+            Assert.Empty(castValue.Items);
         }
 
         [Fact]
         public async Task UpsertScenarioPerformanceCurves_SimulationExists_Ok()
         {
-            Setup();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = PerformanceCurveRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var controller = CreateController(unitOfWork);
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var performanceCurveId = Guid.NewGuid();
-            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-            var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.ScenarioEntity(simulation.Id, attribute.Id, performanceCurveId);
-            performanceCurve.Attribute = attribute;
-            var performanceCurveDto = performanceCurve.ToDto();
+            var dto = PerformanceCurveDtos.Dto(criterionLibraryId, performanceCurveId, "Attribute", "Equation");
             var request = new PagingSyncModel<PerformanceCurveDTO>()
             {
                 LibraryId = null,
-                AddedRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                AddedRows = new List<PerformanceCurveDTO> { dto },
                 RowsForDeletion = new List<Guid>(),
                 UpdateRows = new List<PerformanceCurveDTO>()
             };
             // Act
             var result = await controller
-                .UpsertScenarioPerformanceCurves(simulation.Id,
+                .UpsertScenarioPerformanceCurves(simulationId,
                     request);
 
             // Assert
@@ -235,7 +261,6 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task Upsert_AsksRepositoryToUpsertCurvesAndLibrary()
         {
-            // wjwjwj this test
             var repositoryMock = new Mock<IPerformanceCurveRepository>();
             var user = UserDtos.Admin();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);

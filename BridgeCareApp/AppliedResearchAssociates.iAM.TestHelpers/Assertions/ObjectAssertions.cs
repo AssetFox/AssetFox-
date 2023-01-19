@@ -39,5 +39,11 @@ namespace AppliedResearchAssociates.iAM.TestHelpers
             var singleton = castActual.Single();
             Equivalent(expectedSingleEntry, singleton);
         }
+
+        public static void EmptyEnumerable<T>(object enumerable)
+        {
+            var castEnumerable = (IEnumerable<T>)enumerable;
+            Assert.Empty(castEnumerable);
+        }
     }
 }

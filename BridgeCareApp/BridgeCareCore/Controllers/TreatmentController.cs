@@ -274,7 +274,9 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var dto = _treatmentPagingService.GetSyncedLibraryDataset(upsertRequest);
+                    var treatments = _treatmentPagingService.GetSyncedLibraryDataset(upsertRequest);
+                    var dto = upsertRequest.Library;
+                    dto.Treatments = treatments;
                     if (dto != null)
                     {
                         _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
@@ -334,7 +336,7 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    var dtos = _treatmentPagingService.GetSyncedScenarioDataset(simulationId, pagingSync);
+                    var dtos = _treatmentPagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
                     UnitOfWork.Commit();
                 });

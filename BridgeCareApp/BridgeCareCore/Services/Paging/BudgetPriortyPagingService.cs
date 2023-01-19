@@ -7,10 +7,13 @@ using AppliedResearchAssociates.iAM.DTOs;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
+using BridgeCareCore.Services.Paging.Generics;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace BridgeCareCore.Services
 {
-    public class BudgetPriortyPagingService : IBudgetPriortyPagingService
+    public class BudgetPriortyPagingService : PagingService<BudgetPriorityDTO, BudgetPriorityLibraryDTO>,  IBudgetPriortyPagingService
     {
         private static IUnitOfWork _unitOfWork;
 
@@ -19,31 +22,13 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public PagingPageModel<BudgetPriorityDTO> GetBudgetPriortyPage(Guid simulationId, PagingRequestModel<BudgetPriorityDTO> request)
-        {
-            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId) :
-                _unitOfWork.BudgetPriorityRepo.GetBudgetPrioritiesByLibraryId(request.PagingSync.LibraryId.Value);
-
-            return HandlePaging(rows, request);
-        }
-        public PagingPageModel<BudgetPriorityDTO> GetLibraryBudgetPriortyPage(Guid libraryId, PagingRequestModel<BudgetPriorityDTO> request)
-        {
-            var rows = _unitOfWork.BudgetPriorityRepo.GetBudgetPrioritiesByLibraryId(libraryId);
-
-            return HandlePaging(rows, request);
-        }
         
-        public List<BudgetPriorityDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<BudgetPriorityDTO> request)
-        {
-            var rows = _unitOfWork.BudgetPriorityRepo.GetBudgetPrioritiesByLibraryId(libraryId);
-            return SyncedDataset(rows, request);
-        }
-        public List<BudgetPriorityDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<BudgetPriorityDTO> request)
+        public override List<BudgetPriorityDTO> GetSyncedScenarioDataSet(Guid simulationId, PagingSyncModel<BudgetPriorityDTO> request)
         {
             var rows = request.LibraryId == null ?
                     _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId) :
                     _unitOfWork.BudgetPriorityRepo.GetBudgetPrioritiesByLibraryId(request.LibraryId.Value);
-            rows = SyncedDataset(rows, request);
+            rows =  SyncDataset(rows, request);
 
             if(request.LibraryId != null)
                 rows.ForEach(_ =>
@@ -71,49 +56,8 @@ namespace BridgeCareCore.Services
             return rows;
         }
 
-        public List<BudgetPriorityDTO> GetNewLibraryDataset(PagingSyncModel<BudgetPriorityDTO> pagingSync)
-        {
-            var rows = new List<BudgetPriorityDTO>();
-            return SyncedDataset(rows, pagingSync);
-        }
 
-        private PagingPageModel<BudgetPriorityDTO> HandlePaging(List<BudgetPriorityDTO> rows, PagingRequestModel<BudgetPriorityDTO> request)
-        {
-            var skip = 0;
-            var take = 0;
-            var items = new List<BudgetPriorityDTO>();
-
-            rows = SyncedDataset(rows, request.PagingSync);
-
-            if (request.search.Trim() != "")
-                rows = SearchRows(rows, request.search);
-            if (request.sortColumn.Trim() != "")
-                rows = OrderByColumn(rows, request.sortColumn, request.isDescending);
-
-            if (request.RowsPerPage > 0)
-            {
-                take = request.RowsPerPage;
-                skip = request.RowsPerPage * (request.Page - 1);
-                items = rows.Skip(skip).Take(take).ToList();
-            }
-            else
-            {
-                items = rows;
-                return new PagingPageModel<BudgetPriorityDTO>()
-                {
-                    Items = items,
-                    TotalItems = items.Count
-                };
-            }
-
-            return new PagingPageModel<BudgetPriorityDTO>()
-            {
-                Items = items,
-                TotalItems = rows.Count()
-            };
-        }
-
-        private List<BudgetPriorityDTO> OrderByColumn(List<BudgetPriorityDTO> rows, string sortColumn, bool isDescending)
+        override protected List<BudgetPriorityDTO> OrderByColumn(List<BudgetPriorityDTO> rows, string sortColumn, bool isDescending)
         {
             sortColumn = sortColumn?.ToLower();
             switch (sortColumn)
@@ -143,7 +87,7 @@ namespace BridgeCareCore.Services
             }
         }
 
-        private List<BudgetPriorityDTO> SearchRows(List<BudgetPriorityDTO> rows, string search)
+        override protected List<BudgetPriorityDTO> SearchRows(List<BudgetPriorityDTO> rows, string search)
         {
             return rows
                 .Where(_ => _.PriorityLevel.ToString().Contains(search) ||
@@ -151,16 +95,16 @@ namespace BridgeCareCore.Services
                     (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(search))).ToList();
         }
 
-        private List<BudgetPriorityDTO> SyncedDataset(List<BudgetPriorityDTO> rows, PagingSyncModel<BudgetPriorityDTO> request)
-        {
-            rows = rows.Concat(request.AddedRows).Where(_ => !request.RowsForDeletion.Contains(_.Id)).ToList();
+        protected override List<BudgetPriorityDTO> GetScenarioRows(Guid scenarioId) => _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(scenarioId);
 
-            for (var i = 0; i < rows.Count; i++)
+        protected override List<BudgetPriorityDTO> GetLibraryRows(Guid libraryId) => _unitOfWork.BudgetPriorityRepo.GetBudgetPrioritiesByLibraryId(libraryId);
+        protected override List<BudgetPriorityDTO> CreateAsNewDataset(List<BudgetPriorityDTO> rows)
+        {
+            rows.ForEach(_ =>
             {
-                var item = request.UpdateRows.FirstOrDefault(row => row.Id == rows[i].Id);
-                if (item != null)
-                    rows[i] = item;
-            }
+                _.Id = Guid.NewGuid();
+                _.CriterionLibrary.Id = Guid.NewGuid();
+            });
 
             return rows;
         }

@@ -21,7 +21,7 @@ namespace BridgeCareCore.Services.Paging
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _investmentDefaultDataService = investmentDefaultDataService ?? throw new ArgumentNullException(nameof(investmentDefaultDataService));
         }
-        public InvestmentPagingPageModel GetLibraryInvestmentPage(Guid libraryId, InvestmentPagingRequestModel request)
+        public InvestmentPagingPageModel GetLibraryPage(Guid libraryId, InvestmentPagingRequestModel request)
         {
             var skip = 0;
             var take = 0;
@@ -32,7 +32,7 @@ namespace BridgeCareCore.Services.Paging
             var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
 
 
-            budgets = SyncedDataset(budgets, request.PagingSync);
+            budgets = SyncedDataset(budgets, request.SyncModel);
 
 
 
@@ -70,7 +70,7 @@ namespace BridgeCareCore.Services.Paging
             };
         }
 
-        public InvestmentPagingPageModel GetScenarioInvestmentPage(Guid simulationId, InvestmentPagingRequestModel request)
+        public InvestmentPagingPageModel GetScenarioPage(Guid simulationId, InvestmentPagingRequestModel request)
         {
             var skip = 0;
             var take = 0;
@@ -78,7 +78,7 @@ namespace BridgeCareCore.Services.Paging
             var total = 0;
             var lastYear = 0;
             var firstYear = 0;
-            var investmentPlan = request.PagingSync.Investment == null ? _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId) : request.PagingSync.Investment;
+            var investmentPlan = request.SyncModel.Investment == null ? _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId) : request.SyncModel.Investment;
             if (investmentPlan.Id == Guid.Empty)
             {
                 var investmentDefaultData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
@@ -91,10 +91,10 @@ namespace BridgeCareCore.Services.Paging
 
             investmentPlan.NumberOfYearsInAnalysisPeriod = investmentPlan.NumberOfYearsInAnalysisPeriod == 0 ? 1 : investmentPlan.NumberOfYearsInAnalysisPeriod;
 
-            var budgets = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
-                _unitOfWork.BudgetRepo.GetBudgetLibrary(request.PagingSync.LibraryId.Value).Budgets;
+            var budgets = request.SyncModel.LibraryId == null ? _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
+                _unitOfWork.BudgetRepo.GetBudgetLibrary(request.SyncModel.LibraryId.Value).Budgets;
 
-            budgets = SyncedDataset(budgets, request.PagingSync);
+            budgets = SyncedDataset(budgets, request.SyncModel);
 
             if (request.sortColumn.Trim() != "")
                 budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
@@ -136,7 +136,7 @@ namespace BridgeCareCore.Services.Paging
             };
         }
 
-        public List<BudgetDTO> GetSyncedInvestmentDataset(Guid simulationId, InvestmentPagingSyncModel request)
+        public List<BudgetDTO> GetSyncedScenarioDataSet(Guid simulationId, InvestmentPagingSyncModel request)
         {
             var budgets = request.LibraryId == null ?
                     _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :

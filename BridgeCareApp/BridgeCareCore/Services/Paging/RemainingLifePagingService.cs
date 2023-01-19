@@ -5,10 +5,13 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
+using BridgeCareCore.Services.Paging.Generics;
+using Org.BouncyCastle.Asn1.Ocsp;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Services
 {
-    public class RemainingLifeLimitPagingService : IRemainingLifeLimitPagingService
+    public class RemainingLifeLimitPagingService : PagingService<RemainingLifeLimitDTO, RemainingLifeLimitLibraryDTO>, IRemainingLifeLimitPagingService
     {
         private static IUnitOfWork _unitOfWork;
 
@@ -17,81 +20,21 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public PagingPageModel<RemainingLifeLimitDTO> GetRemainingLifeLimitPage(Guid simulationId, PagingRequestModel<RemainingLifeLimitDTO> request)
+        protected override List<RemainingLifeLimitDTO> GetScenarioRows(Guid scenarioId)
         {
-            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationId) :
-                _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(request.PagingSync.LibraryId.Value);
-
-            return HandlePaging(rows, request);
+            return _unitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(scenarioId);
         }
-        public PagingPageModel<RemainingLifeLimitDTO> GetLibraryRemainingLifeLimitPage(Guid libraryId, PagingRequestModel<RemainingLifeLimitDTO> request)
+        protected override List<RemainingLifeLimitDTO> GetLibraryRows(Guid libraryId)
         {
-            var rows = _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(libraryId);
-
-            return HandlePaging(rows, request);
+            return _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(libraryId);
         }
-        public List<RemainingLifeLimitDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<RemainingLifeLimitDTO> request)
+        protected override List<RemainingLifeLimitDTO> CreateAsNewDataset(List<RemainingLifeLimitDTO>  rows)
         {
-            var rows = _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(libraryId);
-            return SyncedDataset(rows, request);
-        }
-        public List<RemainingLifeLimitDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<RemainingLifeLimitDTO> request)
-        {
-            var rows = request.LibraryId == null ?
-                    _unitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationId) :
-                    _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(request.LibraryId.Value);
-            rows = SyncedDataset(rows, request);
-
-            if (request.LibraryId != null)
-                rows.ForEach(_ =>
-                {
-                    _.Id = Guid.NewGuid();
-                    _.CriterionLibrary.Id = Guid.NewGuid();
-                });
-            return rows;
-        }
-
-        private PagingPageModel<RemainingLifeLimitDTO> HandlePaging(List<RemainingLifeLimitDTO> rows, PagingRequestModel<RemainingLifeLimitDTO> request)
-        {
-            var skip = 0;
-            var take = 0;
-            var items = new List<RemainingLifeLimitDTO>();
-
-            rows = SyncedDataset(rows, request.PagingSync);
-
-            if (request.RowsPerPage > 0)
+            rows.ForEach(_ =>
             {
-                take = request.RowsPerPage;
-                skip = request.RowsPerPage * (request.Page - 1);
-                items = rows.Skip(skip).Take(take).ToList();
-            }
-            else
-            {
-                items = rows;
-                return new PagingPageModel<RemainingLifeLimitDTO>()
-                {
-                    Items = items,
-                    TotalItems = items.Count
-                };
-            }
-
-            return new PagingPageModel<RemainingLifeLimitDTO>()
-            {
-                Items = items,
-                TotalItems = rows.Count()
-            };
-        }
-
-        private List<RemainingLifeLimitDTO> SyncedDataset(List<RemainingLifeLimitDTO> rows, PagingSyncModel<RemainingLifeLimitDTO> request)
-        {
-            rows = rows.Concat(request.AddedRows).Where(_ => !request.RowsForDeletion.Contains(_.Id)).ToList();
-
-            for (var i = 0; i < rows.Count; i++)
-            {
-                var item = request.UpdateRows.FirstOrDefault(row => row.Id == rows[i].Id);
-                if (item != null)
-                    rows[i] = item;
-            }
+                _.Id = Guid.NewGuid();
+                _.CriterionLibrary.Id = Guid.NewGuid();
+            });
 
             return rows;
         }

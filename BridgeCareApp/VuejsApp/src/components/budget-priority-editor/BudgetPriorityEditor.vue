@@ -435,7 +435,7 @@ export default class BudgetPriorityEditor extends Vue {
         const request: PagingRequest<BudgetPriority>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: this.librarySelectItemValue !== null ? this.librarySelectItemValue : null,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
@@ -620,7 +620,7 @@ export default class BudgetPriorityEditor extends Vue {
             const upsertRequest: LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority> = {
                 library: budgetPriorityLibrary,    
                 isNewLibrary: true,           
-                pagingSync: {
+                syncModel: {
                     libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 || !this.hasSelectedLibrary ? null : this.selectedBudgetPriorityLibrary.id,
                     rowsForDeletion: budgetPriorityLibrary.budgetPriorities === [] ? [] : this.deletionIds,
                     updateRows: budgetPriorityLibrary.budgetPriorities === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
@@ -771,7 +771,7 @@ export default class BudgetPriorityEditor extends Vue {
         const upsertRequest: LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority> = {
                 library: this.selectedBudgetPriorityLibrary,
                 isNewLibrary: false,
-                 pagingSync: {
+                 syncModel: {
                     libraryId: this.selectedBudgetPriorityLibrary.id === this.uuidNIL ? null : this.selectedBudgetPriorityLibrary.id,
                     rowsForDeletion: this.deletionIds,
                     updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
@@ -932,7 +932,7 @@ export default class BudgetPriorityEditor extends Vue {
         const request: PagingRequest<BudgetPriority>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],

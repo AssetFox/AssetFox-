@@ -6,8 +6,8 @@ namespace BridgeCareCore.Models
     {
         public LibraryUpsertPagingRequestModel(): base()
         {
-            PagingSync = new PagingSyncModel<Y>();
+            SyncModel = new PagingSyncModel<Y>();
         }
-        public PagingSyncModel<Y> PagingSync { get; set; }
+        public PagingSyncModel<Y> SyncModel { get; set; }
     }
 }

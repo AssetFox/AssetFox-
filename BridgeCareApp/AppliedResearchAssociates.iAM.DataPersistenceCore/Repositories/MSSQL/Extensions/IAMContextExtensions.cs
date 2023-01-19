@@ -244,26 +244,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             {
                 return;
             }
-
+           
             var existingEntities = context.Set<T>();
-
             entities.ForEach(entity =>
             {
                 var idPropertyInfo = GetPropertyInfo<T>("Id");
-                if (existingEntities.Any(_ => idPropertyInfo.GetValue(_) == idPropertyInfo.GetValue(entity)))
+                var idValue = idPropertyInfo.GetValue(entity);
+                var existingEntity = existingEntities.Find(idValue);
+                if (existingEntity != null)
                 {
-                    var existingEntity = existingEntities.Find(idPropertyInfo.GetValue(entity));
-
                     SetPropertyValue(entity, BaseEntityProperty.CreatedBy,
                         GetPropertyInfo<T>(BaseEntityProperty.CreatedBy).GetValue(existingEntity));
-
                     SetPropertyValue(entity, BaseEntityProperty.CreatedDate,
                         GetPropertyInfo<T>(BaseEntityProperty.CreatedDate).GetValue(existingEntity));
-
                     SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy,
                         userId ?? GetPropertyInfo<T>(BaseEntityProperty.LastModifiedBy)
                             .GetValue(existingEntity));
-
                     SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
 
                     context.Entry(existingEntity).CurrentValues.SetValues(entity);
@@ -273,7 +269,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                     if (userId.HasValue)
                     {
                         SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
-
                         SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
                     }
 

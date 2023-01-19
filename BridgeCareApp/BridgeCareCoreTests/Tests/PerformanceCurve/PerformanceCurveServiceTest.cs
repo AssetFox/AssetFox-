@@ -91,7 +91,7 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             {
                 SyncModel = request,
             };
-            repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(curves);
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
 
             var dataset = service.GetSyncedLibraryDataset(upsertRequest);
             Assert.Empty(dataset);
@@ -122,7 +122,7 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             {
                 SyncModel = request,
             };
-            repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(new List<PerformanceCurveDTO>());
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(new List<PerformanceCurveDTO>());
 
             var dataset = service.GetSyncedLibraryDataset(upsertRequest);
             var returnedCurve = dataset.Single();

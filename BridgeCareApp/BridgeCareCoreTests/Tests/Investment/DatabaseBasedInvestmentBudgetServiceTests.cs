@@ -197,7 +197,7 @@ namespace BridgeCareCoreTests.Tests
             var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             AddTestDataToDatabase();
             var excelPackage = CreateRequestWithLibraryFormData();
-            var year = DateTime.Now.Year;
+            var year = 2022;
 
             var currentUserCriteriaFilter = new UserCriteriaDTO
             {
@@ -353,7 +353,7 @@ namespace BridgeCareCoreTests.Tests
         public void ImportScenarioInvestmentBudgetsFile_Does()
         {
             // Arrange
-            var year = DateTime.Now.Year;
+            var year = 2022;
             var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var excelPackage = CreateRequestWithScenarioFormData(simulation.Id);

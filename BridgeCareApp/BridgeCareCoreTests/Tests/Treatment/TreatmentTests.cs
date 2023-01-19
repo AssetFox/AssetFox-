@@ -438,7 +438,7 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var treatmentInvocation = treatmentRepo.SingleInvocationWithName(nameof(ISelectableTreatmentRepository.UpsertOrDeleteTreatments));
             var libraryInvocation = treatmentRepo.SingleInvocationWithName(nameof(ISelectableTreatmentRepository.UpsertTreatmentLibrary));
-            Assert.Equal(libraryAfter, libraryInvocation.Arguments.Single());
+            ObjectAssertions.Equivalent(libraryAfter, libraryInvocation.Arguments.Single());
             Assert.Equal(treatmentsAfter, treatmentInvocation.Arguments[0]);
             Assert.Equal(libraryId, treatmentInvocation.Arguments[1]);
         }

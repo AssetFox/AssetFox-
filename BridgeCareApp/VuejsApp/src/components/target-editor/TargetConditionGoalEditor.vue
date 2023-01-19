@@ -1,69 +1,60 @@
 <template>
-
     <v-layout column>
-        <!-- <v-flex xs12> -->
-           <v-layout justify-start align-center>
-                <v-card-title>
-                    <v-layout row align-center class="px-4">
-                            <v-layout column>
-                                <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
-                                <v-select
-                                    class="ghd-select ghd-text-field ghd-text-field-border"
-                                    :items="librarySelectItems"
-                                    append-icon=$vuetify.icons.ghd-down
-                                    outline
-                                    v-model="librarySelectItemValue"
-                                    outlined
-                                >
-                                </v-select>
-                            </v-layout>
-                        <v-divider vertical 
-                            class="mx-3"
-                            v-if="hasSelectedLibrary && !hasScenario"
+        <v-flex xs12>
+           <v-layout justify-space-between>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout column>
+                        <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
+                        <v-select
+                            class="ghd-select ghd-text-field ghd-text-field-border"
+                            :items="librarySelectItems"
+                            append-icon=$vuetify.icons.ghd-down
+                            outline
+                            v-model="librarySelectItemValue"
+                            outlined
                         >
-                        </v-divider>
-                        <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
+                        </v-select>
+                    </v-layout>
+                </v-flex>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout v-if="hasSelectedLibrary && ! hasScenario" style="padding-top: 10px; padding-left: 10px">
+                        <div v-if="hasSelectedLibrary && !hasScenario" class="header-text-content owner-padding" style="padding-top: 7px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                         </div>
                         <v-divider vertical 
-                            class="mx-3"
+                            class="owner-shared-divider"
                             v-if="hasSelectedLibrary && !hasScenario"
                         >
                         </v-divider>
-                            <v-badge v-show="isShared">
+                        <v-badge v-show="isShared" style="padding: 10px">
                             <template v-slot: badge>
                                 <span>Shared</span>
                             </template>
-                            </v-badge>
-                            <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                                v-show='!hasScenario'>
-                                Share Library
+                        </v-badge>
+                        <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                            v-show='!hasScenario'>
+                            Share Library
                         </v-btn>
-
-                        <!-- <v-switch
-                            label="Shared"
-                            class="ghd-control-label ghd-md-gray my-2"
-                            v-if="hasSelectedLibrary && !hasScenario"
-                            v-model="selectedTargetConditionGoalLibrary.isShared"
-                            @change="checkHasUnsavedChanges()"
-                        /> -->
                     </v-layout>
-                </v-card-title>
-                <v-layout justify-end align-center class="ma-2">
-                    <v-btn outline
-                        @click="showCreateTargetConditionGoalDialog = true"
-                        class="ghd-control-border ghd-blue"
-                        v-show="hasSelectedLibrary || hasScenario" 
-                    >Add Target Condition Goal</v-btn>
-                    <v-btn outline
-                        @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
-                        class="ghd-control-border ghd-blue"
-                        v-show="!hasScenario"
-                    >
-                    Create New Library
-                    </v-btn>
-                </v-layout>
-            </v-layout>
+                </v-flex>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout align-end style="padding-top: 18px !important;">
+                        <v-btn outline
+                            @click="showCreateTargetConditionGoalDialog = true"
+                            class="ghd-control-border ghd-blue"
+                            v-show="hasSelectedLibrary || hasScenario" 
+                        >Add Target Condition Goal</v-btn>
+                        <v-btn outline
+                            @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
+                            class="ghd-control-border ghd-blue"
+                            v-show="!hasScenario"
+                        >
+                        Create New Library
+                        </v-btn>
+                    </v-layout>
+                </v-flex>
+           </v-layout>
+        </v-flex>
         <!-- </v-flex> -->
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="targets-data-table">
@@ -296,7 +287,7 @@
                 </v-btn>
             </v-layout>
         </v-flex>
-
+    
         <ConfirmDeleteAlert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
@@ -323,6 +314,7 @@
             :dialogData="criterionEditorDialogData"
             @submit="onEditTargetConditionGoalCriterionLibrary"
         />
+    </v-layout>
     </v-layout>
 </template>
 

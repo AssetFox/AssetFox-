@@ -1,5 +1,5 @@
 import { CalculatedAttribute, CalculatedAttributeLibrary, CriterionAndEquationSet, Timing } from "./calculated-attribute";
-import { Budget, BudgetAmount, BudgetLibrary, Investment, InvestmentPlan } from "./investment";
+import { Budget, BudgetAmount, BudgetLibrary, BudgetLibraryUser, Investment, InvestmentPlan } from "./investment";
 
 //abstract
 export abstract class BaseLibraryUpsertPagingRequest<T>{
@@ -62,6 +62,7 @@ export interface InvestmentPagingSyncModel{
     updatedBudgetAmounts: { [key: string]: BudgetAmount[]; }
     addedBudgetAmounts: { [key: string]: BudgetAmount[]; }
     firstYearAnalysisBudgetShift: number;
+    users: BudgetLibraryUser[];
 }
 
 //CalculatedAttributes

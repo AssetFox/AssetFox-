@@ -2,7 +2,7 @@
     <v-layout column>
         <v-flex xs12>
             <v-layout justify-space-between>
-                <v-flex xs4 class="ghd-constant-header">
+                <v-flex xs3 class="ghd-constant-header">
                     <v-layout column>
                         <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
                         <v-select
@@ -23,7 +23,7 @@
                     <v-divider class="owner-shared-divider" vertical 
                         v-if="hasSelectedLibrary && !hasScenario">
                     </v-divider>
-                    <v-badge v-show="isShared" style="padding: 10px">
+                    <v-badge v-show="isShared" style="padding: 7px">
                         <template v-slot: badge>
                             <span>Shared</span>
                         </template>
@@ -511,7 +511,6 @@ export default class RemainingLifeLimitEditor extends Vue {
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
         this.isShared = this.isSharedLibrary;
-        console.log("shared: " + this.isShared);
     }
     
     @Watch('stateNumericAttributes')

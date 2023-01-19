@@ -160,7 +160,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             try
             {
-                _unitOfWork.Context.DeleteAll<SimulationOutputEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<SimulationOutputJsonEntity>(_ =>
                 _.SimulationId == simulationId);
 
                 var outputInitialConditionNetwork = JsonConvert.SerializeObject(simulationOutput.InitialConditionOfNetwork, settings);
@@ -187,9 +187,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 foreach (var item in simulationOutput.Years)
                 {
-                    var  targetGoalsToRemove = item.TargetConditionGoals.Where(_ => double.IsNaN(_.TargetValue) && double.IsNaN(_.ActualValue)).ToList();
+                    var  targetGoalsToRemove = item.TargetConditionGoals.Where(_ => double.IsNaN(_.TargetValue) || double.IsNaN(_.ActualValue)).ToList();
                     targetGoalsToRemove.ForEach(_ => item.TargetConditionGoals.Remove(_));
-                    var conditionGoalsToRemove = item.DeficientConditionGoals.Where(_ => double.IsNaN(_.DeficientLimit) && double.IsNaN(_.AllowedDeficientPercentage) && double.IsNaN(_.ActualDeficientPercentage)).ToList();
+                    var conditionGoalsToRemove = item.DeficientConditionGoals.Where(_ => double.IsNaN(_.DeficientLimit) || double.IsNaN(_.AllowedDeficientPercentage) || double.IsNaN(_.ActualDeficientPercentage)).ToList();
                     conditionGoalsToRemove.ForEach(_ => item.DeficientConditionGoals.Remove(_));
                     var simulationOutputYearData = JsonConvert.SerializeObject(item, settings);
 

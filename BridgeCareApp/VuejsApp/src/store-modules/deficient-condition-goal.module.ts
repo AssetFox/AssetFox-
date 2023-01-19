@@ -169,8 +169,8 @@ const actions = {
             }
         });
     },
-    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
-        await DeficientConditionGoalService.getIsSharedLibrary(payload.id).then(
+    async getIsSharedDeficientConditionGoalLibrary({ dispatch, commit }: any, payload: any) {
+        await DeficientConditionGoalService.getIsSharedDeficientConditionGoalLibrary(payload.id).then(
             (response: AxiosResponse) => {
                 if (
                 hasValue(response, 'status') &&

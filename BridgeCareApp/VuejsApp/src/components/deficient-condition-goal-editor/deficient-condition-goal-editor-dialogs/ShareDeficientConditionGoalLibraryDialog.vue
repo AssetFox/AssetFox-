@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title>
         <v-layout justify-center>
-          <h3>Deficient Condition Goal Library Sharing</h3>
+          <h5>Deficient Condition Goal Library Sharing</h5>
         </v-layout>
           <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
             X
@@ -68,7 +68,7 @@ export default class ShareDeficientConditionGoalLibraryDialog extends Vue {
 
   @State(state => state.userModule.users) stateUsers: User[];
 
-  deficientConditionGoalUserGridHeaders: DataTableHeader[] = [
+  deficientConditionGoalLibraryUserGridHeaders: DataTableHeader[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}

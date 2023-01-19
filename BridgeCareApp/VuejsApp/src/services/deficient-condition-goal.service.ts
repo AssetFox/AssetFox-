@@ -54,7 +54,7 @@ export default class DeficientConditionGoalService {
             , proposedUsers
         );
     }
-    static getIsSharedLibrary(deficientConditionGoalLibraryId: string): AxiosPromise {
+    static getIsSharedDeficientConditionGoalLibrary(deficientConditionGoalLibraryId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.DeficientConditionGoal}/GetIsSharedLibrary/${deficientConditionGoalLibraryId}`
         );

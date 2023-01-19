@@ -187,6 +187,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 foreach (var item in simulationOutput.Years)
                 {
+                    var  targetGoalsToRemove = item.TargetConditionGoals.Where(_ => double.IsNaN(_.TargetValue) && double.IsNaN(_.ActualValue)).ToList();
+                    targetGoalsToRemove.ForEach(_ => item.TargetConditionGoals.Remove(_));
+                    var conditionGoalsToRemove = item.DeficientConditionGoals.Where(_ => double.IsNaN(_.DeficientLimit) && double.IsNaN(_.AllowedDeficientPercentage) && double.IsNaN(_.ActualDeficientPercentage)).ToList();
+                    conditionGoalsToRemove.ForEach(_ => item.DeficientConditionGoals.Remove(_));
                     var simulationOutputYearData = JsonConvert.SerializeObject(item, settings);
 
                     _unitOfWork.Context.Add(
@@ -428,8 +432,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void ConvertSimulationOutpuFromJsonTorelational(Guid simulationId)
         {
-            var output = GetSimulationOutputViaJson(simulationId);
+            var output = GetSimulationOutputViaJson(simulationId);            
             CreateSimulationOutputViaRelational(simulationId, output);
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                var outputId = _unitOfWork.Context.SimulationOutput.First(_ => _.SimulationId == simulationId).Id;
+                var outputJsons = _unitOfWork.Context.SimulationOutputJson.Where(_ => _.SimulationId == simulationId).ToList();
+                if (outputJsons.Count != 0)
+                {
+                    outputJsons.ForEach(_ => _.SimulationOutputId = outputId);
+                }
+                
+                _unitOfWork.Context.UpdateAll(outputJsons);
+                _unitOfWork.Commit();
+            }
+            catch(Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+            
         }
 
         private static string GuidsToStringList(List<Guid> assetDetailIds)

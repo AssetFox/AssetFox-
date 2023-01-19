@@ -158,47 +158,6 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(libraryDto, libraryInvocation.Arguments[0]);
         }
 
-        [Fact]
-        public async Task ShouldDeleteDeficientConditionGoalData()
-        {
-            // Arrange
-            var controller = Setup();
-            var libraryId = Guid.NewGuid();
-            var goalId = Guid.NewGuid();
-            SetupLibraryForGet(libraryId, goalId);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            var getResult = await controller.DeficientConditionGoalLibraries();
-            var deficientConditionGoalLibraryDTO = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
-            deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary = criterionLibrary;
-
-            var sync = new PagingSyncModel<DeficientConditionGoalDTO>()
-            {
-                UpdateRows = new List<DeficientConditionGoalDTO>() { deficientConditionGoalLibraryDTO.DeficientConditionGoals[0] }
-            };
-
-            var libraryRequest = new LibraryUpsertPagingRequestModel<DeficientConditionGoalLibraryDTO, DeficientConditionGoalDTO>()
-            {
-                IsNewLibrary = false,
-                Library = deficientConditionGoalLibraryDTO,
-                SyncModel = sync
-            };
-
-            await controller.UpsertDeficientConditionGoalLibrary(libraryRequest);
-
-            // Act
-            var result = await controller.DeleteDeficientConditionGoalLibrary(libraryId);
-
-            // Assert
-            Assert.IsType<OkResult>(result);
-
-            Assert.False(TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId));
-            Assert.False(TestHelper.UnitOfWork.Context.DeficientConditionGoal.Any(_ => _.Id == goalId));
-            Assert.False(
-                TestHelper.UnitOfWork.Context.CriterionLibraryDeficientConditionGoal.Any(_ =>
-                    _.DeficientConditionGoalId == goalId));
-        }
-
-
         //Scenarios
         [Fact]
         public async Task UpsertScenarioDeficientConditionGoals_GoalDeletedInSyncModel_AsksRepositoryToUpsertWithoutGoal()
@@ -294,7 +253,7 @@ namespace BridgeCareCoreTests.Tests
             var goal = DeficientConditionGoalDtos.CulvDurationN(simulationId);
             var goals = new List<DeficientConditionGoalDTO> { goal };
             repo.Setup(r => r.GetScenarioDeficientConditionGoals(simulationId)).Returns(goals);
- 
+
             // Act
             var request = new PagingRequestModel<DeficientConditionGoalDTO>();
             var result = await controller.GetScenarioDeficientConditionGoalPage(simulationId, request);

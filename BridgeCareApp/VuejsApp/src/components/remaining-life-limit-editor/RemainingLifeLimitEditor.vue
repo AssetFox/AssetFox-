@@ -16,28 +16,32 @@
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
-                <v-layout v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 10px; padding-left: 5px">
-                    <div class="header-text-content owner-padding" style="padding-top: 7px;">
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                    <v-layout v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 18px; padding-left: 5px" align-center>
+                        <div class="header-text-content owner-padding">
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                        </div>
+                        <v-divider  vertical 
+                            v-if="hasSelectedLibrary && !hasScenario">
+                        </v-divider>
+                        <v-badge v-show="isShared" style="padding: 7px">
+                            <template v-slot: badge>
+                                <span>Shared</span>
+                            </template>
+                        </v-badge>
+                        <v-btn @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                            v-show='!hasScenario'>
+                            Share Library
+                        </v-btn>
+                    </v-layout>
+                </v-flex>
+                <v-flex xs4 class="ghd-constant-header">
+                <v-layout align-end style="padding-top: 18px !important;">
+                    <div>
+                        <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" outline>Add Remaining Life Limit</v-btn>
+                        <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" outline>Create New Library</v-btn>
                     </div>
-                    <v-divider class="owner-shared-divider" vertical 
-                        v-if="hasSelectedLibrary && !hasScenario">
-                    </v-divider>
-                    <v-badge v-show="isShared" style="padding: 7px">
-                        <template v-slot: badge>
-                            <span>Shared</span>
-                        </template>
-                    </v-badge>
-                    <v-btn @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                        v-show='!hasScenario'>
-                        Share Library
-                    </v-btn>
                 </v-layout>
                 </v-flex>
-                <div>
-                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" outline>Add Remaining Life Limit</v-btn>
-                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" outline>Create New Library</v-btn>
-                </div>
             </v-layout>
         </v-flex>
         <div v-show="librarySelectItemValue != null || hasScenario">

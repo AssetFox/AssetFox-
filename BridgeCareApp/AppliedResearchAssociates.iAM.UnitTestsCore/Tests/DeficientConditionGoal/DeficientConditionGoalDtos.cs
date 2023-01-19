@@ -7,16 +7,17 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    internal static class DeficientConditionGoalDtos
+    public static class DeficientConditionGoalDtos
     {
-        public static DeficientConditionGoalDTO CulvDurationN()
+        public static DeficientConditionGoalDTO CulvDurationN(Guid? id = null)
         {
+            var resolveId = id ?? Guid.NewGuid();
             var dto = new DeficientConditionGoalDTO
             {
                 AllowedDeficientPercentage= 100,
                 Attribute = TestAttributeNames.CulvDurationN,
                 DeficientLimit = 1,
-                Id = Guid.NewGuid(),
+                Id = resolveId,
                 Name = "Test Name",
             };
             return dto;

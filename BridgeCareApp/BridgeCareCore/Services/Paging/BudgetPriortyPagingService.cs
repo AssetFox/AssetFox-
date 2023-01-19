@@ -10,11 +10,11 @@ using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Services
 {
-    public class BudgetPriorityPagingService : IBudgetPriortyPagingService
+    public class BudgetPriortyPagingService : IBudgetPriortyPagingService
     {
         private static IUnitOfWork _unitOfWork;
 
-        public BudgetPriorityPagingService(IUnitOfWork unitOfWork)
+        public BudgetPriortyPagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }

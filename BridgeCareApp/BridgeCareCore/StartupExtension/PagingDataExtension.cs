@@ -13,7 +13,7 @@ namespace BridgeCareCore.StartupExtension
         {
             services.AddScoped<IDeficientConditionGoalPagingService, DeficientConditionGoalPagingService>();
             services.AddScoped<ITargetConditionGoalPagingService, TargetConditionGoalPagingService>();
-            services.AddScoped<IBudgetPriortyPagingService, BudgetPriorityPagingService>();
+            services.AddScoped<IBudgetPriortyPagingService, BudgetPriortyPagingService>();
             services.AddScoped<ICalculatedAttributePagingService, CalculatedAttributePagingService>();
             services.AddScoped<ICommittedProjectPagingService, CommittedProjectPagingService>();
             services.AddScoped<IInvestmentPagingService, InvestmentPagingService>();

@@ -56,7 +56,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService,
                 accessor,
                 _mockClaimHelper.Object,
-                new BudgetPriorityPagingService(TestHelper.UnitOfWork));
+                new BudgetPriortyPagingService(TestHelper.UnitOfWork));
             return controller;
         }
         private BudgetPriorityController CreateTestController(List<string> uClaims)
@@ -70,7 +70,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService,
                 accessor,
                 _mockClaimHelper.Object,
-                new BudgetPriorityPagingService(TestHelper.UnitOfWork));
+                new BudgetPriortyPagingService(TestHelper.UnitOfWork));
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -147,7 +147,7 @@ namespace BridgeCareCoreTests.Tests
 
         private BudgetPriorityController CreateController(Mock<IUnitOfWork> unitOfWork)
         {
-            var service = new BudgetPriorityPagingService(unitOfWork.Object);
+            var service = new BudgetPriortyPagingService(unitOfWork.Object);
             var security = EsecSecurityMocks.AdminMock;
             var hubService = HubServiceMocks.DefaultMock();
             var accessor = HttpContextAccessorMocks.DefaultMock();

@@ -87,9 +87,13 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
                 LibraryId = libraryId,
                 RowsForDeletion = new List<Guid> { curveId },
             };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>
+            {
+                SyncModel = request,
+            };
             repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(curves);
 
-            var dataset = service.GetSyncedLibraryDataset(libraryId, request);
+            var dataset = service.GetSyncedLibraryDataset(upsertRequest);
             Assert.Empty(dataset);
         }
 
@@ -114,9 +118,13 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
                 LibraryId = libraryId,
                 AddedRows = curves,
             };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>
+            {
+                SyncModel = request,
+            };
             repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(new List<PerformanceCurveDTO>());
 
-            var dataset = service.GetSyncedLibraryDataset(libraryId, request);
+            var dataset = service.GetSyncedLibraryDataset(upsertRequest);
             var returnedCurve = dataset.Single();
             ObjectAssertions.Equivalent(curve, returnedCurve);
         }

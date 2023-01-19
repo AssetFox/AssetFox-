@@ -274,7 +274,7 @@ namespace BridgeCareCoreTests.Tests
                 IsNewLibrary = true,
                 Library = dto,
             };
-            pagingService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(dto);
+            pagingService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(new List<TreatmentDTO>()); // correct? Merge build error here.
             var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);
@@ -310,7 +310,7 @@ namespace BridgeCareCoreTests.Tests
             var simulation = new SimulationDTO { Id = simulationId };
 
             var pageSync = new PagingSyncModel<TreatmentDTO>();
-            pagingService.Setup(ts => ts.GetSyncedScenarioDataset(simulationId, pageSync)).Returns(dtos);
+            pagingService.Setup(ts => ts.GetSyncedScenarioDataSet(simulationId, pageSync)).Returns(dtos);
 
             // Act
             var result = await controller.UpsertScenarioSelectedTreatments(simulationId, pageSync);
@@ -428,9 +428,9 @@ namespace BridgeCareCoreTests.Tests
             {
                 IsNewLibrary = false,
                 Library = libraryBefore,
-                PagingSync = sync
+                SyncModel = sync
             };
-            pagingService.Setup(ts => ts.GetSyncedLibraryDataset(libraryRequest)).Returns(libraryAfter);
+            pagingService.Setup(ts => ts.GetSyncedLibraryDataset(libraryRequest)).Returns(treatmentsAfter);
 
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);
@@ -482,11 +482,11 @@ namespace BridgeCareCoreTests.Tests
                 UpdateRows = new List<TreatmentDTO>() { treatmentAfter },
                 LibraryId = libraryId,
             };
-            pagingService.Setup(ts => ts.GetSyncedScenarioDataset(simulationId, sync)).Returns(treatmentsAfter);
+            pagingService.Setup(ts => ts.GetSyncedScenarioDataSet(simulationId, sync)).Returns(treatmentsAfter);
 
             var result = await controller.UpsertScenarioSelectedTreatments(simulationId, sync);
             ActionResultAssertions.Ok(result);
-            var call = pagingService.SingleInvocationWithName(nameof(ITreatmentPagingService.GetSyncedScenarioDataset));
+            var call = pagingService.SingleInvocationWithName(nameof(ITreatmentPagingService.GetSyncedScenarioDataSet));
             Assert.Equal(simulationId, call.Arguments[0]);
             Assert.Equal(sync, call.Arguments[1]);
         }

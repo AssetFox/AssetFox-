@@ -55,7 +55,7 @@ namespace BridgeCareCoreTests.Tests
             var service = CreateInvestmentBudgetsService(unitOfWork);
             var pagingService = CreateInvestmentPagingService(unitOfWork);
             var request = new InvestmentPagingSyncModel();
-            var result = pagingService.GetSyncedInvestmentDataset(simulationId, request);
+            var result = pagingService.GetSyncedScenarioDataSet(simulationId, request);
             var returnedBudget = result.Single();
             Assert.Equal(budget, returnedBudget);
         }
@@ -81,7 +81,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 BudgetsForDeletion = new List<Guid> { budgetId },
             };
-            var result = service.GetSyncedInvestmentDataset(simulationId, request);
+            var result = service.GetSyncedScenarioDataSet(simulationId, request);
             Assert.Empty(result);
         }
 
@@ -108,7 +108,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 AddedBudgets = addedBudgets,
             };
-            var result = service.GetSyncedInvestmentDataset(simulationId, request);
+            var result = service.GetSyncedScenarioDataSet(simulationId, request);
             var resultBudget = result.Single();
             Assert.Equal(budget, resultBudget);
         }
@@ -143,7 +143,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 UpdatedBudgets = modifiedBudgets,
             };
-            var result = service.GetSyncedInvestmentDataset(simulationId, request);
+            var result = service.GetSyncedScenarioDataSet(simulationId, request);
             var resultBudget = result.Single();
             ObjectAssertions.Equivalent(modifiedBudget, resultBudget);
         }

@@ -48,6 +48,27 @@ namespace BridgeCareCoreTests.Tests
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
         }
 
+        private PerformanceCurveController CreateController(Mock<IUnitOfWork> unitOfWork)
+        {
+            var security = EsecSecurityMocks.AdminMock;
+            var hubService = HubServiceMocks.DefaultMock();
+            var contextAccessor = HttpContextAccessorMocks.DefaultMock();
+            var expressionValidationService = new Mock<IExpressionValidationService>();
+            var performanceCurvesService = new PerformanceCurvesService(unitOfWork.Object, hubService.Object, expressionValidationService.Object);
+            var performanceCurvesPagingService = new PerformanceCurvesPagingService(unitOfWork.Object);
+            var claimHelper = new Mock<IClaimHelper>();
+            var controller = new PerformanceCurveController(
+                security.Object,
+                unitOfWork.Object,
+                hubService.Object,
+                contextAccessor.Object,
+                performanceCurvesService,
+                performanceCurvesPagingService,
+                claimHelper.Object
+                );
+            return controller;
+        }
+
         private PerformanceCurveController CreateTestController(List<string> userClaims)
         {
             var accessor = HttpContextAccessorMocks.Default();
@@ -130,11 +151,12 @@ namespace BridgeCareCoreTests.Tests
             dto.Name = "Updated name";
             dto2.Name = "Updated name";
             repo.Setup(r => r.GetPerformanceCurveLibrary(libraryId)).Returns(dto3);
-            repo.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(new List<PerformanceCurveDTO>());
+            repo.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(new List<PerformanceCurveDTO>());
             var controller = CreateController(unitOfWork);
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
-                Library = library,
+                Library = dto,
+                IsNewLibrary = false,
                 SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
@@ -155,6 +177,7 @@ namespace BridgeCareCoreTests.Tests
             ObjectAssertions.EmptyEnumerable<PerformanceCurveDTO>(curveCall.Arguments[0]);
             Assert.Equal(libraryId, curveCall.Arguments[1]);
         }
+
 
         [Fact]
         public async Task DeletePerformanceCurveLibrary_PassesRequestToRepo()
@@ -217,6 +240,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var performanceCurveId = Guid.NewGuid();
             var dto = PerformanceCurveDtos.Dto(criterionLibraryId, performanceCurveId, "Attribute", "Equation");
+            repo.Setup(r => r.GetScenarioPerformanceCurvesOrderedById(simulationId)).Returns(new List<PerformanceCurveDTO>());
             var request = new PagingSyncModel<PerformanceCurveDTO>()
             {
                 LibraryId = null,

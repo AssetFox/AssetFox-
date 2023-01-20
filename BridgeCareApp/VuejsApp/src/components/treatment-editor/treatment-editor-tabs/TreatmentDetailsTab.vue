@@ -22,7 +22,7 @@
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Category</v-subheader>
                         <v-select
-                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border ghd-control-width'
+                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                             :items="Array.from(treatmentCategoryMap.keys())"
                             append-icon=$vuetify.icons.ghd-down
                             @input="
@@ -40,7 +40,7 @@
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Asset type</v-subheader>
                         <v-select
-                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border ghd-control-width'
+                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                         :items="Array.from(assetTypeMap.keys())"
                         append-icon=$vuetify.icons.ghd-down
                             @input="
@@ -100,7 +100,7 @@
                         full-width
                         bottom
                         min-height="500px"
-                        min-width="800px"
+                        min-width="1000px"
                     >   
                         <template slot="activator">                                                                                       
                             <v-layout column class="ghd-left-padding">  

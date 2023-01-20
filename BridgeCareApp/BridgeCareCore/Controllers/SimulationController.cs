@@ -445,5 +445,31 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpPost]
+        [Route("ConvertSimulationOutputToRelational/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> ConvertSimulationOutputToRelational(Guid simulationId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.SimulationOutputRepo.ConvertSimulationOutpuFromJsonTorelational(simulationId);
+                });
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Converting Simulation Output from Json to Relational::{e.Message}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Converting Simulation Output from Json to Relationa::{e.Message}");
+                throw;
+            }
+        }
     }
 }

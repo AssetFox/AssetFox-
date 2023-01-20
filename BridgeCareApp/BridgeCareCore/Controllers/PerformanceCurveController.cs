@@ -51,7 +51,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _performanceCurvePagingService.GetScenarioPerformanceCurvePage(simulationId, pageRequest));
+                var result = await Task.Factory.StartNew(() => _performanceCurvePagingService.GetScenarioPage(simulationId, pageRequest));
                 return Ok(result);
             }
             catch (Exception e)
@@ -69,7 +69,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _performanceCurvePagingService.GetLibraryPerformanceCurvePage(libraryId, pageRequest));
+                var result = await Task.Factory.StartNew(() => _performanceCurvePagingService.GetLibraryPage(libraryId, pageRequest));
                 return Ok(result);
             }
             catch (Exception e)
@@ -145,23 +145,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var curves = new List<PerformanceCurveDTO>();
-                    if (upsertRequest.ScenarioId != null)
-                        curves = _performanceCurvePagingService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
-                    else if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
-                        curves = _performanceCurvePagingService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
-                    else if (!upsertRequest.IsNewLibrary)
-                        curves = _performanceCurvePagingService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
-                    else if (upsertRequest.IsNewLibrary && upsertRequest.PagingSync.LibraryId == Guid.Empty)
-                    {
-                        curves = _performanceCurvePagingService.GetNewLibraryDataset(upsertRequest.PagingSync);
-                    }
-
-                    if (upsertRequest.IsNewLibrary)
-                        curves.ForEach(curve => {
-                            curve.Id = Guid.NewGuid();
-                            curve.CriterionLibrary.Id = Guid.NewGuid();
-                        });
+                    var curves = _performanceCurvePagingService.GetSyncedLibraryDataset(upsertRequest);
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
@@ -199,7 +183,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var dtos = _performanceCurvePagingService.GetSyncedScenarioDataset(simulationId, pagingSync);                   
+                    var dtos = _performanceCurvePagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);                   
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(dtos, simulationId);
                     UnitOfWork.Commit();

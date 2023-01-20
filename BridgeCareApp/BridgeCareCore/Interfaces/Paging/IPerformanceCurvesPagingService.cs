@@ -7,10 +7,9 @@ namespace BridgeCareCore.Interfaces
 {
     public interface IPerformanceCurvesPagingService
     {
-        PagingPageModel<PerformanceCurveDTO> GetScenarioPerformanceCurvePage(Guid simulationId, PagingRequestModel<PerformanceCurveDTO> request);
-        PagingPageModel<PerformanceCurveDTO> GetLibraryPerformanceCurvePage(Guid libraryId, PagingRequestModel<PerformanceCurveDTO> request);
-        List<PerformanceCurveDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<PerformanceCurveDTO> request);
-        List<PerformanceCurveDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<PerformanceCurveDTO> request);
-        List<PerformanceCurveDTO> GetNewLibraryDataset(PagingSyncModel<PerformanceCurveDTO> pagingSync);
+        PagingPageModel<PerformanceCurveDTO> GetScenarioPage(Guid simulationId, PagingRequestModel<PerformanceCurveDTO> request);
+        PagingPageModel<PerformanceCurveDTO> GetLibraryPage(Guid libraryId, PagingRequestModel<PerformanceCurveDTO> request);
+        List<PerformanceCurveDTO> GetSyncedScenarioDataSet(Guid simulationId, PagingSyncModel<PerformanceCurveDTO> request);
+        List<PerformanceCurveDTO> GetSyncedLibraryDataset(LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO> upsertRequest);
     }
 }

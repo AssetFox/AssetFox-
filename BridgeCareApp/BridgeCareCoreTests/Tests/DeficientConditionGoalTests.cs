@@ -219,7 +219,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 IsNewLibrary = false,
                 Library = libraryDto,
-                PagingSync = sync
+                SyncModel = sync
             };
 
             // Act
@@ -264,7 +264,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 IsNewLibrary = false,
                 Library = deficientConditionGoalLibraryDTO,
-                PagingSync = sync
+                SyncModel = sync
             };
 
             await controller.UpsertDeficientConditionGoalLibrary(libraryRequest);

@@ -64,4 +64,8 @@ export default class ScenarioService {
     static getNoTreatmentBeforeCommitted(simulationId: string): AxiosPromise {
         return coreAxiosInstance.get(`${API.Scenario}/GetNoTreatmentBeforeCommitted/${simulationId}`);
     }
+
+    static ConvertSimulationOutputToRelational(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/ConvertSimulationOutputToRelational/${simulationId}`);
+    } 
 }

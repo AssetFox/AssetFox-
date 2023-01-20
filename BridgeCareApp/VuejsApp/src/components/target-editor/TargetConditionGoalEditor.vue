@@ -630,7 +630,7 @@ export default class TargetConditionGoalEditor extends Vue {
         const request: PagingRequest<TargetConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: this.librarySelectItemValue !== null ? this.librarySelectItemValue : null,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
@@ -703,7 +703,7 @@ export default class TargetConditionGoalEditor extends Vue {
             const upsertRequest: LibraryUpsertPagingRequest<TargetConditionGoalLibrary, TargetConditionGoal> = {
                 library: library,    
                 isNewLibrary: true,           
-                 pagingSync: {
+                 syncModel: {
                     libraryId: library.targetConditionGoals.length == 0 || !this.hasSelectedLibrary ? null : this.selectedTargetConditionGoalLibrary.id,
                     rowsForDeletion: library.targetConditionGoals === [] ? [] : this.deletionIds,
                     updateRows: library.targetConditionGoals === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
@@ -794,7 +794,7 @@ export default class TargetConditionGoalEditor extends Vue {
         const upsertRequest: LibraryUpsertPagingRequest<TargetConditionGoalLibrary, TargetConditionGoal> = {
                 library: this.selectedTargetConditionGoalLibrary,
                 isNewLibrary: false,
-                pagingSync: {
+                syncModel: {
                 libraryId: this.selectedTargetConditionGoalLibrary.id === this.uuidNIL ? null : this.selectedTargetConditionGoalLibrary.id,
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
@@ -977,7 +977,7 @@ export default class TargetConditionGoalEditor extends Vue {
         const request: PagingRequest<TargetConditionGoal>= {
             page: 1,
             rowsPerPage: 5,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],

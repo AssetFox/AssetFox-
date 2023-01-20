@@ -8,8 +8,8 @@ namespace BridgeCareCore.Models
     {
         public InvestmentLibraryUpsertPagingRequestModel()
         {
-            PagingSync = new InvestmentPagingSyncModel();
+            SyncModel = new InvestmentPagingSyncModel();
         }
-        public InvestmentPagingSyncModel PagingSync { get; set; }
+        public InvestmentPagingSyncModel SyncModel { get; set; }
     }
 }

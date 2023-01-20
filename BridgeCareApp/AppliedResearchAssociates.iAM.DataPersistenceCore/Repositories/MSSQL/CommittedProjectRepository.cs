@@ -15,6 +15,9 @@ using MoreLinq;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Data.Networking;
+using System.Text.RegularExpressions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -29,6 +32,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetSimulationCommittedProjects(Simulation simulation)
         {
+            double noTreatmentDefaultCost = 0.0;
+            var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
             var simulationEntity = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulation.Id);
             if (simulationEntity == null)
             {
@@ -37,10 +42,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var noTreatment = simulationEntity.NoTreatmentBeforeCommittedProjects;
             ScenarioSelectableTreatmentEntity noTreatmentEntity = null;
             if (noTreatment)
-            {
-                var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
                 noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id);
-            }
+
             var assets = _unitOfWork.Context.MaintainableAsset
                 .Where(_ => _.NetworkId == simulation.Network.Id)
                 .Include(_ => _.MaintainableAssetLocation)
@@ -74,57 +77,135 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         }).ToList(),
                 };
             }
-                //.Select(project => new CommittedProjectEntity
-                //{
-                //    Id = project.Id,
-                //    Name = project.Name,
-                //    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-                //    ShadowForSameTreatment = project.ShadowForSameTreatment,
-                //    Cost = project.Cost,
-                //    Year = project.Year,
-                //    CommittedProjectLocation = project.CommittedProjectLocation,
-                //    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
-                //    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
-                //        new CommittedProjectConsequenceEntity
-                //        {
-                //            Id = consequence.Id,
-                //            ChangeValue = consequence.ChangeValue,
-                //            Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
-                //        }).ToList(),
-                //}).AsNoTracking().ToList();
-
+            //.Select(project => new CommittedProjectEntity
+            //{
+            //    Id = project.Id,
+            //    Name = project.Name,
+            //    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
+            //    ShadowForSameTreatment = project.ShadowForSameTreatment,
+            //    Cost = project.Cost,
+            //    Year = project.Year,
+            //    CommittedProjectLocation = project.CommittedProjectLocation,
+            //    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
+            //    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
+            //        new CommittedProjectConsequenceEntity
+            //        {
+            //            Id = consequence.Id,
+            //            ChangeValue = consequence.ChangeValue,
+            //            Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
+            //        }).ToList(),
+            //}).AsNoTracking().ToList();
             if (projects.Any())
             {
                 projects.ForEach(_ => {
                     var asset = assets.FirstOrDefault(a => _.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
                     if (asset != null)
                     {
-                        _.CreateCommittedProject(simulation, asset.Id, noTreatment, noTreatmentEntity);
+                        if (noTreatment)
+                        {
+                            var defaultNoTreatment = selectableTreatmentRepository.GetDefaultNoTreatment(simulation.Id);
+                            noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
+                        }
+                        _.CreateCommittedProject(simulation, asset.Id, noTreatment, noTreatmentDefaultCost, noTreatmentEntity);
                     }
                 });
             }
-
         }
+        public double GetDefaultNoTreatmentCost(TreatmentDTO treatment, Guid assetId)
+        {
+            double totalCost = 0.0;
+            treatment.Costs.ForEach(c =>
+            {
+                var compiler = new CalculateEvaluateCompiler();
+                var attributes = InstantiateCompilerAndGetExpressionAttributes(c.Equation.Expression, compiler);
+                var calculator = compiler.GetCalculator(c.Equation.Expression);
+                var scope = new CalculateEvaluateScope();
 
+                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
+                    .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
+                var latestAggResults = new List<AggregatedResultEntity>();
+                foreach (var attr in attributes)
+                {
+                    var attrs = aggResults.Where(_ => _.AttributeId == attr.Id).ToList();
+                    if (attrs.Count == 0)
+                        continue;
+                    var latestYear = attrs.Max(_ => _.Year);
+                    var latestAggResult = attrs.FirstOrDefault(_ => _.Year == latestYear);
+                    latestAggResults.Add(latestAggResult);
+                }
+                latestAggResults.ForEach(_ =>
+                {
+                    if (_.Attribute.DataType == "NUMBER")
+                    {
+                        scope.SetNumber(_.Attribute.Name, _.NumericValue.Value);
+                    }
+                    else
+                    {
+                        scope.SetText(_.Attribute.Name, _.TextValue);
+                    }
+                });
+                var currentCost = calculator.Delegate(scope);
+                totalCost += currentCost;
+            });
+            return totalCost;
+        }
+        private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
+        {
+            var modifiedExpression = mergedCriteriaExpression
+                    .Replace("[", "")
+                    .Replace("]", "")
+                    .Replace("@", "")
+                    .Replace("|", "'")
+                    .ToUpper();
+
+            var pattern = "\\[[^\\]]*\\]";
+            var rg = new Regex(pattern);
+            var match = rg.Matches(mergedCriteriaExpression);
+            var hashMatch = new HashSet<string>();
+            foreach (Match m in match)
+            {
+                hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
+            }
+
+            var attributes = _unitOfWork.Context.Attribute.AsNoTracking()
+                .Where(_ => hashMatch.Contains(_.Name))
+                .Select(attribute => new AttributeEntity
+                {
+                    Id = attribute.Id,
+                    Name = attribute.Name,
+                    DataType = attribute.DataType
+                }).AsNoTracking().ToList();
+
+            attributes.ForEach(attribute =>
+            {
+                compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                    ? CalculateEvaluateParameterType.Number
+                    : CalculateEvaluateParameterType.Text;
+            });
+
+            return attributes;
+        }
         public List<SectionCommittedProjectDTO> GetSectionCommittedProjectDTOs(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
-
+            
+            var networkKeyAttribute = GetNetworkKeyAttribute(simulationId);
             var allProjectsInScenario = _unitOfWork.Context.CommittedProject.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
                 .Include(_ => _.CommittedProjectConsequences)
                 .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.CommittedProjectLocation);
+                .Include(_ => _.CommittedProjectLocation)
+                .Include(_=>_.Simulation.Network);
 
             return allProjectsInScenario
                 .Where(_ => _.CommittedProjectLocation.Discriminator == DataPersistenceConstants.SectionLocation)
-                .Select(_ => (SectionCommittedProjectDTO)_.ToDTO())
+                .Select(_ => (SectionCommittedProjectDTO)_.ToDTO(networkKeyAttribute))
                 .ToList();
-        }
+        }               
 
         public List<BaseCommittedProjectDTO> GetCommittedProjectsForExport(Guid simulationId)
         {
@@ -133,33 +214,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            //var entity = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
-            //    .Select(project => new CommittedProjectEntity
-            //    {
-            //        Name = project.Name,
-            //        Year = project.Year,
-            //        ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-            //        ShadowForSameTreatment = project.ShadowForSameTreatment,
-            //        Cost = project.Cost,
-            //        ScenarioBudget = new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name },
-            //        CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
-            //            new CommittedProjectConsequenceEntity
-            //            {
-            //                Attribute = new AttributeEntity { Name = consequence.Attribute.Name },
-            //                ChangeValue = consequence.ChangeValue
-            //            }).ToList(),
-            //        CommittedProjectLocation = project.CommittedProjectLocation
-            //    })
-            //    .Select(_ => _.ToDTO()) // TODO:  Just create the DTO directly?
-            //    .ToList();
-
+            var networkKeyAttribute = GetNetworkKeyAttribute(simulationId);
             return _unitOfWork.Context.CommittedProject
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
                 .Include(_ => _.CommittedProjectConsequences)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CommittedProjectLocation)
-                .Select(_ => _.ToDTO())
+                .Include(_ => _.Simulation.Network)
+                .Select(_ => _.ToDTO(networkKeyAttribute))
                 .ToList();
         }
 
@@ -191,17 +254,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
-
+            
             // Create entities and assign IDs
             var committedProjectEntities = projects.Select(p =>
                 {
                     AssignIdWhenNull(p);
-                    return p.ToEntity(attributes);
+                    return p.ToEntity(attributes, GetNetworkKeyAttribute(p.SimulationId));
                 }).ToList();
+
             var committedProjectConsequenceEntities = committedProjectEntities
                     .Where(_ => _.CommittedProjectConsequences.Any())
                     .SelectMany(_ => _.CommittedProjectConsequences)
                     .ToList();
+
             var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
 
             // Determine the committed projects that exist
@@ -218,25 +283,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.BeginTransaction();
             try
             {
-                // UpsertAll does not work :(
-                // Use calculated attribute repository as an example
-                // TODO: Fix UpsertAll or remove
-
-                // Remove the location and consequence records from the database
-                _unitOfWork.Context.DeleteAll<CommittedProjectLocationEntity>(_ => allExistingCommittedProjectIds.Contains(_.CommittedProjectId));
-                _unitOfWork.Context.DeleteAll<CommittedProjectConsequenceEntity>(_ => allExistingCommittedProjectIds.Contains(_.CommittedProjectId));
-
-                // Update each existing committed project
-                _unitOfWork.Context.UpdateAll(committedProjectEntities.Where(_ => allExistingCommittedProjectIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
-
-                // Add each new committed project
-                _unitOfWork.Context.AddAll(committedProjectEntities.Where(_ => !allExistingCommittedProjectIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
-
-                // Add the locations for all objects to the database
-                _unitOfWork.Context.AddAll(locations, _unitOfWork.UserEntity?.Id);
-
-                // Add the consequences for all objects to the database
-                _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
+                // Upsert(update/insert) all
+                _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
 
                 _unitOfWork.Commit();
             }
@@ -316,6 +364,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (dto.Id == Guid.Empty) dto.Id = Guid.NewGuid();
             dto.Consequences.Where(c => c.Id == Guid.Empty)
                 .ForEach(n => n.Id = Guid.NewGuid());
+        }
+
+        public string GetNetworkKeyAttribute(Guid simulationId)
+        {
+            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().Include(_ => _.Network).FirstOrDefault(_ => _.Id == simulationId);
+            return _unitOfWork.AttributeRepo.GetAttributeName(simulation.Network.KeyAttributeId);
         }
     }
 }

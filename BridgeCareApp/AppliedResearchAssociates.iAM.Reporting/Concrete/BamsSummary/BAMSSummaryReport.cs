@@ -197,7 +197,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             };
 
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
 
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
 
@@ -304,15 +304,17 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
+            // Create Simluation parameters TAB
+            var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
+
             // Bridge Data TAB
             reportDetailDto.Status = $"Creating Bridge Data TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);            
-            var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
-            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, treatmentCategoryLookup);
+            var bridgeDataWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
+            var workSummaryModel = _bridgeDataForSummaryReport.Fill(bridgeDataWorksheet, reportOutputData, treatmentCategoryLookup);
                         
-            // Simulation parameters TAB
-            var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
+            // Fill Simulation parameters TAB
             reportDetailDto.Status = $"Creating Parameters TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
@@ -367,7 +369,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
-            _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
+            _addGraphsInTabs.Add(excelPackage, bridgeDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
             // Simulation Legend TAB
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);

@@ -704,6 +704,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.Id == id).ToDto();
         }
 
+        public TreatmentDTO GetDefaultNoTreatment(Guid simulationId)
+        {
+            try
+            {
+                var scenarioSelectableTreatments = GetScenarioSelectableTreatments(simulationId);
+                var defaultTreatment = scenarioSelectableTreatments.Single(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
+                return defaultTreatment;
+            }
+            catch(InvalidOperationException)
+            {
+                var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
+                throw new InvalidOperationException("More than one default treatments found in scenario" + simulationName);
+            }
+        }
         public ScenarioSelectableTreatmentEntity GetDefaultTreatment(Guid simulationId)
         {
             try

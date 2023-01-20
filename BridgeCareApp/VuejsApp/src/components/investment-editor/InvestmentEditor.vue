@@ -458,7 +458,7 @@ export default class InvestmentEditor extends Vue {
         const request: InvestmentPagingRequestModel= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
                 updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
                 budgetsForDeletion: this.deletionBudgetIds,
@@ -796,7 +796,7 @@ export default class InvestmentEditor extends Vue {
             const libraryUpsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
                 library: budgetLibrary,
                 isNewLibrary: true,
-                pagingSync: {
+                syncModel: {
                     libraryId: budgetLibrary.budgets.length === 0 || !this.hasSelectedLibrary ? null : this.selectedBudgetLibrary.id,
                     Investment: this.investmentPlan,
                     budgetsForDeletion: budgetLibrary.budgets === [] ? [] : this.deletionBudgetIds,
@@ -811,9 +811,9 @@ export default class InvestmentEditor extends Vue {
             }
             // value in v-currency is not parsed back to a number throwing an silent exception between UI and backend.
             const parsedMinimumProjectCostLimit: number = parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''));
-            let tempInvesmentPlan: InvestmentPlan | null = libraryUpsertRequest.pagingSync.Investment;
+            let tempInvesmentPlan: InvestmentPlan | null = libraryUpsertRequest.syncModel.Investment;
             tempInvesmentPlan? tempInvesmentPlan.minimumProjectCostLimit = parsedMinimumProjectCostLimit : 0;
-            libraryUpsertRequest.pagingSync.Investment = tempInvesmentPlan;
+            libraryUpsertRequest.syncModel.Investment = tempInvesmentPlan;
             
             InvestmentService.upsertBudgetLibrary(libraryUpsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') &&http2XX.test(response.status.toString())){
@@ -1128,7 +1128,7 @@ export default class InvestmentEditor extends Vue {
          const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
                 library: this.selectedBudgetLibrary,
                 isNewLibrary: false,
-                pagingSync: sync,
+                syncModel: sync,
                 scenarioId: null
         }
         InvestmentService.upsertBudgetLibrary(upsertRequest).then((response: AxiosResponse) => {
@@ -1342,7 +1342,7 @@ export default class InvestmentEditor extends Vue {
         const request: InvestmentPagingRequestModel= {
             page: 1,
             rowsPerPage: 5,
-            pagingSync: {
+            syncModel: {
                 libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
                 updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
                 budgetsForDeletion: this.deletionBudgetIds,

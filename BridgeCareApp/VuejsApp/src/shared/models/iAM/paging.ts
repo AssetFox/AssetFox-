@@ -62,7 +62,6 @@ export interface InvestmentPagingSyncModel{
     updatedBudgetAmounts: { [key: string]: BudgetAmount[]; }
     addedBudgetAmounts: { [key: string]: BudgetAmount[]; }
     firstYearAnalysisBudgetShift: number;
-    users: BudgetLibraryUser[];
 }
 
 //CalculatedAttributes

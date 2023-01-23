@@ -485,7 +485,6 @@ export default class InvestmentEditor extends Vue {
                 } : this.investmentPlan,
                 addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
                 firstYearAnalysisBudgetShift: this.firstYearOfAnalysisPeriodShift,
-                users: clone(emptyBudgetLibraryUsers)
             },           
             sortColumn: sortBy === '' ? 'year' : sortBy,
             isDescending: descending != null ? descending : false,
@@ -852,7 +851,6 @@ export default class InvestmentEditor extends Vue {
                 updatedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.updatedBudgetAmounts),
                 addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.addedBudgetAmounts),
                 firstYearAnalysisBudgetShift: 0,
-                users: clone(emptyBudgetLibraryUsers)
             },
             scenarioId: this.hasScenario ? this.selectedScenarioId : null
         }
@@ -1143,7 +1141,6 @@ export default class InvestmentEditor extends Vue {
             },
             addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
             firstYearAnalysisBudgetShift: this.firstYearOfAnalysisPeriodShift,
-            users: clone(emptyBudgetLibraryUsers) 
         }
         InvestmentService.upsertInvestment(sync ,this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -1169,7 +1166,6 @@ export default class InvestmentEditor extends Vue {
             Investment: null,
             addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
             firstYearAnalysisBudgetShift: 0,
-            users: clone(emptyBudgetLibraryUsers)
         }
 
         const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
@@ -1399,7 +1395,6 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
                 Investment: null,
                 addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
                 firstYearAnalysisBudgetShift: 0,
-                users: clone(emptyBudgetLibraryUsers)
             },           
             sortColumn: 'year',
             isDescending: false,

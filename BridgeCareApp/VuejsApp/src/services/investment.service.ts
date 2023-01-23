@@ -1,8 +1,9 @@
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { AxiosPromise } from 'axios';
-import { BudgetLibrary, BudgetLibraryUser, Investment, LibraryUser } from '@/shared/models/iAM/investment';
+import { BudgetLibrary, BudgetLibraryUser, Investment } from '@/shared/models/iAM/investment';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingRequestModel, InvestmentPagingSyncModel } from '@/shared/models/iAM/paging';
+import { LibraryUser } from '@/shared/models/iAM/user';
 
 export default class InvestmentService {
     static getInvestment(scenarioId: string): AxiosPromise {

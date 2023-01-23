@@ -9,11 +9,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests {
     public static class PerformanceCurveDtos
     {
         public static PerformanceCurveDTO Dto(
-            Guid criterionLibraryId,
-            Guid performanceCurveId,
-            string attribute,
-            string equation)
+            Guid? performanceCurveId = null,
+            Guid? criterionLibraryId = null,
+            string attribute = "attribute",
+            string equation = "equation"
+            )
         {
+            var resolveCurveId = performanceCurveId ?? Guid.NewGuid();
+            var resolveLibraryId = criterionLibraryId ?? Guid.NewGuid();
             var dto = new PerformanceCurveDTO
             {
                 Attribute = attribute,
@@ -21,11 +24,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests {
                 {
                     Expression = equation,
                 },
-                Id = performanceCurveId,
+                Id = resolveCurveId,
                 Name = "Performance curve",
                 CriterionLibrary = new CriterionLibraryDTO
                 {
-                    Id = criterionLibraryId,
+                    Id = resolveLibraryId,
                     IsSingleUse = true,
                 }
             };

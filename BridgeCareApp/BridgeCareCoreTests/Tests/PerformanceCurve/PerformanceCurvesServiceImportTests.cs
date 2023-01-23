@@ -162,20 +162,29 @@ namespace BridgeCareCoreTests.Tests
             Assert.Contains("exception message", result.WarningMessage);
         }
 
-        [Fact(Skip = WjFixMe)]
+        [Fact]
         public void ImportScenarioPerformanceCurvesFileInvalidEquationTest()
         {
             // Setup
             var libraryId = Guid.NewGuid();
-            var mockExpressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var performanceCurveRepo = PerformanceCurveRepositoryMocks.New(unitOfWork);
+            var mockExpressionValidationService = ExpressionValidationServiceMocks.New();
+            mockExpressionValidationService.SetupValidateAnyCriterionWithoutResults(true);
+            mockExpressionValidationService.SetupValidateAnyEquation(false);
             var hubService = HubServiceMocks.Default();
-            var performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            var performanceCurvesService = CreatePerformanceCurvesService(unitOfWork, mockExpressionValidationService);
+            var args = new List<List<PerformanceCurveDTO>>();
+            performanceCurveRepo.Setup(r => r.UpsertOrDeleteScenarioPerformanceCurves(Capture.In(args), It.IsAny<Guid>()));
+            performanceCurveRepo.Setup(r => r.GetScenarioPerformanceCurves(It.IsAny<Guid>()))
+                .Returns(() => args.Last());
+            //.Returns<List<PerformanceCurveDTO>>(x => args.Last());
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = Guid.NewGuid();
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
             // Assert

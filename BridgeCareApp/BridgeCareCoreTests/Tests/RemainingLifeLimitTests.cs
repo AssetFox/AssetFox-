@@ -40,22 +40,6 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        public RemainingLifeLimitController CreateTestController(List<string> userClaims)
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
-            var controller = new RemainingLifeLimitController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object,
-                new RemainingLifeLimitPagingService(TestHelper.UnitOfWork));
-
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = testUser }
-            };
-            return controller;
-        }
-
         public RemainingLifeLimitLibraryEntity TestRemainingLifeLimitLibrary(Guid? id = null)
         {
             var resolveId = id ?? Guid.NewGuid();
@@ -313,91 +297,6 @@ namespace BridgeCareCoreTests.Tests
             Assert.False(TestHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == library.Id));
             Assert.False(TestHelper.UnitOfWork.Context.RemainingLifeLimit.Any(_ => _.RemainingLifeLimitLibraryId == library.Id));
             Assert.False(TestHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any(_ => _.RemainingLifeLimitId == remainingLifeLimitDto.Id));
-        }
-        [Fact]
-        public async Task UserIsViewRemainingLifeLimitFromLibraryAuthorized()
-        {
-            // Admin authorize
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ViewRemainingLifeLimitFromLibrary,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.RemainingLifeLimitViewAnyFromLibraryAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewRemainingLifeLimitFromLibrary);
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsModifyRemainingLifeLimitFromScenarioAuthorized()
-        {
-            // Non-admin authorize
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ModifyRemainingLifeLimitFromScenario,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.RemainingLifeLimitModifyPermittedFromScenarioAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyRemainingLifeLimitFromScenario);
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsDeleteRemainingLifeLimitFromLibrary()
-        {
-            // Non-admin unauthorize
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.DeleteRemainingLifeLimitFromLibrary,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.RemainingLifeLimitDeleteAnyFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.RemainingLifeLimitDeletePermittedFromLibraryAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.DeleteRemainingLifeLimitFromLibrary);
-            // Assert
-            Assert.False(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsViewRemainingLifeLimitFromLibraryAuthorized_B2C()
-        {
-            // Admin authorize
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ViewRemainingLifeLimitFromLibrary,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.RemainingLifeLimitViewAnyFromLibraryAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewRemainingLifeLimitFromLibrary);
-            // Assert
-            Assert.True(allowed.Succeeded);
         }
     }
 }

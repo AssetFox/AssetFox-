@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis;
-
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
-
-using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.StaticContent;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
@@ -45,22 +40,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             // Budget TAB
             var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();
 
-            var budgets = new HashSet<string>();
+            // // TODO remove later var budgets = new HashSet<string>();
             foreach (var yearData in reportOutputData.Years)
             {
                 foreach (var item in yearData.Budgets)
                 {
-                    budgets.Add(item.BudgetName);
+                    workSummaryByBudgetData.Add(new WorkSummaryByBudgetModel
+                    {
+                        Budget = item.BudgetName,
+                        YearlyData = new List<YearsData>()
+                    });
                 }
             }
-            foreach (var item in budgets)
-            {
-                workSummaryByBudgetData.Add(new WorkSummaryByBudgetModel
-                {
-                    Budget = item,
-                    YearlyData = new List<YearsData>()
-                });
-            }
+            // TODO remove later foreach (var item in budgets)
+            //{
+            //    workSummaryByBudgetData.Add(new WorkSummaryByBudgetModel
+            //    {
+            //        Budget = item,
+            //        YearlyData = new List<YearsData>()
+            //    });
+            //}
 
             var committedTreatments = new HashSet<string>();
             var map = WorkTypeMap.Map;
@@ -68,14 +67,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 foreach (var yearData in reportOutputData.Years)
                 {
-                    foreach (var section in yearData.Assets)
+                    var assets = yearData.Assets.Where(_ => _.TreatmentCause != TreatmentCause.NoSelection);
+                    foreach (var section in assets)
                     {
+                        var treatmentConsiderations = section.TreatmentConsiderations;
+                        var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
+                        _.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget).Sum(bu => bu.CoveredCost));
+
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                             section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                         {
-                            var committedtTreatment = section.TreatmentConsiderations;
-                            var budgetAmount = (double)committedtTreatment.Sum(_ =>
-                            _.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget).Sum(bu => bu.CoveredCost));
                             var category = TreatmentCategory.Other;
                             if (map.ContainsKey(section.AppliedTreatment))
                             {
@@ -94,11 +95,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             continue;
                         }
 
-                        if (section.TreatmentCause != TreatmentCause.NoSelection)
-                        {
-                            var treatmentConsideration = section.TreatmentConsiderations;
-                            var budgetAmount = (double)treatmentConsideration.Sum(_ =>
-                            _.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget).Sum(bu => bu.CoveredCost));
+                        // TODO remove later if (section.TreatmentCause != TreatmentCause.NoSelection)
+                        //{                            
                             var treatmentData = selectableTreatments.FirstOrDefault(_ => _.Name == section.AppliedTreatment);
                             summaryData.YearlyData.Add(new YearsData
                             {
@@ -109,24 +107,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                 TreatmentCategory = treatmentData.Category,
                                 AssetType = treatmentData.AssetCategory
                             });
-                        }
+                        //}
                     }
                 }
-            }
-            // Model setup complete. [TODO]: Make it efficient
+            }            
+
+            // TODO run and check how this tab is painted and then see what can be improved (may be single loop on long and repeated loops and saving may be row no.s where to add data?? using other counts or something....
+            // line 62: 203 ms loop: need refactoring!! than the one below
 
             foreach (var summaryData in workSummaryByBudgetData)
             {
                 //Filtering treatments for the given budget
 
-                var costForCulvertBudget = new List<YearsData>();
+                // var costForCulvertBudget = new List<YearsData>();
                 var costForBridgeBudgets = new List<YearsData>();
                 var costForCommittedBudgets = new List<YearsData>();
 
                 var workTypeTotal = new WorkTypeTotal();
 
-                costForCulvertBudget = summaryData.YearlyData
-                                            .FindAll(_ => _.AssetType == AssetCategory.Culvert && !_.isCommitted);
+                var costForCulvertBudget = summaryData.YearlyData
+                                            .Where(_ => _.AssetType == AssetCategory.Culvert && !_.isCommitted);
 
                 costForBridgeBudgets = summaryData.YearlyData
                                                 .FindAll(_ => _.AssetType == AssetCategory.Bridge && !_.isCommitted);
@@ -143,24 +143,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var numberOfYears = simulationYears.Count;
                 // Filling up the total, "culvert" and "Bridge work" costs
                 foreach (var year in simulationYears)
-                {
-                    var yearlyBudget = costForCulvertBudget.FindAll(_ => _.Year == year);
-                    var culvertAmountSum = yearlyBudget.Sum(s => s.Amount);
+                {   // Where works faster than FindAll, giving a try here
+                    var yearlycostForCulvertBudget = costForCulvertBudget.Where(_ => _.Year == year);
+                    var culvertAmountSum = yearlycostForCulvertBudget.Sum(s => s.Amount);
                     totalBudgetPerYearForCulvert.Add(year, culvertAmountSum);
 
-                    yearlyBudget.Clear();
-
-                    yearlyBudget = costForBridgeBudgets.FindAll(_ => _.Year == year);
-                    var budgetAmountSum = yearlyBudget.Sum(s => s.Amount);
+                    var yearlycostForBridgeBudget = costForBridgeBudgets.Where(_ => _.Year == year);
+                    var budgetAmountSum = yearlycostForBridgeBudget.Sum(s => s.Amount);
                     totalBudgetPerYearForBridgeWork.Add(year, budgetAmountSum);
 
-                    yearlyBudget.Clear();
-
-                    yearlyBudget = costForCommittedBudgets.FindAll(_ => _.Year == year);
-                    var committedAmountSum = yearlyBudget.Sum(s => s.Amount);
+                    var yearlycostForCommittedBudget = costForCommittedBudgets.Where(_ => _.Year == year);
+                    var committedAmountSum = yearlycostForCommittedBudget.Sum(s => s.Amount);
                     totalBudgetPerYearForMPMS.Add(year, committedAmountSum);
-
-                    yearlyBudget.Clear();
 
                     totalSpent.Add((year, culvertAmountSum + budgetAmountSum + committedAmountSum));
                 }
@@ -178,7 +172,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets,
                         committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
 
-                    _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget, totalBudgetPerYearForCulvert, simulationYears, workTypeTotal);
+                    _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget.ToList(), totalBudgetPerYearForCulvert, simulationYears, workTypeTotal);
 
                     _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, totalBudgetPerYearForBridgeWork, workTypeTotal);
                 }

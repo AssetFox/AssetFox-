@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    partial class IAMContextModelSnapshot : ModelSnapshot
+    [Migration("20230117151617_Create_SimulationOutputJson_Table")]
+    partial class Create_SimulationOutputJson_Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3986,17 +3988,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid>("SimulationId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("SimulationOutputId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Id")
                         .IsUnique();
 
                     b.HasIndex("SimulationId");
-
-                    b.HasIndex("SimulationOutputId");
 
                     b.ToTable("SimulationOutputJson");
                 });
@@ -5963,13 +5960,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputEntity", "SimulationOutput")
-                        .WithMany("SimulationOutputJsons")
-                        .HasForeignKey("SimulationOutputId");
-
                     b.Navigation("Simulation");
-
-                    b.Navigation("SimulationOutput");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationReportDetailEntity", b =>
@@ -6581,8 +6572,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputEntity", b =>
                 {
                     b.Navigation("InitialAssetSummaries");
-
-                    b.Navigation("SimulationOutputJsons");
 
                     b.Navigation("Years");
                 });

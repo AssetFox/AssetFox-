@@ -175,6 +175,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<SimulationOutputEntity> SimulationOutput { get; set; }
 
+        public virtual DbSet<SimulationOutputJsonEntity> SimulationOutputJson { get; set; }
+
         public virtual DbSet<TargetConditionGoalEntity> TargetConditionGoal { get; set; }
 
         public virtual DbSet<ScenarioTargetConditionGoalEntity> ScenarioTargetConditionGoals { get; set; }
@@ -1786,6 +1788,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithMany(p => p.SimulationOutputs)
                     .HasForeignKey(d => d.SimulationId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+
+            modelBuilder.Entity<SimulationOutputJsonEntity>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasIndex(e => e.Id).IsUnique();
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.Property(e => e.OutputType).IsRequired();
+                entity.Property(e => e.Output).IsRequired();
+
+                entity.HasOne(e => e.Simulation)
+                    .WithMany(p => p.SimulationOutputJsons)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.SimulationOutput)
+                    .WithMany(p => p.SimulationOutputJsons)
+                    .HasForeignKey(d => d.SimulationOutputId);
             });
 
             modelBuilder.Entity<TargetConditionGoalEntity>(entity =>

@@ -933,6 +933,14 @@ export default class InvestmentEditor extends Vue {
         this.currentPage = clone(budgets);
     }
 
+    onShowShareBudgetLibraryDialog(budgetLibrary: BudgetLibrary) { 
+            this.shareBudgetLibraryDialogData = 
+            { 
+                showDialog: true, 
+                budgetLibrary: clone(budgetLibrary), 
+            }; 
+        } 
+
     onSubmitAddBudgetYearRange() {
         this.showSetRangeForAddingBudgetYearsDialog = false;
 

@@ -22,3 +22,8 @@ export const emptyUser: User = {
     hasInventoryAccess: false,
     lastNewsAccessDate: new Date().toISOString()
 };
+export interface LibraryUser {
+    userId: string;
+    userName: string;
+    accessLevel: number;
+};

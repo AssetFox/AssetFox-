@@ -4,6 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -24,7 +25,14 @@ namespace BridgeCareCoreTests.Tests
     {
         public const string WjFixMe = "Wj fix me";
         public const string Filename = "TestImportPerformanceCurve.xlsx";
-        private PerformanceCurvesService performanceCurvesService;
+
+        private PerformanceCurvesService CreatePerformanceCurvesService(Mock<IUnitOfWork> unitOfWork, Mock<IExpressionValidationService> expressionValidationService = null)
+        {
+            var hubService = HubServiceMocks.DefaultMock();
+            expressionValidationService ??= ExpressionValidationServiceMocks.EverythingIsValid();
+            var service = new PerformanceCurvesService(unitOfWork.Object, hubService.Object, expressionValidationService.Object);
+            return service;
+        }
 
         [Fact]
         public void ImportLibraryPerformanceCurvesFromFile_CallsUpsertOrDeleteOnRepository()
@@ -32,8 +40,6 @@ namespace BridgeCareCoreTests.Tests
             // Setup
             var libraryId = Guid.NewGuid();
             var libraryName = RandomStrings.WithPrefix("PerformanceCurve library");
-            var mockExpressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
-            var hubService = HubServiceMocks.Default();
             var unitOfWork = UnitOfWorkMocks.New();
             var performanceCurveRepo = PerformanceCurveRepositoryMocks.New();
             var expectedPerformanceCurve = new PerformanceCurveDTO
@@ -63,7 +69,7 @@ namespace BridgeCareCoreTests.Tests
             performanceCurveRepo.SetupGetPerformanceCurveLibrary(outputDto);
             performanceCurveRepo.SetupGetPerformanceCurvesForLibrary(libraryId, outputCurves);
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(performanceCurveRepo.Object);
-            performanceCurvesService = new PerformanceCurvesService(unitOfWork.Object, hubService, mockExpressionValidationService.Object);
+            var performanceCurvesService = CreatePerformanceCurvesService(unitOfWork);
 
             // Act
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", Filename);
@@ -89,7 +95,7 @@ namespace BridgeCareCoreTests.Tests
             var libraryId = Guid.NewGuid();
             var mockExpressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
             var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            var performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
@@ -123,8 +129,7 @@ namespace BridgeCareCoreTests.Tests
             performanceCurveRepo.SetupUpsertOrDeleteScenarioPerformanceCurvesThrows("exception message");
             var mockUnitOfWork = UnitOfWorkMocks.New();
             mockUnitOfWork.Setup(m => m.PerformanceCurveRepo).Returns(performanceCurveRepo.Object);
-            var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(mockUnitOfWork.Object, hubService, mockExpressionValidationService.Object);
+            var performanceCurvesService = CreatePerformanceCurvesService(mockUnitOfWork, mockExpressionValidationService);
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
@@ -144,7 +149,7 @@ namespace BridgeCareCoreTests.Tests
             var libraryId = Guid.NewGuid();
             var mockExpressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
             var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            var performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");

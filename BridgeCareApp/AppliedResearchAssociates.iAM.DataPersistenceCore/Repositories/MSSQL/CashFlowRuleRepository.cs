@@ -65,7 +65,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         };
                         criterionJoins.Add(new CriterionLibraryScenarioCashFlowRuleEntity
                         {
-                            CriterionLibraryId = criterion.Id, ScenarioCashFlowRuleId = cashFlowRule.Id
+                            CriterionLibraryId = criterion.Id,
+                            ScenarioCashFlowRuleId = cashFlowRule.Id
                         });
                         return criterion;
                     }).ToList();
@@ -108,8 +109,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto) =>
+        public void UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto)
+        {
+            var libraryExists = _unitOfWork.Context.CashFlowRuleLibrary.Any(bl => bl.Id == dto.Id);
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.SaveChanges();
+        }
 
         public void UpsertOrDeleteCashFlowRules(List<CashFlowRuleDTO> cashFlowRules, Guid libraryId)
         {
@@ -167,7 +172,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         };
                         criterionJoins.Add(new CriterionLibraryCashFlowRuleEntity
                         {
-                            CriterionLibraryId = criterion.Id, CashFlowRuleId = cashFlowRule.Id
+                            CriterionLibraryId = criterion.Id,
+                            CashFlowRuleId = cashFlowRule.Id
                         });
                         return criterion;
                     }).ToList();
@@ -278,7 +284,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         };
                         criterionJoins.Add(new CriterionLibraryScenarioCashFlowRuleEntity
                         {
-                            CriterionLibraryId = criterion.Id, ScenarioCashFlowRuleId = cashFlowRule.Id
+                            CriterionLibraryId = criterion.Id,
+                            ScenarioCashFlowRuleId = cashFlowRule.Id
                         });
                         return criterion;
                     }).ToList();
@@ -289,6 +296,72 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // Update last modified date
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+        }
+
+        public List<CashFlowRuleLibraryDTO> GetCashFlowRuleLibrariesNoChildrenAccessibleToUser(Guid userId)
+        {
+            return _unitOfWork.Context.CashFlowRuleLibraryUser
+                .AsNoTracking()
+                .Include(u => u.CashFlowRuleLibrary)
+                .Where(u => u.UserId == userId)
+                .Select(u => u.CashFlowRuleLibrary.ToDto())
+                .ToList();
+        }
+        public void UpsertOrDeleteUsers(Guid cashFlowRuleLibraryId, IList<LibraryUserDTO> libraryUsers)
+        {
+            var existingEntities = _unitOfWork.Context.CashFlowRuleLibraryUser.Where(u => u.CashFlowRuleLibraryId == cashFlowRuleLibraryId).ToList();
+            var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
+            var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
+            var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
+            var userIdsToUpdate = existingUserIds.Intersect(desiredUserIDs).ToList();
+            var userIdsToAdd = desiredUserIDs.Except(existingUserIds).ToList();
+            var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToCashFlowRuleLibraryUserEntity(u, cashFlowRuleLibraryId)).ToList();
+            var dtosToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToMaybeUpdate = existingEntities.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToUpdate = new List<CashFlowRuleLibraryUserEntity>();
+            foreach (var dto in dtosToUpdate)
+            {
+                var entityToUpdate = entitiesToMaybeUpdate.FirstOrDefault(e => e.UserId == dto.UserId);
+                if (entityToUpdate != null && entityToUpdate.AccessLevel != (int)dto.AccessLevel)
+                {
+                    entityToUpdate.AccessLevel = (int)dto.AccessLevel;
+                    entitiesToUpdate.Add(entityToUpdate);
+                }
+            }
+            _unitOfWork.Context.AddRange(entitiesToAdd);
+            _unitOfWork.Context.UpdateRange(entitiesToUpdate);
+            var entitiesToDelete = existingEntities.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
+            _unitOfWork.Context.RemoveRange(entitiesToDelete);
+            _unitOfWork.Context.SaveChanges();
+        }
+        private List<LibraryUserDTO> GetAccessForUser(Guid cashFlowRuleLibraryId, Guid userId)
+        {
+            var dtos = _unitOfWork.Context.CashFlowRuleLibraryUser
+                .Where(u => u.CashFlowRuleLibraryId == cashFlowRuleLibraryId && u.UserId == userId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
+
+        public List<LibraryUserDTO> GetLibraryUsers(Guid cashFlowRuleLibraryId)
+        {
+            var dtos = _unitOfWork.Context.CashFlowRuleLibraryUser
+                .Include(u => u.User)
+                .Where(u => u.CashFlowRuleLibraryId == cashFlowRuleLibraryId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
+        public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
+        {
+            var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);
+            if (!exists)
+            {
+                return LibraryAccessModels.LibraryDoesNotExist();
+            }
+            var users = GetAccessForUser(libraryId, userId);
+            var user = users.FirstOrDefault();
+            return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
     }
 }

@@ -93,6 +93,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<CashFlowRuleEntity> CashFlowRule { get; set; }
 
         public virtual DbSet<CashFlowRuleLibraryEntity> CashFlowRuleLibrary { get; set; }
+        public virtual DbSet<CashFlowRuleLibraryUserEntity> CashFlowRuleLibraryUser { get; set; }
 
         public virtual DbSet<CommittedProjectEntity> CommittedProject { get; set; }
 
@@ -2537,6 +2538,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.DeficientConditionGoalLibraryUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<CashFlowRuleLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CashFlowRuleLibraryId, e.UserId });
+
+                entity.ToTable("CashFlowRuleLibrary_User");
+
+                entity.HasIndex(e => e.CashFlowRuleLibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.CashFlowRuleLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.CashFlowRuleLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.CashFlowRuleLibraryUsers)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

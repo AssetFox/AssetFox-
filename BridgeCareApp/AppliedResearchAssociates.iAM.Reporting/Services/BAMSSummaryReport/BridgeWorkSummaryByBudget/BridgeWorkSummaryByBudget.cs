@@ -203,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     decimal totalCost = 0;
                     if (currValue != null)
                     {
-                        totalCost = (decimal)worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value;
+                        totalCost = (decimal)currValue;
                     }
                     totalCost += item.Value;
                     worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value = totalCost;

@@ -77,12 +77,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return lifeLimit;
         }
 
-        private CriterionLibraryDTO SetupForUpsertOrDelete()
-        {
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            return criterionLibrary;
-        }
-
         [Fact]
         public void GetRemainingLifeLimitLibrariesNoChildren_DoesNotThrow()
         {
@@ -153,7 +147,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var lifeLimitLibrary = SetupForGet();
-            var criterionLibrary = SetupForUpsertOrDelete();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var dtos = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
 
             var dto = dtos.Single(x => x.Id == lifeLimitLibrary.Id);
@@ -178,7 +172,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var limitEntity = SetupForScenarioGet(simulation.Id);
-            var criterionLibrary = SetupForUpsertOrDelete();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
 
             var dto = limitEntity.ToDto();
             dto.Value = 2.0;
@@ -219,7 +213,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // Arrange
             Setup();
             var library = SetupForGet();
-            var criterionLibrary = SetupForUpsertOrDelete();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var dtos = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
 
             var remainingLifeLimitLibraryDTO = dtos.Single(lib => lib.Id == library.Id);

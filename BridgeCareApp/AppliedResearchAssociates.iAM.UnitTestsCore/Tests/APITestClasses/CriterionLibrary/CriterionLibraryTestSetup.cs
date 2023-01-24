@@ -23,6 +23,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Id = id,
                 Name = resolvedName,
                 MergedCriteriaExpression = resolvedCriteriaExpression,
+                IsSingleUse = true,
             };
             return returnValue;
         }

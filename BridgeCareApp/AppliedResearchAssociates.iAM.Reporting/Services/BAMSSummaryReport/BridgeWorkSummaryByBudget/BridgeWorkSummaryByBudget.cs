@@ -38,31 +38,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             // setting up model to store data. This will be used to fill up Bridge Work Summary By
             // Budget TAB
-            var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();
-
-            // // TODO remove later var budgets = new HashSet<string>();
+            var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();           
+            
+            var budgets = new HashSet<string>();
             foreach (var yearData in reportOutputData.Years)
             {
                 foreach (var item in yearData.Budgets)
                 {
-                    workSummaryByBudgetData.Add(new WorkSummaryByBudgetModel
-                    {
-                        Budget = item.BudgetName,
-                        YearlyData = new List<YearsData>()
-                    });
+                    budgets.Add(item.BudgetName);
                 }
             }
-            // TODO remove later foreach (var item in budgets)
-            //{
-            //    workSummaryByBudgetData.Add(new WorkSummaryByBudgetModel
-            //    {
-            //        Budget = item,
-            //        YearlyData = new List<YearsData>()
-            //    });
-            //}
+            foreach (var item in budgets)
+            {
+                workSummaryByBudgetData.Add(new WorkSummaryByBudgetModel
+                {
+                    Budget = item,
+                    YearlyData = new List<YearsData>()
+                });
+            }
 
             var committedTreatments = new HashSet<string>();
             var map = WorkTypeMap.Map;
+            // loop updates made ~50 ms gain
             foreach (var summaryData in workSummaryByBudgetData)
             {
                 foreach (var yearData in reportOutputData.Years)
@@ -94,56 +91,43 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             committedTreatments.Add(section.AppliedTreatment);
                             continue;
                         }
-
-                        // TODO remove later if (section.TreatmentCause != TreatmentCause.NoSelection)
-                        //{                            
-                            var treatmentData = selectableTreatments.FirstOrDefault(_ => _.Name == section.AppliedTreatment);
-                            summaryData.YearlyData.Add(new YearsData
-                            {
-                                Year = yearData.Year,
-                                Treatment = section.AppliedTreatment,
-                                Amount = budgetAmount,
-                                costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
-                                TreatmentCategory = treatmentData.Category,
-                                AssetType = treatmentData.AssetCategory
-                            });
-                        //}
+                                                  
+                        var treatmentData = selectableTreatments.FirstOrDefault(_ => _.Name == section.AppliedTreatment);
+                        summaryData.YearlyData.Add(new YearsData
+                        {
+                            Year = yearData.Year,
+                            Treatment = section.AppliedTreatment,
+                            Amount = budgetAmount,
+                            costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
+                            TreatmentCategory = treatmentData.Category,
+                            AssetType = treatmentData.AssetCategory
+                        });
                     }
                 }
             }            
-
-            // TODO run and check how this tab is painted and then see what can be improved (may be single loop on long and repeated loops and saving may be row no.s where to add data?? using other counts or something....
-            // line 62: 203 ms loop: need refactoring!! than the one below
-
+                        
             foreach (var summaryData in workSummaryByBudgetData)
             {
-                //Filtering treatments for the given budget
-
-                // var costForCulvertBudget = new List<YearsData>();
-                var costForBridgeBudgets = new List<YearsData>();
-                var costForCommittedBudgets = new List<YearsData>();
-
-                var workTypeTotal = new WorkTypeTotal();
-
+                //Filtering treatments for the given budget             
                 var costForCulvertBudget = summaryData.YearlyData
                                             .Where(_ => _.AssetType == AssetCategory.Culvert && !_.isCommitted);
 
-                costForBridgeBudgets = summaryData.YearlyData
-                                                .FindAll(_ => _.AssetType == AssetCategory.Bridge && !_.isCommitted);
+                var costForBridgeBudgets = summaryData.YearlyData
+                                                .Where(_ => _.AssetType == AssetCategory.Bridge && !_.isCommitted);
 
-                costForCommittedBudgets = summaryData.YearlyData
-                                                    .FindAll(_ => _.isCommitted && _.Treatment.ToLower() != BAMSConstants.NoTreatment);
+                var costForCommittedBudgets = summaryData.YearlyData
+                                                    .Where(_ => _.isCommitted && _.Treatment.ToLower() != BAMSConstants.NoTreatment);
 
                 var totalBudgetPerYearForCulvert = new Dictionary<int, double>();
                 var totalBudgetPerYearForBridgeWork = new Dictionary<int, double>();
                 var totalBudgetPerYearForMPMS = new Dictionary<int, double>();
-
                 var totalSpent = new List<(int year, double amount)>();
-
                 var numberOfYears = simulationYears.Count;
+
                 // Filling up the total, "culvert" and "Bridge work" costs
                 foreach (var year in simulationYears)
-                {   // Where works faster than FindAll, giving a try here
+                {
+                    // Where works faster than FindAll
                     var yearlycostForCulvertBudget = costForCulvertBudget.Where(_ => _.Year == year);
                     var culvertAmountSum = yearlycostForCulvertBudget.Sum(s => s.Amount);
                     totalBudgetPerYearForCulvert.Add(year, culvertAmountSum);
@@ -166,15 +150,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count + 2], Color.Gray);
                 currentCell.Row += 1;
 
+                var workTypeTotal = new WorkTypeTotal();
                 var amount = totalSpent.Sum(_ => _.amount);
                 if (amount > 0)
                 {
-                    _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets,
+                    _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
                         committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
 
                     _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget.ToList(), totalBudgetPerYearForCulvert, simulationYears, workTypeTotal);
 
-                    _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, totalBudgetPerYearForBridgeWork, workTypeTotal);
+                    _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets.ToList(), totalBudgetPerYearForBridgeWork, workTypeTotal);
                 }
 
                 currentCell.Row += 2; // For BAMS Work type Totals
@@ -289,6 +274,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row + 1, currentCell.Column + 2, currentCell.Row + 2, simulationYears.Count + 2], Color.FromArgb(248, 203, 173));
                 currentCell.Row += 2;
             }
+
             worksheet.Calculate();
             worksheet.Cells.AutoFitColumns();
 

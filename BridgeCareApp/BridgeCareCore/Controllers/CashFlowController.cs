@@ -288,7 +288,7 @@ namespace BridgeCareCore.Controllers
             }
         }
         [HttpGet]
-        [Route("GetCashFlowLibraryUsers/{libraryId}")]
+        [Route("GetCashFlowRuleLibraryUsers/{libraryId}")]
         [Authorize(Policy = Policy.ViewCashFlowFromLibrary)]
         public async Task<IActionResult> GetCashFlowRuleLibraryUsers(Guid libraryId)
         {

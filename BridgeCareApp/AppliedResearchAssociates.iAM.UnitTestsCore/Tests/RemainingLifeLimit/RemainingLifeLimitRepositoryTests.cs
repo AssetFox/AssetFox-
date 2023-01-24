@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,14 +7,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using Humanizer;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -111,7 +108,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void GetRemainingLifeLimits_LibraryNotInDb_Throws()
+        public void GetRemainingLifeLimitsByLibraryId_LibraryInDbWithRemainingLifeLimit_Gets()
+        {
+            Setup();
+            // Arrange
+            var library = SetupForGet().ToDto();
+            var limit = library.RemainingLifeLimits[0];
+
+            // Act
+            var dtos = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(library.Id);
+
+            // Assert
+            var dto = dtos.Single();
+            Assert.Equal(limit.Id, dto.Id);
+        }
+
+        [Fact]
+        public void GetRemainingLifeLimitsByLibraryId_LibraryNotInDb_Throws()
         {
             Setup();
             var libraryId = Guid.NewGuid();
@@ -158,107 +171,76 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(dto.RemainingLifeLimits[0].Attribute, modifiedDto.RemainingLifeLimits[0].Attribute);
         }
 
-        //[Fact]
-        //public async Task ShouldModifyScenarioRemainingLifeLimitData()
-        //{
-        //    // Arrange
-        //    var controller = SetupController();
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-        //    var limitEntity = SetupForScenarioGet(simulation.Id);
-        //    var criterionLibrary = SetupForUpsertOrDelete();
+        [Fact]
+        public void ShouldModifyScenarioRemainingLifeLimitData()
+        {
+            // Arrange
+            Setup();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var limitEntity = SetupForScenarioGet(simulation.Id);
+            var criterionLibrary = SetupForUpsertOrDelete();
 
-        //    var dto = limitEntity.ToDto();
-        //    dto.Value = 2.0;
-        //    dto.CriterionLibrary =
-        //        criterionLibrary;
-        //    var sync = new PagingSyncModel<RemainingLifeLimitDTO>()
-        //    {
-        //        UpdateRows = new List<RemainingLifeLimitDTO>() { dto }
-        //    };
+            var dto = limitEntity.ToDto();
+            dto.Value = 2.0;
+            dto.CriterionLibrary =
+                criterionLibrary;
+            var dtos = new List<RemainingLifeLimitDTO> { dto };
 
-        //    // Act
-        //    await controller.UpsertScenarioRemainingLifeLimits(simulation.Id, sync);
+            // Act
+            TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(dtos, simulation.Id);
 
-        //    // Assert
-        //    var modifiedDto = TestHelper.UnitOfWork.RemainingLifeLimitRepo
-        //        .GetScenarioRemainingLifeLimits(simulation.Id).Single(rll => rll.Id == dto.Id);
+            // Assert
+            var modifiedDto = TestHelper.UnitOfWork.RemainingLifeLimitRepo
+                .GetScenarioRemainingLifeLimits(simulation.Id).Single(rll => rll.Id == dto.Id);
 
-        //    Assert.Equal(dto.Value, modifiedDto.Value);
-        //}
-
-        //[Fact]
-        //public async Task ShouldGetLibraryRemainingLifeLimitPageData()
-        //{
-        //    var controller = SetupController();
-        //    // Arrange
-        //    var library = SetupForGet().ToDto();
-        //    var limit = library.RemainingLifeLimits[0];
-
-        //    // Act
-        //    var request = new PagingRequestModel<RemainingLifeLimitDTO>();
-        //    var result = await controller.GetLibraryRemainingLifeLimitPage(library.Id, request);
-
-        //    // Assert
-        //    var okObjResult = result as OkObjectResult;
-        //    Assert.NotNull(okObjResult.Value);
-
-        //    var page = (PagingPageModel<RemainingLifeLimitDTO>)Convert.ChangeType(okObjResult.Value,
-        //        typeof(PagingPageModel<RemainingLifeLimitDTO>));
-        //    var dtos = page.Items;
-        //    var dto = dtos.Single();
-        //    Assert.Equal(limit.Id, dto.Id);
-        //}
-
-        //[Fact]
-        //public async Task ShouldGetScenarioRemainingLifeLimitPageData()
-        //{
-        //    var controller = SetupController();
-        //    // Arrange
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-        //    var limit = SetupForScenarioGet(simulation.Id).ToDto();
-
-        //    // Act
-        //    var request = new PagingRequestModel<RemainingLifeLimitDTO>();
-        //    var result = await controller.GetScenarioRemainingLifeLimitPage(simulation.Id, request);
-
-        //    // Assert
-        //    var okObjResult = result as OkObjectResult;
-        //    Assert.NotNull(okObjResult.Value);
-
-        //    var page = (PagingPageModel<RemainingLifeLimitDTO>)Convert.ChangeType(okObjResult.Value,
-        //        typeof(PagingPageModel<RemainingLifeLimitDTO>));
-        //    var dtos = page.Items;
-        //    var dto = dtos.Single();
-        //    Assert.Equal(limit.Id, dto.Id);
-        //}
-
-        //[Fact]
-        //public async Task ShouldDeleteRemainingLifeLimitData()
-        //{
-        //    // Arrange
-        //    var controller = SetupController();
-        //    var library = SetupForGet();
-        //    var criterionLibrary = SetupForUpsertOrDelete();
-        //    var dtos = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
-
-        //    var remainingLifeLimitLibraryDTO = dtos.Single(lib => lib.Id == library.Id);
-        //    var remainingLifeLimitDto = remainingLifeLimitLibraryDTO.RemainingLifeLimits[0];
-        //    remainingLifeLimitDto.CriterionLibrary =
-        //        criterionLibrary;
-
-        //    TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(remainingLifeLimitLibraryDTO);
-
-        //    // Act
-        //    var result = await controller.DeleteRemainingLifeLimitLibrary(library.Id);
-
-        //    // Assert
-        //    Assert.IsType<OkResult>(result);
-
-        //    Assert.False(TestHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == library.Id));
-        //    Assert.False(TestHelper.UnitOfWork.Context.RemainingLifeLimit.Any(_ => _.RemainingLifeLimitLibraryId == library.Id));
-        //    Assert.False(TestHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any(_ => _.RemainingLifeLimitId == remainingLifeLimitDto.Id));
-        //}
+            Assert.Equal(2.0, modifiedDto.Value);
+        }
 
 
+        [Fact]
+        public void GetScenarioRemainingLifeLimits_ScenarioInDbWithRemainingLifeLimit_Gets()
+        {
+            Setup();
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var limit = SetupForScenarioGet(simulation.Id).ToDto();
+
+            // Act
+            var dtos = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulation.Id);
+
+            // Assert
+            var dto = dtos.Single();
+            Assert.Equal(limit.Id, dto.Id);
+        }
+
+        [Fact]
+        public void DeleteRemainingLifeLimitLibrary_LibraryInDbWithRemainingLifeLimitAndCriterionLibraryLink_DeletesAll()
+        {
+            // Arrange
+            Setup();
+            var library = SetupForGet();
+            var criterionLibrary = SetupForUpsertOrDelete();
+            var dtos = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
+
+            var remainingLifeLimitLibraryDTO = dtos.Single(lib => lib.Id == library.Id);
+            var remainingLifeLimitDto = remainingLifeLimitLibraryDTO.RemainingLifeLimits[0];
+            remainingLifeLimitDto.CriterionLibrary =
+                criterionLibrary;
+            var dtosForUpsert = new List<RemainingLifeLimitDTO> { remainingLifeLimitDto };
+
+            TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(remainingLifeLimitLibraryDTO);
+            TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteRemainingLifeLimits(dtosForUpsert, library.Id);
+            Assert.True(TestHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == library.Id));
+            Assert.True(TestHelper.UnitOfWork.Context.RemainingLifeLimit.Any(_ => _.RemainingLifeLimitLibraryId == library.Id));
+            Assert.True(TestHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any(_ => _.RemainingLifeLimitId == remainingLifeLimitDto.Id));
+
+            // Act
+            TestHelper.UnitOfWork.RemainingLifeLimitRepo.DeleteRemainingLifeLimitLibrary(library.Id);
+
+            // Assert
+            Assert.False(TestHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == library.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.RemainingLifeLimit.Any(_ => _.RemainingLifeLimitLibraryId == library.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any(_ => _.RemainingLifeLimitId == remainingLifeLimitDto.Id));
+        }
     }
 }

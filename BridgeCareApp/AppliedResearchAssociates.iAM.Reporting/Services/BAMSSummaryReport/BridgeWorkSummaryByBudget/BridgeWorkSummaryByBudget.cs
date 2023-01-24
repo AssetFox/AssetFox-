@@ -58,8 +58,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             var committedTreatments = new HashSet<string>();
-            var map = WorkTypeMap.Map;
-            // loop updates made ~50 ms gain
+            var map = WorkTypeMap.Map;            
             foreach (var summaryData in workSummaryByBudgetData)
             {
                 foreach (var yearData in reportOutputData.Years)

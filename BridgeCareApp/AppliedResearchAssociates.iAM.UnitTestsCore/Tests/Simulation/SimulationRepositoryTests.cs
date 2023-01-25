@@ -440,6 +440,43 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
 
         [Fact]
+        public async Task ShouldCreateSimulation()
+        {
+            // Arrange
+            Setup();
+            var newSimulationDto = SimulationTestSetup.TestSimulation();
+            var testUser = await AddTestUser();
+
+            newSimulationDto.Users = new List<SimulationUserDTO>
+                {
+                    new SimulationUserDTO
+                    {
+                        UserId = testUser.Id,
+                        Username = testUser.Username,
+                        CanModify = true,
+                        IsOwner = true
+                    }
+                };
+
+            // Act
+
+            TestHelper.UnitOfWork.SimulationRepo.CreateSimulation(NetworkTestSetup.NetworkId, newSimulationDto);
+            var dto = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(newSimulationDto.Id);
+            // Assert
+            var simulationEntity = TestHelper.UnitOfWork.Context.Simulation
+                .Include(_ => _.SimulationUserJoins)
+                .ThenInclude(_ => _.User)
+                .SingleOrDefault(_ => _.Id == dto.Id);
+
+            Assert.NotNull(simulationEntity);
+            //    Assert.Equal(dto.Users[0].UserId, simulationEntity.CreatedBy); // Not true in any world I can find. -- WJ
+
+            var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
+            var simulationUser = simulationUsers.Single();
+            Assert.Equal(dto.Users[0].UserId, simulationUser.UserId);
+        }
+
+        [Fact]
         public async Task ShouldUpdateSimulation()
         {
             // Arrange

@@ -88,6 +88,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<BudgetPriorityLibraryEntity> BudgetPriorityLibrary { get; set; }
 
+        public virtual DbSet<CalculatedAttributeLibraryUserEntity> CalculatedAttributeLibraryUser { get; set; }
         public virtual DbSet<CashFlowDistributionRuleEntity> CashFlowDistributionRule { get; set; }
 
         public virtual DbSet<CashFlowRuleEntity> CashFlowRule { get; set; }
@@ -2558,6 +2559,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.CashFlowRuleLibraryUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<CalculatedAttributeLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CalculatedAttributeLibraryId, e.UserId });
+
+                entity.ToTable("CalculatedAttributeLibrary_User");
+
+                entity.HasIndex(e => e.CalculatedAttributeLibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.CalculatedAttributeLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.CalculatedAttributeLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.CalculatedAttributeLibraryUsers)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

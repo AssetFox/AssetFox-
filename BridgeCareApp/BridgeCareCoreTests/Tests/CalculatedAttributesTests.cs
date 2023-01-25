@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Utils;
+using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
@@ -19,6 +21,7 @@ namespace BridgeCareCoreTests.Tests
 {
     public class CalculatedAttributesTests
    {
+        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
         private CalculatedAttributesController CreateTestController(List<string> userClaims)
         {
             List<Claim> claims = new List<Claim>();
@@ -34,7 +37,7 @@ namespace BridgeCareCoreTests.Tests
             var userRepo = UserRepositoryMocks.EveryoneExists();
             unitOfWork.Setup(u => u.UserRepo).Returns(userRepo.Object);
             var controller = new CalculatedAttributesController(EsecSecurityMocks.DbeMock.Object,
-                unitOfWork.Object, hubService, accessor, null);
+                unitOfWork.Object, hubService, accessor, _mockClaimHelper.Object, null);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }

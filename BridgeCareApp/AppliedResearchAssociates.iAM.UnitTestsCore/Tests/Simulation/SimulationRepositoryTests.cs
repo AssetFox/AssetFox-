@@ -28,6 +28,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -52,6 +53,44 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return returnValue;
         }
 
+        [Fact] // Seems to be some connection with other tests here. For example, WJ had a failure in an "unrelated" attribute import test that fried it.
+        public void DeleteSimulation_Does()
+        {
+            Setup();
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+
+            // Act
+            TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation.Id);
+            // Assert
+            Assert.False(TestHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id));
+        }
+
+        [Fact]
+        public async Task GetUserScenarios_SimulationInDbOwnedByUser_Gets()
+        {
+            // Arrange
+            Setup();
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            TestHelper.UnitOfWork.SetUser(user.Username);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, owner: user.Id);
+
+            // Act
+            var result = TestHelper.UnitOfWork.SimulationRepo.GetUserScenarios();
+            var retrievedSimulation = result.Single();
+            var simulationFromRepo = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulation.Id);
+            ObjectAssertions.Equivalent(simulationFromRepo, retrievedSimulation);
+        }
+
+        [Fact]
+        public void GetSharedScenarios_DoesNotThrow()
+        {
+            // Arrange
+            Setup();
+
+            var result = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(true, true);
+        }
+
         [Fact]
         public void GetSimulationNameOrId_SimulationNotInDb_GetsId()
         {
@@ -59,6 +98,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var nameOrId = TestHelper.UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
             Assert.Contains(simulationId.ToString(), nameOrId);
         }
+
         private void CreateTestData()
         {
             if (!TestHelper.UnitOfWork.Context.User.Any(u => u.Username == "Clone Tester"))

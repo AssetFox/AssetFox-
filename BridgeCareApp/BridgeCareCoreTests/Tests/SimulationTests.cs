@@ -82,114 +82,32 @@ namespace BridgeCareCoreTests.Tests
                 _mockClaimHelper.Object);
         }
 
-        [Fact] // Seems to be some connection with other tests here. For example, WJ had a failure in an "unrelated" attribute import test that fried it.
-        public async Task ShouldDeleteSimulation()
+        [Fact] 
+        public async Task DeleteSimulation_CallsDeleteOnRepo()
         {
-            var service = Setup();
-            // Arrange
-            CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var controller = CreateController(unitOfWork);
             // Act
-            await _controller.DeleteSimulationOperation(simulation.Id);
+            var result = await controller.DeleteSimulationOperation(simulationId);
             // Assert
-            Assert.True(!TestHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id));
+            ActionResultAssertions.Ok(result);
+            var repoCall = repo.SingleInvocationWithName(nameof(ISimulationRepository.DeleteSimulation));
+            Assert.Equal(simulationId, repoCall.Arguments[0]);
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnGetUserScenariosPage()
+        public async Task GetUserScenariosPage_CallsGetUserScenariosOnRepo()
         {
             // Arrange
-            var service = Setup();
-            CreateAuthorizedController(service);
-
-            var request = new PagingRequestModel<SimulationDTO>()
-            {
-                isDescending = false,
-                Page = 1,
-                RowsPerPage = 5,
-                search = "",
-                sortColumn = ""
-            };
-
-            // Act
-            var result = await _controller.GetUserScenariosPage(request);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnGetSharedScenariosPage()
-        {
-            // Arrange
-            var service = Setup();
-            CreateAuthorizedController(service);
-
-            var request = new PagingRequestModel<SimulationDTO>()
-            {
-                isDescending = false,
-                Page = 1,
-                RowsPerPage = 5,
-                search = "",
-                sortColumn = ""
-            };
-
-            // Act
-            var result = await _controller.GetSharedScenariosPage(request);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnPost()
-        {
-            // Arrange
-            var service = Setup();
-            CreateAuthorizedController(service);
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
             var simulation = SimulationTestSetup.TestSimulation();
-            var result = await _controller.CreateSimulation(NetworkTestSetup.NetworkId, simulation);
+            var simulations = new List<SimulationDTO> { simulation };
+            repo.Setup(r => r.GetUserScenarios()).Returns(simulations);
 
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnPut()
-        {
-            var service = Setup();
-            // Arrange
-            CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            // Act
-            var result = await _controller.UpdateSimulation(simulation);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnDelete()
-        {
-            var service = Setup();
-            // Arrange
-            CreateAuthorizedController(service);
-
-            // Act
-            var result = await _controller.DeleteSimulationOperation(Guid.Empty);
-
-            // Assert
-            Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
-        public async Task ShouldGetSimulationCreatedByUser()
-        {
-            var service = Setup();
-            // Arrange
-            CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, owner:TestHelper.UnitOfWork.CurrentUser.Id);
             var request = new PagingRequestModel<SimulationDTO>()
             {
                 isDescending = false,
@@ -200,45 +118,41 @@ namespace BridgeCareCoreTests.Tests
             };
 
             // Act
-            var userResult = await _controller.GetUserScenariosPage(request);
+            var result = await controller.GetUserScenariosPage(request);
 
             // Assert
-            var okObjResult = userResult as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
-            var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(PagingPageModel<SimulationDTO>))).Items;
-            var dto = dtos.Single(dto => dto.Id == simulation.Id);
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as PagingPageModel<SimulationDTO>;
+            ObjectAssertions.Equivalent(castValue.Items, simulations);
         }
 
         [Fact]
-        public async Task ShouldGetSimulationSharedWithUser()
+        public async Task GetSharedScenariosPage_CallsGetSharedScenariosOnRepo()
         {
-            var service = Setup();
             // Arrange
-            CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulation = SimulationTestSetup.TestSimulation();
+            var simulations = new List<SimulationDTO> { simulation };
+            repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(simulations);
 
-            // Act
             var request = new PagingRequestModel<SimulationDTO>()
             {
                 isDescending = false,
                 Page = 1,
-                RowsPerPage = 100,
+                RowsPerPage = 5,
                 search = "",
                 sortColumn = ""
             };
 
             // Act
-            var sharedResult = await _controller.GetSharedScenariosPage(request);
+            var result = await controller.GetSharedScenariosPage(request);
 
             // Assert
-            var okObjResult = sharedResult as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
-            var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(PagingPageModel<SimulationDTO>))).Items;
-            Assert.NotEmpty(dtos);
-            var dtoFromThisTest = dtos.Single(dto => dto.Id == simulation.Id);
-            Assert.True(dtos.All(_ => _.Owner != TestHelper.UnitOfWork.CurrentUser.Username));
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as PagingPageModel<SimulationDTO>;
+            ObjectAssertions.Equivalent(simulations, castValue.Items);
         }
 
         [Fact]

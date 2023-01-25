@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
+﻿//using NUnit.Framework;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    [TestFixture]
+   // [TestFixture]
     public class DataMinerTests
     {
         /*public List<AttributeDatum<double>> Attribute1 { get; } = new List<AttributeDatum<double>>()

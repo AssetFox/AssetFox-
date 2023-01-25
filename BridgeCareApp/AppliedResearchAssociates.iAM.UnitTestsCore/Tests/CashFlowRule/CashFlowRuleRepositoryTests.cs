@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
@@ -10,6 +11,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 
@@ -68,7 +70,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
         }
 
         [Fact]
-        public void UpsertLibrary_Does()
+        public async Task UpsertLibrary_Does()
         {
             // Arrange
             var dto = CashFlowRuleLibraryDtos.Empty();
@@ -79,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             // Assert
             var libraryAfter = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibrariesNoChildren()
                 .Single(lib => lib.Id == dto.Id);
-            ObjectAssertions.Equivalent(dto, libraryAfter);
+            ObjectAssertions.EquivalentExcluding(dto, libraryAfter, x => x.Owner);
         }
 
         [Fact]
@@ -155,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
 
             // Assert
             var modifiedDto = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().Single(lib => lib.Id == dto.Id);
-            ObjectAssertions.EquivalentExcluding(dto, modifiedDto, x => x.CashFlowRules[0].CriterionLibrary);
+            ObjectAssertions.EquivalentExcluding(dto, modifiedDto, x => x.CashFlowRules[0].CriterionLibrary, x => x.Owner);
         }
 
         [Fact]

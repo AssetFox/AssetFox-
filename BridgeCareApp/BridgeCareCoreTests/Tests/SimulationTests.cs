@@ -1,4 +1,5 @@
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
@@ -13,6 +14,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -715,58 +717,27 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldUpdateSimulation()
+        public async Task UpdateSimulation_CallsUpdateOnRepo()
         {
-            // Arrange
-            var service = Setup();
-            CreateAuthorizedController(service);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, owner: TestHelper.UnitOfWork.CurrentUser.Id);
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var userId = Guid.NewGuid();
+            var simulationId = Guid.NewGuid();
+            var simulationDTO = SimulationTestSetup.TestSimulation(simulationId, SimulationName, userId);
+            var simulationDTO2 = SimulationTestSetup.TestSimulation(simulationId, SimulationName, userId);
+            var simulationDTO3 = SimulationTestSetup.TestSimulation(simulationId, SimulationName, userId);
 
-            var request = new PagingRequestModel<SimulationDTO>()
-            {
-                isDescending = false,
-                Page = 1,
-                RowsPerPage = 5,
-                search = "",
-                sortColumn = ""
-            };
-
-            var getResult = await _controller.GetUserScenariosPage(request);
-
-            var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                typeof(PagingPageModel<SimulationDTO>))).Items;
-
-            var simulationDTO = dtos.Single(s => s.Id == simulation.Id);
-            simulationDTO.Name = "Updated Name";
-            var testUser = await AddTestUser();
-            simulationDTO.Users = new List<SimulationUserDTO>
-                {
-                    new SimulationUserDTO
-                    {
-                        UserId = testUser.Id,
-                        Username = testUser.Username,
-                        CanModify = true,
-                        IsOwner = true
-                    }
-                };
+            repo.Setup(r => r.GetSimulation(simulationId)).Returns(simulationDTO2);
 
             // Act
-            var result = await _controller.UpdateSimulation(simulationDTO);
-            var dto = (SimulationDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(SimulationDTO));
+            var result = await controller.UpdateSimulation(simulationDTO);
 
             // Assert
-            var simulationEntity = TestHelper.UnitOfWork.Context.Simulation
-                .Include(_ => _.SimulationUserJoins)
-                .ThenInclude(_ => _.User)
-                .Single(_ => _.Id == dto.Id);
-
-            Assert.Equal(dto.Name, simulationEntity.Name);
-
-            var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
-            Assert.True(simulationUsers.Count == 2);
-            Assert.Equal(dto.Users.Single(_ => _.UserId != TestHelper.UnitOfWork.CurrentUser.Id).UserId,
-                simulationUsers.Single(_ => _.UserId != TestHelper.UnitOfWork.CurrentUser.Id).UserId);
+            var value = ActionResultAssertions.OkObject(result);
+            ObjectAssertions.Equivalent(simulationDTO3, value);
+            var repoCall = repo.SingleInvocationWithName(nameof(ISimulationRepository.UpdateSimulation));
+            ObjectAssertions.Equivalent(simulationDTO3, repoCall.Arguments[0]);
         }
 
         [Fact]

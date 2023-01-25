@@ -44,6 +44,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(TestHelper.UnitOfWork);
         }
 
+        private async Task<UserDTO> AddTestUser()
+        {
+            var randomName = RandomStrings.Length11();
+            TestHelper.UnitOfWork.AddUser(randomName, true);
+            var returnValue = await TestHelper.UnitOfWork.UserRepo.GetUserByUserName(randomName);
+            return returnValue;
+        }
+
         [Fact]
         public void GetSimulationNameOrId_SimulationNotInDb_GetsId()
         {
@@ -430,6 +438,49 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
         }
 
+
+        [Fact]
+        public async Task ShouldUpdateSimulation()
+        {
+            // Arrange
+            Setup();
+            var testUser1 = await AddTestUser();
+            var testUser2 = await AddTestUser();
+            TestHelper.UnitOfWork.Context.SaveChanges();
+            var simulationId = Guid.NewGuid();
+            var ownerId = testUser1.Id;
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, owner: ownerId);
+            var updatedSimulation = SimulationTestSetup.TestSimulation(simulationId, owner: testUser2.Id);
+
+            updatedSimulation.Name = "Updated Name";
+            updatedSimulation.Users = new List<SimulationUserDTO>
+                {
+                    new SimulationUserDTO
+                    {
+                        UserId = testUser2.Id,
+                        Username = testUser2.Username,
+                        CanModify = true,
+                        IsOwner = true
+                    }
+                };
+
+            // Act
+            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulation(updatedSimulation);
+            var dto = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(updatedSimulation.Id);
+
+            // Assert
+            var simulationEntity = TestHelper.UnitOfWork.Context.Simulation
+                .Include(_ => _.SimulationUserJoins)
+                .ThenInclude(_ => _.User)
+                .Single(_ => _.Id == dto.Id);
+
+            Assert.Equal(dto.Name, simulationEntity.Name);
+
+            var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
+            Assert.True(simulationUsers.Count == 2);
+            Assert.Equal(testUser2.Id,
+                simulationUsers.Single(_ => _.UserId != ownerId).UserId);
+        }
 
         [Fact]
         public void SimulationInDb_Clone_Clones()

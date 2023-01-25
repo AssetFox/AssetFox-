@@ -13,13 +13,13 @@ using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
-    public class AuditReport : IReport
+    public class BAMSAuditReport : IReport
     {
         protected readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private Guid _networkId;
 
-        public AuditReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
+        public BAMSAuditReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
@@ -88,10 +88,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Generate report 
-            var AuditReportPath = string.Empty;
+            var reportPath = string.Empty;
             try
             {
-                AuditReportPath = GenerateAuditReport(_networkId, _simulationId);
+                reportPath = GenerateAuditReport(_networkId, _simulationId);
             }
             catch (Exception e)
             {
@@ -101,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 return;
             }
 
-            if (string.IsNullOrEmpty(AuditReportPath) || string.IsNullOrWhiteSpace(AuditReportPath))
+            if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
             {
                 Errors.Add("Audit report path is missing or not set");
                 IndicateError();
@@ -109,7 +109,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Report success with location of file
-            Results = AuditReportPath;
+            Results = reportPath;
             IsComplete = true;
             Status = "File generated.";
             return;

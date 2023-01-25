@@ -10,13 +10,13 @@ using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
-    public class AuditReportFactory : IReportFactory
+    public class BAMSAuditReportFactory : IReportFactory
     {
-        public string Name => "AuditReport";
+        public string Name => "BAMSAuditReport";
 
         public IReport Create(UnitOfDataPersistenceWork uow, ReportIndexDTO results, IHubService hubService)
         {
-            var report = new AuditReport(uow, Name, results, hubService);
+            var report = new BAMSAuditReport(uow, Name, results, hubService);
             return report;
         }
     }

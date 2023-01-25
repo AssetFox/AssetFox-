@@ -16,7 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Interfaces\AuditReport\" />
     <Folder Include="Properties\" />
+    <Folder Include="Services\AuditReport\" />
   </ItemGroup>
 
 </Project>

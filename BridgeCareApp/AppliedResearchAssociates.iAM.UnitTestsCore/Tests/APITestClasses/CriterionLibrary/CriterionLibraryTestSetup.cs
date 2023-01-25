@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class CriterionLibraryTestSetup
     {
-        public static CriterionLibraryDTO TestCriterionLibrary(string? namePrefix = null, string mergedCriteriaExpression = null)
+        public static CriterionLibraryDTO TestCriterionLibrary(string? namePrefix = null, string mergedCriteriaExpression = null, bool isSingleUse = true)
         {
             var resolvedNamePrefix = namePrefix ?? "Test Criterion Library ";
             var resolvedCriteriaExpression = mergedCriteriaExpression ?? "Test Expression";
@@ -23,17 +23,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Id = id,
                 Name = resolvedName,
                 MergedCriteriaExpression = resolvedCriteriaExpression,
-                IsSingleUse = true,
+                IsSingleUse = isSingleUse,
             };
             return returnValue;
         }
 
 
-        public static CriterionLibraryDTO TestCriterionLibraryInDb(IUnitOfWork unitOfWork, string namePrefix = null, string mergedCreteriaExpression = null)
+        public static CriterionLibraryDTO TestCriterionLibraryInDb(IUnitOfWork unitOfWork, string namePrefix = null, string mergedCreteriaExpression = null, bool isSingleUse = true)
         {
             var resolvedNamePrefix = namePrefix ?? "TestCriterionLibrary";
             var resolvedExpression = mergedCreteriaExpression ?? "Test Expression";
-            var criterionLibrary = TestCriterionLibrary(resolvedNamePrefix, resolvedExpression);
+            var criterionLibrary = TestCriterionLibrary(resolvedNamePrefix, resolvedExpression, isSingleUse);
             unitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(criterionLibrary);
             return criterionLibrary;
         }

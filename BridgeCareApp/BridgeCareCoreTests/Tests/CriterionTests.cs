@@ -54,12 +54,6 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        private CriterionLibraryDTO Setup()
-        {
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
-            return criterionLibrary;
-        }
-
         [Fact]
         public async Task CriterionLibraries_CallsThroughToRepo()
         {
@@ -117,7 +111,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var controller = SetupController();
             // Arrange
-            var criterionLibrary = Setup();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, isSingleUse: false);
 
             // Act
             var result = await controller.CriterionLibraries();

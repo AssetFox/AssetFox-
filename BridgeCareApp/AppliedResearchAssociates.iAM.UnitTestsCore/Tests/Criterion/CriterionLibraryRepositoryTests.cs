@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Criterion
         public async Task GetCriterionLibraries_LibraryInDb_Gets()
         {
             // Arrange
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, isSingleUse: false);
 
             // Act
             var dtos = await TestHelper.UnitOfWork.CriterionLibraryRepo.CriterionLibraries();

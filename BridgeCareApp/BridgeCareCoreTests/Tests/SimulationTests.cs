@@ -25,7 +25,6 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
-using BridgeCareCoreTests.Tests.Simulation;
 using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -678,42 +677,35 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldCreateSimulation()
+        public async Task CreateSimulation_CallsCreateOnRepo()
         {
-            var service = Setup();
-            // Arrange
-            CreateAuthorizedController(service);
-            var newSimulationDto = SimulationTestSetup.TestSimulation();
-            var testUser = await AddTestUser();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var networkId = Guid.NewGuid();
+            var controller = CreateController(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var newSimulationDto = SimulationTestSetup.TestSimulation(simulationId);
+            var simulationDtoAfter = SimulationTestSetup.TestSimulation(simulationId, newSimulationDto.Name);
+            var userId = Guid.NewGuid();
+            var simulationUserDto = SimulationUserDtos.Dto(userId);
 
             newSimulationDto.Users = new List<SimulationUserDTO>
                 {
-                    new SimulationUserDTO
-                    {
-                        UserId = testUser.Id,
-                        Username = testUser.Username,
-                        CanModify = true,
-                        IsOwner = true
-                    }
+                    simulationUserDto,
                 };
+            simulationDtoAfter.Users = new List<SimulationUserDTO> { simulationUserDto };
+            repo.Setup(r => r.GetSimulation(newSimulationDto.Id)).Returns(simulationDtoAfter);
 
             // Act
             var result =
-                await _controller.CreateSimulation(NetworkTestSetup.NetworkId, newSimulationDto) as OkObjectResult;
+                await controller.CreateSimulation(networkId, newSimulationDto) as OkObjectResult;
             var dto = (SimulationDTO)Convert.ChangeType(result!.Value, typeof(SimulationDTO));
 
             // Assert
-            var simulationEntity = TestHelper.UnitOfWork.Context.Simulation
-                .Include(_ => _.SimulationUserJoins)
-                .ThenInclude(_ => _.User)
-                .SingleOrDefault(_ => _.Id == dto.Id);
-
-            Assert.NotNull(simulationEntity);
-            //    Assert.Equal(dto.Users[0].UserId, simulationEntity.CreatedBy); // Not true in any world I can find. -- WJ
-
-            var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
-            var simulationUser = simulationUsers.Single();
-            Assert.Equal(dto.Users[0].UserId, simulationUser.UserId);
+            var createCall = repo.SingleInvocationWithName(nameof(ISimulationRepository.CreateSimulation));
+            Assert.Equal(networkId, createCall.Arguments[0]);
+            Assert.Equal(newSimulationDto, createCall.Arguments[1]);
+            ObjectAssertions.Equivalent(dto, newSimulationDto);
         }
 
         [Fact]

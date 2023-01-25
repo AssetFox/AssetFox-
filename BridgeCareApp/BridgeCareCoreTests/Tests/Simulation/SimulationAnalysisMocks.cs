@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using BridgeCareCore.Interfaces;
 using Moq;
 
-namespace BridgeCareCoreTests.Tests.Simulation
+namespace BridgeCareCoreTests.Tests
 {
     public static class SimulationAnalysisMocks
     {

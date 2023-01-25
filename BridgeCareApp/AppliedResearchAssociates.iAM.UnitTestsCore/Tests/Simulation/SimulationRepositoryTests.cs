@@ -440,7 +440,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
 
         [Fact]
-        public async Task ShouldCreateSimulation()
+        public async Task CreateSimulation_Does()
         {
             // Arrange
             Setup();
@@ -477,7 +477,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public async Task ShouldUpdateSimulation()
+        public async Task UpdateSimulation_Does()
         {
             // Arrange
             Setup();

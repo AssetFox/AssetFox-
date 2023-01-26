@@ -1,10 +1,13 @@
 ﻿using System.Threading.Channels;
 using AppliedResearchAssociates.iAM.Data;
+using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.SampleData;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -31,7 +34,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task Aggregate_ExcelDataSourceInDb_AttributesInDb_Aggregates2()
+        public async Task Aggregate_ExcelDataSourceReturnedFromRepo_AttributesReturnedFromRepo_Aggregates()
         {
             var mockUnitOfWork = UnitOfWorkMocks.New();
             var networkRepo = NetworkRepositoryMocks.New(mockUnitOfWork);
@@ -73,10 +76,8 @@ namespace BridgeCareCoreTests.Tests
             };
             var network = NetworkTestSetupViaFactory.ModelViaFactory(
                 mockUnitOfWork.Object, districtAttributeDomain, parameters, networkName);
-
-
             var networkId = network.Id;
-            var assetName = "AssetName";
+            var assetName = "100";
             var location = new SectionLocation(Guid.NewGuid(), assetName);
             var maintainableAssetId = Guid.NewGuid();
             var spatialWeightingValue = "[Deck_Area]";
@@ -91,52 +92,14 @@ namespace BridgeCareCoreTests.Tests
             var aggregationResult = await aggregationService.AggregateNetworkData(channel.Writer, networkId, aggregationState, attributes);
 
             Assert.True(aggregationResult);
-        }
-
-        [Fact]
-        public async Task Aggregate_ExcelDataSourceInDb_AttributesInDb_Aggregates()
-        {
-            var spreadsheetService = TestServices.CreateExcelSpreadsheetImportService(TestHelper.UnitOfWork);
-            var dataSourceDto = DataSourceTestSetup.DtoForExcelDataSourceInDb(TestHelper.UnitOfWork);
-            var districtAttribute = AttributeDtos.District(dataSourceDto);
-            var districtAttributeDomain = AttributeMapper.ToDomain(districtAttribute, TestHelper.UnitOfWork.EncryptionKey);
-            UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
-            var path = SampleAttributeDataPath();
-            var stream = File.OpenRead(path);
-            var excelPackage = new ExcelPackage(stream);
-            var importResult = spreadsheetService.ImportRawData(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
-
-            var networkName = RandomStrings.WithPrefix("Network");
-            var attribute = UnitTestsCoreAttributeTestSetup.ExcelAttributeForEntityInDb(dataSourceDto);
-            var allDataSourceDto = AllDataSourceDtoFakeFrontEndFactory.ToAll(dataSourceDto);
-
-            var networkDefinitionAttribute = AllAttributeDtos.BrKey(allDataSourceDto);
-            var parameters = new NetworkCreationParameters
-            {
-                DefaultEquation = "[Deck_Area]",
-                NetworkDefinitionAttribute = networkDefinitionAttribute
-            };
-            var network = NetworkTestSetupViaFactory.ModelForEntityInDbViaFactory(
-                TestHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
-
-
-            var networkId = network.Id;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
-            TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
-
-
-            var aggregationService = new AggregationService(TestHelper.UnitOfWork);
-
-            var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
-            var aggregationState = new AggregationState();
-            var attributes = new List<AttributeDTO> { districtAttribute };
-            var aggregationResult = await aggregationService.AggregateNetworkData(channel.Writer, networkId, aggregationState, attributes);
-            Assert.True(aggregationResult);
+            var addCall = aggregatedResultRepo.SingleInvocationWithName(nameof(IAggregatedResultRepository.AddAggregatedResults));
+            var results = addCall.Arguments[0] as List<IAggregatedResult>;
+            var theResult = results.Single();
+            var theStringResult = theResult as AggregatedResult<string>;
+            var aggregatedDatum = theStringResult.AggregatedData.Single();
+            Assert.Equal(districtAttribute.Id, aggregatedDatum.attribute.Id);
+            Assert.Equal(2022, aggregatedDatum.yearValuePair.year);
+            Assert.Equal("110", aggregatedDatum.yearValuePair.value);
         }
     }
 }

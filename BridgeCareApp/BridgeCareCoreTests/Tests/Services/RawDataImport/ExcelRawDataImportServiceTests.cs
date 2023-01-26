@@ -1,10 +1,16 @@
 ﻿using System;
 using System.IO;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.SampleData;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
+using BridgeCareCoreTests.Helpers;
+using Moq;
 using OfficeOpenXml;
 using Xunit;
 
@@ -103,6 +109,38 @@ namespace BridgeCareCoreTests.Tests
             var importResult = spreadsheetService.ImportRawData(dataSourceId, excelPackage.Workbook.Worksheets[0]);
             var warning = importResult.WarningMessage;
             Assert.Contains(ExcelRawDataImportService.DataSourceDoesNotExist, warning);
+        }
+
+        [Fact]
+        public void RawDataSpreadsheetInDb_GetColumnNames_Does()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var dataSourceRepo = DataSourceRepositoryMocks.New(unitOfWork);
+            var rawDataRepo = ExcelRawDataRepositoryMocks.New(unitOfWork);
+            rawDataRepo.Setup(r => r.AddExcelRawData(It.IsAny<ExcelRawDataDTO>())).Returns((ExcelRawDataDTO d) => d.Id);
+            var path = SampleAttributeDataPath();
+            var stream = File.OpenRead(path);
+            var excelPackage = new ExcelPackage(stream);
+            var spreadsheetService = TestServices.CreateExcelSpreadsheetImportService(unitOfWork.Object);
+            var dataSourceId = Guid.NewGuid();
+            var dataSourceName = RandomStrings.WithPrefix("DataSourceName");
+            var dataSourceDto = new ExcelDataSourceDTO
+            {
+                Id = dataSourceId,
+                Name = dataSourceName,
+            };
+            dataSourceRepo.Setup(d => d.GetDataSource(dataSourceId)).Returns(dataSourceDto);
+
+            var importResult = spreadsheetService.ImportRawData(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
+
+            var spreadsheetId = importResult.RawDataId;
+            var addCall = rawDataRepo.SingleInvocationWithName(nameof(IExcelRawDataRepository.AddExcelRawData));
+            var upsertedSpreadsheet = addCall.Arguments[0] as ExcelRawDataDTO;
+            var serializedWorksheetcontent = upsertedSpreadsheet.SerializedWorksheetContent;
+            var deserializedWorksheetContent = ExcelRawDataSpreadsheetSerializer.Deserialize(serializedWorksheetcontent);
+            var columnHeaders = deserializedWorksheetContent.Worksheet.Columns.Select(c => c.Entries.FirstOrDefault().ObjectValue().ToString()).ToList();
+            var expectedColumnHeaders = new List<string> { "BRKEY", "DISTRICT", "Inspection_Date" };
+            ObjectAssertions.Equivalent(expectedColumnHeaders, columnHeaders);
         }
     }
 }

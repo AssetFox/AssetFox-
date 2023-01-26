@@ -283,7 +283,7 @@ import Alert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import CreateCalculatedAttributeLibraryDialog from './calculated-attribute-editor-dialogs/CreateCalculatedAttributeLibraryDialog.vue';
 import CreateCalculatedAttributeDialog from './calculated-attribute-editor-dialogs/CreateCalculatedAttributeDialog.vue';
-import ShareCalculatedAttributeLibraryDialog from '@/components/calculated-attribute-editor/calculated-attribute-dialogs/ShareCalculatedAttributeLibraryDialog.vue';
+import ShareCalculatedAttributeLibraryDialog from '@/components/calculated-attribute-editor/calculated-attribute-editor-dialogs/ShareCalculatedAttributeLibraryDialog.vue';
 import { emptyShareCalculatedAttributeLibraryDialogData, ShareCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/share-calculated-attribute-data';
 import {
     InputValidationRules,

@@ -3,11 +3,11 @@ using System.IO;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.SampleData;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
 using Moq;
@@ -22,10 +22,10 @@ namespace BridgeCareCoreTests.Tests
         public const string BrKey = "BRKEY";
         public const string InspectionDateColumnTitle = "Inspection_Date";
 
-        private static ExcelRawDataImportService CreateExcelSpreadsheetImportService()
+        private static ExcelRawDataImportService CreateExcelSpreadsheetImportService(Mock<IUnitOfWork> unitOfWork = null)
         {
-            var returnValue = TestServices.CreateExcelSpreadsheetImportService(TestHelper.UnitOfWork);
-            return returnValue;
+            var service = new ExcelRawDataImportService(unitOfWork.Object);
+            return service;
         }
 
         private static string SampleAttributeDataPath()
@@ -50,7 +50,10 @@ namespace BridgeCareCoreTests.Tests
             var path = SampleAttributeDataPath();
             var stream = File.OpenRead(path);
             var excelPackage = new ExcelPackage(stream);
-            var spreadsheetService = CreateExcelSpreadsheetImportService();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var dataSourceRepo = DataSourceRepositoryMocks.New(unitOfWork);
+            var rawDataRepo = ExcelRawDataRepositoryMocks.New(unitOfWork);
+            var spreadsheetService = CreateExcelSpreadsheetImportService(unitOfWork);
             var dataSourceId = Guid.NewGuid();
             var dataSourceName = RandomStrings.WithPrefix("DataSourceName");
             var dataSourceDto = new ExcelDataSourceDTO
@@ -58,10 +61,13 @@ namespace BridgeCareCoreTests.Tests
                 Id = dataSourceId,
                 Name = dataSourceName,
             };
-            TestHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
+            dataSourceRepo.Setup(d => d.GetDataSource(dataSourceId)).Returns(dataSourceDto);
+
             var importResult = spreadsheetService.ImportRawData(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
+
             var spreadsheetId = importResult.RawDataId;
-            var upsertedSpreadsheet = TestHelper.UnitOfWork.ExcelWorksheetRepository.GetExcelRawData(spreadsheetId);
+            var addCall = rawDataRepo.SingleInvocationWithName(nameof(IExcelRawDataRepository.AddExcelRawData));
+            var upsertedSpreadsheet = addCall.Arguments[0] as ExcelRawDataDTO;
             var serializedWorksheetContent = upsertedSpreadsheet.SerializedWorksheetContent;
             Assert.StartsWith("[[", serializedWorksheetContent);
             Assert.EndsWith("]]", serializedWorksheetContent);
@@ -83,15 +89,19 @@ namespace BridgeCareCoreTests.Tests
             var excelPackage = new ExcelPackage(stream);
             var dataSourceId = Guid.NewGuid();
             var dataSourceName = RandomStrings.WithPrefix("DataSourceName");
+            var unitOfWork = UnitOfWorkMocks.New();
+            var dataSourceRepo = DataSourceRepositoryMocks.New(unitOfWork);
+            var rawDataRepo = ExcelRawDataRepositoryMocks.New(unitOfWork);
             var dataSourceDto = new ExcelDataSourceDTO
             {
                 Id = dataSourceId,
                 Name = dataSourceName,
             };
-            TestHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
+            dataSourceRepo.Setup(d => d.GetDataSource(dataSourceId)).Returns(dataSourceDto);
+            var service = CreateExcelSpreadsheetImportService(unitOfWork);
 
-            var service = CreateExcelSpreadsheetImportService();
             var result = service.ImportRawData(dataSourceId, excelPackage.Workbook.Worksheets[0]);
+
             var warningMessage = result.WarningMessage;
             Assert.Equal(warningMessage, ExcelRawDataImportService.TopSpreadsheetRowIsEmpty);
         }
@@ -100,19 +110,22 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void ImportRawDataSpreadsheet_DataSourceDoesNotExist_FailsWithWarning()
         {
-            // When this test is run, the ExcelWorksheet entity appears in the database, with no corresponding DataSource entity. The foreign key is not enforced. And that needs fixing.
             var path = SampleAttributeDataPath();
             var stream = File.OpenRead(path);
             var excelPackage = new ExcelPackage(stream);
-            var spreadsheetService = CreateExcelSpreadsheetImportService();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var dataSourceRepo = DataSourceRepositoryMocks.New(unitOfWork);
+            var spreadsheetService = CreateExcelSpreadsheetImportService(unitOfWork);
             var dataSourceId = Guid.NewGuid();
+
             var importResult = spreadsheetService.ImportRawData(dataSourceId, excelPackage.Workbook.Worksheets[0]);
+
             var warning = importResult.WarningMessage;
             Assert.Contains(ExcelRawDataImportService.DataSourceDoesNotExist, warning);
         }
 
         [Fact]
-        public void RawDataSpreadsheetInDb_GetColumnNames_Does()
+        public void ImportSpreadsheet_ColumnNames_Expected()
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var dataSourceRepo = DataSourceRepositoryMocks.New(unitOfWork);

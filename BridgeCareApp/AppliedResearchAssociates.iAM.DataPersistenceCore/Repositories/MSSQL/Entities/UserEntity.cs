@@ -14,6 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             SimulationUserJoins = new HashSet<SimulationUserEntity>();
             RemainingLifeLimitLibraryUsers = new HashSet<RemainingLifeLimitLibraryUserEntity>();
             DeficientConditionGoalLibraryUsers = new HashSet<DeficientConditionGoalLibraryUserEntity>();
+            CashFlowRuleLibraryUsers = new HashSet<CashFlowRuleLibraryUserEntity>();
         }
 
         public Guid Id { get; set; }

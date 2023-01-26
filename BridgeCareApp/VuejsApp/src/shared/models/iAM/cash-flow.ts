@@ -32,6 +32,7 @@ export const emptyCashFlowRuleLibrary: CashFlowRuleLibrary = {
     name: '',
     description: '',
     cashFlowRules: [],
+    users: [],
     appliedScenarioIds: [],
     isShared: false
 };

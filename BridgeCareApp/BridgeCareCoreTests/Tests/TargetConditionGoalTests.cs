@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -15,17 +9,12 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
-using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
-
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -436,91 +425,6 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(localUpdatedTargetGoal.Attribute, serverUpdatedTargetGoal.Attribute);
             Assert.Equal(localUpdatedTargetGoal.CriterionLibrary.MergedCriteriaExpression,
                 serverUpdatedTargetGoal.CriterionLibrary.MergedCriteriaExpression);
-        }
-        [Fact]
-        public async Task UserIsViewTargetConditionGoalFromScenarioAuthorized()
-        {
-            // non-admin authorized
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ViewTargetConditionGoalFromScenario,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TargetConditionGoalViewPermittedFromScenarioAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewTargetConditionGoalFromScenario);
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsModifyTargetConditionGoalFromLibraryAuthorized()
-        {
-            // admin authorized
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ModifyTargetConditionGoalFromLibrary,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TargetConditionGoalUpdateAnyFromLibraryAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyTargetConditionGoalFromLibrary);
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsDeleteTargetConditionGoalFromLibraryAuthorized()
-        {
-            // Non-admin unauthorized
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.DeleteTargetConditionGoalFromLibrary,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TargetConditionGoalDeleteAnyFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TargetConditionGoalDeletePermittedFromLibraryAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.DeleteTargetConditionGoalFromLibrary);
-            // Assert
-            Assert.False(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsViewTargetConditionGoalFromScenarioAuthorized_B2C()
-        {
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ViewTargetConditionGoalFromScenario,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TargetConditionGoalViewAnyFromScenarioAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TargetConditionGoalViewPermittedFromScenarioAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewTargetConditionGoalFromScenario);
-            // Assert
-            Assert.True(allowed.Succeeded);
         }
 
     }

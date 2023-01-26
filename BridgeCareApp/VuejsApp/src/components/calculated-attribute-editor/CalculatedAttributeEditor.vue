@@ -21,11 +21,20 @@
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                         </div>
                         <v-divider class="owner-shared-divider" inset vertical></v-divider>
-                        <v-switch
+                        <v-badge v-show="isShared" style="padding: 10px">
+                            <template v-slot: badge>
+                                <span>Shared</span>
+                            </template>
+                        </v-badge>
+                        <v-btn @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                            v-show='!hasScenario'>
+                            Share Library
+                        </v-btn>
+                        <!-- <v-switch
                             class='sharing header-text-content'
                             label="Default Calculation"
                             v-model="isDefaultBool"
-                            />
+                            /> -->
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -248,7 +257,9 @@
             :dialogData="createCalculatedAttributeLibraryDialogData"
             @submit="onSubmitCreateCalculatedAttributeLibraryDialogResult"
         />
-
+        <ShareCalculatedAttributeLibraryDialog :dialogData="shareCalculatedAttributeLibraryDialogData"
+            @submit="onShareCalculatedAttributeDialogSubmit" 
+        />
         <CreateCalculatedAttributeDialog
             :showDialog="showCreateCalculatedAttributeDialog"
             @submit="onSubmitCreateCalculatedAttributeDialogResult"
@@ -272,6 +283,8 @@ import Alert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import CreateCalculatedAttributeLibraryDialog from './calculated-attribute-editor-dialogs/CreateCalculatedAttributeLibraryDialog.vue';
 import CreateCalculatedAttributeDialog from './calculated-attribute-editor-dialogs/CreateCalculatedAttributeDialog.vue';
+import ShareCalculatedAttributeLibraryDialog from '@/components/calculated-attribute-editor/calculated-attribute-dialogs/ShareCalculatedAttributeLibraryDialog.vue';
+import { emptyShareCalculatedAttributeLibraryDialogData, ShareCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/share-calculated-attribute-data';
 import {
     InputValidationRules,
     rules,
@@ -292,6 +305,7 @@ import {
     CalculatedAttribute,
     CalculatedAttributeGridModel,
     CalculatedAttributeLibrary,
+    CalculatedAttributeLibraryUser,
     CriterionAndEquationSet,
     emptyCalculatedAttribute,
     emptyCalculatedAttributeLibrary,
@@ -332,11 +346,14 @@ import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { isNullOrUndefined } from 'util';
+import { LibraryUser } from '@/shared/models/iAM/user';
 
 @Component({
     components: {
         CreateCalculatedAttributeLibraryDialog,
         CreateCalculatedAttributeDialog,
+        ShareCalculatedAttributeLibraryDialog,
         EquationEditorDialog,
         GeneralCriterionEditorDialog,
         ConfirmDeleteAlert: Alert,
@@ -350,7 +367,8 @@ export default class CalculatedAttributeEditor extends Vue {
     @State(state => state.calculatedAttributeModule.calculatedAttributes) stateCalculatedAttributes: Attribute[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-
+    @State(state => state.calculatedAttributeModule.isSharedLibrary) isSharedLibrary: boolean;
+    @Action('getIsSharedCalculatedAttributeLibrary') getIsSharedLibraryAction: any;
     @Action('upsertScenarioCalculatedAttribute')
     upsertScenarioCalculatedAttributeAction: any;
     @Action('deleteCalculatedAttributeLibrary')
@@ -392,6 +410,10 @@ export default class CalculatedAttributeEditor extends Vue {
     currentPage: CalculatedAttribute = clone(emptyCalculatedAttribute);
     initializing: boolean = true;
     uuidNIL: string = getBlankGuid();
+    isShared: boolean = false;
+
+    shareCalculatedAttributeLibraryDialogData: ShareCalculatedAttributeLibraryDialogData = clone(emptyShareCalculatedAttributeLibraryDialogData);
+
 
     defaultEquation: CriterionAndEquationSet = emptyCriterionAndEquationSet;
     defaultEquationCache: CriterionAndEquationSet = emptyCriterionAndEquationSet;
@@ -532,7 +554,9 @@ export default class CalculatedAttributeEditor extends Vue {
             search: this.currentSearch,
             attributeId: this.stateCalculatedAttributes.find(_ => _.name === this.selectedAttribute.attribute)!.id
         };
-        
+        if (!isNullOrUndefined(this.selectedCalculatedAttributeLibrary.id) ) {
+            this.getIsSharedLibraryAction(this.selectedCalculatedAttributeLibrary).then(this.isShared = this.isSharedLibrary);
+        }
         if((!this.hasSelectedLibrary && this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
             CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
@@ -759,6 +783,9 @@ export default class CalculatedAttributeEditor extends Vue {
         else {
             this.hasSelectedLibrary = false;
         }
+        if (!isNullOrUndefined(this.selectedCalculatedAttributeLibrary.id) ) {
+            this.getIsSharedLibraryAction(this.selectedCalculatedAttributeLibrary).then(this.isShared = this.isSharedLibrary);
+        }   
 
         this.clearChanges();
         if (this.hasScenario && this.hasSelectedLibrary) {
@@ -823,7 +850,13 @@ export default class CalculatedAttributeEditor extends Vue {
             })          
         }         
     }
-
+    @Watch('isSharedLibrary')
+    onStateSharedAccessChanged() {
+        this.isShared = this.isSharedLibrary;
+        if (!isNullOrUndefined(this.selectCalculatedAttributeLibrary)) {
+            this.selectCalculatedAttributeLibrary.isShared = this.isShared;
+        } 
+    }
     setTiming(selectedItem: number) {
         this.setTimingsMultiSelect(selectedItem);
     }
@@ -1424,6 +1457,51 @@ export default class CalculatedAttributeEditor extends Vue {
             next();
         }
     };
+
+    onShowShareCalculatedAttributeLibraryDialog(calculatedAttributeLibrary: CalculatedAttributeLibrary) {
+        this.shareCalculatedAttributeLibraryDialogData = {
+            showDialog:true,
+            calculatedAttributeLibrary: clone(calculatedAttributeLibrary)
+        }
+    }
+
+    onShareCalculatedAttributeDialogSubmit(calculatedAttributeLibraryUsers: CalculatedAttributeLibraryUser[]) {
+        this.shareCalculatedAttributeLibraryDialogData = clone(emptyShareCalculatedAttributeLibraryDialogData);
+
+                if (!isNil(calculatedAttributeLibraryUsers) && this.selectedCalculatedAttributeLibrary.id !== getBlankGuid())
+                {
+                    let libraryUserData: LibraryUser[] = [];
+
+                    //create library users
+                    calculatedAttributeLibraryUsers.forEach((calculatedAttributeLibraryUser, index) =>
+                    {   
+                        //determine access level
+                        let libraryUserAccessLevel: number = 0;
+                        if (libraryUserAccessLevel == 0 && calculatedAttributeLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
+                        if (libraryUserAccessLevel == 0 && calculatedAttributeLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
+
+                        //create library user object
+                        let libraryUser: LibraryUser = {
+                            userId: calculatedAttributeLibraryUser.userId,
+                            userName: calculatedAttributeLibraryUser.username,
+                            accessLevel: libraryUserAccessLevel
+                        }
+
+                        //add library user to an array
+                        libraryUserData.push(libraryUser);
+                    });
+                    if (!isNullOrUndefined(this.selectedCalculatedAttributeLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedCalculatedAttributeLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
+                    //update calculated attribute library sharing
+                    CalculatedAttributeService.upsertOrDeleteCalculatedAttributeLibraryUsers(this.selectedCalculatedAttributeLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
+                        {
+                            this.resetPage();
+                        }
+                    });
+                }
+    }
 
     initializePages(){
         const request: CalculatedAttributePagingRequestModel= {

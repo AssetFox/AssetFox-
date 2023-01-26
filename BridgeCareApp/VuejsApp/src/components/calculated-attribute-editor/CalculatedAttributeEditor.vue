@@ -16,7 +16,7 @@
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
-                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 24px !important" class="shared-owner-flex-padding">
+                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 18px !important" class="shared-owner-flex-padding">
                         <div class="header-text-content owner-padding" style="padding-top: 7px !important">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                         </div>

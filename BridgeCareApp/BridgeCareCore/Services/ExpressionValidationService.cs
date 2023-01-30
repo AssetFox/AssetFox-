@@ -179,19 +179,13 @@ namespace BridgeCareCore.Services
                 var pattern = "\\[[^\\]]*\\]";
                 var rg = new Regex(pattern);
                 var match = rg.Matches(mergedCriteriaExpression);
-                var hashMatch = new HashSet<string>();
+                var hashMatch = new List<string>();
                 foreach (Match m in match)
                 {
                     hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
                 }
 
-                var attributes = _unitOfWork.Context.Attribute
-                    .Where(_ => hashMatch.Contains(_.Name))
-                    .Select(attribute => new AttributeDTO
-                    {
-                        Name = attribute.Name,
-                        Type = attribute.DataType
-                    }).AsNoTracking().ToList();
+                var attributes = _unitOfWork.AttributeRepo.GetAttributesWithNames(hashMatch);
 
                 var compiler = new CalculateEvaluateCompiler();
 

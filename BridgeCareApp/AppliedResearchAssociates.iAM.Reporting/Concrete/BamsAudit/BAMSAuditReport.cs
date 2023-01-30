@@ -8,6 +8,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSAuditReport;
+using AppliedResearchAssociates.iAM.Reporting.Services;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport;
 using BridgeCareCore.Services;
 using OfficeOpenXml;
 
@@ -18,13 +22,27 @@ namespace AppliedResearchAssociates.iAM.Reporting
         protected readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private Guid _networkId;
+        private readonly IReportHelper _reportHelper;
+        private readonly IBridgesTab _bridgesTab;
 
         public BAMSAuditReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
-            ReportTypeName = name;
+            ReportTypeName = name;            
+            _reportHelper = new ReportHelper();
+            _bridgesTab = new BridgesTab();
+
+            // check for existing report id
+            var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
+
+            // set report return default parameters
+            ID = (Guid)reportId;
+            Errors = new List<string>();
             Warnings = new List<string>();
+            Status = "Report definition created.";
+            Results = string.Empty;
+            IsComplete = false;
         }        
 
         public Guid ID { get; set; }
@@ -134,8 +152,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Bridge Data TAB
             reportDetailDto.Status = $"Creating Bridges TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);            
-            // TODO Add worksheet and Fill method for bridges data tab here
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            var bridgesWorksheet = excelPackage.Workbook.Worksheets.Add(AuditReportConstants.BridgesTab);
+            _bridgesTab.Fill(bridgesWorksheet, reportOutputData);
 
 
             // Fill Decisions TAB

@@ -85,5 +85,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         public const string Work = "Work";
         public const string Yes = "Y";
         public const string No = "N";
+        public const string BridgesTab = "Bridges";
     }
 }

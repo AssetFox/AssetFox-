@@ -196,7 +196,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         }
 
         private const string BRIDGE_FUNDING = "Bridge Funding";
-        private const string INTERSTATE = "Interstate";
 
         private List<string> GetHeadersRow1()
         {

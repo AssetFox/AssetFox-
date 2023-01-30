@@ -140,7 +140,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         }
 
         private const string INTERSTATE = "Interstate";
-
         private static List<string> GetHeadersRow()
         {
             return new List<string>

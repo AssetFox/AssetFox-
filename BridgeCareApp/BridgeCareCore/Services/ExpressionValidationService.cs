@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Models.Validation;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;

@@ -2,11 +2,15 @@
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using OfficeOpenXml.FormulaParsing.Logging;
+using System;
 
 namespace AppliedResearchAssociates.iAM.Data.Aggregation
 {
     public static class Aggregator
     {
+        public static event EventHandler<AggregationLogEventArgs> AggregationLog;
+
         public static void AssignAttributeDataToMaintainableAsset(
             IEnumerable<IAttributeDatum> attributeData,
             IEnumerable<MaintainableAsset> maintainableAssets)
@@ -20,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.Data.Aggregation
                 if (matchingLocationSegment != null)
                 {
                     matchingLocationSegment.AssignedData.Add(datum);
+                    
                 }
                 else
                 {
@@ -27,5 +32,6 @@ namespace AppliedResearchAssociates.iAM.Data.Aggregation
                 }
             }
         }
+        //private static void OnLog(AggregationLogEventArgs e) => AggregationLog?.Invoke(this, e);
     }
 }

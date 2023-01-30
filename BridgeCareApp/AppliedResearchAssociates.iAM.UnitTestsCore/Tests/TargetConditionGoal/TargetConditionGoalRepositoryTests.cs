@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -159,212 +160,171 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var dto = dtos.Single(d => d.Id == library.Id);
         }
 
-        //[Fact]
-        //public async Task ShouldModifyTargetConditionGoalData()
-        //{
-        //    Setup();
-        //    // Arrange
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-        //    var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
-        //    var library = SetupLibraryForGet();
-        //    var goal = SetupTargetConditionGoal(library.Id);
+        [Fact]
+        public void UpsertOrDeleteTargetConditionGoals_GoalInDbWithLibrary_ModifiesGoal()
+        {
+            Setup();
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
+            var library = SetupLibraryForGet();
+            var goal = SetupTargetConditionGoal(library.Id);
 
-        //    var libraryDto = library.ToDto();
-        //    var goalDto = goal.ToDto();
+            var libraryDto = library.ToDto();
+            var goalDto = goal.ToDto();
 
-        //    libraryDto.Description = "Updated Description";
-        //    goalDto.Name = "Updated Name";
-        //    goalDto.CriterionLibrary = criterionLibrary;
+            goalDto.Name = "Updated Name";
+            goalDto.CriterionLibrary = criterionLibrary;
+            var updateRows = new List<TargetConditionGoalDTO>() { goalDto };
 
-        //    var sync = new PagingSyncModel<TargetConditionGoalDTO>()
-        //    {
-        //        UpdateRows = new List<TargetConditionGoalDTO>() { goalDto }
-        //    };
+            // Act //UpsertOrDeleteTargetConditionGoals
+            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(updateRows, libraryDto.Id);
 
-        //    var libraryRequest = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>()
-        //    {
-        //        IsNewLibrary = false,
-        //        Library = libraryDto,
-        //        SyncModel = sync
-        //    };
+            // Assert
+            var modifiedDto = TestHelper.UnitOfWork.TargetConditionGoalRepo
+                .GetTargetConditionGoalLibrariesWithTargetConditionGoals()
+                .Single(x => x.Id == library.Id);
 
-        //    // Act
-        //    await controller.UpsertTargetConditionGoalLibrary(libraryRequest);
+            Assert.Equal("Updated Name", modifiedDto.TargetConditionGoals[0].Name);
+            Assert.Equal(goalDto.Attribute, modifiedDto.TargetConditionGoals[0].Attribute);
+        }
 
-        //    // Assert
-        //    var modifiedDto = TestHelper.UnitOfWork.TargetConditionGoalRepo
-        //        .GetTargetConditionGoalLibrariesWithTargetConditionGoals()
-        //        .Single(x => x.Id == library.Id);
-        //    Assert.Equal(libraryDto.Description, modifiedDto.Description);
+        [Fact]
+        public void UpsertTargetConditionGoalLibrary_LibraryInDb_Modifies()
+        {
+            Setup();
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
+            var library = SetupLibraryForGet();
+            var libraryDto = library.ToDto();
+            libraryDto.Description = "Updated Description";
 
-        //    // below fails on some db weirdness. The name is updated in the db but not in the get result!?!
-        //    // Assert.Equal(dto.TargetConditionGoals[0].Name, modifiedDto.TargetConditionGoals[0].Name);
-        //    Assert.Equal(goalDto.Attribute, modifiedDto.TargetConditionGoals[0].Attribute);
-        //}
+            // Act //UpsertOrDeleteTargetConditionGoals
+            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(libraryDto);
 
-        //[Fact]
-        //public async Task ShouldDeleteTargetConditionGoalData()
-        //{
-        //    Setup();
-        //    // Arrange
-        //    var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
-        //    var targetConditionGoalLibraryEntity = SetupLibraryForGet();
-        //    var libraryId = targetConditionGoalLibraryEntity.Id;
-        //    var targetConditionGoalEntity = SetupTargetConditionGoal(libraryId);
-        //    var goalId = targetConditionGoalEntity.Id;
+            // Assert
+            var modifiedDto = TestHelper.UnitOfWork.TargetConditionGoalRepo
+                .GetTargetConditionGoalLibrariesWithTargetConditionGoals()
+                .Single(x => x.Id == library.Id);
+            Assert.Equal(libraryDto.Description, modifiedDto.Description);
+        }
 
-        //    JoinCriterionToLibraryConditionGoal(goalId, criterionLibrary.Id);
+        [Fact]
+        public void DeleteTargetConditionGoalLibrary_DeletesGoalsAndData()
+        {
+            Setup();
+            // Arrange
+            var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
+            var targetConditionGoalLibraryEntity = SetupLibraryForGet();
+            var libraryId = targetConditionGoalLibraryEntity.Id;
+            var targetConditionGoalEntity = SetupTargetConditionGoal(libraryId);
+            var goalId = targetConditionGoalEntity.Id;
 
-        //    // Act
-        //    var result = await controller.DeleteTargetConditionGoalLibrary(libraryId);
+            JoinCriterionToLibraryConditionGoal(goalId, criterionLibrary.Id);
 
-        //    // Assert
-        //    Assert.IsType<OkResult>(result);
+            // Act
+            TestHelper.UnitOfWork.TargetConditionGoalRepo.DeleteTargetConditionGoalLibrary(libraryId);
 
-        //    Assert.True(!TestHelper.UnitOfWork.Context.TargetConditionGoalLibrary.Any(_ => _.Id == libraryId));
-        //    Assert.True(!TestHelper.UnitOfWork.Context.TargetConditionGoal.Any(_ => _.Id == goalId));
-        //    Assert.True(
-        //        !TestHelper.UnitOfWork.Context.CriterionLibraryTargetConditionGoal.Any(_ =>
-        //            _.TargetConditionGoalId == TargetConditionGoalId));
-        //}
+            Assert.True(!TestHelper.UnitOfWork.Context.TargetConditionGoalLibrary.Any(_ => _.Id == libraryId));
+            Assert.True(!TestHelper.UnitOfWork.Context.TargetConditionGoal.Any(_ => _.Id == goalId));
+            Assert.True(
+                !TestHelper.UnitOfWork.Context.CriterionLibraryTargetConditionGoal.Any(_ =>
+                    _.TargetConditionGoalId == TargetConditionGoalId));
+        }
 
-        //[Fact]
-        //public async Task ShouldGetAllScenarioTargetConditionGoalData()
-        //{
-        //    Setup();
-        //    // Arrange
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-        //    var goal = SetupForScenarioTargetGet(simulation.Id);
+        [Fact]
+        public void GetScenarioTargetConditionGoals_ScenarioInDbWithGoal_Gets()
+        {
+            Setup();
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var goal = SetupForScenarioTargetGet(simulation.Id);
 
-        //    // Act
-        //    var result = await controller.GetScenarioTargetConditionGoals(simulation.Id);
+            // Act
+            var dtos = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);
 
-        //    // Assert
-        //    var okObjResult = result as OkObjectResult;
-        //    Assert.NotNull(okObjResult.Value);
+            // Assert
+            var dto = dtos.Single();
+            Assert.Equal(goal.Id, dto.Id);
+        }
 
-        //    var dtos = (List<TargetConditionGoalDTO>)Convert.ChangeType(okObjResult.Value,
-        //        typeof(List<TargetConditionGoalDTO>));
-        //    var dto = dtos.Single();
-        //    Assert.Equal(goal.Id, dto.Id);
-        //}
+        [Fact]
+        public void ShouldGetLibraryTargetConditionGoalPageData()
+        {
+            Setup();
+            // Arrange
+            var library = SetupLibraryForGet();
+            var goal = SetupTargetConditionGoal(library.Id);
 
-        //[Fact]
-        //public async Task ShouldGetScenarioTargetConditionGoalPageData()
-        //{
-        //    Setup();
-        //    // Arrange
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-        //    var goal = SetupForScenarioTargetGet(simulation.Id);
+            // Act
+            var dtos = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalsByLibraryId(library.Id);
 
-        //    // Act
-        //    var request = new PagingRequestModel<TargetConditionGoalDTO>();
-        //    var result = await controller.GetScenarioTargetConditionGoalPage(simulation.Id, request);
+            // Assert
+            var dto = dtos.Single();
+            Assert.Equal(goal.Id, dto.Id);
+        }
 
-        //    // Assert
-        //    var okObjResult = result as OkObjectResult;
-        //    Assert.NotNull(okObjResult.Value);
+        [Fact]
+        public void ShouldModifyScenarioTargetConditionGoalData()
+        {
+            Setup();
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var criterionLibrary = SetupForScenarioTargetUpsertOrDelete(simulation.Id);
+            var dtos = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);
+            var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
 
-        //    var page = (PagingPageModel<TargetConditionGoalDTO>)Convert.ChangeType(okObjResult.Value,
-        //        typeof(PagingPageModel<TargetConditionGoalDTO>));
-        //    var dtos = page.Items;
-        //    var dto = dtos.Single();
-        //    Assert.Equal(goal.Id, dto.Id);
-        //}
+            var deletedTargetConditionId = Guid.NewGuid();
+            TestHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Add(new ScenarioTargetConditionGoalEntity
+            {
+                Id = deletedTargetConditionId,
+                SimulationId = simulation.Id,
+                AttributeId = attribute.Id,
+                Name = "Deleted"
+            });
+            TestHelper.UnitOfWork.Context.SaveChanges();
 
-        //[Fact]
-        //public async Task ShouldGetLibraryTargetConditionGoalPageData()
-        //{
-        //    Setup();
-        //    // Arrange
-        //    var library = SetupLibraryForGet();
-        //    var goal = SetupTargetConditionGoal(library.Id);
+            var localScenarioTargetGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);
+            var indexToDelete = localScenarioTargetGoals.FindIndex(g => g.Id == deletedTargetConditionId);
+            var deleteId = localScenarioTargetGoals[indexToDelete].Id;
+            var goalToUpdate = localScenarioTargetGoals.Single(g => g.Id != deletedTargetConditionId);
+            var updatedGoalId = goalToUpdate.Id;
+            goalToUpdate.Name = "Updated";
+            goalToUpdate.CriterionLibrary = criterionLibrary;
+            var newGoalId = Guid.NewGuid();
+            var addedGoal = new TargetConditionGoalDTO
+            {
+                Id = newGoalId,
+                Attribute = attribute.Name,
+                Name = "New"
+            };
+            var goals = new List<TargetConditionGoalDTO> { addedGoal, goalToUpdate };
 
-        //    // Act
-        //    var request = new PagingRequestModel<TargetConditionGoalDTO>();
-        //    var result = await controller.GetLibraryTargetConditionGoalPage(library.Id, request);
+            // Act
+            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(goals, simulation.Id);
 
-        //    // Assert
-        //    var okObjResult = result as OkObjectResult;
-        //    Assert.NotNull(okObjResult.Value);
+            // Assert
+            var serverScenarioTargetConditionGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo
+                .GetScenarioTargetConditionGoals(simulation.Id);
+            Assert.Equal(serverScenarioTargetConditionGoals.Count, serverScenarioTargetConditionGoals.Count);
 
-        //    var page = (PagingPageModel<TargetConditionGoalDTO>)Convert.ChangeType(okObjResult.Value,
-        //        typeof(PagingPageModel<TargetConditionGoalDTO>));
-        //    var dtos = page.Items;
-        //    var dto = dtos.Single();
-        //    Assert.Equal(goal.Id, dto.Id);
-        //}
+            Assert.False(
+                TestHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Any(_ => _.Id == deletedTargetConditionId));
+            localScenarioTargetGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);
+            var localNewTargetGoal = localScenarioTargetGoals.Single(_ => _.Name == "New");
+            var serverNewTargetGoal = localScenarioTargetGoals.FirstOrDefault(_ => _.Id == newGoalId);
+            Assert.NotNull(serverNewTargetGoal);
+            Assert.Equal(localNewTargetGoal.Attribute, serverNewTargetGoal.Attribute);
 
-        //[Fact]
-        //public async Task ShouldModifyScenarioTargetConditionGoalData()
-        //{
-        //    Setup();
-        //    // Arrange
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-        //    var criterionLibrary = SetupForScenarioTargetUpsertOrDelete(simulation.Id);
-        //    var getResult = await controller.GetScenarioTargetConditionGoals(simulation.Id);
-        //    var dtos = (List<TargetConditionGoalDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-        //        typeof(List<TargetConditionGoalDTO>));
-
-        //    var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
-
-        //    var deletedTargetConditionId = Guid.NewGuid();
-        //    TestHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Add(new ScenarioTargetConditionGoalEntity
-        //    {
-        //        Id = deletedTargetConditionId,
-        //        SimulationId = simulation.Id,
-        //        AttributeId = attribute.Id,
-        //        Name = "Deleted"
-        //    });
-        //    TestHelper.UnitOfWork.Context.SaveChanges();
-
-        //    var localScenarioTargetGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);
-        //    var indexToDelete = localScenarioTargetGoals.FindIndex(g => g.Id == deletedTargetConditionId);
-        //    var deleteId = localScenarioTargetGoals[indexToDelete].Id;
-        //    var goalToUpdate = localScenarioTargetGoals.Single(g => g.Id != deletedTargetConditionId);
-        //    var updatedGoalId = goalToUpdate.Id;
-        //    goalToUpdate.Name = "Updated";
-        //    goalToUpdate.CriterionLibrary = criterionLibrary;
-        //    var newGoalId = Guid.NewGuid();
-        //    var addedGoal = new TargetConditionGoalDTO
-        //    {
-        //        Id = newGoalId,
-        //        Attribute = attribute.Name,
-        //        Name = "New"
-        //    };
-
-        //    var sync = new PagingSyncModel<TargetConditionGoalDTO>()
-        //    {
-        //        UpdateRows = new List<TargetConditionGoalDTO>() { goalToUpdate },
-        //        AddedRows = new List<TargetConditionGoalDTO>() { addedGoal },
-        //        RowsForDeletion = new List<Guid>() { deleteId }
-        //    };
-
-        //    // Act
-        //    await controller.UpsertScenarioTargetConditionGoals(simulation.Id, sync);
-
-        //    // Assert
-        //    var serverScenarioTargetConditionGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo
-        //        .GetScenarioTargetConditionGoals(simulation.Id);
-        //    Assert.Equal(serverScenarioTargetConditionGoals.Count, serverScenarioTargetConditionGoals.Count);
-
-        //    Assert.False(
-        //        TestHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Any(_ => _.Id == deletedTargetConditionId));
-        //    localScenarioTargetGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);
-        //    var localNewTargetGoal = localScenarioTargetGoals.Single(_ => _.Name == "New");
-        //    var serverNewTargetGoal = localScenarioTargetGoals.FirstOrDefault(_ => _.Id == newGoalId);
-        //    Assert.NotNull(serverNewTargetGoal);
-        //    Assert.Equal(localNewTargetGoal.Attribute, serverNewTargetGoal.Attribute);
-
-        //    var localUpdatedTargetGoal = localScenarioTargetGoals.Single(_ => _.Id == updatedGoalId);
-        //    var serverUpdatedTargetGoal = serverScenarioTargetConditionGoals
-        //        .FirstOrDefault(_ => _.Id == updatedGoalId);
-        //    ObjectAssertions.Equivalent(localNewTargetGoal, serverNewTargetGoal);
-        //    Assert.Equal(localUpdatedTargetGoal.Name, serverUpdatedTargetGoal.Name);
-        //    Assert.Equal(localUpdatedTargetGoal.Attribute, serverUpdatedTargetGoal.Attribute);
-        //    Assert.Equal(localUpdatedTargetGoal.CriterionLibrary.MergedCriteriaExpression,
-        //        serverUpdatedTargetGoal.CriterionLibrary.MergedCriteriaExpression);
-        //}
-
+            var localUpdatedTargetGoal = localScenarioTargetGoals.Single(_ => _.Id == updatedGoalId);
+            var serverUpdatedTargetGoal = serverScenarioTargetConditionGoals
+                .FirstOrDefault(_ => _.Id == updatedGoalId);
+            ObjectAssertions.Equivalent(localNewTargetGoal, serverNewTargetGoal);
+            Assert.Equal(localUpdatedTargetGoal.Name, serverUpdatedTargetGoal.Name);
+            Assert.Equal(localUpdatedTargetGoal.Attribute, serverUpdatedTargetGoal.Attribute);
+            Assert.Equal(localUpdatedTargetGoal.CriterionLibrary.MergedCriteriaExpression,
+                serverUpdatedTargetGoal.CriterionLibrary.MergedCriteriaExpression);
+        }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
     public static class AuditReportConstants
     {

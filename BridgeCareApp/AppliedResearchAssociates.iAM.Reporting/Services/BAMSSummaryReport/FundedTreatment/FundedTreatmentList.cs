@@ -4,8 +4,9 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 using MoreLinq;
 using OfficeOpenXml;
 
@@ -14,12 +15,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
     public class FundedTreatmentList : IFundedTreatmentList
     {
         private ITreatmentCommon _treatmentCommon;
-        private ISummaryReportHelper _summaryReportHelper;
+        private IReportHelper _reportHelper;
 
         public FundedTreatmentList()
         {
             _treatmentCommon = new TreatmentCommon.TreatmentCommon();
-            _summaryReportHelper = new SummaryReportHelper();
+            _reportHelper = new ReportHelper();
         }
 
         public void Fill(ExcelWorksheet fundedTreatmentWorksheet, SimulationOutput simulationOutput)
@@ -211,27 +212,27 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             object empty = leaveEmpty ? "" : null;
 
-            var familyId = int.Parse(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "FAMILY_ID"));
+            var familyId = int.Parse(_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FAMILY_ID"));
             if (familyId < 11)
             {
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                var deck = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_SEEDED");
+                var deck = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_SEEDED");
                 worksheet.Cells[row, columnNo++].Value = empty ?? deck;
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                var sup = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUP_SEEDED");
+                var sup = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUP_SEEDED");
                 worksheet.Cells[row, columnNo++].Value = empty ?? sup;
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                var sub = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
+                var sub = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
                 worksheet.Cells[row, columnNo++].Value = empty ?? sub;
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = BAMSConstants.No; // CULV_SEEDED
+                worksheet.Cells[row, columnNo++].Value = AuditReportConstants.No; // CULV_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
@@ -242,15 +243,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             {
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = empty ?? BAMSConstants.No; // DECK_SEEDED
+                worksheet.Cells[row, columnNo++].Value = empty ?? AuditReportConstants.No; // DECK_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = empty ?? BAMSConstants.No; // SUP_SEEDED
+                worksheet.Cells[row, columnNo++].Value = empty ?? AuditReportConstants.No; // SUP_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = empty ?? BAMSConstants.No; // SUB_SEEDED
+                worksheet.Cells[row, columnNo++].Value = empty ?? AuditReportConstants.No; // SUB_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
@@ -284,14 +285,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             {
                 var treatedSections = year.Assets
                     .Where(section => section.TreatmentCause is not TreatmentCause.Undefined and not TreatmentCause.NoSelection
-                        && !(section.TreatmentCause is TreatmentCause.CommittedProject && section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment.ToLower()))
+                        && !(section.TreatmentCause is TreatmentCause.CommittedProject && section.AppliedTreatment.ToLower() == AuditReportConstants.NoTreatment.ToLower()))
                     .ToList();
 
-                var facilityIds = treatedSections.Select(section => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_")));
+                var facilityIds = treatedSections.Select(section => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_")));
 
                 treatedSections.ForEach(asset =>
                 {
-                    var id = Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(asset.ValuePerNumericAttribute, "BRKEY_"));
+                    var id = Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(asset.ValuePerNumericAttribute, "BRKEY_"));
                     var treatmentOption = asset.TreatmentOptions.FirstOrDefault(o => o.TreatmentName == asset.AppliedTreatment);
                     var treatmentConsideration = asset.TreatmentConsiderations.FirstOrDefault(c => c.TreatmentName == asset.AppliedTreatment);
 

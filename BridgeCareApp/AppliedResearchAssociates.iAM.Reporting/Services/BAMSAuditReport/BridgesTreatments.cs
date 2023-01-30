@@ -1,27 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.TreatmentCommon
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
-    public class TreatmentCommon : ITreatmentCommon
+    public class BridgesTreatments : IBridgesTreatments
     {
-        private ISummaryReportHelper _summaryReportHelper;
         private IReportHelper _reportHelper;
 
-        public TreatmentCommon()
+        public BridgesTreatments()
         {
-            _summaryReportHelper = new SummaryReportHelper();
             _reportHelper = new ReportHelper();
         }
 
@@ -54,7 +48,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
             }
 
             ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, 1, headerRow + 1, worksheet.Dimension.Columns]);
-            //ExcelHelper.ApplyStyle(worksheet.Cells[headerRow + 1, bridgeFundingColumn, headerRow + 1, analysisColumn - 1]);
             worksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             return new CurrentCell { Row = 3, Column = headersRow.Count + 1 };
@@ -71,7 +64,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
             var longitude = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "LONG");
 
             // LAT and LONG appear to be in Degree/Minute/Second form, but concatenated into a single number without delimiters.
-
             var lat_degrees = Math.Floor(latitude / 10_000);
             var lat_minutes = Math.Floor((latitude - 10_000 * lat_degrees) / 100);
             var lat_seconds = latitude - 10_000 * lat_degrees - 100 * lat_minutes;
@@ -111,6 +103,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
             worksheet.Cells[row, columnNo++].Value = deckArea;
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
+         // TODO change to Family
             worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? AuditReportConstants.Yes : AuditReportConstants.No; // Large Bridge
 
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "STRUCTURE_TYPE");
@@ -159,7 +152,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
                 "MPO/RPO",
                 "Bridge\r\nLength",
                 "Deck\r\nArea",
-                "Large\r\nBridge",
+                "Family",
                 "Structure\r\nType",
                 "Functional\r\nClass",
                 "BPN",

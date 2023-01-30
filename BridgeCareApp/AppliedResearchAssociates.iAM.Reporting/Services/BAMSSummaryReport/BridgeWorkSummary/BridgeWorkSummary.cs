@@ -8,6 +8,8 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -20,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private DeckAreaBridgeWorkSummary _deckAreaBridgeWorkSummary;
         private PostedClosedBridgeWorkSummary _postedClosedBridgeWorkSummary;
         private ProjectsCompletedCount _projectsCompletedCount;
-        private ISummaryReportHelper _summaryReportHelper;
+        private IReportHelper _reportHelper;
 
         public BridgeWorkSummary(IList<string> Warnings)
         {
@@ -32,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _deckAreaBridgeWorkSummary = new DeckAreaBridgeWorkSummary();
             _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel);
             _projectsCompletedCount = new ProjectsCompletedCount(Warnings);
-            _summaryReportHelper = new SummaryReportHelper();
+            _reportHelper = new ReportHelper();
         }
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
@@ -45,11 +47,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
             var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
-            simulationTreatments.Add((BAMSConstants.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Add((BAMSConstants.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
+            simulationTreatments.Add((AuditReportConstants.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Add((AuditReportConstants.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
             foreach (var item in selectableTreatments)
             {
-                if (item.Name.ToLower() == BAMSConstants.NoTreatment) continue;
+                if (item.Name.ToLower() == AuditReportConstants.NoTreatment) continue;
                 simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
             }
             simulationTreatments.Sort((a, b) => a.Item1.CompareTo(b.Item1));
@@ -111,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 foreach (var section in yearData.Assets)
                 {
                     //get business plan network
-                    var busPlanNetwork = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
+                    var busPlanNetwork = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
 
                     if (!costPerBPNPerYear[yearData.Year].ContainsKey(busPlanNetwork))
                     {
@@ -119,7 +121,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
 
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                        section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
+                        section.AppliedTreatment.ToLower() != AuditReportConstants.NoTreatment)
                     {
                         var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
 
@@ -170,10 +172,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             if (section.TreatmentCause == TreatmentCause.NoSelection)
             {
-                var culvert = BAMSConstants.CulvertBridgeType;
-                var nonCulvert = BAMSConstants.NonCulvertBridgeType;
+                var culvert = AuditReportConstants.CulvertBridgeType;
+                var nonCulvert = AuditReportConstants.NonCulvertBridgeType;
                 // If Bridge type is culvert
-                if (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BRIDGE_TYPE") == culvert)
+                if (_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BRIDGE_TYPE") == culvert)
                 {
                     AddKeyValueForWorkedOn(costAndCountPerTreatmentPerYear[year], culvert, section.AppliedTreatment, cost);
                 }
@@ -204,16 +206,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             if (section.TreatmentCause == TreatmentCause.NoSelection)
             {
-                var culvert = BAMSConstants.CulvertBridgeType;
+                var culvert = AuditReportConstants.CulvertBridgeType;
                 // If Bridge type is culvert
-                if (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BRIDGE_TYPE") == culvert)
+                if (_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BRIDGE_TYPE") == culvert)
                 {
                     AddKeyValue(countForCompletedProject[year], culvert, section.AppliedTreatment);
                 }
                 // If Bridge type is non culvert
                 else
                 {
-                    AddKeyValue(countForCompletedProject[year], BAMSConstants.NonCulvertBridgeType, section.AppliedTreatment);
+                    AddKeyValue(countForCompletedProject[year], AuditReportConstants.NonCulvertBridgeType, section.AppliedTreatment);
                 }
             }
             else

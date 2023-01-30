@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
         public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalPoorBridgesDeckAreaSectionYearsRow, int simulationYearsCount)
         {
             _stackedColumnChartCommon.SetWorksheetProperties(worksheet);
-            var title = BAMSConstants.PoorBridgeCompareDeckArea;
+            var title = AuditReportConstants.PoorBridgeCompareDeckArea;
             var chart = worksheet.Drawings.AddChart(title, eChartType.ColumnStacked);
             _stackedColumnChartCommon.SetChartProperties(chart, title, 1050, 800, 2, 5);
 
@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
 
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPoorBridgesDeckAreaSectionYearsRow, int count, ExcelChart chart)
         {
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorBridgesDeckAreaSectionYearsRow, count, chart, totalPoorBridgesDeckAreaSectionYearsRow + 1, BAMSConstants.Overall, Color.FromArgb(68, 114, 196));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorBridgesDeckAreaSectionYearsRow, count, chart, totalPoorBridgesDeckAreaSectionYearsRow + 1, AuditReportConstants.Overall, Color.FromArgb(68, 114, 196));
         }
 
         private void CreateSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPoorBridgesDeckAreaSectionYearsRow, int count, ExcelChart chart, int fromRow, string header, Color color)

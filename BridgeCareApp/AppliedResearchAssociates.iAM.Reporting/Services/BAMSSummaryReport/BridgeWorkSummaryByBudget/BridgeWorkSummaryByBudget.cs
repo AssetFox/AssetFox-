@@ -10,6 +10,8 @@ using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.StaticContent;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -20,6 +22,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private BridgeWorkCost _bridgeWorkCost;
         private CommittedProjectCost _committedProjectCost;
         private ISummaryReportHelper _summaryReportHelper;
+        private IReportHelper _reportHelper;
 
         public BridgeWorkSummaryByBudget()
         {
@@ -71,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         _.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget).Sum(bu => bu.CoveredCost));
 
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                            section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
+                            section.AppliedTreatment.ToLower() != AuditReportConstants.NoTreatment)
                         {
                             var category = TreatmentCategory.Other;
                             if (map.ContainsKey(section.AppliedTreatment))
@@ -84,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                 Treatment = section.AppliedTreatment,
                                 Amount = budgetAmount,
                                 isCommitted = true,
-                                costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
+                                costPerBPN = (_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
                                 TreatmentCategory = category
                             });
                             committedTreatments.Add(section.AppliedTreatment);
@@ -97,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             Year = yearData.Year,
                             Treatment = section.AppliedTreatment,
                             Amount = budgetAmount,
-                            costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
+                            costPerBPN = (_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
                             TreatmentCategory = treatmentData.Category,
                             AssetType = treatmentData.AssetCategory
                         });
@@ -115,7 +118,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                                 .Where(_ => _.AssetType == AssetCategory.Bridge && !_.isCommitted);
 
                 var costForCommittedBudgets = summaryData.YearlyData
-                                                    .Where(_ => _.isCommitted && _.Treatment.ToLower() != BAMSConstants.NoTreatment);
+                                                    .Where(_ => _.isCommitted && _.Treatment.ToLower() != AuditReportConstants.NoTreatment);
 
                 var totalBudgetPerYearForCulvert = new Dictionary<int, double>();
                 var totalBudgetPerYearForBridgeWork = new Dictionary<int, double>();
@@ -191,7 +194,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 currentCell.Row += 2;
                 currentCell.Column = 1;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.TotalBridgeCareBudget;
+                worksheet.Cells[currentCell.Row, currentCell.Column].Value = AuditReportConstants.TotalBridgeCareBudget;
 
                 var budgetDetails = yearlyBudgetAmount[summaryData.Budget];
                 var yearTracker = 0;
@@ -242,9 +245,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");
                 currentCell.Row += 1;
                 currentCell.Column = 1;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.RemainingBudget;
-                worksheet.Cells[currentCell.Row + 1, currentCell.Column].Value = BAMSConstants.PercentBudgetSpentMPMS;
-                worksheet.Cells[currentCell.Row + 2, currentCell.Column].Value = BAMSConstants.PercentBudgetSpentBAMS;
+                worksheet.Cells[currentCell.Row, currentCell.Column].Value = AuditReportConstants.RemainingBudget;
+                worksheet.Cells[currentCell.Row + 1, currentCell.Column].Value = AuditReportConstants.PercentBudgetSpentMPMS;
+                worksheet.Cells[currentCell.Row + 2, currentCell.Column].Value = AuditReportConstants.PercentBudgetSpentBAMS;
 
                 yearTracker = 0;
                 foreach (var budgetData in budgetDetails.YearlyAmounts)
@@ -349,7 +352,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 }
                 totalBPNPerYear[item.Year] += item.costPerBPN.cost;
             }
-            worksheet.Cells[firstBPNRow + bpnNames.Count(), 1].Value = BAMSConstants.TotalBPNCost;
+            worksheet.Cells[firstBPNRow + bpnNames.Count(), 1].Value = AuditReportConstants.TotalBPNCost;
 
             // Total BPN Cost
             foreach (var bpnCost in totalBPNPerYear)
@@ -399,7 +402,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             firstContentRow++;
             // Add data for BAMS Work Type Totals "Total Spent"
-            worksheet.Cells[firstContentRow, 1].Value = BAMSConstants.TotalSpent;
+            worksheet.Cells[firstContentRow, 1].Value = AuditReportConstants.TotalSpent;
             foreach (var item in workTypeTotal.TotalCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);

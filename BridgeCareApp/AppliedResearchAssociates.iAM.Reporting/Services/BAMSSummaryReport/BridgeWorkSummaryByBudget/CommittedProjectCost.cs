@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -56,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
             }
 
-            worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.BridgeTotal;
+            worksheet.Cells[currentCell.Row, currentCell.Column].Value = AuditReportConstants.BridgeTotal;
 
             foreach (var totalCommittedBudget in totalBudgetPerYearForCommittedWork)
             {

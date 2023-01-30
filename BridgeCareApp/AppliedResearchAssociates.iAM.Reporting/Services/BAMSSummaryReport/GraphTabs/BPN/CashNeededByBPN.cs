@@ -30,17 +30,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
         }
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalCashNeededByBPNYearsRow, int count, ExcelChart chart)
         {
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 1, BAMSConstants.BPN1, Color.FromArgb(68, 114, 196));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 2, BAMSConstants.BPN2, Color.FromArgb(237, 125, 49));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 3, BAMSConstants.BPN3, Color.FromArgb(165, 165, 165));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 4, BAMSConstants.BPN4, Color.FromArgb(255, 192, 0));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 5, BAMSConstants.BPND, Color.FromArgb(91, 155, 21));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 6, BAMSConstants.BPNH, Color.FromArgb(112, 173, 71));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 7, BAMSConstants.BPNL, Color.FromArgb(38, 68, 120));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 8, BAMSConstants.BPNN, Color.FromArgb(158, 72, 14));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 9, BAMSConstants.BPNT, Color.FromArgb(99, 99, 99));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 1, AuditReportConstants.BPN1, Color.FromArgb(68, 114, 196));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 2, AuditReportConstants.BPN2, Color.FromArgb(237, 125, 49));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 3, AuditReportConstants.BPN3, Color.FromArgb(165, 165, 165));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 4, AuditReportConstants.BPN4, Color.FromArgb(255, 192, 0));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 5, AuditReportConstants.BPND, Color.FromArgb(91, 155, 21));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 6, AuditReportConstants.BPNH, Color.FromArgb(112, 173, 71));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 7, AuditReportConstants.BPNL, Color.FromArgb(38, 68, 120));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 8, AuditReportConstants.BPNN, Color.FromArgb(158, 72, 14));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 9, AuditReportConstants.BPNT, Color.FromArgb(99, 99, 99));
 
-            CreateLine(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 10, BAMSConstants.AnnualizedAmount, Color.Blue);
+            CreateLine(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 10, AuditReportConstants.AnnualizedAmount, Color.Blue);
         }
 
         private void CreateLine(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalCashNeededByBPNYearsRow, int count, ExcelChart chart, int fromRow, string header, Color color)

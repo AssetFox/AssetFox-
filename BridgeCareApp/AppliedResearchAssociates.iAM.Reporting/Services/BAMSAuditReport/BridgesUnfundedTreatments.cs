@@ -1,50 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentCommon
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
-    public class UnfundedTreatmentCommon : IUnfundedTreatmentCommon
+    public class BridgesUnfundedTreatments : IBridgesUnfundedTreatments
     {
-        private ISummaryReportHelper _summaryReportHelper;
-        private ITreatmentCommon _treatmentCommon;
         private IReportHelper _reportHelper;
+        private IBridgesTreatments _bridgesTreatments;
 
-        public UnfundedTreatmentCommon()
+        public BridgesUnfundedTreatments()
         {
-            _summaryReportHelper = new SummaryReportHelper();
-            _treatmentCommon = new TreatmentCommon.TreatmentCommon();
             _reportHelper = new ReportHelper();
+            _bridgesTreatments = new BridgesTreatments();
         }
 
         public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment)
         {
-            _treatmentCommon.FillDataInWorkSheet(worksheet, currentCell, section, Year);
+            _bridgesTreatments.FillDataInWorkSheet(worksheet, currentCell, section, Year);
 
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingNHPP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingSTP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingBOF(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBRIP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingBRIP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingState(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingState(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNotApplicable(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingNotApplicable(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = Year;
@@ -126,7 +121,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet)
         {
-            var currentCell = _treatmentCommon.AddHeadersCells(worksheet);
+            var currentCell = _bridgesTreatments.AddHeadersCells(worksheet);
 
             var columnNo = currentCell.Column;
 
@@ -243,7 +238,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
         public void PerformPostAutofitAdjustments(ExcelWorksheet worksheet)
         {
-            _treatmentCommon.PerformPostAutofitAdjustments(worksheet);
+            _bridgesTreatments.PerformPostAutofitAdjustments(worksheet);
         }
     }
 }

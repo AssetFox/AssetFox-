@@ -8,19 +8,20 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentFinalList
 {
     public class UnfundedTreatmentFinalList : IUnfundedTreatmentFinalList
     {
         private IUnfundedTreatmentCommon _unfundedTreatmentCommon;
-        private ISummaryReportHelper _summaryReportHelper;
+        private IReportHelper _reportHelper;
 
         public UnfundedTreatmentFinalList()
         {
             _unfundedTreatmentCommon = new UnfundedTreatmentCommon.UnfundedTreatmentCommon();
-            _summaryReportHelper = new SummaryReportHelper();
+            _reportHelper = new ReportHelper();
         }
 
         public void Fill(ExcelWorksheet unfundedTreatmentTimeWorksheet, SimulationOutput simulationOutput)
@@ -69,19 +70,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 if (firstYear)
                 {
                     validFacilityIds.AddRange(
-                        year.Assets.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))
-                            .Except(treatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_"))))
+                        year.Assets.Select(_ => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))
+                            .Except(treatedSections.Select(_ => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_"))))
                     );
                     firstYear = false;
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Except(treatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))).ToList();
+                    validFacilityIds = validFacilityIds.Except(treatedSections.Select(_ => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))).ToList();
                 }
 
                 foreach (var section in untreatedSections)
                 {
-                    var facilityId = Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_"));
+                    var facilityId = Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_"));
                     if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section
                     {
                         var treatmentOptions = section.TreatmentOptions.

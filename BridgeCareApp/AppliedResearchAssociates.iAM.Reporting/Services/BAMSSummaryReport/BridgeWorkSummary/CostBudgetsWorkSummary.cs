@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.StaticContent;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -40,8 +41,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var localSimulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>(simulationTreatments);
-            localSimulationTreatments.Remove((BAMSConstants.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
-            localSimulationTreatments.Remove((BAMSConstants.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
+            localSimulationTreatments.Remove((AuditReportConstants.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            localSimulationTreatments.Remove((AuditReportConstants.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
 
             var workTypeTotalMPMS = FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
 
@@ -363,7 +364,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             column = currentCell.Column;
-            worksheet.Cells[currentCell.Row, column].Value = BAMSConstants.CommittedTotal;
+            worksheet.Cells[currentCell.Row, column].Value = AuditReportConstants.CommittedTotal;
             column++;
             var fromColumn = column + 1;
 
@@ -404,7 +405,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             // filling in the culvert treatments in the excel TAB
             _bridgeWorkSummaryCommon.SetCulvertSectionExcelString(worksheet, simulationTreatments, ref row, ref column);
 
-            worksheet.Cells[row++, column].Value = BAMSConstants.CulvertTotal;
+            worksheet.Cells[row++, column].Value = AuditReportConstants.CulvertTotal;
             column++;
             var fromColumn = column + 1;
             // Filling in the cost per treatment per year in the excel TAB
@@ -418,7 +419,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 {
                     decimal cost = 0;
                     if (treatment.AssetType == AssetCategory.Culvert &&
-                        !treatment.Name.Contains(BAMSConstants.NoTreatment, StringComparison.OrdinalIgnoreCase))
+                        !treatment.Name.Contains(AuditReportConstants.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var culvertCostAndCount);
                         worksheet.Cells[row++, column].Value = culvertCostAndCount.treatmentCost;
@@ -473,7 +474,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             int bridgeTotalRow = 0;
             _bridgeWorkSummaryCommon.SetNonCulvertSectionExcelString(worksheet, simulationTreatments, ref row, ref column);
 
-            worksheet.Cells[row++, column].Value = BAMSConstants.BridgeTotal;
+            worksheet.Cells[row++, column].Value = AuditReportConstants.BridgeTotal;
             column++;
             var fromColumn = column + 1;
             // Filling in the cost per treatment per year in the excel TAB
@@ -487,7 +488,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 {
                     decimal cost = 0;
                     if (treatment.AssetType == AssetCategory.Bridge &&
-                    !treatment.Name.Contains(BAMSConstants.NoTreatment, StringComparison.OrdinalIgnoreCase))
+                    !treatment.Name.Contains(AuditReportConstants.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCostAndCount);
                         worksheet.Cells[row++, column].Value = nonCulvertCostAndCount.treatmentCost;
@@ -532,9 +533,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-            worksheet.Cells[row++, column].Value = BAMSConstants.RemainingBudget;
-            worksheet.Cells[row++, column].Value = BAMSConstants.PercentBudgetSpentMPMS;
-            worksheet.Cells[row++, column].Value = BAMSConstants.PercentBudgetSpentBAMS;
+            worksheet.Cells[row++, column].Value = AuditReportConstants.RemainingBudget;
+            worksheet.Cells[row++, column].Value = AuditReportConstants.PercentBudgetSpentMPMS;
+            worksheet.Cells[row++, column].Value = AuditReportConstants.PercentBudgetSpentBAMS;
             column++;
             var fromColumn = column + 1;
             foreach (var year in simulationYears)

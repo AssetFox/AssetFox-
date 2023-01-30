@@ -258,8 +258,6 @@ namespace BridgeCareCore.Services
                 FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
                 MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             };
-        }
-
-        
+        }      
     }
 }

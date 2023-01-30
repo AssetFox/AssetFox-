@@ -14,14 +14,6 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
         #region "Calculate"
 
-        static CalculateEvaluateCompilerVisitor()
-        {
-            var mathMethods = typeof(Math).GetMethods(BindingFlags.Public | BindingFlags.Static);
-            var numberMethods = mathMethods.Where(method => method.ReturnType == typeof(double) && method.GetParameters().All(parameter => parameter.ParameterType == typeof(double))).ToArray();
-            NumberFunctionDescriptions = numberMethods.Select(method => new NumberFunctionDescription(method.Name, method.GetParameters().Select(parameter => parameter.Name))).ToArray();
-            MethodPerSignature = numberMethods.ToDictionary(method => (method.Name, method.GetParameters().Length), ValueTupleEqualityComparer.Create<string, int>(StringComparer.OrdinalIgnoreCase));
-        }
-
         public static IReadOnlyDictionary<string, double> NumberConstants { get; } = GetNumberConstants();
 
         public static IReadOnlyCollection<NumberFunctionDescription> NumberFunctionDescriptions { get; }

@@ -167,18 +167,6 @@ namespace BridgeCareCoreTests.Tests
             TestHelper.UnitOfWork.Context.SaveChanges();
         }
 
-        private void JoinCriterionTosScenarioConditionGoal(Guid goalId, Guid criterionId)
-        {
-            var libraryJoin = new CriterionLibraryScenarioTargetConditionGoalEntity()
-            {
-                CriterionLibraryId = criterionId,
-                ScenarioTargetConditionGoalId = goalId
-            };
-
-            TestHelper.UnitOfWork.Context.CriterionLibraryScenarioTargetConditionGoal.Add(libraryJoin);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-        }
-
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
         {

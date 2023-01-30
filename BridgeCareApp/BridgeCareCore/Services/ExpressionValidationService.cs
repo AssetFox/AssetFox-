@@ -187,17 +187,17 @@ namespace BridgeCareCore.Services
 
                 var attributes = _unitOfWork.Context.Attribute
                     .Where(_ => hashMatch.Contains(_.Name))
-                    .Select(attribute => new AttributeEntity
+                    .Select(attribute => new AttributeDTO
                     {
                         Name = attribute.Name,
-                        DataType = attribute.DataType
+                        Type = attribute.DataType
                     }).AsNoTracking().ToList();
 
                 var compiler = new CalculateEvaluateCompiler();
 
                 attributes.ForEach(attribute =>
                 {
-                    compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                    compiler.ParameterTypes[attribute.Name] = attribute.Type == "NUMBER"
                         ? CalculateEvaluateParameterType.Number
                         : CalculateEvaluateParameterType.Text;
                 });
@@ -207,7 +207,7 @@ namespace BridgeCareCore.Services
                 var customAttribute = new List<(string name, string datatype)>();
                 foreach (var attribute in attributes)
                 {
-                    customAttribute.Add((attribute.Name, attribute.DataType));
+                    customAttribute.Add((attribute.Name, attribute.Type));
                 }
 
                 var resultsCount = GetResultsCount(modifiedExpression, customAttribute, networkId);
@@ -266,17 +266,17 @@ namespace BridgeCareCore.Services
 
                 var attributes = _unitOfWork.Context.Attribute
                     .Where(_ => hashMatch.Contains(_.Name))
-                    .Select(attribute => new AttributeEntity
+                    .Select(attribute => new AttributeDTO
                     {
                         Name = attribute.Name,
-                        DataType = attribute.DataType
+                        Type = attribute.DataType
                     }).AsNoTracking().ToList();
 
                 var compiler = new CalculateEvaluateCompiler();
 
                 attributes.ForEach(attribute =>
                 {
-                    compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                    compiler.ParameterTypes[attribute.Name] = attribute.Type == "NUMBER"
                         ? CalculateEvaluateParameterType.Number
                         : CalculateEvaluateParameterType.Text;
                 });
@@ -386,7 +386,8 @@ namespace BridgeCareCore.Services
                     NumericValue = aggregatedResult.NumericValue,
                     Attribute = new AttributeEntity
                     {
-                        Name = aggregatedResult.Attribute.Name, DataType = aggregatedResult.Attribute.DataType
+                        Name = aggregatedResult.Attribute.Name,
+                        DataType = aggregatedResult.Attribute.DataType
                     }
                 }).AsNoTracking().AsSplitQuery().AsEnumerable()
                 .GroupBy(_ => _.MaintainableAssetId, _ => _)

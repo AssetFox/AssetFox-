@@ -1,10 +1,12 @@
 using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -156,67 +158,55 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnPost()
+        public async Task UpsertTargetConditionGoalLibrary_CallsRepo()
         {
-            var controller = SetupController();
-            var entity = SetupLibraryForGet();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
+            var libraryDto = TargetConditionGoalLibraryDtos.Dto();
+            repo.Setup(r => r.GetTargetConditionGoalsByLibraryId(libraryDto.Id)).ReturnsEmptyList();
+            var controller = CreateController(unitOfWork);
             var request = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>();
-            request.Library = entity.ToDto();
+            request.Library = libraryDto;
             // Act
             var result = await controller
                 .UpsertTargetConditionGoalLibrary(request);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var libraryCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertTargetConditionGoalLibrary));
+            ObjectAssertions.Equivalent(libraryDto, libraryCall.Arguments[0]);
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnDelete()
+        public async Task DeleteTargetConditionGoalLibrary_CallsRepo()
         {
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
+            var libraryDto = TargetConditionGoalLibraryDtos.Dto();
+            var controller = CreateController(unitOfWork);
+            var libraryId = Guid.NewGuid();
             // Act
-            var result = await controller.DeleteTargetConditionGoalLibrary(Guid.Empty);
+            var result = await controller.DeleteTargetConditionGoalLibrary(libraryId);
 
             // Assert
-            Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
-        public async Task ShouldGetAllTargetConditionGoalLibraries()
-        {
-            var controller = SetupController();
-            // Arrange
-            var library = SetupLibraryForGet();
-            var goal = SetupTargetConditionGoal(library.Id);
-
-            // Act
-            var result = await controller.TargetConditionGoalLibraries();
-
-            // Assert
-            var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
-            var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType(okObjResult.Value,
-                typeof(List<TargetConditionGoalLibraryDTO>));
-            Assert.NotNull(dtos.SingleOrDefault(dto => dto.Id == library.Id));
+            ActionResultAssertions.Ok(result);
+            var repoCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.DeleteTargetConditionGoalLibrary));
+            Assert.Equal(libraryId, repoCall.Arguments[0]);
         }
 
         [Fact]
         public async Task ShouldModifyTargetConditionGoalData()
         {
-            var controller = SetupController();
-            // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
-            var library = SetupLibraryForGet();
-            var goal = SetupTargetConditionGoal(library.Id);
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var libraryDto = TargetConditionGoalLibraryDtos.Dto(libraryId);
+            var goalDto = TargetConditionGoalDtos.Dto("attribute");
+            repo.Setup(r => r.GetTargetConditionGoalsByLibraryId(libraryId)).ReturnsList(goalDto);
 
-            var libraryDto = library.ToDto();
-            var goalDto = goal.ToDto();
-            
             libraryDto.Description = "Updated Description";
             goalDto.Name = "Updated Name";
-            goalDto.CriterionLibrary = criterionLibrary;
 
             var sync = new PagingSyncModel<TargetConditionGoalDTO>()
             {
@@ -231,17 +221,18 @@ namespace BridgeCareCoreTests.Tests
             };
 
             // Act
-            await controller.UpsertTargetConditionGoalLibrary(libraryRequest);
+            var result = await controller.UpsertTargetConditionGoalLibrary(libraryRequest);
 
             // Assert
-            var modifiedDto = TestHelper.UnitOfWork.TargetConditionGoalRepo
-                .GetTargetConditionGoalLibrariesWithTargetConditionGoals()
-                .Single(x => x.Id == library.Id);
-            Assert.Equal(libraryDto.Description, modifiedDto.Description);
-
-            // below fails on some db weirdness. The name is updated in the db but not in the get result!?!
-            // Assert.Equal(dto.TargetConditionGoals[0].Name, modifiedDto.TargetConditionGoals[0].Name);
-            Assert.Equal(goalDto.Attribute, modifiedDto.TargetConditionGoals[0].Attribute);
+            ActionResultAssertions.Ok(result);
+            var libraryCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertTargetConditionGoalLibrary));
+            var goalsCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertOrDeleteTargetConditionGoals));
+            var upsertedLibrary = libraryCall.Arguments[0] as TargetConditionGoalLibraryDTO;
+            Assert.Equal("Updated Description", upsertedLibrary.Description);
+            var upsertedGoals = goalsCall.Arguments[0] as List<TargetConditionGoalDTO>;
+            var upsertedGoal = upsertedGoals.Single();
+            Assert.Equal("Updated Name", upsertedGoal.Name);
+            Assert.Equal(libraryId, goalsCall.Arguments[1]);
         }
 
         [Fact]

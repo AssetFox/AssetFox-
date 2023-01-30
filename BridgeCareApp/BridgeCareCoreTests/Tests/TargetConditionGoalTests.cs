@@ -20,7 +20,6 @@ namespace BridgeCareCoreTests.Tests
 {
     public class TargetConditionGoalTests
     {
-        private static readonly Guid TargetConditionGoalLibraryId = Guid.Parse("a353d18d-cacf-48c9-b8a3-a58cb7410e81");
         private static readonly Guid TargetConditionGoalId = Guid.Parse("42b3bbfc-d590-4d3d-aea9-fc8221210c57");
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
@@ -33,21 +32,6 @@ namespace BridgeCareCoreTests.Tests
             var controller = new TargetConditionGoalController(EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
                 hubService, accessor, _mockClaimHelper.Object,
                 new TargetConditionGoalPagingService(TestHelper.UnitOfWork));
-            return controller;
-        }
-        private TargetConditionGoalController CreateTestController(List<string> userClaims)
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
-            var controller = new TargetConditionGoalController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object,
-                new TargetConditionGoalPagingService(TestHelper.UnitOfWork));
-
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = testUser }
-            };
             return controller;
         }
 
@@ -148,18 +132,6 @@ namespace BridgeCareCoreTests.Tests
             };
 
             TestHelper.UnitOfWork.Context.CriterionLibraryTargetConditionGoal.Add(libraryJoin);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-        }
-
-        private void JoinCriterionTosScenarioConditionGoal(Guid goalId, Guid criterionId)
-        {
-            var libraryJoin = new CriterionLibraryScenarioTargetConditionGoalEntity()
-            {
-                CriterionLibraryId = criterionId,
-                ScenarioTargetConditionGoalId = goalId
-            };
-
-            TestHelper.UnitOfWork.Context.CriterionLibraryScenarioTargetConditionGoal.Add(libraryJoin);
             TestHelper.UnitOfWork.Context.SaveChanges();
         }
 

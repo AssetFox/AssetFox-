@@ -1,3 +1,4 @@
+using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -11,6 +12,7 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -112,7 +114,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
             var goal = TargetConditionGoalDtos.Dto(attribute.Name);
-            var goals = new List<TargetConditionGoalDTO> { goal };
+            var goals = Lists.New(goal);
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(goals, simulationId);
             return goal;
         }
@@ -137,14 +139,20 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnGet()
+        public async Task TargetConditionGoalLibraries_GrabsFromRepo()
         {
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
+            var libraryDto = TargetConditionGoalLibraryDtos.Dto();
+            var libraryDtos = Lists.New(libraryDto);
+            repo.Setup(r => r.GetTargetConditionGoalLibrariesNoChildren()).Returns(libraryDtos);
+            var controller = CreateController(unitOfWork);
             // Act
             var result = await controller.TargetConditionGoalLibraries();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            var value = ActionResultAssertions.OkObject(result);
+            ObjectAssertions.Equivalent(libraryDtos, value);
         }
 
         [Fact]

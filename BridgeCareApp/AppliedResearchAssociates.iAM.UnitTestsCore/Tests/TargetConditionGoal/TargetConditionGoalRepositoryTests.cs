@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -33,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
             var targetConditionGoal = TargetConditionGoalDtos.Dto(attribute.Name);
-            var targetConditionGoals = new List<TargetConditionGoalDTO> { targetConditionGoal };
+            var targetConditionGoals = Lists.New(targetConditionGoal);
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(targetConditionGoals, targetConditionGoalLibraryId);
             return targetConditionGoal;
         }
@@ -48,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
             var goal = TargetConditionGoalDtos.Dto(attribute.Name);
-            var goals = new List<TargetConditionGoalDTO> { goal };
+            var goals = Lists.New(goal);
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(goals, simulationId);
             return goal;
         }
@@ -114,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var goalDto = SetupTargetConditionGoal(libraryDto.Id);
             goalDto.Name = "Updated Name";
             goalDto.CriterionLibrary = criterionLibrary;
-            var updateRows = new List<TargetConditionGoalDTO>() { goalDto };
+            var updateRows = Lists.New(goalDto);
 
             // Act //UpsertOrDeleteTargetConditionGoals
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(updateRows, libraryDto.Id);
@@ -237,7 +238,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Attribute = attribute.Name,
                 Name = "New"
             };
-            var goals = new List<TargetConditionGoalDTO> { addedGoal, goalToUpdate };
+            var goals = Lists.New(addedGoal, goalToUpdate);
 
             // Act
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(goals, simulation.Id);

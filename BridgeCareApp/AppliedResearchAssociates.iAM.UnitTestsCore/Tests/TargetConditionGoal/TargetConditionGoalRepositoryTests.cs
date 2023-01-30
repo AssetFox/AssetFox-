@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -26,22 +20,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-        }
-
-        private ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal(Guid simulationId,
-            Guid attributeId,
-            Guid? id = null)
-        {
-            var resolveId = id ?? Guid.NewGuid();
-            var returnValue = new ScenarioTargetConditionGoalEntity
-            {
-                Id = resolveId,
-                SimulationId = simulationId,
-                AttributeId = attributeId,
-                Name = "Test Name",
-                Target = 1
-            };
-            return returnValue;
         }
 
         private TargetConditionGoalLibraryDTO SetupLibraryForGet()
@@ -66,12 +44,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return criterionLibrary;
         }
 
-        private ScenarioTargetConditionGoalEntity SetupForScenarioTargetGet(Guid simulationId)
+        private TargetConditionGoalDTO SetupForScenarioTargetGet(Guid simulationId)
         {
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
-            var goal = TestScenarioTargetConditionGoal(simulationId, attribute.Id);
-            TestHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Add(goal);
-            TestHelper.UnitOfWork.Context.SaveChanges();
+            var goal = TargetConditionGoalDtos.Dto(attribute.Name);
+            var goals = new List<TargetConditionGoalDTO> { goal };
+            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(goals, simulationId);
             return goal;
         }
 

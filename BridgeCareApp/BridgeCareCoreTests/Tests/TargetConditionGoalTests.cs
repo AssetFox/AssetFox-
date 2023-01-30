@@ -83,21 +83,6 @@ namespace BridgeCareCoreTests.Tests
             };
             return returnValue;
         }
-        private ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal(Guid simulationId,
-            Guid attributeId,
-            Guid? id = null)
-        {
-            var resolveId = id ?? Guid.NewGuid();
-            var returnValue = new ScenarioTargetConditionGoalEntity
-            {
-                Id = resolveId,
-                SimulationId = simulationId,
-                AttributeId = attributeId,
-                Name = "Test Name",
-                Target = 1
-            };
-            return returnValue;
-        }
 
         private TargetConditionGoalLibraryEntity SetupLibraryForGet()
         {
@@ -123,12 +108,12 @@ namespace BridgeCareCoreTests.Tests
             return criterionLibrary;
         }
 
-        private ScenarioTargetConditionGoalEntity SetupForScenarioTargetGet(Guid simulationId)
+        private TargetConditionGoalDTO SetupForScenarioTargetGet(Guid simulationId)
         {
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
-            var goal = TestScenarioTargetConditionGoal(simulationId, attribute.Id);
-            TestHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Add(goal);
-            TestHelper.UnitOfWork.Context.SaveChanges();
+            var goal = TargetConditionGoalDtos.Dto(attribute.Name);
+            var goals = new List<TargetConditionGoalDTO> { goal };
+            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(goals, simulationId);
             return goal;
         }
 

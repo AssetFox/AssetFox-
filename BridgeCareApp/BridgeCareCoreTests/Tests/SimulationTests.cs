@@ -25,10 +25,6 @@ namespace BridgeCareCoreTests.Tests
 {
     public class SimulationTests
     {
-        private SimulationController _controller;
-
-        private UserEntity _testUserEntity;
-        private SimulationEntity _testSimulationToClone;
         private const string SimulationName = "Simulation";
         private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
@@ -54,32 +50,6 @@ namespace BridgeCareCoreTests.Tests
                 claimHelper.Object
                 );
             return controller;
-        }
-
-        public SimulationAnalysisService Setup()
-        {
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(TestHelper.UnitOfWork);
-
-            var simulationAnalysisService =
-                new SimulationAnalysisService(TestHelper.UnitOfWork, new());
-            return simulationAnalysisService;
-        }
-
-        private void CreateAuthorizedController(SimulationAnalysisService simulationAnalysisService)
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            _controller = new SimulationController(
-                simulationAnalysisService,
-                new SimulationPagingService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
-                _mockSimulationQueueService.Object,
-                EsecSecurityMocks.Admin,
-                TestHelper.UnitOfWork,
-                hubService,
-                accessor,
-                _mockClaimHelper.Object);
         }
 
         [Fact] 

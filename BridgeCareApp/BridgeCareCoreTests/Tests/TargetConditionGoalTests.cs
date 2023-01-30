@@ -1,6 +1,7 @@
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -10,8 +11,6 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils.Interfaces;
-using BridgeCareCoreTests.Helpers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -23,6 +22,23 @@ namespace BridgeCareCoreTests.Tests
         private static readonly Guid TargetConditionGoalId = Guid.Parse("42b3bbfc-d590-4d3d-aea9-fc8221210c57");
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
+        private TargetConditionGoalController CreateController(Mock<IUnitOfWork> unitOfWork)
+        {
+            var security = EsecSecurityMocks.AdminMock;
+            var hubService = HubServiceMocks.DefaultMock();
+            var accessor = HttpContextAccessorMocks.DefaultMock();
+            var claimHelper = ClaimHelperMocks.New();
+            var pagingService = new TargetConditionGoalPagingService(unitOfWork.Object);
+            var controller = new TargetConditionGoalController(
+                security.Object,
+                unitOfWork.Object,
+                hubService.Object,
+                accessor.Object,
+                claimHelper.Object,
+                pagingService
+                );
+            return controller;
+        }
         private TargetConditionGoalController SetupController()
         {
             var accessor = HttpContextAccessorMocks.Default();

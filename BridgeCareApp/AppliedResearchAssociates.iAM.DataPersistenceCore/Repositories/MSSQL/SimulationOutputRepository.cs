@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -15,6 +16,7 @@ using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -30,8 +32,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public const string AssetDetailSaveOverrideBatchSizeKey = "AssetDetailBatchSizeOverrideForValueSave";
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-
-        public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput, ILog loggerForUserInfo = null, ILog loggerForTechnicalInfo = null)
+        
+        public void CreateSimulationOutputViaRelational(Guid simulationId, SimulationOutput simulationOutput, ILog loggerForUserInfo = null, ILog loggerForTechnicalInfo = null)
         {
             loggerForTechnicalInfo ??= new DoNotLog();
             loggerForUserInfo ??= new DoNotLog();
@@ -139,6 +141,75 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        public void CreateSimulationOutputViaJson(Guid simulationId, SimulationOutput simulationOutput)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation found for given scenario.");
+            }
+
+            var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
+                .Single(_ => _.Id == simulationId);
+
+            if (simulationOutput == null)
+            {
+                throw new InvalidOperationException($"No results found for simulation {simulationEntity.Name}. Please ensure that the simulation analysis has been run.");
+            }
+
+            var settings = new StringEnumConverter();
+
+            try
+            {
+                _unitOfWork.Context.DeleteAll<SimulationOutputJsonEntity>(_ =>
+                _.SimulationId == simulationId);
+
+                var outputInitialConditionNetwork = JsonConvert.SerializeObject(simulationOutput.InitialConditionOfNetwork, settings);
+
+                _unitOfWork.Context.Add(
+                        new SimulationOutputJsonEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            SimulationId = simulationId,
+                            Output = outputInitialConditionNetwork,
+                            OutputType = SimulationOutputEnum.InitialConditionNetwork
+                        });
+
+                var outputInitialSummary = JsonConvert.SerializeObject(simulationOutput.InitialAssetSummaries, settings);
+
+                _unitOfWork.Context.Add(
+                        new SimulationOutputJsonEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            SimulationId = simulationId,
+                            Output = outputInitialSummary,
+                            OutputType = SimulationOutputEnum.InitialSummary
+                        });
+
+                foreach (var item in simulationOutput.Years)
+                {
+                    var  targetGoalsToRemove = item.TargetConditionGoals.Where(_ => double.IsNaN(_.TargetValue) || double.IsNaN(_.ActualValue)).ToList();
+                    targetGoalsToRemove.ForEach(_ => item.TargetConditionGoals.Remove(_));
+                    var conditionGoalsToRemove = item.DeficientConditionGoals.Where(_ => double.IsNaN(_.DeficientLimit) || double.IsNaN(_.AllowedDeficientPercentage) || double.IsNaN(_.ActualDeficientPercentage)).ToList();
+                    conditionGoalsToRemove.ForEach(_ => item.DeficientConditionGoals.Remove(_));
+                    var simulationOutputYearData = JsonConvert.SerializeObject(item, settings);
+
+                    _unitOfWork.Context.Add(
+                        new SimulationOutputJsonEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            SimulationId = simulationId,
+                            Output = simulationOutputYearData,
+                            OutputType = SimulationOutputEnum.YearlySection
+                        });
+                }
+                _unitOfWork.Context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         private static void HackSaveOutputToFile(SimulationOutput simulationOutput)
         {
             var directory = Directory.GetCurrentDirectory();
@@ -173,7 +244,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return null;
         }
 
-        public SimulationOutput GetSimulationOutput(Guid simulationId, ILog loggerForUserInfo = null, ILog loggerForTechinalInfo = null)
+        public SimulationOutput GetSimulationOutputViaRelation(Guid simulationId, ILog loggerForUserInfo = null, ILog loggerForTechinalInfo = null)
         {
             loggerForUserInfo ??= new DoNotLog();
             loggerForTechinalInfo ??= new DoNotLog();
@@ -315,6 +386,73 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 WriteTimingsToFile(memos, outputFilename);
             }
             return domain;
+        }
+        public SimulationOutput GetSimulationOutputViaJson(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"Found no simulation having id {simulationId}");
+            }
+
+            if (!_unitOfWork.Context.SimulationOutputJson.Any(_ => _.SimulationId == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation analysis results were found for simulation having id {simulationId}. Please ensure that the simulation analysis has been run.");
+            }
+
+            var simulationOutputObjects = _unitOfWork.Context.SimulationOutputJson.Where(_ => _.SimulationId == simulationId);
+
+            var simulationOutput = new SimulationOutput();
+            foreach (var item in simulationOutputObjects)
+            {
+                switch (item.OutputType)
+                {
+                case SimulationOutputEnum.YearlySection:
+                    var yearlySections = JsonConvert.DeserializeObject<SimulationYearDetail>(item.Output, new JsonSerializerSettings
+                    {
+                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+                    });
+                    simulationOutput.Years.Add(yearlySections);
+                    break;
+                case SimulationOutputEnum.InitialConditionNetwork:
+                    simulationOutput.InitialConditionOfNetwork = Convert.ToDouble(item.Output);
+                    break;
+                case SimulationOutputEnum.InitialSummary:
+                    var initialSummary = JsonConvert.DeserializeObject<List<AssetSummaryDetail>>(item.Output, new JsonSerializerSettings
+                    {
+                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+                    });
+                    simulationOutput.InitialAssetSummaries.AddRange(initialSummary);
+                    break;
+                }
+            }
+            simulationOutput.Years.Sort((a, b) => a.Year.CompareTo(b.Year));
+
+            return simulationOutput;
+        }
+
+        public void ConvertSimulationOutpuFromJsonTorelational(Guid simulationId)
+        {
+            var output = GetSimulationOutputViaJson(simulationId);            
+            CreateSimulationOutputViaRelational(simulationId, output);
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                var outputId = _unitOfWork.Context.SimulationOutput.First(_ => _.SimulationId == simulationId).Id;
+                var outputJsons = _unitOfWork.Context.SimulationOutputJson.Where(_ => _.SimulationId == simulationId).ToList();
+                if (outputJsons.Count != 0)
+                {
+                    outputJsons.ForEach(_ => _.SimulationOutputId = outputId);
+                }
+                
+                _unitOfWork.Context.UpdateAll(outputJsons);
+                _unitOfWork.Commit();
+            }
+            catch(Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+            
         }
 
         private static string GuidsToStringList(List<Guid> assetDetailIds)

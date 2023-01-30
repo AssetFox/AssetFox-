@@ -39,6 +39,7 @@ export interface ScenarioActions {
     title: string;
     action: string;
     icon: string;
+    isCustomIcon: boolean;
 }
 export interface TabItems {
     name: string;

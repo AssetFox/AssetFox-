@@ -179,7 +179,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 };
                 UpdateSimulationAnalysisDetail(dto);
             });
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
 
             var simulationYears = new List<int>();

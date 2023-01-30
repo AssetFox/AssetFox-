@@ -12,9 +12,9 @@
                 >
                     <template slot="items" slot-scope="props">
                         <tr style="border:none">
-                            <td>                            
+                            <td xs5>                            
                                 <v-layout xs6 align-center>                                
-                                    <v-subheader class="ghd-control-label ghd-md-gray" style="width:90%">Equation</v-subheader>
+                                    <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Equation</v-subheader>
                                     <v-btn
                                         @click="
                                             onShowCostEquationEditorDialog(
@@ -40,9 +40,9 @@
                                     </v-textarea>  
                                 </v-layout>                          
                             </td>
-                            <td>
+                            <td xs5>
                                 <v-layout xs6 align-center>
-                                <v-subheader class="ghd-control-label ghd-md-gray" style="width:90%">Criteria</v-subheader>
+                                    <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Criteria</v-subheader>
                                     <v-btn
                                         @click="
                                             onShowCostCriterionEditorDialog(
@@ -71,7 +71,7 @@
                                     </v-textarea>
                                 </v-layout>
                             </td>     
-                            <td>
+                            <td xs2>
                                 <v-layout align-start>
                                     <v-btn
                                         @click="onRemoveCost(props.item.id)"
@@ -278,11 +278,13 @@ export default class CostsTab extends Vue {
 <style>
 .costs-tab-content {
     height: 185px;
+    min-width: 1100px;
 }
 
 .costs-data-table {
     overflow-y: auto;
     border: 1px solid #999999 !important;
+    min-width: 1000px;
 }
 
 .costs-data-table table.v-table thead tr{

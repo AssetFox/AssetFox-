@@ -179,7 +179,8 @@
                                                                 true) "
                                                         class="menu-style">
                                                         <v-list-tile-title icon>
-                                                            <img style="padding-right:5px" v-bind:src="item.icon"/>
+                                                            <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
+                                                            <v-icon v-else class="action-icon-padding">{{ item.icon}}</v-icon> 
                                                             {{item.title}}
                                                         </v-list-tile-title>
                                                     </v-list-tile>
@@ -336,7 +337,8 @@
                                                         @click="OnActionTaken(item.action,props.item.users,props.item,false)"
                                                         class="menu-style">
                                                         <v-list-tile-title icon>                                                        
-                                                            <img style="padding-right:5px" v-bind:src="item.icon"/>
+                                                            <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
+                                                            <v-icon v-else class="action-icon-padding">{{ item.icon}}</v-icon>  
                                                             {{item.title}}
                                                         </v-list-tile-title>
                                                     </v-list-tile>
@@ -438,6 +440,11 @@
         <ConfirmAnalysisRunAlert
             :dialogData="confirmAnalysisRunAlertData"
             @submit="onConfirmAnalysisRunAlertSubmit"
+        />
+
+        <ConfirmConvertToRelationalAlert
+            :dialogData="ConfirmConvertJsonToRelationalData"
+            @submit="onConfirmConvertJsonToRelationalAlertSubmit"
         />
 
         <ReportsDownloaderDialog :dialogData="reportsDownloaderDialogData" />
@@ -556,6 +563,7 @@ import ScenarioService from '@/services/scenario.service';
         ConfirmCancelAlert: Alert,
         ConfirmRollupAlert: Alert,
         ConfirmAnalysisRunAlert: Alert,
+        ConfirmConvertToRelationalAlert: Alert,
         ReportsDownloaderDialog,
         CreateScenarioDialog,
         CloneScenarioDialog,
@@ -842,6 +850,8 @@ export default class Scenarios extends Vue {
     shareScenarioDialogData: ShareScenarioDialogData = clone(
         emptyShareScenarioDialogData,
     );
+    
+    ConfirmConvertJsonToRelationalData: AlertData = clone(emptyAlertData);
     confirmCloneScenarioAlertData: AlertData = clone(emptyAlertData);
     cloneScenarioDialogData: CloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
@@ -1032,7 +1042,8 @@ export default class Scenarios extends Vue {
             share: 'share',
             clone: 'clone',
             delete: 'delete',
-            commitedProjects: 'commitedProjects'
+            commitedProjects: 'commitedProjects',
+            convert:'convert'
         };
         this.availableSimulationActions = {
             cancel: 'cancel'
@@ -1042,31 +1053,43 @@ export default class Scenarios extends Vue {
                 title: 'Run Analysis',
                 action: this.availableActions.runAnalysis,
                 icon: require("@/assets/icons/monitor.svg"),
+                isCustomIcon: true
             },
             {
                 title: 'Reports',
                 action: this.availableActions.reports,
                 icon: require("@/assets/icons/clipboard.svg"),
+                isCustomIcon: true
             },
             {
                 title: 'Settings',
                 action: this.availableActions.settings,
                 icon: require("@/assets/icons/gear.svg"),
+                isCustomIcon: true
             },
             {
                 title: 'Committed Projects',
                 action: this.availableActions.commitedProjects,
                 icon: require("@/assets/icons/committed-projects.svg"),
+                isCustomIcon: true
+            },
+            {
+                title: 'Convert Output from Json to Relational',
+                action: this.availableActions.convert,
+                icon: "fas fa-exchange-alt",
+                isCustomIcon: false
             },
             {
                 title: 'Clone',
                 action: this.availableActions.clone,
                 icon: require("@/assets/icons/copy.svg"),
+                isCustomIcon: true
             },
             {
                 title: 'Delete',
                 action: this.availableActions.delete,
                 icon: require("@/assets/icons/trash.svg"),
+                isCustomIcon: true
             }           
         ];
         this.actionItemsForSimulationQueue = [
@@ -1074,6 +1097,7 @@ export default class Scenarios extends Vue {
                 title: 'Cancel Analysis',
                 action: this.availableSimulationActions.cancel,
                 icon: require("@/assets/icons/x-circle.svg"),
+                isCustomIcon: true
             }             
         ];
         this.actionItems = this.actionItemsForSharedScenario.slice();
@@ -1081,6 +1105,7 @@ export default class Scenarios extends Vue {
             title: 'Share',
             action: this.availableActions.share,
             icon: require("@/assets/icons/share-geometric.svg"),
+                isCustomIcon: true
         });
         this.tabItems.push(
             { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: this.totalUserScenarios },
@@ -1246,6 +1271,26 @@ export default class Scenarios extends Vue {
                 networkId: this.selectedScenario.networkId,
                 scenarioId: this.selectedScenario.id,
             }).then(() => (this.selectedScenario = clone(emptyScenario)));
+        }
+    }
+
+    onShowConfirmConvertJsonToRelationalAlert(scenario: Scenario) {
+        this.selectedScenario = clone(scenario);
+
+        this.ConfirmConvertJsonToRelationalData = {
+            showDialog: true,
+            heading: 'Warning',
+            choice: true,
+            message:
+                'Converting the simulation output from json to a relational format can be a lengthy process.',
+        };
+    }
+
+    onConfirmConvertJsonToRelationalAlertSubmit(submit: boolean) {
+        this.ConfirmConvertJsonToRelationalData = clone(emptyAlertData);
+
+        if (submit && this.selectedScenario.id !== getBlankGuid()) {
+            ScenarioService.ConvertSimulationOutputToRelational(this.selectedScenario.id);
         }
     }
 
@@ -1590,6 +1635,8 @@ export default class Scenarios extends Vue {
                 // this.selectedScenarioId = scenario.id;
                 // this.showImportExportCommittedProjectsDialog = true;
                 break;
+            case this.availableActions.convert:
+                this.onShowConfirmConvertJsonToRelationalAlert(scenario);
         }
     }
 

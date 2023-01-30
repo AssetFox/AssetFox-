@@ -143,7 +143,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             // TODO Add worksheet and Fill method for Decisions tab here
-
+            // TODO take a look at unfunded treatment final list's UnfundedTreatmentCommon.cs line 49, for GCR...yellow columns.
+            // simulationOutput.Years to be focused for getting data, Use SortedDictionary to collect data of interest for this tab
+            // TODO ask what would be used for "Budget Levels"?? Budgets from SimulationYearDetail? what should be the values -- AvailableFunding??
 
             // Check and generate folder
             var folderPathForSimulation = $"Reports\\{simulationId}";

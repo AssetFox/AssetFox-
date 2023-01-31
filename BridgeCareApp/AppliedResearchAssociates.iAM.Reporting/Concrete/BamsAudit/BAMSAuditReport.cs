@@ -143,7 +143,19 @@ namespace AppliedResearchAssociates.iAM.Reporting
             };
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-                        
+
+            var requiredSections = new HashSet<string>()
+            {
+                $"{AuditReportConstants.DeckSeeded}",
+                $"{AuditReportConstants.SupSeeded}",
+                $"{AuditReportConstants.SubSeeded}",
+                $"{AuditReportConstants.CulvSeeded}",
+                $"{AuditReportConstants.DeckDurationN}",
+                $"{AuditReportConstants.SupDurationN}",
+                $"{AuditReportConstants.SubDurationN}",
+                $"{AuditReportConstants.CulvDurationN}"
+            };
+
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);            
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {
-    public static class AuditReportConstants
+    public static class BAMSConstants
     {
         public const string AnnualizedAmount = "Annualized Amount";
         public const string BPN1 = "BPN 1";

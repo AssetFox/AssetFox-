@@ -43,10 +43,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         public void InitializeLabelCells(ExcelWorksheet worksheet, CurrentCell currentCell, out int startRow, out int startColumn, out int row, out int column)
         {
             SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-            worksheet.Cells[row++, column].Value = AuditReportConstants.Good;
-            worksheet.Cells[row++, column].Value = AuditReportConstants.Fair;
-            worksheet.Cells[row++, column].Value = AuditReportConstants.Poor;
-            worksheet.Cells[row++, column++].Value = AuditReportConstants.Closed;
+            worksheet.Cells[row++, column].Value = BAMSConstants.Good;
+            worksheet.Cells[row++, column].Value = BAMSConstants.Fair;
+            worksheet.Cells[row++, column].Value = BAMSConstants.Poor;
+            worksheet.Cells[row++, column++].Value = BAMSConstants.Closed;
             worksheet.Cells[row - 4, column - 1, row - 1, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
         }
 
@@ -151,11 +151,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             foreach (var item in simulationTreatments)
             {
-                if (item.AssetType == AssetCategory.Bridge || item.Name == AuditReportConstants.NonCulvertNoTreatment)
+                if (item.AssetType == AssetCategory.Bridge || item.Name == BAMSConstants.NonCulvertNoTreatment)
                 {
-                    if (item.Name == AuditReportConstants.NonCulvertNoTreatment)
+                    if (item.Name == BAMSConstants.NonCulvertNoTreatment)
                     {
-                        worksheet.Cells[row++, column].Value = AuditReportConstants.NoTreatmentForWorkSummary;
+                        worksheet.Cells[row++, column].Value = BAMSConstants.NoTreatmentForWorkSummary;
                     }
                     else
                     {
@@ -170,11 +170,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             foreach (var item in simulationTreatments)
             {
-                if (item.AssetType == AssetCategory.Culvert || item.Name == AuditReportConstants.CulvertNoTreatment)
+                if (item.AssetType == AssetCategory.Culvert || item.Name == BAMSConstants.CulvertNoTreatment)
                 {
-                    if (item.Name == AuditReportConstants.CulvertNoTreatment)
+                    if (item.Name == BAMSConstants.CulvertNoTreatment)
                     {
-                        worksheet.Cells[row++, column].Value = AuditReportConstants.NoTreatmentForWorkSummary;
+                        worksheet.Cells[row++, column].Value = BAMSConstants.NoTreatmentForWorkSummary;
                     }
                     else
                     {

@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 WorkTypeTotalHelper.FillWorkTypeTotals(treatment, workTypeTotal);
             }
 
-            worksheet.Cells[currentCell.Row, currentCell.Column].Value = AuditReportConstants.CulvertTotal;
+            worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.CulvertTotal;
 
             foreach (var totalculvertBudget in totalBudgetPerYearForCulvert)
             {

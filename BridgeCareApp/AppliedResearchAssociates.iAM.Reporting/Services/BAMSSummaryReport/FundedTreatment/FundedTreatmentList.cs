@@ -232,7 +232,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = AuditReportConstants.No; // CULV_SEEDED
+                worksheet.Cells[row, columnNo++].Value = BAMSConstants.No; // CULV_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
@@ -243,15 +243,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             {
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = empty ?? AuditReportConstants.No; // DECK_SEEDED
+                worksheet.Cells[row, columnNo++].Value = empty ?? BAMSConstants.No; // DECK_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = empty ?? AuditReportConstants.No; // SUP_SEEDED
+                worksheet.Cells[row, columnNo++].Value = empty ?? BAMSConstants.No; // SUP_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = empty ?? AuditReportConstants.No; // SUB_SEEDED
+                worksheet.Cells[row, columnNo++].Value = empty ?? BAMSConstants.No; // SUB_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
@@ -285,7 +285,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             {
                 var treatedSections = year.Assets
                     .Where(section => section.TreatmentCause is not TreatmentCause.Undefined and not TreatmentCause.NoSelection
-                        && !(section.TreatmentCause is TreatmentCause.CommittedProject && section.AppliedTreatment.ToLower() == AuditReportConstants.NoTreatment.ToLower()))
+                        && !(section.TreatmentCause is TreatmentCause.CommittedProject && section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment.ToLower()))
                     .ToList();
 
                 var facilityIds = treatedSections.Select(section => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_")));

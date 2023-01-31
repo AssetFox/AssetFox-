@@ -164,13 +164,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells[rowNo + 8, currentCell.Column].Value = "Posted";
 
             // open
-            worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "OPEN") ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "OPEN") ? BAMSConstants.Yes : BAMSConstants.No;
             // closed
-            worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "CLOSED") ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "CLOSED") ? BAMSConstants.Yes : BAMSConstants.No;
             // P3
-            worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "P3") > 0) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "P3") > 0) ? BAMSConstants.Yes : BAMSConstants.No;
             // Posted
-            worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "POSTED") ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "POSTED") ? BAMSConstants.Yes : BAMSConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 5, currentCell.Column + 1, rowNo + 8, currentCell.Column + 1]);
 
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 8, currentCell.Column + 1]);

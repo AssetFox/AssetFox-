@@ -188,14 +188,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var requiredSections = new HashSet<string>()
             {
-                $"{AuditReportConstants.DeckSeeded}",
-                $"{AuditReportConstants.SupSeeded}",
-                $"{AuditReportConstants.SubSeeded}",
-                $"{AuditReportConstants.CulvSeeded}",
-                $"{AuditReportConstants.DeckDurationN}",
-                $"{AuditReportConstants.SupDurationN}",
-                $"{AuditReportConstants.SubDurationN}",
-                $"{AuditReportConstants.CulvDurationN}"
+                $"{BAMSConstants.DeckSeeded}",
+                $"{BAMSConstants.SupSeeded}",
+                $"{BAMSConstants.SubSeeded}",
+                $"{BAMSConstants.CulvSeeded}",
+                $"{BAMSConstants.DeckDurationN}",
+                $"{BAMSConstants.SupDurationN}",
+                $"{BAMSConstants.SubDurationN}",
+                $"{BAMSConstants.CulvDurationN}"
             };
 
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));

@@ -31,13 +31,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
 
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int dataStartColumn, int count, ExcelChart chart)
         {
-            CreateSeries(bridgeWorkSummaryWorkSheet, dataStartColumn, count, chart, dataStartColumn + 4, AuditReportConstants.Closed, Color.Black);
+            CreateSeries(bridgeWorkSummaryWorkSheet, dataStartColumn, count, chart, dataStartColumn + 4, BAMSConstants.Closed, Color.Black);
 
-            CreateSeries(bridgeWorkSummaryWorkSheet, dataStartColumn, count, chart, dataStartColumn + 3, AuditReportConstants.Poor, Color.Red);
+            CreateSeries(bridgeWorkSummaryWorkSheet, dataStartColumn, count, chart, dataStartColumn + 3, BAMSConstants.Poor, Color.Red);
 
-            CreateSeries(bridgeWorkSummaryWorkSheet, dataStartColumn, count, chart, dataStartColumn + 2, AuditReportConstants.Fair, Color.Yellow);
+            CreateSeries(bridgeWorkSummaryWorkSheet, dataStartColumn, count, chart, dataStartColumn + 2, BAMSConstants.Fair, Color.Yellow);
 
-            CreateSeries(bridgeWorkSummaryWorkSheet, dataStartColumn, count, chart, dataStartColumn + 1, AuditReportConstants.Good, Color.FromArgb(0, 176, 80));
+            CreateSeries(bridgeWorkSummaryWorkSheet, dataStartColumn, count, chart, dataStartColumn + 1, BAMSConstants.Good, Color.FromArgb(0, 176, 80));
         }
 
         private void CreateSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int dataColumn, int count, ExcelChart chart, int fromColumn, string header, Color color)

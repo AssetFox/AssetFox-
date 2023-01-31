@@ -311,7 +311,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.Yellow);
                 ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
             }
-            worksheet.Cells[row, ++column].Value = _reportHelper.CheckAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "MINCOND") < 5 ? AuditReportConstants.Yes : AuditReportConstants.No; //poor
+            worksheet.Cells[row, ++column].Value = _reportHelper.CheckAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "MINCOND") < 5 ? BAMSConstants.Yes : BAMSConstants.No; //poor
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column]);
 
             if (row % 2 == 0)
@@ -366,7 +366,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 // Add work done cells
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
-                var previousYearTreatment = AuditReportConstants.NoTreatment;
+                var previousYearTreatment = BAMSConstants.NoTreatment;
                 var i = 0; double section_BRKEY = 0;
                 foreach (var section in yearlySectionData.Assets)
                 {
@@ -457,7 +457,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     else
                     {
-                        range.Value = section.AppliedTreatment.ToLower() == AuditReportConstants.NoTreatment ? "--" :
+                        range.Value = section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" :
                             section.AppliedTreatment.ToLower();
 
                         worksheet.Cells[row, column + 1].Value = cost;
@@ -817,7 +817,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 ExcelHelper.MergeCells(worksheet, row, ++column, row, ++column);
                 worksheet.Cells[row, column - 1].Value = HeaderConstText + year;
-                worksheet.Cells[row + 2, column -1].Value = AuditReportConstants.Work;
+                worksheet.Cells[row + 2, column -1].Value = BAMSConstants.Work;
                 worksheet.Cells[row + 2, column].Value = "Cost";
                 ExcelHelper.ApplyStyle(worksheet.Cells[row + 2, column - 1, row + 2, column]);
                 ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1], ColorTranslator.FromHtml("#D9E1F2"));

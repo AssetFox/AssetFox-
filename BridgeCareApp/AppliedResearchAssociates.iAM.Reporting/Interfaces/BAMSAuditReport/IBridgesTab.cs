@@ -5,6 +5,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSAuditReport
 {
     public interface IBridgesTab
     {
-        void Fill(ExcelWorksheet unfundedRecommendationWorksheet, SimulationOutput simulationOutput);
+        void Fill(ExcelWorksheet bridgesWorksheet, SimulationOutput simulationOutput);
     }
 }

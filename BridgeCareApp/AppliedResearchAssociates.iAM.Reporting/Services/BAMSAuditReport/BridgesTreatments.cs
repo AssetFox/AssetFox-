@@ -25,7 +25,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             int headerRow = 1;
             var headersRow = GetHeadersRow();
 
-
             worksheet.Cells.Style.WrapText = false;
 
             // Add all Row 1 headers
@@ -35,7 +34,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
 
             var row = headerRow;
-
             worksheet.Row(row).Height = 15;
             worksheet.Row(row + 1).Height = 15;
             // Autofit before the merges
@@ -103,8 +101,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             worksheet.Cells[row, columnNo++].Value = deckArea;
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-         // TODO change to Family
-            worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? AuditReportConstants.Yes : AuditReportConstants.No; // Large Bridge
+            var family = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FAMILY_ID");
+            worksheet.Cells[row, columnNo++].Value = int.TryParse(family, out var familyNumber) ? familyNumber : family;
 
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "STRUCTURE_TYPE");
 
@@ -123,10 +121,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 worksheet.Cells[row, columnNo++].Value = bpn_string;
             }
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND") == "0" ? "N" : "Y";
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND") == "0" ? AuditReportConstants.No : AuditReportConstants.Yes;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "INTERSTATE");
-
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "###,###,###,###,##0";
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "RISK_SCORE");
 

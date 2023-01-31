@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -157,8 +155,53 @@ namespace AppliedResearchAssociates.iAM.Reporting
             };
 
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);            
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
+                        
+            var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
+            var sectionValueAttribute = reportOutputData.Years[0].Assets[0].ValuePerNumericAttribute;
+            foreach (var item in requiredSections)
+            {
+                if (!initialSectionValues.ContainsKey(item))
+                {
+                    reportDetailDto.Status = $"{item} was not found in initial section";
+                    UpdateSimulationAnalysisDetail(reportDetailDto);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+                    Errors.Add(reportDetailDto.Status);
+                    throw new KeyNotFoundException($"{item} was not found in initial section");
+                }
 
+                if (!sectionValueAttribute.ContainsKey(item))
+                {
+                    reportDetailDto.Status = $"{item} was not found in sections";
+                    UpdateSimulationAnalysisDetail(reportDetailDto);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+                    Errors.Add(reportDetailDto.Status);
+                    throw new KeyNotFoundException($"{item} was not found in sections");
+                }
+            }
+
+            // Sort data
+            reportOutputData.InitialAssetSummaries.Sort(
+                    (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
+                    );
+
+            foreach (var yearlySectionData in reportOutputData.Years)
+            {
+                yearlySectionData.Assets.Sort(
+                    (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
+                    );
+            }
+
+            //// TODO check if gets used in 2nd tab else remove
+            var simulationYears = new List<int>();
+            foreach (var item in reportOutputData.Years)
+            {
+                simulationYears.Add(item.Year);
+            }
+            var simulationYearsCount = simulationYears.Count;
+            ////
+
+            // Report
             using var excelPackage = new ExcelPackage(new FileInfo("AuditReportData.xlsx"));
             
             // Bridge Data TAB
@@ -173,10 +216,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             reportDetailDto.Status = $"Creating Decisions TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            // TODO Add worksheet and Fill method for Decisions tab here
-            // TODO take a look at unfunded treatment final list's UnfundedTreatmentCommon.cs line 49, for GCR...yellow columns.
+            // TODO Add worksheet and Fill method for Decisions tab here           
             // simulationOutput.Years to be focused for getting data, Use SortedDictionary to collect data of interest for this tab
-            // TODO ask what would be used for "Budget Levels"?? Budgets from SimulationYearDetail? what should be the values -- AvailableFunding??
 
             // Check and generate folder
             var folderPathForSimulation = $"Reports\\{simulationId}";

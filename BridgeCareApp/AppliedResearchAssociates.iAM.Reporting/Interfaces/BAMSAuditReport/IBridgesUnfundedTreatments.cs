@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSAuditReport
 {
     public interface IBridgesUnfundedTreatments
     {
-        void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment);
+        void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year);
 
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet);
 

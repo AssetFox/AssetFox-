@@ -261,7 +261,6 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldValidateCriterion()
         {
-            // Wjwjwj this test calls ValidateCriterion and AddFlattenedDataToTable
             // Arrange
             var controller = SetupController();
             var model = new ValidationParameter
@@ -345,7 +344,6 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldInvalidateCriteria()
         {
-            // Wjwjwj this test calls ValidateCriterion
             var controller = SetupController();
             var invalid = GetInvalidCriterionValidationData().ToList();
             foreach (var testDataSet in invalid)

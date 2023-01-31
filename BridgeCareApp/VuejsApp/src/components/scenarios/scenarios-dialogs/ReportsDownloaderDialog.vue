@@ -62,6 +62,7 @@ import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
+import { getBlankGuid } from '@/shared/utils/uuid-utils';
 
 @Component({})
 export default class ReportsDownloaderDialog extends Vue {

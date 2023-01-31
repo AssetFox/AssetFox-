@@ -271,6 +271,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return AttributeMapper.ToDtoNullPropagating(entity, GetEncryptionKey());
         }
 
+        public List<AbbreviatedAttributeDTO> GetAttributesWithNames(List<string> attributeNames)
+        {
+            var entities = _unitOfWork.Context.Attribute.AsNoTracking().AsEnumerable();
+            var dtos = new List<AbbreviatedAttributeDTO>();
+            foreach (var entity in entities)
+            {
+                foreach (var name in attributeNames)
+                {
+                    if (name.Equals(entity.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var dto = AttributeMapper.ToAbbreviatedDto(entity);
+                        dtos.Add(dto);
+                        continue;
+                    }
+                }
+            }
+            return dtos;
+        }
+
+        public List<AbbreviatedAttributeDTO> GetAllAttributesAbbreviated()
+        {
+            var dtos = _unitOfWork.Context.Attribute.AsEnumerable()
+                .Select(a => AttributeMapper.ToAbbreviatedDto(a))
+                .ToList();
+            return dtos;
+        }
+
         public void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete)
         {
             foreach (var id in attributeIdsToDelete)

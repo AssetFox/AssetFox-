@@ -43,5 +43,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         string GetEncryptionKey();
 
         string GetAttributeName(Guid attributeId);
+        List<AbbreviatedAttributeDTO> GetAllAttributesAbbreviated();
     }
 }

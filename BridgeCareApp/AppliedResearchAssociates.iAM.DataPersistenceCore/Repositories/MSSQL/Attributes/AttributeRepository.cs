@@ -273,7 +273,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<AbbreviatedAttributeDTO> GetAttributesWithNames(List<string> attributeNames)
         {
-            var entities = _unitOfWork.Context.Attribute.AsEnumerable();
+            var entities = _unitOfWork.Context.Attribute.AsNoTracking().AsEnumerable();
             var dtos = new List<AbbreviatedAttributeDTO>();
             foreach (var entity in entities)
             {
@@ -287,6 +287,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     }
                 }
             }
+            return dtos;
+        }
+
+        public List<AbbreviatedAttributeDTO> GetAllAttributesAbbreviated()
+        {
+            var dtos = _unitOfWork.Context.Attribute.AsEnumerable()
+                .Select(a => AttributeMapper.ToAbbreviatedDto(a))
+                .ToList();
             return dtos;
         }
 

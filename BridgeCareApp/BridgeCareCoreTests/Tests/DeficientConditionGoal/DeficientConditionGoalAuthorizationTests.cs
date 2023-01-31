@@ -23,7 +23,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using NUnit.Framework.Internal.Execution;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 using static BridgeCareCore.Security.SecurityConstants;

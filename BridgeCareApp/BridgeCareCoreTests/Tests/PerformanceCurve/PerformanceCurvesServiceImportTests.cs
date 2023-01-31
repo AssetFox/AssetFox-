@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -88,29 +89,48 @@ namespace BridgeCareCoreTests.Tests
             ObjectAssertions.EquivalentExcluding(expectedPerformanceCurve, upsertedCurve, c => c.Id, c => c.CriterionLibrary.Id, c => c.Equation.Id);
         }
 
-        [Fact(Skip = WjFixMe)]
+        private Mock<IExpressionValidationService> SetupMockOld(Guid performanceCurveLibraryId)
+        {
+            var dbContext = TestHelper.DbContext;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var mockExpressionValidationService = ExpressionValidationServiceMocks.New();
+            dbContext.Add(new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "TestPerformanceCurveLibrary" });
+            dbContext.SaveChanges();
+            return mockExpressionValidationService;
+        }
+
+        [Fact]
         public void ImportScenarioPerformanceCurvesFileTest()
         {
             // Setup
             var libraryId = Guid.NewGuid();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var performanceCurveRepo = PerformanceCurveRepositoryMocks.New(unitOfWork); 
             var mockExpressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
             var hubService = HubServiceMocks.Default();
-            var performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            var performanceCurvesService = CreatePerformanceCurvesService(unitOfWork);
+            var args = new List<List<PerformanceCurveDTO>>();
+            performanceCurveRepo.Setup(r => r.UpsertOrDeleteScenarioPerformanceCurves(Capture.In(args), It.IsAny<Guid>()));
+            performanceCurveRepo.Setup(r => r.GetScenarioPerformanceCurves(It.IsAny<Guid>()))
+                .Returns(() => args.Last());
+                //.Returns<List<PerformanceCurveDTO>>(x => args.Last());
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
 
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
             // Assert
-            Assert.NotNull(result);
             Assert.Null(result.WarningMessage);
             var performanceCurve = result.PerformanceCurves.Single();
-            Assert.NotNull(performanceCurve.CriterionLibrary);
-            Assert.NotNull(performanceCurve.Equation);
+            Assert.Equal("ScenarioPerformance_Eq1", performanceCurve.Name);
+            Assert.Equal("AGE", performanceCurve.Attribute);
+            Assert.Equal("[AGE]", performanceCurve.Equation.Expression);
+            performanceCurveRepo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeleteScenarioPerformanceCurves));
+            performanceCurveRepo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.GetScenarioPerformanceCurves));
         }
 
         // The import goes ahead and completes, even if there are invalid
@@ -142,20 +162,29 @@ namespace BridgeCareCoreTests.Tests
             Assert.Contains("exception message", result.WarningMessage);
         }
 
-        [Fact(Skip = WjFixMe)]
+        [Fact]
         public void ImportScenarioPerformanceCurvesFileInvalidEquationTest()
         {
             // Setup
             var libraryId = Guid.NewGuid();
-            var mockExpressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var performanceCurveRepo = PerformanceCurveRepositoryMocks.New(unitOfWork);
+            var mockExpressionValidationService = ExpressionValidationServiceMocks.New();
+            mockExpressionValidationService.SetupValidateAnyCriterionWithoutResults(true);
+            mockExpressionValidationService.SetupValidateAnyEquation(false);
             var hubService = HubServiceMocks.Default();
-            var performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            var performanceCurvesService = CreatePerformanceCurvesService(unitOfWork, mockExpressionValidationService);
+            var args = new List<List<PerformanceCurveDTO>>();
+            performanceCurveRepo.Setup(r => r.UpsertOrDeleteScenarioPerformanceCurves(Capture.In(args), It.IsAny<Guid>()));
+            performanceCurveRepo.Setup(r => r.GetScenarioPerformanceCurves(It.IsAny<Guid>()))
+                .Returns(() => args.Last());
+            //.Returns<List<PerformanceCurveDTO>>(x => args.Last());
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = Guid.NewGuid();
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
             // Assert

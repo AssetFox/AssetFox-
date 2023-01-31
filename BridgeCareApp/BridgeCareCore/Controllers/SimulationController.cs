@@ -31,7 +31,7 @@ namespace BridgeCareCore.Controllers
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
@@ -442,6 +442,32 @@ namespace BridgeCareCore.Controllers
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Getting NoTreatmentBeforeCommitted for {simulationName} ::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("ConvertSimulationOutputToRelational/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> ConvertSimulationOutputToRelational(Guid simulationId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.SimulationOutputRepo.ConvertSimulationOutpuFromJsonTorelational(simulationId);
+                });
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Converting Simulation Output from Json to Relational::{e.Message}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Converting Simulation Output from Json to Relationa::{e.Message}");
                 throw;
             }
         }

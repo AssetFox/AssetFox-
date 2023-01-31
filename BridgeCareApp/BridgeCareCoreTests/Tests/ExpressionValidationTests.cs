@@ -7,6 +7,7 @@ using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -17,7 +18,9 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Services;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
@@ -31,6 +34,26 @@ namespace BridgeCareCoreTests.Tests
         {
             var service = new ExpressionValidationService(TestHelper.UnitOfWork, new LogNLog());
             return service;
+        }
+
+        private ExpressionValidationService CreateValidationService(Mock<IUnitOfWork> unitOfWork)
+        {
+            var log = new LogNLog();
+            return new ExpressionValidationService(unitOfWork.Object, log);
+        }
+
+        private ExpressionValidationController CreateController(Mock<IUnitOfWork> unitOfWork)
+        {
+            var service = CreateValidationService(unitOfWork);
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var controller = new ExpressionValidationController(
+                service,
+                EsecSecurityMocks.Admin,
+                unitOfWork.Object,
+                hubService,
+                accessor);
+            return controller;
         }
 
         private ExpressionValidationController SetupController()
@@ -193,7 +216,8 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnEquationPost()
         {
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = CreateController(unitOfWork);
             // Arrange
             var model = new EquationValidationParameters
             {
@@ -213,7 +237,8 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldValidateEquation()
         {
             // Arrange
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = CreateController(unitOfWork);
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
@@ -225,8 +250,8 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.GetEquationValidationResult(model);
 
             // Assert
-            var validationResult = (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
-                typeof(ValidationResult));
+            var value = ActionResultAssertions.OkObject(result);
+            var validationResult = value as ValidationResult;
             Assert.True(validationResult.IsValid);
             Assert.Equal("Success", validationResult.ValidationMessage);
         }

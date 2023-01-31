@@ -373,15 +373,15 @@ namespace BridgeCareCore.Services
 
             var valuePerAttributeNamePerMaintainableAssetId = _unitOfWork.Context.AggregatedResult.Include(_ => _.MaintainableAsset)
                 .Where(_ => attributeNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == networkId)
-                .Select(aggregatedResult => new AggregatedResultEntity
+                .Select(aggregatedResult => new AggregatedResultDTO
                 {
                     MaintainableAssetId = aggregatedResult.MaintainableAssetId,
                     TextValue = aggregatedResult.TextValue,
                     NumericValue = aggregatedResult.NumericValue,
-                    Attribute = new AttributeEntity
+                    Attribute = new AbbreviatedAttributeDTO
                     {
                         Name = aggregatedResult.Attribute.Name,
-                        DataType = aggregatedResult.Attribute.DataType
+                        Type = aggregatedResult.Attribute.DataType
                     }
                 }).AsNoTracking().AsSplitQuery().AsEnumerable()
                 .GroupBy(_ => _.MaintainableAssetId, _ => _)
@@ -389,11 +389,11 @@ namespace BridgeCareCore.Services
                 {
                     var value = aggregatedResults.ToDictionary(_ => _.Attribute.Name, _ =>
                     {
-                        var data = _.Attribute.DataType == DataPersistenceConstants.AttributeNumericDataType
+                        var data = _.Attribute.Type == DataPersistenceConstants.AttributeNumericDataType
                             ? _.NumericValue?.ToString()
                             : _.TextValue;
 
-                        var type = _.Attribute.DataType;
+                        var type = _.Attribute.Type;
                         return (data, type);
                     });
                     return value;

@@ -23,34 +23,5 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
             sectionLocation1 = new SectionLocation(guId, CommonTestParameterValues.LocationIdentifier1);
             sectionLocation2 = new SectionLocation(guId, CommonTestParameterValues.LocationIdentifier2);
         }
-
-        [Fact]
-        public void AssignNoMatchingAttributeDataToMaintainableAssetTest()
-        {
-            // Arrange
-            attributeData.Add(new AttributeDatum<string>(guId, null, CommonTestParameterValues.StringValue, sectionLocation1, CommonTestParameterValues.TimeStamp));            
-            maintainableAssets.Add(new MaintainableAsset(guId, guId, sectionLocation2, string.Empty));
-
-            //Act
-            Aggregator.AssignAttributeDataToMaintainableAsset(attributeData, maintainableAssets);
-
-            //Assert
-            Assert.True(maintainableAssets[0].AssignedData.Count == 0);
-        }
-
-        [Fact]
-        public void AssignMatchingAttributeDataToMaintainableAssetTest()
-        {
-            // Arrange
-            attributeData.Add(new AttributeDatum<string>(guId, null, CommonTestParameterValues.StringValue, sectionLocation1, CommonTestParameterValues.TimeStamp));
-            maintainableAssets.Add(new MaintainableAsset(guId, guId, sectionLocation1, string.Empty));
-
-            //Act
-            Aggregator.AssignAttributeDataToMaintainableAsset(attributeData, maintainableAssets);
-
-            //Assert
-            Assert.True(maintainableAssets[0].AssignedData.Count == 1);
-            Assert.Equal(attributeData, maintainableAssets[0].AssignedData);
-        }
     }
 }

@@ -19,9 +19,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public SimulationRepository(UnitOfDataPersistenceWork unitOfWork)
+        public SimulationRepository(IUnitOfWork unitOfWork)
         {
-            _unitOfWork = unitOfWork ??
+            _unitOfWork = (unitOfWork as UnitOfDataPersistenceWork) ??
                           throw new ArgumentNullException(nameof(unitOfWork));
         }
 

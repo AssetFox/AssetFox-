@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using System.Text;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -73,6 +74,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
 
             _unitOfWork.Context.AddAll(aggregatedResultEntities, _unitOfWork.UserEntity?.Id);
+        }
+
+        public List<AggregatedResultDTO> GetAggregatedResultsForAttributeNames(Guid networkId, List<string> attributeNames)
+        {
+            return _unitOfWork.Context.AggregatedResult.Include(_ => _.MaintainableAsset)
+                .Where(_ => attributeNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == networkId)
+                .Select(aggregatedResult => new AggregatedResultDTO
+                {
+                    MaintainableAssetId = aggregatedResult.MaintainableAssetId,
+                    TextValue = aggregatedResult.TextValue,
+                    NumericValue = aggregatedResult.NumericValue,
+                    Attribute = new AttributeDTO
+                    {
+                        Name = aggregatedResult.Attribute.Name,
+                        Type = aggregatedResult.Attribute.DataType
+                    }
+                }).AsNoTracking().AsSplitQuery().ToList();
         }
     }
 }

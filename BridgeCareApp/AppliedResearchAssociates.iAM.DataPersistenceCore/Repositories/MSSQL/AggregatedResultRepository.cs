@@ -85,7 +85,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     MaintainableAssetId = aggregatedResult.MaintainableAssetId,
                     TextValue = aggregatedResult.TextValue,
                     NumericValue = aggregatedResult.NumericValue,
-                    Attribute = new AbbreviatedAttributeDTO
+                    Attribute = new AttributeDTO
                     {
                         Name = aggregatedResult.Attribute.Name,
                         Type = aggregatedResult.Attribute.DataType

@@ -9,6 +9,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public Guid MaintainableAssetId { get; set; }
         public string TextValue { get; set; }
         public double? NumericValue { get; set; }
-        public AbbreviatedAttributeDTO Attribute { get; set; }
+        public AttributeDTO Attribute { get; set; }
     }
 }

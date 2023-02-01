@@ -213,9 +213,10 @@ namespace BridgeCareCoreTests.Tests
             var aggregatedResult2 = AggregatedResultDtos.Number(AbbreviatedAttributeDtos.CulvDurationN, assetId, 1);
             var aggregatedResults = new List<AggregatedResultDTO> { aggregatedResult1, aggregatedResult2 };
             var networkId = Guid.NewGuid();
-            aggregatedResultRepo.Setup(a => a.GetAggregatedResultsForAttributeNames(networkId, It.IsAny<List<string>>())).Returns(aggregatedResults);
+            aggregatedResultRepo.Setup(a => a.GetAggregatedResultsForAttributeNames(networkId, It.Is<List<string>>(list => list.Count() == 2 && list.Contains(TestAttributeNames.CulvDurationN) && list.Contains(TestAttributeNames.ActionType)))).Returns(aggregatedResults);
             attributeRepo.Setup(r => r.GetAllAttributesAbbreviated()).Returns(attributes);
-            attributeRepo.Setup(r => r.GetAttributesWithNames(It.IsAny<List<string>>())).Returns(attributes);
+            attributeRepo.Setup(r => r.GetAttributesWithNames(It.Is<List<string>>(list => list.Count() == 2
+            && list.Contains(TestAttributeNames.CulvDurationN) && list.Contains(TestAttributeNames.ActionType)))).Returns(attributes);
             var model = new ValidationParameter
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
@@ -353,14 +354,19 @@ namespace BridgeCareCoreTests.Tests
                 AbbreviatedAttributeDtos.ActionType,
                 AbbreviatedAttributeDtos.CulvDurationN,
             };
+            var culvDurationAttributes = new List<AbbreviatedAttributeDTO>
+            {
+                AbbreviatedAttributeDtos.CulvDurationN
+            };
             var assetId = Guid.NewGuid();
-            var aggregatedResult1 = AggregatedResultDtos.Text(AbbreviatedAttributeDtos.ActionType, assetId, "test");
             var aggregatedResult2 = AggregatedResultDtos.Number(AbbreviatedAttributeDtos.CulvDurationN, assetId, 1);
-            var aggregatedResults = new List<AggregatedResultDTO> { aggregatedResult1, aggregatedResult2 };
+            var aggregatedResults = new List<AggregatedResultDTO> { aggregatedResult2 };
             var networkId = Guid.NewGuid();
-            aggregatedResultRepo.Setup(a => a.GetAggregatedResultsForAttributeNames(networkId, It.IsAny<List<string>>())).Returns(aggregatedResults);
+            aggregatedResultRepo.Setup(a => a.GetAggregatedResultsForAttributeNames(networkId, It.Is<List<string>>(list => list.Count() == 1
+            && list.Contains(TestAttributeNames.CulvDurationN)))).Returns(aggregatedResults);
             attributeRepo.Setup(r => r.GetAllAttributesAbbreviated()).Returns(attributes);
-            attributeRepo.Setup(r => r.GetAttributesWithNames(It.IsAny<List<string>>())).Returns(attributes);
+            attributeRepo.Setup(r => r.GetAttributesWithNames(It.Is<List<string>>(list => list.Count() == 1
+            && list.Contains(TestAttributeNames.CulvDurationN)))).Returns(culvDurationAttributes);
 
             var model = new ValidationParameter
             {

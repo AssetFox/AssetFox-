@@ -9,14 +9,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class AbbreviatedAttributeDtos
     {
-        public static AbbreviatedAttributeDTO CulvDurationN
+        public static AttributeDTO CulvDurationN
         => new()
         {
             Name = TestAttributeNames.CulvDurationN,
             Type = AttributeTypeNames.Number,
         };
 
-        public static AbbreviatedAttributeDTO ActionType
+        public static AttributeDTO ActionType
             => new()
             {
                 Name = TestAttributeNames.ActionType,

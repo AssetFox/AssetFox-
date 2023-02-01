@@ -9,14 +9,14 @@ namespace BridgeCareCoreTests.Tests
 {
     public static class AggregatedResultDtos
     {
-        public static AggregatedResultDTO Text(AbbreviatedAttributeDTO attribute, Guid assetId, string text)
+        public static AggregatedResultDTO Text(AttributeDTO attribute, Guid assetId, string text)
             => new()
             {
                 Attribute = attribute,
                 MaintainableAssetId = assetId,
                 TextValue = text
             };
-        public static AggregatedResultDTO Number(AbbreviatedAttributeDTO attribute, Guid assetId, double number)
+        public static AggregatedResultDTO Number(AttributeDTO attribute, Guid assetId, double number)
             => new()
             {
                 Attribute = attribute,

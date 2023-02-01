@@ -173,7 +173,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
             var controller = CreateController(unitOfWork);
-            var attributes = new List<AbbreviatedAttributeDTO>
+            var attributes = new List<AttributeDTO>
             {
                 AbbreviatedAttributeDtos.CulvDurationN,
             };
@@ -203,7 +203,7 @@ namespace BridgeCareCoreTests.Tests
             var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
             var aggregatedResultRepo = AggregatedResultRepositoryMocks.New(unitOfWork);
             var controller = CreateController(unitOfWork);
-            var attributes = new List<AbbreviatedAttributeDTO>
+            var attributes = new List<AttributeDTO>
             {
                 AbbreviatedAttributeDtos.ActionType,
                 AbbreviatedAttributeDtos.CulvDurationN,
@@ -269,7 +269,7 @@ namespace BridgeCareCoreTests.Tests
                 Expression = "[FALSE_ATTRIBUTE]",
                 IsPiecewise = false
             };
-            var attributes = new List<AbbreviatedAttributeDTO>
+            var attributes = new List<AttributeDTO>
             {
                 AbbreviatedAttributeDtos.ActionType,
                 AbbreviatedAttributeDtos.CulvDurationN,
@@ -292,7 +292,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-            var attributes = new List<AbbreviatedAttributeDTO>
+            var attributes = new List<AttributeDTO>
             {
                 AbbreviatedAttributeDtos.ActionType,
                 AbbreviatedAttributeDtos.CulvDurationN,
@@ -316,7 +316,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ValidateInvalidCriterion_NotValid()
         {
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-            var attributes = new List<AbbreviatedAttributeDTO>
+            var attributes = new List<AttributeDTO>
             {
                 AbbreviatedAttributeDtos.ActionType,
                 AbbreviatedAttributeDtos.CulvDurationN,
@@ -349,12 +349,12 @@ namespace BridgeCareCoreTests.Tests
             var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
             var aggregatedResultRepo = AggregatedResultRepositoryMocks.New(unitOfWork);
             var controller = CreateController(unitOfWork);
-            var attributes = new List<AbbreviatedAttributeDTO>
+            var attributes = new List<AttributeDTO>
             {
                 AbbreviatedAttributeDtos.ActionType,
                 AbbreviatedAttributeDtos.CulvDurationN,
             };
-            var culvDurationAttributes = new List<AbbreviatedAttributeDTO>
+            var culvDurationAttributes = new List<AttributeDTO>
             {
                 AbbreviatedAttributeDtos.CulvDurationN
             };

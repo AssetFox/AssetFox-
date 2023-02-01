@@ -15,9 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using BridgeCareCore.Utils.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
@@ -36,7 +34,7 @@ namespace BridgeCareCore.Controllers
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         public TreatmentController(ITreatmentService treatmentService, ITreatmentPagingService treatmentPagingService,
             IEsecSecurity esecSecurity,
-            UnitOfDataPersistenceWork unitOfWork,
+            IUnitOfWork unitOfWork,
             IHubService hubService,
             IHttpContextAccessor httpContextAccessor,
             IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
@@ -172,32 +170,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-
                 var result = new TreatmentDTO();
                 await Task.Factory.StartNew(() =>
                 {
-                    var entity = UnitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
-                    .Include(_ => _.ScenarioTreatmentCosts)
-                    .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.ScenarioTreatmentCosts)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.ScenarioTreatmentConsequences.OrderBy(__ => __.Attribute.Name))
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.ScenarioTreatmentConsequences)
-                    .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.ScenarioTreatmentConsequences)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
-                    .ThenInclude(_ => _.ScenarioBudget)
-                    .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Single(_ => _.Id == id);
-                    _claimHelper.CheckUserSimulationReadAuthorization(entity.SimulationId, UserId);
-                    result = entity.ToDto();
+                    var scenarioTreatment = UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentById(id);
+                    _claimHelper.CheckUserSimulationReadAuthorization(scenarioTreatment.SimulationId, UserId);
+                    result = scenarioTreatment.Treatment;
                 });
 
                 return Ok(result);

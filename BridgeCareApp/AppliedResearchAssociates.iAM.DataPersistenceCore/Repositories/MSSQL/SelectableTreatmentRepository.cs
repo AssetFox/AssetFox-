@@ -658,7 +658,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public TreatmentDTO GetScenarioSelectableTreatmentById(Guid id)
+        public TreatmentDTOWithSimulationId GetScenarioSelectableTreatmentById(Guid id)
         {
             return _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Include(_ => _.ScenarioTreatmentCosts)
@@ -679,7 +679,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.ScenarioBudget)
                 .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Single(_ => _.Id == id).ToDto();
+                .Single(_ => _.Id == id)
+                .ToDtoWithSimulationId();
         }
 
         public TreatmentDTO GetSelectableTreatmentById(Guid id)

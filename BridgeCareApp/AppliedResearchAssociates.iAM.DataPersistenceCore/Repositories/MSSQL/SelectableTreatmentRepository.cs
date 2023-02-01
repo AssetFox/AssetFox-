@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -701,9 +701,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Single(_ => _.Id == id).ToDto();
+                .Single(_ => _.Id == id)
+                .ToDto();
         }
 
+        public TreatmentLibraryDTO GetTreatmentLibraryWithSingleTreatmentByTreatmentId(Guid treatmentId)
+        {
+            var entity = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.TreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.TreatmentConsequences.OrderBy(__ => __.Attribute.Name))
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.TreatmentLibrary)
+                .Single(_ => _.Id == treatmentId);
+            return entity.TreatmentLibrary.ToDto();
+        }
         public TreatmentDTO GetDefaultNoTreatment(Guid simulationId)
         {
             try
@@ -732,5 +756,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new InvalidOperationException("More than one default treatments found in scenario" + simulationName);
             }
         }
+
     }
 }

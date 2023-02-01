@@ -108,37 +108,17 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-
                 var result = new TreatmentDTO();
                 await Task.Factory.StartNew(() =>
                 {
-                    var entity = UnitOfWork.Context.SelectableTreatment.AsNoTracking()
-                    .Include(_ => _.TreatmentCosts)
-                    .ThenInclude(_ => _.TreatmentCostEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.TreatmentCosts)
-                    .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.TreatmentConsequences.OrderBy(__ => __.Attribute.Name))
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.TreatmentConsequences)
-                    .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.TreatmentConsequences)
-                    .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.TreatmentLibrary)
-                    .Single(_ => _.Id == id);
-                    var library = entity.TreatmentLibrary.ToDto();
+                    var library = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraryWithSingleTreatmentByTreatmentId(id);
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         if (library.Owner == UserId || library.IsShared == true)
-                            result = entity.ToDto();
+                            result = library.Treatments[0];
                     }
                     else
-                        result = entity.ToDto();
+                        result = library.Treatments[0];
                 });
 
                 return Ok(result);

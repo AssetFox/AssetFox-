@@ -1,18 +1,14 @@
-﻿using System;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
-using BridgeCareCore.Security;
 using MoreLinq;
 using Xunit;
 using Assert = Xunit.Assert;
 
-namespace BridgeCareCoreTests.Tests 
+namespace BridgeCareCoreTests.Tests
 {
     public class UpdateScenarioPerformanceCurveTests
     {
@@ -183,7 +179,6 @@ namespace BridgeCareCoreTests.Tests
             Assert.Null(criterionLibraryJoinAfter);
         }
 
-        private const string Reason = "Not updated";
         [Fact]
         public async Task UpsertScenarioPerformanceCurves_CurveInDbWithCriterionLibrary_CurveRemovedFromUpsertedLibrary_RemovesCurveAndCriterionJoin()
         {

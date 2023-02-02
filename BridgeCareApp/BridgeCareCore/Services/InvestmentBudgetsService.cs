@@ -152,7 +152,7 @@ namespace BridgeCareCore.Services
 
                 var budgetWorksheet = excelPackage.Workbook.Worksheets.Add("Budget");
 
-                var budgetNames = budgetAmounts.Select(_ => _.ScenarioBudget.Name).Distinct().OrderBy(budgetName => budgetName)
+                var budgetNames = budgetAmounts.Select(_ => _.BudgetName).Distinct().OrderBy(budgetName => budgetName)
                     .ToList();
 
                 AddHeaderCells(budgetWorksheet, budgetNames);
@@ -161,7 +161,7 @@ namespace BridgeCareCore.Services
                     .OrderBy(budgetAmount => budgetAmount.Year)
                     .GroupBy(budgetAmount => budgetAmount.Year, entities => entities)
                     .ToDictionary(group => group.Key, entities => entities
-                        .OrderBy(budgetAmount => budgetAmount.ScenarioBudget.Name)
+                        .OrderBy(budgetAmount => budgetAmount.BudgetName)
                         .Select(budgetAmount => budgetAmount.Value).ToList());
 
                 AddDataCells(budgetWorksheet, budgetAmountsPerYear);

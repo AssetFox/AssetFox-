@@ -861,7 +861,7 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
                 .GetScenarioBudgetAmounts(simulation.Id)
-                .Where(_ => _.ScenarioBudget.Name.IndexOf("Sample") != -1)
+                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
                 .ToList();
 
             Assert.Equal(2, budgetAmounts.Count);
@@ -999,7 +999,7 @@ namespace BridgeCareCoreTests.Tests
 
             var excelPackage = new ExcelPackage(memStream);
             var worksheet = excelPackage.Workbook.Worksheets[0];
-
+            Assert.Equal("Year", worksheet.Cells[1, 1, 1, 1].GetValue<string>());
             var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
             Assert.True(worksheetBudgetNames.Any());
@@ -1007,7 +1007,8 @@ namespace BridgeCareCoreTests.Tests
 
             var worksheetBudgetYearAndAmount = worksheet.Cells[2, 1, 2, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
-            //  Assert.Equal(expectedYear.ToString(), worksheetBudgetYearAndAmount[0]);
+            var expectedYear = DateTime.Now.Year;
+            Assert.Equal(expectedYear.ToString(), worksheetBudgetYearAndAmount[0]);
             Assert.Equal(_testScenarioBudget.ScenarioBudgetAmounts.ToList()[0].Value.ToString(), worksheetBudgetYearAndAmount[1]);
         }
 

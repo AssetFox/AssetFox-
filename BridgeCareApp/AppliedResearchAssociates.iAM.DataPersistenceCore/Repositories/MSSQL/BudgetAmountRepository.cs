@@ -118,7 +118,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }).AsNoTracking().ToList();
         }
 
-        public List<ScenarioBudgetAmountEntity> GetScenarioBudgetAmounts(Guid simulationId)
+        public List<BudgetAmountDTO> GetScenarioBudgetAmounts(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
@@ -127,11 +127,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return _unitOfWork.Context.ScenarioBudgetAmount.AsNoTracking()
                 .Where(_ => _.ScenarioBudget.SimulationId == simulationId)
-                .Select(budgetAmount => new ScenarioBudgetAmountEntity
+                .Include(sb => sb.ScenarioBudget)
+                .Select(budgetAmount => new BudgetAmountDTO
                 {
                     Year = budgetAmount.Year,
                     Value = budgetAmount.Value,
-                    ScenarioBudget = new ScenarioBudgetEntity {Name = budgetAmount.ScenarioBudget.Name, BudgetOrder=budgetAmount.ScenarioBudget.BudgetOrder}
+                    BudgetName = budgetAmount.ScenarioBudget.Name,
                 }).AsNoTracking().ToList();
         }
     }

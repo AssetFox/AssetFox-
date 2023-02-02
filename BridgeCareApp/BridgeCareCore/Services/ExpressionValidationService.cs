@@ -6,13 +6,10 @@ using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Models.Validation;
-using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
 namespace BridgeCareCore.Services
@@ -39,11 +36,11 @@ namespace BridgeCareCore.Services
 
                 var expression = model.Expression.Trim();
                 CheckAttributes(expression);
-                var attributes = _unitOfWork.Context.Attribute.ToList();
+                var attributes = _unitOfWork.AttributeRepo.GetAllAttributesAbbreviated();
                 var compiler = new CalculateEvaluateCompiler();
                 foreach (var attribute in attributes.Where(_ => expression.Contains(_.Name)))
                 {
-                    compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                    compiler.ParameterTypes[attribute.Name] = attribute.Type == "NUMBER"
                         ? CalculateEvaluateParameterType.Number
                         : CalculateEvaluateParameterType.Text;
                 }
@@ -179,25 +176,19 @@ namespace BridgeCareCore.Services
                 var pattern = "\\[[^\\]]*\\]";
                 var rg = new Regex(pattern);
                 var match = rg.Matches(mergedCriteriaExpression);
-                var hashMatch = new HashSet<string>();
+                var attributeNames = new List<string>();
                 foreach (Match m in match)
                 {
-                    hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
+                    attributeNames.Add(m.Value.Substring(1, m.Value.Length - 2));
                 }
 
-                var attributes = _unitOfWork.Context.Attribute
-                    .Where(_ => hashMatch.Contains(_.Name))
-                    .Select(attribute => new AttributeEntity
-                    {
-                        Name = attribute.Name,
-                        DataType = attribute.DataType
-                    }).AsNoTracking().ToList();
+                var attributes = _unitOfWork.AttributeRepo.GetAttributesWithNames(attributeNames);
 
                 var compiler = new CalculateEvaluateCompiler();
 
                 attributes.ForEach(attribute =>
                 {
-                    compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                    compiler.ParameterTypes[attribute.Name] = attribute.Type == "NUMBER"
                         ? CalculateEvaluateParameterType.Number
                         : CalculateEvaluateParameterType.Text;
                 });
@@ -207,7 +198,7 @@ namespace BridgeCareCore.Services
                 var customAttribute = new List<(string name, string datatype)>();
                 foreach (var attribute in attributes)
                 {
-                    customAttribute.Add((attribute.Name, attribute.DataType));
+                    customAttribute.Add((attribute.Name, attribute.Type));
                 }
 
                 var resultsCount = GetResultsCount(modifiedExpression, customAttribute, networkId);
@@ -258,25 +249,19 @@ namespace BridgeCareCore.Services
                 var pattern = "\\[[^\\]]*\\]";
                 var rg = new Regex(pattern);
                 var match = rg.Matches(mergedCriteriaExpression);
-                var hashMatch = new HashSet<string>();
+                var hashMatch = new List<string>();
                 foreach (Match m in match)
                 {
                     hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
                 }
 
-                var attributes = _unitOfWork.Context.Attribute
-                    .Where(_ => hashMatch.Contains(_.Name))
-                    .Select(attribute => new AttributeEntity
-                    {
-                        Name = attribute.Name,
-                        DataType = attribute.DataType
-                    }).AsNoTracking().ToList();
+                var attributes = _unitOfWork.AttributeRepo.GetAttributesWithNames(hashMatch);
 
                 var compiler = new CalculateEvaluateCompiler();
 
                 attributes.ForEach(attribute =>
                 {
-                    compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                    compiler.ParameterTypes[attribute.Name] = attribute.Type == "NUMBER"
                         ? CalculateEvaluateParameterType.Number
                         : CalculateEvaluateParameterType.Text;
                 });
@@ -302,11 +287,11 @@ namespace BridgeCareCore.Services
 
         private void CheckAttributes(string target)
         {
-            var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
+            var attributes = _unitOfWork.AttributeRepo.GetAllAttributesAbbreviated();
             target = target.Replace('[', '?');
             foreach (var allowedAttribute in attributes.Where(allowedAttribute => target.IndexOf("?" + allowedAttribute.Name + "]", StringComparison.Ordinal) >= 0))
             {
-                target = allowedAttribute.DataType == "STRING"
+                target = allowedAttribute.Type == "STRING"
                     ? target.Replace("?" + allowedAttribute.Name + "]", "[@" + allowedAttribute.Name + "]")
                     : target.Replace("?" + allowedAttribute.Name + "]", "[" + allowedAttribute.Name + "]");
             }
@@ -377,28 +362,20 @@ namespace BridgeCareCore.Services
                 attributeNames.Add(attribute.name);
             }
 
-            var valuePerAttributeNamePerMaintainableAssetId = _unitOfWork.Context.AggregatedResult.Include(_ => _.MaintainableAsset)
-                .Where(_ => attributeNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == networkId)
-                .Select(aggregatedResult => new AggregatedResultEntity
-                {
-                    MaintainableAssetId = aggregatedResult.MaintainableAssetId,
-                    TextValue = aggregatedResult.TextValue,
-                    NumericValue = aggregatedResult.NumericValue,
-                    Attribute = new AttributeEntity
-                    {
-                        Name = aggregatedResult.Attribute.Name, DataType = aggregatedResult.Attribute.DataType
-                    }
-                }).AsNoTracking().AsSplitQuery().AsEnumerable()
+            var results =
+                _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(networkId,
+                attributeNames);
+            var valuePerAttributeNamePerMaintainableAssetId = results
                 .GroupBy(_ => _.MaintainableAssetId, _ => _)
                 .ToDictionary(_ => _.Key, aggregatedResults =>
                 {
                     var value = aggregatedResults.ToDictionary(_ => _.Attribute.Name, _ =>
                     {
-                        var data = _.Attribute.DataType == DataPersistenceConstants.AttributeNumericDataType
+                        var data = _.Attribute.Type == DataPersistenceConstants.AttributeNumericDataType
                             ? _.NumericValue?.ToString()
                             : _.TextValue;
 
-                        var type = _.Attribute.DataType;
+                        var type = _.Attribute.Type;
                         return (data, type);
                     });
                     return value;

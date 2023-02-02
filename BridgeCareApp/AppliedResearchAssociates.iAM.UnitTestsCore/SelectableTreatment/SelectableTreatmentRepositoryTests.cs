@@ -168,6 +168,51 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
+        public void GetTreatmentLibraryWithSingleTreatmentByTreatmentId_TreatmentInDb_Expected()
+        {
+            // Arrange
+            Setup();
+            CreateLibraryTestData();
+
+            // Act
+            var libraryDTO = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraryWithSingleTreatmentByTreatmentId(_testTreatment.Id);
+
+            // Assert
+            Assert.Equal(_testTreatmentLibrary.Id, libraryDTO.Id);
+            var dto = libraryDTO.Treatments[0];
+
+            Assert.Equal(_testTreatment.Id, dto.Id);
+            Assert.Single(dto.Consequences);
+            Assert.Single(dto.Costs);
+
+            Assert.Equal(_testTreatmentConsequence.Id, dto.Consequences[0].Id);
+            Assert.Equal(_testTreatmentCost.Id, dto.Costs[0].Id);
+        }
+
+        [Fact]
+        public void GetScenarioSelectableTreatmentById_TreatmentInDb_Expected()
+        {
+            Setup();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var budget = CreateScenarioTestData(simulation.Id);
+
+            // Act
+            var treatmentDtoWithSimulationId = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentById(_testScenarioTreatment.Id);
+
+            // Assert
+            Assert.Equal(simulation.Id, treatmentDtoWithSimulationId.SimulationId);
+            var treatmentDto = treatmentDtoWithSimulationId.Treatment;
+            Assert.Equal(_testScenarioTreatment.Id, treatmentDto.Id);
+            Assert.Single(treatmentDto.Consequences);
+            Assert.Single(treatmentDto.Costs);
+            Assert.Single(treatmentDto.BudgetIds);
+
+            Assert.Equal(_testScenarioTreatmentConsequence.Id, treatmentDto.Consequences[0].Id);
+            Assert.Equal(_testScenarioTreatmentCost.Id, treatmentDto.Costs[0].Id);
+            Assert.Contains(budget.Id, treatmentDto.BudgetIds);
+        }
+
+        [Fact]
         public void ShouldReturnOkResultOnLibraryPost()
         {
             // Arrange

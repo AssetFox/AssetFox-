@@ -1,231 +1,80 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
-using BridgeCareCore.Models;
-using BridgeCareCore.Services.Treatment;
-using BridgeCareCore.Services;
-using BridgeCareCore.Utils;
-using BridgeCareCore.Utils.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
-using Xunit;
-
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
+using BridgeCareCore.Services;
+using BridgeCareCore.Services.Treatment;
+using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
 using BridgeCareCoreTests.Tests.Treatment;
-using NuGet.LibraryModel;
-using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
     public class TreatmentTests
     {
-        private TreatmentLibraryEntity _testTreatmentLibrary;
-        private SelectableTreatmentEntity _testTreatment;
-        private TreatmentCostEntity _testTreatmentCost;
-        private ConditionalTreatmentConsequenceEntity _testTreatmentConsequence;
-        private ScenarioSelectableTreatmentEntity _testScenarioTreatment;
-        private ScenarioTreatmentCostEntity _testScenarioTreatmentCost;
-        private ScenarioConditionalTreatmentConsequenceEntity _testScenarioTreatmentConsequence;
-        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
-
-        private void Setup()
-        {
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-        }
-
-        private TreatmentController CreateAuthorizedController()
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentPagingServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
-            return controller;
-        }
-
-        private TreatmentController CreateAuthorizedControllerWithTreatmService()
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var treatmentService = new TreatmentService(TestHelper.UnitOfWork, new ExcelTreatmentLoader(new Mock<IExpressionValidationService>().Object));
-            var treatmentPagingService = new TreatmentPagingService(TestHelper.UnitOfWork);
-            var controller = new TreatmentController(treatmentService, treatmentPagingService, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
-            return controller;
-        }
-
-
-        private TreatmentController CreateUnauthorizedController()
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentPagingServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
-            return controller;
-        }
-
-        private TreatmentController CreateTestController(List<string> userClaims)
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
-            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentPagingServiceMocks.EmptyMock.Object,  EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = testUser }
-            };
-            return controller;
-        }
-
-        private void CreateLibraryTestData()
-        {
-            _testTreatmentLibrary = new TreatmentLibraryEntity { Id = Guid.NewGuid(), Name = "Test Name" };
-            TestHelper.UnitOfWork.Context.TreatmentLibrary.Add(_testTreatmentLibrary);
-
-            _testTreatment = new SelectableTreatmentEntity
-            {
-                Id = Guid.NewGuid(),
-                TreatmentLibraryId = _testTreatmentLibrary.Id,
-                Name = "Test Name",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 1
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(_testTreatment);
-
-            _testTreatmentCost = new TreatmentCostEntity { Id = Guid.NewGuid(), TreatmentId = _testTreatment.Id };
-            TestHelper.UnitOfWork.Context.AddEntity(_testTreatmentCost);
-
-            _testTreatmentConsequence = new ConditionalTreatmentConsequenceEntity
-            {
-                Id = Guid.NewGuid(),
-                SelectableTreatmentId = _testTreatment.Id,
-                ChangeValue = "1",
-                AttributeId = TestHelper.UnitOfWork.Context.Attribute.First().Id
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(_testTreatmentConsequence);
-
-            TestHelper.UnitOfWork.Context.SaveChanges();
-        }
-
-        private ScenarioBudgetEntity CreateScenarioTestData(Guid simulationId)
-        {
-            var budget = new ScenarioBudgetEntity
-            {
-                Id = Guid.NewGuid(),
-                SimulationId = simulationId,
-                Name = "Test Name"
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(budget);
-
-
-            _testScenarioTreatment = new ScenarioSelectableTreatmentEntity
-            {
-                Id = Guid.NewGuid(),
-                SimulationId = simulationId,
-                Name = "Test Name",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 1,
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatment);
-            TestHelper.UnitOfWork.Context.AddEntity(new ScenarioSelectableTreatmentScenarioBudgetEntity
-            {
-                ScenarioBudgetId = budget.Id,
-                ScenarioSelectableTreatmentId = _testScenarioTreatment.Id
-            });
-
-            _testScenarioTreatmentCost = new ScenarioTreatmentCostEntity
-            {
-                Id = Guid.NewGuid(),
-                ScenarioSelectableTreatmentId = _testScenarioTreatment.Id
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatmentCost);
-
-
-            _testScenarioTreatmentConsequence = new ScenarioConditionalTreatmentConsequenceEntity
-            {
-                Id = Guid.NewGuid(),
-                ScenarioSelectableTreatmentId = _testScenarioTreatment.Id,
-                ChangeValue = "1",
-                AttributeId = TestHelper.UnitOfWork.Context.Attribute.First().Id
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatmentConsequence);
-
-
-            TestHelper.UnitOfWork.Context.SaveChanges();
-            return budget;
-        }
-
         [Fact]
-        public async Task ShouldGetSelectedTreatmentByIdWithDataUnfixable()
+        public async Task ShouldGetSelectedTreatmentByIdWithData()
         {
             // Arrange
-            Setup();
-            var controller = CreateAuthorizedController();
-            CreateLibraryTestData();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var treatmentId = Guid.NewGuid();
+            var libraryId = Guid.NewGuid();
+            var library = TreatmentLibraryDtos.WithSingleTreatment(libraryId, treatmentId);
+            treatmentRepo.Setup(t => t.GetTreatmentLibraryWithSingleTreatmentByTreatmentId(treatmentId)).Returns(library);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork);
 
             // Act
-            var result = await controller.GetSelectedTreatmentById(_testTreatment.Id);
+            var result = await controller.GetSelectedTreatmentById(treatmentId);
 
             // Assert
             var okObjResult = result as OkObjectResult;
             Assert.NotNull(okObjResult.Value);
 
             var dto = (TreatmentDTO)Convert.ChangeType(okObjResult.Value,
-                typeof(TreatmentDTO));        
-
-            Assert.Equal(_testTreatment.Id, dto.Id);
-            Assert.Single(dto.Consequences);
-            Assert.Single(dto.Costs);
-
-            Assert.Equal(_testTreatmentConsequence.Id, dto.Consequences[0].Id);
-            Assert.Equal(_testTreatmentCost.Id, dto.Costs[0].Id);
+                typeof(TreatmentDTO));
+            ObjectAssertions.Equivalent(library.Treatments[0], dto);
         }
+
         [Fact]
-        public async Task ShouldGetScenarioSelectedTreatmentByIdWithDataUnfixable()
+        public async Task ShouldGetScenarioSelectedTreatmentByIdWithData()
         {
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateAuthorizedController();
-            var budget = CreateScenarioTestData(simulation.Id);
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var treatmentId = Guid.NewGuid();
+            var simulationId = Guid.NewGuid();
+            var treatment = TreatmentDtos.Dto(treatmentId);
+            var treatmentWithSimulation = new TreatmentDTOWithSimulationId
+            {
+                SimulationId = simulationId,
+                Treatment = treatment,
+            };
+            treatmentRepo.Setup(t => t.GetScenarioSelectableTreatmentById(treatmentId)).Returns(treatmentWithSimulation);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork);
 
             // Act
-            var result = await controller.GetScenarioSelectedTreatmentById(_testScenarioTreatment.Id);
+            var result = await controller.GetScenarioSelectedTreatmentById(treatmentId);
 
             // Assert
-            var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
-            var dto = (TreatmentDTO)Convert.ChangeType(okObjResult.Value, typeof(TreatmentDTO));
-
-            Assert.Equal(_testScenarioTreatment.Id, dto.Id);
-            Assert.Single(dto.Consequences);
-            Assert.Single(dto.Costs);
-            Assert.Single(dto.BudgetIds);
-
-            Assert.Equal(_testScenarioTreatmentConsequence.Id, dto.Consequences[0].Id);
-            Assert.Equal(_testScenarioTreatmentCost.Id, dto.Costs[0].Id);
-            Assert.Contains(budget.Id, dto.BudgetIds);
+            var value = ActionResultAssertions.OkObject(result);
+            ObjectAssertions.Equivalent(treatment, value);
         }
 
         [Fact]
@@ -512,91 +361,6 @@ namespace BridgeCareCoreTests.Tests
             //Assert.True(
             //    !TestHelper.UnitOfWork.Context.TreatmentConsequence.Any(_ =>
             //        _.Id == _testTreatmentConsequence.Id));
-        }
-        [Fact]
-        public async Task UserIsViewTreatmentFromLibraryAuthorized()
-        {
-            // Admin authorized
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ViewTreatmentFromLibrary,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentViewAnyFromLibraryAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewTreatmentFromLibrary);
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsModifyTreatementFromScenarioAuthorized()
-        {
-            // Non-admin authorized
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ModifyTreatmentFromScenario,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentModifyAnyFromScenarioAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentModifyPermittedFromScenarioAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyTreatmentFromScenario);
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsDeleteTreatmentFromLibraryAuthorized()
-        {
-            // Non-admin unauthorized
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.DeleteTreatmentFromLibrary,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentDeletePermittedFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentDeleteAnyFromLibraryAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.DeleteTreatmentFromLibrary);
-            // Assert
-            Assert.False(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsViewTreatmentFromLibraryAuthorized_B2C()
-        {
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ViewTreatmentFromLibrary,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentViewAnyFromLibraryAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewTreatmentFromLibrary);
-            // Assert
-            Assert.True(allowed.Succeeded);
         }
     }
 }

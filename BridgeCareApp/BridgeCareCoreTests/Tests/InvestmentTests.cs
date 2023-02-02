@@ -672,7 +672,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
         }
 
-        [Fact(Skip = "WJ needs a working front end to investigate this failure, which arose over the new year -- but that may not be the whole issue with it")]
+        [Fact]
         public async Task ShouldOverwriteExistingLibraryBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange

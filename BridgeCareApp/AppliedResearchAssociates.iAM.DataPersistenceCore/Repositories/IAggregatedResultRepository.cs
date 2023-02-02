@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -14,5 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateAggregatedResults<T>(
             Dictionary<(Guid maintainableAssetId, Guid attributeId), IAttributeValueHistory<T>>
                 attributeValueHistoryPerMaintainableAssetIdAttributeIdTuple);
+
+        List<AggregatedResultDTO> GetAggregatedResultsForAttributeNames(Guid networkId, List<string> attributeNames);
     }
 }

@@ -33,5 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildren();
 
         List<int> GetBudgetYearsBySimulationId(Guid simulationId);
+        Dictionary<string, string> GetCriteriaPerBudgetNameForSimulation(Guid simulationId);
+        Dictionary<string, string> GetCriteriaPerBudgetNameForBudgetLibrary(Guid budgetLibraryId);
     }
 }

@@ -134,13 +134,7 @@ namespace BridgeCareCore.Services
         {
             // hit by InvestmentTests.ShouldExportScenarioBudgetsFile and by InvestmentTests.ShouldExportSampleScenarioBudgetsFile
             var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(simulationId);
-            var criteriaPerBudgetName = _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
-                .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .Where(_ => _.SimulationId == simulationId)
-                .ToDictionary(_ => _.Name,
-                    _ => _.CriterionLibraryScenarioBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? "");
-
+            var criteriaPerBudgetName = _unitOfWork.BudgetRepo.GetCriteriaPerBudgetNameForSimulation(simulationId);
             if (budgetAmounts.Any())
             {
                 var simulationName = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
@@ -197,12 +191,7 @@ namespace BridgeCareCore.Services
         {
             // InvestmentTests.ShouldExportSampleLibraryBudgetsFile
             var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetLibraryBudgetAmounts(budgetLibraryId);
-            var criteriaPerBudgetName = _unitOfWork.Context.Budget.AsNoTracking().AsSplitQuery()
-                .Include(_ => _.CriterionLibraryBudgetJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .Where(_ => _.BudgetLibraryId == budgetLibraryId)
-                .ToDictionary(_ => _.Name,
-                    _ => _.CriterionLibraryBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? "");
+            var criteriaPerBudgetName = _unitOfWork.BudgetRepo.GetCriteriaPerBudgetNameForBudgetLibrary(budgetLibraryId);
 
             if (budgetAmounts.Any())
             {

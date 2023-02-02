@@ -312,5 +312,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return years;
         }
+
+        public Dictionary<string, string> GetCriteriaPerBudgetNameForSimulation(Guid simulationId)
+        {
+            var criteriaPerBudgetName = _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
+                .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Where(_ => _.SimulationId == simulationId)
+                .ToDictionary(_ => _.Name,
+                    _ => _.CriterionLibraryScenarioBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? "");
+            return criteriaPerBudgetName;
+        }
+
+        public Dictionary<string, string> GetCriteriaPerBudgetNameForBudgetLibrary(Guid budgetLibraryId)
+        {
+            var criteriaPerBudgetName = _unitOfWork.Context.Budget.AsNoTracking().AsSplitQuery()
+                .Include(_ => _.CriterionLibraryBudgetJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Where(_ => _.BudgetLibraryId == budgetLibraryId)
+                .ToDictionary(_ => _.Name,
+                    _ => _.CriterionLibraryBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? "");
+            return criteriaPerBudgetName;
+        }
     }
 }

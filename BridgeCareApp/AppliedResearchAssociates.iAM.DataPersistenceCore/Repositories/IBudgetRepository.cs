@@ -37,5 +37,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         Dictionary<string, string> GetCriteriaPerBudgetNameForBudgetLibrary(Guid budgetLibraryId);
         string GetBudgetLibraryName(Guid budgetLibraryId);
         void DeleteAllScenarioBudgetsForSimulation(Guid simulationId);
+        void DeleteAllBudgetsForLibrary(Guid budgetLibraryId);
     }
 }

@@ -102,6 +102,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertBudgetLibrary(BudgetLibraryDTO dto) =>
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
 
+        public void DeleteAllBudgetsForLibrary(Guid budgetLibraryId)
+        {
+            _unitOfWork.Context.DeleteAll<BudgetEntity>(_ => _.BudgetLibraryId == budgetLibraryId);
+
+        }
+
         public void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId)
         {
             if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
@@ -346,6 +352,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteAllScenarioBudgetsForSimulation(Guid simulationId)
         {
+            var projects = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId && _.ScenarioBudgetId != null).ToList();
+            if (projects.Count > 0)
+            {
+                projects.ForEach(_ => _.ScenarioBudgetId = null);
+                _unitOfWork.Context.UpdateAll(projects);
+            }
             _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
         }
     }

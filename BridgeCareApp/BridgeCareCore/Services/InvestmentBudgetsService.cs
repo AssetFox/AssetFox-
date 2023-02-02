@@ -137,8 +137,11 @@ namespace BridgeCareCore.Services
             var criteriaPerBudgetName = _unitOfWork.BudgetRepo.GetCriteriaPerBudgetNameForSimulation(simulationId);
             if (budgetAmounts.Any())
             {
-                var simulationName = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
-                    .Select(_ => new SimulationEntity { Name = _.Name }).AsNoTracking().Single().Name;
+                var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
+                if (simulationName == null)
+                {
+                    throw new InvalidOperationException($"No simulation with id {simulationId}");
+                }
 
                 var fileName = $"{simulationName.Trim().Replace(" ", "_")}_investment_budgets.xlsx";
 
@@ -279,12 +282,6 @@ namespace BridgeCareCore.Services
                 {
                     var budgetNames = criteriaPerBudgetName.Keys.ToList();
                     _unitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForSimulation(simulationId, budgetNames);
-                }
-                var projects = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId && _.ScenarioBudgetId != null).ToList();
-                if (projects.Count > 0)
-                {
-                    projects.ForEach(_ => _.ScenarioBudgetId = null);
-                    _unitOfWork.Context.UpdateAll(projects);
                 }
 
                 _unitOfWork.BudgetRepo.DeleteAllScenarioBudgetsForSimulation(simulationId);
@@ -498,7 +495,7 @@ namespace BridgeCareCore.Services
                     _unitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(budgetLibraryId, budgetNames);
                 }
 
-                _unitOfWork.Context.DeleteAll<BudgetEntity>(_ => _.BudgetLibraryId == budgetLibraryId);
+                _unitOfWork.BudgetRepo.DeleteAllBudgetsForLibrary(budgetLibraryId);
             }
 
             var existingBudgetEntities = _unitOfWork.BudgetRepo.GetLibraryBudgets(budgetLibraryId);
@@ -563,10 +560,7 @@ namespace BridgeCareCore.Services
                 allBudgetEntities.AddRange(newBudgetEntities);
 
                 var budgetNames = criteriaPerBudgetName.Keys.ToList();
-                _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
-                    _.IsSingleUse && _.CriterionLibraryBudgetJoins.Any(join =>
-                        join.Budget.BudgetLibraryId == budgetLibraryId &&
-                        budgetNames.Contains(join.Budget.Name)));
+                _unitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(budgetLibraryId, budgetNames);
 
                 var criteria = new List<CriterionLibraryEntity>();
                 var criteriaJoins = new List<CriterionLibraryBudgetEntity>();

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -22,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private Guid _networkId;
         private readonly IReportHelper _reportHelper;
         private readonly IBridgesTab _bridgesTab;
+        private readonly IDecisionsTab _decisionsTab;
 
         public BAMSAuditReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
@@ -30,6 +33,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             ReportTypeName = name;            
             _reportHelper = new ReportHelper();
             _bridgesTab = new BridgesTab();
+            _decisionsTab = new DecisionsTab();
 
             // check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -155,10 +159,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             };
 
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
+            var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
                         
-            var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
-            var sectionValueAttribute = reportOutputData.Years[0].Assets[0].ValuePerNumericAttribute;
+            var initialSectionValues = simulationOutput.InitialAssetSummaries[0].ValuePerNumericAttribute;
+            var sectionValueAttribute = simulationOutput.Years[0].Assets[0].ValuePerNumericAttribute;
             foreach (var item in requiredSections)
             {
                 if (!initialSectionValues.ContainsKey(item))
@@ -181,11 +185,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Sort data
-            reportOutputData.InitialAssetSummaries.Sort(
+            simulationOutput.InitialAssetSummaries.Sort(
                     (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );
 
-            foreach (var yearlySectionData in reportOutputData.Years)
+            foreach (var yearlySectionData in simulationOutput.Years)
             {
                 yearlySectionData.Assets.Sort(
                     (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
@@ -194,12 +198,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //// TODO check if gets used in 2nd tab else remove
             var simulationYears = new List<int>();
-            foreach (var item in reportOutputData.Years)
+            foreach (var item in simulationOutput.Years)
             {
                 simulationYears.Add(item.Year);
             }
             var simulationYearsCount = simulationYears.Count;
             ////
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
+            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+            var simulation = network.Simulations.First();            
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); // TODO check if needed
 
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("AuditReportData.xlsx"));
@@ -209,15 +221,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var bridgesWorksheet = excelPackage.Workbook.Worksheets.Add(AuditReportConstants.BridgesTab);
-            _bridgesTab.Fill(bridgesWorksheet, reportOutputData);
+            _bridgesTab.Fill(bridgesWorksheet, simulationOutput);
 
 
             // Fill Decisions TAB
             reportDetailDto.Status = $"Creating Decisions TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            // TODO Add worksheet and Fill method for Decisions tab here           
-            // simulationOutput.Years to be focused for getting data, Use SortedDictionary to collect data of interest for this tab
+            var decisionsWorksheet = excelPackage.Workbook.Worksheets.Add(AuditReportConstants.DecisionsTab);
+            _decisionsTab.Fill(decisionsWorksheet, simulationOutput, simulation);                        
 
             // Check and generate folder
             var folderPathForSimulation = $"Reports\\{simulationId}";

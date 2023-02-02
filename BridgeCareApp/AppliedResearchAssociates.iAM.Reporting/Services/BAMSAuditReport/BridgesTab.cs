@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
         private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
         {
-            // facilityId, year, section, treatment
+            // facilityId, year, section
             var treatmentsPerSection = new SortedDictionary<int, Tuple<SimulationYearDetail, AssetDetail>>();
             // It will keep the Ids which has gone unfunded for all the years
             var validFacilityIds = new List<int>();

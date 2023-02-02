@@ -409,5 +409,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     join.ScenarioBudget.SimulationId == simulationId &&
                     budgetNames.Contains(join.ScenarioBudget.Name)));
         }
+
+        public void DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(Guid budgetLibraryId, List<string> budgetNames)
+        {
+            _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
+                _.IsSingleUse && _.CriterionLibraryBudgetJoins.Any(join =>
+                    join.Budget.BudgetLibraryId == budgetLibraryId &&
+                    budgetNames.Contains(join.Budget.Name)));
+        }
     }
 }

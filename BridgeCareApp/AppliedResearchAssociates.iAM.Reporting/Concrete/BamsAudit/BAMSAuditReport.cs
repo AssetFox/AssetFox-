@@ -195,15 +195,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );
             }
-
-            //// TODO check if gets used in 2nd tab else remove
-            var simulationYears = new List<int>();
-            foreach (var item in simulationOutput.Years)
-            {
-                simulationYears.Add(item.Year);
-            }
-            var simulationYearsCount = simulationYears.Count;
-            ////
+            
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
@@ -211,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); // TODO check if needed
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
 
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("AuditReportData.xlsx"));

@@ -24,7 +24,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
 using static BridgeCareCore.Security.SecurityConstants;
 using BridgeCareCoreTests.Helpers;
 

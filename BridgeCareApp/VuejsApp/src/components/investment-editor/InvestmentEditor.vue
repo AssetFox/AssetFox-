@@ -21,7 +21,7 @@
                         </v-divider>
                         <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedBudgetLibrary.isShared' />-->
                         <v-btn @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                               v-show='!hasScenario'>
+                               v-show='!hasScenario && this.checkUserIsLibraryOwner()'>
                             Share Library
                         </v-btn>
                     </v-layout>

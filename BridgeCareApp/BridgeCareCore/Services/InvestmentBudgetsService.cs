@@ -132,6 +132,7 @@ namespace BridgeCareCore.Services
 
         public FileInfoDTO ExportScenarioInvestmentBudgetsFile(Guid simulationId)
         {
+            // hit by InvestmentTests.ShouldExportScenarioBudgetsFile and by InvestmentTests.ShouldExportSampleScenarioBudgetsFile
             var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(simulationId);
             var criteriaPerBudgetName = _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
                 .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
@@ -194,6 +195,7 @@ namespace BridgeCareCore.Services
 
         public FileInfoDTO ExportLibraryInvestmentBudgetsFile(Guid budgetLibraryId)
         {
+            // InvestmentTests.ShouldExportSampleLibraryBudgetsFile
             var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetLibraryBudgetAmounts(budgetLibraryId);
             var criteriaPerBudgetName = _unitOfWork.Context.Budget.AsNoTracking().AsSplitQuery()
                 .Include(_ => _.CriterionLibraryBudgetJoin)
@@ -258,6 +260,7 @@ namespace BridgeCareCore.Services
         public ScenarioBudgetImportResultDTO ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage,
             UserCriteriaDTO currentUserCriteriaFilter, bool overwriteBudgets)
         {
+            // InvestmentTests.ImportScenarioInvestmentBudgetsExcelFile
             var budgetWorksheet = excelPackage.Workbook.Worksheets[0];
             var budgetWorksheetEnd = budgetWorksheet.Dimension.End;
 
@@ -481,6 +484,7 @@ namespace BridgeCareCore.Services
         public BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter,
             bool overwriteBudgets)
         {
+            // InvestmentTests.ShouldImportLibraryBudgetsFromFile
             var budgetWorksheet = excelPackage.Workbook.Worksheets[0];
             var budgetWorksheetEnd = budgetWorksheet.Dimension.End;
 

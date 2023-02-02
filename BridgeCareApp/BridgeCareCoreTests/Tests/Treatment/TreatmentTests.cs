@@ -114,7 +114,7 @@ namespace BridgeCareCoreTests.Tests
 
             TestHelper.UnitOfWork.Context.SaveChanges();
         }
-
+        
         private ScenarioBudgetEntity CreateScenarioTestData(Guid simulationId)
         {
             var budget = new ScenarioBudgetEntity
@@ -164,7 +164,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldGetSelectedTreatmentByIdWithDataUnfixable()
+        public async Task ShouldGetSelectedTreatmentByIdWithData()
         {
             // Arrange
             Setup();
@@ -189,7 +189,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(_testTreatmentCost.Id, dto.Costs[0].Id);
         }
         [Fact]
-        public async Task ShouldGetScenarioSelectedTreatmentByIdWithDataUnfixable()
+        public async Task ShouldGetScenarioSelectedTreatmentByIdWithData()
         {
             Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);

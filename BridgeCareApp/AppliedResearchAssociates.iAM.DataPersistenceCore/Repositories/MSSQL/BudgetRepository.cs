@@ -334,5 +334,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _ => _.CriterionLibraryBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? "");
             return criteriaPerBudgetName;
         }
+
+        public string GetBudgetLibraryName(Guid budgetLibraryId)
+        {
+            var name = _unitOfWork.Context.BudgetLibrary.Where(_ => _.Id == budgetLibraryId)
+                .AsNoTracking()
+                .First()
+                .Name;
+            return name;
+        }
+
+        public void DeleteAllScenarioBudgetsForSimulation(Guid simulationId)
+        {
+            _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
+        }
     }
 }

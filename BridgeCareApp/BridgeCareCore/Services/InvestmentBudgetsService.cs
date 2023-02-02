@@ -195,9 +195,7 @@ namespace BridgeCareCore.Services
 
             if (budgetAmounts.Any())
             {
-                var budgetLibraryName = _unitOfWork.Context.BudgetLibrary.Where(_ => _.Id == budgetLibraryId)
-                    .Select(budgetLibrary => new BudgetLibraryEntity { Name = budgetLibrary.Name }).AsNoTracking().Single()
-                    .Name;
+                var budgetLibraryName = _unitOfWork.BudgetRepo.GetBudgetLibraryName(budgetLibraryId);
 
                 var fileName = $"{budgetLibraryName.Trim().Replace(" ", "_")}_investment_budgets.xlsx";
 
@@ -280,21 +278,17 @@ namespace BridgeCareCore.Services
                 if (criteriaPerBudgetName.Values.Any())
                 {
                     var budgetNames = criteriaPerBudgetName.Keys.ToList();
-                    _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
-                        _.IsSingleUse && _.CriterionLibraryScenarioBudgetJoins.Any(join =>
-                            join.ScenarioBudget.SimulationId == simulationId &&
-                            budgetNames.Contains(join.ScenarioBudget.Name)));
+                    _unitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForSimulation(simulationId, budgetNames);
                 }
                 var projects = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId && _.ScenarioBudgetId != null).ToList();
-                if(projects.Count > 0)
+                if (projects.Count > 0)
                 {
                     projects.ForEach(_ => _.ScenarioBudgetId = null);
                     _unitOfWork.Context.UpdateAll(projects);
                 }
-                
-                _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
-            }
 
+                _unitOfWork.BudgetRepo.DeleteAllScenarioBudgetsForSimulation(simulationId);
+            }
             var existingBudgetEntities = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId)
                 .Select(_ => _.ToScenarioEntityWithBudgetAmount(simulationId)).ToList();
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
@@ -399,6 +400,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfWork.Context.DeleteEntity<CriterionLibraryEntity>(_ => _.Id == libraryId);
+        }
+
+        public void DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForSimulation(Guid simulationId, List<string> budgetNames)
+        {
+            _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
+                _.IsSingleUse && _.CriterionLibraryScenarioBudgetJoins.Any(join =>
+                    join.ScenarioBudget.SimulationId == simulationId &&
+                    budgetNames.Contains(join.ScenarioBudget.Name)));
         }
     }
 }

@@ -22,5 +22,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         Guid UpsertCriterionLibrary(CriterionLibraryDTO dto);
 
         void DeleteCriterionLibrary(Guid libraryId);
+        void DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForSimulation(Guid simulationId, List<string> budgetNames);
     }
 }

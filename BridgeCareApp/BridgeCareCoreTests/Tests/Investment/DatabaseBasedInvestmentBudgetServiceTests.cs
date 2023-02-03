@@ -369,7 +369,7 @@ namespace BridgeCareCoreTests.Tests
 
             var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
                 .GetScenarioBudgetAmounts(simulation.Id)
-                .Where(_ => _.ScenarioBudget.Name.IndexOf("Sample") != -1)
+                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
                 .ToList();
 
             Assert.Equal(2, budgetAmounts.Count);

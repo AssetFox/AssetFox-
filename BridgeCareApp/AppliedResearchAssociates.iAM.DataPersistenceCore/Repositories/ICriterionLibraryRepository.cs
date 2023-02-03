@@ -26,5 +26,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(Guid budgetLibraryId, List<string> budgetNames);
         void AddLibraries(List<CriterionLibraryDTO> criteria);
         void AddLibraryScenarioBudgetJoins(List<CriterionLibraryScenarioBudgetDTO> criteriaJoins);
+        void AddLibraryBudgetJoins(List<CriterionLibraryBudgetDTO> criteriaJoins);
     }
 }

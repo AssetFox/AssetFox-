@@ -562,8 +562,8 @@ namespace BridgeCareCore.Services
                 var budgetNames = criteriaPerBudgetName.Keys.ToList();
                 _unitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(budgetLibraryId, budgetNames);
 
-                var criteria = new List<CriterionLibraryEntity>();
-                var criteriaJoins = new List<CriterionLibraryBudgetEntity>();
+                var criteria = new List<CriterionLibraryDTO>();
+                var criteriaJoins = new List<CriterionLibraryBudgetDTO>();
                 var invalidOperationEx = false;
                 var exceptionMessage = "";
                 criteriaPerBudgetName.Where(_ => !string.IsNullOrEmpty(_.Value)).ToList().ForEach(criterionPerBudgetName =>
@@ -576,7 +576,7 @@ namespace BridgeCareCore.Services
                         if (validationResult.IsValid)
                         {
                             var criterionId = Guid.NewGuid();
-                            criteria.Add(new CriterionLibraryEntity
+                            criteria.Add(new CriterionLibraryDTO
                             {
                                 Id = criterionId,
                                 IsSingleUse = true,
@@ -586,7 +586,7 @@ namespace BridgeCareCore.Services
                             
                             try
                             {
-                                criteriaJoins.Add(new CriterionLibraryBudgetEntity
+                                criteriaJoins.Add(new CriterionLibraryBudgetDTO
                                 {
                                     CriterionLibraryId = criterionId,
                                     BudgetId = allBudgetEntities.Single(_ => _.Name == budgetName).Id
@@ -619,8 +619,8 @@ namespace BridgeCareCore.Services
                     HubService.SendRealTimeMessage("", HubConstant.BroadcastError, sb.ToString());
                     throw new InvalidOperationException(exceptionMessage);
                 }
-                _unitOfWork.Context.AddAll(criteria, _unitOfWork.CurrentUser?.Id);
-                _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.CurrentUser?.Id);
+                _unitOfWork.CriterionLibraryRepo.AddLibraries(criteria);
+                _unitOfWork.CriterionLibraryRepo.AddLibraryBudgetJoins(criteriaJoins);
             }
 
             var warningSb = new StringBuilder();

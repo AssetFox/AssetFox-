@@ -429,5 +429,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var entities = criteriaJoins.Select(c => c.ToEntity()).ToList();
             _unitOfWork.Context.AddAll(entities, _unitOfWork.CurrentUser?.Id);
         }
+        public void AddLibraryBudgetJoins(List<CriterionLibraryBudgetDTO> criteriaJoins)
+        {
+            var entities = criteriaJoins.Select(c => c.ToEntity()).ToList();
+            _unitOfWork.Context.AddAll(entities, _unitOfWork.CurrentUser?.Id);
+        }
     }
 }

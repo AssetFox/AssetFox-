@@ -12,8 +12,6 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
-using static OfficeOpenXml.ExcelErrorValue;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -216,14 +214,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            var dtos = _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
-                .Where(_ => _.SimulationId == simulationId)
+            return _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery().Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Select(_ => _.ToDto())
                 .ToList();
-            return dtos;
         }
 
         public void UpsertOrDeleteScenarioBudgets(List<BudgetDTO> budgets, Guid simulationId)

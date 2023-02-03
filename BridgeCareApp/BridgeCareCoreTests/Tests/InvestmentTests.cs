@@ -234,6 +234,37 @@ namespace BridgeCareCoreTests.Tests
             return mock.Object;
         }
 
+        private IHttpContextAccessor CreateRequestWithLibraryFormDataWithExtraCriterion(bool overwriteBudgets = false)
+        {
+            var httpContext = new DefaultHttpContext();
+            var formData = new Dictionary<string, StringValues>()
+            {
+                {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
+                {"libraryId", new StringValues(_testBudgetLibrary.Id.ToString())},
+                {"currentUserCriteriaFilter", Newtonsoft.Json.JsonConvert.SerializeObject(new UserCriteriaDTO
+                {
+                    CriteriaId = Guid.NewGuid(),
+                    UserId = Guid.NewGuid(),
+                    UserName = "Test User",
+                    Criteria = string.Empty,
+                    HasCriteria = false,
+                    HasAccess = true,
+                })}
+            };
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
+                "TestInvestmentBudgetsWithExtraBudgetCriterion.xlsx");
+            using var stream = File.OpenRead(filePath);
+            var memStream = new MemoryStream();
+            stream.CopyTo(memStream);
+            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestInvestmentBudgets.xlsx");
+            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
+            HttpContextSetup.AddAuthorizationHeader(httpContext);
+            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
+
+            var mock = new Mock<IHttpContextAccessor>();
+            mock.Setup(m => m.HttpContext).Returns(httpContext);
+            return mock.Object;
+        }
         private IHttpContextAccessor CreateRequestWithScenarioFormData(Guid simulationId, bool overwriteBudgets = false)
         {
             var httpContext = new DefaultHttpContext();
@@ -678,6 +709,43 @@ namespace BridgeCareCoreTests.Tests
             await controller.ImportLibraryInvestmentBudgetsExcelFile();
 
             // Assert
+            var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
+                .GetLibraryBudgetAmounts(_testBudgetLibrary.Id)
+                .Where(_ => _.Budget.Name.IndexOf("Sample") != -1)
+                .ToList();
+
+            Assert.Equal(2, budgetAmounts.Count);
+            Assert.True(budgetAmounts.All(_ => _.Year == year));
+            Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
+
+            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
+            Assert.Equal(3, budgets.Count);
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
+
+            var criteriaPerBudgetName = GetCriteriaPerBudgetName();
+            var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+        }
+        [Fact]
+        public async Task ShouldImportLibraryBudgetsFromFileWithExtraCriterion()
+        {
+            // Arrange
+            var hubService = HubServiceMocks.DefaultInterfaceMock();
+            var service = Setup(hubService);
+            CreateLibraryTestData();
+            var accessor = CreateRequestWithLibraryFormDataWithExtraCriterion();
+            var controller = CreateAuthorizedController(service, accessor, hubService);
+            var year = 2022;
+
+
+            // Act
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => controller.ImportLibraryInvestmentBudgetsExcelFile());
+
+            // Assert
+            var hubServiceMessages = hubService.Invocations;
+            Assert.Equal(2, hubServiceMessages.Count);
+            Assert.Contains(hubServiceMessages, m => m.Arguments[2].ToString().Contains("Missing budget"));
+
             var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
                 .GetLibraryBudgetAmounts(_testBudgetLibrary.Id)
                 .Where(_ => _.Budget.Name.IndexOf("Sample") != -1)

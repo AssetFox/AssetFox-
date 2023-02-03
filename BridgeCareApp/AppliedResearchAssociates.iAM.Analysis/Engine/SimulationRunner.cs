@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -111,7 +112,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 applicablePriorities.Sort(BudgetPriorityComparer);
                 return applicablePriorities.AsEnumerable();
             });
-
             CommittedProjectsPerAsset = Simulation.CommittedProjects.ToLookup(committedProject => committedProject.Asset);
             ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
             CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
@@ -143,7 +143,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var logMessage = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
                 Send(logMessage);
             }
-
+            foreach (var assetContext in AssetContexts)
+            {
+                //if (Simulation.CommittedProjects.FirstOrDefault(committedProject => committedProject.Id == assetContext.Detail.AssetId) == null) continue;
+                assetContext.Detail.TreatmentCategory = Simulation.CommittedProjects.FirstOrDefault(committedProject => committedProject.Id == assetContext.Detail.AssetId) != null
+                    ? Simulation.CommittedProjects.FirstOrDefault(committedProject => committedProject.Id == assetContext.Detail.AssetId).treatmentCategory
+                    : TreatmentCategory.Other;
+            }
             InParallel(AssetContexts, context =>
             {
                 context.RollForward();
@@ -189,6 +195,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             SimulationOutput output = new();
             output.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
             output.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
+            output.TreatmentCategory = Simulation.CommittedProjects.FirstOrDefault().treatmentCategory;
             Simulation.ResultsOnDisk.Initialize(output);
             output = null;
 

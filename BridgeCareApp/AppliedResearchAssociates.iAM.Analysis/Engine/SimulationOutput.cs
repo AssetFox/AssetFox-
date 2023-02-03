@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
@@ -15,5 +16,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         public List<SimulationYearDetail> Years { get; } = new List<SimulationYearDetail>();
 
         public DateTime LastModifiedDate { get; set; }
+
+        public TreatmentCategory TreatmentCategory { get; set; }
     }
 }

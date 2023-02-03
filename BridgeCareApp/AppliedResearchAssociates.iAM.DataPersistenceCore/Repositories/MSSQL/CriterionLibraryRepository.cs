@@ -417,5 +417,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     join.Budget.BudgetLibraryId == budgetLibraryId &&
                     budgetNames.Contains(join.Budget.Name)));
         }
+
+        public void AddLibraries(List<CriterionLibraryDTO> criteria)
+        {
+            var entities = criteria.Select(c => c.ToEntity()).ToList();
+            _unitOfWork.Context.AddAll(entities, _unitOfWork.CurrentUser?.Id);
+        }
+
+        public void AddLibraryScenarioBudgetJoins(List<CriterionLibraryScenarioBudgetDTO> criteriaJoins)
+        {
+            var entities = criteriaJoins.Select(c => c.ToEntity()).ToList();
+            _unitOfWork.Context.AddAll(entities, _unitOfWork.CurrentUser?.Id);
+        }
     }
 }

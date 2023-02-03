@@ -359,8 +359,8 @@ namespace BridgeCareCore.Services
 
                 _unitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForSimulation(simulationId, budgetNames);
 
-                var criteria = new List<CriterionLibraryEntity>();
-                var criteriaJoins = new List<CriterionLibraryScenarioBudgetEntity>();
+                var criteria = new List<CriterionLibraryDTO>();
+                var criteriaJoins = new List<CriterionLibraryScenarioBudgetDTO>();
                 var invalidOperationEx = false;
                 var exceptionMessage = "";
                 criteriaPerBudgetName.Where(_ => !string.IsNullOrEmpty(_.Value)).ToList().ForEach(criterionPerBudgetName =>
@@ -373,7 +373,7 @@ namespace BridgeCareCore.Services
                         if (validationResult.IsValid)
                         {
                             var criterionId = Guid.NewGuid();
-                            criteria.Add(new CriterionLibraryEntity
+                            criteria.Add(new CriterionLibraryDTO
                             {
                                 Id = criterionId,
                                 IsSingleUse = true,
@@ -382,7 +382,7 @@ namespace BridgeCareCore.Services
                             });
                             try
                             {
-                                criteriaJoins.Add(new CriterionLibraryScenarioBudgetEntity
+                                criteriaJoins.Add(new CriterionLibraryScenarioBudgetDTO
                                 {
                                     CriterionLibraryId = criterionId,
                                     ScenarioBudgetId = allBudgetEntities.Single(_ => _.Name.ToUpperInvariant() == budgetName.ToUpperInvariant()).Id
@@ -415,8 +415,8 @@ namespace BridgeCareCore.Services
                     HubService.SendRealTimeMessage("", HubConstant.BroadcastError, sb.ToString());
                     throw new InvalidOperationException(exceptionMessage);
                 }
-                _unitOfWork.Context.AddAll(criteria, _unitOfWork.CurrentUser?.Id);
-                _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.CurrentUser?.Id);
+                _unitOfWork.CriterionLibraryRepo.AddLibraries(criteria);
+                _unitOfWork.CriterionLibraryRepo.AddLibraryScenarioBudgetJoins(criteriaJoins);
             }
 
             var warningSb = new StringBuilder();

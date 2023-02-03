@@ -160,7 +160,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
             var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
-                        
+
+            // Validation
             var initialSectionValues = simulationOutput.InitialAssetSummaries[0].ValuePerNumericAttribute;
             var sectionValueAttribute = simulationOutput.Years[0].Assets[0].ValuePerNumericAttribute;
             foreach (var item in requiredSections)

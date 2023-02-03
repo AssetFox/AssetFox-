@@ -4,13 +4,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
 {
     public class DecisionsDataModel
     {
-        public int BRKey { get; set; }
+        public double BRKey { get; set; }
 
         public int AnalysisYear { get; set; }
 
-        public List<string> CurrentAttributesValues { get; set; }
+        public List<string> CurrentAttributesValues { get; set; } // Calcuation for CI/value of resp benefit attr, note CI coln no.
 
-        public List<double> BudgetLevels { get; set; } // TODO check later if double stored in budgetlevel values
+        public List<decimal> BudgetLevels { get; set; } // TODO check later if double stored in budgetlevel values
 
         public List<DecisionTreatment> decisionsTreatments { get; set; }
     }
@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
     {
         public bool Feasiable { get; set; }
 
-        public double CIImprovement { get; set; } // TODO ask what should this be
+        public double CIImprovement { get; set; } // Calculation = 10 - CI
 
         public double Cost { get; set; }
 
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
 
         public bool Selected { get; set; }
 
-        public double? AmountSpent { get; set; }
+        public decimal? AmountSpent { get; set; }
 
         public string BudgetsUsed { get; set; }
 

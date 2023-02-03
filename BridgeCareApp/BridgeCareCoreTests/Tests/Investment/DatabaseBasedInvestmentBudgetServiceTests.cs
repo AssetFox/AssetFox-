@@ -26,6 +26,10 @@ using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Utils.Interfaces;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCoreTests.Tests.Investment;
+using BridgeCareCoreTests.Helpers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Services.DefaultData;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -41,6 +45,20 @@ namespace BridgeCareCoreTests.Tests
         private const string BudgetEntityName = "Budget";
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
+
+        private InvestmentBudgetsService CreateService(Mock<IUnitOfWork> unitOfWork)
+        {
+            var investmentDefaultDataService = new InvestmentDefaultDataService();
+            var expressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
+            var hubService = HubServiceMocks.DefaultMock();
+            var service = new InvestmentBudgetsService(
+                unitOfWork.Object,
+                expressionValidationService.Object,
+                hubService.Object,
+                investmentDefaultDataService
+                );
+            return service;
+        }
         private Dictionary<string, string> GetCriteriaPerBudgetName()
         {
             var criteriaPerBudgetName = new Dictionary<string, string>();
@@ -273,18 +291,22 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public void ExportLibraryInvestmentBudgetsFile_NoBudgetAmountsInDatabase_CreatesSampleFile()
+        public void ExportLibraryInvestmentBudgetsFile_NoBudgetAmountsReturnedFromRepo_CreatesSampleFile()
         {
             // Arrange
-            var year = DateTime.Now.Year;
-            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
-            AddTestDataToDatabase();
-            TestHelper.UnitOfWork.Context.DeleteAll<BudgetAmountEntity>(_ => _.BudgetId == _testBudget.Id);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetAmountRepo = BudgetAmountRepositoryMocks.New(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            budgetAmountRepo.Setup(b => b.GetLibraryBudgetAmounts(libraryId)).ReturnsEmptyList();
+            var meaninglessDictionary = new Dictionary<string, string> { { "Budget", "expression" } };
+            budgetRepo.Setup(b => b.GetCriteriaPerBudgetNameForBudgetLibrary(libraryId)).Returns(meaninglessDictionary);
+            var service2 = CreateService(unitOfWork);
+            var year = 2023;
 
             // Act
-            var fileInfo = service.ExportLibraryInvestmentBudgetsFile(_testBudgetLibrary.Id);
+            var fileInfo = service2.ExportLibraryInvestmentBudgetsFile(libraryId);
 
-            // Assert
             Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);
             Assert.Equal("sample_investment_budgets_import_export_file.xlsx", fileInfo.FileName);
 

@@ -21,14 +21,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void DeleteBudgetLibrary(Guid libraryId);
 
-        List<BudgetEntity> GetLibraryBudgets(Guid libraryId);
+        List<BudgetDTO> GetLibraryBudgets(Guid libraryId);
 
         BudgetLibraryDTO GetBudgetLibrary(Guid libraryId);
 
         List<BudgetDTO> GetScenarioBudgets(Guid simulationId);
 
         void UpsertOrDeleteScenarioBudgets(List<BudgetDTO> budgets, Guid simulationId);
-        ScenarioBudgetEntity EnsureExistenceOfUnknownBudgetForSimulation(Guid simulationId);
 
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildren();
 
@@ -41,5 +40,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void AddScenarioBudgets(Guid simulationId, List<BudgetDTO> newBudgetEntities);
         void UpdateScenarioBudgetAmounts(Guid simulationId, List<BudgetAmountDTOWithBudgetId> budgetAmounts);
         void AddScenarioBudgetAmounts(List<BudgetAmountDTOWithBudgetId> newBudgetAmountEntities);
+        void AddLibraryBudgetAmounts(List<BudgetAmountDTOWithBudgetId> newBudgetAmountEntities);
+        void AddBudgets(List<BudgetDTOWithLibraryId> budgets);
+        void UpdateLibraryBudgetAmounts(List<BudgetAmountDTOWithBudgetId> budgetAmounts);
     }
 }

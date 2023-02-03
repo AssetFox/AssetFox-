@@ -178,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteEntity<BudgetLibraryEntity>(_ => _.Id == libraryId);
         }
 
-        public List<BudgetEntity> GetLibraryBudgets(Guid libraryId)
+        public List<BudgetDTO> GetLibraryBudgets(Guid libraryId)
         {
             if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
             {
@@ -188,23 +188,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return _unitOfWork.Context.Budget.AsNoTracking()
                 .Include(_ => _.BudgetAmounts)
                 .Where(_ => _.BudgetLibrary.Id == libraryId)
+                .Select(_ => _.ToDto())
                 .ToList();
-        }
-
-        public ScenarioBudgetEntity EnsureExistenceOfUnknownBudgetForSimulation(Guid simulationId)
-        {
-            var r = _unitOfWork.Context.ScenarioBudget.AsNoTracking().SingleOrDefault(b => b.SimulationId == simulationId && b.Name == "Unknown");
-            if (r == null)
-            {
-                r = new ScenarioBudgetEntity
-                {
-                    Name = "Unknown",
-                    Id = Guid.NewGuid(),
-                    SimulationId = simulationId,
-                };
-                _unitOfWork.Context.ScenarioBudget.Add(r);
-            }
-            return r;
         }
 
         public BudgetLibraryDTO GetBudgetLibrary(Guid libraryId)
@@ -231,13 +216,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            var entities = _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
+            var dtos = _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .ToList();
-            var dtos = entities
                 .Select(_ => _.ToDto())
                 .ToList();
             return dtos;
@@ -377,10 +360,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.UpdateAll(budgetAmountEntities, _unitOfWork.CurrentUser?.Id);
         }
 
+        public void UpdateLibraryBudgetAmounts(List<BudgetAmountDTOWithBudgetId> budgetAmounts)
+        {
+            var budgetAmountEntities = budgetAmounts.Select(amount => amount.BudgetAmount.ToLibraryEntity(amount.BudgetId)).ToList();
+            _unitOfWork.Context.UpdateAll(budgetAmountEntities, _unitOfWork.CurrentUser?.Id);
+        }
+
         public void AddScenarioBudgetAmounts(List<BudgetAmountDTOWithBudgetId> newBudgetAmounts)
         {
             var newBudgetAmountEntities = newBudgetAmounts.Select(b => b.BudgetAmount.ToScenarioEntity(b.BudgetId)).ToList();  
             _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.CurrentUser?.Id);
+        }
+
+        public void AddLibraryBudgetAmounts(List<BudgetAmountDTOWithBudgetId> newBudgetAmounts)
+        {
+            var newBudgetAmountEntities = newBudgetAmounts.Select(b => b.BudgetAmount.ToLibraryEntity(b.BudgetId)).ToList();
+            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.CurrentUser?.Id);
+        }
+        public void AddBudgets(List<BudgetDTOWithLibraryId> budgets)
+        {
+            var entities = budgets.Select(b => b.Budget.ToLibraryEntity(b.BudgetLibraryId)).ToList();
+            _unitOfWork.Context.AddAll(entities, _unitOfWork.CurrentUser?.Id);
         }
     }
 }

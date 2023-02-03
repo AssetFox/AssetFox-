@@ -42,6 +42,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services.Paging;
 using AppliedResearchAssociates.iAM.Hubs.Services;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -55,11 +56,11 @@ namespace BridgeCareCoreTests.Tests
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
-        public InvestmentBudgetsService Setup(Mock<HubService> hubServiceMock = null)
+        public InvestmentBudgetsService Setup(Mock<IHubService> hubServiceMock = null)
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var hubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
+            var hubService = hubServiceMock ?? HubServiceMocks.DefaultInterfaceMock();
             var logger = new LogNLog();
             var service = new InvestmentBudgetsService(
                 TestHelper.UnitOfWork,
@@ -69,11 +70,11 @@ namespace BridgeCareCoreTests.Tests
             return service;
         }
 
-        private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null, Mock<HubService> hubServiceMock = null)
+        private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null, Mock<IHubService> hubServiceMock = null)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
-            var hubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
+            var hubService = hubServiceMock ?? HubServiceMocks.DefaultInterfaceMock();
             var controller = new InvestmentController(service, new InvestmentPagingService(TestHelper.UnitOfWork, new InvestmentDefaultDataService()), EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService.Object,
@@ -908,7 +909,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = 2022;
-            var hubService = HubServiceMocks.DefaultMock();
+            var hubService = HubServiceMocks.DefaultInterfaceMock();
             var service = Setup(hubService);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var accessor = CreateRequestWithScenarioFormDataWithExtraCriterion(simulation.Id);
@@ -920,6 +921,8 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             var hubServiceMessages = hubService.Invocations;
+            Assert.Equal(2, hubServiceMessages.Count);
+            Assert.Contains(hubServiceMessages, m => m.Arguments[2].ToString().Contains("Missing budget"));
             var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
                 .GetScenarioBudgetAmounts(simulation.Id)
                 .Where(_ => _.BudgetName.IndexOf("Sample") != -1)

@@ -31,5 +31,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var mock = DefaultMock();
             return mock.Object;
         }
+
+        public static Mock<IHubService> DefaultInterfaceMock()
+        {
+            var mock = new Mock<IHubService>();
+            return mock;
+        }
     }
 }

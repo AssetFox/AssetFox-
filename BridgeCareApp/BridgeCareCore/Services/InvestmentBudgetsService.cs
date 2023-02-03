@@ -18,8 +18,8 @@ namespace BridgeCareCore.Services
 {
     public class InvestmentBudgetsService : IInvestmentBudgetsService
     {
-        private static IUnitOfWork _unitOfWork;
-        private static IExpressionValidationService _expressionValidationService;
+        private IUnitOfWork _unitOfWork;
+        private IExpressionValidationService _expressionValidationService;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
         protected readonly IHubService HubService;
 
@@ -638,9 +638,10 @@ namespace BridgeCareCore.Services
             {
                 warningSb.Append($"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}");
             }
+            var returnBudgetLibrary = _unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryId);
             return new BudgetImportResultDTO
             {
-                BudgetLibrary = _unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryId),
+                BudgetLibrary = returnBudgetLibrary,
                 WarningMessage = !string.IsNullOrEmpty(warningSb.ToString())
                     ? warningSb.ToString()
                     : null

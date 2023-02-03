@@ -1,35 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+﻿using System.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using OfficeOpenXml;
-using Xunit;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
-using Microsoft.Extensions.Primitives;
-using Moq;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Models.DefaultData;
 using BridgeCareCore.Services;
-using BridgeCareCore.Interfaces.DefaultData;
-using BridgeCareCore.Utils.Interfaces;
-using AppliedResearchAssociates.iAM.Analysis;
-using BridgeCareCoreTests.Tests.Investment;
-using BridgeCareCoreTests.Helpers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Services.DefaultData;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
+using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.Investment;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Moq;
+using OfficeOpenXml;
+using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -191,38 +183,47 @@ namespace BridgeCareCoreTests.Tests
             return excelPackage;
         }
 
-        private InvestmentController CreateDatabaseAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
-        {
-            _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
-            accessor ??= HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var pagingService = InvestmentPagingServiceMocks.DefaultMock();
-            var controller = new InvestmentController(service,
-                pagingService.Object,
-                EsecSecurityMocks.Admin,
-                TestHelper.UnitOfWork,
-                hubService,
-                accessor,
-                _mockInvestmentDefaultDataService.Object,
-                _mockClaimHelper.Object);
-            return controller;
-        }
-
         [Fact]
         public void ImportLibraryInvestmentBudgetsFile_Does()
         {
             // Arrange
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var budgetAmountRepo = BudgetAmountRepositoryMocks.New(unitOfWork);
+            var criterionLibraryRepo = CriterionLibraryRepositoryMocks.New(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var service2 = CreateService(unitOfWork);
             var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             AddTestDataToDatabase();
             var excelPackage = CreateRequestWithLibraryFormData();
             var year = 2022;
-
+            var budgetId = Guid.NewGuid();
+            var sampleBudget1Id = Guid.NewGuid();
+            var sampleBudget2Id = Guid.NewGuid();
+            decimal fiveMillion = 5000000;
+            var budgetDto = BudgetDtos.WithSingleAmount(budgetId, "Budget", year, 1234);
+            var sampleBudget1Dto = BudgetDtos.WithSingleAmount(sampleBudget1Id, "Sample budget 1", year, fiveMillion);
+            var sampleBudget2Dto = BudgetDtos.WithSingleAmount(sampleBudget1Id, "Sample budget 2", year, fiveMillion);
+            budgetRepo.Setup(b => b.GetLibraryBudgets(libraryId)).ReturnsList(budgetDto);
             var currentUserCriteriaFilter = new UserCriteriaDTO
             {
                 HasCriteria = false
             };
+            var expectedBudgetLibraryAfter = new BudgetLibraryDTO
+            {
+                Name = "Test Name",
+                Id = libraryId,
+                Budgets = new List<BudgetDTO>
+                {
+                    budgetDto,
+                    sampleBudget1Dto,
+                    sampleBudget2Dto,
+                },
+            };
+            budgetRepo.Setup(b => b.GetBudgetLibrary(libraryId)).Returns(expectedBudgetLibraryAfter);
             // need to construct the ExcelPackage in order to call the service.
             service.ImportLibraryInvestmentBudgetsFile(_testBudgetLibrary.Id, excelPackage, currentUserCriteriaFilter, false);
+            var result = service2.ImportLibraryInvestmentBudgetsFile(libraryId, excelPackage, currentUserCriteriaFilter, false);
 
             // Assert
             var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo

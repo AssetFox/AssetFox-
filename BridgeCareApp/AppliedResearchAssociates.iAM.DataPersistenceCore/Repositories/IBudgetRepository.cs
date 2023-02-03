@@ -38,5 +38,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         string GetBudgetLibraryName(Guid budgetLibraryId);
         void DeleteAllScenarioBudgetsForSimulation(Guid simulationId);
         void DeleteAllBudgetsForLibrary(Guid budgetLibraryId);
+        void AddScenarioBudgets(Guid simulationId, List<BudgetDTO> newBudgetEntities);
+        void UpdateScenarioBudgetAmounts(Guid simulationId, List<BudgetAmountDTOWithBudgetId> budgetAmounts);
+        void AddScenarioBudgetAmounts(List<BudgetAmountDTOWithBudgetId> newBudgetAmountEntities);
     }
 }

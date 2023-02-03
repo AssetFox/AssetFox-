@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
+using static OfficeOpenXml.ExcelErrorValue;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -230,13 +231,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            return _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
+            var entities = _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .ToList();
+            var dtos = entities
                 .Select(_ => _.ToDto())
                 .ToList();
+            return dtos;
         }
 
         public void UpsertOrDeleteScenarioBudgets(List<BudgetDTO> budgets, Guid simulationId)
@@ -359,6 +363,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.UpdateAll(projects);
             }
             _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
+        }
+
+        public void AddScenarioBudgets(Guid simulationId, List<BudgetDTO> newBudgetDtos)
+        {
+            var newBudgetEntities = newBudgetDtos.Select(b => b.ToScenarioEntity(simulationId)).ToList();
+            _unitOfWork.Context.AddAll(newBudgetEntities, _unitOfWork.CurrentUser?.Id);
+        }
+
+        public void UpdateScenarioBudgetAmounts(Guid simulationId, List<BudgetAmountDTOWithBudgetId> budgetAmounts)
+        {
+            var budgetAmountEntities = budgetAmounts.Select(amount => amount.BudgetAmount.ToScenarioEntity(amount.BudgetId)).ToList();
+            _unitOfWork.Context.UpdateAll(budgetAmountEntities, _unitOfWork.CurrentUser?.Id);
+        }
+
+        public void AddScenarioBudgetAmounts(List<BudgetAmountDTOWithBudgetId> newBudgetAmounts)
+        {
+            var newBudgetAmountEntities = newBudgetAmounts.Select(b => b.BudgetAmount.ToScenarioEntity(b.BudgetId)).ToList();  
+            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.CurrentUser?.Id);
         }
     }
 }

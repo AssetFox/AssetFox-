@@ -286,33 +286,36 @@ namespace BridgeCareCore.Services
 
                 _unitOfWork.BudgetRepo.DeleteAllScenarioBudgetsForSimulation(simulationId);
             }
-            var existingBudgetEntities = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId)
-                .Select(_ => _.ToScenarioEntityWithBudgetAmount(simulationId)).ToList();
+            var existingBudgetEntities = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
 
             var existingBudgetNames = existingBudgetEntities.Select(existingBudget => existingBudget.Name).ToList();
             var newBudgetEntities = worksheetBudgetNames.Where(budgetName => !existingBudgetNames.Contains(budgetName))
-                .Select(budgetName => new ScenarioBudgetEntity
+                .Select(budgetName => new BudgetDTO
                 {
                     Id = Guid.NewGuid(),
-                    SimulationId = simulationId,
                     Name = budgetName
                 }).ToList();
 
-            var budgetAmountsPerBudgetYearTuple = new Dictionary<(string, int), ScenarioBudgetAmountEntity>();
+            var budgetAmountsPerBudgetYearTuple = new Dictionary<(string, int), BudgetAmountDTOWithBudgetId>();
             existingBudgetEntities.ForEach(budget =>
             {
-                budget.ScenarioBudgetAmounts.ForEach(budgetAmount =>
+                budget.BudgetAmounts.ForEach(budgetAmount =>
                 {
                     // The if condition is to avoid any duplicate records coming from the DB.
                     // Ideally the database must have only 1 record per Budget name per year.
                     if (!budgetAmountsPerBudgetYearTuple.ContainsKey((budget.Name, budgetAmount.Year)))
                     {
-                        budgetAmountsPerBudgetYearTuple.Add((budget.Name, budgetAmount.Year), budgetAmount);
+                        var budgetAmountDtoWithBudgetId = new BudgetAmountDTOWithBudgetId
+                        {
+                            BudgetAmount = budgetAmount,
+                            BudgetId = budget.Id,
+                        };
+                        budgetAmountsPerBudgetYearTuple.Add((budget.Name, budgetAmount.Year), budgetAmountDtoWithBudgetId);
                     }
                 });
             });
 
-            var newBudgetAmountEntities = new List<ScenarioBudgetAmountEntity>();
+            var newBudgetAmountEntities = new List<BudgetAmountDTOWithBudgetId>();
             for (var row = 2; row <= budgetWorksheetEnd.Row; row++)
             {
                 for (var col = 2; col <= budgetWorksheetEnd.Column; col++)
@@ -328,30 +331,34 @@ namespace BridgeCareCore.Services
                             : newBudgetEntities
                                 .Single(_ => _.Name == budgetYearTuple.budgetName).Id;
 
-                        newBudgetAmountEntities.Add(new ScenarioBudgetAmountEntity
+                        newBudgetAmountEntities.Add(new BudgetAmountDTOWithBudgetId
                         {
-                            Id = Guid.NewGuid(),
-                            ScenarioBudgetId = budgetId,
-                            Year = budgetYearTuple.year,
-                            Value = budgetWorksheet.GetValue<decimal>(row, col)
+                            BudgetId = budgetId,
+                            BudgetAmount = new BudgetAmountDTO
+                            {
+                                Id = Guid.NewGuid(),
+                                Year = budgetYearTuple.year,
+                                Value = budgetWorksheet.GetValue<decimal>(row, col)
+                            }
                         });
                     }
                     else
                     {
-                        budgetAmountsPerBudgetYearTuple[budgetYearTuple].Value = budgetWorksheet.GetValue<decimal>(row, col);
+                        budgetAmountsPerBudgetYearTuple[budgetYearTuple].BudgetAmount.Value = budgetWorksheet.GetValue<decimal>(row, col);
                     }
                 }
             }
 
-            _unitOfWork.Context.AddAll(newBudgetEntities, _unitOfWork.CurrentUser?.Id);
-            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.CurrentUser?.Id);
-            _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList(), _unitOfWork.CurrentUser?.Id);
+            _unitOfWork.BudgetRepo.AddScenarioBudgets(simulationId, newBudgetEntities);
+            _unitOfWork.BudgetRepo.AddScenarioBudgetAmounts(newBudgetAmountEntities);
+            var values = budgetAmountsPerBudgetYearTuple.Values.ToList();
+            _unitOfWork.BudgetRepo.UpdateScenarioBudgetAmounts(simulationId, values);
 
             var budgetsWithInvalidCriteria = new List<string>();
             var criteriaBudgetNamesNotPresentInBudgetTab = new List<string>();
             if (criteriaPerBudgetName.Values.Any())
             {
-                var allBudgetEntities = new List<ScenarioBudgetEntity>();
+                var allBudgetEntities = new List<BudgetDTO>();
                 allBudgetEntities.AddRange(existingBudgetEntities);
                 allBudgetEntities.AddRange(newBudgetEntities);
 
@@ -636,7 +643,5 @@ namespace BridgeCareCore.Services
                     : null
             };
         }
-
-        
     }
 }

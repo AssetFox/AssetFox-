@@ -23,7 +23,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 SimulationYearDetailId = simulationYearDetailId,
                 AppliedTreatment = domain.AppliedTreatment,
                 TreatmentCause = (int)domain.TreatmentCause,
-                TreatmentCategory= domain.TreatmentCategory,
                 TreatmentFundingIgnoresSpendingLimit = domain.TreatmentFundingIgnoresSpendingLimit,
                 TreatmentStatus = (int)domain.TreatmentStatus,
             };
@@ -55,7 +54,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 AppliedTreatment = entity.AppliedTreatment,
                 TreatmentCause = (TreatmentCause)entity.TreatmentCause,
-                TreatmentCategory = entity.TreatmentCategory,
                 TreatmentFundingIgnoresSpendingLimit = entity.TreatmentFundingIgnoresSpendingLimit,
                 TreatmentStatus = (TreatmentStatus)entity.TreatmentStatus,                
             };

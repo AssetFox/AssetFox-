@@ -25,8 +25,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public int TreatmentCause { get; set; }
 
-        public TreatmentCategory TreatmentCategory { get; set; }
-
         public ICollection<AssetDetailValueEntityIntId> AssetDetailValuesIntId { get; set; } = new HashSet<AssetDetailValueEntityIntId>();
 
         public ICollection<TreatmentConsiderationDetailEntity> TreatmentConsiderationDetails { get; set; } = new HashSet<TreatmentConsiderationDetailEntity>();

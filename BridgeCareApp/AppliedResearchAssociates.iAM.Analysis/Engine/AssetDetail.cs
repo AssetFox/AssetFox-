@@ -21,8 +21,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public TreatmentCause TreatmentCause { get; set; }
 
-        public TreatmentCategory TreatmentCategory { get; set; }
-
         public List<TreatmentConsiderationDetail> TreatmentConsiderations { get; } = new List<TreatmentConsiderationDetail>();
 
         public bool TreatmentFundingIgnoresSpendingLimit { get; set; }
@@ -39,7 +37,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             AppliedTreatment = original.AppliedTreatment;
             TreatmentCause = original.TreatmentCause;
-            TreatmentCategory = original.TreatmentCategory;
             TreatmentStatus = original.TreatmentStatus;
             TreatmentFundingIgnoresSpendingLimit = original.TreatmentFundingIgnoresSpendingLimit;
 

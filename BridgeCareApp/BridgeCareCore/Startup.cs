@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.Reporting;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Hubs.Services;
-using BridgeCareCore.Logging;
+
 using BridgeCareCore.Services.Aggregation;
 using BridgeCareCore.StartupExtension;
 using Microsoft.AspNetCore.Builder;

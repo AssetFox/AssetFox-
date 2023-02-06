@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
@@ -35,28 +36,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             currentAttributes.Add(simulation.AnalysisMethod.Benefit.Attribute.Name);
 
             // Distinct budgets            
-            var budgets = new HashSet<string>();
-            //TODO ask // will this be same per year?? then no need to loop, just take firt yr instance and add budget name
-            //foreach (var yearData in simulationOutput.Years)
-            //{
+            var budgets = new HashSet<string>();            
             foreach (var item in simulationOutput.Years.FirstOrDefault()?.Budgets)
             {
                 budgets.Add(item.BudgetName);
             }
-            //}
 
             var treatments = new List<string>();
-            treatments = simulation.Treatments.Select(_ => _.Name).ToList();
+            treatments = simulation.Treatments?.OrderBy(_ => _.Name).Select(_ => _.Name).ToList();
 
             // Add excel headers to excel.
             var currentCell = AddHeadersCells(decisionsWorksheet, currentAttributes, budgets, treatments);
-
-            // Add row next to headers for filters. Cover from top, left to right, bottom set of data
-            using (var autoFilterCells = decisionsWorksheet.Cells[3, 1, currentCell.Row, currentCell.Column - 1])
-            {
-                autoFilterCells.AutoFilter = true;
-            }
-
             decisionsWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             // Create report model
@@ -66,12 +56,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             FillDynamicDataInWorkSheet(decisionsWorksheet, decisionsDataModels, currentCell);                          
 
             decisionsWorksheet.Cells.AutoFitColumns();
-            
-            // ?? any here?? _bridgesUnfundedTreatments.PerformPostAutofitAdjustments(bridgesWorksheet);
+
+            // PerformPostAutofitAdjustments any here?? 
         }
 
         private void FillDynamicDataInWorkSheet(ExcelWorksheet decisionsWorksheet, List<DecisionsDataModel> decisionsDataModels, CurrentCell currentCell)
         {
+
 
         }
 
@@ -83,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             // Use treatments, Pcurves, AnalysisMethod
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {                
-                var brKey = _reportHelper.CheckAndGetValue<double>(initialAssetSummary.ValuePerNumericAttribute, "BRKEY_");                
+                var brKey = _reportHelper.CheckAndGetValue<double>(initialAssetSummary.ValuePerNumericAttribute, "BRKEY_");
                 foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
                 {
                     var decisionsDataModel = new DecisionsDataModel();
@@ -92,30 +83,32 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
                     var section = year.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
                     // Current
-                    var currentAttributesValues = new List<string>();                    
+                    var currentAttributesValues = new List<double>();
                     for (int index = 0; index < currentAttributes.Count - 1; index++)
                     {
-                        // TODO handle double and formatting?
-                        var value = _reportHelper.CheckAndGetValue<string>(section.ValuePerNumericAttribute, currentAttributes.ElementAt(index));
-                        currentAttributes.Add(value);                        
+                        var value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, currentAttributes.ElementAt(index));
+                        currentAttributesValues.Add(value);
                     }
                     // analysis benefit attribute
-                    currentAttributes.Add(_reportHelper.CheckAndGetValue<string>(section.ValuePerNumericAttribute, currentAttributes.Last()));
+                    currentAttributesValues.Add(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, currentAttributes.Last()));
                     decisionsDataModel.CurrentAttributesValues = currentAttributesValues;
 
                     // Budget levels
                     var budgetsAtDecisionTime = section.BudgetsAtDecisionTime ?? new List<BudgetDetail>();
                     var budgetLevels = new List<decimal>();
-                    foreach (var budget in budgets)
+                    if (budgetsAtDecisionTime.Count > 0)
                     {
-                        var budgetAtDecisionTime = budgetsAtDecisionTime.FirstOrDefault(_ => _.BudgetName == budget);
-                        if (budgetAtDecisionTime == null)
+                        foreach (var budget in budgets)
                         {
-                            // TODO raise error?
-                        }
-                        else
-                        {
-                            budgetLevels.Add(budgetAtDecisionTime.AvailableFunding);
+                            var budgetAtDecisionTime = budgetsAtDecisionTime.FirstOrDefault(_ => _.BudgetName == budget);
+                            if (budgetAtDecisionTime == null)
+                            {
+                                // TODO raise error?
+                            }
+                            else
+                            {
+                                budgetLevels.Add(budgetAtDecisionTime.AvailableFunding);
+                            }
                         }
                     }
                     decisionsDataModel.BudgetLevels = budgetLevels;
@@ -134,7 +127,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                         decisionsTreatment.Selected = section.AppliedTreatment == treatment;
                         var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
                         decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.BudgetUsages.Sum(_ => _.CoveredCost) : 0;        
-                        decisionsTreatment.BudgetsUsed = treatmentConsideration != null ? String.Join(",", treatmentConsideration.BudgetUsages.Select(_ => _.BudgetName)) : string.Empty;
+                        decisionsTreatment.BudgetsUsed = treatmentConsideration != null ? string.Join(",", treatmentConsideration.BudgetUsages.Select(_ => _.BudgetName)) : string.Empty;
                         decisionsTreatment.RejectionReason = GetRejectionReason(treatmentConsideration);
 
                         decisionsTreatments.Add(decisionsTreatment);
@@ -150,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
         private string GetRejectionReason(TreatmentConsiderationDetail treatmentConsideration)
         {
-            if(treatmentConsideration == null)return string.Empty;
+            if (treatmentConsideration == null) return string.Empty;
             var rejectionReason = treatmentConsideration.BudgetUsages.All(_ => _.Status == BudgetUsageStatus.CostNotCovered) ? "No available funding" : string.Empty;
 
             // TODO ask for more cases to be checked here
@@ -174,14 +167,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
             // Treatments
             column = AddCurrentTreatmentsHeaders(worksheet, treatments, column);
-
-            // Apply for req.ed header cells
-            // ExcelHelper.ApplyColor(worksheet.Cells[row, cellColumn], Color.FromArgb(255, 242, 204));
-
+                        
+            ExcelHelper.ApplyColor(worksheet.Cells[headerRow2, 3, headerRow2, column - 1], Color.FromArgb(255, 242, 204));
             ExcelHelper.ApplyBorder(worksheet.Cells[headerRow1, 1, headerRow2, worksheet.Dimension.Columns]);
-
-            // ?? ExcelHelper.ApplyStyle
-
+            // check if any other style needed or to be removed by new method in helper
+            ExcelHelper.ApplyStyle(worksheet.Cells[headerRow2, 1, headerRow2, column - 1]);
             worksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             return new CurrentCell { Row = headerRow1 + 2, Column = worksheet.Dimension.Columns + 1 };
@@ -199,7 +189,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 // Repeat treatmentHeaders for row 2 per treatment
                 foreach (var treatmentHeader in treatmentHeaders)
                 {
-                    worksheet.Cells[headerRow1, column++].Value = treatmentHeader;
+                    worksheet.Cells[headerRow2, column++].Value = treatmentHeader;
                 }
                 // Merge cells for each treatment
                 ExcelHelper.MergeCells(worksheet, headerRow1, treatmentsColumn, headerRow1, column - 1);

@@ -200,7 +200,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
-            var simulation = network.Simulations.First();            
+            var simulation = network.Simulations.First();
+            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
@@ -215,7 +216,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var bridgesWorksheet = excelPackage.Workbook.Worksheets.Add(AuditReportConstants.BridgesTab);
             _bridgesTab.Fill(bridgesWorksheet, simulationOutput);
-
 
             // Fill Decisions TAB
             reportDetailDto.Status = $"Creating Decisions TAB";

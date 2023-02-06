@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
 
         public int AnalysisYear { get; set; }
 
-        public List<string> CurrentAttributesValues { get; set; } // Calcuation for CI/value of resp benefit attr, note CI coln no.
+        public List<double> CurrentAttributesValues { get; set; } // Calcuation for CI/value of resp benefit attr, note CI coln no.
 
         public List<decimal> BudgetLevels { get; set; } // TODO check later if double stored in budgetlevel values
 

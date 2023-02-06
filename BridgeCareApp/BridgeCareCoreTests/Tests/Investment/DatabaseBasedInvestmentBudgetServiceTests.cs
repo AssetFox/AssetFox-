@@ -370,12 +370,18 @@ namespace BridgeCareCoreTests.Tests
         public void ExportLibraryInvestmentBudgetsFile_Does()
         {
             // Arrange
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var budgetAmountRepo = BudgetAmountRepositoryMocks.New(unitOfWork);
+            var criterionLibraryRepo = CriterionLibraryRepositoryMocks.New(unitOfWork);
             var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
+            var service2 = CreateService(unitOfWork);
             AddTestDataToDatabase();
             var year = DateTime.Now.Year;
 
             // Act
             var fileInfo = service.ExportLibraryInvestmentBudgetsFile(_testBudgetLibrary.Id);
+            var fileInfo2 = service2.ExportLibraryInvestmentBudgetsFile(_testBudgetLibrary.Id);
 
             // Assert
             Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);

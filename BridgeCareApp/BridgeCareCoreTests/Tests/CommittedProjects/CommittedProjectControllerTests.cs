@@ -16,7 +16,6 @@ using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
 using System.Security.Claims;
@@ -492,7 +491,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        public async Task UpsertSectionWorksWithValidProjects()
+        public async Task UpsertSectionWorksWithValidProjects()//
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();

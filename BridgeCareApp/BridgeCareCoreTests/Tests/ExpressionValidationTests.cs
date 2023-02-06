@@ -14,7 +14,6 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Mvc;

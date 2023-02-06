@@ -175,12 +175,6 @@ order by networkid
             return explorer;
         }
 
-        public Simulation GetStandAloneSimulation(int networkId, int simulationId)
-        {
-            RequestedSimulationsPerNetwork = new SortedDictionary<int, SortedSet<int>> { [networkId] = new SortedSet<int> { simulationId } };
-            return GetExplorer().Networks.Single().Simulations.Single();
-        }
-
         private const string NUMBER_ATTRIBUTE_TYPE_NAME = "NUMBER";
         private const string STRING_ATTRIBUTE_TYPE_NAME = "STRING";
 

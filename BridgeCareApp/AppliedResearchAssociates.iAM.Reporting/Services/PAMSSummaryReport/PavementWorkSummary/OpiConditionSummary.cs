@@ -22,22 +22,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryComputationHelper = new PavementWorkSummaryComputationHelper();
         }
 
-
-        private void AddSegmentMilesForBPN(ExcelWorksheet worksheet, int row, int column, List<AssetSummaryDetail> initialSectionSummaries, BPNName bpn)
-        {
-            var bpnKey = bpn.ToMatchInDictionary();
-                        
-            var excellentMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(initialSectionSummaries, bpnKey, _ => _.OpiConditionIsExcellent());
-            var goodMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(initialSectionSummaries, bpnKey, _ => _.OpiConditionIsGood());
-            var fairMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(initialSectionSummaries, bpnKey, _ => _.OpiConditionIsFair());
-            var poorMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(initialSectionSummaries, bpnKey, _ => _.OpiConditionIsPoor());
-                        
-            worksheet.Cells[row++, column].Value = excellentMiles;
-            worksheet.Cells[row++, column].Value = goodMiles;
-            worksheet.Cells[row++, column].Value = fairMiles;
-            worksheet.Cells[row++, column].Value = poorMiles;
-        }
-
         private void AddSegmentMilesForBPN(ExcelWorksheet worksheet, int row, int column, List<AssetDetail> sectionDetails, BPNName bpn)
         {
             var bpnKey = bpn.ToMatchInDictionary();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -131,27 +131,6 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("ListReports/{simulationId}")]
-        [Authorize]
-        public async Task<IActionResult> GetSimulationReports(Guid simulationId)
-        {
-            // Since Guid cannot be null, if it is not provided, simulation ID will be Guid.Empty
-            if (simulationId == Guid.Empty)
-            {
-                var message = new List<string>() { $"No simulation ID provided." };
-                return CreateErrorListing(message);
-            }
-
-            if (UnitOfWork.SimulationRepo.GetSimulation(simulationId) == null)
-            {
-                var message = new List<string>() { $"A simulation with the ID of {simulationId} is not available in the database." };
-                return CreateErrorListing(message);
-            }
-
-            return Ok(UnitOfWork.ReportIndexRepository.GetAllForScenario(simulationId));
-        }
-
-        [HttpGet]
         [Route("DownloadReport/{simulationId}/{reportName}")]
         [Authorize]
         public async Task<IActionResult> DownloadReport(Guid simulationId, string reportName)
@@ -190,39 +169,6 @@ namespace BridgeCareCore.Controllers
             try
             {
                 result = await GetReport(report);
-            }
-            catch (Exception e)
-            {
-                return CreateErrorListing(new List<string>() { e.Message });
-            }
-            return Ok(result);
-        }
-
-        [HttpGet]
-        [Route("DownloadSpecificReport/{reportIndexID}")]
-        [Authorize]
-        public async Task<IActionResult> DownloadSpecificReport(string reportIndexID)
-        {
-            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
-            {
-                var message = new List<string>() { $"Repository index identifier is missing or not set" };
-                return CreateErrorListing(message);
-            }
-
-            //get report path
-            var reportIndex = UnitOfWork.ReportIndexRepository.Get(Guid.Parse(reportIndexID));
-            var reportPath = reportIndex?.Result != null ? Path.Combine(Environment.CurrentDirectory, reportIndex.Result) : "";
-            if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
-            {
-                var message = new List<string>() { $"Failed to get report path using the specified repository index" };
-                return CreateErrorListing(message);
-            }
-
-            // return the download response
-            FileInfoDTO result;
-            try
-            {
-                result = await GetReport(reportIndex);
             }
             catch (Exception e)
             {

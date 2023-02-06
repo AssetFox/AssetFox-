@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
@@ -192,9 +193,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetAmountRepo = BudgetAmountRepositoryMocks.New(unitOfWork);
             var criterionLibraryRepo = CriterionLibraryRepositoryMocks.New(unitOfWork);
             var libraryId = Guid.NewGuid();
-            var service2 = CreateService(unitOfWork);
-            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
-            AddTestDataToDatabase();
+            var service = CreateService(unitOfWork);
             var excelPackage = CreateRequestWithLibraryFormData();
             var year = 2022;
             var budgetId = Guid.NewGuid();
@@ -202,8 +201,8 @@ namespace BridgeCareCoreTests.Tests
             var sampleBudget2Id = Guid.NewGuid();
             decimal fiveMillion = 5000000;
             var budgetDto = BudgetDtos.WithSingleAmount(budgetId, "Budget", year, 1234);
-            var sampleBudget1Dto = BudgetDtos.WithSingleAmount(sampleBudget1Id, "Sample budget 1", year, fiveMillion);
-            var sampleBudget2Dto = BudgetDtos.WithSingleAmount(sampleBudget1Id, "Sample budget 2", year, fiveMillion);
+            var sampleBudget1Dto = BudgetDtos.WithSingleAmount(sampleBudget1Id, "Sample Budget 1", year, fiveMillion);
+            var sampleBudget2Dto = BudgetDtos.WithSingleAmount(sampleBudget1Id, "Sample Budget 2", year, fiveMillion);
             budgetRepo.Setup(b => b.GetLibraryBudgets(libraryId)).ReturnsList(budgetDto);
             var currentUserCriteriaFilter = new UserCriteriaDTO
             {
@@ -221,27 +220,57 @@ namespace BridgeCareCoreTests.Tests
                 },
             };
             budgetRepo.Setup(b => b.GetBudgetLibrary(libraryId)).Returns(expectedBudgetLibraryAfter);
-            // need to construct the ExcelPackage in order to call the service.
-            service.ImportLibraryInvestmentBudgetsFile(_testBudgetLibrary.Id, excelPackage, currentUserCriteriaFilter, false);
-            var result = service2.ImportLibraryInvestmentBudgetsFile(libraryId, excelPackage, currentUserCriteriaFilter, false);
+
+            var result = service.ImportLibraryInvestmentBudgetsFile(libraryId, excelPackage, currentUserCriteriaFilter, false);
 
             // Assert
-            var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
-                .GetLibraryBudgetAmounts(_testBudgetLibrary.Id)
-                .Where(_ => _.Budget.Name.IndexOf("Sample") != -1)
-                .ToList();
-
-            Assert.Equal(2, budgetAmounts.Count);
-            Assert.True(budgetAmounts.All(_ => _.Year == year));
-            Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
-
-            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
-            Assert.Equal(3, budgets.Count);
-            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
-            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
-
-            var criteriaPerBudgetName = GetCriteriaPerBudgetName();
-            var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+            ObjectAssertions.Equivalent(expectedBudgetLibraryAfter, result.BudgetLibrary);
+            var invocations = budgetRepo.Invocations.ToList();
+            var addInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.AddBudgets));
+            var addedBudgets = addInvocation.Arguments[0] as List<BudgetDTOWithLibraryId>;
+            Assert.Equal(2, addedBudgets.Count);
+            ObjectAssertions.EquivalentExcluding(sampleBudget1Dto, addedBudgets[0].Budget, b => b.Id, b=> b.BudgetAmounts);
+            ObjectAssertions.EquivalentExcluding(sampleBudget2Dto, addedBudgets[1].Budget, b => b.Id, b=> b.BudgetAmounts);
+            Assert.Equal(libraryId, addedBudgets[0].BudgetLibraryId);
+            Assert.Equal(libraryId, addedBudgets[1].BudgetLibraryId);
+            var amountInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.AddLibraryBudgetAmounts));
+            var addedAmounts = amountInvocation.Arguments[0] as List<BudgetAmountDTOWithBudgetId>;
+            Assert.Equal(2, addedAmounts.Count);
+            var expectedAmountZero = new BudgetAmountDTOWithBudgetId
+            {
+                BudgetId = addedBudgets[0].Budget.Id,
+                BudgetAmount = new BudgetAmountDTO
+                {
+                    Value = 5000000,
+                    Year = 2022,
+                }
+            };
+            var expectedAmountOne = new BudgetAmountDTOWithBudgetId
+            {
+                BudgetId = addedBudgets[1].Budget.Id,
+                BudgetAmount = new BudgetAmountDTO
+                {
+                    Value = 5000000,
+                    Year = 2022,
+                }
+            };
+            ObjectAssertions.EquivalentExcluding(expectedAmountZero, addedAmounts[0], a => a.BudgetAmount.Id);
+            ObjectAssertions.EquivalentExcluding(expectedAmountOne, addedAmounts[1], a => a.BudgetAmount.Id);
+            var updateInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpdateLibraryBudgetAmounts));
+            var updatedAmounts = updateInvocation.Arguments[0] as List<BudgetAmountDTOWithBudgetId>;
+            var expectedUpdateAmount = new BudgetAmountDTOWithBudgetId
+            {
+                BudgetId = budgetId,
+                BudgetAmount = new BudgetAmountDTO
+                {
+                    Id = budgetDto.BudgetAmounts[0].Id,
+                    Year = 2022,
+                    Value = 1234,
+                    BudgetName = "Budget",
+                }
+            };
+            var updatedAmount = updatedAmounts.Single();
+            ObjectAssertions.Equivalent(expectedUpdateAmount, updatedAmount);
         }
 
         [Fact (Skip ="WJ needs working front end to investigate")]

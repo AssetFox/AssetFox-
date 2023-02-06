@@ -374,14 +374,20 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var budgetAmountRepo = BudgetAmountRepositoryMocks.New(unitOfWork);
             var criterionLibraryRepo = CriterionLibraryRepositoryMocks.New(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.New(budgetId);
+            var budgetAmount = BudgetAmountDtos.ForBudgetAndYear(budget, 2022, 500000);
+            var budgetAmounts = new List<BudgetAmountDTO> { budgetAmount };
+            budgetAmountRepo.Setup(b => b.GetLibraryBudgetAmounts(libraryId)).Returns(budgetAmounts);
+            var criteria = new Dictionary<string, string> { { "Budget", "expression" } };
+            budgetRepo.Setup(b => b.GetCriteriaPerBudgetNameForBudgetLibrary(libraryId)).Returns(criteria);
+            budgetRepo.Setup(b => b.GetBudgetLibraryName(libraryId)).Returns("Test Name");
             var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             var service2 = CreateService(unitOfWork);
-            AddTestDataToDatabase();
-            var year = DateTime.Now.Year;
 
             // Act
-            var fileInfo = service.ExportLibraryInvestmentBudgetsFile(_testBudgetLibrary.Id);
-            var fileInfo2 = service2.ExportLibraryInvestmentBudgetsFile(_testBudgetLibrary.Id);
+            var fileInfo = service2.ExportLibraryInvestmentBudgetsFile(libraryId);
 
             // Assert
             Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);
@@ -398,12 +404,12 @@ namespace BridgeCareCoreTests.Tests
             var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
             Assert.Single(worksheetBudgetNames);
-            Assert.Equal(_testBudget.Name, worksheetBudgetNames[0]);
+            Assert.Equal("Budget", worksheetBudgetNames[0]);
 
             var worksheetBudgetYearAndAmount = worksheet.Cells[2, 1, 2, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
-            Assert.Equal(year.ToString(), worksheetBudgetYearAndAmount[0]);
-            Assert.Equal(_testBudget.BudgetAmounts.ToList()[0].Value.ToString(), worksheetBudgetYearAndAmount[1]);
+            Assert.Equal(2022.ToString(), worksheetBudgetYearAndAmount[0]);
+            Assert.Equal("500000", worksheetBudgetYearAndAmount[1]);
         }
 
 

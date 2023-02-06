@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertOrDeleteScenarioBudgetAmounts(Dictionary<Guid, List<BudgetAmountDTO>> budgetAmountsPerBudgetId,
             Guid simulationId);
 
-        List<BudgetAmountEntity> GetLibraryBudgetAmounts(Guid libraryId);
+        List<BudgetAmountDTO> GetLibraryBudgetAmounts(Guid libraryId);
 
         List<BudgetAmountDTO> GetScenarioBudgetAmounts(Guid simulationId);
     }

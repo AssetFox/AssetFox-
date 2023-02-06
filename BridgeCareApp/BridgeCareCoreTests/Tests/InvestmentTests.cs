@@ -711,7 +711,7 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
                 .GetLibraryBudgetAmounts(_testBudgetLibrary.Id)
-                .Where(_ => _.Budget.Name.IndexOf("Sample") != -1)
+                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
                 .ToList();
 
             Assert.Equal(2, budgetAmounts.Count);
@@ -748,7 +748,7 @@ namespace BridgeCareCoreTests.Tests
 
             var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
                 .GetLibraryBudgetAmounts(_testBudgetLibrary.Id)
-                .Where(_ => _.Budget.Name.IndexOf("Sample") != -1)
+                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
                 .ToList();
 
             Assert.Equal(2, budgetAmounts.Count);

@@ -103,7 +103,8 @@ namespace BridgeCareCoreTests.Tests
                     {
                         Id = Guid.NewGuid(),
                         MergedCriteriaExpression = "expression",
-                        Name = "Criterion"
+                        Name = "Criterion",
+                        IsSingleUse = true,
                     }
                 }
             };
@@ -149,7 +150,8 @@ namespace BridgeCareCoreTests.Tests
                     {
                         Id = Guid.NewGuid(),
                         MergedCriteriaExpression = "expression",
-                        Name = "Criterion"
+                        Name = "Criterion",
+                        IsSingleUse = true,
                     }
                 }
             };
@@ -277,7 +279,7 @@ namespace BridgeCareCoreTests.Tests
         public void ImportLibraryInvestmentBudgetsFile_BudgetExists_Overwrites()
         {
             // Arrange
-            var year = DateTime.Now.Year;
+            var year = 2022;
             var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             AddTestDataToDatabase();
             var excelPackage = CreateRequestWithLibraryFormData();
@@ -295,7 +297,7 @@ namespace BridgeCareCoreTests.Tests
             };
             // need to construct the ExcelPackage in order to call the service.
 
-            service.ImportLibraryInvestmentBudgetsFile(_testBudgetLibrary.Id, excelPackage, currentUserCriteriaFilter, false);
+            service.ImportLibraryInvestmentBudgetsFile(_testBudgetLibrary.Id, excelPackage, currentUserCriteriaFilter, true);
 
             // Assert
             var budgetAmounts =
@@ -449,11 +451,11 @@ namespace BridgeCareCoreTests.Tests
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
         }
 
-        [Fact(Skip = "WJ needs working front end to investigate")]
+        [Fact]
         public void ImportScenarioInvestmentBudgetsFile_BudgetExists_Overwrites()
         {
             // Arrange
-            var year = DateTime.Now.Year;
+            var year = 2022;
             var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             AddScenarioDataToDatabase(simulation.Id);

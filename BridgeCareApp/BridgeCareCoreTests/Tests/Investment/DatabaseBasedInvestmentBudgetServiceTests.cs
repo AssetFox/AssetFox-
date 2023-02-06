@@ -273,7 +273,7 @@ namespace BridgeCareCoreTests.Tests
             ObjectAssertions.Equivalent(expectedUpdateAmount, updatedAmount);
         }
 
-        [Fact (Skip ="WJ needs working front end to investigate")]
+        [Fact]
         public void ImportLibraryInvestmentBudgetsFile_BudgetExists_Overwrites()
         {
             // Arrange

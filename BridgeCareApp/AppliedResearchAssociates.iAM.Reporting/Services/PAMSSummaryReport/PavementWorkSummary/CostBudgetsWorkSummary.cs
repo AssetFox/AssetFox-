@@ -139,33 +139,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             AsphaltTotalRow = asphaltTotalRow;
             return workTypeFullDepthAsphalt;
         }
-
-
-
-        private void FillWorkTypeTotalFullDepthAsphalt(
-            Dictionary<TreatmentCategory,
-            SortedDictionary<int, decimal>> workTypeTotalFullDepthAsphalt,
-            TreatmentCategory category,
-            List<int> simulationYears,
-            int currYear,
-            decimal treatmentCost)
-        {
-            if (!workTypeTotalFullDepthAsphalt.ContainsKey(category))
-            {
-                workTypeTotalFullDepthAsphalt.Add(category, new SortedDictionary<int, decimal>());
-                foreach (var year in simulationYears)
-                {
-                    workTypeTotalFullDepthAsphalt[category].Add(year, 0);
-                }
-                workTypeTotalFullDepthAsphalt[category][currYear] += treatmentCost;
-            }
-            else
-            {
-                workTypeTotalFullDepthAsphalt[category][currYear] += treatmentCost;
-            }
-        }
  
-
     private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfCompositeWork(
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
@@ -256,31 +230,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             CompositeTotalRow = compositeTotalRow;
             return workTypeComposite;
-        }
-
-
-
-        private void FillWorkTypeTotalComposite(
-            Dictionary<TreatmentCategory,
-            SortedDictionary<int, decimal>> workTypeTotalComposite,
-            TreatmentCategory category,
-            List<int> simulationYears,
-            int currYear,
-            decimal treatmentCost)
-        {
-            if (!workTypeTotalComposite.ContainsKey(category))
-            {
-                workTypeTotalComposite.Add(category, new SortedDictionary<int, decimal>());
-                foreach (var year in simulationYears)
-                {
-                    workTypeTotalComposite[category].Add(year, 0);
-                }
-                workTypeTotalComposite[category][currYear] += treatmentCost;
-            }
-            else
-            {
-                workTypeTotalComposite[category][currYear] += treatmentCost;
-            }
         }
 
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfConcreteWork(
@@ -374,31 +323,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             ConcreteTotalRow = concreteTotalRow;
             return workTypeConcrete;
-        }
-
-
-
-        private void FillWorkTypeTotalConcrete(
-            Dictionary<TreatmentCategory,
-            SortedDictionary<int, decimal>> workTypeTotalConcrete,
-            TreatmentCategory category,
-            List<int> simulationYears,
-            int currYear,
-            decimal treatmentCost)
-        {
-            if (!workTypeTotalConcrete.ContainsKey(category))
-            {
-                workTypeTotalConcrete.Add(category, new SortedDictionary<int, decimal>());
-                foreach (var year in simulationYears)
-                {
-                    workTypeTotalConcrete[category].Add(year, 0);
-                }
-                workTypeTotalConcrete[category][currYear] += treatmentCost;
-            }
-            else
-            {
-                workTypeTotalConcrete[category][currYear] += treatmentCost;
-            }
         }
 
 

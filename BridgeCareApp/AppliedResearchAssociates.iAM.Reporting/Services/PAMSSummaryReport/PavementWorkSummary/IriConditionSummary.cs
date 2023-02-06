@@ -23,21 +23,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryComputationHelper = new PavementWorkSummaryComputationHelper();
         }
 
-        private void AddSegmentMilesForBPN(ExcelWorksheet worksheet, int row, int column, List<AssetSummaryDetail> initialSectionSummaries, BPNName bpn)
-        {
-            var bpnKey = bpn.ToMatchInDictionary();
-                                    
-            var excellentMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(initialSectionSummaries, bpnKey, _ => _.IriConditionIsExcellent());
-            var goodMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(initialSectionSummaries, bpnKey, _ => _.IriConditionIsGood());
-            var fairMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(initialSectionSummaries, bpnKey, _ => _.IriConditionIsFair());
-            var poorMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(initialSectionSummaries, bpnKey, _ => _.IriConditionIsPoor());
-
-            worksheet.Cells[row++, column].Value = excellentMiles;
-            worksheet.Cells[row++, column].Value = goodMiles;
-            worksheet.Cells[row++, column].Value = fairMiles;
-            worksheet.Cells[row++, column].Value = poorMiles;
-        }
-
         private void AddSegmentMilesForBPN(ExcelWorksheet worksheet, int row, int column, List<AssetDetail> sectionDetails, BPNName bpn)
         {
             var bpnKey = bpn.ToMatchInDictionary();
@@ -52,23 +37,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[row++, column].Value = fairMiles;
             worksheet.Cells[row++, column].Value = poorMiles;
         }
-
-
-        //private void AddDetailsForClosedBridgesCountByBPN(ExcelWorksheet worksheet, CurrentCell currentCell,
-        //    SimulationOutput reportOutputData)
-        //{
-        //    int startRow, startColumn, row, column;
-        //    AddSegmentMilesForBPN(worksheet, startRow, column, reportOutputData.InitialAssetSummaries);
-        //    foreach (var yearlyData in reportOutputData.Years)
-        //    {
-        //        row = startRow;
-        //        column = ++column;
-        //        AddSegmentMilesForBPN(worksheet, row, column, yearlyData.Assets);
-        //    }
-        //    var bpnNames = EnumExtensions.GetValues<BPNName>();
-        //    ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
-        //        _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, row + bpnNames.Count, column);
-        //}
 
         private void AddIriConditionSection(
             ExcelWorksheet worksheet,
@@ -94,7 +62,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             row = startRow;
             column = fromColumn;
 
-            //AddSegmentMilesForBPN(worksheet, row, column, reportOutputData.InitialAssetSummaries, bpn);
             foreach (var yearlyData in reportOutputData.Years)
             {
                 row = startRow;

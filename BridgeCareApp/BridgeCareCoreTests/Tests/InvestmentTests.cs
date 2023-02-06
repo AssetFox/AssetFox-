@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
+﻿using System.Data;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
@@ -23,11 +19,8 @@ using Moq;
 using OfficeOpenXml;
 using Xunit;
 using MoreLinq;
-using System.Threading;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
-using BridgeCareCore.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Services.DefaultData;
 using BridgeCareCore.Models;
@@ -69,20 +62,6 @@ namespace BridgeCareCoreTests.Tests
         }
 
         private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
-        {
-            _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
-            accessor ??= HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var controller = new InvestmentController(service, new InvestmentPagingService(TestHelper.UnitOfWork, new InvestmentDefaultDataService()), EsecSecurityMocks.Admin,
-                TestHelper.UnitOfWork,
-                hubService,
-                accessor,
-                _mockInvestmentDefaultDataService.Object,
-                _mockClaimHelper.Object);
-            return controller;
-        }
-
-        private InvestmentController CreateUnauthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();

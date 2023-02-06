@@ -67,15 +67,5 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             return chartRowsModel;
         }
-
-        #region Private methods
-
-
-
-
-
-
-
-        #endregion Private methods
     }
 }

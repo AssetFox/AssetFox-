@@ -82,21 +82,6 @@ namespace BridgeCareCoreTests.Tests
                 _mockClaimHelper.Object);
         }
 
-        private void CreateUnauthorizedController(SimulationAnalysisService simulationAnalysisService)
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            _controller = new SimulationController(simulationAnalysisService,
-                new SimulationPagingService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
-                _mockSimulationQueueService.Object,
-                EsecSecurityMocks.Dbe,
-                TestHelper.UnitOfWork,
-                hubService,
-                accessor,
-                _mockClaimHelper.Object);
-        }
-
-
         private SimulationController CreateTestController(List<string> userClaims)
         {
             List<Claim> claims = new List<Claim>();

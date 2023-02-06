@@ -73,14 +73,6 @@ namespace BridgeCareCoreTests.Tests
                 hubService, accessor, _mockClaimHelper.Object, new CashFlowPagingService(TestHelper.UnitOfWork));
         }
 
-        private void CreateUnauthorizedController()
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            _controller = new CashFlowController(EsecSecurityMocks.DbeMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object, new CashFlowPagingService(TestHelper.UnitOfWork));
-        }
-
         private void CreateLibraryTestData()
         {
             _testCashFlowRuleLibrary = new CashFlowRuleLibraryEntity

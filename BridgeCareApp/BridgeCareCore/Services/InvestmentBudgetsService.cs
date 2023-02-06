@@ -661,8 +661,6 @@ namespace BridgeCareCore.Services
                     ? warningSb.ToString()
                     : null
             };
-        }
-
-        
+        }        
     }
 }

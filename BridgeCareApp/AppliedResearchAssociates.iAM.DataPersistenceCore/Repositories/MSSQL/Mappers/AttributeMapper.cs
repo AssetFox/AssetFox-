@@ -207,6 +207,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return dto;
         }
 
+        public static AttributeDTO ToAbbreviatedDto(this AttributeEntity entity)
+            => new AttributeDTO
+            {
+                Name = entity.Name,
+                Type = entity.DataType,
+            };
+
         public static AttributeDTO ToDto(this AttributeEntity entity, string encryptionKey) =>
             new()
             {

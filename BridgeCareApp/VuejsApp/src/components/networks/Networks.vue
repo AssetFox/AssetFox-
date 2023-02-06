@@ -150,6 +150,9 @@
                 <v-btn @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Aggregate
                 </v-btn>
+                <v-btn @click='onDeleteClick' :disabled='isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                    Delete
+                </v-btn>
                 <v-btn @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
                     v-show="isNewNetwork"
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'>
@@ -213,6 +216,7 @@ export default class Networks extends Vue {
     @Action('getAttributes') getAttributes: any;
     @Action('selectNetwork') selectNetworkAction: any;
     @Action('createNetwork') createNetworkAction: any;
+    @Action('deleteNetwork') deleteNetworkAction: any;
     @Action('aggregateNetworkData') aggregateNetworkAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
@@ -381,6 +385,12 @@ export default class Networks extends Vue {
         });
 
         this.hasStartedAggregation = true;
+    }
+
+    onDeleteClick(){
+        this.deleteNetworkAction(this.selectedNetwork.id).then(() => {
+            this.onDiscardChanges();
+        })       
     }
     disableCrudButtonsCreate() {
 

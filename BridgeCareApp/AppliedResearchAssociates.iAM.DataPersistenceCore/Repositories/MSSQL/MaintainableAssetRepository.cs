@@ -214,6 +214,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.AddAll(maintainableAssetLocationEntities, _unitOfWork.UserEntity?.Id);
         }
 
+        public void DeleteMaintainableAssetsByNetworkId(Guid networkId)
+        {
+            var maintainableAssetIds = _unitOfWork.Context.MaintainableAsset.Where(_ => _.NetworkId == networkId).Select(_ => _.Id);
+            _unitOfWork.Context.DeleteAll<AssetDetailEntity>(_ => maintainableAssetIds.Contains(_.MaintainableAssetId));
+            _unitOfWork.Context.DeleteAll<AssetSummaryDetailEntity>(_ => maintainableAssetIds.Contains(_.MaintainableAssetId));
+            _unitOfWork.Context.DeleteAll<MaintainableAssetEntity>(_ => _.NetworkId == networkId);
+        }
+
         public bool CheckIfKeyAttributeValueExists(Guid networkId, string attributeValue)
         {
             var network = _unitOfWork.Context.Network.AsNoTracking().Include(_ => _.Simulations).FirstOrDefault(_ => _.Id == networkId);

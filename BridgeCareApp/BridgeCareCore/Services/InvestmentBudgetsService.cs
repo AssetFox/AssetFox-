@@ -492,6 +492,7 @@ namespace BridgeCareCore.Services
                 {
                     var budgetNames = criteriaPerBudgetName.Keys.ToList();
                     _unitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(budgetLibraryId, budgetNames);
+                    // WjJake -- We have two calls to this. Both existed in the prior code, but it feels weird.
                 }
 
                 _unitOfWork.BudgetRepo.DeleteAllBudgetsForLibrary(budgetLibraryId);
@@ -571,6 +572,7 @@ namespace BridgeCareCore.Services
 
                 var budgetNames = criteriaPerBudgetName.Keys.ToList();
                 _unitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(budgetLibraryId, budgetNames);
+                // WjJake -- two calls to this.
 
                 var criteria = new List<CriterionLibraryDTO>();
                 var criteriaJoins = new List<CriterionLibraryBudgetDTO>();

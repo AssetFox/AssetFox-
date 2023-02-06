@@ -143,13 +143,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var logMessage = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
                 Send(logMessage);
             }
-            foreach (var assetContext in AssetContexts)
-            {
-                //if (Simulation.CommittedProjects.FirstOrDefault(committedProject => committedProject.Id == assetContext.Detail.AssetId) == null) continue;
-                assetContext.Detail.TreatmentCategory = Simulation.CommittedProjects.FirstOrDefault(committedProject => committedProject.Id == assetContext.Detail.AssetId) != null
-                    ? Simulation.CommittedProjects.FirstOrDefault(committedProject => committedProject.Id == assetContext.Detail.AssetId).treatmentCategory
-                    : TreatmentCategory.Other;
-            }
             InParallel(AssetContexts, context =>
             {
                 context.RollForward();
@@ -195,7 +188,17 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             SimulationOutput output = new();
             output.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
             output.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
-            output.TreatmentCategory = Simulation.CommittedProjects.FirstOrDefault().treatmentCategory;
+
+            output.AssetTreatmentCategories = new();
+            foreach (var assetContext in AssetContexts)
+            {
+                var committedProject = Simulation.CommittedProjects.FirstOrDefault(c => c.Asset.Id == assetContext.Asset.Id);
+                if (committedProject != null)
+                {
+                    var assetTreatmentCategoryDetail = new AssetTreatmentCategoryDetail(committedProject.Asset.Id, committedProject.Asset.AssetName, committedProject.treatmentCategory);
+                    output.AssetTreatmentCategories.Add(assetTreatmentCategoryDetail);
+                }
+            }
             Simulation.ResultsOnDisk.Initialize(output);
             output = null;
 

@@ -17,6 +17,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public DateTime LastModifiedDate { get; set; }
 
-        public TreatmentCategory TreatmentCategory { get; set; }
+        public List<AssetTreatmentCategoryDetail> AssetTreatmentCategories;
     }
 }

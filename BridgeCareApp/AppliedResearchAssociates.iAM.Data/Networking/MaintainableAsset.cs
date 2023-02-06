@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
@@ -53,6 +55,9 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
 
         public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
         {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append("Unmatched datum");
+            StreamWriter writer = new StreamWriter("D:\\Non-locationMatches.txt");
             foreach (var datum in attributeData)
             {
                 if (datum.Location.MatchOn(Location))
@@ -61,9 +66,18 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
                 }
                 else
                 {
+                    stringBuilder.Append(datum);
                     // TODO: No matching maintainable asset for the current data. What do we do?
+
                 }
             }
+            writer.WriteLine(stringBuilder.ToString());
+            writer.Close();
+
+            //string outputPath = /*Directory.GetCurrentDirectory()*/ "D:\\Non-locationMatches.txt";
+            //File.CreateText(outputPath);
+            //File.AppendAllText(outputPath, stringBuilder.ToString());
+            stringBuilder.Clear();
         }
 
         public void AssignAttributeDataFromDataSource(IEnumerable<IAttributeDatum> attributeData) => AssignedData.AddRange(attributeData);

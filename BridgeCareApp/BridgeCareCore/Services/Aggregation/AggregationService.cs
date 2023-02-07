@@ -11,8 +11,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs;
-using BridgeCareCore.Models;
 using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
 
 namespace BridgeCareCore.Services.Aggregation

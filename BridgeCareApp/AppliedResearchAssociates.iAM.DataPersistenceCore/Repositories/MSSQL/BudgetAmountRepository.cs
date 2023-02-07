@@ -102,20 +102,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 budgetAmountEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
         }
 
-        public List<BudgetAmountEntity> GetLibraryBudgetAmounts(Guid libraryId)
+        public List<BudgetAmountDTO> GetLibraryBudgetAmounts(Guid libraryId)
         {
             if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
             {
                 throw new RowNotInTableException("The specified budget library was not found.");
             }
 
-            return _unitOfWork.Context.BudgetAmount.Where(_ => _.Budget.BudgetLibrary.Id == libraryId)
-                .Select(budgetAmount => new BudgetAmountEntity
+            var dtos = _unitOfWork.Context.BudgetAmount
+                .Include(_ => _.Budget)
+                .OrderBy(_ => _.Budget.BudgetOrder)
+                .Where(_ => _.Budget.BudgetLibrary.Id == libraryId)
+                .Select(budgetAmount => new BudgetAmountDTO
                 {
                     Year = budgetAmount.Year,
                     Value = budgetAmount.Value,
-                    Budget = new BudgetEntity {Name = budgetAmount.Budget.Name, BudgetOrder = budgetAmount.Budget.BudgetOrder }
-                }).AsNoTracking().ToList();
+                    BudgetName = budgetAmount.Budget.Name,
+                }).ToList();
+            return dtos;
         }
 
         public List<BudgetAmountDTO> GetScenarioBudgetAmounts(Guid simulationId)

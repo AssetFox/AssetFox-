@@ -249,7 +249,6 @@ import {
     setAuthHeader,
     setContentTypeCharset,
 } from '@/shared/utils/http-utils';
-//import ReportsService from './services/reports.service';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { clone } from 'ramda';

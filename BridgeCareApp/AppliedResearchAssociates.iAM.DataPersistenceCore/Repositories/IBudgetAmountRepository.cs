@@ -18,6 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<BudgetAmountEntity> GetLibraryBudgetAmounts(Guid libraryId);
 
-        List<ScenarioBudgetAmountEntity> GetScenarioBudgetAmounts(Guid simulationId);
+        List<BudgetAmountDTO> GetScenarioBudgetAmounts(Guid simulationId);
     }
 }

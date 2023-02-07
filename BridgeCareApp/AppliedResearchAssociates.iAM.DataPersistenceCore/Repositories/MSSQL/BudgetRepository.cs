@@ -12,7 +12,6 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -164,6 +163,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.SaveChanges();
         }
 
+        public void DeleteAllBudgetsForLibrary(Guid budgetLibraryId)
+        {
+            _unitOfWork.Context.DeleteAll<BudgetEntity>(_ => _.BudgetLibraryId == budgetLibraryId);
+
+        }
+
         public void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId)
         {
             if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
@@ -233,7 +238,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteEntity<BudgetLibraryEntity>(_ => _.Id == libraryId);
         }
 
-        public List<BudgetEntity> GetLibraryBudgets(Guid libraryId)
+        public List<BudgetDTO> GetLibraryBudgets(Guid libraryId)
         {
             if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
             {
@@ -243,6 +248,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return _unitOfWork.Context.Budget.AsNoTracking()
                 .Include(_ => _.BudgetAmounts)
                 .Where(_ => _.BudgetLibrary.Id == libraryId)
+                .Select(_ => _.ToDto())
                 .ToList();
         }
 
@@ -283,8 +289,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            return _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
-                .Where(_ => _.SimulationId == simulationId)
+            return _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery().Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
@@ -370,6 +375,83 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return years;
+        }
+
+        public Dictionary<string, string> GetCriteriaPerBudgetNameForSimulation(Guid simulationId)
+        {
+            var criteriaPerBudgetName = _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
+                .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Where(_ => _.SimulationId == simulationId)
+                .ToDictionary(_ => _.Name,
+                    _ => _.CriterionLibraryScenarioBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? "");
+            return criteriaPerBudgetName;
+        }
+
+        public Dictionary<string, string> GetCriteriaPerBudgetNameForBudgetLibrary(Guid budgetLibraryId)
+        {
+            var criteriaPerBudgetName = _unitOfWork.Context.Budget.AsNoTracking().AsSplitQuery()
+                .Include(_ => _.CriterionLibraryBudgetJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Where(_ => _.BudgetLibraryId == budgetLibraryId)
+                .ToDictionary(_ => _.Name,
+                    _ => _.CriterionLibraryBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? "");
+            return criteriaPerBudgetName;
+        }
+
+        public string GetBudgetLibraryName(Guid budgetLibraryId)
+        {
+            var name = _unitOfWork.Context.BudgetLibrary.Where(_ => _.Id == budgetLibraryId)
+                .AsNoTracking()
+                .First()
+                .Name;
+            return name;
+        }
+
+        public void DeleteAllScenarioBudgetsForSimulation(Guid simulationId)
+        {
+            var projects = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId && _.ScenarioBudgetId != null).ToList();
+            if (projects.Count > 0)
+            {
+                projects.ForEach(_ => _.ScenarioBudgetId = null);
+                _unitOfWork.Context.UpdateAll(projects);
+            }
+            _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
+        }
+
+        public void AddScenarioBudgets(Guid simulationId, List<BudgetDTO> newBudgetDtos)
+        {
+            var newBudgetEntities = newBudgetDtos.Select(b => b.ToScenarioEntity(simulationId)).ToList();
+            _unitOfWork.Context.AddAll(newBudgetEntities, _unitOfWork.CurrentUser?.Id);
+        }
+
+        public void UpdateScenarioBudgetAmounts(Guid simulationId, List<BudgetAmountDTOWithBudgetId> budgetAmounts)
+        {
+            var budgetAmountEntities = budgetAmounts.Select(amount => amount.BudgetAmount.ToScenarioEntity(amount.BudgetId)).ToList();
+            _unitOfWork.Context.UpdateAll(budgetAmountEntities, _unitOfWork.CurrentUser?.Id);
+        }
+
+        public void UpdateLibraryBudgetAmounts(List<BudgetAmountDTOWithBudgetId> budgetAmounts)
+        {
+            var budgetAmountEntities = budgetAmounts.Select(amount => amount.BudgetAmount.ToLibraryEntity(amount.BudgetId)).ToList();
+            _unitOfWork.Context.UpdateAll(budgetAmountEntities, _unitOfWork.CurrentUser?.Id);
+        }
+
+        public void AddScenarioBudgetAmounts(List<BudgetAmountDTOWithBudgetId> newBudgetAmounts)
+        {
+            var newBudgetAmountEntities = newBudgetAmounts.Select(b => b.BudgetAmount.ToScenarioEntity(b.BudgetId)).ToList();  
+            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.CurrentUser?.Id);
+        }
+
+        public void AddLibraryBudgetAmounts(List<BudgetAmountDTOWithBudgetId> newBudgetAmounts)
+        {
+            var newBudgetAmountEntities = newBudgetAmounts.Select(b => b.BudgetAmount.ToLibraryEntity(b.BudgetId)).ToList();
+            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.CurrentUser?.Id);
+        }
+        public void AddBudgets(List<BudgetDTOWithLibraryId> budgets)
+        {
+            var entities = budgets.Select(b => b.Budget.ToLibraryEntity(b.BudgetLibraryId)).ToList();
+            _unitOfWork.Context.AddAll(entities, _unitOfWork.CurrentUser?.Id);
         }
     }
 }

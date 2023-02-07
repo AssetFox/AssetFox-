@@ -45,5 +45,16 @@ namespace AppliedResearchAssociates.iAM.TestHelpers
             var castEnumerable = (IEnumerable<T>)enumerable;
             Assert.Empty(castEnumerable);
         }
+
+        public static void CheckEnumerable<T>(object enumerable, params T[] expectedEntries)
+        {
+            var actualEnumerable = (IEnumerable<T>)enumerable;
+            var index = 0;
+            foreach (var t in actualEnumerable)
+            {
+                Equivalent(expectedEntries[index], t);
+                index++;
+            }
+        }
     }
 }

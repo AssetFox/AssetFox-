@@ -18,8 +18,8 @@ namespace BridgeCareCore.Services
 {
     public class InvestmentBudgetsService : IInvestmentBudgetsService
     {
-        private static IUnitOfWork _unitOfWork;
-        private static IExpressionValidationService _expressionValidationService;
+        private IUnitOfWork _unitOfWork;
+        private IExpressionValidationService _expressionValidationService;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
         protected readonly IHubService HubService;
 
@@ -460,7 +460,6 @@ namespace BridgeCareCore.Services
         public BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter,
             bool overwriteBudgets)
         {
-            // InvestmentTests.ShouldImportLibraryBudgetsFromFile
             var budgetWorksheet = excelPackage.Workbook.Worksheets[0];
             var budgetWorksheetEnd = budgetWorksheet.Dimension.End;
 
@@ -492,6 +491,7 @@ namespace BridgeCareCore.Services
                 {
                     var budgetNames = criteriaPerBudgetName.Keys.ToList();
                     _unitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(budgetLibraryId, budgetNames);
+                    // WjJake -- We have two calls to this. Both existed in the prior code, but it feels weird.
                 }
 
                 _unitOfWork.BudgetRepo.DeleteAllBudgetsForLibrary(budgetLibraryId);
@@ -571,6 +571,7 @@ namespace BridgeCareCore.Services
 
                 var budgetNames = criteriaPerBudgetName.Keys.ToList();
                 _unitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(budgetLibraryId, budgetNames);
+                // WjJake -- two calls to this.
 
                 var criteria = new List<CriterionLibraryDTO>();
                 var criteriaJoins = new List<CriterionLibraryBudgetDTO>();
@@ -638,13 +639,14 @@ namespace BridgeCareCore.Services
             {
                 warningSb.Append($"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}");
             }
+            var returnBudgetLibrary = _unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryId);
             return new BudgetImportResultDTO
             {
-                BudgetLibrary = _unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryId),
+                BudgetLibrary = returnBudgetLibrary,
                 WarningMessage = !string.IsNullOrEmpty(warningSb.ToString())
                     ? warningSb.ToString()
                     : null
             };
-        }        
+        }
     }
 }

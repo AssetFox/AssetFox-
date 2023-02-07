@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return mock;
         }
 
-        private static Mock<HubService> DefaultMock()
+        public static Mock<HubService> DefaultMock()
         {
             var context = MockHubContext();
             var mock = new Mock<HubService>(context.Object);
@@ -30,6 +30,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             var mock = DefaultMock();
             return mock.Object;
+        }
+
+        public static Mock<IHubService> DefaultInterfaceMock()
+        {
+            var mock = new Mock<IHubService>();
+            return mock;
         }
     }
 }

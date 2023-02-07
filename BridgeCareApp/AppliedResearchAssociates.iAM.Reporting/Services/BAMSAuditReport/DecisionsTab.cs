@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         private IReportHelper _reportHelper;
         private const int headerRow1 = 1;
         private const int headerRow2 = 2;
-        private List<int> columnNumbersToAdjustWidth;
+        private List<int> columnNumbersBudgetsUsed;
 
         public DecisionsTab()
         {     
@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         // TODO Budgets data to be tested later when engine side updates ready
         public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation)
         {
-            columnNumbersToAdjustWidth = new List<int>();
+            columnNumbersBudgetsUsed = new List<int>();
             var currentAttributes = new HashSet<string>();
             // Distinct performance curve attributes
             foreach(var performanceCurve in simulation.PerformanceCurves)
@@ -47,146 +47,141 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             var treatments = new List<string>();
             treatments = simulation.Treatments?.OrderBy(_ => _.Name).Select(_ => _.Name).ToList();
 
-            // Add excel headers to excel.
-            var currentCell = AddHeadersCells(decisionsWorksheet, currentAttributes, budgets, treatments);            
+            // Add headers to excel
+            var currentCell = AddHeadersCells(decisionsWorksheet, currentAttributes, budgets, treatments);
 
-            // Create report model
-            var decisionsDataModels = CreateDecisionsDataModels(simulationOutput, currentAttributes, budgets, treatments);
-
-            // Add data to worksheet
-            FillDynamicDataInWorkSheet(decisionsWorksheet, decisionsDataModels, budgets.Count, currentCell);                          
-
-            decisionsWorksheet.Cells.AutoFitColumns();
-            PerformPostAutofitAdjustments(decisionsWorksheet, columnNumbersToAdjustWidth);
-        }
-
-        private void FillDynamicDataInWorkSheet(ExcelWorksheet decisionsWorksheet, List<DecisionsDataModel> decisionsDataModels, int budgetsCount, CurrentCell currentCell)
-        {
-            var row = currentCell.Row;
-            int column;
-
-            foreach (var decisionsDataModel in decisionsDataModels)
-            {
-                column = 1;
-
-                decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.BRKey;
-                decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.AnalysisYear;
-
-                foreach (var currentAttributesValue in decisionsDataModel.CurrentAttributesValues)
-                {
-                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
-                    decisionsWorksheet.Cells[row, column++].Value = currentAttributesValue;
-                }
-
-                foreach (var budgetLevel in decisionsDataModel.BudgetLevels)
-                {
-                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
-                    decisionsWorksheet.Cells[row, column++].Value = budgetLevel;
-                }
-                // TODO rmove this once decisionsDataModel.BudgetLevels starts getting data
-                if (decisionsDataModel.BudgetLevels.Count == 0)
-                {
-                    column += budgetsCount;
-                }
-
-                foreach (var decisionsTreatment in decisionsDataModel.DecisionsTreatments)
-                {
-                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Feasiable ? AuditReportConstants.Yes : AuditReportConstants.No;
-                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
-                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.CIImprovement;
-                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.Accounting);
-                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Cost;
-                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
-                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BCRatio;
-                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Selected ? AuditReportConstants.Yes : AuditReportConstants.No;
-                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.Accounting);
-                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.AmountSpent;
-                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BudgetsUsed;
-                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.RejectionReason;
-                }
-                row++;
-            }
+            // Fill data in excel
+            FillDynamicDataInWorkSheet(simulationOutput, currentAttributes, budgets, treatments, decisionsWorksheet, currentCell);
+                                                 
             decisionsWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
-        }
-
-        private List<DecisionsDataModel> CreateDecisionsDataModels(SimulationOutput simulationOutput, HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments)
-        {
-            List<DecisionsDataModel> decisionsDataModels = new List<DecisionsDataModel>();
-
-            // TODO do we need any filter for InitialAssetSummaries ?? or whole set is good
+            decisionsWorksheet.Cells.AutoFitColumns();
+            PerformPostAutofitAdjustments(decisionsWorksheet, columnNumbersBudgetsUsed, currentAttributes.Count);
+        }        
+        
+        private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, ExcelWorksheet decisionsWorksheet, CurrentCell currentCell)
+        {                        
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {                
                 var brKey = _reportHelper.CheckAndGetValue<double>(initialAssetSummary.ValuePerNumericAttribute, "BRKEY_");
                 foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
                 {
-                    var decisionsDataModel = new DecisionsDataModel();
-                    decisionsDataModel.BRKey = brKey;
-                    decisionsDataModel.AnalysisYear = year.Year;
+                    // Generate data model
+                    var decisionsDataModel = GenerateDecisionsDataModel(currentAttributes, budgets, treatments, brKey, year);
 
-                    var section = year.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
-                    // Current
-                    var currentAttributesValues = new List<double>();
-                    for (int index = 0; index < currentAttributes.Count - 1; index++)
-                    {
-                        var value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, currentAttributes.ElementAt(index));
-                        currentAttributesValues.Add(value);
-                    }
-                    // analysis benefit attribute
-                    currentAttributesValues.Add(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, currentAttributes.Last()));
-                    decisionsDataModel.CurrentAttributesValues = currentAttributesValues;
-
-                    // Budget levels
-                    var budgetsAtDecisionTime = section.BudgetsAtDecisionTime ?? new List<BudgetDetail>();
-                    var budgetLevels = new List<decimal>();
-                    if (budgetsAtDecisionTime.Count > 0)
-                    {
-                        foreach (var budget in budgets)
-                        {
-                            var budgetAtDecisionTime = budgetsAtDecisionTime.FirstOrDefault(_ => _.BudgetName == budget);
-                            if (budgetAtDecisionTime == null)
-                            {
-                                // TODO raise error?
-                            }
-                            else
-                            {
-                                budgetLevels.Add(budgetAtDecisionTime.AvailableFunding);
-                            }
-                        }
-                    }
-                    decisionsDataModel.BudgetLevels = budgetLevels;
-
-                    // Treatments
-                    var decisionsTreatments = new List<DecisionTreatment>();
-                    foreach (var treatment in treatments)
-                    {
-                        var decisionsTreatment = new DecisionTreatment();
-                        var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
-                        decisionsTreatment.Feasiable = treatmentRejection != null && treatmentRejection.TreatmentRejectionReason == TreatmentRejectionReason.NotFeasible ? false : true;
-                        decisionsTreatment.CIImprovement = 10 - Convert.ToDouble(decisionsDataModel.CurrentAttributesValues.Last());
-                        var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
-                        decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
-                        decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
-                        decisionsTreatment.Selected = section.AppliedTreatment == treatment;
-                        var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
-                        decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.BudgetUsages.Sum(_ => _.CoveredCost) : 0;        
-                        decisionsTreatment.BudgetsUsed = treatmentConsideration != null ? string.Join(",", treatmentConsideration.BudgetUsages.Select(_ => _.BudgetName)) : string.Empty;
-                        decisionsTreatment.RejectionReason = GetRejectionReason(treatmentConsideration);
-
-                        decisionsTreatments.Add(decisionsTreatment);
-                    }
-                    decisionsDataModel.DecisionsTreatments = decisionsTreatments;
-
-                    decisionsDataModels.Add(decisionsDataModel);
+                    // Fill in excel
+                    currentCell = FillDataInWorkSheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentCell);
                 }
             }
+        }
 
-            return decisionsDataModels;
+        private DecisionsDataModel GenerateDecisionsDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year)
+        {
+            var decisionsDataModel = new DecisionsDataModel();
+            decisionsDataModel.BRKey = brKey;
+            decisionsDataModel.AnalysisYear = year.Year;
+
+            var section = year.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
+            // Current
+            var currentAttributesValues = new List<double>();
+            for (int index = 0; index < currentAttributes.Count - 1; index++)
+            {
+                var value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, currentAttributes.ElementAt(index));
+                currentAttributesValues.Add(value);
+            }
+            // analysis benefit attribute
+            currentAttributesValues.Add(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, currentAttributes.Last()));
+            decisionsDataModel.CurrentAttributesValues = currentAttributesValues;
+
+            // Budget levels
+            var budgetsAtDecisionTime = section.BudgetsAtDecisionTime ?? new List<BudgetDetail>();
+            var budgetLevels = new List<decimal>();
+            if (budgetsAtDecisionTime.Count > 0)
+            {
+                foreach (var budget in budgets)
+                {
+                    var budgetAtDecisionTime = budgetsAtDecisionTime.FirstOrDefault(_ => _.BudgetName == budget);
+                    if (budgetAtDecisionTime == null)
+                    {
+                        // TODO raise error?
+                    }
+                    else
+                    {
+                        budgetLevels.Add(budgetAtDecisionTime.AvailableFunding);
+                    }
+                }
+            }
+            decisionsDataModel.BudgetLevels = budgetLevels;
+
+            // Treatments
+            var decisionsTreatments = new List<DecisionTreatment>();
+            foreach (var treatment in treatments)
+            {
+                var decisionsTreatment = new DecisionTreatment();
+                var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
+                decisionsTreatment.Feasiable = treatmentRejection != null && treatmentRejection.TreatmentRejectionReason == TreatmentRejectionReason.NotFeasible ? false : true;
+                decisionsTreatment.CIImprovement = 10 - Convert.ToDouble(decisionsDataModel.CurrentAttributesValues.Last());
+                var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
+                decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
+                decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
+                decisionsTreatment.Selected = section.AppliedTreatment == treatment;
+                var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
+                decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.BudgetUsages.Sum(_ => _.CoveredCost) : 0;
+                decisionsTreatment.BudgetsUsed = treatmentConsideration != null ? string.Join(", ", treatmentConsideration.BudgetUsages.Select(_ => _.BudgetName)) : string.Empty;
+                decisionsTreatment.RejectionReason = GetRejectionReason(treatmentConsideration);
+
+                decisionsTreatments.Add(decisionsTreatment);
+            }
+            decisionsDataModel.DecisionsTreatments = decisionsTreatments;
+            return decisionsDataModel;
+        }
+
+        private CurrentCell FillDataInWorkSheet(ExcelWorksheet decisionsWorksheet, DecisionsDataModel decisionsDataModel, int budgetsCount, CurrentCell currentCell)
+        {
+            var row = currentCell.Row;
+            int column = 1;
+
+            ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
+            decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.BRKey;
+            ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
+            decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.AnalysisYear;
+
+            foreach (var currentAttributesValue in decisionsDataModel.CurrentAttributesValues)
+            {
+                ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+                decisionsWorksheet.Cells[row, column++].Value = currentAttributesValue;
+            }
+
+            foreach (var budgetLevel in decisionsDataModel.BudgetLevels)
+            {
+                ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+                decisionsWorksheet.Cells[row, column++].Value = budgetLevel;
+            }
+            // TODO rmove this once decisionsDataModel.BudgetLevels starts getting data
+            if (decisionsDataModel.BudgetLevels.Count == 0)
+            {
+                column += budgetsCount;
+            }
+
+            foreach (var decisionsTreatment in decisionsDataModel.DecisionsTreatments)
+            {
+                ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Feasiable ? AuditReportConstants.Yes : AuditReportConstants.No;
+                ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.CIImprovement;
+                ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.Accounting);
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Cost;
+                ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BCRatio;
+                ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Selected ? AuditReportConstants.Yes : AuditReportConstants.No;
+                ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.Accounting);
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.AmountSpent;
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BudgetsUsed;
+                decisionsWorksheet.Cells[row, column - 1].Style.WrapText = true;
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.RejectionReason;
+            }
+            ExcelHelper.ApplyBorder(decisionsWorksheet.Cells[row, 1, row, column - 1]);
+            return new CurrentCell { Row = row + 1, Column = column - 1 };
         }
 
         private string GetRejectionReason(TreatmentConsiderationDetail treatmentConsideration)
@@ -216,10 +211,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             column = AddCurrentTreatmentsHeaders(worksheet, treatments, column);
                         
             ExcelHelper.ApplyColor(worksheet.Cells[headerRow2, 3, headerRow2, column - 1], Color.FromArgb(255, 242, 204));
-            ExcelHelper.ApplyBorder(worksheet.Cells[headerRow1, 1, headerRow2, worksheet.Dimension.Columns]);
-            // TODO check if any other style needed or to be removed by new method in helper
-            ExcelHelper.ApplyStyle(worksheet.Cells[headerRow2, 1, headerRow2, column - 1]);
-            worksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
+            ExcelHelper.ApplyBorder(worksheet.Cells[headerRow1, 1, headerRow2, worksheet.Dimension.Columns]);            
+            ExcelHelper.ApplyStyle(worksheet.Cells[headerRow2, 1, headerRow2, column - 1]);                                  
 
             return new CurrentCell { Row = headerRow1 + 2, Column = worksheet.Dimension.Columns + 1 };
         }
@@ -238,7 +231,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 {
                     if (treatmentHeader.Equals("Budget(s)\r\nUsed"))
                     {
-                        columnNumbersToAdjustWidth.Add(column);
+                        columnNumbersBudgetsUsed.Add(column);
                     }
                     worksheet.Cells[headerRow2, column++].Value = treatmentHeader;                    
                 }
@@ -273,7 +266,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 worksheet.Cells[headerRow2, column++].Value = currentAttribute;
             }
             // Merge cells for "Current"
-            ExcelHelper.MergeCells(worksheet, headerRow1, currentAttributesColumn, headerRow1, column - 1);
+            ExcelHelper.MergeCells(worksheet, headerRow1, currentAttributesColumn, headerRow1, column - 1);           
+
             return column;
         }
 
@@ -292,12 +286,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             };
         }
 
-        public void PerformPostAutofitAdjustments(ExcelWorksheet worksheet,List<int> columnNumbers)
+        public void PerformPostAutofitAdjustments(ExcelWorksheet worksheet,List<int> columnNumbersBudgetsUsed, int currentAttributesCount)
         {
-            foreach (var columnNumber in columnNumbers)
+            foreach (var columnNumber in columnNumbersBudgetsUsed)
             {
-                worksheet.Column(columnNumber).SetTrueWidth(15);
+                worksheet.Column(columnNumber).SetTrueWidth(30);
             }
+
+            //var toCol = currentAttributesCount + 3;
+            //for(int col = 3; col < currentAttributesCount; col++)
+            //{
+            //    worksheet.Column(col).SetTrueWidth(12);
+            //}
         }
     }
 }

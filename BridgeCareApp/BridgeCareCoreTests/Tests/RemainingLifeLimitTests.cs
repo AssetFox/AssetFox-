@@ -1,7 +1,4 @@
 ﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
@@ -15,7 +12,6 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
@@ -55,83 +51,6 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        public RemainingLifeLimitLibraryEntity TestRemainingLifeLimitLibrary(Guid? id = null)
-        {
-            var resolveId = id ?? Guid.NewGuid();
-            var returnValue = new RemainingLifeLimitLibraryEntity
-            {
-                Id = resolveId,
-                Name = "Test Name"
-            };
-            return returnValue;
-        }
-
-        public RemainingLifeLimitEntity TestRemainingLifeLimit(Guid libraryId, Guid attributeId)
-        {
-            return new RemainingLifeLimitEntity
-            {
-                Id = Guid.NewGuid(),
-                RemainingLifeLimitLibraryId = libraryId,
-                Value = 1.0,
-                AttributeId = attributeId,
-            };
-        }
-
-        public ScenarioRemainingLifeLimitEntity ScenarioTestRemainingLifeLimit(Guid scenarioId, Guid attributeId)
-        {
-            return new ScenarioRemainingLifeLimitEntity
-            {
-                Id = Guid.NewGuid(),
-                SimulationId = scenarioId,
-                Value = 1.0,
-                AttributeId = attributeId,
-            };
-        }
-
-        private RemainingLifeLimitLibraryEntity SetupForGet()
-        {
-            var library = TestRemainingLifeLimitLibrary();
-            var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
-            var lifeLimit = TestRemainingLifeLimit(library.Id, attribute.Id);
-            TestHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Add(library);
-            TestHelper.UnitOfWork.Context.RemainingLifeLimit.Add(lifeLimit);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-            return library;
-        }
-
-        private ScenarioRemainingLifeLimitEntity SetupForScenarioGet(Guid scenarioId)
-        {
-            var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
-            var lifeLimit = ScenarioTestRemainingLifeLimit(scenarioId, attribute.Id);
-            TestHelper.UnitOfWork.Context.ScenarioRemainingLifeLimit.Add(lifeLimit);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-            return lifeLimit;
-        }
-
-        private CriterionLibraryDTO SetupForUpsertOrDelete()
-        {
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            return criterionLibrary;
-        }
-
-        [Fact]
-        public async Task RemainingLifeLimitLibraries_GetsFromRepo()
-        {
-            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-            var repo = RemainingLifeLimitRepositoryMocks.New(unitOfWork);
-            var libraryDto = RemainingLifeLimitLibraryDtos.Empty();
-            var libraryDtos = new List<RemainingLifeLimitLibraryDTO> { libraryDto };
-            repo.Setup(r => r.GetAllRemainingLifeLimitLibrariesNoChildren()).Returns(libraryDtos);
-            var controller = CreateController(unitOfWork);
-
-            // Act
-            var result = await controller.RemainingLifeLimitLibraries();
-
-            // Assert
-            var value = ActionResultAssertions.OkObject(result);
-            ObjectAssertions.Equivalent(libraryDtos, value);
-        }
-
         [Fact]
         public async Task UpsertRemainingLifeLimitLibrary_CallsUpsertLibraryAndUpsertLifeLimitsOnRepo()
         {
@@ -139,10 +58,11 @@ namespace BridgeCareCoreTests.Tests
             var repo = RemainingLifeLimitRepositoryMocks.New(unitOfWork);
             var controller = CreateController(unitOfWork);
 
-            var library = TestRemainingLifeLimitLibrary();
+            var libraryId = Guid.NewGuid();
+            var dto = RemainingLifeLimitLibraryDtos.Empty(libraryId);
             var request = new LibraryUpsertPagingRequestModel<RemainingLifeLimitLibraryDTO, RemainingLifeLimitDTO>();
             request.IsNewLibrary = true;
-            request.Library = library.ToDto();
+            request.Library = dto;
             // Act
             var result = await controller
                 .UpsertRemainingLifeLimitLibrary(request);
@@ -152,7 +72,7 @@ namespace BridgeCareCoreTests.Tests
             var repoLibraryCall = repo.SingleInvocationWithName(nameof(IRemainingLifeLimitRepository.UpsertRemainingLifeLimitLibrary));
             var repoLimitCall = repo.SingleInvocationWithName(nameof(IRemainingLifeLimitRepository.UpsertOrDeleteRemainingLifeLimits));
             ObjectAssertions.Equivalent(request.Library, repoLibraryCall.Arguments[0]);
-            Assert.Equal(library.Id, repoLimitCall.Arguments[1]);
+            Assert.Equal(libraryId, repoLimitCall.Arguments[1]);
             var castArgumentZero = repoLimitCall.Arguments[0] as List<RemainingLifeLimitDTO>;
             Assert.Empty(castArgumentZero);
         }

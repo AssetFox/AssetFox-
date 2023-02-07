@@ -1,27 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Data;
-using System.IO;
-using System.Threading.Tasks;
-using Xunit;
-using Moq;
-using OfficeOpenXml;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using BridgeCareCore.Services;
-using BridgeCareCore.Interfaces;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+﻿using System.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using BridgeCareCore.Controllers;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
-using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using BridgeCareCore.Models;
+using BridgeCareCore.Services;
+using Moq;
+using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {

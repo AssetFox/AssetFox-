@@ -30,7 +30,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForAnyTreatment = domain.ShadowForAnyTreatment,
                 ShadowForSameTreatment = domain.ShadowForSameTreatment,
                 Cost = domain.Cost,
-                Year = domain.Year
+                Year = domain.Year,
+                treatmentCategory = domain.treatmentCategory
             };
 
             entity.CommittedProjectLocation = maintainableAsset.MaintainableAssetLocation.ToCommittedProjectLocation(entity);
@@ -40,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity, string networkKeyAttribute)
         {
-            TreatmentCategory convertedCategory = default(TreatmentCategory);
+            TreatmentCategory convertedCategory = entity.treatmentCategory!=default(TreatmentCategory) ? entity.treatmentCategory : default(TreatmentCategory);
             if (Enum.TryParse(typeof(TreatmentCategory), entity.Category, true, out var convertedCategoryOut))
             {
                 convertedCategory = (TreatmentCategory)convertedCategoryOut;

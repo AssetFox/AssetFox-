@@ -13,7 +13,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services.Aggregation;

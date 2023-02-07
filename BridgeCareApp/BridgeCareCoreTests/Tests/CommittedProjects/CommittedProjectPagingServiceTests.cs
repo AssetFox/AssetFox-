@@ -20,7 +20,6 @@ using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 

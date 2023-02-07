@@ -128,7 +128,6 @@ namespace BridgeCareCore.Services.Aggregation
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.AppendLine("Datum Name, Location Id, Datum Id");
                     StreamWriter streamWriter = new StreamWriter(path + "\\UnmatchedDatum.txt");
-
                     
                     state.Status = "Aggregating";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
@@ -258,8 +257,7 @@ namespace BridgeCareCore.Services.Aggregation
             });
             if (isUnmatchedDatum)
             {
-                // Send log message with log location?
-                WriteError(writer, "Unmatched Datum location found::See unmatchedDatum.txt log file for more details.");
+                WriteError(writer, "Unmatched Datum locations found::See unmatchedDatum.txt log file for more details.");
             }
             return !isError;
         }

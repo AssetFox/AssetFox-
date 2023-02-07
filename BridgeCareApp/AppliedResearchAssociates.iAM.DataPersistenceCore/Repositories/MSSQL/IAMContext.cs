@@ -658,6 +658,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
+                entity.Property(e => e.treatmentCategory).IsRequired();
+
                 entity.HasOne(d => d.ScenarioBudget)
                     .WithMany(p => p.CommittedProjects)
                     .HasForeignKey(d => d.ScenarioBudgetId)

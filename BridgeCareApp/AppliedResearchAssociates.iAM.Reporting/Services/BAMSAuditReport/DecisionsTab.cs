@@ -18,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         private IReportHelper _reportHelper;
         private const int headerRow1 = 1;
         private const int headerRow2 = 2;
+        private List<int> columnNumbersToAdjustWidth;
 
         public DecisionsTab()
         {     
@@ -27,6 +28,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         // TODO Budgets data to be tested later when engine side updates ready
         public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation)
         {
+            columnNumbersToAdjustWidth = new List<int>();
             var currentAttributes = new HashSet<string>();
             // Distinct performance curve attributes
             foreach(var performanceCurve in simulation.PerformanceCurves)
@@ -46,32 +48,78 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             treatments = simulation.Treatments?.OrderBy(_ => _.Name).Select(_ => _.Name).ToList();
 
             // Add excel headers to excel.
-            var currentCell = AddHeadersCells(decisionsWorksheet, currentAttributes, budgets, treatments);
-            decisionsWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
+            var currentCell = AddHeadersCells(decisionsWorksheet, currentAttributes, budgets, treatments);            
 
             // Create report model
             var decisionsDataModels = CreateDecisionsDataModels(simulationOutput, currentAttributes, budgets, treatments);
 
-            // TODO Add data to worksheet
-            FillDynamicDataInWorkSheet(decisionsWorksheet, decisionsDataModels, currentCell);                          
+            // Add data to worksheet
+            FillDynamicDataInWorkSheet(decisionsWorksheet, decisionsDataModels, budgets.Count, currentCell);                          
 
             decisionsWorksheet.Cells.AutoFitColumns();
-
-            // PerformPostAutofitAdjustments any here?? 
+            PerformPostAutofitAdjustments(decisionsWorksheet, columnNumbersToAdjustWidth);
         }
 
-        private void FillDynamicDataInWorkSheet(ExcelWorksheet decisionsWorksheet, List<DecisionsDataModel> decisionsDataModels, CurrentCell currentCell)
+        private void FillDynamicDataInWorkSheet(ExcelWorksheet decisionsWorksheet, List<DecisionsDataModel> decisionsDataModels, int budgetsCount, CurrentCell currentCell)
         {
+            var row = currentCell.Row;
+            int column;
 
+            foreach (var decisionsDataModel in decisionsDataModels)
+            {
+                column = 1;
 
+                decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.BRKey;
+                decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.AnalysisYear;
+
+                foreach (var currentAttributesValue in decisionsDataModel.CurrentAttributesValues)
+                {
+                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
+                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+                    decisionsWorksheet.Cells[row, column++].Value = currentAttributesValue;
+                }
+
+                foreach (var budgetLevel in decisionsDataModel.BudgetLevels)
+                {
+                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
+                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+                    decisionsWorksheet.Cells[row, column++].Value = budgetLevel;
+                }
+                // TODO rmove this once decisionsDataModel.BudgetLevels starts getting data
+                if (decisionsDataModel.BudgetLevels.Count == 0)
+                {
+                    column += budgetsCount;
+                }
+
+                foreach (var decisionsTreatment in decisionsDataModel.DecisionsTreatments)
+                {
+                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Feasiable ? AuditReportConstants.Yes : AuditReportConstants.No;
+                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
+                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.CIImprovement;
+                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
+                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.Accounting);
+                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Cost;
+                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
+                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BCRatio;
+                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Selected ? AuditReportConstants.Yes : AuditReportConstants.No;
+                    ExcelHelper.HorizontalRightAlign(decisionsWorksheet.Cells[row, column]);
+                    ExcelHelper.SetCustomFormat(decisionsWorksheet.Cells[row, column], ExcelHelperCellFormat.Accounting);
+                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.AmountSpent;
+                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BudgetsUsed;
+                    decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.RejectionReason;
+                }
+                row++;
+            }
+            decisionsWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
         }
 
         private List<DecisionsDataModel> CreateDecisionsDataModels(SimulationOutput simulationOutput, HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments)
         {
             List<DecisionsDataModel> decisionsDataModels = new List<DecisionsDataModel>();
-            
-            // TODO - define obj that holds data to be displayed, use similar to make sorted dict like bridgetab with some changes, no dict just list of DecisionsDataModels   
-            // Use treatments, Pcurves, AnalysisMethod
+
+            // TODO do we need any filter for InitialAssetSummaries ?? or whole set is good
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {                
                 var brKey = _reportHelper.CheckAndGetValue<double>(initialAssetSummary.ValuePerNumericAttribute, "BRKEY_");
@@ -132,7 +180,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
                         decisionsTreatments.Add(decisionsTreatment);
                     }
-                    decisionsDataModel.decisionsTreatments = decisionsTreatments;
+                    decisionsDataModel.DecisionsTreatments = decisionsTreatments;
 
                     decisionsDataModels.Add(decisionsDataModel);
                 }
@@ -151,8 +199,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         }
 
         private CurrentCell AddHeadersCells(ExcelWorksheet worksheet, HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments)
-        {
-            // Row 1            
+        {            
             int column = 1;
 
             worksheet.Cells.Style.WrapText = false;
@@ -170,14 +217,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                         
             ExcelHelper.ApplyColor(worksheet.Cells[headerRow2, 3, headerRow2, column - 1], Color.FromArgb(255, 242, 204));
             ExcelHelper.ApplyBorder(worksheet.Cells[headerRow1, 1, headerRow2, worksheet.Dimension.Columns]);
-            // check if any other style needed or to be removed by new method in helper
+            // TODO check if any other style needed or to be removed by new method in helper
             ExcelHelper.ApplyStyle(worksheet.Cells[headerRow2, 1, headerRow2, column - 1]);
             worksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             return new CurrentCell { Row = headerRow1 + 2, Column = worksheet.Dimension.Columns + 1 };
         }
 
-        private static int AddCurrentTreatmentsHeaders(ExcelWorksheet worksheet, List<string> treatments, int column)
+        private int AddCurrentTreatmentsHeaders(ExcelWorksheet worksheet, List<string> treatments, int column)
         {
             var treatmentsColumn = column;
             // Fixed treatment headers for row 2 per treatment
@@ -189,7 +236,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 // Repeat treatmentHeaders for row 2 per treatment
                 foreach (var treatmentHeader in treatmentHeaders)
                 {
-                    worksheet.Cells[headerRow2, column++].Value = treatmentHeader;
+                    if (treatmentHeader.Equals("Budget(s)\r\nUsed"))
+                    {
+                        columnNumbersToAdjustWidth.Add(column);
+                    }
+                    worksheet.Cells[headerRow2, column++].Value = treatmentHeader;                    
                 }
                 // Merge cells for each treatment
                 ExcelHelper.MergeCells(worksheet, headerRow1, treatmentsColumn, headerRow1, column - 1);
@@ -239,6 +290,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 "Budget(s)\r\nUsed",
                 "Rejection Reason"
             };
+        }
+
+        public void PerformPostAutofitAdjustments(ExcelWorksheet worksheet,List<int> columnNumbers)
+        {
+            foreach (var columnNumber in columnNumbers)
+            {
+                worksheet.Column(columnNumber).SetTrueWidth(15);
+            }
         }
     }
 }

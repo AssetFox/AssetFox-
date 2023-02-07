@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
 
         public List<decimal> BudgetLevels { get; set; } // TODO check later if double stored in budgetlevel values
 
-        public List<DecisionTreatment> decisionsTreatments { get; set; }
+        public List<DecisionTreatment> DecisionsTreatments { get; set; }
     }
 
     public class DecisionTreatment

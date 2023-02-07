@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
@@ -12,6 +14,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Models;
 using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
 
@@ -30,7 +33,9 @@ namespace BridgeCareCore.Services.Aggregation
         {
             state.NetworkId = networkId;
             var isError = false;
+            var isUnmatchedDatum = false;
             state.ErrorMessage = "";
+
             await Task.Run(() =>
             {
                 try
@@ -130,7 +135,8 @@ namespace BridgeCareCore.Services.Aggregation
                         i++;
                         maintainableAsset.AssignedData.RemoveAll(_ =>
                             attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
-                        maintainableAsset.AssignAttributeData(attributeData);
+                        int unmatchedDatum = maintainableAsset.AssignAttributeData(attributeData, maintainableAsset.Id);
+                        if (unmatchedDatum > 0) isUnmatchedDatum = true;
 
                         //maintainableAsset.AssignSpatialWeighting(benefitQuantifierEquation.Equation.Expression);
                         try
@@ -230,6 +236,11 @@ namespace BridgeCareCore.Services.Aggregation
                 }
 
             });
+            if (isUnmatchedDatum)
+            {
+                // Send log message with log location?
+                WriteError(writer, "See log for unmatched datum");
+            }
             return !isError;
         }
 

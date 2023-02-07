@@ -53,11 +53,15 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
         //    //SpatialWeighting = new SpatialWeighting(result);
         //}
 
-        public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
+        public int AssignAttributeData(IEnumerable<IAttributeDatum> attributeData, Guid maintainableAssetId)
         {
+            int unmatchedCount = 0;
+
+            // Set up the log
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append("Unmatched datum");
-            StreamWriter writer = new StreamWriter("D:\\Non-locationMatches.txt");
+            stringBuilder.AppendLine("Maintainable asset unmatched datum - " + maintainableAssetId);
+            StreamWriter streamWriter = new StreamWriter("D:\\Non-locationMatches_" + maintainableAssetId + ".txt");
+
             foreach (var datum in attributeData)
             {
                 if (datum.Location.MatchOn(Location))
@@ -66,18 +70,21 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
                 }
                 else
                 {
-                    stringBuilder.Append(datum);
-                    // TODO: No matching maintainable asset for the current data. What do we do?
-
+                    // return the unmatched datum to be logged and reported
+                    unmatchedCount++;
+                    stringBuilder.AppendLine(datum.ToString());
                 }
             }
-            writer.WriteLine(stringBuilder.ToString());
-            writer.Close();
+
+            streamWriter.WriteLine(stringBuilder.ToString());
+            streamWriter.Close();
 
             //string outputPath = /*Directory.GetCurrentDirectory()*/ "D:\\Non-locationMatches.txt";
             //File.CreateText(outputPath);
             //File.AppendAllText(outputPath, stringBuilder.ToString());
-            stringBuilder.Clear();
+            //stringBuilder.Clear();
+
+            return unmatchedCount;
         }
 
         public void AssignAttributeDataFromDataSource(IEnumerable<IAttributeDatum> attributeData) => AssignedData.AddRange(attributeData);

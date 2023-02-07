@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
+﻿using System.Data;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
@@ -23,11 +19,8 @@ using Moq;
 using OfficeOpenXml;
 using Xunit;
 using MoreLinq;
-using System.Threading;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
-using BridgeCareCore.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Services.DefaultData;
 using BridgeCareCore.Models;
@@ -41,6 +34,8 @@ using Microsoft.AspNetCore.Authorization;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services.Paging;
+using AppliedResearchAssociates.iAM.Hubs.Services;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -54,42 +49,28 @@ namespace BridgeCareCoreTests.Tests
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
-        public InvestmentBudgetsService Setup()
+        public InvestmentBudgetsService Setup(Mock<IHubService> hubServiceMock = null)
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var hubService = HubServiceMocks.Default();
+            var hubService = hubServiceMock ?? HubServiceMocks.DefaultInterfaceMock();
             var logger = new LogNLog();
             var service = new InvestmentBudgetsService(
                 TestHelper.UnitOfWork,
                 new ExpressionValidationService(TestHelper.UnitOfWork, logger),
-                hubService,
+                hubService.Object,
                 new InvestmentDefaultDataService());
             return service;
         }
 
-        private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
+        private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null, Mock<IHubService> hubServiceMock = null)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
+            var hubService = hubServiceMock ?? HubServiceMocks.DefaultInterfaceMock();
             var controller = new InvestmentController(service, new InvestmentPagingService(TestHelper.UnitOfWork, new InvestmentDefaultDataService()), EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
-                hubService,
-                accessor,
-                _mockInvestmentDefaultDataService.Object,
-                _mockClaimHelper.Object);
-            return controller;
-        }
-
-        private InvestmentController CreateUnauthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
-        {
-            _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
-            accessor ??= HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var controller = new InvestmentController(service, new InvestmentPagingService(TestHelper.UnitOfWork, new InvestmentDefaultDataService()), EsecSecurityMocks.Admin,
-                TestHelper.UnitOfWork,
-                hubService,
+                hubService.Object,
                 accessor,
                 _mockInvestmentDefaultDataService.Object,
                 _mockClaimHelper.Object);
@@ -232,6 +213,37 @@ namespace BridgeCareCoreTests.Tests
             return mock.Object;
         }
 
+        private IHttpContextAccessor CreateRequestWithLibraryFormDataWithExtraCriterion(bool overwriteBudgets = false)
+        {
+            var httpContext = new DefaultHttpContext();
+            var formData = new Dictionary<string, StringValues>()
+            {
+                {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
+                {"libraryId", new StringValues(_testBudgetLibrary.Id.ToString())},
+                {"currentUserCriteriaFilter", Newtonsoft.Json.JsonConvert.SerializeObject(new UserCriteriaDTO
+                {
+                    CriteriaId = Guid.NewGuid(),
+                    UserId = Guid.NewGuid(),
+                    UserName = "Test User",
+                    Criteria = string.Empty,
+                    HasCriteria = false,
+                    HasAccess = true,
+                })}
+            };
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
+                "TestInvestmentBudgetsWithExtraBudgetCriterion.xlsx");
+            using var stream = File.OpenRead(filePath);
+            var memStream = new MemoryStream();
+            stream.CopyTo(memStream);
+            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestInvestmentBudgets.xlsx");
+            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
+            HttpContextSetup.AddAuthorizationHeader(httpContext);
+            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
+
+            var mock = new Mock<IHttpContextAccessor>();
+            mock.Setup(m => m.HttpContext).Returns(httpContext);
+            return mock.Object;
+        }
         private IHttpContextAccessor CreateRequestWithScenarioFormData(Guid simulationId, bool overwriteBudgets = false)
         {
             var httpContext = new DefaultHttpContext();
@@ -240,6 +252,31 @@ namespace BridgeCareCoreTests.Tests
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
                 "TestInvestmentBudgets.xlsx");
+            using var stream = File.OpenRead(filePath);
+            var memStream = new MemoryStream();
+            stream.CopyTo(memStream);
+            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestInvestmentBudgets.xlsx");
+
+            var formData = new Dictionary<string, StringValues>()
+            {
+                {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
+                {"simulationId", new StringValues(simulationId.ToString())}
+            };
+
+            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
+            var accessor = new Mock<IHttpContextAccessor>();
+            accessor.Setup(_ => _.HttpContext).Returns(httpContext);
+            return accessor.Object;
+        }
+
+        private IHttpContextAccessor CreateRequestWithScenarioFormDataWithExtraCriterion(Guid simulationId, bool overwriteBudgets = false)
+        {
+            var httpContext = new DefaultHttpContext();
+            HttpContextSetup.AddAuthorizationHeader(httpContext);
+            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
+                "TestInvestmentBudgetsWithExtraBudgetCriterion.xlsx");
             using var stream = File.OpenRead(filePath);
             var memStream = new MemoryStream();
             stream.CopyTo(memStream);
@@ -653,7 +690,44 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
                 .GetLibraryBudgetAmounts(_testBudgetLibrary.Id)
-                .Where(_ => _.Budget.Name.IndexOf("Sample") != -1)
+                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
+                .ToList();
+
+            Assert.Equal(2, budgetAmounts.Count);
+            Assert.True(budgetAmounts.All(_ => _.Year == year));
+            Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
+
+            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
+            Assert.Equal(3, budgets.Count);
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
+
+            var criteriaPerBudgetName = GetCriteriaPerBudgetName();
+            var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+        }
+        [Fact]
+        public async Task ShouldImportLibraryBudgetsFromFileWithExtraCriterion()
+        {
+            // Arrange
+            var hubService = HubServiceMocks.DefaultInterfaceMock();
+            var service = Setup(hubService);
+            CreateLibraryTestData();
+            var accessor = CreateRequestWithLibraryFormDataWithExtraCriterion();
+            var controller = CreateAuthorizedController(service, accessor, hubService);
+            var year = 2022;
+
+
+            // Act
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => controller.ImportLibraryInvestmentBudgetsExcelFile());
+
+            // Assert
+            var hubServiceMessages = hubService.Invocations;
+            Assert.Equal(2, hubServiceMessages.Count);
+            Assert.Contains(hubServiceMessages, m => m.Arguments[2].ToString().Contains("Missing budget"));
+
+            var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
+                .GetLibraryBudgetAmounts(_testBudgetLibrary.Id)
+                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
                 .ToList();
 
             Assert.Equal(2, budgetAmounts.Count);
@@ -861,7 +935,44 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
                 .GetScenarioBudgetAmounts(simulation.Id)
-                .Where(_ => _.ScenarioBudget.Name.IndexOf("Sample") != -1)
+                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
+                .ToList();
+
+            Assert.Equal(2, budgetAmounts.Count);
+            Assert.True(budgetAmounts.All(_ => _.Year == year));
+            Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
+
+            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            Assert.Equal(3, budgets.Count);
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
+
+            var criteriaPerBudgetName = GetCriteriaPerBudgetName();
+            var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+        }
+
+        [Fact]
+        public async Task ShouldImportScenarioBudgetsFromFileWithExtraCriterion()
+        {
+            // Arrange
+            var year = 2022;
+            var hubService = HubServiceMocks.DefaultInterfaceMock();
+            var service = Setup(hubService);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var accessor = CreateRequestWithScenarioFormDataWithExtraCriterion(simulation.Id);
+            var controller = CreateAuthorizedController(service, accessor, hubService);
+            CreateScenarioTestData(simulation.Id);
+
+            // Act
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => controller.ImportScenarioInvestmentBudgetsExcelFile());
+
+            // Assert
+            var hubServiceMessages = hubService.Invocations;
+            Assert.Equal(2, hubServiceMessages.Count);
+            Assert.Contains(hubServiceMessages, m => m.Arguments[2].ToString().Contains("Missing budget"));
+            var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
+                .GetScenarioBudgetAmounts(simulation.Id)
+                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
                 .ToList();
 
             Assert.Equal(2, budgetAmounts.Count);
@@ -999,7 +1110,7 @@ namespace BridgeCareCoreTests.Tests
 
             var excelPackage = new ExcelPackage(memStream);
             var worksheet = excelPackage.Workbook.Worksheets[0];
-
+            Assert.Equal("Year", worksheet.Cells[1, 1, 1, 1].GetValue<string>());
             var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
             Assert.True(worksheetBudgetNames.Any());
@@ -1007,7 +1118,8 @@ namespace BridgeCareCoreTests.Tests
 
             var worksheetBudgetYearAndAmount = worksheet.Cells[2, 1, 2, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
-            //  Assert.Equal(expectedYear.ToString(), worksheetBudgetYearAndAmount[0]);
+            var expectedYear = DateTime.Now.Year;
+            Assert.Equal(expectedYear.ToString(), worksheetBudgetYearAndAmount[0]);
             Assert.Equal(_testScenarioBudget.ScenarioBudgetAmounts.ToList()[0].Value.ToString(), worksheetBudgetYearAndAmount[1]);
         }
 

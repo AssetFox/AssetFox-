@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
@@ -24,16 +24,9 @@ namespace BridgeCareCoreTests.Tests
 {
     public class DatabaseBasedInvestmentBudgetServiceTests
     {
-        // The code under test in these tests accesses the db context, without
-        // going through a repo. Removing real db access from the tests is therefore
-        // difficult.
-        private BudgetEntity _testBudget;
-        private BudgetLibraryEntity _testBudgetLibrary;
         private InvestmentPlanEntity _testInvestmentPlan;
         private ScenarioBudgetEntity _testScenarioBudget;
         private const string BudgetEntityName = "Budget";
-        private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
-        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private InvestmentBudgetsService CreateService(Mock<IUnitOfWork> unitOfWork)
         {
@@ -74,38 +67,6 @@ namespace BridgeCareCoreTests.Tests
             }
 
             return criteriaPerBudgetName;
-        }
-
-        private void AddTestDataToDatabase()
-        {
-            var year = DateTime.Now.Year;
-            _testBudgetLibrary = new BudgetLibraryEntity { Id = Guid.NewGuid(), Name = "Test Name" };
-            TestHelper.UnitOfWork.Context.AddEntity(_testBudgetLibrary);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-
-            _testBudget = new BudgetEntity
-            {
-                Id = Guid.NewGuid(),
-                Name = BudgetEntityName,
-                BudgetLibraryId = _testBudgetLibrary.Id,
-                BudgetAmounts =
-                new List<BudgetAmountEntity>
-                {
-                   new BudgetAmountEntity {Id = Guid.NewGuid(), Year = year, Value = 500000}
-                },
-                CriterionLibraryBudgetJoin = new CriterionLibraryBudgetEntity
-                {
-                    CriterionLibrary = new CriterionLibraryEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        MergedCriteriaExpression = "expression",
-                        Name = "Criterion",
-                        IsSingleUse = true,
-                    }
-                }
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(_testBudget);
-            TestHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void AddScenarioDataToDatabase(Guid simulationId)
@@ -227,8 +188,8 @@ namespace BridgeCareCoreTests.Tests
             var addInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.AddBudgets));
             var addedBudgets = addInvocation.Arguments[0] as List<BudgetDTOWithLibraryId>;
             Assert.Equal(2, addedBudgets.Count);
-            ObjectAssertions.EquivalentExcluding(sampleBudget1Dto, addedBudgets[0].Budget, b => b.Id, b=> b.BudgetAmounts);
-            ObjectAssertions.EquivalentExcluding(sampleBudget2Dto, addedBudgets[1].Budget, b => b.Id, b=> b.BudgetAmounts);
+            ObjectAssertions.EquivalentExcluding(sampleBudget1Dto, addedBudgets[0].Budget, b => b.Id, b => b.BudgetAmounts);
+            ObjectAssertions.EquivalentExcluding(sampleBudget2Dto, addedBudgets[1].Budget, b => b.Id, b => b.BudgetAmounts);
             Assert.Equal(libraryId, addedBudgets[0].BudgetLibraryId);
             Assert.Equal(libraryId, addedBudgets[1].BudgetLibraryId);
             var amountInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.AddLibraryBudgetAmounts));
@@ -424,15 +385,12 @@ namespace BridgeCareCoreTests.Tests
             var memStream = new MemoryStream();
             memStream.Write(file, 0, file.Length);
             memStream.Seek(0, SeekOrigin.Begin);
-
             var excelPackage = new ExcelPackage(memStream);
             var worksheet = excelPackage.Workbook.Worksheets[0];
-
             var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
             Assert.Equal(4, worksheetBudgetNames.Count);
             Assert.True(worksheetBudgetNames.All(name => name.Contains("Sample Budget")));
-
             var expectedYear = year;
             worksheet.Cells[2, 1, worksheet.Dimension.End.Row, 1]
                 .Select(cell => cell.GetValue<int>()).ToList().ForEach(year =>
@@ -440,7 +398,6 @@ namespace BridgeCareCoreTests.Tests
                     Assert.Equal(expectedYear, year);
                     expectedYear++;
                 });
-
             var budgetAmounts = worksheet.Cells[2, 2, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<decimal>()).ToList();
             Assert.True(budgetAmounts.All(amount => amount == decimal.Parse("5000000")));
@@ -463,24 +420,20 @@ namespace BridgeCareCoreTests.Tests
             var criteria = new Dictionary<string, string> { { "Budget", "expression" } };
             budgetRepo.Setup(b => b.GetCriteriaPerBudgetNameForBudgetLibrary(libraryId)).Returns(criteria);
             budgetRepo.Setup(b => b.GetBudgetLibraryName(libraryId)).Returns("Test Name");
-            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
-            var service2 = CreateService(unitOfWork);
+            var service = CreateService(unitOfWork);
 
             // Act
-            var fileInfo = service2.ExportLibraryInvestmentBudgetsFile(libraryId);
+            var fileInfo = service.ExportLibraryInvestmentBudgetsFile(libraryId);
 
             // Assert
             Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);
             Assert.Equal("Test_Name_investment_budgets.xlsx", fileInfo.FileName);
-
             var file = Convert.FromBase64String(fileInfo.FileData);
             var memStream = new MemoryStream();
             memStream.Write(file, 0, file.Length);
             memStream.Seek(0, SeekOrigin.Begin);
-
             var excelPackage = new ExcelPackage(memStream);
             var worksheet = excelPackage.Workbook.Worksheets[0];
-
             var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
             Assert.Single(worksheetBudgetNames);
@@ -497,36 +450,128 @@ namespace BridgeCareCoreTests.Tests
         public void ImportScenarioInvestmentBudgetsFile_Does()
         {
             // Arrange
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var criterionLibraryRepo = CriterionLibraryRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var service2 = CreateService(unitOfWork);
+            var excelPackage = CreateRequestWithLibraryFormData();
             var year = 2022;
+            var budgetId = Guid.NewGuid();
+            var sampleBudget1Id = Guid.NewGuid();
+            var sampleBudget2Id = Guid.NewGuid();
+            decimal fiveMillion = 5000000;
+            decimal fourMillion = 4000000;
+            var budgetDto1 = BudgetDtos.WithSingleAmount(budgetId, "Budget", year, 1234);
+            var budgetDtoList1 = new List<BudgetDTO> { budgetDto1 };
+
+            var budgetLibraryDto = new BudgetLibraryDTO
+            {
+                Budgets = new List<BudgetDTO> { budgetDto1 },
+                Id = simulationId,
+            };
+            var sampleBudget1Dto = BudgetDtos.WithSingleAmount(sampleBudget1Id, "Sample Budget 1", year, fourMillion);
+            var sampleBudget2Dto = BudgetDtos.WithSingleAmount(sampleBudget1Id, "Sample Budget 2", year, fiveMillion);
+            var budgetDtoList2 = new List<BudgetDTO> { budgetDto1, sampleBudget1Dto, sampleBudget2Dto };
+            budgetRepo.SetupSequence(b => b.GetScenarioBudgets(simulationId)).Returns(budgetDtoList1).Returns(budgetDtoList2);
+            budgetRepo.Setup(b => b.GetBudgetLibrary(simulationId)).Returns(budgetLibraryDto);
+            var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock(unitOfWork);
+            var investmentPlanId = Guid.NewGuid();
+            var investmentPlan = new InvestmentPlanDTO
+            {
+                FirstYearOfAnalysisPeriod = 2023,
+                Id = investmentPlanId,
+                InflationRatePercentage = 3,
+                NumberOfYearsInAnalysisPeriod = 1,
+                MinimumProjectCostLimit = 500000,
+            };
+            investmentPlanRepo.Setup(i => i.GetInvestmentPlan(simulationId)).Returns(investmentPlan);
             var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var excelPackage = CreateRequestWithScenarioFormData(simulation.Id);
-            AddScenarioDataToDatabase(simulation.Id);
             var currentUserCriteriaFilter = new UserCriteriaDTO
             {
                 HasCriteria = false
             };
 
             // Act
-            service.ImportScenarioInvestmentBudgetsFile(simulation.Id, excelPackage, currentUserCriteriaFilter, false);
+            var result = service2.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter, false);
+
             // Assert
-
-            var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
-                .GetScenarioBudgetAmounts(simulation.Id)
-                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
-                .ToList();
-
-            Assert.Equal(2, budgetAmounts.Count);
-            Assert.True(budgetAmounts.All(_ => _.Year == year));
-            Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
-
-            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
-            Assert.Equal(3, budgets.Count);
-            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
-            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
-
-            var criteriaPerBudgetName = GetCriteriaPerBudgetName();
-            var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+            var budgetInvocations = budgetRepo.Invocations.ToList();
+            var libraryInvocations = criterionLibraryRepo.Invocations.ToList();
+            var addScenarioBudgetsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.AddScenarioBudgets));
+            Assert.Equal(simulationId, addScenarioBudgetsInvocation.Arguments[0]);
+            var addedScenarioBudgets = addScenarioBudgetsInvocation.Arguments[1] as List<BudgetDTO>;
+            Assert.Equal("Sample Budget 1", addedScenarioBudgets[0].Name);
+            Assert.Equal("Sample Budget 2", addedScenarioBudgets[1].Name);
+            var addScenarioBudgetAmountsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.AddScenarioBudgetAmounts));
+            var addedScenarioBudgetAmounts = addScenarioBudgetAmountsInvocation.Arguments[0] as List<BudgetAmountDTOWithBudgetId>;
+            var expectedAddedScenarioBudgetAmount0 = new BudgetAmountDTOWithBudgetId
+            {
+                BudgetId = addedScenarioBudgets[0].Id,
+                BudgetAmount = new BudgetAmountDTO
+                {
+                    Year = 2022,
+                    Value = 5000000,
+                }
+            };
+            var expectedAddedScenarioBudgetAmount1 = new BudgetAmountDTOWithBudgetId
+            {
+                BudgetId = addedScenarioBudgets[1].Id,
+                BudgetAmount = new BudgetAmountDTO
+                {
+                    Year = 2022,
+                    Value = 5000000,
+                }
+            };
+            ObjectAssertions.EquivalentExcluding(expectedAddedScenarioBudgetAmount0, addedScenarioBudgetAmounts[0], x => x.BudgetAmount.Id);
+            ObjectAssertions.EquivalentExcluding(expectedAddedScenarioBudgetAmount1, addedScenarioBudgetAmounts[1], x => x.BudgetAmount.Id);
+            var updateScenarioBudgetAmountsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpdateScenarioBudgetAmounts));
+            Assert.Equal(simulationId, updateScenarioBudgetAmountsInvocation.Arguments[0]);
+            var expectedUpdatedAmount = new BudgetAmountDTOWithBudgetId
+            {
+                BudgetId = budgetDto1.Id,
+                BudgetAmount = new BudgetAmountDTO
+                {
+                    BudgetName = "Budget",
+                    Value = 1234m,
+                    Year = 2022,
+                    Id = budgetDto1.BudgetAmounts[0].Id,
+                }
+            };
+            ObjectAssertions.EquivalentSingleton(expectedUpdatedAmount, updateScenarioBudgetAmountsInvocation.Arguments[1]);
+            var addLibrariesInvocation = criterionLibraryRepo.SingleInvocationWithName(nameof(ICriterionLibraryRepository.AddLibraries));
+            var addedCriterionLibraries = addLibrariesInvocation.Arguments[0] as List<CriterionLibraryDTO>;
+            var expectedAddedCriterionLibrary1 = new CriterionLibraryDTO
+            {
+                Name = "Sample Budget 1 Criterion Library",
+                IsSingleUse = true,
+                MergedCriteriaExpression = "[INTERSTATE]=|Y| AND [INTERNET_REPORT]=|State|",
+            };
+            ObjectAssertions.EquivalentExcluding(expectedAddedCriterionLibrary1, addedCriterionLibraries[0], x => x.Id);
+            var expectedAddedCriterionLibrary2 = new CriterionLibraryDTO
+            {
+                Name = "Sample Budget 2 Criterion Library",
+                IsSingleUse = true,
+                MergedCriteriaExpression = "[INTERSTATE]='Y' AND [INTERNET_REPORT]='State'",
+            };
+            ObjectAssertions.EquivalentExcluding(expectedAddedCriterionLibrary2, addedCriterionLibraries[1], x => x.Id);
+            var addJoinsInvocation = criterionLibraryRepo.SingleInvocationWithName(nameof(ICriterionLibraryRepository.AddLibraryScenarioBudgetJoins));
+            var addedJoins = addJoinsInvocation.Arguments[0] as List<CriterionLibraryScenarioBudgetDTO>;
+            var expectedJoins = new List<CriterionLibraryScenarioBudgetDTO>
+            {
+                new CriterionLibraryScenarioBudgetDTO
+                {
+                    CriterionLibraryId = addedCriterionLibraries[0].Id,
+                    ScenarioBudgetId = addedScenarioBudgets[0].Id,
+                },
+                new CriterionLibraryScenarioBudgetDTO
+                {
+                    CriterionLibraryId= addedCriterionLibraries[1].Id,
+                    ScenarioBudgetId= addedScenarioBudgets[1].Id,
+                }
+            };
+            ObjectAssertions.Equivalent(expectedJoins, addedJoins);
         }
 
         [Fact]

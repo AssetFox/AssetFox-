@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.Data.Helpers;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.Data.Networking
@@ -53,15 +54,10 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
         //    //SpatialWeighting = new SpatialWeighting(result);
         //}
 
-        public int AssignAttributeData(IEnumerable<IAttributeDatum> attributeData, Guid maintainableAssetId)
+        public List<DatumLog> AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
         {
-            int unmatchedCount = 0;
-
-            // Set up the log
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("Maintainable asset unmatched datum - " + maintainableAssetId);
-            StreamWriter streamWriter = new StreamWriter("D:\\Non-locationMatches_" + maintainableAssetId + ".txt");
-
+            int logThreshold = 10;
+            List<DatumLog> datumLog = new List<DatumLog>();
             foreach (var datum in attributeData)
             {
                 if (datum.Location.MatchOn(Location))
@@ -71,20 +67,12 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
                 else
                 {
                     // return the unmatched datum to be logged and reported
-                    unmatchedCount++;
-                    stringBuilder.AppendLine(datum.ToString());
+                    if (datumLog.Count < logThreshold)
+                        datumLog.Add(new DatumLog(datum.Attribute.Id, Location.Id, datum.Attribute.Name));
                 }
             }
 
-            streamWriter.WriteLine(stringBuilder.ToString());
-            streamWriter.Close();
-
-            //string outputPath = /*Directory.GetCurrentDirectory()*/ "D:\\Non-locationMatches.txt";
-            //File.CreateText(outputPath);
-            //File.AppendAllText(outputPath, stringBuilder.ToString());
-            //stringBuilder.Clear();
-
-            return unmatchedCount;
+            return datumLog;
         }
 
         public void AssignAttributeDataFromDataSource(IEnumerable<IAttributeDatum> attributeData) => AssignedData.AddRange(attributeData);

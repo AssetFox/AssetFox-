@@ -17,6 +17,7 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Models;
 using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
+using AppliedResearchAssociates.iAM.Data.Helpers;
 
 namespace BridgeCareCore.Services.Aggregation
 {
@@ -121,6 +122,14 @@ namespace BridgeCareCore.Services.Aggregation
                     var totalAssets = (double)maintainableAssets.Count;
                     var i = 0.0;
 
+                    var directory = Directory.GetCurrentDirectory();
+                    var path = Path.Combine(directory, "Logs");
+                    // Set up the log
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.AppendLine("Datum Name, Location Id, Datum Id");
+                    StreamWriter streamWriter = new StreamWriter(path + "\\UnmatchedDatum.txt");
+
+                    
                     state.Status = "Aggregating";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                     // loop over maintainable assets and remove assigned data that has an attribute id
@@ -135,8 +144,17 @@ namespace BridgeCareCore.Services.Aggregation
                         i++;
                         maintainableAsset.AssignedData.RemoveAll(_ =>
                             attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
-                        int unmatchedDatum = maintainableAsset.AssignAttributeData(attributeData, maintainableAsset.Id);
-                        if (unmatchedDatum > 0) isUnmatchedDatum = true;
+                        List<DatumLog> unmatchedDatum = maintainableAsset.AssignAttributeData(attributeData);
+                        if (unmatchedDatum.Count > 0)
+                        {
+                            isUnmatchedDatum = true;
+                            foreach(var datum in unmatchedDatum)
+                            {
+                                stringBuilder.AppendLine(datum.ToString());
+                            }
+                            streamWriter.WriteLine(stringBuilder);
+                            stringBuilder.Clear();
+                        }
 
                         //maintainableAsset.AssignSpatialWeighting(benefitQuantifierEquation.Equation.Expression);
                         try
@@ -173,6 +191,8 @@ namespace BridgeCareCore.Services.Aggregation
                     }
                     state.Status = "Saving";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+
+                    streamWriter.Close();
 
                     try
                     {
@@ -239,7 +259,7 @@ namespace BridgeCareCore.Services.Aggregation
             if (isUnmatchedDatum)
             {
                 // Send log message with log location?
-                WriteError(writer, "See log for unmatched datum");
+                WriteError(writer, "Unmatched Datum location found::See unmatchedDatum.txt log file for more details.");
             }
             return !isError;
         }

@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Networking
             mockAggregationRule.Setup(m => m.Apply(attributeData, mockAttribute.Object)).Returns(new List<(Attribute attribute, (int year, double value))> { attributeYearValueTupple });
 
             var maintainableAsset = new MaintainableAsset(guId, networkId, sectionLocation, CommonTestParameterValues.DefaultEquation);
-            maintainableAsset.AssignAttributeData(attributeData, maintainableAsset.Id);
+            maintainableAsset.AssignAttributeData(attributeData);
             
             // Act
             var result = maintainableAsset.GetAggregatedValuesByYear<double>(mockAttribute.Object, mockAggregationRule.Object);
@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Networking
             var maintainableAsset = new MaintainableAsset(guId, networkId, sectionLocation, CommonTestParameterValues.DefaultEquation);
 
             // Act
-            maintainableAsset.AssignAttributeData(attributeData, maintainableAsset.Id);
+            maintainableAsset.AssignAttributeData(attributeData);
 
             // Assert
             Assert.Equal(maintainableAsset.AssignedData, attributeData);
@@ -78,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Networking
             var maintainableAsset = new MaintainableAsset(guId, networkId, sectionLocationUnmatched, CommonTestParameterValues.DefaultEquation);
 
             // Act
-            maintainableAsset.AssignAttributeData(attributeData, maintainableAsset.Id);
+            maintainableAsset.AssignAttributeData(attributeData);
 
             // Assert
             Assert.True(maintainableAsset.AssignedData.Count == 0);

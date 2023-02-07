@@ -176,7 +176,7 @@ namespace BridgeCareCore.Services
                         }
                         attributeDataForAsset.Add(attributeDatum);
                     }
-                    newAsset.AssignAttributeData(attributeDataForAsset, maintainableAssetId);
+                    newAsset.AssignAttributeData(attributeDataForAsset);
                     maintainableAssets.Add(newAsset);
                 }
             }

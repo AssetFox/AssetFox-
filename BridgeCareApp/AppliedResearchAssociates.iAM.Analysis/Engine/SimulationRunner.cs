@@ -112,6 +112,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 applicablePriorities.Sort(BudgetPriorityComparer);
                 return applicablePriorities.AsEnumerable();
             });
+
             CommittedProjectsPerAsset = Simulation.CommittedProjects.ToLookup(committedProject => committedProject.Asset);
             ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
             CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
@@ -199,6 +200,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     output.AssetTreatmentCategories.Add(assetTreatmentCategoryDetail);
                 }
             }
+
             Simulation.ResultsOnDisk.Initialize(output);
             output = null;
 

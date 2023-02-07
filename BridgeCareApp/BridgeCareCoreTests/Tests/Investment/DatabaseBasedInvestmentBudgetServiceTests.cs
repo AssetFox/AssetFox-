@@ -364,7 +364,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var criterionLibraryRepo = CriterionLibraryRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
-            var service2 = CreateService(unitOfWork);
+            var service = CreateService(unitOfWork);
             var excelPackage = CreateRequestWithLibraryFormData();
             var year = 2022;
             var budgetId = Guid.NewGuid();
@@ -395,15 +395,13 @@ namespace BridgeCareCoreTests.Tests
                 MinimumProjectCostLimit = 500000,
             };
             investmentPlanRepo.Setup(i => i.GetInvestmentPlan(simulationId)).Returns(investmentPlan);
-            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var currentUserCriteriaFilter = new UserCriteriaDTO
             {
                 HasCriteria = false
             };
 
             // Act
-            var result = service2.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter, false);
+            var result = service.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter, false);
 
             // Assert
             var budgetInvocations = budgetRepo.Invocations.ToList();
@@ -491,7 +489,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var criterionLibraryRepo = CriterionLibraryRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
-            var service2 = CreateService(unitOfWork);
+            var service = CreateService(unitOfWork);
             var excelPackage = CreateRequestWithLibraryFormData();
             var year = 2022;
             var sampleBudget1Id = Guid.NewGuid();
@@ -521,15 +519,13 @@ namespace BridgeCareCoreTests.Tests
                 MinimumProjectCostLimit = 500000,
             };
             investmentPlanRepo.Setup(i => i.GetInvestmentPlan(simulationId)).Returns(investmentPlan);
-            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var currentUserCriteriaFilter = new UserCriteriaDTO
             {
                 HasCriteria = false
             };
 
             // Act
-            var result = service2.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter, false);
+            var result = service.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter, false);
 
             // Assert
             var budgetInvocations = budgetRepo.Invocations.ToList();

@@ -231,7 +231,7 @@ namespace BridgeCareCoreTests.Tests
                 _mockService.Object,
                 _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
-                TestHelper.UnitOfWork,
+                _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
 

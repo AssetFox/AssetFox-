@@ -301,18 +301,23 @@ namespace BridgeCareCoreTests.Tests
             {
                 HasCriteria = false,
             };
-            service2.ImportLibraryInvestmentBudgetsFile(libraryId, excelPackage, currentUserCriteriaFilter, true);
+
+            var importResult = service2.ImportLibraryInvestmentBudgetsFile(libraryId, excelPackage, currentUserCriteriaFilter, true);
 
             // Assert
+            var expectedImportResult = new BudgetImportResultDTO
+            {
+                BudgetLibrary = budgetLibraryDto,
+            };
+            ObjectAssertions.Equivalent(expectedImportResult, importResult);
+
             var deleteBudgetsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.DeleteAllBudgetsForLibrary));
             var getLibraryBudgetsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.GetLibraryBudgets));
             Assert.Equal(libraryId, deleteBudgetsInvocation.Arguments[0]);
             Assert.Equal(libraryId, getLibraryBudgetsInvocation.Arguments[0]);
             var addBudgetsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.AddBudgets));
-            var budgetInvocations = budgetRepo.Invocations.ToList();
             var addBudgetAmountsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.AddLibraryBudgetAmounts));
             var updateBudgetAmountsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpdateLibraryBudgetAmounts));
-            var criterionInvocations = criterionLibraryRepo.Invocations.ToList();
             var deleteCriterionInvocations = criterionLibraryRepo.InvocationsWithName(nameof(ICriterionLibraryRepository.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary));
             foreach (var deleteInvocation in deleteCriterionInvocations)
             {
@@ -320,8 +325,6 @@ namespace BridgeCareCoreTests.Tests
                 ObjectAssertions.CheckEnumerable(deleteInvocation.Arguments[1], "Sample Budget 1", "Sample Budget 2");
             }
 
-            var addCriterionInvocation = criterionLibraryRepo.SingleInvocationWithName(nameof(ICriterionLibraryRepository.AddLibraries));
-            var addLibraryBudgetJoinInvocation = criterionLibraryRepo.SingleInvocationWithName(nameof(ICriterionLibraryRepository.AddLibraryBudgetJoins));
             var budgetAmountsWithBudgetIds = addBudgetAmountsInvocation.Arguments[0] as List<BudgetAmountDTOWithBudgetId>;
             var budgetsWithLibraryIds = addBudgetsInvocation.Arguments[0] as List<BudgetDTOWithLibraryId>;
             var expectedBudgetWithLibraryId0 = new BudgetDTOWithLibraryId
@@ -362,7 +365,40 @@ namespace BridgeCareCoreTests.Tests
             };
             ObjectAssertions.EquivalentExcluding(expectedBudgetAmountWithBudgetId0, budgetAmountsWithBudgetIds[0], x => x.BudgetAmount.Id);
             ObjectAssertions.EquivalentExcluding(expectedBudgetAmountWithBudgetId1, budgetAmountsWithBudgetIds[1], x => x.BudgetAmount.Id);
-         }
+            var criterionInvocations = criterionLibraryRepo.Invocations.ToList();
+            var addCriterionInvocation = criterionLibraryRepo.SingleInvocationWithName(nameof(ICriterionLibraryRepository.AddLibraries));
+            var addedCriterionLibraries = addCriterionInvocation.Arguments[0] as List<CriterionLibraryDTO>;
+            var expectedAddedCriterionLibrary1 = new CriterionLibraryDTO
+            {
+                Name = "Sample Budget 1 Criterion Library",
+                IsSingleUse = true,
+                MergedCriteriaExpression = "[INTERSTATE]=|Y| AND [INTERNET_REPORT]=|State|",
+            };
+            ObjectAssertions.EquivalentExcluding(expectedAddedCriterionLibrary1, addedCriterionLibraries[0], x => x.Id);
+            var expectedAddedCriterionLibrary2 = new CriterionLibraryDTO
+            {
+                Name = "Sample Budget 2 Criterion Library",
+                IsSingleUse = true,
+                MergedCriteriaExpression = "[INTERSTATE]='Y' AND [INTERNET_REPORT]='State'",
+            };
+            ObjectAssertions.EquivalentExcluding(expectedAddedCriterionLibrary2, addedCriterionLibraries[1], x => x.Id);
+            var addLibraryBudgetJoinInvocation = criterionLibraryRepo.SingleInvocationWithName(nameof(ICriterionLibraryRepository.AddLibraryBudgetJoins));
+            var addedJoins = addLibraryBudgetJoinInvocation.Arguments[0] as List<CriterionLibraryBudgetDTO>;
+            var expectedAddedJoins = new List<CriterionLibraryBudgetDTO>
+            {
+                new CriterionLibraryBudgetDTO
+                {
+                    CriterionLibraryId = addedCriterionLibraries[0].Id,
+                    BudgetId = budgetsWithLibraryIds[0].Budget.Id,
+                },
+                new CriterionLibraryBudgetDTO
+                {
+                    CriterionLibraryId = addedCriterionLibraries[1].Id,
+                    BudgetId = budgetsWithLibraryIds[1].Budget.Id,
+                }
+            };
+            ObjectAssertions.Equivalent(expectedAddedJoins, addedJoins);
+        }
 
         [Fact]
         public void ExportLibraryInvestmentBudgetsFile_NoBudgetAmountsReturnedFromRepo_CreatesSampleFile()

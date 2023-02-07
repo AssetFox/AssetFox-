@@ -460,7 +460,6 @@ namespace BridgeCareCore.Services
         public BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter,
             bool overwriteBudgets)
         {
-            // InvestmentTests.ShouldImportLibraryBudgetsFromFile
             var budgetWorksheet = excelPackage.Workbook.Worksheets[0];
             var budgetWorksheetEnd = budgetWorksheet.Dimension.End;
 

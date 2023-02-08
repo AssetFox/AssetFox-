@@ -9,6 +9,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public string Name { get; set; }
 
+        public Dictionary<Attribute, double> PerformanceCurveAdjustmentFactors { get; } = new();
+
         public int ShadowForAnyTreatment
         {
             get => _ShadowForAnyTreatment;
@@ -21,7 +23,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
             set => _ShadowForSameTreatment = Math.Max(value, DEFAULT_SHADOW);
         }
 
-        public virtual ValidatorBag Subvalidators => new ValidatorBag();
+        public string ShortDescription => Name;
+
+        public virtual ValidatorBag Subvalidators => new();
 
         public virtual ValidationResultBag GetDirectValidationResults()
         {
@@ -37,10 +41,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 results.Add(ValidationStatus.Warning, "\"Same\" shadow is less than \"any\" shadow.", this);
             }
 
+            foreach (var (attribute, factor) in PerformanceCurveAdjustmentFactors)
+            {
+                if (factor <= 0)
+                {
+                    results.Add(
+                        ValidationStatus.Error,
+                        $"Attribute \"{attribute.Name}\" performance curve adjustment factor is non-positive.",
+                        this);
+                }
+            }
+
             return results;
         }
-
-        public string ShortDescription => Name;
 
         public abstract IEnumerable<TreatmentScheduling> GetSchedulings();
 

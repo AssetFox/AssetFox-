@@ -41,11 +41,6 @@ namespace BridgeCareCoreTests.Tests
                 );
             return controller;
         }
-        private void Setup()
-        {
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-        }
 
         [Fact]
         public async Task UpsertScenarioPerformanceCurves_CurveUpdateInUpsert_PassesToRepo()

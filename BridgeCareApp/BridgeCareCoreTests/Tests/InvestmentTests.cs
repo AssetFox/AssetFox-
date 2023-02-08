@@ -2,64 +2,30 @@ using System.Data;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
-using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Models;
-using BridgeCareCore.Models.DefaultData;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.DefaultData;
 using BridgeCareCore.Services.Paging;
-using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Moq;
 using MoreLinq;
-using OfficeOpenXml;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
     public class InvestmentTests
     {
-        private BudgetLibraryEntity _testBudgetLibrary;
-        private BudgetEntity _testBudget;
-        private InvestmentPlanEntity _testInvestmentPlan;
-        private ScenarioBudgetEntity _testScenarioBudget;
-        private const string BudgetEntityName = "Budget";
-        private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
-        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
-
-        public InvestmentBudgetsService Setup(Mock<IHubService> hubServiceMock = null)
-        {
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var hubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
-            var logger = new LogNLog();
-            var service = new InvestmentBudgetsService(
-                TestHelper.UnitOfWork,
-                new ExpressionValidationService(TestHelper.UnitOfWork, logger),
-                hubService.Object,
-                new InvestmentDefaultDataService());
-            return service;
-        }
-
         private InvestmentBudgetsService CreateService(Mock<IUnitOfWork> mockUnitOfWork)
         {
             var logger = new LogNLog();
@@ -94,248 +60,6 @@ namespace BridgeCareCoreTests.Tests
                 dataService,
                 claimHelper.Object);
             return controller;
-        }
-
-        private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null, Mock<IHubService> hubServiceMock = null)
-        {
-            _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
-            accessor ??= HttpContextAccessorMocks.Default();
-            var hubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
-            var pagingService = new InvestmentPagingService(TestHelper.UnitOfWork, new InvestmentDefaultDataService());
-            var controller = new InvestmentController(service,
-                pagingService,
-                EsecSecurityMocks.Admin,
-                TestHelper.UnitOfWork,
-                hubService.Object,
-                accessor,
-                _mockInvestmentDefaultDataService.Object,
-                _mockClaimHelper.Object);
-            return controller;
-        }
-
-        private void CreateLibraryTestData()
-        {
-            var year = DateTime.Now.Year;
-            _testBudgetLibrary = new BudgetLibraryEntity { Id = Guid.NewGuid(), Name = "Test Name" };
-            TestHelper.UnitOfWork.Context.AddEntity(_testBudgetLibrary);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-
-            _testBudget = new BudgetEntity
-            {
-                Id = Guid.NewGuid(),
-                Name = BudgetEntityName,
-                BudgetLibraryId = _testBudgetLibrary.Id,
-                BudgetAmounts =
-                new List<BudgetAmountEntity>
-                {
-                   new BudgetAmountEntity {Id = Guid.NewGuid(), Year = year, Value = 500000}
-                },
-                CriterionLibraryBudgetJoin = new CriterionLibraryBudgetEntity
-                {
-                    CriterionLibrary = new CriterionLibraryEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        MergedCriteriaExpression = "expression",
-                        Name = "Criterion",
-                        IsSingleUse = true,
-                    }
-                }
-            };
-            TestHelper.UnitOfWork.Context.AddEntity(_testBudget);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-        }
-
-        private void CreateScenarioTestData(Guid simulationId)
-        {
-            var year = DateTime.Now.Year;
-            _testInvestmentPlan = new InvestmentPlanEntity
-            {
-                Id = Guid.NewGuid(),
-                SimulationId = simulationId,
-                FirstYearOfAnalysisPeriod = year,
-                NumberOfYearsInAnalysisPeriod = 1,
-                MinimumProjectCostLimit = 500000,
-                InflationRatePercentage = 3
-            };
-            var investmentPlan = TestHelper.UnitOfWork.Context.InvestmentPlan.FirstOrDefault(ip => ip.SimulationId == simulationId);
-            if (investmentPlan != null)
-            {
-                TestHelper.UnitOfWork.Context.Remove(investmentPlan);
-            }
-            TestHelper.UnitOfWork.Context.AddEntity(_testInvestmentPlan);
-
-            _testScenarioBudget = new ScenarioBudgetEntity
-            {
-                Id = Guid.NewGuid(),
-                Name = BudgetEntityName,
-                SimulationId = simulationId,
-                ScenarioBudgetAmounts =
-                        new List<ScenarioBudgetAmountEntity>
-                        {
-                        new ScenarioBudgetAmountEntity
-                        {
-                            Id = Guid.NewGuid(), Year = year, Value = 5000000
-                        }
-                        },
-                CriterionLibraryScenarioBudgetJoin = new CriterionLibraryScenarioBudgetEntity
-                {
-                    CriterionLibrary = new CriterionLibraryEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        MergedCriteriaExpression = "expression",
-                        Name = "Criterion",
-                        IsSingleUse = true,
-                    }
-                }
-            };
-            var scenarioBudget = TestHelper.UnitOfWork.Context.ScenarioBudget.FirstOrDefault(b => b.Name == BudgetEntityName);
-            if (scenarioBudget != null)
-            {
-                TestHelper.UnitOfWork.Context.Remove(scenarioBudget);
-            }
-            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioBudget);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-        }
-
-        private IHttpContextAccessor CreateRequestWithLibraryFormData(bool overwriteBudgets = false)
-        {
-            var httpContext = new DefaultHttpContext();
-            var formData = new Dictionary<string, StringValues>()
-            {
-                {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
-                {"libraryId", new StringValues(_testBudgetLibrary.Id.ToString())},
-                {"currentUserCriteriaFilter", Newtonsoft.Json.JsonConvert.SerializeObject(new UserCriteriaDTO
-                {
-                    CriteriaId = Guid.NewGuid(),
-                    UserId = Guid.NewGuid(),
-                    UserName = "Test User",
-                    Criteria = string.Empty,
-                    HasCriteria = false,
-                    HasAccess = true,
-                })}
-            };
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
-                "TestInvestmentBudgets.xlsx");
-            using var stream = File.OpenRead(filePath);
-            var memStream = new MemoryStream();
-            stream.CopyTo(memStream);
-            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestInvestmentBudgets.xlsx");
-            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
-            HttpContextSetup.AddAuthorizationHeader(httpContext);
-            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
-
-            var mock = new Mock<IHttpContextAccessor>();
-            mock.Setup(m => m.HttpContext).Returns(httpContext);
-            return mock.Object;
-        }
-
-        private IHttpContextAccessor CreateRequestWithLibraryFormDataWithExtraCriterion(bool overwriteBudgets = false)
-        {
-            var httpContext = new DefaultHttpContext();
-            var formData = new Dictionary<string, StringValues>()
-            {
-                {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
-                {"libraryId", new StringValues(_testBudgetLibrary.Id.ToString())},
-                {"currentUserCriteriaFilter", Newtonsoft.Json.JsonConvert.SerializeObject(new UserCriteriaDTO
-                {
-                    CriteriaId = Guid.NewGuid(),
-                    UserId = Guid.NewGuid(),
-                    UserName = "Test User",
-                    Criteria = string.Empty,
-                    HasCriteria = false,
-                    HasAccess = true,
-                })}
-            };
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
-                "TestInvestmentBudgetsWithExtraBudgetCriterion.xlsx");
-            using var stream = File.OpenRead(filePath);
-            var memStream = new MemoryStream();
-            stream.CopyTo(memStream);
-            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestInvestmentBudgets.xlsx");
-            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
-            HttpContextSetup.AddAuthorizationHeader(httpContext);
-            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
-
-            var mock = new Mock<IHttpContextAccessor>();
-            mock.Setup(m => m.HttpContext).Returns(httpContext);
-            return mock.Object;
-        }
-        private IHttpContextAccessor CreateRequestWithScenarioFormData(Guid simulationId, bool overwriteBudgets = false)
-        {
-            var httpContext = new DefaultHttpContext();
-            HttpContextSetup.AddAuthorizationHeader(httpContext);
-            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
-
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
-                "TestInvestmentBudgets.xlsx");
-            using var stream = File.OpenRead(filePath);
-            var memStream = new MemoryStream();
-            stream.CopyTo(memStream);
-            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestInvestmentBudgets.xlsx");
-
-            var formData = new Dictionary<string, StringValues>()
-            {
-                {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
-                {"simulationId", new StringValues(simulationId.ToString())}
-            };
-
-            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
-            var accessor = new Mock<IHttpContextAccessor>();
-            accessor.Setup(_ => _.HttpContext).Returns(httpContext);
-            return accessor.Object;
-        }
-
-        private IHttpContextAccessor CreateRequestWithScenarioFormDataWithExtraCriterion(Guid simulationId, bool overwriteBudgets = false)
-        {
-            var httpContext = new DefaultHttpContext();
-            HttpContextSetup.AddAuthorizationHeader(httpContext);
-            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
-
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
-                "TestInvestmentBudgetsWithExtraBudgetCriterion.xlsx");
-            using var stream = File.OpenRead(filePath);
-            var memStream = new MemoryStream();
-            stream.CopyTo(memStream);
-            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestInvestmentBudgets.xlsx");
-
-            var formData = new Dictionary<string, StringValues>()
-            {
-                {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
-                {"simulationId", new StringValues(simulationId.ToString())}
-            };
-
-            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
-            var accessor = new Mock<IHttpContextAccessor>();
-            accessor.Setup(_ => _.HttpContext).Returns(httpContext);
-            return accessor.Object;
-        }
-
-        private Dictionary<string, string> GetCriteriaPerBudgetName()
-        {
-            var criteriaPerBudgetName = new Dictionary<string, string>();
-
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
-                "TestInvestmentBudgets.xlsx");
-            using var stream = File.OpenRead(filePath);
-            var memStream = new MemoryStream();
-            stream.CopyTo(memStream);
-            var excelPackage = new ExcelPackage(memStream);
-            var criteriaWorksheet = excelPackage.Workbook.Worksheets[1];
-            var budgetCol = 1;
-            var criteriaCol = 2;
-            for (var row = 2; row <= criteriaWorksheet.Dimension.End.Row; row++)
-            {
-                var budgetName = criteriaWorksheet.GetValue<string>(row, budgetCol);
-                var criteria = criteriaWorksheet.GetValue<string>(row, criteriaCol);
-                if (!criteriaPerBudgetName.ContainsKey(budgetName))
-                {
-                    criteriaPerBudgetName.Add(budgetName, string.Empty);
-                }
-
-                criteriaPerBudgetName[budgetName] = criteria;
-            }
-
-            return criteriaPerBudgetName;
         }
 
         private Mock<IHttpContextAccessor> CreateRequestForExceptionTesting(FormFile file = null)
@@ -538,7 +262,6 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldModifyInvestmentData()
         {
-
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock(unitOfWork);
@@ -546,8 +269,8 @@ namespace BridgeCareCoreTests.Tests
             var budgetAmountId = Guid.NewGuid();
             var oldBudget = BudgetDtos.New(budgetId);
             var newBudget = BudgetDtos.New(budgetId, "Updated Name");
-            var oldBudgetAmount = BudgetAmountDtos.ForBudgetAndYear(oldBudget, 2023, 500000);
-            var newBudgetAmount = BudgetAmountDtos.ForBudgetAndYear(newBudget, 2023, 1000000);
+            var oldBudgetAmount = BudgetAmountDtos.ForBudgetAndYear(oldBudget, 2023, 500000, budgetAmountId);
+            var newBudgetAmount = BudgetAmountDtos.ForBudgetAndYear(newBudget, 2023, 1000000, budgetAmountId);
             oldBudget.BudgetAmounts.Add(oldBudgetAmount);
             newBudget.BudgetAmounts.Add(newBudgetAmount);
             var investmentPlanId = Guid.NewGuid();
@@ -559,9 +282,8 @@ namespace BridgeCareCoreTests.Tests
                 Id = libraryId,
                 Budgets = new List<BudgetDTO> { oldBudget }
             };
-            budgetRepo.Setup(br => br.GetBudgetLibrary(simulationId)).Returns(oldBudgetLibrary);
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).ReturnsList(oldBudget);
             var controller = CreateController(unitOfWork);
-
             var dto = new InvestmentDTO
             {
                 ScenarioBudgets = new List<BudgetDTO> { newBudget },
@@ -569,7 +291,6 @@ namespace BridgeCareCoreTests.Tests
             };
             dto.ScenarioBudgets[0].CriterionLibrary = new CriterionLibraryDTO();
             dto.InvestmentPlan.MinimumProjectCostLimit = 1000000;
-
             var request = new InvestmentPagingSyncModel();
             request.Investment = dto.InvestmentPlan;
             request.UpdatedBudgets.Add(newBudget);
@@ -578,46 +299,20 @@ namespace BridgeCareCoreTests.Tests
             // Act
             await controller.UpsertInvestment(simulationId, request);
 
-            // Assert
-        //    var modifiedBudgetDto =
-        //        TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id)[0];
-        //    var modifiedInvestmentPlanDto =
-        //        TestHelper.UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulation.Id);
-
-        //    Assert.Equal(dto.ScenarioBudgets[0].Name, modifiedBudgetDto.Name);
-        //    Assert.Equal(dto.ScenarioBudgets[0].CriterionLibrary.Id,
-        //        modifiedBudgetDto.CriterionLibrary.Id);
-
-        //    Assert.Single(modifiedBudgetDto.BudgetAmounts);
-        //    Assert.Equal(dto.ScenarioBudgets[0].BudgetAmounts[0].Value,
-        //        modifiedBudgetDto.BudgetAmounts[0].Value);
-
-        //    Assert.Equal(dto.InvestmentPlan.MinimumProjectCostLimit,
-        //        modifiedInvestmentPlanDto.MinimumProjectCostLimit);
-        }
-
-        [Fact]
-        public async Task ShouldDeleteBudgetData()
-        {
-            // Arrange
-            var service = Setup();
-            var controller = CreateAuthorizedController(service);
-            CreateLibraryTestData();
-
-            // Act
-            var result = await controller.DeleteBudgetLibrary(_testBudgetLibrary.Id);
-
-            // Assert
-            Assert.IsType<OkResult>(result);
-
-            Assert.True(!TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == _testBudgetLibrary.Id));
-            Assert.True(!TestHelper.UnitOfWork.Context.Budget.Any(_ => _.Id == _testBudget.Id));
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ =>
-                    _.BudgetId == _testBudget.Id));
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ =>
-                    _.Id == _testBudget.BudgetAmounts.ToList()[0].Id));
+            var scenarioBudgetInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteScenarioBudgets));
+            var investmentPlanInvocation = investmentPlanRepo.SingleInvocationWithName(nameof(IInvestmentPlanRepository.UpsertInvestmentPlan));
+            Assert.Equal(simulationId, scenarioBudgetInvocation.Arguments[1]);
+            Assert.Equal(simulationId, investmentPlanInvocation.Arguments[1]);
+            var modifiedBudgetDtos = scenarioBudgetInvocation.Arguments[0] as List<BudgetDTO>;
+            var modifiedBudgetDto = modifiedBudgetDtos.Single();
+            Assert.Equal("Updated Name", modifiedBudgetDto.Name);
+            Assert.Equal(dto.ScenarioBudgets[0].CriterionLibrary.Id,
+                modifiedBudgetDto.CriterionLibrary.Id);
+            Assert.Single(modifiedBudgetDto.BudgetAmounts);
+            Assert.Equal(1000000,
+               modifiedBudgetDto.BudgetAmounts[0].Value);
+            var modifiedInvestmentPlan = investmentPlanInvocation.Arguments[0] as InvestmentPlanDTO;
+            Assert.Equal(1000000, modifiedInvestmentPlan.MinimumProjectCostLimit);
         }
 
         [Fact]
@@ -626,7 +321,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var service = CreateService(unitOfWork);
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateController(unitOfWork);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>

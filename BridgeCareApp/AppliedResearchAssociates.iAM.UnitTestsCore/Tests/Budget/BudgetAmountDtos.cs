@@ -9,11 +9,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class BudgetAmountDtos
     {
-        public static BudgetAmountDTO ForBudgetAndYear(BudgetDTO budget, int year, decimal value = 1234)
+        public static BudgetAmountDTO ForBudgetAndYear(BudgetDTO budget, int year, decimal value = 1234, Guid? id = null)
         {
+            var resolveId = id ?? Guid.NewGuid();
             var amount = new BudgetAmountDTO
             {
-                Id = Guid.NewGuid(),
+                Id = resolveId,
                 BudgetName = budget.Name,
                 Year = year,
                 Value = value

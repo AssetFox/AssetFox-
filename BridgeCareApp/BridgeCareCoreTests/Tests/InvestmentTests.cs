@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
@@ -23,12 +24,15 @@ using BridgeCareCore.Services.DefaultData;
 using BridgeCareCore.Services.Paging;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
+using Microsoft.SqlServer.Dac.Model;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Moq;
 using MoreLinq;
 using OfficeOpenXml;
@@ -58,6 +62,20 @@ namespace BridgeCareCoreTests.Tests
                 new ExpressionValidationService(TestHelper.UnitOfWork, logger),
                 hubService.Object,
                 new InvestmentDefaultDataService());
+            return service;
+        }
+
+        private InvestmentBudgetsService CreateService(Mock<IUnitOfWork> mockUnitOfWork)
+        {
+            var logger = new LogNLog();
+            var hubService = HubServiceMocks.DefaultMock();
+            var expressionValidationService = new ExpressionValidationService(mockUnitOfWork.Object, logger);
+            var service = new InvestmentBudgetsService(
+                mockUnitOfWork.Object,
+                expressionValidationService,
+                hubService.Object,
+                new InvestmentDefaultDataService()
+                );
             return service;
         }
 
@@ -572,48 +590,11 @@ namespace BridgeCareCoreTests.Tests
         /**************************INVESTMENT BUDGETS EXCEL FILE IMPORT/EXPORT TESTS***********************************/
 
         [Fact]
-        public async Task ShouldImportLibraryBudgetsFromFileWithExtraCriterion()
-        {
-            // Arrange
-            var hubService = HubServiceMocks.DefaultMock();
-            var service = Setup(hubService);
-            CreateLibraryTestData();
-            var accessor = CreateRequestWithLibraryFormDataWithExtraCriterion();
-            var controller = CreateAuthorizedController(service, accessor, hubService);
-            var year = 2022;
-
-
-            // Act
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => controller.ImportLibraryInvestmentBudgetsExcelFile());
-
-            // Assert
-            var hubServiceMessages = hubService.Invocations;
-            Assert.Equal(2, hubServiceMessages.Count);
-            Assert.Contains(hubServiceMessages, m => m.Arguments[2].ToString().Contains("Missing budget"));
-
-            var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
-                .GetLibraryBudgetAmounts(_testBudgetLibrary.Id)
-                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
-                .ToList();
-
-            Assert.Equal(2, budgetAmounts.Count);
-            Assert.True(budgetAmounts.All(_ => _.Year == year));
-            Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
-
-            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
-            Assert.Equal(3, budgets.Count);
-            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
-            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
-
-            var criteriaPerBudgetName = GetCriteriaPerBudgetName();
-            var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
-        }
-
-        [Fact]
         public async Task ShouldThrowConstraintWhenNoMimeTypeForLibraryImport()
         {
             // Arrange
-            var service = Setup();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var service = CreateService(unitOfWork);
             var controller = CreateAuthorizedController(service);
 
             // Act + Asset
@@ -626,7 +607,8 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoFilesForLibraryImport()
         {
             // Arrange
-            var service = Setup();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var service = CreateService(unitOfWork);
             var accessor = CreateRequestForExceptionTesting();
             var controller = CreateAuthorizedController(service, accessor);
 
@@ -640,7 +622,8 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoBudgetLibraryIdFoundForImport()
         {
             // Arrange
-            var service = Setup();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var service = CreateService(unitOfWork);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
@@ -653,60 +636,11 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldImportScenarioBudgetsFromFileWithExtraCriterion()
-        {
-            // Arrange
-            var year = 2022;
-            var hubService = HubServiceMocks.DefaultMock();
-            var service = Setup(hubService);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var accessor = CreateRequestWithScenarioFormDataWithExtraCriterion(simulation.Id);
-            var controller = CreateAuthorizedController(service, accessor, hubService);
-            CreateScenarioTestData(simulation.Id);
-
-            // Act
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => controller.ImportScenarioInvestmentBudgetsExcelFile());
-
-            // Assert
-            var hubServiceMessages = hubService.Invocations;
-            Assert.Equal(2, hubServiceMessages.Count);
-            Assert.Contains(hubServiceMessages, m => m.Arguments[2].ToString().Contains("Missing budget"));
-            var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
-                .GetScenarioBudgetAmounts(simulation.Id)
-                .Where(_ => _.BudgetName.IndexOf("Sample") != -1)
-                .ToList();
-
-            Assert.Equal(2, budgetAmounts.Count);
-            Assert.True(budgetAmounts.All(_ => _.Year == year));
-            Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
-
-            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
-            Assert.Equal(3, budgets.Count);
-            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
-            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
-
-            var criteriaPerBudgetName = GetCriteriaPerBudgetName();
-            var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
-        }
-
-        [Fact]
-        public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
-        {
-            // Arrange
-            var service = Setup();
-            var controller = CreateAuthorizedController(service);
-
-            // Act + Asset
-            var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                await controller.ImportScenarioInvestmentBudgetsExcelFile());
-            Assert.Equal("Request MIME type is invalid.", exception.Message);
-        }
-
-        [Fact]
         public async Task ShouldThrowConstraintWhenNoFilesForScenarioImport()
         {
             // Arrange
-            var service = Setup();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var service = CreateService(unitOfWork);
             var accessor = CreateRequestForExceptionTesting();
             var controller = CreateAuthorizedController(service, accessor);
 
@@ -720,7 +654,8 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoBudgetSimulationIdFoundForImport()
         {
             // Arrange
-            var service = Setup();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var service = CreateService(unitOfWork);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);

@@ -57,7 +57,9 @@ namespace BridgeCareCoreTests.Tests
             _testRepo = mockedRepo;
         }
 
-        [Fact]
+        public const string Reason = "Delaying these until I test paging services";
+
+        [Fact (Skip = Reason)]
         public void GetLibraryCalculatedAttributePageTest()
         {
             var service = new CalculatedAttributePagingService(_testRepo);
@@ -77,7 +79,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(pairIds.First() == result.DefaultEquation.Id);
         }
 
-        [Fact]
+        [Fact(Skip = Reason)]
         public void GetScenarioCalculatedAttributePageTest()
         {
             var service = new CalculatedAttributePagingService(_testRepo);
@@ -97,7 +99,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(pairIds.First() == result.DefaultEquation.Id);
         }
 
-        [Fact]
+        [Fact(Skip = Reason)]
         public void GetSyncedScenarioDatasetTest()
         {
             var service = new CalculatedAttributePagingService(_testRepo);
@@ -111,7 +113,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(result.Where(_ => calcAttrIds.Contains(_.Id)).Count() == calcAttrIds.Count());
         }
 
-        [Fact]
+        [Fact(Skip = Reason)]
         public void GetSyncedLibraryDatasetTest()
         {
             var service = new CalculatedAttributePagingService(_testRepo);

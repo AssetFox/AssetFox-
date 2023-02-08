@@ -8,88 +8,103 @@ using BridgeCareCore.Security;
 using System;
 using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
 using BridgeCareCore.Interfaces;
-using Moq;
-
+using Moq;using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using Microsoft.AspNetCore.Http;
+using BridgeCareCoreTests.Helpers;
+
 namespace BridgeCareCoreTests.Tests
 {
     public class ClaimHelperTests
     {
-        private ClaimHelper _claimHelper;
-        private Guid ownerId = Guid.NewGuid();
-        private Guid userId = Guid.NewGuid();
+        private ClaimHelper CreateClaimHelper(
+            Mock<IHttpContextAccessor> contextAccessor,
+            Mock<IUnitOfWork> unitOfWork = null)
+        {
+            var simulationQueueService = new Mock<ISimulationQueueService>();
+            var resolveUnitOfWork = unitOfWork ?? UnitOfWorkMocks.New();
+            var claimHelper = new ClaimHelper(
+                resolveUnitOfWork.Object,
+                simulationQueueService.Object,
+                contextAccessor.Object);
+            return claimHelper;
+        }
+
         private ISimulationQueueService _simulationQueueService = new Mock<ISimulationQueueService>().Object;
 
         [Fact]
-        public void ShouldReturnFalseRequirePermittedCheck()
+        public void RequirePermittedCheck_AdminAccess_False()
         {
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.AdminAccess) };
-
+            var contextAccessor = HttpContextAccessorMocks.MockWithClaims(claims);
+            var claimHelper = CreateClaimHelper(contextAccessor);
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
-            var result = _claimHelper.RequirePermittedCheck();
 
-            // Assert
-            Assert.IsType<bool>(result);
+            var result = claimHelper.RequirePermittedCheck();
+
             Assert.False(result);
         }        
 
         [Fact]
-        public void ShouldReturnTrueRequirePermittedCheck()
+        public void RequirePermittedCheck_NoAdminAccess_True()
         {
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.BudgetPriorityAddPermittedFromLibraryAccess) };
+            var contextAccessor = HttpContextAccessorMocks.MockWithClaims(claims);
+            var claimHelper = CreateClaimHelper(contextAccessor);
 
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
-            var result = _claimHelper.RequirePermittedCheck();
+            var result = claimHelper.RequirePermittedCheck();
 
-            // Assert
-            Assert.IsType<bool>(result);
             Assert.True(result);
         }
 
 
         [Fact]
-        public void ShouldPassCheckUserSimulationReadAuthorization()
+        public void CheckUserSimulationReadAuthorization_SimulationAccess_Passes()
         {
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.SimulationAccess) };
+            var contextAccessor = HttpContextAccessorMocks.MockWithClaims(claims);
+            var claimHelper = CreateClaimHelper(contextAccessor);
+            var userId = Guid.NewGuid();
 
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
-            _claimHelper.CheckUserSimulationReadAuthorization(Guid.NewGuid(), userId, true);
+            claimHelper.CheckUserSimulationReadAuthorization(Guid.NewGuid(), userId, true);
         }        
 
         [Fact]
-        public void ShouldPassCheckUserSimulationModifyAuthorization()
+        public void CheckUserSimulationModifyAuthorization_AdminUser_Passes()
         {
             var claims = SystemSecurityClaimLists.Admin();
-
+            var contextAccessor = HttpContextAccessorMocks.MockWithClaims(claims);
+            var claimHelper = CreateClaimHelper(contextAccessor);
+            var userId = Guid.NewGuid();
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
-            _claimHelper.CheckUserSimulationModifyAuthorization(Guid.NewGuid(), userId, false);
+            claimHelper.CheckUserSimulationModifyAuthorization(Guid.NewGuid(), userId, false);
         }
 
         [Fact]
-        public void ShouldExceptionOutCheckUserLibraryModifyAuthorization()
+        public void OldWayCheckUserLibraryModifyAuthorization_NotAuthorized_Throws()
         {
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.BudgetPriorityViewPermittedFromLibraryAccess) };
+            var contextAccessor = HttpContextAccessorMocks.MockWithClaims(claims);
+            var claimHelper = CreateClaimHelper(contextAccessor);
+            var ownerId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
 
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
-
-            var ex = Assert.Throws<UnauthorizedAccessException>(() => _claimHelper.OldWayCheckUserLibraryModifyAuthorization(ownerId, userId));
+            var ex = Assert.Throws<UnauthorizedAccessException>(() => claimHelper.OldWayCheckUserLibraryModifyAuthorization(ownerId, userId));
             Assert.Equal("You are not authorized to modify this library's data.", ex.Message);
         }
 
         [Fact]
-        public void ShouldPassCheckUserLibraryModifyAuthorization()
+        public void OldWayCheckUserLibraryModifyAuthorization_UserIsOwner_Passes()
         {
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.BudgetPriorityViewPermittedFromLibraryAccess) };
+            var contextAccessor = HttpContextAccessorMocks.MockWithClaims(claims);
+            var claimHelper = CreateClaimHelper(contextAccessor);
+            var ownerId = Guid.NewGuid();
 
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
-            userId = ownerId;
-            _claimHelper.OldWayCheckUserLibraryModifyAuthorization(ownerId, userId);
-            
+            claimHelper.OldWayCheckUserLibraryModifyAuthorization(ownerId, ownerId);
         }
     }
 }

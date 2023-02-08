@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
 
         public List<DatumLog> AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
         {
-            int logThreshold = 10;
+            int logThreshold = 50;
             List<DatumLog> datumLog = new List<DatumLog>();
             foreach (var datum in attributeData)
             {
@@ -68,7 +68,11 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
                 {
                     // return the unmatched datum to be logged and reported
                     if (datumLog.Count < logThreshold)
-                        datumLog.Add(new DatumLog(datum.Attribute.Id, Location.Id, datum.Attribute.Name));
+                    {
+                        var currentDatumLog = new DatumLog(datum.Attribute.Id, Location.Id, datum.Attribute.Name);
+                        if (datumLog.Find(x => (x.Equals(currentDatumLog))) == null)
+                            datumLog.Add(currentDatumLog);
+                    }
                 }
             }
 

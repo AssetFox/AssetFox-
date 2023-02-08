@@ -20,5 +20,12 @@ namespace AppliedResearchAssociates.iAM.Data.Helpers
         {
             return datumName + "," + locationId + "," + datumId;
         }
+
+        public bool Equals(DatumLog other)
+        {
+            return this.datumId.Equals(other.datumId) &&
+                   this.locationId.Equals( other.locationId) &&
+                   this.datumName == other.datumName;
+        }
     }
 }

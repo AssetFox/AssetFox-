@@ -65,7 +65,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CreateNetwork/{networkName}")]
-        [ClaimAuthorize("NetworkAddAccess")]
+        [ClaimAuthorize("NetworkDeleteAccess")]
         public async Task<IActionResult> CreateNetwork(string networkName, NetworkCreationParameters parameters)
         {
             try

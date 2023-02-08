@@ -108,7 +108,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("DeleteNetwork/{networkId}")]
-        [Authorize]
+        [ClaimAuthorize("NetworkAddAccess")]
         public async Task<IActionResult> DeleteNetwork(Guid networkId)
         {
             try
@@ -124,7 +124,7 @@ namespace BridgeCareCore.Controllers
                     {
                         await Task.Factory.StartNew(() =>
                         {
-                            //UnitOfWork.NetworkRepo.DeleteNetwork(networkId);
+                            UnitOfWork.NetworkRepo.DeleteNetwork(networkId);
                         });
                     }
                     catch (UnauthorizedAccessException e)

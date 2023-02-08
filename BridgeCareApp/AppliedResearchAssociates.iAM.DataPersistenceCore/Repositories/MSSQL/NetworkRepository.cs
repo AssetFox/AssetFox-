@@ -161,11 +161,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteNetwork(Guid networkId)
         {
-            _unitOfWork.BenefitQuantifierRepo.DeleteBenefitQuantifier(networkId);
-            _unitOfWork.SimulationRepo.DeleteSimulationsByNetworkId(networkId);
-            _unitOfWork.MaintainableAssetRepo.DeleteMaintainableAssetsByNetworkId(networkId);
-
-            _unitOfWork.Context.DeleteEntity<NetworkEntity>(_ => _.Id == networkId);
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                _unitOfWork.BenefitQuantifierRepo.DeleteBenefitQuantifier(networkId);
+                _unitOfWork.SimulationRepo.DeleteSimulationsByNetworkId(networkId);
+                _unitOfWork.Context.DeleteEntity<NetworkEntity>(_ => _.Id == networkId);
+                _unitOfWork.Commit();
+            }
+            catch (Exception e)
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
         }
 
         public void UpsertNetworkRollupDetail(Guid networkId, string status)

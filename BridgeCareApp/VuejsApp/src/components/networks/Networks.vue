@@ -301,7 +301,10 @@ export default class Networks extends Vue {
     @Watch('selectNetworkItemValue')
     onSelectNetworkItemValueChanged() {
         this.selectNetworkAction(this.selectNetworkItemValue);
-        this.hasSelectedNetwork = true;
+        if(this.selectNetworkItemValue != getBlankGuid() || this.isNewNetwork)
+            this.hasSelectedNetwork = true;
+        else
+            this.hasSelectedNetwork = false;
     }
     @Watch('selectedAttributeRows')
     onSelectedAttributeRowsChanged()
@@ -348,10 +351,11 @@ export default class Networks extends Vue {
             text: network.name,
             value: network.id
         });
-
+        
+        this.isNewNetwork = true;
         this.selectNetworkItemValue = network.id;
         this.selectedNetwork = clone(network);
-        this.isNewNetwork = true;
+        this.hasSelectedNetwork = true;
     }
     onDiscardChanges() {
         this.selectedNetwork = clone(this.stateSelectedNetwork);
@@ -389,7 +393,9 @@ export default class Networks extends Vue {
 
     onDeleteClick(){
         this.deleteNetworkAction(this.selectedNetwork.id).then(() => {
-            this.onDiscardChanges();
+            this.hasSelectedNetwork = false;
+            this.selectNetworkItemValue = "";
+            this.selectedNetwork = clone(emptyNetwork)
         })       
     }
     disableCrudButtonsCreate() {

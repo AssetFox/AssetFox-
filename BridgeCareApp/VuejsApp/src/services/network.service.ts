@@ -13,7 +13,7 @@ export default class NetworkService {
     }
 
     static deleteNetwork(netowrkId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`${API.Network}/DeleteNetwork/${netowrkId}`)
+        return coreAxiosInstance.post(`${API.Network}/DeleteNetwork/${netowrkId}`)
     }
 
     static getCompatibleNetworks(networkId: any): AxiosPromise {

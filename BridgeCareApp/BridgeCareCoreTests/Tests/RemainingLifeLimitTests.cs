@@ -39,18 +39,6 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        public RemainingLifeLimitController SetupController()
-        {
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var controller = new RemainingLifeLimitController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object,
-                new RemainingLifeLimitPagingService(TestHelper.UnitOfWork));
-            return controller;
-        }
-
         [Fact]
         public async Task UpsertRemainingLifeLimitLibrary_CallsUpsertLibraryAndUpsertLifeLimitsOnRepo()
         {

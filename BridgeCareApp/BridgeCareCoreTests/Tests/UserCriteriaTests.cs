@@ -93,6 +93,5 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             Assert.True(allowed.Succeeded);
         }
-
     }
 }

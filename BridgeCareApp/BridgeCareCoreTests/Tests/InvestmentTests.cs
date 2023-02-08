@@ -1,6 +1,7 @@
 using System.Data;
-using System.Security.Claims;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
@@ -8,36 +9,30 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
-using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Models;
 using BridgeCareCore.Models.DefaultData;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.DefaultData;
 using BridgeCareCore.Services.Paging;
-using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
-using Microsoft.SqlServer.Dac.Model;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Moq;
 using MoreLinq;
 using OfficeOpenXml;
 using Xunit;
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -77,6 +72,28 @@ namespace BridgeCareCoreTests.Tests
                 new InvestmentDefaultDataService()
                 );
             return service;
+        }
+
+        private InvestmentController CreateController(
+            Mock<IUnitOfWork> mockUnitOfWork, Mock<IHttpContextAccessor> accessor = null)
+        {
+            var service = CreateService(mockUnitOfWork);
+            var resolveAccessor = accessor ?? HttpContextAccessorMocks.DefaultMock();
+            var hubService = HubServiceMocks.DefaultMock();
+            var dataService = new InvestmentDefaultDataService();
+            var security = EsecSecurityMocks.Admin;
+            var pagingService = new InvestmentPagingService(mockUnitOfWork.Object, dataService);
+            var claimHelper = ClaimHelperMocks.New();
+            var controller = new InvestmentController(
+                service,
+                pagingService,
+                security,
+                mockUnitOfWork.Object,
+                hubService.Object,
+                resolveAccessor.Object,
+                dataService,
+                claimHelper.Object);
+            return controller;
         }
 
         private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null, Mock<IHubService> hubServiceMock = null)
@@ -321,7 +338,7 @@ namespace BridgeCareCoreTests.Tests
             return criteriaPerBudgetName;
         }
 
-        private IHttpContextAccessor CreateRequestForExceptionTesting(FormFile file = null)
+        private Mock<IHttpContextAccessor> CreateRequestForExceptionTesting(FormFile file = null)
         {
             var httpContext = new DefaultHttpContext();
 
@@ -338,112 +355,142 @@ namespace BridgeCareCoreTests.Tests
             httpContext.Request.Form = new FormCollection(new Dictionary<string, StringValues>(), formFileCollection);
             var accessor = new Mock<IHttpContextAccessor>();
             accessor.Setup(_ => _.HttpContext).Returns(httpContext);
-            return accessor.Object;
+            return accessor;
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnLibraryGet()
+        public async Task GetInvestment_Expected()
         {
-            var service = Setup();
-            // Arrange
-            var controller = CreateAuthorizedController(service);
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = CreateController(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            budgetRepo.Setup(b => b.GetScenarioBudgets(simulationId)).ReturnsEmptyList();
+            var investmentPlan = InvestmentPlanDtos.Dto(Guid.Empty);
+            investmentPlanRepo.Setup(i => i.GetInvestmentPlan(simulationId)).Returns(investmentPlan);
 
             // Act
-            var result = await controller.GetBudgetLibraries();
+            var result = await controller.GetInvestment(simulationId);
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            var value = ActionResultAssertions.OkObject(result);
+            var expected = new InvestmentDTO
+            {
+                InvestmentPlan = new InvestmentPlanDTO
+                {
+                    FirstYearOfAnalysisPeriod = 2022,
+                    InflationRatePercentage = 3,
+                    NumberOfYearsInAnalysisPeriod = 1,
+                    MinimumProjectCostLimit = 1000,
+                },
+                ScenarioBudgets = new List<BudgetDTO>(),
+            };
+            ObjectAssertions.Equivalent(expected, value);
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnScenarioGet()
+        public async Task UpsertNewLibrary_Does()
         {
-            var service = Setup();
-            // Arrange
-            var controller = CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-
-            // Act
-            var result = await controller.GetInvestment(simulation.Id);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnLibraryPost()
-        {
-            var service = Setup();
-            // Arrange
-            var controller = CreateAuthorizedController(service);
-            var dto = new BudgetLibraryDTO { Id = Guid.NewGuid(), Name = "", Budgets = new List<BudgetDTO>() };
-
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var dto = new BudgetLibraryDTO { Id = libraryId, Name = "Library", Budgets = new List<BudgetDTO>() };
             var request = new InvestmentLibraryUpsertPagingRequestModel();
+            var libraryAccess = LibraryAccessModels.LibraryDoesNotExist();
+            budgetRepo.Setup(br => br.GetLibraryAccess(libraryId, It.IsAny<Guid>())).Returns(libraryAccess);
             request.IsNewLibrary = true;
-
             request.Library = dto;
+            var controller = CreateController(unitOfWork);
 
             // Act
             var result = await controller.UpsertBudgetLibrary(request);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var upsertLibraryInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertBudgetLibrary));
+            var upsertBudgetsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteBudgets));
+            var upsertUsersInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteUsers));
+            ObjectAssertions.EmptyEnumerable<BudgetDTO>(upsertBudgetsInvocation.Arguments[0]);
+            var expectedUpsertedLibrary = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+                Budgets = new List<BudgetDTO>(),
+                Name = "Library",
+            };
+            ObjectAssertions.Equivalent(expectedUpsertedLibrary, upsertLibraryInvocation.Arguments[0]);
+            Assert.Equal(libraryId, upsertBudgetsInvocation.Arguments[1]);
+            var expectedUser = new LibraryUserDTO
+            {
+                AccessLevel = LibraryAccessLevel.Owner,
+            };
+            Assert.Equal(libraryId, upsertUsersInvocation.Arguments[0]);
+            ObjectAssertions.CheckEnumerable(upsertUsersInvocation.Arguments[1], expectedUser);
         }
 
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
-            var service = Setup();
-            // Arrange
-            var controller = CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            budgetRepo.Setup(b => b.GetScenarioBudgets(simulationId)).ReturnsEmptyList();
+            var controller = CreateController(unitOfWork);
             var request = new InvestmentPagingSyncModel();
-            request.Investment = new InvestmentPlanDTO();
-            
+            var investmentPlan = new InvestmentPlanDTO();
+            request.Investment = investmentPlan;
 
             // Act
-            var result = await controller.UpsertInvestment(simulation.Id, request);
+            var result = await controller.UpsertInvestment(simulationId, request);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var upsertCall = investmentPlanRepo.SingleInvocationWithName(nameof(IInvestmentPlanRepository.UpsertInvestmentPlan));
+            ObjectAssertions.Equivalent(upsertCall.Arguments[0], investmentPlan);
+            Assert.Equal(simulationId, upsertCall.Arguments[1]);
         }
 
         [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
-            var service = Setup();
-            // Arrange
-            var controller = CreateAuthorizedController(service);
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var libraryId = Guid.NewGuid();
 
             // Act
-            var result = await controller.DeleteBudgetLibrary(Guid.Empty);
+            var result = await controller.DeleteBudgetLibrary(libraryId);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var repoCall = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+            Assert.Equal(libraryId, repoCall.Arguments[0]);
         }
 
         [Fact]
-        public async Task ShouldGetLibraryDataNoChildren()
+        public async Task GetBudgetLibraries_CallsGetBudgetLibrariesNoChildrenOnController()
         {
             // Arrange
-            var service = Setup();
-            var controller = CreateAuthorizedController(service);
-            CreateLibraryTestData();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var dto = new BudgetLibraryDTO { Id = libraryId, Name = "Library", Budgets = new List<BudgetDTO>() };
+            var request = new InvestmentLibraryUpsertPagingRequestModel();
+            var libraryAccess = LibraryAccessModels.LibraryExistsWithUsers(Guid.Empty, null);
+            budgetRepo.Setup(br => br.GetLibraryAccess(libraryId, It.IsAny<Guid>())).Returns(libraryAccess);
+            request.IsNewLibrary = true;
+            request.Library = dto;
+            var controller = CreateController(unitOfWork);
+            var library = BudgetLibraryDtos.New();
+            budgetRepo.Setup(b => b.GetBudgetLibrariesNoChildren()).ReturnsList(library);
 
             // Act
             var result = await controller.GetBudgetLibraries();
 
             // Assert
-            var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
-            var dtos = (List<BudgetLibraryDTO>)Convert.ChangeType(okObjResult.Value,
-                typeof(List<BudgetLibraryDTO>));
-            Assert.Contains(dtos, b => b.Id == _testBudgetLibrary.Id);
-            var resultBudgetLibrary = dtos.FirstOrDefault(b => b.Id == _testBudgetLibrary.Id);
-
-            Assert.True(resultBudgetLibrary.Budgets.Count == 0);
+            var value = ActionResultAssertions.OkObject(result);
+            ObjectAssertions.CheckEnumerable(value, library);
         }
 
         [Fact]
@@ -482,40 +529,45 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldModifyLibraryData()
+        public async Task UpsertBudgetLibrary_LibraryExists_Modifies()
         {
             // Arrange
-            var service = Setup();
-            var controller = CreateAuthorizedController(service);
-            CreateLibraryTestData();
-
-            _testBudgetLibrary.Budgets = new List<BudgetEntity> { _testBudget };
-            var dto = _testBudgetLibrary.ToDto();
-            dto.Description = "Updated Description";
-            dto.Budgets[0].Name = "Updated Name";
-            dto.Budgets[0].BudgetAmounts[0].Value = 1000000;
-            dto.Budgets[0].CriterionLibrary = new CriterionLibraryDTO();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var libraryAccess = LibraryAccessModels.LibraryExistsWithUsers(Guid.Empty, null);
+            var libraryId = Guid.NewGuid();
+            budgetRepo.Setup(br => br.GetLibraryAccess(libraryId, Guid.Empty)).Returns(libraryAccess);
+            var controller = CreateController(unitOfWork);
+            var budgetId = Guid.NewGuid();
+            var existingLibrary = BudgetLibraryDtos.New(libraryId);
+            var existingBudget = BudgetDtos.WithSingleAmount(budgetId, "Budget", 2022, 1234m);
+            existingLibrary.Budgets.Add(existingBudget);
+            budgetRepo.Setup(b => b.GetBudgetLibrary(libraryId)).Returns(existingLibrary);
+            var updatedLibrary = BudgetLibraryDtos.New(libraryId);
+            var updatedBudget = BudgetDtos.WithSingleAmount(budgetId, "Budget", 2022, 1000000);
+            updatedLibrary.Budgets.Add(updatedBudget);
+            updatedLibrary.Description = "Updated Description";
+            updatedLibrary.Budgets[0].CriterionLibrary = new CriterionLibraryDTO();
 
             var request = new InvestmentLibraryUpsertPagingRequestModel();
 
-            request.Library = dto;
-            request.SyncModel.UpdatedBudgets.Add(dto.Budgets[0]);
+            request.Library = updatedLibrary;
+            request.SyncModel.UpdatedBudgets.Add(updatedBudget);
 
             // Act
             await controller.UpsertBudgetLibrary(request);
 
             // Assert
-            var modifiedDto = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibraries().Single(lib => lib.Id == dto.Id);
-
-            Assert.Equal(dto.Description, modifiedDto.Description);
-
-            Assert.Equal(dto.Budgets[0].Name, modifiedDto.Budgets[0].Name);
-            Assert.Equal(dto.Budgets[0].CriterionLibrary.Id,
-                modifiedDto.Budgets[0].CriterionLibrary.Id);
-
-            Assert.Single(modifiedDto.Budgets[0].BudgetAmounts);
-            Assert.Equal(dto.Budgets[0].BudgetAmounts[0].Value,
-                modifiedDto.Budgets[0].BudgetAmounts[0].Value);
+            var invocations = budgetRepo.Invocations.ToList();
+            var upsertLibraryInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertBudgetLibrary));
+            var budgetsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteBudgets));
+            var upsertedLibrary = upsertLibraryInvocation.Arguments[0] as BudgetLibraryDTO;
+            Assert.Equal("Updated Description", upsertedLibrary.Description);
+            var updatedBudgetDtos = budgetsInvocation.Arguments[0] as List<BudgetDTO>;
+            var updatedBudgetDto = updatedBudgetDtos.Single();
+            Assert.Equal(1234m, updatedBudgetDto.BudgetAmounts[0].Value); // counterintuitive behavior. Verified that it is present in the repo back to at least Sept. 30, 2022 (commit 82e8df57004)
+            ObjectAssertions.EquivalentExcluding(updatedBudgetDto, updatedBudget, x => x.BudgetAmounts[0].Id, x => x.BudgetAmounts[0].Value);
+            Assert.Equal(libraryId, budgetsInvocation.Arguments[1]);
         }
 
         [Fact]
@@ -587,8 +639,6 @@ namespace BridgeCareCoreTests.Tests
                     _.Id == _testBudget.BudgetAmounts.ToList()[0].Id));
         }
 
-        /**************************INVESTMENT BUDGETS EXCEL FILE IMPORT/EXPORT TESTS***********************************/
-
         [Fact]
         public async Task ShouldThrowConstraintWhenNoMimeTypeForLibraryImport()
         {
@@ -608,9 +658,8 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-            var service = CreateService(unitOfWork);
             var accessor = CreateRequestForExceptionTesting();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateController(unitOfWork, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -623,11 +672,10 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-            var service = CreateService(unitOfWork);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateController(unitOfWork, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -640,9 +688,8 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-            var service = CreateService(unitOfWork);
             var accessor = CreateRequestForExceptionTesting();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateController(unitOfWork, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -655,11 +702,10 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-            var service = CreateService(unitOfWork);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateController(unitOfWork, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>

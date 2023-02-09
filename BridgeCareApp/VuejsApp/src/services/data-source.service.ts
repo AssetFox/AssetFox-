@@ -29,7 +29,7 @@ export default class DataSourceService {
     static DeleteDataSource(
         id: string,
     ): AxiosPromise {
-        return coreAxiosInstance.post(
+        return coreAxiosInstance.delete(
             `${API.DataSource}/DeleteDataSource/${id}`
         );
     }

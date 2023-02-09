@@ -78,7 +78,7 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-        [HttpPost]
+        [HttpDelete]
         [Route("DeleteDataSource/{dataSourceId}")]
         [ClaimAuthorize("DataSourceModifyAccess")]
         public async Task<IActionResult> DeleteDataSource(Guid dataSourceId)

@@ -12,6 +12,7 @@ using MoreLinq;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using System.Text;
 using AppliedResearchAssociates.iAM.DTOs;
+using Org.BouncyCastle.Asn1.Cms;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -80,17 +81,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             return _unitOfWork.Context.AggregatedResult.Include(_ => _.MaintainableAsset)
                 .Where(_ => attributeNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == networkId)
-                .Select(aggregatedResult => new AggregatedResultDTO
-                {
-                    MaintainableAssetId = aggregatedResult.MaintainableAssetId,
-                    TextValue = aggregatedResult.TextValue,
-                    NumericValue = aggregatedResult.NumericValue,
-                    Attribute = new AttributeDTO
-                    {
-                        Name = aggregatedResult.Attribute.Name,
-                        Type = aggregatedResult.Attribute.DataType
-                    }
-                }).AsNoTracking().AsSplitQuery().ToList();
+                .Select(e => AggregatedResultMapper.ToDto(e))
+                .AsNoTracking().AsSplitQuery().ToList();
         }
+
+        public List<AggregatedResultDTO> GetAggregatedResultsForMaintainableAsset(Guid assetId, List<Guid> attributeIds)
+        {
+            var entities = _unitOfWork.Context.AggregatedResult.AsSplitQuery().AsNoTracking().Include(_ => _.Attribute)
+                    .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributeIds.Contains(_.AttributeId)).ToList();
+            return entities.Select(AggregatedResultMapper.ToDto).ToList();
+        }
+
+        public List<AggregatedResultDTO> GetAggregatedResultsForMaintainableAsset(Guid assetId) => throw new NotImplementedException();
     }
 }

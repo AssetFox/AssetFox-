@@ -17,5 +17,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
                 attributeValueHistoryPerMaintainableAssetIdAttributeIdTuple);
 
         List<AggregatedResultDTO> GetAggregatedResultsForAttributeNames(Guid networkId, List<string> attributeNames);
+        List<AggregatedResultDTO> GetAggregatedResultsForMaintainableAsset(Guid assetId);
     }
 }

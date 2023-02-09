@@ -41,7 +41,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
             var libraryDto = TargetConditionGoalLibraryDtos.Dto();
-            var libraryDtos = Lists.New(libraryDto);
+            var libraryDtos = new List<TargetConditionGoalLibraryDTO> { libraryDto };
             repo.Setup(r => r.GetTargetConditionGoalLibrariesNoChildren()).Returns(libraryDtos);
             var controller = CreateController(unitOfWork);
             // Act

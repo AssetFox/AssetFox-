@@ -103,6 +103,7 @@ namespace BridgeCareCore.Utils
         /// </summary>
         /// <param name="owner"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
+        [Obsolete("Should not be used in new library sharing.")]
         public void CheckIfAdminOrOwner(Guid owner, Guid userId)
         {
             if (RequirePermittedCheck() && owner != userId)

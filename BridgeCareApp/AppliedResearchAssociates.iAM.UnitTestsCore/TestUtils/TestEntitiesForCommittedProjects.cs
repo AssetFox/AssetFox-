@@ -17,8 +17,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             new ScenarioBudgetEntity()
             {
-                Id = Guid.Parse("4dcf6bbc-d135-458c-a6fc-db9bb0801bfd"),
-                Name = "Interstate",
+                Id = TestDataForCommittedProjects.InterstateBudgetId,
+                Name = TestDataForCommittedProjects.InterstateBudgetName,
                 ScenarioBudgetAmounts = new List<ScenarioBudgetAmountEntity>()
                 {
                     new ScenarioBudgetAmountEntity() { Year = 2022, Value = 10000000 },
@@ -27,8 +27,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             },
             new ScenarioBudgetEntity()
             {
-                Id = Guid.Parse("93d59432-c9e5-4a4a-8f1b-d18dcfc0524d"),
-                Name = "Local",
+                Id = TestDataForCommittedProjects.LocalBudgetId,
+                Name = TestDataForCommittedProjects.LocalBudgetName,
                 ScenarioBudgetAmounts = new List<ScenarioBudgetAmountEntity>()
                 {
                     new ScenarioBudgetAmountEntity() { Year = 2022, Value = 5000000 },
@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Network = new NetworkEntity()
                 {
                     Id = TestDataForCommittedProjects.NetworkId,
-                    Name = "Primary",
+                    Name = TestDataForCommittedProjects.NetworkName,
                     KeyAttributeId = Guid.Parse("c31ea5bb-3d48-45bb-a68f-01ee75f17f0c")
                 },
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
@@ -271,7 +271,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Network = new NetworkEntity()
                 {
                     Id = TestDataForCommittedProjects.NetworkId,
-                    Name = "Primary",
+                    Name = TestDataForCommittedProjects.NetworkName,
                     MaintainableAssets = MaintainableAssetEntities
                 },
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>(),
@@ -309,7 +309,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Network = new NetworkEntity()
                 {
                     Id = TestDataForCommittedProjects.NetworkId,
-                    Name = "Primary",
+                    Name = TestDataForCommittedProjects.NetworkName,
                     KeyAttributeId = Guid.Parse("c31ea5bb-3d48-45bb-a68f-01ee75f17f0c")
                 },
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()

@@ -131,7 +131,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var result = repo.GetCommittedProjectsForExport(TestDataForCommittedProjects.NoCommitSimulationId);
 
             // Assert
-            Assert.Equal(0, result.Count);
+            Assert.Empty(result);
         }
 
         [Fact]

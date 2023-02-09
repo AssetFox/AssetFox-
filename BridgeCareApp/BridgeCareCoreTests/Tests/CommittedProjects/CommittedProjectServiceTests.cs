@@ -43,6 +43,7 @@ namespace BridgeCareCoreTests.Tests
             mockedTestUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
             _mockedSimulationRepo = new Mock<ISimulationRepository>();
+            _mockedSimulationRepo.Setup(s => s.GetSimulation(TestDataForCommittedProjects.SimulationId)).Returns(TestDataForCommittedProjects.TestSimulationDTO);
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Simulation, TestEntitiesForCommittedProjects.Simulations.AsQueryable());
             _mockedSimulationRepo.Setup(_ => _.GetSimulationName(It.Is<Guid>(_ => _ != _badScenario))).Returns("Test");
             _mockedSimulationRepo.Setup(_ => _.GetSimulationName(It.Is<Guid>(_ => _ == _badScenario))).Returns<string>(null);

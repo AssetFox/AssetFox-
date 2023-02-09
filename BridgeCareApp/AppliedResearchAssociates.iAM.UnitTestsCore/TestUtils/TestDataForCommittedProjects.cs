@@ -420,5 +420,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         }
 
         #endregion
+
+        public static InvestmentPlanDTO TestInvestmentPlan => new InvestmentPlanDTO
+        {
+            Id = Guid.Parse("ad1e1f67-486f-409a-b532-b03d7eb4b1c7"),
+            FirstYearOfAnalysisPeriod = 2022,
+            InflationRatePercentage = 3,
+            MinimumProjectCostLimit = 1000,
+            NumberOfYearsInAnalysisPeriod = 3
+        };
     }
 }

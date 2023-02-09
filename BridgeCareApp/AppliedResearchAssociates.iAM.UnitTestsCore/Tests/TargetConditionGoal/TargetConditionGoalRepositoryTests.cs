@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
             var targetConditionGoal = TargetConditionGoalDtos.Dto(attribute.Name);
-            var targetConditionGoals = Lists.New(targetConditionGoal);
+            var targetConditionGoals = new List<TargetConditionGoalDTO> { targetConditionGoal };
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(targetConditionGoals, targetConditionGoalLibraryId);
             return targetConditionGoal;
         }
@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
             var goal = TargetConditionGoalDtos.Dto(attribute.Name);
-            var goals = Lists.New(goal);
+            var goals = new List<TargetConditionGoalDTO> { goal };
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(goals, simulationId);
             return goal;
         }
@@ -115,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var goalDto = SetupTargetConditionGoal(libraryDto.Id);
             goalDto.Name = "Updated Name";
             goalDto.CriterionLibrary = criterionLibrary;
-            var updateRows = Lists.New(goalDto);
+            var updateRows = new List<TargetConditionGoalDTO> { goalDto };
 
             // Act //UpsertOrDeleteTargetConditionGoals
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(updateRows, libraryDto.Id);
@@ -238,7 +238,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Attribute = attribute.Name,
                 Name = "New"
             };
-            var goals = Lists.New(addedGoal, goalToUpdate);
+            var goals = new List<TargetConditionGoalDTO> { addedGoal, goalToUpdate };
 
             // Act
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(goals, simulation.Id);

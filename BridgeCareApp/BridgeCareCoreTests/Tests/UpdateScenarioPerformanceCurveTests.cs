@@ -73,7 +73,7 @@ namespace BridgeCareCoreTests.Tests
 
             // assert
             var upsertCall = performanceCurveRepo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeleteScenarioPerformanceCurves));
-            var expectedArgument = Lists.New(performanceCurveDto2);
+            var expectedArgument = new List<PerformanceCurveDTO> { performanceCurveDto2 };
             ObjectAssertions.Equivalent(expectedArgument, upsertCall.Arguments[0]);
             Assert.Equal(simulationId, upsertCall.Arguments[1]);
         }
@@ -131,7 +131,7 @@ namespace BridgeCareCoreTests.Tests
 
             // assert
             var upsertCall = performanceCurveRepo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeleteScenarioPerformanceCurves));
-            var expectedArgument = Lists.New(performanceCurveDto);
+            var expectedArgument = new List<PerformanceCurveDTO> { performanceCurveDto };
             ObjectAssertions.Equivalent(expectedArgument, upsertCall.Arguments[0]);
             Assert.Equal(simulationId, upsertCall.Arguments[1]);
         }

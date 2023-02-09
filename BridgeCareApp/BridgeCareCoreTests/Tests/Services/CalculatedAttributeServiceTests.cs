@@ -26,7 +26,7 @@ namespace BridgeCareCoreTests.Tests
         private Mock<DbSet<AttributeEntity>> _mockAttributes;
 
         private List<CalculatedAttributeDTO> _testScenarionCalcAttributes;
-        private List<CalculatedAttributeDTO> _testLIbraryCalcAttributes;
+        private List<CalculatedAttributeDTO> _testLibraryCalcAttributes;
 
         public CalculatedAttributeServiceTests()
         {
@@ -39,7 +39,7 @@ namespace BridgeCareCoreTests.Tests
 
             var libraryCalcAttrRepo = libraryRepo.SelectMany(_ => _.CalculatedAttributes);
             _mockLibrarycalcAttr = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.CalculatedAttribute, libraryCalcAttrRepo);
-            _testLIbraryCalcAttributes = libraryCalcAttrRepo.Where(_ => _.CalculatedAttributeLibraryId ==
+            _testLibraryCalcAttributes = libraryCalcAttrRepo.Where(_ => _.CalculatedAttributeLibraryId ==
             new Guid("86bf65df-5ac9-44cc-b26d-9a1182c258d4")).Select(_ => _.ToDto()).ToList();
 
             var scenarioRepo = TestDataForCalculatedAttributesRepository.GetSimulationCalculatedAttributesRepo();
@@ -59,7 +59,7 @@ namespace BridgeCareCoreTests.Tests
 
         public const string Reason = "Delaying these until I test paging services";
 
-        [Fact (Skip = Reason)]
+        [Fact]
         public void GetLibraryCalculatedAttributePageTest()
         {
             var service = new CalculatedAttributePagingService(_testRepo);
@@ -73,18 +73,18 @@ namespace BridgeCareCoreTests.Tests
             };
 
             var result = service.GetScenarioPage(libraryId, request) as CalculcatedAttributePagingPageModel;
-            var pairIds = _testLIbraryCalcAttributes.First(_ => _.Attribute ==
+            var pairIds = _testLibraryCalcAttributes.First(_ => _.Attribute ==
             TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Name).Equations.Select(_ => _.Id).ToList();
 
             Assert.True(pairIds.First() == result.DefaultEquation.Id);
         }
 
-        [Fact(Skip = Reason)]
+        [Fact]
         public void GetScenarioCalculatedAttributePageTest()
         {
             var service = new CalculatedAttributePagingService(_testRepo);
 
-            var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
+            var simulationId = TestDataForCalculatedAttributesRepository.FirstSimulationId;
 
             var request = new CalculatedAttributePagingRequestModel()
             {
@@ -99,12 +99,12 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(pairIds.First() == result.DefaultEquation.Id);
         }
 
-        [Fact(Skip = Reason)]
+        [Fact]
         public void GetSyncedScenarioDatasetTest()
         {
             var service = new CalculatedAttributePagingService(_testRepo);
 
-            var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
+            var simulationId = TestDataForCalculatedAttributesRepository.FirstSimulationId;
 
             var SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() };
 
@@ -113,7 +113,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(result.Where(_ => calcAttrIds.Contains(_.Id)).Count() == calcAttrIds.Count());
         }
 
-        [Fact(Skip = Reason)]
+        [Fact]
         public void GetSyncedLibraryDatasetTest()
         {
             var service = new CalculatedAttributePagingService(_testRepo);
@@ -123,7 +123,7 @@ namespace BridgeCareCoreTests.Tests
             var SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() };
 
             var result = service.GetSyncedLibraryDataset(libraryId, SyncModel);
-            var calcAttrIds = _testLIbraryCalcAttributes.Select(_ => _.Id);
+            var calcAttrIds = _testLibraryCalcAttributes.Select(_ => _.Id);
             Assert.True(result.Where(_ => calcAttrIds.Contains(_.Id)).Count() == calcAttrIds.Count());
         }
     }

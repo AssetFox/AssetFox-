@@ -2,25 +2,21 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using AppliedResearchAssociates.iAM.DTOs.Enums;
+using Newtonsoft.Json;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class TestDataForCommittedProjects
     {
         public static Guid NetworkId => Guid.Parse("7940d27c-c9b1-4ef2-b5e7-2f1d8240a064");
+
+        public const string NetworkName = "Primary";
+        public const string Username = "pdsystbamsusr01";
 
         public static Guid AuthorizedUser => Guid.Parse("b047f934-2a40-4cbb-b3cd-0a17c8a5af21");
 
@@ -36,6 +32,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static Guid CostId => Guid.Parse("100dacfe-02da-4109-b8aa-add932756dee");
 
+        public static Guid InterstateBudgetId => Guid.Parse("4dcf6bbc-d135-458c-a6fc-db9bb0801bfd");
+
+        public static Guid LocalBudgetId => Guid.Parse("93d59432-c9e5-4a4a-8f1b-d18dcfc0524d");
+
+        public const string InterstateBudgetName = "Interstate";
+        public const string LocalBudgetName = "Local";
+        public const decimal TenMillion = 10000000;
+        public const decimal ThreeMillion = 3000000;
+        public const decimal FiveMillion = 5000000;
+
+
         //public static List<string> KeyProperties => new List<string> { "ID", "BRKEY_", "BMSID" };
         public static Dictionary<string, List<KeySegmentDatum>> KeyProperties()
         {
@@ -47,21 +54,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return result;
         }
 
-        public static List<SimulationDTO> AuthorizedSimulationDTOs()
+        public static SimulationUserDTO SimulationUserDto()
         {
-            var authorizedUserDto = new SimulationUserDTO
+            var dto = new SimulationUserDTO
             {
                 UserId = AuthorizedUser,
-                Username = "pdsystbamsusr01",
+                Username = Username,
                 IsOwner = true,
-                CanModify = true
+                CanModify = true,
             };
-            var result = TestEntitiesForCommittedProjects.Simulations.Select(_ => _.ToDto(new UserEntity() { Id = authorizedUserDto.UserId, Username = authorizedUserDto.Username })).ToList();
-            foreach (var simulation in result)
+            return dto;
+        }
+
+        public static SimulationDTO TestSimulationDTO()
+        {
+            var date = new DateTime(2023, 2, 9);
+            var dto = new SimulationDTO
             {
-                simulation.Users.Add(authorizedUserDto);
-            }
-            return result;
+                Id = SimulationId,
+                CreatedDate = date,
+                NetworkId = NetworkId,
+                NetworkName = NetworkName,
+                Creator = Username,
+                LastModifiedDate = date,
+                Users = new List<SimulationUserDTO>
+                {
+                    SimulationUserDto(),
+                }
+            };
+            return dto;
         }
 
         public static List<AttributeDTO> Attributes => new List<AttributeDTO>()
@@ -300,27 +321,57 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         private static List<BudgetDTO> ScenarioBudgetDTOs()
         {
             // Avoiding the use of the mapper here as that is not what we are tesitng
-            var result = new List<BudgetDTO>();
-            foreach (var budget in TestEntitiesForCommittedProjects.ScenarioBudgetEntities)
+            var interstate = new BudgetDTO
             {
-                var budgetAmounts = new List<BudgetAmountDTO>();
-                foreach (var amount in budget.ScenarioBudgetAmounts)
+                Name = InterstateBudgetName,
+                Id = InterstateBudgetId,
+                BudgetAmounts = new List<BudgetAmountDTO>
                 {
-                    budgetAmounts.Add(new BudgetAmountDTO()
+                    new BudgetAmountDTO
                     {
+                        Year = 2022,
+                        BudgetName = InterstateBudgetName,
                         Id = Guid.NewGuid(),
-                        Year = amount.Year,
-                        Value = amount.Value,
-                        BudgetName = budget.Name
-                    });
+                        Value = TenMillion,
+                    },
+                    new BudgetAmountDTO
+                    {
+                        Year = 2023,
+                        BudgetName = InterstateBudgetName,
+                        Id = Guid.NewGuid(),
+                        Value = TenMillion,
+                    }
                 }
-                result.Add(new BudgetDTO()
+           
+            };
+            var local = new BudgetDTO
+            {
+                Name = LocalBudgetName,
+                Id = LocalBudgetId,
+                BudgetAmounts = new List<BudgetAmountDTO>
                 {
-                    Id = budget.Id,
-                    Name = budget.Name,
-                    BudgetAmounts = budgetAmounts
-                });
-            }
+                    new BudgetAmountDTO
+                    {
+                        Id= Guid.NewGuid(),
+                        BudgetName = LocalBudgetName,
+                        Value = FiveMillion,
+                        Year = 2022,
+                    },
+                    new BudgetAmountDTO
+                    {
+                        Id= Guid.NewGuid(),
+                        BudgetName = LocalBudgetName,
+                        Value = ThreeMillion,
+                        Year = 2023,
+                    }
+                }
+            };
+            var result = new List<BudgetDTO>
+            {
+                interstate,
+                local,
+            };
+            var bar = JsonConvert.SerializeObject(result, Formatting.Indented);
             return result;
         }
 

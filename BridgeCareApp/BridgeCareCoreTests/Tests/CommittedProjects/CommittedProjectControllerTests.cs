@@ -46,7 +46,7 @@ namespace BridgeCareCoreTests.Tests
 
             var mockSimulationRepo = new Mock<ISimulationRepository>();
             mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => SimulationInTestData(_))))
-                .Returns(TestDataForCommittedProjects.AuthorizedSimulationDTOs().First());
+                .Returns(TestDataForCommittedProjects.TestSimulationDTO());
             mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => !SimulationInTestData(_))))
                 .Throws<RowNotInTableException>();
             _mockUOW.Setup(_ => _.SimulationRepo).Returns(mockSimulationRepo.Object);

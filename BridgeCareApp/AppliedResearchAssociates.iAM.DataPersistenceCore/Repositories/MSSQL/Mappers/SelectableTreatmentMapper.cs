@@ -133,6 +133,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AssetType = (TreatmentDTOEnum.AssetType)entity.AssetType
             };
 
+        public static TreatmentDTOWithSimulationId ToDtoWithSimulationId(this ScenarioSelectableTreatmentEntity entity)
+        {
+            var treatmentDto = entity.ToDto();
+            return new TreatmentDTOWithSimulationId
+            {
+                SimulationId
+                = entity.SimulationId,
+                Treatment = treatmentDto,
+            };
+        }
+
         public static TreatmentLibraryDTO ToDto(this TreatmentLibraryEntity entity) =>
             new TreatmentLibraryDTO
             {

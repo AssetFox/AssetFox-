@@ -67,16 +67,6 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-
-        private TreatmentController CreateUnauthorizedController()
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentServiceMocks.EmptyPagingMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
-            return controller;
-        }
-
         private TreatmentController CreateTestController(List<string> userClaims)
         {
             List<Claim> claims = new List<Claim>();

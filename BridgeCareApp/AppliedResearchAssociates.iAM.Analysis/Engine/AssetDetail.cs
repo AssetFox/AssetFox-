@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine

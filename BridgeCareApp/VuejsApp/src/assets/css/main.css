@@ -768,6 +768,10 @@ display: none !important;
     margin-bottom: 0 !important;
 } 
 
+.ghd-margin-top{
+    margin-top: 25px !important;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 .ghd-content{
     padding-left: 295px !important;

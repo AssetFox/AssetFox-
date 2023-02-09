@@ -1,9 +1,9 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout>
+        <v-layout class="budgets-tab-content">
             <v-flex xs12>
                 <v-layout>
-                    <v-flex xs11>
+                    <v-flex xs10>
                         <v-layout column v-if='budgets.length === 0'>
                             <h3>Investment Library Not Found</h3>
                             <div>
@@ -24,7 +24,7 @@
                                     <td>
                                         <v-checkbox hide-details primary v-model='props.selected' />
                                     </td>
-                                    <td>
+                                    <td style="width:400px;">
                                         {{ props.item.name }}
                                     </td>
                                     <td></td>
@@ -95,13 +95,20 @@ export default class BudgetsTab extends Vue {
 </script>
 
 <style>
+.budgets-tab-content{
+   min-width: 1000px;  
+}
+
 .budgets-data-table {
+    min-width: 800px;
+    width: 800px;
     height: 295px !important;
     overflow-y: auto;
 }
 
 .budgets-data-table .v-table tbody tr td{
     font-size: 14px !important;
+    min-width: 80px;
 }
 
 .budgets-data-table .v-table thead tr th{
@@ -109,6 +116,6 @@ export default class BudgetsTab extends Vue {
 }
 
 .budgets-data-table .v-table thead tr th .v-input {
-    width: 20px !important;
+    max-width: 40px !important;
 } 
 </style>

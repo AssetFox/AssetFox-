@@ -31,8 +31,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public void AllocateCost(decimal cost, int targetYear) => _AllocateCost(cost, targetYear - FirstYearOfAnalysisPeriod);
 
-        public decimal GetAmount(int year) => CumulativeAmountPerYear[year - FirstYearOfAnalysisPeriod];
-
         public void MoveToNextYear() => SetYearIndex(CurrentYearIndex + 1);
 
         public void SetPriority(BudgetPriority budgetPriority)

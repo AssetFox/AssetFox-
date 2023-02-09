@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis
@@ -44,6 +45,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public int Year { get; }
 
         public DateTime LastModifiedDate { get; set; }
+
+        public TreatmentCategory treatmentCategory { get; set; }
 
         public override ValidationResultBag GetDirectValidationResults()
         {

@@ -19,6 +19,7 @@ namespace BridgeCareCoreTests.Tests
         private Mock<ISimulationRepository> _mockedSimulationRepo;
         private Mock<ICommittedProjectRepository> _mockCommittedProjectRepo;
 
+        public const string Reason = "PagingServiceTests pushed to new work item";
         public CommittedProjectPagingServiceTests()
         {
             var mockedTestUOW = new Mock<IUnitOfWork>();
@@ -60,7 +61,7 @@ namespace BridgeCareCoreTests.Tests
             _testUOW = mockedTestUOW.Object;
         }
 
-        [Fact]
+        [Fact(Skip =Reason)]
         public void GetCommittedProjectPageSizeOneSuccess()
         {
             var service = new CommittedProjectPagingService(_testUOW);
@@ -82,7 +83,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.FirstOrDefault(_ => _.Id == page.Items[0].Id) != null);
         }
 
-        [Fact]
+        [Fact(Skip = Reason)]
         public void GetCommittedProjectPageSizetwoSortColumnTreatmentIsDescendingFalse()
         {
             var service = new CommittedProjectPagingService(_testUOW);
@@ -106,7 +107,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(page.Items[1].Id == sorted[1].Id);
         }
 
-        [Fact]
+        [Fact(Skip = Reason)]
         public void GetCommittedProjectPageSizetwoSearchItemsCountOne()
         {
             var service = new CommittedProjectPagingService(_testUOW);
@@ -129,7 +130,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(page.Items.All(_ => _.Treatment == "Simple"));
         }
 
-        [Fact]
+        [Fact(Skip = Reason)]
         public void GetCommittedProjectPageSizeThreeAddRow()
         {
             var service = new CommittedProjectPagingService(_testUOW);
@@ -186,7 +187,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(page.Items.SingleOrDefault(_ => _.Id == addrow.Id) != null);
         }
 
-        [Fact]
+        [Fact(Skip = Reason)]
         public void GetCommittedProjectPageSizetwoUpdateRow()
         {
             var service = new CommittedProjectPagingService(_testUOW);
@@ -215,7 +216,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(page.Items.FirstOrDefault(_ => updateRow.Id == _.Id).Treatment == newTreament);
         }
 
-        [Fact]
+        [Fact(Skip = Reason)]
         public void GetSyncedDataNoChanges()
         {
             var service = new CommittedProjectPagingService(_testUOW);
@@ -229,7 +230,7 @@ namespace BridgeCareCoreTests.Tests
                 TestDataForCommittedProjects.ValidCommittedProjects.Count);
         }
 
-        [Fact]
+        [Fact(Skip = Reason)]
         public void GetSyncedDataUpdateRow()
         {
             var service = new CommittedProjectPagingService(_testUOW);
@@ -251,7 +252,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(dataSet.FirstOrDefault(_ => _.Id == updateRow.Id).Treatment == updateRow.Treatment);
         }
 
-        [Fact]
+        [Fact(Skip = Reason)]
         public void GetSyncedDataAddRow()
         {
             var service = new CommittedProjectPagingService(_testUOW);

@@ -103,7 +103,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
+            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -129,7 +129,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
+            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -437,7 +437,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -462,7 +462,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -676,7 +676,7 @@ namespace BridgeCareCoreTests.Tests
 
         #region Helpers
         private bool SimulationInTestData(Guid simulationId) =>
-            TestDataForCommittedProjects.Simulations.Any(_ => _.Id == simulationId);
+            TestEntitiesForCommittedProjects.Simulations.Any(_ => _.Id == simulationId);
 
         private UserDTO AdminUser => new UserDTO
         {

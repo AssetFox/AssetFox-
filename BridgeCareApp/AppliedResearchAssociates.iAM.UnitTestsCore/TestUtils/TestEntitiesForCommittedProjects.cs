@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -60,6 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 },
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
             };
+
         private static CommittedProjectEntity SomethingEntity(Guid id, Guid simulationId, int year) => new CommittedProjectEntity()
         {
             Id = id,
@@ -92,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         };
 
         private static CommittedProjectEntity SomethingFourYear2023() =>
-    SomethingEntity(Guid.Parse("444e66df-4436-49b1-ae68-9f5c10656b1b"), TestDataForCommittedProjects.FourYearSimulationId, 2023);
+            SomethingEntity(Guid.Parse("444e66df-4436-49b1-ae68-9f5c10656b1b"), TestDataForCommittedProjects.FourYearSimulationId, 2023);
 
         private static CommittedProjectEntity SomethingFourYear2025() =>
             SomethingEntity(Guid.Parse("4e9e66df-4436-49b1-ae68-9f5c10656b1b"), TestDataForCommittedProjects.FourYearSimulationId, 2025);
@@ -101,7 +103,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             SomethingEntity(Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"), TestDataForCommittedProjects.SimulationId, 2022),
             SomethingFourYear2025(),
-     //       SomethingFourYear2023(),
             SimpleEntity(),
         };
 
@@ -292,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             new SimulationEntity()
             {
-                Id = Guid.Parse("dae1c62c-adba-4510-bfe5-61260c49ec99"),
+                Id = TestDataForCommittedProjects.NoCommitSimulationId,
                 Name = "No Commit",
                 InvestmentPlan = new InvestmentPlanEntity()
                 {
@@ -326,6 +327,53 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
 
             return result;
+        }
+
+        public static List<ScenarioSelectableTreatmentEntity> FourYearScenarioNoTreatmentEntities()
+        {
+            var entity = FourYearScenarioNoTreatment();
+            var list = new List<ScenarioSelectableTreatmentEntity> { entity };
+            return list;
+        }
+
+        public static ScenarioSelectableTreatmentEntity FourYearScenarioNoTreatment()
+        {
+
+
+            var equation = new EquationEntity
+            {
+                Expression = "100",
+            };
+            var equationJoin = new ScenarioTreatmentCostEquationEntity
+            {
+                Equation = equation,
+                ScenarioTreatmentCostId = TestDataForCommittedProjects.NoTreatmentId,
+            };
+            var scenarioTreatmentCost = new ScenarioTreatmentCostEntity
+            {
+                Id = TestDataForCommittedProjects.CostId,
+                ScenarioTreatmentCostEquationJoin = equationJoin,
+                ScenarioSelectableTreatmentId = TestDataForCommittedProjects.NoTreatmentId,
+            };
+            var costs = new List<ScenarioTreatmentCostEntity> { scenarioTreatmentCost };
+            var consequences = new List<ScenarioConditionalTreatmentConsequenceEntity>();
+            var budgets = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>();
+            var treatmentJoin = new CriterionLibraryScenarioSelectableTreatmentEntity
+            {
+
+            };
+            var entity = new ScenarioSelectableTreatmentEntity
+            {
+                Id = TestDataForCommittedProjects.NoTreatmentId,
+                ScenarioTreatmentCosts = costs,
+                Description = "No Treatment",
+                Name = "No Treatment",
+                SimulationId = TestDataForCommittedProjects.FourYearSimulationId,
+                ScenarioTreatmentConsequences = consequences,
+                ScenarioSelectableTreatmentScenarioBudgetJoins = budgets,
+                CriterionLibraryScenarioSelectableTreatmentJoin = null,
+            };
+            return entity;
         }
 
     }

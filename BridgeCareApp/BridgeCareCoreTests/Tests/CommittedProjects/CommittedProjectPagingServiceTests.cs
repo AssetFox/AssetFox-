@@ -51,8 +51,8 @@ namespace BridgeCareCoreTests.Tests
             mockedTestUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
             _mockedSimulationRepo = new Mock<ISimulationRepository>();
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Simulation, TestDataForCommittedProjects.Simulations.AsQueryable());
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioBudget, TestDataForCommittedProjects.ScenarioBudgetEntities.AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Simulation, TestEntitiesForCommittedProjects.Simulations.AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioBudget, TestEntitiesForCommittedProjects.ScenarioBudgetEntities.AsQueryable());
             mockedTestUOW.Setup(_ => _.SimulationRepo).Returns(_mockedSimulationRepo.Object);
 
             var mockAttributeRepository = new Mock<IAttributeRepository>();
@@ -155,7 +155,7 @@ namespace BridgeCareCoreTests.Tests
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 1,
                 Cost = 10000,
-                SimulationId = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,
+                SimulationId = TestEntitiesForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,
                 LocationKeys = new Dictionary<string, string>()
                 {
                     { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
@@ -234,7 +234,7 @@ namespace BridgeCareCoreTests.Tests
             var service = new CommittedProjectPagingService(_testUOW);
 
 
-            var dataSet = service.GetSyncedDataset(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id, new PagingSyncModel<SectionCommittedProjectDTO>());
+            var dataSet = service.GetSyncedDataset(TestEntitiesForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id, new PagingSyncModel<SectionCommittedProjectDTO>());
             var dataIds = dataSet.Select(_ => _.Id).ToList();
 
             Assert.True(dataSet.Count == TestDataForCommittedProjects.ValidCommittedProjects.Count);
@@ -255,7 +255,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 UpdateRows = new List<SectionCommittedProjectDTO> { updateRow }
             };
-            var dataSet = service.GetSyncedDataset(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,sync);
+            var dataSet = service.GetSyncedDataset(TestEntitiesForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,sync);
             var dataIds = dataSet.Select(_ => _.Id).ToList();
 
             Assert.True(dataSet.Count == TestDataForCommittedProjects.ValidCommittedProjects.Count);
@@ -277,7 +277,7 @@ namespace BridgeCareCoreTests.Tests
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 1,
                 Cost = 10000,
-                SimulationId = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,
+                SimulationId = TestEntitiesForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,
                 LocationKeys = new Dictionary<string, string>()
                 {
                     { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
@@ -305,7 +305,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 AddedRows = new List<SectionCommittedProjectDTO> { addrow }
             };
-            var dataSet = service.GetSyncedDataset(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id, sync);
+            var dataSet = service.GetSyncedDataset(TestEntitiesForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id, sync);
             var dataIds = dataSet.Select(_ => _.Id).ToList();
 
             Assert.True(dataSet.Count == TestDataForCommittedProjects.ValidCommittedProjects.Count + 1);

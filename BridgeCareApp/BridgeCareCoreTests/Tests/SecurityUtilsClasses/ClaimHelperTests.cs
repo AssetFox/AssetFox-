@@ -76,7 +76,7 @@ namespace BridgeCareCoreTests.Tests
             // Act
             _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
 
-            var ex = Assert.Throws<UnauthorizedAccessException>(() => _claimHelper.OldWayCheckUserLibraryModifyAuthorization(ownerId, userId));
+            var ex = Assert.Throws<UnauthorizedAccessException>(() => _claimHelper.CheckIfAdminOrOwner(ownerId, userId));
             Assert.Equal("You are not authorized to modify this library's data.", ex.Message);
         }
 
@@ -88,7 +88,7 @@ namespace BridgeCareCoreTests.Tests
             // Act
             _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
             userId = ownerId;
-            _claimHelper.OldWayCheckUserLibraryModifyAuthorization(ownerId, userId);
+            _claimHelper.CheckIfAdminOrOwner(ownerId, userId);
             
         }
     }

@@ -237,7 +237,7 @@ namespace BridgeCareCore.Controllers
                     dto.Treatments = treatments;
                     if (dto != null)
                     {
-                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
@@ -331,7 +331,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
                     UnitOfWork.Commit();
@@ -385,7 +385,7 @@ namespace BridgeCareCore.Controllers
                         var existingTreatmentLibrary = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
                         if (existingTreatmentLibrary != null)
                         {
-                            _claimHelper.OldWayCheckUserLibraryModifyAuthorization(existingTreatmentLibrary.Owner, UserId);
+                            _claimHelper.CheckIfAdminOrOwner(existingTreatmentLibrary.Owner, UserId);
                         }
                     }
                     result = _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
@@ -426,7 +426,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null || treatment == null) return;
-                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatment, libraryId);
                     UnitOfWork.Commit();

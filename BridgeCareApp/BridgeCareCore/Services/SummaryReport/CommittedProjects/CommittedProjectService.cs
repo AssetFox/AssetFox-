@@ -572,7 +572,7 @@ namespace BridgeCareCore.Services
             return evaluator.Delegate(scope);
         }
 
-        private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
+        private List<AttributeDTO> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
         {
             var modifiedExpression = mergedCriteriaExpression
                     .Replace("[", "")
@@ -584,24 +584,17 @@ namespace BridgeCareCore.Services
             var pattern = "\\[[^\\]]*\\]";
             var rg = new Regex(pattern);
             var match = rg.Matches(mergedCriteriaExpression);
-            var hashMatch = new HashSet<string>();
+            var hashMatch = new List<string>();
             foreach (Match m in match)
             {
                 hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
             }
 
-            var attributes = _unitOfWork.Context.Attribute.AsNoTracking()
-                .Where(_ => hashMatch.Contains(_.Name))
-                .Select(attribute => new AttributeEntity
-                {
-                    Id = attribute.Id,
-                    Name = attribute.Name,
-                    DataType = attribute.DataType
-                }).AsNoTracking().ToList();
+            var attributes = _unitOfWork.AttributeRepo.GetAttributesWithNames(hashMatch);
 
             attributes.ForEach(attribute =>
             {
-                compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                compiler.ParameterTypes[attribute.Name] = attribute.Type == "NUMBER"
                     ? CalculateEvaluateParameterType.Number
                     : CalculateEvaluateParameterType.Text;
             });

@@ -385,6 +385,5 @@ namespace BridgeCareCore.Services
 
             return flattenedDataTable.Select(expression).Length;
         }
-
     }
 }

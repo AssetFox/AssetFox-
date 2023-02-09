@@ -45,10 +45,6 @@ namespace BridgeCareCoreTests.Tests
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UserDtos.Admin());
 
             var mockSimulationRepo = new Mock<ISimulationRepository>();
-            mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => SimulationInTestData(_))))
-                .Returns(TestDataForCommittedProjects.TestSimulationDTO());
-            mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => !SimulationInTestData(_))))
-                .Throws<RowNotInTableException>();
             _mockUOW.Setup(_ => _.SimulationRepo).Returns(mockSimulationRepo.Object);
 
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
@@ -665,12 +661,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(allowed.Succeeded);
         }
 
-
-
         #region Helpers
-        private bool SimulationInTestData(Guid simulationId) =>
-            TestEntitiesForCommittedProjects.Simulations.Any(_ => _.Id == simulationId);
-
         private UserDTO UnauthorizedUser => new UserDTO
         {
             Username = "Nonadmin",

@@ -261,6 +261,10 @@ namespace BridgeCareCore.Services
         {
             // First, get the simulation
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
+            if (simulation == null)
+            {
+                throw new ArgumentException($"No simulation was found for the given scenario.");
+            }
             var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
             var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
 

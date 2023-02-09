@@ -79,7 +79,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<AggregatedResultDTO> GetAggregatedResultsForAttributeNames(Guid networkId, List<string> attributeNames)
         {
-            return _unitOfWork.Context.AggregatedResult.Include(_ => _.MaintainableAsset)
+            return _unitOfWork.Context.AggregatedResult
+                .Include(_ => _.MaintainableAsset)
+                .Include(_ => _.Attribute)
                 .Where(_ => attributeNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == networkId)
                 .Select(e => AggregatedResultMapper.ToDto(e))
                 .AsNoTracking().AsSplitQuery().ToList();

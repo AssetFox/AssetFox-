@@ -205,23 +205,6 @@ namespace BridgeCareCore.Services
         }
 
         /**
-         * Gets SimulationEntity data for a Committed Project Import
-         */
-        private SimulationEntity GetSimulationEntityForCommittedProjectImport(Guid simulationId)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new ArgumentException($"No simulation was found for the given scenario.");
-            }
-
-            return _unitOfWork.Context.Simulation
-                .Include(_ => _.InvestmentPlan)
-                .Include(_ => _.Budgets)
-                .ThenInclude(_ => _.ScenarioBudgetAmounts)
-                .Single(_ => _.Id == simulationId);
-        }
-
-        /**
          * Gets a Dictionary of AttributeEntity Id per AttributeEntity Name
          */
         private Dictionary<string, Guid> GetAttributeIdsPerAttributeName(List<string> consequenceAttributeNames)
@@ -277,9 +260,11 @@ namespace BridgeCareCore.Services
             ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
             // First, get the simulation
-            var simulationEntity = GetSimulationEntityForCommittedProjectImport(simulationId);
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
+            var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
 
-            if (simulationEntity.InvestmentPlan == null)
+            if (investmentPlan == null)
             {
                 throw new RowNotInTableException("Simulation has no investment plan.");
             }
@@ -295,7 +280,7 @@ namespace BridgeCareCore.Services
             var end = worksheet.Dimension.End;  // Contains both column and row ends
 
             // Get the location => asset ID lookup for all maintainable assets in the network
-            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulationEntity.NetworkId);
+            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulation.NetworkId);
 
             // Get the column ID for the network's key field
             if (!headers.Contains(_networkKeyField))
@@ -360,12 +345,12 @@ namespace BridgeCareCore.Services
 
                 if (!budgetNameIsEmpty)
                 {
-                    if (simulationEntity.Budgets.All(_ => _.Name != budgetName))
+                    if (budgets.All(_ => _.Name != budgetName))
                     {
                         throw new RowNotInTableException(
                             $"Budget {budgetName} does not exist in the applied budget library.");
                     }
-                    budgetId = simulationEntity.Budgets.Single(_ => _.Name == budgetName).Id;
+                    budgetId = budgets.Single(_ => _.Name == budgetName).Id;
                 }
 
                 // This to convert the incoming string to a TreatmentCategory
@@ -383,7 +368,7 @@ namespace BridgeCareCore.Services
                 var project = new SectionCommittedProjectDTO
                 {
                     Id = Guid.NewGuid(),
-                    SimulationId = simulationEntity.Id,
+                    SimulationId = simulation.Id,
                     ScenarioBudgetId = budgetId,
                     LocationKeys = locationInformation,
                     Treatment = worksheet.GetCellValue<string>(row, _keyFields.Count + 1), // Assumes that InitialHeaders stays constant
@@ -416,19 +401,19 @@ namespace BridgeCareCore.Services
 
             // Apply required no treatment entries if required by the user
             if (applyNoTreatment && projectsPerLocationIdentifierAndYearTuple.Keys.Any(_ =>
-                _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod))
+                _.Item2 > investmentPlan.FirstYearOfAnalysisPeriod))
             {
                 // Loop through committed projects that do not start in the initial year
                 // (Projects in the initial year do not require No Treatment variables)
                 var locationIdentifierAndYearTuples = projectsPerLocationIdentifierAndYearTuple.Keys
-                    .Where(_ => _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod).ToList();
+                    .Where(_ => _.Item2 > investmentPlan.FirstYearOfAnalysisPeriod).ToList();
                 locationIdentifierAndYearTuples.ForEach(locationIdentifierAndYearTuple =>
                 {
                     var project = projectsPerLocationIdentifierAndYearTuple[locationIdentifierAndYearTuple];
 
                     // Add no treatment projects for each year from the first year of the analysis to the year
                     // prior to the committed project
-                    var year = simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod;
+                    var year = investmentPlan.FirstYearOfAnalysisPeriod;
                     while (year < project.Year &&
                            !projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifierAndYearTuple.Item1,
                                year)))

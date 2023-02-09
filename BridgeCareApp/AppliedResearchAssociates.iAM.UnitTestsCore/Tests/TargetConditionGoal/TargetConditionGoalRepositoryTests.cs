@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
             var targetConditionGoal = TargetConditionGoalDtos.Dto(attribute.Name);
-            var targetConditionGoals = Lists.New(targetConditionGoal);
+            var targetConditionGoals = new List<TargetConditionGoalDTO> { targetConditionGoal };
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(targetConditionGoals, targetConditionGoalLibraryId);
             return targetConditionGoal;
         }

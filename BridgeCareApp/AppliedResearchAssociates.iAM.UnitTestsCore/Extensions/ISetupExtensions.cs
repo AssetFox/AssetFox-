@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Extensions
         public static IReturnsResult<T> ReturnsList<T, U>(this ISetup<T, List<U>> setup, params U[] listContents)
             where T : class
         {
-            var list = Lists.New(listContents);
+            var list = new List<U>(listContents);
             return setup.Returns(list);
         }
     }

@@ -496,12 +496,11 @@ namespace BridgeCareCore.Services
                 compiler = new CalculateEvaluateCompiler();
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.TreatmentCostEquationJoin.Equation.Expression, compiler);
 
-                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-                    .Where(_ => _.MaintainableAssetId == asset.Id).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
-                var latestAggResults = new List<AggregatedResultEntity>();
+                var aggResultEntities = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(asset.Id);
+                var latestAggResults = new List<AggregatedResultDTO>();
                 foreach(var attr in attributes)
                 {
-                    var attrs = aggResults.Where(_ => _.AttributeId == attr.Id).ToList();
+                    var attrs = aggResultEntities.Where(_ => _.Attribute.Id == attr.Id).ToList();
                     if (attrs.Count == 0)
                         continue;
                     var latestYear = attrs.Max(_ => _.Year);
@@ -551,13 +550,12 @@ namespace BridgeCareCore.Services
         private bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId)
         {
             var attributes = InstantiateCompilerAndGetExpressionAttributes(expression, compiler);
-
-            var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-                    .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
-            var latestAggResults = new List<AggregatedResultEntity>();
+            var attributeIds = attributes.Select(a => a.Id).ToList();
+            var aggResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(assetId);
+            var latestAggResults = new List<AggregatedResultDTO>();
             foreach (var attr in attributes)
             {
-                var attrs = aggResults.Where(_ => _.AttributeId == attr.Id).ToList();
+                var attrs = aggResults.Where(_ => _.Attribute.Id == attr.Id).ToList();
                 if (attrs.Count == 0)
                     continue;
                 var latestYear = attrs.Max(_ => _.Year);
@@ -602,11 +600,11 @@ namespace BridgeCareCore.Services
             return attributes;
         }
 
-        private void InstantiateScope(List<AggregatedResultEntity> results, CalculateEvaluateScope scope)
+        private void InstantiateScope(List<AggregatedResultDTO> results, CalculateEvaluateScope scope)
         {
             results.ForEach(_ =>
             {
-                if (_.Attribute.DataType == "NUMBER")
+                if (_.Attribute.Type == "NUMBER")
                 {
                     scope.SetNumber(_.Attribute.Name, _.NumericValue.Value);
                 }

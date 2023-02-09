@@ -30,6 +30,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static Guid FourYearSimulationId => Guid.Parse("4cdacfde-02da-4109-b8aa-add932756dee");
 
+        public static Guid NoCommitSimulationId => Guid.Parse("dae1c62c-adba-4510-bfe5-61260c49ec99");
+
         public static Guid NoTreatmentId => Guid.Parse("00dacfde-02da-4109-b8aa-add932756dee");
 
         public static Guid CostId => Guid.Parse("100dacfe-02da-4109-b8aa-add932756dee");
@@ -45,53 +47,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return result;
         }
 
-        public static List<ScenarioSelectableTreatmentEntity> FourYearScenarioNoTreatmentEntities()
-        {
-            var entity = FourYearScenarioNoTreatment();
-            var list = new List<ScenarioSelectableTreatmentEntity> { entity };
-            return list;
-        }
-
-        public static ScenarioSelectableTreatmentEntity FourYearScenarioNoTreatment()
-        {
-
-
-            var equation = new EquationEntity
-            {
-                Expression = "100",
-            };
-            var equationJoin = new ScenarioTreatmentCostEquationEntity
-            {
-                Equation = equation,
-                ScenarioTreatmentCostId = NoTreatmentId,
-            };
-            var scenarioTreatmentCost = new ScenarioTreatmentCostEntity
-            {
-                Id = CostId,
-                ScenarioTreatmentCostEquationJoin = equationJoin,
-                ScenarioSelectableTreatmentId = NoTreatmentId,
-            };
-            var costs = new List<ScenarioTreatmentCostEntity> { scenarioTreatmentCost };
-            var consequences = new List<ScenarioConditionalTreatmentConsequenceEntity>();
-            var budgets = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>();
-            var treatmentJoin = new CriterionLibraryScenarioSelectableTreatmentEntity
-            {
-
-            };
-            var entity = new ScenarioSelectableTreatmentEntity
-            {
-                Id = NoTreatmentId,
-                ScenarioTreatmentCosts = costs,
-                Description = "No Treatment",
-                Name = "No Treatment",
-                SimulationId = FourYearSimulationId,
-                ScenarioTreatmentConsequences = consequences,
-                ScenarioSelectableTreatmentScenarioBudgetJoins = budgets,
-                CriterionLibraryScenarioSelectableTreatmentJoin = null,
-            };
-            return entity;
-        }
-
         public static List<SimulationDTO> AuthorizedSimulationDTOs()
         {
             var authorizedUserDto = new SimulationUserDTO
@@ -101,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 IsOwner = true,
                 CanModify = true
             };
-            var result = Simulations.Select(_ => _.ToDto(new UserEntity() { Id = authorizedUserDto.UserId, Username = authorizedUserDto.Username })).ToList();
+            var result = TestEntitiesForCommittedProjects.Simulations.Select(_ => _.ToDto(new UserEntity() { Id = authorizedUserDto.UserId, Username = authorizedUserDto.Username })).ToList();
             foreach (var simulation in result)
             {
                 simulation.Users.Add(authorizedUserDto);
@@ -346,7 +301,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             // Avoiding the use of the mapper here as that is not what we are tesitng
             var result = new List<BudgetDTO>();
-            foreach (var budget in ScenarioBudgetEntities)
+            foreach (var budget in TestEntitiesForCommittedProjects.ScenarioBudgetEntities)
             {
                 var budgetAmounts = new List<BudgetAmountDTO>();
                 foreach (var amount in budget.ScenarioBudgetAmounts)

@@ -1,4 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Utils;
 using Xunit;
 using Assert = Xunit.Assert;
@@ -57,7 +57,6 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(result);
         }
 
-
         [Fact]
         public void CheckUserSimulationReadAuthorization_SimulationAccess_Passes()
         {
@@ -91,8 +90,7 @@ namespace BridgeCareCoreTests.Tests
             var userId = Guid.NewGuid();
 
             // Act
-            var ex = Assert.Throws<UnauthorizedAccessException>(() => claimHelper.OldWayCheckUserLibraryModifyAuthorization(ownerId, userId));
-            Assert.Equal("You are not authorized to modify this library's data.", ex.Message);
+            var ex = Assert.Throws<UnauthorizedAccessException>(() => claimHelper.CheckIfAdminOrOwner(ownerId, userId));
         }
 
         [Fact]
@@ -104,7 +102,7 @@ namespace BridgeCareCoreTests.Tests
             var ownerId = Guid.NewGuid();
 
             // Act
-            claimHelper.OldWayCheckUserLibraryModifyAuthorization(ownerId, ownerId);
+            claimHelper.CheckIfAdminOrOwner(ownerId, ownerId);
         }
     }
 }

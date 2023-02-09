@@ -15,7 +15,7 @@ namespace BridgeCareCore.Utils.Interfaces
 
         public bool RequirePermittedCheck();
 
-        public void OldWayCheckUserLibraryModifyAuthorization(Guid owner, Guid userId);
+        public void CheckIfAdminOrOwner(Guid owner, Guid userId);
         public void CheckUserLibraryDeleteAuthorization(LibraryUserAccessModel libraryAccess, Guid userId);
         public void CheckUserLibraryRecreateAuthorization(LibraryUserAccessModel accessModel, Guid userId);
         bool CanModifyAccessLevels(LibraryUserAccessModel accessModel, Guid userId);

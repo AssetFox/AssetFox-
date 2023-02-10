@@ -161,7 +161,7 @@ namespace BridgeCareCoreTests.Tests
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 1,
                 Cost = 10000,
-                SimulationId = TestEntitiesForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,
+                SimulationId = TestDataForCommittedProjects.SimulationId,
                 LocationKeys = new Dictionary<string, string>()
                 {
                     { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },

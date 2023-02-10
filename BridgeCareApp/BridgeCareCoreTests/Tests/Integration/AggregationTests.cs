@@ -14,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
-namespace BridgeCareCoreTests.Tests
+namespace BridgeCareCoreTests.Tests.Integration
 {
     public class AggregationTests
     {

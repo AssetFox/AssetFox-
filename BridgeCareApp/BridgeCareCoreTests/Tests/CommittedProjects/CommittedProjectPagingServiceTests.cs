@@ -222,7 +222,7 @@ namespace BridgeCareCoreTests.Tests
             var updateRow = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioTreatmentId1);
             updateRow.Treatment = "updated treatment";
             sectionCommittedProject1.Treatment = "Simple";
-            sectionCommittedProject2.Treatment = "Complicated";
+            sectionCommittedProject2.Treatment = "Z Complicated";
             sectionCommittedProject3.Treatment = "Simple";
             sectionCommittedProject1.LocationKeys["BRKEY_"] = "1";
             sectionCommittedProject2.LocationKeys["BRKEY_"] = "2";
@@ -242,7 +242,7 @@ namespace BridgeCareCoreTests.Tests
                     UpdateRows = new List<SectionCommittedProjectDTO> { updateRow }
                 },
                 search = "",
-                sortColumn = ""
+                sortColumn = "treatment"
             };
 
             var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);

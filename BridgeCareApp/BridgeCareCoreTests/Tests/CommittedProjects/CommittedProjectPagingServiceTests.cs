@@ -19,6 +19,7 @@ namespace BridgeCareCoreTests.Tests
         private Mock<IAMContext> _mockedContext;
         private Mock<ISimulationRepository> _mockedSimulationRepo;
         private Mock<ICommittedProjectRepository> _mockCommittedProjectRepo;
+        private Mock<IBudgetRepository> _mockBudgetRepository;
 
         public const string Reason = "PagingServiceTests pushed to new work item";
         public CommittedProjectPagingServiceTests()
@@ -53,9 +54,9 @@ namespace BridgeCareCoreTests.Tests
                 .Returns(TestDataForCommittedProjects.MaintainableAssets);
             mockedTestUOW.Setup(_ => _.MaintainableAssetRepo).Returns(mockMaintainableAssetRepository.Object);
 
-            var mockBudgetRepository = new Mock<IBudgetRepository>();
-            mockBudgetRepository.Setup(_ => _.GetScenarioBudgets(It.IsAny<Guid>())).Returns(TestDataForCommittedProjects.ScenarioBudgets);
-            mockedTestUOW.Setup(_ => _.BudgetRepo).Returns(mockBudgetRepository.Object);
+            _mockBudgetRepository = new Mock<IBudgetRepository>();
+            _mockBudgetRepository.Setup(_ => _.GetScenarioBudgets(It.IsAny<Guid>())).Returns(TestDataForCommittedProjects.ScenarioBudgets);
+            mockedTestUOW.Setup(_ => _.BudgetRepo).Returns(_mockBudgetRepository.Object);
 
             mockedTestUOW.Setup(_ => _.Context).Returns(_mockedContext.Object);
             _testUOW = mockedTestUOW.Object;
@@ -103,6 +104,8 @@ namespace BridgeCareCoreTests.Tests
                 search = "",
                 sortColumn = "treatment"
             };
+            
+            
 
             var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
             var sorted = TestDataForCommittedProjects.ValidCommittedProjects.OrderBy(_ => _.Treatment).ToList();
@@ -127,6 +130,18 @@ namespace BridgeCareCoreTests.Tests
                 search = "Simple",
                 sortColumn = ""
             };
+            var dictionary = new Dictionary<Guid, string>
+            {
+                {
+                    Guid.Parse("4dcf6bbc-d135-458c-a6fc-db9bb0801bfd"), "Interstate"
+                },
+                {
+                    Guid.Parse("93d59432-c9e5-4a4a-8f1b-d18dcfc0524d"),
+                    "Local"
+                }
+            };
+            _mockBudgetRepository.Setup(b => b.GetScenarioBudgetDictionary(It.Is<List<Guid>>(list => list.Count == 2)))
+                .Returns(dictionary);
 
             var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
 

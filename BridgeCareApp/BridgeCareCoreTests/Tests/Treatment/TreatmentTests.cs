@@ -163,12 +163,15 @@ namespace BridgeCareCoreTests.Tests
             var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
             var controller = TestTreatmentControllerSetup.Create(unitOfWork);
+            var libraryId = Guid.NewGuid();
 
             // Act
-            var result = await controller.DeleteTreatmentLibrary(Guid.Empty);
+            var result = await controller.DeleteTreatmentLibrary(libraryId);
 
             // Assert
             ActionResultAssertions.Ok(result);
+            var deleteInvocation = treatmentRepo.SingleInvocationWithName(nameof(ISelectableTreatmentRepository.DeleteTreatmentLibrary));
+            Assert.Equal(libraryId, deleteInvocation.Arguments[0]);
         }
 
         [Fact]
@@ -326,29 +329,6 @@ namespace BridgeCareCoreTests.Tests
             var call = pagingService.SingleInvocationWithName(nameof(ITreatmentPagingService.GetSyncedScenarioDataSet));
             Assert.Equal(simulationId, call.Arguments[0]);
             Assert.Equal(sync, call.Arguments[1]);
-        }
-
-        [Fact]
-        public async Task ShouldDeleteLibraryData()
-        {
-            //// Arrange
-            //Setup();
-            //var controller = CreateAuthorizedController();
-            //CreateLibraryTestData();
-
-            //// Act
-            //var result = await controller.DeleteTreatmentLibrary(_testTreatmentLibrary.Id);
-
-            //// Assert
-            //Assert.IsType<OkResult>(result);
-
-            //Assert.True(
-            //    !TestHelper.UnitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == _testTreatmentLibrary.Id));
-            //Assert.True(!TestHelper.UnitOfWork.Context.SelectableTreatment.Any(_ => _.Id == _testTreatment.Id));
-            //Assert.True(!TestHelper.UnitOfWork.Context.TreatmentCost.Any(_ => _.Id == _testTreatmentCost.Id));
-            //Assert.True(
-            //    !TestHelper.UnitOfWork.Context.TreatmentConsequence.Any(_ =>
-            //        _.Id == _testTreatmentConsequence.Id));
         }
     }
 }

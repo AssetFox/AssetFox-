@@ -9,12 +9,13 @@ namespace BridgeCareCoreTests.Tests
 {
     public static class CalculatedAttributeDtos
     {
-        public static CalculatedAttributeDTO ForAttribute(AttributeDTO attribute, Guid? id = null)
+        public static CalculatedAttributeDTO ForAttribute(AttributeDTO attribute, Guid? id = null, Guid? equationCriterionPairId = null)
         {
             var resolveId = id ?? Guid.NewGuid();
+            var resolveEquationCriterionPairId = equationCriterionPairId ?? Guid.NewGuid(); ;
             var equation = new CalculatedAttributeEquationCriteriaPairDTO
             {
-                Id = Guid.NewGuid(),
+                Id = resolveEquationCriterionPairId,
                 Equation = EquationDtos.AgePlus1(),
             };
             var equations = new List<CalculatedAttributeEquationCriteriaPairDTO> { equation };

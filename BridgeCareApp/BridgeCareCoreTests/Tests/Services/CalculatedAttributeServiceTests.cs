@@ -59,29 +59,29 @@ namespace BridgeCareCoreTests.Tests
         public const string Reason = "Delaying these until I test paging services";
 
         [Fact]
-        public void GetLibraryCalculatedAttributePageTest()
+        public void GetScenarioPage_DefaultEquationIdHasExpectedValue()
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var attribute = AttributeDtos.Age;
             var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
             attributeRepo.Setup(a => a.GetSingleById(attribute.Id)).Returns(attribute);
             var calculatedAttributeRepo = CalculatedAttributeRepositoryMocks.New(unitOfWork);
-            var newLibraryId = Guid.NewGuid();
-            var calculatedAttribute = CalculatedAttributeDtos.ForAttribute(attribute);
-            calculatedAttributeRepo.Setup(c => c.GetLibraryCalulatedAttributesByLibraryAndAttributeId(newLibraryId, attribute.Id)).Returns(calculatedAttribute));
+            var libraryId = Guid.NewGuid();
+            var calculatedAttributeId = Guid.NewGuid();
+            var calculatedAttributeEquationCriterionId = Guid.NewGuid();
+            var calculatedAttribute = CalculatedAttributeDtos.ForAttribute(attribute, calculatedAttributeId, calculatedAttributeEquationCriterionId);
+            var equation = calculatedAttribute.Equations.FirstOrDefault();
+            calculatedAttributeRepo.Setup(c => c.GetLibraryCalulatedAttributesByLibraryAndAttributeId(libraryId, attribute.Id)).Returns(calculatedAttribute);
             var service = new CalculatedAttributePagingService(unitOfWork.Object);
-            var libraryId = TestDataForCalculatedAttributesRepository.GetLibraryRepo().First(_ => _.Name == "First").Id;
             var request = new CalculatedAttributePagingRequestModel()
             {
-                AttributeId = TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Id,
+                AttributeId = attribute.Id,
                 SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() }
             };
 
             var result = service.GetScenarioPage(libraryId, request) as CalculcatedAttributePagingPageModel;
 
-            var pairIds = _testLibraryCalcAttributes.First(_ => _.Attribute ==
-            TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Name).Equations.Select(_ => _.Id).ToList();
-            Assert.True(pairIds.First() == result.DefaultEquation.Id);
+            Assert.Equal(calculatedAttributeEquationCriterionId, result.DefaultEquation.Id);
         }
 
         [Fact]

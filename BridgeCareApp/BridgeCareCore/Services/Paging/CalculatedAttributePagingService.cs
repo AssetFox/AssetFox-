@@ -13,8 +13,8 @@ namespace BridgeCareCore.Services
 {
     public class CalculatedAttributePagingService : ICalculatedAttributePagingService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public CalculatedAttributePagingService(UnitOfDataPersistenceWork unitOfWork)
+        private readonly IUnitOfWork _unitOfWork;
+        public CalculatedAttributePagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }

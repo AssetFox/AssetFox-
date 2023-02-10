@@ -22,10 +22,7 @@ namespace BridgeCareCoreTests.Tests
     public class CalculatedAttributeServiceTests
     {
         private UnitOfDataPersistenceWork _testRepo;
-        private UnitOfDataPersistenceWork _emptyTestRepo;
-        private UnitOfDataPersistenceWork _isCalcualtedTestRepo;
         private Mock<IAMContext> _mockedContext;
-        private Mock<IAMContext> _emptyMockedContext;
         private Mock<DbSet<CalculatedAttributeLibraryEntity>> _mockLibrary;
         private Mock<DbSet<CalculatedAttributeEntity>> _mockLibrarycalcAttr;
         private Mock<DbSet<ScenarioCalculatedAttributeEntity>> _mockScenarioCalculations;

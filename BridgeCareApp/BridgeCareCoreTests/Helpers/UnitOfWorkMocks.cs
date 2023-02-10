@@ -16,10 +16,18 @@ namespace BridgeCareCoreTests.Helpers
             var unitOfWork = new Mock<IUnitOfWork>();
             return unitOfWork;
         }
+        public static Mock<IUnitOfWork> EveryoneExists()
+        {
+            var mock = New();
+            UserRepositoryMocks.EveryoneExists(mock);
+            return mock;
+        }
         public static Mock<IUnitOfWork> WithCurrentUser(UserDTO user)
         {
             var unitOfWork = New();
             unitOfWork.Setup(u => u.CurrentUser).Returns(user);
+            var userRepository = UserRepositoryMocks.UserExists(user.Username);
+            unitOfWork.Setup(u => u.UserRepo).Returns(userRepository.Object);
             return unitOfWork;
         }
     }

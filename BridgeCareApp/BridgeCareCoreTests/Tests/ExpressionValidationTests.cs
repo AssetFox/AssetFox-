@@ -1,106 +1,40 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.CalculateEvaluate;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Services;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
     public class ExpressionValidationTests
     {
-        private static readonly Guid MaintainableAssetId = Guid.Parse("04580d3b-d99a-45f6-b854-adaa3f78910d");
-        private static readonly Guid MaintainableAssetLocationId = Guid.Parse("14580d3b-d99a-45f6-b854-adaa3f78910d");
-
-        private ExpressionValidationService CreateValidationService()
+        private ExpressionValidationService CreateValidationService(Mock<IUnitOfWork> unitOfWork)
         {
-            var service = new ExpressionValidationService(TestHelper.UnitOfWork, new LogNLog());
-            return service;
+            var log = new LogNLog();
+            return new ExpressionValidationService(unitOfWork.Object, log);
         }
 
-        private ExpressionValidationController SetupController()
+        private ExpressionValidationController CreateController(Mock<IUnitOfWork> unitOfWork)
         {
-            var unitOfWork = TestHelper.UnitOfWork;
-            AttributeTestSetup.CreateAttributes(unitOfWork);
-            NetworkTestSetup.CreateNetwork(unitOfWork);
-            AddTestData();
-            var service = CreateValidationService();
+            var service = CreateValidationService(unitOfWork);
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new ExpressionValidationController(service, EsecSecurityMocks.Admin, unitOfWork,
+            var controller = new ExpressionValidationController(
+                service,
+                EsecSecurityMocks.Admin,
+                unitOfWork.Object,
                 hubService,
                 accessor);
             return controller;
-        }
-
-        private MaintainableAssetEntity TestMaintainableAsset { get; } =
-            new MaintainableAssetEntity
-            {
-                Id = MaintainableAssetId,
-                MaintainableAssetLocation = new MaintainableAssetLocationEntity
-                {
-                    Id = MaintainableAssetLocationId,
-                    LocationIdentifier = "TestLocationIdentifier2",
-                    Discriminator = DataPersistenceConstants.SectionLocation,
-                    MaintainableAssetId = MaintainableAssetId,
-                }
-            };
-
-        private AggregatedResultEntity TestNumericAggregatedResult { get; } = new AggregatedResultEntity
-        {
-            Id = Guid.NewGuid(),
-            MaintainableAssetId = MaintainableAssetId,
-            Discriminator = DataPersistenceConstants.AggregatedResultNumericDiscriminator,
-            NumericValue = 1
-        };
-
-        private AggregatedResultEntity TestTextAggregatedResult { get; } = new AggregatedResultEntity
-        {
-            Id = Guid.NewGuid(),
-            MaintainableAssetId = MaintainableAssetId,
-            Discriminator = DataPersistenceConstants.AggregatedResultTextDiscriminator,
-            TextValue = "test"
-        };
-
-        private static bool TestDataHaveBeenAdded = false;
-        private static object TestDataLock = new object();
-
-        private void AddTestData()
-        {
-            if (!TestDataHaveBeenAdded)
-            {
-                lock (TestDataLock)
-                {
-                    if (!TestDataHaveBeenAdded)
-                    {
-                        TestDataHaveBeenAdded = true;
-                        var culvAttribute = AttributeDtos.CulvDurationN;
-                        var actionTypeAttribute = AttributeDtos.ActionType;
-                        TestMaintainableAsset.NetworkId = NetworkTestSetup.NetworkId;
-                        TestHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
-                        TestNumericAggregatedResult.AttributeId = AttributeDtos.CulvDurationN.Id;
-                        TestTextAggregatedResult.AttributeId = AttributeDtos.ActionType.Id;
-                        TestHelper.UnitOfWork.Context.AddAll(new List<AggregatedResultEntity>
-                        {
-                            TestNumericAggregatedResult, TestTextAggregatedResult
-                        });
-                    }
-                }
-            }
         }
 
         public static IEnumerable<object[]> GetInvalidPiecewiseEquationValidationData()
@@ -190,9 +124,10 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnEquationPost()
+        public async Task ValidateEquation_OkObjectResult()
         {
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = CreateController(unitOfWork);
             // Arrange
             var model = new EquationValidationParameters
             {
@@ -205,14 +140,15 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.GetEquationValidationResult(model);
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            ActionResultAssertions.OkObject(result);
         }
 
         [Fact]
-        public async Task ShouldValidateEquation()
+        public async Task ValidateValidEquation_Success()
         {
             // Arrange
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = CreateController(unitOfWork);
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
@@ -224,17 +160,24 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.GetEquationValidationResult(model);
 
             // Assert
-            var validationResult = (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
-                typeof(ValidationResult));
+            var value = ActionResultAssertions.OkObject(result);
+            var validationResult = value as ValidationResult;
             Assert.True(validationResult.IsValid);
             Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
         [Fact]
-        public async Task ShouldValidateNonPiecewiseEquation()
+        public async Task ValidateValidNonPiecewiseEquation_Valid()
         {
             // Arrange
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var attributes = new List<AttributeDTO>
+            {
+                AbbreviatedAttributeDtos.CulvDurationN,
+            };
+            attributeRepo.Setup(r => r.GetAllAttributesAbbreviated()).Returns(attributes);
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
@@ -248,25 +191,37 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var validationResult = (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
                 typeof(ValidationResult));
-            if (!validationResult.IsValid)
-            {
-                // Occasional test failure here. A breakpoint may hopefully catch it in the act someday.
-                Assert.Equal("dummy assert to print the message", AttributeDtos.CulvDurationN.Name + " " + validationResult.ValidationMessage);
-                Assert.True(validationResult.IsValid);
-            }
+            Assert.True(validationResult.IsValid);
             Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
         [Fact]
-        public async Task ShouldValidateCriterion()
+        public async Task ValidateValidCriterion_Valid()
         {
             // Arrange
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
+            var aggregatedResultRepo = AggregatedResultRepositoryMocks.New(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var attributes = new List<AttributeDTO>
+            {
+                AbbreviatedAttributeDtos.ActionType,
+                AbbreviatedAttributeDtos.CulvDurationN,
+            };
+            var assetId = Guid.NewGuid();
+            var aggregatedResult1 = AggregatedResultDtos.Text(AbbreviatedAttributeDtos.ActionType, assetId, "test");
+            var aggregatedResult2 = AggregatedResultDtos.Number(AbbreviatedAttributeDtos.CulvDurationN, assetId, 1);
+            var aggregatedResults = new List<AggregatedResultDTO> { aggregatedResult1, aggregatedResult2 };
+            var networkId = Guid.NewGuid();
+            aggregatedResultRepo.Setup(a => a.GetAggregatedResultsForAttributeNames(networkId, It.Is<List<string>>(list => list.Count() == 2 && list.Contains(TestAttributeNames.CulvDurationN) && list.Contains(TestAttributeNames.ActionType)))).Returns(aggregatedResults);
+            attributeRepo.Setup(r => r.GetAllAttributesAbbreviated()).Returns(attributes);
+            attributeRepo.Setup(r => r.GetAttributesWithNames(It.Is<List<string>>(list => list.Count() == 2
+            && list.Contains(TestAttributeNames.CulvDurationN) && list.Contains(TestAttributeNames.ActionType)))).Returns(attributes);
             var model = new ValidationParameter
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
                 Expression = $"[{AttributeDtos.CulvDurationN.Name}]='1' AND [{AttributeDtos.ActionType.Name}]='test'",
-                NetworkId = NetworkTestSetup.NetworkId,
+                NetworkId = networkId,
             };
 
             // Act
@@ -282,36 +237,45 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public void ShouldInvalidatePiecewiseEquations()
+        public void ValidateInvalidPiecewiseEquation_NotValid()
         {
             // Act + Assert
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = CreateController(unitOfWork);
             var invalidPiecewiseEquationValidationData = GetInvalidPiecewiseEquationValidationData().ToList();
 
             foreach (var testDataSet in invalidPiecewiseEquationValidationData)
             {
-                var result = controller.GetEquationValidationResult(testDataSet[0] as EquationValidationParameters);
+                var invalidEquation = testDataSet[0] as EquationValidationParameters;
+                var result = controller.GetEquationValidationResult(invalidEquation);
                 var objectResult = (OkObjectResult)result.Result;
                 var actualValidationResult = (ValidationResult)objectResult.Value;
                 var expectedValidationResult = testDataSet[1] as ValidationResult;
-
+                ObjectAssertions.Equivalent(expectedValidationResult, actualValidationResult);  
                 Assert.Equal(expectedValidationResult.IsValid, actualValidationResult.IsValid);
                 Assert.Equal(expectedValidationResult.ValidationMessage, actualValidationResult.ValidationMessage);
             };
         }
 
         [Fact]
-        public async Task ShouldInvalidateNonPiecewiseEquation()
+        public async Task ValidateInvalidNonPiecewiseEquation_NotValid ()
         {
             // Arrange
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = CreateController(unitOfWork);
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
                 Expression = "[FALSE_ATTRIBUTE]",
                 IsPiecewise = false
             };
-
+            var attributes = new List<AttributeDTO>
+            {
+                AbbreviatedAttributeDtos.ActionType,
+                AbbreviatedAttributeDtos.CulvDurationN,
+            };
+            var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
+            attributeRepo.Setup(a => a.GetAllAttributesAbbreviated()).Returns(attributes);
             // Act
             var result = await controller.GetEquationValidationResult(model);
 
@@ -327,23 +291,39 @@ namespace BridgeCareCoreTests.Tests
         public void ValidateEmptyEquation_Invalid()
         {
             // Arrange
-            var service = CreateValidationService();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var attributes = new List<AttributeDTO>
+            {
+                AbbreviatedAttributeDtos.ActionType,
+                AbbreviatedAttributeDtos.CulvDurationN,
+            };
+            var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
+            attributeRepo.Setup(a => a.GetAllAttributesAbbreviated()).Returns(attributes);
+            var service = CreateValidationService(unitOfWork);
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
                 Expression = "",
                 IsPiecewise = false
             };
-
+            // Act
             var result = service.ValidateEquation(model);
-            // Act + Assert
+            // Assert
             Assert.False(result.IsValid);
         }
 
         [Fact]
-        public async Task ShouldInvalidateCriteria()
+        public async Task ValidateInvalidCriterion_NotValid()
         {
-            var controller = SetupController();
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var attributes = new List<AttributeDTO>
+            {
+                AbbreviatedAttributeDtos.ActionType,
+                AbbreviatedAttributeDtos.CulvDurationN,
+            };
+            var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
+            attributeRepo.Setup(a => a.GetAllAttributesAbbreviated()).Returns(attributes);
+            var controller = CreateController(unitOfWork);
             var invalid = GetInvalidCriterionValidationData().ToList();
             foreach (var testDataSet in invalid)
             {
@@ -357,29 +337,55 @@ namespace BridgeCareCoreTests.Tests
 
                 var expectedValidationResult = testDataSet[1] as CriterionValidationResult;
 
-                Assert.Equal(expectedValidationResult.IsValid, actualValidationResult.IsValid);
-                Assert.Equal(expectedValidationResult.ResultsCount, actualValidationResult.ResultsCount);
-                Assert.Equal(expectedValidationResult.ValidationMessage, actualValidationResult.ValidationMessage);
+                ObjectAssertions.Equivalent(expectedValidationResult, actualValidationResult);
             }
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnCriterionPost()
+        public async Task ValidateValidCriterionViaController_Valid()
         {
-            // Arrange   
-            var controller = SetupController();
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
+            var aggregatedResultRepo = AggregatedResultRepositoryMocks.New(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var attributes = new List<AttributeDTO>
+            {
+                AbbreviatedAttributeDtos.ActionType,
+                AbbreviatedAttributeDtos.CulvDurationN,
+            };
+            var culvDurationAttributes = new List<AttributeDTO>
+            {
+                AbbreviatedAttributeDtos.CulvDurationN
+            };
+            var assetId = Guid.NewGuid();
+            var aggregatedResult2 = AggregatedResultDtos.Number(AbbreviatedAttributeDtos.CulvDurationN, assetId, 1);
+            var aggregatedResults = new List<AggregatedResultDTO> { aggregatedResult2 };
+            var networkId = Guid.NewGuid();
+            aggregatedResultRepo.Setup(a => a.GetAggregatedResultsForAttributeNames(networkId, It.Is<List<string>>(list => list.Count() == 1
+            && list.Contains(TestAttributeNames.CulvDurationN)))).Returns(aggregatedResults);
+            attributeRepo.Setup(r => r.GetAllAttributesAbbreviated()).Returns(attributes);
+            attributeRepo.Setup(r => r.GetAttributesWithNames(It.Is<List<string>>(list => list.Count() == 1
+            && list.Contains(TestAttributeNames.CulvDurationN)))).Returns(culvDurationAttributes);
+
             var model = new ValidationParameter
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
                 Expression = $"[{AttributeDtos.CulvDurationN.Name}]='1'",
-                NetworkId = NetworkTestSetup.NetworkId,
+                NetworkId = networkId,
             };
 
             // Act
             var result = await controller.GetCriterionValidationResult(model);
-
+            var expected = new CriterionValidationResult
+            {
+                IsValid = true,
+                ValidationMessage = "Success",
+                ResultsCount = 1,
+            };
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            var value = ActionResultAssertions.OkObject(result);
+            ObjectAssertions.Equivalent(expected, value);
         }
     }
 }

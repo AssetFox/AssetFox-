@@ -17,7 +17,7 @@ namespace BridgeCareCore.Controllers
     public class CriterionLibraryController : BridgeCareCoreBaseController
     {
         public const string CriterionLibraryError = "Criterion Library Error";
-        public CriterionLibraryController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+        public CriterionLibraryController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
         [HttpGet]

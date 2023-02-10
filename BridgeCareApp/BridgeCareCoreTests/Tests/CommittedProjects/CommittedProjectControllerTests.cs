@@ -42,7 +42,7 @@ namespace BridgeCareCoreTests.Tests
             _mockUOW = new Mock<IUnitOfWork>();
             // This is the DEFAULT current user (a user in the admin role)
             // It MUST be changed if testing for an unauthorized user.
-            _mockUOW.Setup(_ => _.CurrentUser).Returns(AdminUser);
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UserDtos.Admin());
 
             var mockSimulationRepo = new Mock<ISimulationRepository>();
             mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => SimulationInTestData(_))))
@@ -54,8 +54,7 @@ namespace BridgeCareCoreTests.Tests
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
             _mockUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
-            var mockUserRepo = UserRepositoryMocks.EveryoneExists();
-            _mockUOW.Setup(_ => _.UserRepo).Returns(mockUserRepo.Object);
+            var mockUserRepo = UserRepositoryMocks.EveryoneExists(_mockUOW);
 
             _mockService = new Mock<ICommittedProjectService>();
             _mockService.Setup(_ => _.ExportCommittedProjectsFile(It.IsAny<Guid>()))
@@ -64,15 +63,9 @@ namespace BridgeCareCoreTests.Tests
         }
         public CommittedProjectController CreateTestController(List<string> userClaims)
         {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 _mockPagingService.Object,
@@ -677,13 +670,6 @@ namespace BridgeCareCoreTests.Tests
         #region Helpers
         private bool SimulationInTestData(Guid simulationId) =>
             TestDataForCommittedProjects.Simulations.Any(_ => _.Id == simulationId);
-
-        private UserDTO AdminUser => new UserDTO
-        {
-            Username = "Admin",
-            HasInventoryAccess = true,
-            Id = TestDataForCommittedProjects.AuthorizedUser
-        };
 
         private UserDTO UnauthorizedUser => new UserDTO
         {

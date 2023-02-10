@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Utils;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,15 +20,9 @@ namespace BridgeCareCoreTests.Tests
     {
         private UserCriteriaController CreateTestController(List<string> userClaims)
         {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
             var controller = new UserCriteriaController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork, hubService, accessor);
             controller.ControllerContext = new ControllerContext()
             {

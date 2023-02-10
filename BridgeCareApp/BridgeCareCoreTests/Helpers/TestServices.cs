@@ -34,7 +34,7 @@ namespace BridgeCareCoreTests
             var service = new PerformanceCurvesService(unitOfWork, hubService, expressionValidation);
             return service;
         }
-        public static ExcelRawDataImportService CreateExcelSpreadsheetImportService(UnitOfDataPersistenceWork unitOfWork)
+        public static ExcelRawDataImportService CreateExcelSpreadsheetImportService(IUnitOfWork unitOfWork)
         {
             var returnValue = new ExcelRawDataImportService(unitOfWork);
             return returnValue;

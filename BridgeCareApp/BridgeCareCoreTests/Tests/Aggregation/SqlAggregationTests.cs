@@ -23,7 +23,7 @@ namespace BridgeCareCoreTests.Tests
 {
     public class SqlAggregationTests
     {
-        [Fact]
+        [Fact (Skip ="WJ is skeptical that he can remove the database from this one")]
         public async Task Aggregate_SqlDataSourceInDb_AttributesInDb_Aggregates()
         {
             var config = TestConfiguration.Get();

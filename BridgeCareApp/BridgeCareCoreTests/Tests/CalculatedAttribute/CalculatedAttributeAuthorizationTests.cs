@@ -17,31 +17,8 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class CalculatedAttributesTests
-   {
-        private CalculatedAttributesController CreateTestController(List<string> userClaims)
-        {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var unitOfWork = UnitOfWorkMocks.New();
-            var userRepo = UserRepositoryMocks.EveryoneExists();
-            unitOfWork.Setup(u => u.UserRepo).Returns(userRepo.Object);
-            var controller = new CalculatedAttributesController(EsecSecurityMocks.DbeMock.Object,
-                unitOfWork.Object, hubService, accessor, null);
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = testUser }
-            };
-            return controller;
-        }
-
+    public class CalculatedAttributeAuthorizationTests
+    {
         [Fact]
         public async Task UserIsModifyCalculatedAttributesFromScenarioAuthorized()
         {
@@ -58,12 +35,14 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly }));
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly });
+            var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCalculatedAttributesFromScenario);
+            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ModifyCalculatedAttributesFromScenario);
             // Assert
             Assert.False(allowed.Succeeded);
         }
+
         [Fact]
         public async Task UserIsModifyCalculatedAttributesFromLibraryAuthorized()
         {
@@ -80,12 +59,14 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator });
+            var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCalculatedAttributesFromLibrary);
+            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ModifyCalculatedAttributesFromLibrary);
             // Assert
             Assert.True(allowed.Succeeded);
         }
+
         [Fact]
         public async Task UserIsModifyCalculatedAttributesFromScenarioAuthorized_B2C()
         {
@@ -101,9 +82,10 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator });
+            var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCalculatedAttributesFromScenario);
+            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ModifyCalculatedAttributesFromScenario);
             // Assert
             Assert.True(allowed.Succeeded);
         }

@@ -8,29 +8,29 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
 
         public int AnalysisYear { get; set; }
 
-        public List<double> CurrentAttributesValues { get; set; } // Calcuation for CI/value of resp benefit attr, note CI coln no.
+        public List<double> CurrentAttributesValues { get; set; }
 
-        public List<decimal> BudgetLevels { get; set; } // TODO check later if double stored in budgetlevel values
+        public List<decimal> BudgetLevels { get; set; }
 
         public List<DecisionTreatment> DecisionsTreatments { get; set; }
     }
 
     public class DecisionTreatment
     {
-        public bool Feasiable { get; set; }
+        public string Feasiable { get; set; }
 
-        public double CIImprovement { get; set; } // Calculation = 10 - CI
+        public double CIImprovement { get; set; }
 
         public double Cost { get; set; }
 
         public double BCRatio { get; set; }
 
-        public bool Selected { get; set; }
+        public string Selected { get; set; }
 
         public decimal? AmountSpent { get; set; }
 
         public string BudgetsUsed { get; set; }
 
-        public string RejectionReason { get; set ; }
+        public string RejectionReason { get; set ; }        
     }
 }

@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
 
             var treatments = new List<string>();
-            treatments = simulation.Treatments?.OrderBy(_ => _.Name).Select(_ => _.Name).ToList();
+            treatments = simulation.Treatments.Where(_=>_.Name != "No Treatment")?.OrderBy(_ => _.Name).Select(_ => _.Name).ToList();
 
             // Add headers to excel
             var currentCell = AddHeadersCells(decisionsWorksheet, currentAttributes, budgets, treatments);
@@ -67,8 +67,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 var prevYearCIImprovement = CheckGetValue(initialAssetSummary.ValuePerNumericAttribute, currentAttributes.Last());
                 foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
                 {
+                    var section = year.Assets.FirstOrDefault(_ => CheckGetValue(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
+                    if (section.AppliedTreatment == "No Treatment")
+                    {
+                        continue; // TODO is this correct? skipped rows 
+                    }
+
                     // Generate data model
-                    var decisionsDataModel = GenerateDecisionsDataModel(currentAttributes, budgets, treatments, brKey, year, prevYearCIImprovement);
+                    var decisionsDataModel = GenerateDecisionsDataModel(currentAttributes, budgets, treatments, brKey, year, section, prevYearCIImprovement);
                     prevYearCIImprovement = decisionsDataModel.CurrentAttributesValues.Last();
 
                     // Fill in excel
@@ -77,15 +83,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
         }
 
-        private DecisionsDataModel GenerateDecisionsDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, double prevYearCIImprovement)
+        private DecisionsDataModel GenerateDecisionsDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section, double prevYearCIImprovement)
         {
             var decisionsDataModel = new DecisionsDataModel
             {
                 BRKey = brKey,
-                AnalysisYear = year.Year
+                AnalysisYear = year.Year,                
             };
-
-            var section = year.Assets.FirstOrDefault(_ => CheckGetValue(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
+            
+            var isCashFlowProject = section.TreatmentCause == TreatmentCause.CashFlowProject;
             // Current
             var currentAttributesValues = new List<double>();
             for (int index = 0; index < currentAttributes.Count - 1; index++)
@@ -117,24 +123,30 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
             decisionsDataModel.BudgetLevels = budgetLevels;
 
+            if (brKey == 153 && year.Year == 2022)//== 21539)// 13648) //
+            {
+
+            }
+
             // Treatments
             var decisionsTreatments = new List<DecisionTreatment>();
             foreach (var treatment in treatments)
-            {
-                // TODO check if its feasible, must have cost n b/c ratio
-                var decisionsTreatment = new DecisionTreatment();
+            {                
+                var decisionsTreatment = new DecisionTreatment();                
                 var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
-                decisionsTreatment.Feasiable = treatmentRejection != null && treatmentRejection.TreatmentRejectionReason == TreatmentRejectionReason.NotFeasible ? false : true;
+                decisionsTreatment.Feasiable = isCashFlowProject ? "-" : (treatmentRejection == null ? AuditReportConstants.Yes : AuditReportConstants.No);
                 var currentCIImprovement = Convert.ToDouble(decisionsDataModel.CurrentAttributesValues.Last());
                 decisionsTreatment.CIImprovement = Math.Abs(prevYearCIImprovement - currentCIImprovement);
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
-                decisionsTreatment.Selected = section.AppliedTreatment == treatment;
+                decisionsTreatment.Selected = isCashFlowProject ? AuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? AuditReportConstants.Yes : AuditReportConstants.No);
                 var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.BudgetUsages.Sum(_ => _.CoveredCost) : 0;
-                decisionsTreatment.BudgetsUsed = treatmentConsideration != null ? string.Join(", ", treatmentConsideration.BudgetUsages.Where(_ => _.CoveredCost > 0).Select(_ => _.BudgetName)) : string.Empty; // currently this will be single value
-                decisionsTreatment.RejectionReason = treatmentConsideration != null ? string.Join(", ", treatmentConsideration.BudgetUsages.Select(_ => _.Status).Distinct()) : string.Empty;
+                var budgetsUsed = treatmentConsideration?.BudgetUsages.Where(_ => _.CoveredCost > 0);
+                var budgetsUsedValue = budgetsUsed != null && budgetsUsed.Count() != 0 ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName)) : string.Empty; // currently this will be single value
+                decisionsTreatment.BudgetsUsed = budgetsUsedValue;
+                decisionsTreatment.RejectionReason = treatmentConsideration == null ? string.Empty : (budgetsUsed != null && budgetsUsed.Count() != 0 ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName + ": " + _.Status)) : string.Join(", ", treatmentConsideration.BudgetUsages.Select(_ => _.BudgetName + ": " + _.Status)));
 
                 decisionsTreatments.Add(decisionsTreatment);
             }
@@ -174,7 +186,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             foreach (var decisionsTreatment in decisionsDataModel.DecisionsTreatments)
             {
                 ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
-                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Feasiable ? AuditReportConstants.Yes : AuditReportConstants.No;
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Feasiable;
                 SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.CIImprovement;
                 SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
@@ -182,7 +194,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BCRatio;
                 ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
-                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Selected ? AuditReportConstants.Yes : AuditReportConstants.No;
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Selected;
                 SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.AmountSpent;
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BudgetsUsed;
@@ -298,6 +310,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             foreach (var columnNumber in columnNumbersBudgetsUsed)
             {
                 worksheet.Column(columnNumber).SetTrueWidth(25);
+                // Rejection reason
+                worksheet.Column(columnNumber + 1).SetTrueWidth(50);
+                worksheet.Column(columnNumber + 1).Style.WrapText = true;
             }
         }
     }

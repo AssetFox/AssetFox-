@@ -13,6 +13,7 @@
         public const string SubDurationN = "SUB_DURATION_N";
         public const string SubSeeded = "SUB_SEEDED";
         public const string SupDurationN = "SUP_DURATION_N";
-        public const string SupSeeded = "SUP_SEEDED";       
+        public const string SupSeeded = "SUP_SEEDED";
+        public const string CashFlow = "CF";
     }
 }

@@ -29,6 +29,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertOrDeleteScenarioBudgets(List<BudgetDTO> budgets, Guid simulationId);
 
+        /// <summary>Returned dictionary values are the names of the corresponding scenario budgets.</summary>
+        Dictionary<Guid, string> GetScenarioBudgetDictionary(List<Guid> budgetIds);
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildren();
 
         List<int> GetBudgetYearsBySimulationId(Guid simulationId);

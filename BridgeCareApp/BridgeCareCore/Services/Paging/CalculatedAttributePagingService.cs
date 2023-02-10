@@ -8,6 +8,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services.Paging.Generics;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using Newtonsoft.Json;
 
 namespace BridgeCareCore.Services
 {
@@ -28,6 +29,7 @@ namespace BridgeCareCore.Services
                 calcAttribute = addedCalc;
             else
                 calcAttribute = _unitOfWork.CalculatedAttributeRepo.GetLibraryCalulatedAttributesByLibraryAndAttributeId(libraryId, request.AttributeId);
+            var debugThis = JsonConvert.SerializeObject(calcAttribute, Formatting.Indented);
             return HandlePaging(calcAttribute, request);
         }
 

@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
+using BridgeCareCoreTests.Helpers;
 using Moq;
 using Xunit;
 
@@ -60,10 +61,16 @@ namespace BridgeCareCoreTests.Tests
             _testUOW = mockedTestUOW.Object;
         }
 
-        [Fact(Skip =Reason)]
-        public void GetCommittedProjectPageSizeOneSuccess()
+        [Fact]
+        public void GetCommittedProjectPage_PageSizeOne_ReturnsOneItem()
         {
-            var service = new CommittedProjectPagingService(_testUOW);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var sectionCommittedProjectId1 = Guid.NewGuid();
+            var sectionCommittedProjectId2 = Guid.NewGuid();
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2);
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2 };
+            var service = new CommittedProjectPagingService(unitOfWork.Object);
 
             var request = new PagingRequestModel<SectionCommittedProjectDTO>()
             {
@@ -75,18 +82,17 @@ namespace BridgeCareCoreTests.Tests
                 sortColumn = ""
             };
 
-            var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
+            var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);
 
-            Assert.Equal(3, page.TotalItems);
-            Assert.Equal(page.Items.Count ,request.RowsPerPage);
-            Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.FirstOrDefault(_ => _.Id == page.Items[0].Id) != null);
+            Assert.Equal(2, page.TotalItems);
+            Assert.Equal(page.Items.Count, request.RowsPerPage);
+            sectionCommittedProjects.Single(_ => _.Id == page.Items[0].Id);
         }
 
-        [Fact(Skip = Reason)]
+        [Fact]
         public void GetCommittedProjectPageSizetwoSortColumnTreatmentIsDescendingFalse()
         {
             var service = new CommittedProjectPagingService(_testUOW);
-
 
             var request = new PagingRequestModel<SectionCommittedProjectDTO>()
             {

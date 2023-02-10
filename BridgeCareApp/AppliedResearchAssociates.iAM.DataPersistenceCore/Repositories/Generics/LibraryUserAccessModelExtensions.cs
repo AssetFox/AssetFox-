@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
@@ -17,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
             {
                 throw new InvalidOperationException("Can't check access of nonexistent library.");
             }
-            if (accessModel.UserId != userId)
+            if (accessModel.UserId!=userId)
             {
                 throw new InvalidOperationException("Checking access for the wrong user!");
             }

@@ -79,6 +79,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<BudgetEntity> Budget { get; set; }
 
         public virtual DbSet<BudgetLibraryEntity> BudgetLibrary { get; set; }
+        public virtual DbSet<BudgetLibraryUserEntity> BudgetLibraryUser { get; set; }
 
         public virtual DbSet<BudgetAmountEntity> BudgetAmount { get; set; }
 
@@ -2539,6 +2540,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.DeficientConditionGoalLibraryUsers)
+
+
+            modelBuilder.Entity<BudgetLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.BudgetLibraryId, e.UserId });
+
+                entity.ToTable("BudgetLibrary_User");
+
+                entity.HasIndex(e => e.BudgetLibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.BudgetLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.BudgetLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.BudgetLibraryUsers)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

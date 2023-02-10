@@ -1,4 +1,8 @@
-﻿using System.Data;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
@@ -53,7 +57,7 @@ namespace BridgeCareCoreTests.Tests
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var hubService = hubServiceMock ?? HubServiceMocks.DefaultInterfaceMock();
+            var hubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
             var logger = new LogNLog();
             var service = new InvestmentBudgetsService(
                 TestHelper.UnitOfWork,
@@ -67,8 +71,11 @@ namespace BridgeCareCoreTests.Tests
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
-            var hubService = hubServiceMock ?? HubServiceMocks.DefaultInterfaceMock();
-            var controller = new InvestmentController(service, new InvestmentPagingService(TestHelper.UnitOfWork, new InvestmentDefaultDataService()), EsecSecurityMocks.Admin,
+            var hubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
+            var pagingService = new InvestmentPagingService(TestHelper.UnitOfWork, new InvestmentDefaultDataService());
+            var controller = new InvestmentController(service,
+                pagingService,
+                EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService.Object,
                 accessor,
@@ -709,7 +716,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldImportLibraryBudgetsFromFileWithExtraCriterion()
         {
             // Arrange
-            var hubService = HubServiceMocks.DefaultInterfaceMock();
+            var hubService = HubServiceMocks.DefaultMock();
             var service = Setup(hubService);
             CreateLibraryTestData();
             var accessor = CreateRequestWithLibraryFormDataWithExtraCriterion();
@@ -956,7 +963,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = 2022;
-            var hubService = HubServiceMocks.DefaultInterfaceMock();
+            var hubService = HubServiceMocks.DefaultMock();
             var service = Setup(hubService);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var accessor = CreateRequestWithScenarioFormDataWithExtraCriterion(simulation.Id);

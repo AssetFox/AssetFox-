@@ -6,16 +6,17 @@ using System.Security.Claims;
 using System.Collections.Generic;
 using BridgeCareCore.Security;
 using System;
-using BridgeCareCore.Interfaces;
-using Moq;
-
+using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
+using BridgeCareCore.Interfaces;
+using Moq;
+
 namespace BridgeCareCoreTests.Tests
 {
     public class ClaimHelperTests
     {
         private ClaimHelper _claimHelper;
         private Guid ownerId = Guid.NewGuid();
-        private Guid userId = Guid.NewGuid();
+        private Guid userId = Guid.NewGuid();
         private ISimulationQueueService _simulationQueueService = new Mock<ISimulationQueueService>().Object;
 
         [Fact]
@@ -60,7 +61,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void ShouldPassCheckUserSimulationModifyAuthorization()
         {
-            var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.AdminAccess) };
+            var claims = SystemSecurityClaimLists.Admin();
 
             // Act
             _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
@@ -75,7 +76,7 @@ namespace BridgeCareCoreTests.Tests
             // Act
             _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
 
-            var ex = Assert.Throws<UnauthorizedAccessException>(() => _claimHelper.CheckUserLibraryModifyAuthorization(ownerId, userId));
+            var ex = Assert.Throws<UnauthorizedAccessException>(() => _claimHelper.CheckIfAdminOrOwner(ownerId, userId));
             Assert.Equal("You are not authorized to modify this library's data.", ex.Message);
         }
 
@@ -87,7 +88,7 @@ namespace BridgeCareCoreTests.Tests
             // Act
             _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
             userId = ownerId;
-            _claimHelper.CheckUserLibraryModifyAuthorization(ownerId, userId);
+            _claimHelper.CheckIfAdminOrOwner(ownerId, userId);
             
         }
     }

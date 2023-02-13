@@ -147,6 +147,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
+                throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
             var defaultLibrary = _unitOfWork.Context.CalculatedAttributeLibrary.Where(_ => _.IsDefault == true)

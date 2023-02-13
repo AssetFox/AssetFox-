@@ -183,10 +183,10 @@ namespace BridgeCareCore.Controllers
                 });
 
                 return Ok(result);
-            }//
+            }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetBudgetLibraries - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetBudgetLibraries - {e.Message}");
                 throw;
             }
         }

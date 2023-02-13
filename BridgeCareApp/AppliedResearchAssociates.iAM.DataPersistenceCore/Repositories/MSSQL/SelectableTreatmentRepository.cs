@@ -18,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class SelectableTreatmentRepository : ISelectableTreatmentRepository
     {
+        public const string TreatmentLibraryNotFoundErrorMessage = "The provided treatment library was not found";
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public SelectableTreatmentRepository(UnitOfDataPersistenceWork unitOfWork) =>
@@ -414,11 +415,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
+        public List<string> GetSelectableTreatmentNames(Guid libraryId)
+        {
+
+            if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException(TreatmentLibraryNotFoundErrorMessage);
+            }
+            var names = _unitOfWork.Context.SelectableTreatment
+                .Where(t => t.TreatmentLibraryId == libraryId)
+                .Select(t => t.Name)
+                .OrderBy(s => s)
+                .ToList();
+            return names;
+        }
+
         public List<TreatmentDTO> GetSelectableTreatments(Guid libraryId)
         {
             if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
             {
-                throw new RowNotInTableException("The provided treatment library was not found");
+                throw new RowNotInTableException(TreatmentLibraryNotFoundErrorMessage);
             }
 
             return _unitOfWork.Context.SelectableTreatment.AsNoTracking()
@@ -644,7 +660,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
             {
-                throw new RowNotInTableException("The provided treatment library was not found");
+                throw new RowNotInTableException(TreatmentLibraryNotFoundErrorMessage);
             }
 
             return _unitOfWork.Context.SelectableTreatment.AsNoTracking()

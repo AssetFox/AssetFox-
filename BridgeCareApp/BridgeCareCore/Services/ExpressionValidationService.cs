@@ -362,9 +362,10 @@ namespace BridgeCareCore.Services
                 attributeNames.Add(attribute.name);
             }
 
-            var valuePerAttributeNamePerMaintainableAssetId =
+            var results =
                 _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(networkId,
-                attributeNames)
+                attributeNames);
+            var valuePerAttributeNamePerMaintainableAssetId = results
                 .GroupBy(_ => _.MaintainableAssetId, _ => _)
                 .ToDictionary(_ => _.Key, aggregatedResults =>
                 {

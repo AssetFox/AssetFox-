@@ -58,7 +58,7 @@ namespace BridgeCareCoreTests.Tests
             };
             excelWorksheetRepo.Setup(e => e.GetExcelRawDataByDataSourceId(dataSourceDto.Id)).Returns(excelRawDataDto);
             var districtAttribute = AttributeDtos.District(dataSourceDto);
-            var districtAttributeDomain = AttributeMapper.ToDomain(districtAttribute, unitOfWork.EncryptionKey);
+            var districtAttributeDomain = AttributeMapper.ToDomain(districtAttribute, unitOfWork.EncryptionKey); // wjwj this call creates an entity
             var path = SampleAttributeDataPath();
             var stream = File.OpenRead(path);
             var excelPackage = new ExcelPackage(stream);
@@ -90,6 +90,7 @@ namespace BridgeCareCoreTests.Tests
             var attributes = new List<AttributeDTO> { districtAttribute };
 
             var aggregationResult = await aggregationService.AggregateNetworkData(channel.Writer, networkId, aggregationState, attributes);
+            // Wjwjwj this makes a call to AttributeMapper, which in turn uses entities. Can one or both of those be changed?
 
             Assert.True(aggregationResult);
             var addCall = aggregatedResultRepo.SingleInvocationWithName(nameof(IAggregatedResultRepository.AddAggregatedResults));

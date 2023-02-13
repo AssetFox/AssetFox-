@@ -30,7 +30,7 @@ namespace BridgeCareCoreTests.Tests
         public void GetSyncedInvestmentDataset_RepoReturnsABudget_BudgetInDataset()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             var budgetId = Guid.NewGuid();
             var budgetName = RandomStrings.Length11();
@@ -42,7 +42,6 @@ namespace BridgeCareCoreTests.Tests
             };
             var budgets = new List<BudgetDTO> { budget };
             budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
-            unitOfWork.SetupBudgetRepo(budgetRepo);
             var pagingService = CreateInvestmentPagingService(unitOfWork);
             var request = new InvestmentPagingSyncModel();
             var result = pagingService.GetSyncedScenarioDataSet(simulationId, request);
@@ -54,7 +53,7 @@ namespace BridgeCareCoreTests.Tests
         public void GetSyncedInvestmentDataset_RepoReturnsABudgetButBudgetIsDeletedInRequest_BudgetInDataset()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             var budgetId = Guid.NewGuid();
             var budgetName = RandomStrings.Length11();
@@ -65,7 +64,6 @@ namespace BridgeCareCoreTests.Tests
             };
             var budgets = new List<BudgetDTO> { budget };
             budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
-            unitOfWork.SetupBudgetRepo(budgetRepo);
             var service = CreateInvestmentPagingService(unitOfWork);
             var request = new InvestmentPagingSyncModel
             {
@@ -79,7 +77,7 @@ namespace BridgeCareCoreTests.Tests
         public void GetSyncedInvestmentDataset_BudgetAddedInRequest_BudgetInDataset()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             var budgetId = Guid.NewGuid();
             var budgetName = RandomStrings.Length11();
@@ -92,7 +90,6 @@ namespace BridgeCareCoreTests.Tests
             var emptyBudgets = new List<BudgetDTO>();
             var addedBudgets = new List<BudgetDTO> { budget };
             budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(emptyBudgets);
-            unitOfWork.SetupBudgetRepo(budgetRepo);
             var service = CreateInvestmentPagingService(unitOfWork);
             var request = new InvestmentPagingSyncModel
             {
@@ -108,7 +105,7 @@ namespace BridgeCareCoreTests.Tests
         public void GetSyncedInvestmentDataset_BudgetModifiedInRequest_ModifiedBudgetInDataset()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             var budgetId = Guid.NewGuid();
             var budgetName = RandomStrings.Length11();
@@ -127,7 +124,6 @@ namespace BridgeCareCoreTests.Tests
             };
             var modifiedBudgets = new List<BudgetDTO> { modifiedBudget };
             budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
-            unitOfWork.SetupBudgetRepo(budgetRepo);
             var service = CreateInvestmentPagingService(unitOfWork);
             var request = new InvestmentPagingSyncModel
             {

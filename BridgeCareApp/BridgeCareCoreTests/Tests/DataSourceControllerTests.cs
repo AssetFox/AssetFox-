@@ -31,7 +31,7 @@ namespace BridgeCareCoreTests.Tests
             _mockUOW.Setup(_ => _.UserRepo).Returns(mockUserRepo.Object);
 
             _mockDataSource = new Mock<IDataSourceRepository>();
-            _mockDataSource.Setup(_ => _.GetDataSources()).Returns(TestDataForDataSources.SourceDTOs());
+            _mockDataSource.Setup(_ => _.GetDataSources()).Returns(TestDataForDataSources.SourceDTOs());  // wjwjwj entities here
             _mockDataSource.Setup(_ => _.GetDataSource(It.IsAny<Guid>()))
                 .Returns<Guid>(p => TestDataForDataSources.SourceDTOs().Single(ds => ds.Id == p));
 
@@ -137,7 +137,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task DeleteWorksWithExistingDataSource()
         {
             // Arrange
-            var sourceToDelete = TestDataForDataSources.SimpleRepo().Single(_ => _.Name == "Some Excel File").Id;
+            var sourceToDelete = TestDataForDataSources.ExcelDatasourceId;
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(
@@ -223,8 +223,8 @@ namespace BridgeCareCoreTests.Tests
         {
             // We can test BOTH Excel and SQL here
             // Arrange
-            var sourceSQL = TestDataForDataSources.SimpleRepo().Single(_ => _.Name == "SQL Server Data Source").Id;
-            var sourceExcel = TestDataForDataSources.SimpleRepo().Single(_ => _.Name == "Some Excel File").Id;
+            var sourceSQL = TestDataForDataSources.SqlDatasourceId;
+            var sourceExcel = TestDataForDataSources.ExcelDatasourceId;
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(

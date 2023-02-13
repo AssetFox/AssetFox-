@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 using AppliedResearchAssociates.iAM.Data.Mappers;
+using AppliedResearchAssociates.iAM;
 
 namespace BridgeCareCore.Services
 {
@@ -143,7 +144,7 @@ namespace BridgeCareCore.Services
                                 WarningMessage = warningMessage,
                             };
                         }
-                        if (attribute.Type == DataPersistenceConstants.AttributeNumericDataType)
+                        if (attribute.Type == AttributeTypeNames.Number)
                         {
                             if (attributeDatum is AttributeDatum<double> doubleAttributeDatum)
                             {
@@ -199,10 +200,10 @@ namespace BridgeCareCore.Services
             IAttributeDatum returnValue = null;
             switch (attributeType)
             {
-            case DataPersistenceConstants.AttributeTextDataType:
+            case AttributeTypeNames.String:
                 returnValue = new AttributeDatum<string>(attributeId, domainAttribute, attributeValue.ToString(), location, inspectionDate);
                 break;
-            case DataPersistenceConstants.AttributeNumericDataType:
+            case AttributeTypeNames.Number:
                 double? nullableDoubleValue = null;
                 if (attributeValue == null || attributeValue is string attributeValueString && string.IsNullOrWhiteSpace(attributeValueString))
                 {

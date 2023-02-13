@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -371,7 +372,7 @@ namespace BridgeCareCore.Services
                 {
                     var value = aggregatedResults.ToDictionary(_ => _.Attribute.Name, _ =>
                     {
-                        var data = _.Attribute.Type == DataPersistenceConstants.AttributeNumericDataType
+                        var data = _.Attribute.Type == AttributeTypeNames.Number
                             ? _.NumericValue?.ToString()
                             : _.TextValue;
 

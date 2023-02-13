@@ -67,10 +67,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 var prevYearCIImprovement = CheckGetValue(initialAssetSummary.ValuePerNumericAttribute, currentAttributes.Last());
                 foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
                 {
-                    var section = year.Assets.FirstOrDefault(_ => CheckGetValue(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
-                    if (section.AppliedTreatment == "No Treatment")
+                    var section = year.Assets.FirstOrDefault(_ => CheckGetValue(_.ValuePerNumericAttribute, "BRKEY_") == brKey);                    
+                    if (section.TreatmentCause == TreatmentCause.CommittedProject)
                     {
-                        continue; // TODO is this correct? skipped rows 
+                        continue;
                     }
 
                     // Generate data model

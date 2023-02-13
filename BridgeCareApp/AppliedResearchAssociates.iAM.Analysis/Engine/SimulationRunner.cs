@@ -477,8 +477,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                     foreach (var option in treatmentOptions)
                     {
-                        if (workingContextPerBaselineContext.TryGetValue(option.Context, out var workingContext) && priority.Criterion.EvaluateOrDefault(workingContext))
+                        var optionContextIsPending = workingContextPerBaselineContext.TryGetValue(option.Context, out var workingContext);
+                        if (optionContextIsPending && priority.Criterion.EvaluateOrDefault(workingContext))
                         {
+                            workingContext.Detail.BudgetsAtDecisionTime.AddRange(
+                                BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.CurrentAmount)));
+
                             var costCoverage = TryToPayForTreatment(
                                 workingContext,
                                 option.CandidateTreatment,

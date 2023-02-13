@@ -453,5 +453,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var entities = budgets.Select(b => b.Budget.ToLibraryEntity(b.BudgetLibraryId)).ToList();
             _unitOfWork.Context.AddAll(entities, _unitOfWork.CurrentUser?.Id);
         }
+
+        public Dictionary<Guid, string> GetScenarioBudgetDictionary(List<Guid> budgetIds)
+        {
+            var dictionary = _unitOfWork.Context.ScenarioBudget.AsNoTracking().Where(_ => budgetIds.Contains(_.Id)).ToDictionary(_ => _.Id, _ => _.Name);
+            return dictionary;
+        }
     }
 }

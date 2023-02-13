@@ -43,8 +43,8 @@ namespace BridgeCareCore.Services
 
             if (request.search.Trim() != "" || request.sortColumn.Trim() != "")
             {
-                var budgetIds = committedProjects.Select(_ => _.ScenarioBudgetId).Distinct();
-                budgetdict = _unitOfWork.Context.ScenarioBudget.AsNoTracking().Where(_ => budgetIds.Contains(_.Id)).ToDictionary(_ => _.Id, _ => _.Name);
+                var budgetIds = committedProjects.Select(_ => _.ScenarioBudgetId).Distinct().Where(x => x!=null).Select(x => x.Value).ToList();
+                budgetdict = _unitOfWork.BudgetRepo.GetScenarioBudgetDictionary(budgetIds);
             }
 
             if (request.search.Trim() != "")

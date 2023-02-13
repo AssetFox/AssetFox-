@@ -29,7 +29,6 @@ namespace BridgeCareCore.Services
                 calcAttribute = addedCalc;
             else
                 calcAttribute = _unitOfWork.CalculatedAttributeRepo.GetLibraryCalulatedAttributesByLibraryAndAttributeId(libraryId, request.AttributeId);
-            var debugThis = JsonConvert.SerializeObject(calcAttribute, Formatting.Indented);
             return HandlePaging(calcAttribute, request);
         }
 

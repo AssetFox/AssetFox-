@@ -12,7 +12,6 @@ using MoreLinq;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using System.Text;
 using AppliedResearchAssociates.iAM.DTOs;
-using Org.BouncyCastle.Asn1.Cms;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {

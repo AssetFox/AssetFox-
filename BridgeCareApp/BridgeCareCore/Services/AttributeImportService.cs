@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 
 namespace BridgeCareCore.Services
 {
@@ -192,7 +193,7 @@ namespace BridgeCareCore.Services
 
         private IAttributeDatum CreateAttributeDatum(AttributeDTO attribute, object attributeValue, Guid maintainableAssetId, Location location, DateTime inspectionDate)
         {
-            var domainAttribute = AttributeMapper.ToDomain(attribute, _unitOfWork.EncryptionKey);
+            var domainAttribute = AttributeDtoDomainMapper.ToDomain(attribute, _unitOfWork.EncryptionKey);
             var attributeId = Guid.NewGuid();
             var attributeType = domainAttribute.DataType;
             IAttributeDatum returnValue = null;

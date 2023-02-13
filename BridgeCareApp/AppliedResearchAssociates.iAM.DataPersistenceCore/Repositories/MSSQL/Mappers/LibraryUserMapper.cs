@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using System.Security.Principal;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -21,6 +22,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new DeficientConditionGoalLibraryUserEntity
             {
                 DeficientConditionGoalLibraryId = deficientConditionGoalLibraryId,
+                
+            };
         public static BudgetLibraryUserEntity ToBudgetLibraryUserEntity(this LibraryUserDTO dto, Guid budgetLibraryId) =>
             new BudgetLibraryUserEntity
             {
@@ -37,6 +40,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AccessLevel = (LibraryAccessLevel)entity.AccessLevel,
             };
         public static LibraryUserDTO ToDto(this DeficientConditionGoalLibraryUserEntity entity) =>
+            new LibraryUserDTO
+            {
+                UserId = entity.UserId,
+                UserName = entity.User?.Username,
+                AccessLevel = (LibraryAccessLevel)entity.AccessLevel,
+            };
         public static LibraryUserDTO ToDto(this BudgetLibraryUserEntity entity) =>
             new LibraryUserDTO
             {

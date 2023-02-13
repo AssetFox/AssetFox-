@@ -14,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
-namespace BridgeCareCoreTests.Tests
+namespace BridgeCareCoreTests.Tests.Integration
 {
     public class AggregationTests
     {
@@ -39,47 +39,6 @@ namespace BridgeCareCoreTests.Tests
                 HttpContext = new DefaultHttpContext() { User = testUser }
             };
             return controller;
-        }
-        [Fact]
-        public async Task UserIsAggregateNetworkDataAuthorized()
-        {
-            // Admin test authorize
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy("TestAggregatePolicy",
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.NetworkAggregateAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, "TestAggregatePolicy");
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsAggregateNetworkDataAuthorized_B2C()
-        {
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy("TestAggregatePolicy",
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.NetworkAggregateAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, "TestAggregatePolicy");
-            // Assert
-            Assert.True(allowed.Succeeded);
         }
     }
 }

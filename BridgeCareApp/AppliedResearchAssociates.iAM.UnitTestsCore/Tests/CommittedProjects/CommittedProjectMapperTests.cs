@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
         public CommittedProjectMapperTests()
         {
-            simulationSource = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "FourYearTest");
+            simulationSource = TestEntitiesForCommittedProjects.Simulations.Single(_ => _.Name == "FourYearTest");
             var debugExplorer = new Explorer("dummy");
             var testNetwork = simulationSource.Network.ToDomain(debugExplorer);
             simulationSource.CreateSimulation(testNetwork, DateTime.Now, DateTime.Now);
@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             var providedCommittedProject = simulationSource.CommittedProjects.First(_ => _.Year == 2025);
             var testAssetId = simulationSource.Network.MaintainableAssets.First().Id;
-            var noTreatment = TestDataForCommittedProjects.FourYearScenarioNoTreatment();
+            var noTreatment = TestEntitiesForCommittedProjects.FourYearScenarioNoTreatment();
 
             // Act
             providedCommittedProject.CreateCommittedProject(
@@ -69,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 testAssetId,
                 false,
                 0,
-                TestDataForCommittedProjects.FourYearScenarioNoTreatment());
+                TestEntitiesForCommittedProjects.FourYearScenarioNoTreatment());
 
             // Assert
             Assert.Equal(1, testSimulation.CommittedProjects.Count);
@@ -83,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var secondCommittedProject = simulationSource.CommittedProjects.Last();
             secondCommittedProject.Name = "Something Else";
             var testAssetId = simulationSource.Network.MaintainableAssets.First().Id;
-            var noTreatment = TestDataForCommittedProjects.FourYearScenarioNoTreatment();
+            var noTreatment = TestEntitiesForCommittedProjects.FourYearScenarioNoTreatment();
 
             // Act
             firstCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, 0, noTreatment);
@@ -105,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             secondCommittedProject.Name = "Something Else";
             secondCommittedProject.Year = firstCommittedProject.Year;
             var testAssetId = simulationSource.Network.MaintainableAssets.First().Id;
-            var noTreatment = TestDataForCommittedProjects.FourYearScenarioNoTreatment();
+            var noTreatment = TestEntitiesForCommittedProjects.FourYearScenarioNoTreatment();
 
             // Act
             firstCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, 0, noTreatment);

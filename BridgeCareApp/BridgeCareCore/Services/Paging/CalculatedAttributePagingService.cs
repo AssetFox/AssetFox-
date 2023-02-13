@@ -8,6 +8,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services.Paging.Generics;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using Newtonsoft.Json;
 
 namespace BridgeCareCore.Services
 {

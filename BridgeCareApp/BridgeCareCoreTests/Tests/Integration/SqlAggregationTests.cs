@@ -7,7 +7,6 @@ using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
@@ -18,8 +17,9 @@ using OfficeOpenXml;
 using Xunit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using BridgeCareCoreTests.Helpers;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 
-namespace BridgeCareCoreTests.Tests
+namespace BridgeCareCoreTests.Tests.Integration
 {
     public class SqlAggregationTests
     {
@@ -30,7 +30,7 @@ namespace BridgeCareCoreTests.Tests
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(TestHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
-            var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
+            var districtAttribute = AttributeDtoDomainMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
 
             var networkName = RandomStrings.WithPrefix("Network");
@@ -42,9 +42,8 @@ namespace BridgeCareCoreTests.Tests
                 DefaultEquation = "[Deck_Area]",
                 NetworkDefinitionAttribute = networkDefinitionAttribute
             };
-            var network = NetworkTestSetupViaFactory.ModelForEntityInDbViaFactory(
+            var network = NetworkIntegrationTestSetup.ModelForEntityInDbViaFactory(
                 TestHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
-
 
             var networkId = network.Id;
             var assetName = "AssetName";

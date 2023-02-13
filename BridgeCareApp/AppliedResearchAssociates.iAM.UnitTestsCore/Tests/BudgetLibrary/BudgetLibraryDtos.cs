@@ -7,19 +7,18 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class BudgetAmountDtos
+    public static class BudgetLibraryDtos
     {
-        public static BudgetAmountDTO ForBudgetAndYear(BudgetDTO budget, int year, decimal value = 1234, Guid? id = null)
+        public static BudgetLibraryDTO New(Guid? id = null, string name = "BudgetLibrary")
         {
             var resolveId = id ?? Guid.NewGuid();
-            var amount = new BudgetAmountDTO
+            var dto = new BudgetLibraryDTO
             {
                 Id = resolveId,
-                BudgetName = budget.Name,
-                Year = year,
-                Value = value
+                Name = name,
+                Budgets = new List<BudgetDTO>(),
             };
-            return amount;
+            return dto;
         }
     }
 }

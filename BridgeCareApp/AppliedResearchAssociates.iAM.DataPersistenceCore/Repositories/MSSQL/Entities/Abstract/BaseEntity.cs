@@ -4,6 +4,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public abstract class BaseEntity
     {
+        public BaseEntity()
+        {
+            int x = 666;
+        }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         public DateTime LastModifiedDate { get; set; } = DateTime.Now;

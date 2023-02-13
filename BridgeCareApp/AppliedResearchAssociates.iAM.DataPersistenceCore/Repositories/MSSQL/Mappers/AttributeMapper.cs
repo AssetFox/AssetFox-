@@ -56,16 +56,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
         }
 
+        private static string GetConnectionString(BaseDataSourceDTO dto)
+        {
+            if (dto is SQLDataSourceDTO sql)
+            {
+                return sql.ConnectionString;
+            }
+            return "";
+        }
+
         private static TextAttribute ToText(AttributeDTO dto, string encryptionKey)
         {
+            var datasource = dto.DataSource;
             return new TextAttribute(
                 dto.DefaultValue,
                 dto.Id,
                 dto.Name,
                 dto.AggregationRuleType,
                 dto.Command,
-                MapDTODataSourceTypes(dto.DataSource?.Type),
-                GetConnectionString(dto.DataSource?.ToEntity(encryptionKey), encryptionKey),
+                MapDTODataSourceTypes(datasource?.Type),
+                GetConnectionString(datasource),
                 dto.IsCalculated,
                 dto.IsAscending,
                 dto.DataSource?.Id);
@@ -83,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     dto.AggregationRuleType,
                     dto.Command,
                     MapDTODataSourceTypes(dto.DataSource?.Type),
-                    GetConnectionString(dto.DataSource?.ToEntity(encryptionKey), encryptionKey),
+                    GetConnectionString(dto.DataSource),
                     dto.IsCalculated,
                     dto.IsAscending,
                     dto.DataSource?.Id)

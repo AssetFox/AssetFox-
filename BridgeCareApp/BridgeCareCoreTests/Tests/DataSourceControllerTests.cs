@@ -31,7 +31,7 @@ namespace BridgeCareCoreTests.Tests
             _mockUOW.Setup(_ => _.UserRepo).Returns(mockUserRepo.Object);
 
             _mockDataSource = new Mock<IDataSourceRepository>();
-            _mockDataSource.Setup(_ => _.GetDataSources()).Returns(TestDataForDataSources.SourceDTOs());  // wjwjwj entities here
+            _mockDataSource.Setup(_ => _.GetDataSources()).Returns(TestDataForDataSources.SourceDTOs());
             _mockDataSource.Setup(_ => _.GetDataSource(It.IsAny<Guid>()))
                 .Returns<Guid>(p => TestDataForDataSources.SourceDTOs().Single(ds => ds.Id == p));
 

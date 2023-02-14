@@ -309,7 +309,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
         {
-            var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);
+            var exists = _unitOfWork.Context.DeficientConditionGoalLibrary.Any(bl => bl.Id == libraryId);
             if (!exists)
             {
                 return LibraryAccessModels.LibraryDoesNotExist();

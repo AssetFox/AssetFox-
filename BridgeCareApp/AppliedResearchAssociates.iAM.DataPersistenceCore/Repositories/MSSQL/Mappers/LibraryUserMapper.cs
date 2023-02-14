@@ -22,7 +22,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new DeficientConditionGoalLibraryUserEntity
             {
                 DeficientConditionGoalLibraryId = deficientConditionGoalLibraryId,
-                
+                UserId = dto.UserId,
+                AccessLevel= (int)dto.AccessLevel,
             };
         public static BudgetLibraryUserEntity ToBudgetLibraryUserEntity(this LibraryUserDTO dto, Guid budgetLibraryId) =>
             new BudgetLibraryUserEntity

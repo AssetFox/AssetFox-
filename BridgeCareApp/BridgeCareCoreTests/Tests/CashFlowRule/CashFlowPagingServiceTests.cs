@@ -114,7 +114,7 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
         }
 
         [Fact]
-        public void TooManyRulesForPage_Truncates()
+        public void GetScenarioPage_TooManyRulesForPage_Truncates()
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
@@ -144,7 +144,7 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
         }
 
         [Fact]
-        public void RequestForSecondPage_Expected()
+        public void GetScenarioPage_RequestSecondPage_Expected()
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
@@ -171,6 +171,83 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             Assert.Equal(2, result.TotalItems);
             var item = result.Items.Single();
             ObjectAssertions.Equivalent(dto2Clone, item);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_EverythingIsEmpty_Empty()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsEmptyList();
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = false,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetSyncedScenarioDataset_EmptyNewLibrary_Empty()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            Assert.Empty(result);
+        }
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var rule = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId); ;
+            var ruleName = rule.Name;
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+                AddedRows = new List<CashFlowRuleDTO> { rule },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedRule = result.Single();
+            Assert.Equal(ruleName, returnedRule.Name);
+            Assert.NotEqual(ruleId, returnedRule.Id);
+            Assert.NotEqual(criterionLibraryId, returnedRule.CriterionLibrary.Id);
+            Assert.NotEqual(distributionRuleId, returnedRule.CashFlowDistributionRules.Single().Id);
         }
     }
 }

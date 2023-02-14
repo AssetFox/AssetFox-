@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
@@ -20,7 +22,7 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             return service;
         }
         [Fact]
-        public void GetSyncedScenarioDataset_Does()
+        public void GetSyncedScenarioDataset_EverythingIsEmpty_Empty()
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
@@ -29,6 +31,59 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             repo.Setup(r => r.GetScenarioCashFlowRules(scenarioId)).ReturnsEmptyList();
             var syncModel = new PagingSyncModel<CashFlowRuleDTO>
             {
+            };
+
+            var result = pagingService.GetSyncedScenarioDataSet(
+                scenarioId, syncModel);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetSyncedScenarioDataset_RowToUpdate_ReturnsUpdatedRow()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var scenarioId = Guid.NewGuid();
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var dto1 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dto2 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            dto2.Name = "Updated name";
+            var dto3 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            dto3.Name = "Updated name";
+            var dtos = new List<CashFlowRuleDTO> { dto1 };
+            repo.Setup(r => r.GetScenarioCashFlowRules(scenarioId)).Returns(dtos);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+                UpdateRows = new List<CashFlowRuleDTO> { dto2 },
+            };
+
+            var result = pagingService.GetSyncedScenarioDataSet(
+                scenarioId, syncModel);
+
+            var resultDto = result.Single();
+            ObjectAssertions.Equivalent(dto3, resultDto);
+        }
+        [Fact]
+        public void GetSyncedScenarioDataset_RowToDelete_DeletesRow()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var scenarioId = Guid.NewGuid();
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var dto1 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dto2 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dtos = new List<CashFlowRuleDTO> { dto1 };
+            repo.Setup(r => r.GetScenarioCashFlowRules(scenarioId)).Returns(dtos);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+                RowsForDeletion = new List<Guid> { ruleId },
             };
 
             var result = pagingService.GetSyncedScenarioDataSet(

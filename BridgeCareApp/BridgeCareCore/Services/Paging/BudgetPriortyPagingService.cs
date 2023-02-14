@@ -1,15 +1,11 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using System;
-using BridgeCareCore.Interfaces;
-using BridgeCareCore.Models;
-using AppliedResearchAssociates.iAM.DTOs;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Services.Paging.Generics;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace BridgeCareCore.Services
 {

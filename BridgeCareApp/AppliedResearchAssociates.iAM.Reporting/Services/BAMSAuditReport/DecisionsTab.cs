@@ -121,12 +121,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     }
                 }
             }
-            decisionsDataModel.BudgetLevels = budgetLevels;
-
-            if (brKey == 153 && year.Year == 2022)//== 21539)// 13648) //
-            {
-
-            }
+            decisionsDataModel.BudgetLevels = budgetLevels;           
 
             // Treatments
             var decisionsTreatments = new List<DecisionTreatment>();
@@ -144,9 +139,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.BudgetUsages.Sum(_ => _.CoveredCost) : 0;
                 var budgetsUsed = treatmentConsideration?.BudgetUsages.Where(_ => _.CoveredCost > 0);
-                var budgetsUsedValue = budgetsUsed != null && budgetsUsed.Count() != 0 ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName)) : string.Empty; // currently this will be single value
+                var budgetsUsedValue = budgetsUsed != null && budgetsUsed.Any() ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName)) : string.Empty; // currently this will be single value
                 decisionsTreatment.BudgetsUsed = budgetsUsedValue;
-                decisionsTreatment.RejectionReason = treatmentConsideration == null ? string.Empty : (budgetsUsed != null && budgetsUsed.Count() != 0 ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName + ": " + _.Status)) : string.Join(", ", treatmentConsideration.BudgetUsages.Select(_ => _.BudgetName + ": " + _.Status)));
+                decisionsTreatment.RejectionReason = treatmentConsideration == null ? string.Empty : (budgetsUsed != null && budgetsUsed.Any() ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName + ": " + _.Status)) : string.Join(", ", treatmentConsideration.BudgetUsages.Where(_ => _.Status != BudgetUsageStatus.ConditionNotMet).Select(_ => _.BudgetName + ": " + _.Status)));
 
                 decisionsTreatments.Add(decisionsTreatment);
             }
@@ -309,9 +304,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         {
             foreach (var columnNumber in columnNumbersBudgetsUsed)
             {
-                worksheet.Column(columnNumber).SetTrueWidth(25);
+                worksheet.Column(columnNumber).SetTrueWidth(20);
                 // Rejection reason
-                worksheet.Column(columnNumber + 1).SetTrueWidth(50);
+                worksheet.Column(columnNumber + 1).SetTrueWidth(35);
                 worksheet.Column(columnNumber + 1).Style.WrapText = true;
             }
         }

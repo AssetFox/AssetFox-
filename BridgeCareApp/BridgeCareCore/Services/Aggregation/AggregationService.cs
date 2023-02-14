@@ -7,15 +7,13 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs;
-using AppliedResearchAssociates.iAM.Hubs.Services;
-using BridgeCareCore.Models;
 using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
 using AppliedResearchAssociates.iAM.Data.Helpers;
 
@@ -51,7 +49,7 @@ namespace BridgeCareCore.Services.Aggregation
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);  // DbUpdateException here -- "The wait operation timed out."
 
                     // Get/create configurable attributes
-                    var configurationAttributes = AttributeMapper.ToDomainList(attributes, _unitOfWork.EncryptionKey);
+                    var configurationAttributes = AttributeDtoDomainMapper.ToDomainList(attributes, _unitOfWork.EncryptionKey);
 
                     var checkForDuplicateIDs = configurationAttributes.Select(_ => _.Id).ToList();
 

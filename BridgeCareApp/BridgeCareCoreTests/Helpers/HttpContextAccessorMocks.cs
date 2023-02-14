@@ -24,7 +24,7 @@ namespace BridgeCareCoreTests
             return mock.Object;
         }
 
-        private static Mock<IHttpContextAccessor> MockWithClaims(List<Claim> claims)
+        public static Mock<IHttpContextAccessor> MockWithClaims(List<Claim> claims)
         {
             var mock = new Mock<IHttpContextAccessor>();
             mock.AddClaims(claims);

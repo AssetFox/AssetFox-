@@ -1,9 +1,9 @@
 ﻿using System.Threading.Channels;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
@@ -58,7 +58,7 @@ namespace BridgeCareCoreTests.Tests
             };
             excelWorksheetRepo.Setup(e => e.GetExcelRawDataByDataSourceId(dataSourceDto.Id)).Returns(excelRawDataDto);
             var districtAttribute = AttributeDtos.District(dataSourceDto);
-            var districtAttributeDomain = AttributeMapper.ToDomain(districtAttribute, unitOfWork.EncryptionKey);
+            var districtAttributeDomain = AttributeDtoDomainMapper.ToDomain(districtAttribute, unitOfWork.EncryptionKey);
             var path = SampleAttributeDataPath();
             var stream = File.OpenRead(path);
             var excelPackage = new ExcelPackage(stream);

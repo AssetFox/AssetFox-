@@ -2,8 +2,6 @@
 using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
@@ -87,17 +85,6 @@ namespace BridgeCareCoreTests.Tests
             var upsertedCurves = performanceCurveRepo.GetUpsertedOrDeletedPerformanceCurves(libraryId);
             var upsertedCurve = upsertedCurves.Single();
             ObjectAssertions.EquivalentExcluding(expectedPerformanceCurve, upsertedCurve, c => c.Id, c => c.CriterionLibrary.Id, c => c.Equation.Id);
-        }
-
-        private Mock<IExpressionValidationService> SetupMockOld(Guid performanceCurveLibraryId)
-        {
-            var dbContext = TestHelper.DbContext;
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var mockExpressionValidationService = ExpressionValidationServiceMocks.New();
-            dbContext.Add(new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "TestPerformanceCurveLibrary" });
-            dbContext.SaveChanges();
-            return mockExpressionValidationService;
         }
 
         [Fact]

@@ -10,14 +10,14 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
     internal class BudgetPriorityLibraryDtos
     {
 
-        public const string BudgetPriorityLibraryEntityName = "BudgetPriorityLibraryEntity";
+        public const string BudgetPriorityLibraryName = "BudgetPriorityLibrary";
 
         public static BudgetPriorityLibraryDTO New(Guid? id = null)
         {
             var dto = new BudgetPriorityLibraryDTO
             {
                 Id = id ?? Guid.NewGuid(),
-                Name = BudgetPriorityLibraryEntityName,
+                Name = BudgetPriorityLibraryName,
             };
             return dto;
         }

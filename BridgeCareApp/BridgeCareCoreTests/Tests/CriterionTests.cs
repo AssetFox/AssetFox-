@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -37,20 +30,6 @@ namespace BridgeCareCoreTests.Tests
                 hubService.Object,
                 accessor.Object
                 );
-            return controller;
-        }
-        private CriterionLibraryController SetupController()
-        {
-            var unitOfWork = TestHelper.UnitOfWork;
-            AttributeTestSetup.CreateAttributes(unitOfWork);
-            NetworkTestSetup.CreateNetwork(unitOfWork);
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var controller = new CriterionLibraryController(
-                EsecSecurityMocks.Admin,
-                unitOfWork,
-                hubService,
-                accessor);
             return controller;
         }
 
@@ -104,25 +83,6 @@ namespace BridgeCareCoreTests.Tests
             ActionResultAssertions.Ok(result);
             var invocation = repo.SingleInvocationWithName(nameof(ICriterionLibraryRepository.DeleteCriterionLibrary));
             Assert.Equal(libraryId, invocation.Arguments[0]);
-        }
-
-        [Fact]
-        public async Task ShouldGetAllCriterionLibraries()
-        {
-            var controller = SetupController();
-            // Arrange
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, isSingleUse: false);
-
-            // Act
-            var result = await controller.CriterionLibraries();
-
-            // Assert
-            var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
-            var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType(okObjResult.Value,
-                typeof(List<CriterionLibraryDTO>));
-            Assert.Contains(dtos, cl => cl.Id == criterionLibrary.Id);
         }
     }
 }

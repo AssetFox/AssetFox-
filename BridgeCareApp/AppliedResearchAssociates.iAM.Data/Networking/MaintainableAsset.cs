@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.Data.Helpers;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.Data.Networking
@@ -51,8 +54,9 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
         //    //SpatialWeighting = new SpatialWeighting(result);
         //}
 
-        public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
+        public List<DatumLog> AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
         {
+            List<DatumLog> datumLog = new List<DatumLog>();
             foreach (var datum in attributeData)
             {
                 if (datum.Location.MatchOn(Location))
@@ -61,9 +65,14 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
                 }
                 else
                 {
-                    // TODO: No matching maintainable asset for the current data. What do we do?
+                    // return the unmatched datum to be logged and reported
+                        var currentDatumLog = new DatumLog(datum.Attribute.Id, Location.Id, datum.Attribute.Name);
+                        if (datumLog.Find(x => (x.Equals(currentDatumLog))) == null)
+                            datumLog.Add(currentDatumLog);
                 }
             }
+
+            return datumLog;
         }
 
         public void AssignAttributeDataFromDataSource(IEnumerable<IAttributeDatum> attributeData) => AssignedData.AddRange(attributeData);

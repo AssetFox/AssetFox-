@@ -14,13 +14,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 RemainingLifeLimitLibraryId = remainingLifeLimitLibraryId,
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel,
-            }
+            };
         public static BudgetLibraryUserEntity ToBudgetLibraryUserEntity(this LibraryUserDTO dto, Guid budgetLibraryId) =>
-            new BudgetLibraryUserEntity {
+            new BudgetLibraryUserEntity
+            {
                 BudgetLibraryId = budgetLibraryId,
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel,
-            }
+            };
         public static LibraryUserDTO ToDto(this RemainingLifeLimitLibraryUserEntity entity) =>
             new LibraryUserDTO
             {

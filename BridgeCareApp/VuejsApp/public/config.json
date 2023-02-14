@@ -3,6 +3,6 @@
     "clientId": "a56bb9d5-190d-4873-afea-0767d82dd91c",
     "redirectUri": "https://v2.iam-deploy.com/Authentication/",
     "reportType": ["BAMSSummaryReport","InventoryLookup", "PAMSSummaryReport", "ScenarioOutput"],
-    "agencyLogo": "PennDOTLogo.svg",
-    "productLogo": "BridgeCareLogo.svg"
+    "agencyLogo": "",
+    "productLogo": ""
 }

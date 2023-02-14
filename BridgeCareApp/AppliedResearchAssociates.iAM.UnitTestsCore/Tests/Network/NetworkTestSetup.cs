@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return network;
         }
 
-        public static NetworkEntity TestNetwork { get; } = new NetworkEntity
+        public static NetworkEntity TestNetwork() => new NetworkEntity
         {
             Id = NetworkId,
             Name = "Test Network"
@@ -37,7 +37,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 {
                     if (!unitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
                     {
-                        unitOfWork.Context.AddEntity(TestNetwork);
+                        var network = TestNetwork();
+                        unitOfWork.Context.AddEntity(network);
                     }
                 }
             }

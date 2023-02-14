@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
@@ -16,7 +16,6 @@ using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
 using System.Security.Claims;
@@ -43,20 +42,15 @@ namespace BridgeCareCoreTests.Tests
             _mockUOW = new Mock<IUnitOfWork>();
             // This is the DEFAULT current user (a user in the admin role)
             // It MUST be changed if testing for an unauthorized user.
-            _mockUOW.Setup(_ => _.CurrentUser).Returns(AdminUser);
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UserDtos.Admin());
 
             var mockSimulationRepo = new Mock<ISimulationRepository>();
-            mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => SimulationInTestData(_))))
-                .Returns(TestDataForCommittedProjects.AuthorizedSimulationDTOs().First());
-            mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => !SimulationInTestData(_))))
-                .Throws<RowNotInTableException>();
             _mockUOW.Setup(_ => _.SimulationRepo).Returns(mockSimulationRepo.Object);
 
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
             _mockUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
-            var mockUserRepo = UserRepositoryMocks.EveryoneExists();
-            _mockUOW.Setup(_ => _.UserRepo).Returns(mockUserRepo.Object);
+            var mockUserRepo = UserRepositoryMocks.EveryoneExists(_mockUOW);
 
             _mockService = new Mock<ICommittedProjectService>();
             _mockService.Setup(_ => _.ExportCommittedProjectsFile(It.IsAny<Guid>()))
@@ -65,15 +59,9 @@ namespace BridgeCareCoreTests.Tests
         }
         public CommittedProjectController CreateTestController(List<string> userClaims)
         {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 _mockPagingService.Object,
@@ -104,7 +92,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
+            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -130,7 +118,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
+            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -239,7 +227,7 @@ namespace BridgeCareCoreTests.Tests
                 _mockService.Object,
                 _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
-                TestHelper.UnitOfWork,
+                _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
 
@@ -438,7 +426,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -463,7 +451,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -492,7 +480,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        public async Task UpsertSectionWorksWithValidProjects()
+        public async Task UpsertSectionWorksWithValidProjects()//
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
@@ -673,19 +661,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(allowed.Succeeded);
         }
 
-
-
         #region Helpers
-        private bool SimulationInTestData(Guid simulationId) =>
-            TestDataForCommittedProjects.Simulations.Any(_ => _.Id == simulationId);
-
-        private UserDTO AdminUser => new UserDTO
-        {
-            Username = "Admin",
-            HasInventoryAccess = true,
-            Id = TestDataForCommittedProjects.AuthorizedUser
-        };
-
         private UserDTO UnauthorizedUser => new UserDTO
         {
             Username = "Nonadmin",

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using BridgeCareCore.Security;
 using BridgeCareCore.Utils;
 using Xunit;
@@ -9,13 +7,11 @@ namespace BridgeCareCoreTests.Tests
 {
     public class RoleClaimsMapperTests
     {
-        private RoleClaimsMapper _roleClaimsMapper;
-
         [Fact]
         public void ShouldReturnRoleGetInternalRole()
         {
-            _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, new List<string> { "PD-BAMS-Administrator" });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var result = roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, new List<string> { "PD-BAMS-Administrator" });
 
             // Assert
             Assert.IsType<List<string>>(result);
@@ -27,8 +23,8 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void ShouldReturnClaimsGetClaims()
         {
-            _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var result = roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor });
 
             // Assert
             Assert.IsType<List<string>>(result);
@@ -42,8 +38,8 @@ namespace BridgeCareCoreTests.Tests
             var claimsPrincipal = MockHttpContext(claims);
 
             // Act
-            _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var result = roleClaimsMapper.HasAdminAccess(claimsPrincipal);
 
             // Assert
             Assert.IsType<bool>(result);
@@ -57,8 +53,8 @@ namespace BridgeCareCoreTests.Tests
             var claimsPrincipal = MockHttpContext(claims);
 
             // Act
-            _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var result = roleClaimsMapper.HasAdminAccess(claimsPrincipal);
 
             // Assert
             Assert.IsType<bool>(result);
@@ -72,8 +68,8 @@ namespace BridgeCareCoreTests.Tests
             var claimsPrincipal = MockHttpContext(claims);
 
             // Act
-            _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var result = roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
 
             // Assert
             Assert.IsType<bool>(result);
@@ -87,8 +83,8 @@ namespace BridgeCareCoreTests.Tests
             var claimsPrincipal = MockHttpContext(claims);
 
             // Act
-            _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var result = roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
 
             // Assert
             Assert.IsType<bool>(result);
@@ -102,13 +98,13 @@ namespace BridgeCareCoreTests.Tests
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
 
             // Act
-            _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.AddClaimsToUserIdentity(claimsPrincipal, new List<string> { "Administrator" }, claims);
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var result = roleClaimsMapper.AddClaimsToUserIdentity(claimsPrincipal, new List<string> { "Administrator" }, claims);
 
             // Assert
             Assert.IsType<ClaimsIdentity>(result);
-            Assert.True(result.Claims.Any(c => c.Type == ClaimTypes.Role));
-            Assert.True(result.Claims.Any(c => c.Type == ClaimTypes.Name));
+            Assert.Contains(result.Claims, c => c.Type == ClaimTypes.Role);
+            Assert.Contains(result.Claims, c => c.Type == ClaimTypes.Name);
         }
 
         private ClaimsPrincipal MockHttpContext(List<Claim> claims)

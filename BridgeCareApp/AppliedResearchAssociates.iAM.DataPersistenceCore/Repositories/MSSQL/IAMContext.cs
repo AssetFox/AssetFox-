@@ -79,6 +79,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<BudgetEntity> Budget { get; set; }
 
         public virtual DbSet<BudgetLibraryEntity> BudgetLibrary { get; set; }
+        public virtual DbSet<BudgetLibraryUserEntity> BudgetLibraryUser { get; set; }
 
         public virtual DbSet<BudgetAmountEntity> BudgetAmount { get; set; }
 
@@ -176,6 +177,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<SimulationLogEntity> SimulationLog { get; set; }
 
         public virtual DbSet<SimulationOutputEntity> SimulationOutput { get; set; }
+
+        public virtual DbSet<SimulationOutputJsonEntity> SimulationOutputJson { get; set; }
 
         public virtual DbSet<TargetConditionGoalEntity> TargetConditionGoal { get; set; }
 
@@ -657,6 +660,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Year).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.treatmentCategory).IsRequired();
 
                 entity.HasOne(d => d.ScenarioBudget)
                     .WithMany(p => p.CommittedProjects)
@@ -1790,6 +1795,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+
+            modelBuilder.Entity<SimulationOutputJsonEntity>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasIndex(e => e.Id).IsUnique();
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.Property(e => e.OutputType).IsRequired();
+                entity.Property(e => e.Output).IsRequired();
+
+                entity.HasOne(e => e.Simulation)
+                    .WithMany(p => p.SimulationOutputJsons)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.SimulationOutput)
+                    .WithMany(p => p.SimulationOutputJsons)
+                    .HasForeignKey(d => d.SimulationOutputId);
+            });
+
             modelBuilder.Entity<TargetConditionGoalEntity>(entity =>
             {
                 entity.HasIndex(e => e.AttributeId);
@@ -2493,6 +2519,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.RemainingLifeLimitLibraryUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<BudgetLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.BudgetLibraryId, e.UserId });
+
+                entity.ToTable("BudgetLibrary_User");
+
+                entity.HasIndex(e => e.BudgetLibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.BudgetLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.BudgetLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.BudgetLibraryUsers)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

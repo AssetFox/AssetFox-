@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using System.Text;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -74,5 +75,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.AddAll(aggregatedResultEntities, _unitOfWork.UserEntity?.Id);
         }
+
+        public List<AggregatedResultDTO> GetAggregatedResultsForAttributeNames(Guid networkId, List<string> attributeNames)
+        {
+            return _unitOfWork.Context.AggregatedResult
+                .Include(_ => _.MaintainableAsset)
+                .Include(_ => _.Attribute)
+                .Where(_ => attributeNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == networkId)
+                .Select(e => AggregatedResultMapper.ToDto(e))
+                .AsNoTracking().AsSplitQuery().ToList();
+        }
+
+        public List<AggregatedResultDTO> GetAggregatedResultsForMaintainableAsset(Guid assetId, List<Guid> attributeIds)
+        {
+            var entities = _unitOfWork.Context.AggregatedResult.AsSplitQuery().AsNoTracking().Include(_ => _.Attribute)
+                    .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributeIds.Contains(_.AttributeId)).ToList();
+            return entities.Select(AggregatedResultMapper.ToDto).ToList();
+        }
+
+        public List<AggregatedResultDTO> GetAggregatedResultsForMaintainableAsset(Guid assetId) => throw new NotImplementedException();
     }
 }

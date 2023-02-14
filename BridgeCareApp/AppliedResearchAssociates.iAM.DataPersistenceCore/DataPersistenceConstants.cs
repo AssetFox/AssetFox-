@@ -10,9 +10,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
         public const string AggregatedResultNumericDiscriminator = "NumericAggregatedResult";
         public const string AggregatedResultTextDiscriminator = "TextAggregatedResult";
 
-        public const string AttributeTextDataType = "STRING";
-        public const string AttributeNumericDataType = "NUMBER";
-
         public const string SectionLocation = "SectionLocation";
         public const string LinearLocation = "LinearLocation";
 

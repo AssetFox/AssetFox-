@@ -11,6 +11,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     public static class TreatmentServiceMocks
     {
         public static Mock<ITreatmentService> EmptyMock => new Mock<ITreatmentService>();
-        public static Mock<ITreatmentPagingService> EmptyPagingMock => new Mock<ITreatmentPagingService>();
     }
 }

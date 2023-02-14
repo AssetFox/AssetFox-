@@ -55,7 +55,6 @@ namespace BridgeCareCore.Services
                 return null;
             }
         }        
-
         public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
             ExcelPackage excelPackage)
@@ -96,7 +95,6 @@ namespace BridgeCareCore.Services
             }
             return returnValue;
         }
-
         public ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage)
         {
             var validationMessages = new List<string>();
@@ -130,7 +128,6 @@ namespace BridgeCareCore.Services
             }
             return scenarioTreatmentImportResult;
         }
-
         public FileInfoDTO ExportScenarioTreatmentsExcelFile(Guid simulationId)
         {
             var fileInfoResult = new FileInfoDTO();
@@ -155,7 +152,6 @@ namespace BridgeCareCore.Services
             }
             return fileInfoResult;
         }
-
         private void SaveToDatabase(
             TreatmentImportResultDTO importResult)
         {

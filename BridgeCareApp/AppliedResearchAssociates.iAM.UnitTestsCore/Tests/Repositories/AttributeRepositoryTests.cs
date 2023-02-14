@@ -17,6 +17,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
@@ -252,7 +253,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attributeAfter = TestHelper.UnitOfWork.AttributeRepo.GetSingleById(attributeId);
             var sqlDataSourceAfter = attributeAfter.DataSource as SQLDataSourceDTO;
             Assert.Equal("data source=Test;initial catalog=TestDB;persist security info=True;user id=TestId;password=TestPassword;MultipleActiveResultSets=True;App=EntityFramework", sqlDataSourceAfter.ConnectionString);
-            var domainAttributeAfter = AttributeMapper.ToDomain(attributeAfter, TestHelper.UnitOfWork.EncryptionKey);
+            var domainAttributeAfter = AttributeDtoDomainMapper.ToDomain(attributeAfter, TestHelper.UnitOfWork.EncryptionKey);
             Assert.Equal("data source=Test;initial catalog=TestDB;persist security info=True;user id=TestId;password=TestPassword;MultipleActiveResultSets=True;App=EntityFramework", domainAttributeAfter.ConnectionString);
         }
 

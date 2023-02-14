@@ -13,23 +13,43 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public static class HubServiceMocks
     {
-        public static Mock<IHubContext<BridgeCareHub>> MockHubContext()
+        private static Dictionary<string, string> _createErrorList()
         {
-            var mock = new Mock<IHubContext<BridgeCareHub>>();
+            var dummyHubContext = new Mock<IHubContext<BridgeCareHub>>();
+            var dummy = new HubService(dummyHubContext.Object);
+            var castDummy = dummy as IHubService;
+            var dictionary = castDummy.errorList;
+            return dictionary;
+        }
+
+        public static Mock<IHubService> DefaultMock()
+        {
+            var mock = new Mock<IHubService>();
+            var errorList = _createErrorList();
+            mock.Setup(m => m.errorList).Returns(errorList);
             return mock;
         }
 
-        private static Mock<HubService> DefaultMock()
-        {
-            var context = MockHubContext();
-            var mock = new Mock<HubService>(context.Object);
-            return mock;
-        }
-
-        public static HubService Default()
+        public static IHubService Default()
         {
             var mock = DefaultMock();
             return mock.Object;
+        }
+
+        public static List<string> ThreeArgumentUserMessages(this Mock<IHubService> mock)
+        {
+            var invocations = mock.Invocations.ToList();
+            var realTimeMessageInvocations = invocations.Where(i => i.Method.Name == nameof(IHubService.SendRealTimeMessage)).ToList();
+            var threeArgumentInvocations = realTimeMessageInvocations.Where(i => i.Arguments.Count == 3).ToList();
+            var threeArgumentInvocationFinalArguments = threeArgumentInvocations.Select(i => i.Arguments[2].ToString()).ToList();
+            return threeArgumentInvocationFinalArguments;
+        }
+
+        public static string SingleThreeArgumentUserMessage(this Mock<IHubService> mock)
+        {
+            var messages = mock.ThreeArgumentUserMessages();
+            var message = messages.Single();
+            return message;
         }
     }
 }

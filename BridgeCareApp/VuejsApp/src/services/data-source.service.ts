@@ -1,6 +1,6 @@
 import {AxiosPromise} from 'axios';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
-import { Datasource, ExcelDataSource, SqlDataSource, TestConnection } from '@/shared/models/iAM/data-source';
+import {ExcelDataSource, SqlDataSource, TestConnection} from '@/shared/models/iAM/data-source';
 
 
 export default class DataSourceService {

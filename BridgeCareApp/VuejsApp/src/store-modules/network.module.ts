@@ -5,7 +5,6 @@ import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import prepend from 'ramda/es/prepend';
 import { http2XX } from '@/shared/utils/http-utils';
-import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import AggregationService from '@/services/aggregation.service';
 
 const state = {

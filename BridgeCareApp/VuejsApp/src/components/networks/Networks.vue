@@ -182,15 +182,13 @@ import {
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
 import { Attribute, emptyAttribute } from '@/shared/models/iAM/attribute';
-import { Datasource, emptyDatasource, RawDataColumns } from '@/shared/models/iAM/data-source';
-import { clone, filter, findIndex, isNil, propEq, update, any, find } from 'ramda';
+import { Datasource } from '@/shared/models/iAM/data-source';
+import { clone, isNil, propEq, any } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
-import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 import  AddNetworkDialog from '@/components/networks/networks-dialogs/AddNetworkDialog.vue';
 import { AddNetworkDialogData, emptyAddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
-import { NetworkRequestType } from 'msal/lib-commonjs/utils/Constants';
 import { Hub } from '@/connectionHub';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 

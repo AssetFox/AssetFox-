@@ -196,17 +196,12 @@ import {
     RemainingLifeLimitLibrary,
 } from '@/shared/models/iAM/remaining-life-limit';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
-import { prepend, clone, findIndex, isNil, propEq, update, contains, any, find } from 'ramda';
+import { clone, isNil, propEq, any, find } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import CreateRemainingLifeLimitDialog from '@/components/remaining-life-limit-editor/remaining-life-limit-editor-dialogs/CreateRemainingLifeLimitDialog.vue';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
-import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
 import {
     CreateRemainingLifeLimitLibraryDialogData,
     emptyCreateRemainingLifeLimitLibraryDialogData,
@@ -223,9 +218,7 @@ import {
     InputValidationRules,
     rules,
 } from '@/shared/utils/input-validation-rules';
-import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
@@ -446,19 +439,7 @@ export default class RemainingLifeLimitEditor extends Vue {
 
     @Watch('selectedRemainingLifeLimitLibrary')
     onSelectedRemainingLifeLimitLibraryChanged() {
-        this.hasSelectedLibrary =
-            this.selectedRemainingLifeLimitLibrary.id !== this.uuidNIL;
-
-        // if (this.hasScenario) {
-        //     this.currentPage = this.selectedRemainingLifeLimitLibrary.remainingLifeLimits.map((remainingLifeLimit: RemainingLifeLimit) => ({
-        //         ...remainingLifeLimit, id: getNewGuid()
-        //     }));
-        // } else {
-        //     this.currentPage = clone(
-        //         this.selectedRemainingLifeLimitLibrary.remainingLifeLimits,
-        //     );
-        // }
-
+        this.hasSelectedLibrary =  this.selectedRemainingLifeLimitLibrary.id !== this.uuidNIL;
         this.clearChanges();
         this.initializing = false;
         if(this.hasSelectedLibrary)
@@ -629,18 +610,12 @@ export default class RemainingLifeLimitEditor extends Vue {
     onAddRemainingLifeLimit(newRemainingLifeLimit: RemainingLifeLimit) {
         this.createRemainingLifeLimitDialogData = clone(emptyCreateRemainingLifeLimitDialogData);
         if (!isNil(newRemainingLifeLimit)) {
-            // this.currentPage = prepend(newRemainingLifeLimit, this.currentPage);
             this.addedRows.push(newRemainingLifeLimit);
             this.onPaginationChanged()
         }
     }
 
     onEditRemainingLifeLimitProperty(remainingLifeLimit: RemainingLifeLimit, property: string, value: any) {
-        // this.currentPage = update(
-        //     findIndex(propEq('id', remainingLifeLimit.id), this.currentPage),
-        //     setItemPropertyValue(property, value, remainingLifeLimit),
-        //     this.currentPage,
-        // );
         this.onUpdateRow(remainingLifeLimit.id, clone(remainingLifeLimit))
         this.onPaginationChanged();
     }
@@ -662,17 +637,7 @@ export default class RemainingLifeLimitEditor extends Vue {
         if (!isNil(criteriaExpression) && this.selectedRemainingLifeLimit.id !== this.uuidNIL) {
             if(this.selectedRemainingLifeLimit.criterionLibrary.id === getBlankGuid())
                 this.selectedRemainingLifeLimit.criterionLibrary.id = getNewGuid();
-            // this.currentPage = update(
-            //     findIndex(
-            //         propEq('id', this.selectedRemainingLifeLimit.id),
-            //         this.currentPage,
-            //     ),
-            //     {
-            //         ...this.selectedRemainingLifeLimit,
-            //         criterionLibrary: criterionLibrary,
-            //     },
-            //     this.currentPage,
-            // );
+
             this.onUpdateRow(this.selectedRemainingLifeLimit.id, 
             {
                 ...this.selectedRemainingLifeLimit,

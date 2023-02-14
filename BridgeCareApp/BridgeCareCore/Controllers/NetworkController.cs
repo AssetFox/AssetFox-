@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Security;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 
 namespace BridgeCareCore.Controllers
 {
@@ -70,7 +71,7 @@ namespace BridgeCareCore.Controllers
             {
                 var idAttribute = AttributeService.ConvertAllAttribute(parameters.NetworkDefinitionAttribute);
 
-                var attribute = AttributeMapper.ToDomain(idAttribute, UnitOfWork.EncryptionKey);
+                var attribute = AttributeDtoDomainMapper.ToDomain(idAttribute, UnitOfWork.EncryptionKey);
                 var result = await Task.Factory.StartNew(() =>
                 {
                     // throw an exception if not network definition attribute is present

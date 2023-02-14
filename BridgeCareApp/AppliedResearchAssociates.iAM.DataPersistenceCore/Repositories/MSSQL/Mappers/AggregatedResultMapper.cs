@@ -4,6 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -103,6 +104,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
 
             return entities;
+        }
+
+        public static AggregatedResultDTO ToDto(this AggregatedResultEntity entity)
+        {
+            return new AggregatedResultDTO
+            {
+                MaintainableAssetId = entity.MaintainableAssetId,
+                TextValue = entity.TextValue,
+                NumericValue = entity.NumericValue,
+                Year = entity.Year,
+                Attribute = new AttributeDTO
+                {
+                    Name = entity.Attribute.Name,
+                    Type = entity.Attribute.DataType
+                }
+            };
         }
     }
 }

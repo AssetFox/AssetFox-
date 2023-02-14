@@ -12,6 +12,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
+using AppliedResearchAssociates.iAM.Data.Mappers;
+using AppliedResearchAssociates.iAM;
 
 namespace BridgeCareCore.Services
 {
@@ -142,7 +144,7 @@ namespace BridgeCareCore.Services
                                 WarningMessage = warningMessage,
                             };
                         }
-                        if (attribute.Type == DataPersistenceConstants.AttributeNumericDataType)
+                        if (attribute.Type == AttributeTypeNames.Number)
                         {
                             if (attributeDatum is AttributeDatum<double> doubleAttributeDatum)
                             {
@@ -192,16 +194,16 @@ namespace BridgeCareCore.Services
 
         private IAttributeDatum CreateAttributeDatum(AttributeDTO attribute, object attributeValue, Guid maintainableAssetId, Location location, DateTime inspectionDate)
         {
-            var domainAttribute = AttributeMapper.ToDomain(attribute, _unitOfWork.EncryptionKey);
+            var domainAttribute = AttributeDtoDomainMapper.ToDomain(attribute, _unitOfWork.EncryptionKey);
             var attributeId = Guid.NewGuid();
             var attributeType = domainAttribute.DataType;
             IAttributeDatum returnValue = null;
             switch (attributeType)
             {
-            case DataPersistenceConstants.AttributeTextDataType:
+            case AttributeTypeNames.String:
                 returnValue = new AttributeDatum<string>(attributeId, domainAttribute, attributeValue.ToString(), location, inspectionDate);
                 break;
-            case DataPersistenceConstants.AttributeNumericDataType:
+            case AttributeTypeNames.Number:
                 double? nullableDoubleValue = null;
                 if (attributeValue == null || attributeValue is string attributeValueString && string.IsNullOrWhiteSpace(attributeValueString))
                 {

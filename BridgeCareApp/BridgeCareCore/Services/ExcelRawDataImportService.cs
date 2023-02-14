@@ -18,10 +18,10 @@ namespace BridgeCareCore.Services
         private const int MaximumRows = 100000;
         private const int MaximumColumns = 1000;
 
-        private UnitOfDataPersistenceWork _unitOfWork;
+        private IUnitOfWork _unitOfWork;
 
         public ExcelRawDataImportService(
-            UnitOfDataPersistenceWork unitOfWork
+            IUnitOfWork unitOfWork
             )
         {
             _unitOfWork = unitOfWork;

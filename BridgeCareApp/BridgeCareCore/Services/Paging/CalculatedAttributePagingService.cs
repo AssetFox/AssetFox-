@@ -8,13 +8,14 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services.Paging.Generics;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using Newtonsoft.Json;
 
 namespace BridgeCareCore.Services
 {
     public class CalculatedAttributePagingService : ICalculatedAttributePagingService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public CalculatedAttributePagingService(UnitOfDataPersistenceWork unitOfWork)
+        private readonly IUnitOfWork _unitOfWork;
+        public CalculatedAttributePagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
@@ -22,7 +23,7 @@ namespace BridgeCareCore.Services
         public PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO> GetScenarioPage(Guid libraryId, CalculatedAttributePagingRequestModel request)
         {
             var calcAttribute = new CalculatedAttributeDTO();
-            var attribute = _unitOfWork.Context.Attribute.First(_ => _.Id == request.AttributeId);
+            var attribute = _unitOfWork.AttributeRepo.GetSingleById(request.AttributeId);
             var addedCalc = request.SyncModel.AddedCalculatedAttributes.FirstOrDefault(_ => _.Attribute == attribute.Name);
             if (addedCalc != null)
                 calcAttribute = addedCalc;
@@ -34,7 +35,7 @@ namespace BridgeCareCore.Services
         public PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO> GetLibraryPage(Guid simulationId, CalculatedAttributePagingRequestModel request)
         {
             var calcAttribute = new CalculatedAttributeDTO();
-            var attribute = _unitOfWork.Context.Attribute.First(_ => _.Id == request.AttributeId);
+            var attribute = _unitOfWork.AttributeRepo.GetSingleById(request.AttributeId);
             var addedCalc = request.SyncModel.AddedCalculatedAttributes.FirstOrDefault(_ => _.Attribute == attribute.Name);
             if (addedCalc != null)
                 calcAttribute = addedCalc;

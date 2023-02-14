@@ -1,4 +1,5 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
@@ -11,7 +12,7 @@ using BridgeCareCore.Models;
 using BridgeCareCoreTests.Helpers;
 using Xunit;
 
-namespace BridgeCareCoreTests.Tests
+namespace BridgeCareCoreTests.Tests.Integration
 {
     public class SimulationRunTests
     {
@@ -22,7 +23,7 @@ namespace BridgeCareCoreTests.Tests
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(TestHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
-            var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
+            var districtAttribute = AttributeDtoDomainMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
 
             var networkName = RandomStrings.WithPrefix("Network");
@@ -34,7 +35,7 @@ namespace BridgeCareCoreTests.Tests
                 DefaultEquation = "[Deck_Area]",
                 NetworkDefinitionAttribute = networkDefinitionAttribute
             };
-            var network = NetworkTestSetupViaFactory.ModelForEntityInDbViaFactory(
+            var network = NetworkIntegrationTestSetup.ModelForEntityInDbViaFactory(
                 TestHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
 
             var simulationId = Guid.NewGuid();

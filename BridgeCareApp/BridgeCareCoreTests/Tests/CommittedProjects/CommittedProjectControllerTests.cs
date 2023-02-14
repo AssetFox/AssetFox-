@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
@@ -45,10 +45,6 @@ namespace BridgeCareCoreTests.Tests
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UserDtos.Admin());
 
             var mockSimulationRepo = new Mock<ISimulationRepository>();
-            mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => SimulationInTestData(_))))
-                .Returns(TestDataForCommittedProjects.AuthorizedSimulationDTOs().First());
-            mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => !SimulationInTestData(_))))
-                .Throws<RowNotInTableException>();
             _mockUOW.Setup(_ => _.SimulationRepo).Returns(mockSimulationRepo.Object);
 
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
@@ -96,7 +92,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
+            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -122,7 +118,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
+            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -231,7 +227,7 @@ namespace BridgeCareCoreTests.Tests
                 _mockService.Object,
                 _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
-                TestHelper.UnitOfWork,
+                _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
 
@@ -430,7 +426,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -455,7 +451,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -665,12 +661,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(allowed.Succeeded);
         }
 
-
-
         #region Helpers
-        private bool SimulationInTestData(Guid simulationId) =>
-            TestDataForCommittedProjects.Simulations.Any(_ => _.Id == simulationId);
-
         private UserDTO UnauthorizedUser => new UserDTO
         {
             Username = "Nonadmin",

@@ -30,8 +30,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         public DataSourceRepositoryTests()
         {
             _mockedContext = new Mock<IAMContext>();
-            _testDataSourceList = TestDataForDataSources.SimpleRepo().AsQueryable();
-            _testAttributeSourceList = TestDataForDataSources.SimpleAttributeRepo().AsQueryable();
+            _testDataSourceList = TestEntitiesForDataSources.SimpleRepo().AsQueryable();
+            _testAttributeSourceList = TestEntitiesForDataSources.SimpleAttributeRepo().AsQueryable();
 
             _mockedDataSourceSet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.DataSource, _testDataSourceList);
             _mockedAttributeSet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, _testAttributeSourceList);

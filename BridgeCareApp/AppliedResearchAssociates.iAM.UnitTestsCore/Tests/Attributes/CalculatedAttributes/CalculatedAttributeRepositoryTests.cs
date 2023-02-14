@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
@@ -288,7 +288,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
         {
             // Arrange
             var repo = new CalculatedAttributeRepository(_testRepo);
-            var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
+            var simulationId = TestDataForCalculatedAttributesRepository.FirstSimulationId;
 
             // Act
             var result = repo.GetScenarioCalculatedAttributes(simulationId);
@@ -303,7 +303,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
         {
             // Arrange
             var repo = new CalculatedAttributeRepository(_emptyTestRepo);
-            var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
+            var simulationId = TestDataForCalculatedAttributesRepository.FirstSimulationId;
 
             // Act
             var result = repo.GetScenarioCalculatedAttributes(simulationId);
@@ -455,7 +455,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
         {
             // Arrange
             var repo = new CalculatedAttributeRepository(_testRepo);
-            var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
+            var simulationId = TestDataForCalculatedAttributesRepository.FirstSimulationId;
             var attr = _testRepo.Context.Attribute.First(_ => _.Name == "AGE");
             
             // Act

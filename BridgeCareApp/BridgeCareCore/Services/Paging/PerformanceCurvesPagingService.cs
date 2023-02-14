@@ -19,8 +19,6 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-
-
         protected override List<PerformanceCurveDTO> OrderByColumn(List<PerformanceCurveDTO> curves, string sortColumn, bool isDescending)
         {
             sortColumn = sortColumn?.ToLower();

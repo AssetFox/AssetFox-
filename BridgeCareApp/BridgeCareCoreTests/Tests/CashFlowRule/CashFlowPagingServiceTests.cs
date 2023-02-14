@@ -21,6 +21,7 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             var service = new CashFlowPagingService(unitOfWork.Object);
             return service;
         }
+
         [Fact]
         public void GetSyncedScenarioDataset_EverythingIsEmpty_Empty()
         {
@@ -67,6 +68,7 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             var resultDto = result.Single();
             ObjectAssertions.Equivalent(dto3, resultDto);
         }
+
         [Fact]
         public void GetSyncedScenarioDataset_RowToDelete_DeletesRow()
         {
@@ -75,11 +77,8 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             var pagingService = CreatePagingService(unitOfWork);
             var scenarioId = Guid.NewGuid();
             var ruleId = Guid.NewGuid();
-            var criterionLibraryId = Guid.NewGuid();
-            var distributionRuleId = Guid.NewGuid();
-            var dto1 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
-            var dto2 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
-            var dtos = new List<CashFlowRuleDTO> { dto1 };
+            var dto = CashFlowRuleDtos.Rule(ruleId);
+            var dtos = new List<CashFlowRuleDTO> { dto };
             repo.Setup(r => r.GetScenarioCashFlowRules(scenarioId)).Returns(dtos);
             var syncModel = new PagingSyncModel<CashFlowRuleDTO>
             {
@@ -90,6 +89,88 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
                 scenarioId, syncModel);
 
             Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetSyncedScenarioDataset_RepoReturnsRule_ReturnedInResult()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var scenarioId = Guid.NewGuid();
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var dto1 = CashFlowRuleDtos.Rule(ruleId, criterionLibraryId, distributionRuleId);
+            var dto2 = CashFlowRuleDtos.Rule(ruleId, criterionLibraryId, distributionRuleId);
+            var dtos = new List<CashFlowRuleDTO> { dto1 };
+            repo.Setup(r => r.GetScenarioCashFlowRules(scenarioId)).Returns(dtos);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>();
+
+            var result = pagingService.GetSyncedScenarioDataSet(scenarioId, syncModel);
+
+            var resultDto = result.Single();
+            ObjectAssertions.Equivalent(dto2, resultDto);
+        }
+
+        [Fact]
+        public void TooManyRulesForPage_Truncates()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var scenarioId = Guid.NewGuid();
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var dto1 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dto1Clone = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dto2 = CashFlowRuleDtos.Rule();
+            var dtos = new List<CashFlowRuleDTO> { dto1, dto2 };
+            repo.Setup(r => r.GetScenarioCashFlowRules(scenarioId)).Returns(dtos);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>();
+            var pagingRequest = new PagingRequestModel<CashFlowRuleDTO>
+            {
+                SyncModel = syncModel,
+                RowsPerPage= 1,
+                Page = 1,
+            };
+
+            var result = pagingService.GetScenarioPage(scenarioId, pagingRequest);
+
+            Assert.Equal(2, result.TotalItems);
+            var item = result.Items.Single();
+            ObjectAssertions.Equivalent(dto1Clone, item);
+        }
+
+        [Fact]
+        public void RequestForSecondPage_Expected()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var scenarioId = Guid.NewGuid();
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var dto1 = CashFlowRuleDtos.Rule();
+            var dto2 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dto2Clone = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dtos = new List<CashFlowRuleDTO> { dto1, dto2 };
+            repo.Setup(r => r.GetScenarioCashFlowRules(scenarioId)).Returns(dtos);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>();
+            var pagingRequest = new PagingRequestModel<CashFlowRuleDTO>
+            {
+                SyncModel = syncModel,
+                RowsPerPage = 1,
+                Page = 2,
+            };
+
+            var result = pagingService.GetScenarioPage(scenarioId, pagingRequest);
+
+            Assert.Equal(2, result.TotalItems);
+            var item = result.Items.Single();
+            ObjectAssertions.Equivalent(dto2Clone, item);
         }
     }
 }

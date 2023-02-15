@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
@@ -16,7 +16,6 @@ using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
 using System.Security.Claims;
@@ -33,6 +32,7 @@ namespace BridgeCareCoreTests.Tests
     {
         private Mock<IUnitOfWork> _mockUOW;
         private Mock<ICommittedProjectService> _mockService;
+        private Mock<ICommittedProjectPagingService> _mockPagingService;
         private Mock<ICommittedProjectRepository> _mockCommittedProjectRepo;
         private Guid _badScenario = Guid.Parse("0c66674c-8fcb-462b-8765-69d6815e0958");
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
@@ -45,10 +45,6 @@ namespace BridgeCareCoreTests.Tests
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UserDtos.Admin());
 
             var mockSimulationRepo = new Mock<ISimulationRepository>();
-            mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => SimulationInTestData(_))))
-                .Returns(TestDataForCommittedProjects.AuthorizedSimulationDTOs().First());
-            mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => !SimulationInTestData(_))))
-                .Throws<RowNotInTableException>();
             _mockUOW.Setup(_ => _.SimulationRepo).Returns(mockSimulationRepo.Object);
 
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
@@ -59,20 +55,16 @@ namespace BridgeCareCoreTests.Tests
             _mockService = new Mock<ICommittedProjectService>();
             _mockService.Setup(_ => _.ExportCommittedProjectsFile(It.IsAny<Guid>()))
                 .Returns(TestDataForCommittedProjects.GoodFile());
+            _mockPagingService = new Mock<ICommittedProjectPagingService>();
         }
         public CommittedProjectController CreateTestController(List<string> userClaims)
         {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.AdminMock.Object,
                 _mockUOW.Object,
                 hubService,
@@ -93,13 +85,14 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
+            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -118,13 +111,14 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
+            var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -137,9 +131,10 @@ namespace BridgeCareCoreTests.Tests
             var mockContextAccessor = new Mock<IHttpContextAccessor>();
             var hubService = HubServiceMocks.Default();
             mockContextAccessor.Setup(_ => _.HttpContext)
-                .Returns(CreateLoadedContextForSimulation(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
+                .Returns(CreateLoadedContextForSimulation(TestDataForCommittedProjects.SimulationId));
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -159,11 +154,12 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var mockContextAccessor = new Mock<IHttpContextAccessor>();
             mockContextAccessor.Setup(_ => _.HttpContext)
-                .Returns(CreateLoadedContextForSimulation(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
+                .Returns(CreateLoadedContextForSimulation(TestDataForCommittedProjects.SimulationId));
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -183,20 +179,20 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var mockContextAccessor = new Mock<IHttpContextAccessor>();
             mockContextAccessor.Setup(_ => _.HttpContext)
-                .Returns(CreateContextWithNoFile(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
+                .Returns(CreateContextWithNoFile(TestDataForCommittedProjects.SimulationId));
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
                 mockContextAccessor.Object, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ImportCommittedProjects();
 
+            await Assert.ThrowsAsync<ConstraintException>(() => controller.ImportCommittedProjects());
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result);
             _mockService.Verify(_ => _.ImportCommittedProjectFiles(It.IsAny<Guid>(), It.IsAny<ExcelPackage>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
         }
 
@@ -208,16 +204,16 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ImportCommittedProjects();
+            await Assert.ThrowsAsync<ConstraintException>(() => controller.ImportCommittedProjects());
 
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result);
             _mockService.Verify(_ => _.ImportCommittedProjectFiles(It.IsAny<Guid>(), It.IsAny<ExcelPackage>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
         }
 
@@ -229,15 +225,14 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
-                TestHelper.UnitOfWork,
+                _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
 
             // Act + Asset
-            var result = await controller.ImportCommittedProjects();
-            Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Committed Project error::Request MIME type is invalid.", ((BadRequestObjectResult)result).Value);
+            await Assert.ThrowsAsync<ConstraintException>(() => controller.ImportCommittedProjects());
         }
 
         [Fact]
@@ -252,17 +247,18 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
                 mockContextAccessor.Object, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ImportCommittedProjects();
+            await Assert.ThrowsAsync<ArgumentException>(() => controller.ImportCommittedProjects());
 
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result);
             _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Never());
+            
         }
 
         [Fact]
@@ -273,13 +269,14 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.DeleteSimulationCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var result = await controller.DeleteSimulationCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -295,13 +292,13 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
-
             // Act
-            var result = await controller.DeleteSimulationCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var result = await controller.DeleteSimulationCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -316,6 +313,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -337,6 +335,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -362,10 +361,11 @@ namespace BridgeCareCoreTests.Tests
             var accessor = HttpContextAccessorMocks.Default();
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
             _mockCommittedProjectRepo.Setup(_ => _.GetSimulationId(It.IsAny<Guid>()))
-                .Returns(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+                .Returns(TestDataForCommittedProjects.SimulationId);
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -392,6 +392,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -418,19 +419,20 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
             var okResult = result as OkObjectResult;
             var contents = okResult.Value as List<SectionCommittedProjectDTO>;
-            Assert.Equal(2, contents.Count);
+            Assert.Equal(3, contents.Count);
         }
 
         [Fact(Skip ="Authorization handled via claims, can we delete?")]
@@ -442,13 +444,14 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -464,6 +467,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -476,13 +480,14 @@ namespace BridgeCareCoreTests.Tests
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        public async Task UpsertSectionWorksWithValidProjects()
+        public async Task UpsertSectionWorksWithValidProjects()//
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -514,6 +519,7 @@ namespace BridgeCareCoreTests.Tests
 
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -526,7 +532,7 @@ namespace BridgeCareCoreTests.Tests
                 UpdateRows = new List<SectionCommittedProjectDTO>(),
                 RowsForDeletion = new List<Guid>()
             };
-            _mockService.Setup(_ => _.GetSyncedDataset(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync)).Returns(TestDataForCommittedProjects.ValidCommittedProjects);
+            _mockPagingService.Setup(_ => _.GetSyncedDataset(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync)).Returns(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Act
             var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
@@ -544,6 +550,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -654,12 +661,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(allowed.Succeeded);
         }
 
-
-
         #region Helpers
-        private bool SimulationInTestData(Guid simulationId) =>
-            TestDataForCommittedProjects.Simulations.Any(_ => _.Id == simulationId);
-
         private UserDTO UnauthorizedUser => new UserDTO
         {
             Username = "Nonadmin",

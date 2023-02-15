@@ -55,7 +55,7 @@
                                 </v-text-field>
                             </td>
                             <td>
-                                <v-btn @click="onRemoveBudget(props.item.id)"  class="ghd-blue" icon>
+                                <v-btn @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </td>
@@ -83,7 +83,7 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
-        <CriterionLibraryEditorDialog :dialogData='criterionLibraryEditorDialogData'
+        <GeneralCriterionEditorDialog :dialogData='criterionLibraryEditorDialogData'
                                       @submit='onSubmitCriterionLibraryEditorDialogResult' />
     </v-layout>
 </template>
@@ -95,24 +95,21 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { Action } from 'vuex-class';
 import { any, clone, isNil, update, findIndex, propEq, isEmpty } from 'ramda';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import {
     EditBudgetsDialogData, EmitedBudgetChanges, emptyEmitBudgetChanges,
 } from '@/shared/models/modals/edit-budgets-dialog';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import { Budget, emptyBudget } from '@/shared/models/iAM/investment';
 import { rules, InputValidationRules } from '@/shared/utils/input-validation-rules';
 import ObjectID from 'bson-objectid';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary, emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
-import { isNull } from 'util';
+import { isNull, isNullOrUndefined } from 'util';
 
 @Component({
     components: {
-        CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
     },
 })
 export default class EditBudgetsDialog extends Vue {
@@ -127,8 +124,8 @@ export default class EditBudgetsDialog extends Vue {
         { text: 'Actions', value: 'actions', sortable: false, align: 'left', class: '', width: '' }
     ];
     editBudgetsDialogGridData: Budget[] = [];
-    selectedGridRows: Budget[] = [];
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+    selectedGridRows: Budget[] = [];    
+    criterionLibraryEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
     selectedBudgetForCriteriaEdit: Budget = clone(emptyBudget);
     rules: InputValidationRules = rules;
     uuidNIL: string = getBlankGuid();
@@ -224,8 +221,8 @@ export default class EditBudgetsDialog extends Vue {
     onRemoveBudget(id: string){
         this.editBudgetsDialogGridData = this.editBudgetsDialogGridData
             .filter((budget: Budget) => budget.id != id);
-
-        this.removeBudget(id)
+        this.removeBudget(id);
+        this.cleanReorderList();
     }
 
     removeBudget(id: string){
@@ -233,8 +230,10 @@ export default class EditBudgetsDialog extends Vue {
             this.budgetChanges.addedBudgets = this.budgetChanges.addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
             this.budgetChanges.deletionIds.push(id);
         }              
-        else if(any(propEq('id', id), this.budgetChanges.updatedBudgets))
+        else if(any(propEq('id', id), this.budgetChanges.updatedBudgets)) {
             this.budgetChanges.updatedBudgets = this.budgetChanges.updatedBudgets.filter((upBudge: Budget) => upBudge.id != id);
+            this.budgetChanges.deletionIds.push(id);
+        }
         else
             this.budgetChanges.deletionIds.push(id);
     }
@@ -244,38 +243,47 @@ export default class EditBudgetsDialog extends Vue {
 
         this.criterionLibraryEditorDialogData = {
             showDialog: true,
-            libraryId: budget.criterionLibrary.id,
-            isCallFromScenario: this.dialogData.scenarioId !== this.uuidNIL,
-            isCriterionForLibrary: this.dialogData.scenarioId === this.uuidNIL
+            CriteriaExpression: budget.criterionLibrary.mergedCriteriaExpression
         };
     }
 
-    onSubmitCriterionLibraryEditorDialogResult(criterionLibrary: CriterionLibrary) {
-        this.criterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+    onSubmitCriterionLibraryEditorDialogResult(criterionExpression: string) {
+        this.criterionLibraryEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionLibrary) && this.selectedBudgetForCriteriaEdit.id !== this.uuidNIL) {
+        if (!isNil(criterionExpression) && this.selectedBudgetForCriteriaEdit.id !== this.uuidNIL) {
+            this.selectedBudgetForCriteriaEdit.criterionLibrary.mergedCriteriaExpression = criterionExpression;           
+
             this.editBudgetsDialogGridData = update(
                 findIndex(propEq('id', this.selectedBudgetForCriteriaEdit.id), this.editBudgetsDialogGridData),
-                { ...this.selectedBudgetForCriteriaEdit, criterionLibrary: criterionLibrary },
+                { ...this.selectedBudgetForCriteriaEdit, criterionLibrary: this.selectedBudgetForCriteriaEdit.criterionLibrary },
                 this.editBudgetsDialogGridData,
             );
 
-        const budget = this.selectedBudgetForCriteriaEdit;
-        const origBudget = this.dialogData.budgets.find((b) => b.id == budget.id)
-        if(!isNil(origBudget)){
-            if(origBudget.criterionLibrary.mergedCriteriaExpression !== budget.criterionLibrary.mergedCriteriaExpression){
-                if(any(propEq('id', budget.id), this.budgetChanges.addedBudgets))
-                    this.budgetChanges.addedBudgets[this.budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
-                else if(any(propEq('id', budget.id), this.budgetChanges.updatedBudgets))
-                    this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
-                else
-                    this.budgetChanges.updatedBudgets.push(budget);
+            const budget = this.selectedBudgetForCriteriaEdit;
+            const origBudget = this.dialogData.budgets.find((b) => b.id == budget.id);
+
+            if(!isNil(origBudget)){
+                if(origBudget.criterionLibrary.mergedCriteriaExpression !== budget.criterionLibrary.mergedCriteriaExpression){                                                            
+                    if(this.budgetChanges.addedBudgets.length !== 0){
+                        this.budgetChanges.addedBudgets[this.budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                    }
+                    else if(this.budgetChanges.updatedBudgets.length !== 0){                        
+                        this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                    }
+                    else
+                    {
+                        this.budgetChanges.updatedBudgets.push(budget);
+                    }
+                }
             }
-        }  
+            else{
+                this.budgetChanges.addedBudgets[this.budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+            }        
 
             this.selectedBudgetForCriteriaEdit = clone(emptyBudget);
         }
     }
+
     onSubmit(submit: boolean) {
         if (submit) {
             this.$emit('submit', this.budgetChanges);
@@ -360,6 +368,14 @@ export default class EditBudgetsDialog extends Vue {
         this.editBudgetsDialogGridData.sort(this.compareOrder);
         this.originalOrder = 0;
         this.currentSelectedBudget = emptyBudget;
+    }
+    cleanReorderList() {
+        let count: number = 1;
+        this.editBudgetsDialogGridData.forEach(element => {
+            element.budgetOrder = count;
+            this.onEditBudgetOrder(element);
+            count++;
+        });
     }
     setCurrentOrder(item: Budget) {
         this.originalOrder = item.budgetOrder;

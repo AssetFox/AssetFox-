@@ -22,7 +22,7 @@
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Category</v-subheader>
                         <v-select
-                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border ghd-control-width'
+                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                             :items="Array.from(treatmentCategoryMap.keys())"
                             append-icon=$vuetify.icons.ghd-down
                             @input="
@@ -40,7 +40,7 @@
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Asset type</v-subheader>
                         <v-select
-                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border ghd-control-width'
+                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                         :items="Array.from(assetTypeMap.keys())"
                         append-icon=$vuetify.icons.ghd-down
                             @input="
@@ -100,7 +100,7 @@
                         full-width
                         bottom
                         min-height="500px"
-                        min-width="800px"
+                        min-width="1000px"
                     >   
                         <template slot="activator">                                                                                       
                             <v-layout column class="ghd-left-padding">  
@@ -116,7 +116,7 @@
                                             class="ghd-white-bg ghd-blue ghd-button-text"
                                             icon
                                         >
-                                            Clear
+                                            <v-icon style="font-size:20px !important" class="ghd-blue">fas fa-eraser</v-icon>
                                         </v-btn>
                                         <v-btn
                                             @click="
@@ -124,6 +124,7 @@
                                             "
                                             class="edit-icon"
                                             icon
+                                            style="left:25px"
                                         >
                                             <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-btn>   
@@ -231,7 +232,7 @@ export default class TreatmentDetailsTab extends Vue {
     onShowTreatmentCriterionEditorDialog() {
         this.treatmentCriterionEditorDialogData = {
             showDialog: true,
-            CriteriaExpression: this.selectedTreatmentDetails.criterionLibrary.id
+            CriteriaExpression: this.selectedTreatmentDetails.criterionLibrary.mergedCriteriaExpression
         };
     }
 

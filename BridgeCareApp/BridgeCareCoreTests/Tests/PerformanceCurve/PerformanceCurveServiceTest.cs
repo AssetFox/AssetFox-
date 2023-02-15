@@ -21,20 +21,21 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
         public void GetLibrarySyncedDataSet_NoCurvesInLibrary_ReturnsEmptyListOfCurves()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var hubService = HubServiceMocks.Default();
-            var expressionValidationService = ExpressionValidationServiceMocks.New();
             var repository = new Mock<IPerformanceCurveRepository>();
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
-            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
             var libraryId = Guid.NewGuid();
-            var request = new PagingSyncModel<PerformanceCurveDTO>
+            var libraryRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
-                LibraryId = libraryId,
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>
+                {
+                    LibraryId = libraryId,
+                }
             };
             var curves = new List<PerformanceCurveDTO>();
-            repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(curves);
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
 
-            var dataset = service.GetSyncedLibraryDataset(libraryId, request);
+            var dataset = service.GetSyncedLibraryDataset(libraryRequest);
             Assert.Empty(dataset);
         }
 
@@ -42,24 +43,25 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
         public void GetLibrarySyncedDataSet_OneCurveInLibrary_ReturnsTheCurve()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var hubService = HubServiceMocks.Default();
-            var expressionValidationService = ExpressionValidationServiceMocks.New();
             var repository = new Mock<IPerformanceCurveRepository>();
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
-            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
             var libraryId = Guid.NewGuid();
-            var request = new PagingSyncModel<PerformanceCurveDTO>
+            var libraryRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
-                LibraryId = libraryId,
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>
+                {
+                    LibraryId = libraryId,
+                }
             };
             var curve = new PerformanceCurveDTO
             {
                 Id = Guid.NewGuid(),
             };
             var curves = new List<PerformanceCurveDTO> { curve};
-            repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(curves);
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
 
-            var dataset = service.GetSyncedLibraryDataset(libraryId, request);
+            var dataset = service.GetSyncedLibraryDataset(libraryRequest);
             var returnedCurve = dataset.Single();
             ObjectAssertions.Equivalent(curve, returnedCurve);
         }
@@ -72,7 +74,7 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var expressionValidationService = ExpressionValidationServiceMocks.New();
             var repository = new Mock<IPerformanceCurveRepository>();
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
-            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var curve = new PerformanceCurveDTO
@@ -85,9 +87,13 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
                 LibraryId = libraryId,
                 RowsForDeletion = new List<Guid> { curveId },
             };
-            repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(curves);
+            var upsertRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>
+            {
+                SyncModel = request,
+            };
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
 
-            var dataset = service.GetSyncedLibraryDataset(libraryId, request);
+            var dataset = service.GetSyncedLibraryDataset(upsertRequest);
             Assert.Empty(dataset);
         }
 
@@ -99,7 +105,7 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var expressionValidationService = ExpressionValidationServiceMocks.New();
             var repository = new Mock<IPerformanceCurveRepository>();
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
-            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var curve = new PerformanceCurveDTO
@@ -112,9 +118,13 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
                 LibraryId = libraryId,
                 AddedRows = curves,
             };
-            repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(new List<PerformanceCurveDTO>());
+            var upsertRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>
+            {
+                SyncModel = request,
+            };
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(new List<PerformanceCurveDTO>());
 
-            var dataset = service.GetSyncedLibraryDataset(libraryId, request);
+            var dataset = service.GetSyncedLibraryDataset(upsertRequest);
             var returnedCurve = dataset.Single();
             ObjectAssertions.Equivalent(curve, returnedCurve);
         }

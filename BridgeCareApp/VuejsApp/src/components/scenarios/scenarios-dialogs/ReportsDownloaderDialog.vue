@@ -62,6 +62,7 @@ import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
+import { getBlankGuid } from '@/shared/utils/uuid-utils';
 
 @Component({})
 export default class ReportsDownloaderDialog extends Vue {
@@ -102,11 +103,11 @@ export default class ReportsDownloaderDialog extends Vue {
                     }
 
                     this.addSuccessNotificationAction({
-                        message: 'Summary report generation started.',
+                        message: 'Summary report generation started for ' + this.dialogData.name + '.',
                     });
                 } else {
                     this.addErrorNotificationAction({
-                        message: 'Failed to generate report.',
+                        message: 'Failed to generate apricot for ' + this.dialogData.name + '.',
                         longMessage:
                             'Failed to generate the summary report. Make sure the scenario has been run',
                     });

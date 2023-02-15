@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -7,36 +6,34 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
-using BridgeCareCore.Services.CommittedProjects;
 using BridgeCareCore.Utils;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using NuGet.ContentModel;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace BridgeCareCore.Services
 {
     public class CommittedProjectService : ICommittedProjectService
     {
         private static IUnitOfWork _unitOfWork;
-
         public const string UnknownBudgetName = "Unknown";
 
         // TODO: Determine based on associated network
         private readonly string _networkKeyField = "BRKEY_";
-        private readonly Dictionary<string, List<KeySegmentDatum>> _keyProperties;
-        private readonly List<string> _keyFields;
+        private Dictionary<string, List<KeySegmentDatum>> _keyProperties;
+        private List<string> _keyFields;
 
-        private static readonly List<string> InitialHeaders = new List<string>
+        private static readonly List<string> InitialHeaders = new()
         {
             "TREATMENT",
             "YEAR",
@@ -53,15 +50,13 @@ namespace BridgeCareCore.Services
         public CommittedProjectService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties.ToDictionary();
-            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
         }
 
         /**
          * Adds excel worksheet header row cell values for Committed Project Export
          */
         private void AddHeaderCells(ExcelWorksheet worksheet, List<string> attributeNames)
-        {
+        {            
             var column = 1;
             if (_keyFields.Contains(_networkKeyField))
             {
@@ -101,7 +96,7 @@ namespace BridgeCareCore.Services
                             locationValue = project.LocationKeys[_networkKeyField];
                             worksheet.Cells[row, column++].Value = locationValue;
                         }
-
+                                            
                         // Add other data from key fields based on ID
                         var otherData = _keyFields.Where(_ => _ != _networkKeyField);
                         if (!String.IsNullOrEmpty(locationValue) && otherData.Count() > 0)
@@ -163,7 +158,8 @@ namespace BridgeCareCore.Services
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
 
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
-
+            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             if (committedProjectDTOs.Any())
             {
                 var attributeNames = committedProjectDTOs
@@ -196,7 +192,8 @@ namespace BridgeCareCore.Services
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
 
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
-
+            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             AddHeaderCells(worksheet, new List<string> { "Add Consequences Here and in columns to the right" });
 
             return new FileInfoDTO
@@ -205,23 +202,6 @@ namespace BridgeCareCore.Services
                 FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
                 MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             };
-        }
-
-        /**
-         * Gets SimulationEntity data for a Committed Project Import
-         */
-        private SimulationEntity GetSimulationEntityForCommittedProjectImport(Guid simulationId)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new ArgumentException($"No simulation was found for the given scenario.");
-            }
-
-            return _unitOfWork.Context.Simulation
-                .Include(_ => _.InvestmentPlan)
-                .Include(_ => _.Budgets)
-                .ThenInclude(_ => _.ScenarioBudgetAmounts)
-                .Single(_ => _.Id == simulationId);
         }
 
         /**
@@ -280,9 +260,15 @@ namespace BridgeCareCore.Services
             ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
             // First, get the simulation
-            var simulationEntity = GetSimulationEntityForCommittedProjectImport(simulationId);
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
+            if (simulation == null)
+            {
+                throw new ArgumentException($"No simulation was found for the given scenario.");
+            }
+            var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
+            var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
 
-            if (simulationEntity.InvestmentPlan == null)
+            if (investmentPlan == null)
             {
                 throw new RowNotInTableException("Simulation has no investment plan.");
             }
@@ -298,7 +284,7 @@ namespace BridgeCareCore.Services
             var end = worksheet.Dimension.End;  // Contains both column and row ends
 
             // Get the location => asset ID lookup for all maintainable assets in the network
-            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulationEntity.NetworkId);
+            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulation.NetworkId);
 
             // Get the column ID for the network's key field
             if (!headers.Contains(_networkKeyField))
@@ -363,23 +349,30 @@ namespace BridgeCareCore.Services
 
                 if (!budgetNameIsEmpty)
                 {
-                    if (simulationEntity.Budgets.All(_ => _.Name != budgetName))
+                    if (budgets.All(_ => _.Name != budgetName))
                     {
                         throw new RowNotInTableException(
                             $"Budget {budgetName} does not exist in the applied budget library.");
                     }
-                    budgetId = simulationEntity.Budgets.Single(_ => _.Name == budgetName).Id;
+                    budgetId = budgets.Single(_ => _.Name == budgetName).Id;
                 }
 
                 // This to convert the incoming string to a TreatmentCategory
-                var convertedCategory = EnumDeserializer.Deserialize<TreatmentCategory>(worksheet.GetCellValue<string>(row, _keyFields.Count + 8));// Assumes that InitialHeaders stays constant
-
+                var convertedCategory = new TreatmentCategory();
+                try
+                {
+                    convertedCategory = EnumDeserializer.Deserialize<TreatmentCategory>(worksheet.GetCellValue<string>(row, _keyFields.Count + 8));// Assumes that InitialHeaders stays constant
+                }
+                catch
+                {
+                    convertedCategory = TreatmentCategory.Other;
+                }
 
                 // Build the committed project object
                 var project = new SectionCommittedProjectDTO
                 {
                     Id = Guid.NewGuid(),
-                    SimulationId = simulationEntity.Id,
+                    SimulationId = simulation.Id,
                     ScenarioBudgetId = budgetId,
                     LocationKeys = locationInformation,
                     Treatment = worksheet.GetCellValue<string>(row, _keyFields.Count + 1), // Assumes that InitialHeaders stays constant
@@ -412,19 +405,19 @@ namespace BridgeCareCore.Services
 
             // Apply required no treatment entries if required by the user
             if (applyNoTreatment && projectsPerLocationIdentifierAndYearTuple.Keys.Any(_ =>
-                _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod))
+                _.Item2 > investmentPlan.FirstYearOfAnalysisPeriod))
             {
                 // Loop through committed projects that do not start in the initial year
                 // (Projects in the initial year do not require No Treatment variables)
                 var locationIdentifierAndYearTuples = projectsPerLocationIdentifierAndYearTuple.Keys
-                    .Where(_ => _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod).ToList();
+                    .Where(_ => _.Item2 > investmentPlan.FirstYearOfAnalysisPeriod).ToList();
                 locationIdentifierAndYearTuples.ForEach(locationIdentifierAndYearTuple =>
                 {
                     var project = projectsPerLocationIdentifierAndYearTuple[locationIdentifierAndYearTuple];
 
                     // Add no treatment projects for each year from the first year of the analysis to the year
                     // prior to the committed project
-                    var year = simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod;
+                    var year = investmentPlan.FirstYearOfAnalysisPeriod;
                     while (year < project.Year &&
                            !projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifierAndYearTuple.Item1,
                                year)))
@@ -464,6 +457,8 @@ namespace BridgeCareCore.Services
 
         public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
+            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             var committedProjectDTOs =
                 CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
 
@@ -471,215 +466,111 @@ namespace BridgeCareCore.Services
 
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
-
-        public double GetTreatmentCost(Guid simulationId, string brkey, string treatment, int year)
+        
+        public double GetTreatmentCost(Guid treatmentLibraryId, string assetKeyData, string treatment, Guid networkId)
         {
-            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().FirstOrDefault(_ => _.Id == simulationId);
-            if (simulation == null)
-                return 0;
-            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(simulation.NetworkId, brkey);
+            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
             
             if (asset == null)
                 return 0;
-            var treatmentCostEquations = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
-                .Include(_ => _.ScenarioTreatmentCosts)
-                .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+            var treatmentCosts = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.TreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
-                .FirstOrDefault(_ => _.Name == treatment && _.SimulationId == simulationId)?.ScenarioTreatmentCosts
-                .Select(_ => _.ScenarioTreatmentCostEquationJoin.Equation).ToList();
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .FirstOrDefault(_ => _.Name == treatment && _.TreatmentLibraryId == treatmentLibraryId)?.TreatmentCosts
+                .Where(_ => _.TreatmentCostEquationJoin != null);
 
             double totalCost = 0;
-            if (treatmentCostEquations == null)
+            if (treatmentCosts == null)
                 return totalCost;
-            foreach(var cost in treatmentCostEquations)
+            foreach(var cost in treatmentCosts)
             {
                 var compiler = new CalculateEvaluateCompiler();
-                var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.Expression, compiler);
 
-                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-                .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
-                var calculator = compiler.GetCalculator(cost.Expression);
+                if (cost.CriterionLibraryTreatmentCostJoin != null && !IsCriteriaValid(compiler, cost.CriterionLibraryTreatmentCostJoin.CriterionLibrary.MergedCriteriaExpression, asset.Id))               
+                    continue;
+                
+                compiler = new CalculateEvaluateCompiler();
+                var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.TreatmentCostEquationJoin.Equation.Expression, compiler);
+
+                var aggResultEntities = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(asset.Id);
+                var latestAggResults = new List<AggregatedResultDTO>();
+                foreach(var attr in attributes)
+                {
+                    var attrs = aggResultEntities.Where(_ => _.Attribute.Id == attr.Id).ToList();
+                    if (attrs.Count == 0)
+                        continue;
+                    var latestYear = attrs.Max(_ => _.Year);
+                    var latestAggResult = attrs.FirstOrDefault(_ => _.Year == latestYear);
+                    latestAggResults.Add(latestAggResult);
+                }                             
+                var calculator = compiler.GetCalculator(cost.TreatmentCostEquationJoin.Equation.Expression);
                 var scope = new CalculateEvaluateScope();
-                var aggResultAttrDict = new Dictionary<string, AggregatedResultEntity>();
-                if (aggResults.Count != attributes.Count)
-                    return 0;
-                InstantiateScope(aggResults, scope);
+                if (latestAggResults.Count != attributes.Count)
+                    continue;
+                InstantiateScope(latestAggResults, scope);
                 var currentCost = calculator.Delegate(scope);
                 totalCost += currentCost;
             }
             return totalCost;
         }
 
-        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid simulationId, string brkey, string treatment, int year)
+        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentLIbraryId, string assetKeyData, string treatment, Guid networkId)
         {
             var consequencesToReturn = new List<CommittedProjectConsequenceDTO>();
-            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().FirstOrDefault(_ => _.Id == simulationId);
-            if (simulation == null)
-                return consequencesToReturn;
-            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(simulation.NetworkId, brkey);
+            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
             if (asset == null)
                 return consequencesToReturn;
-            var treatmentConsequences = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
-                .Include(_ => _.ScenarioTreatmentConsequences)
-                .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+            var treatmentConsequences = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.ScenarioTreatmentConsequences)
+                .Include(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.Attribute)
-                .FirstOrDefault(_ => _.Name == treatment && _.SimulationId == simulationId)?.ScenarioTreatmentConsequences.ToList();
+                .FirstOrDefault(_ => _.Name == treatment && _.TreatmentLibraryId == treatmentLIbraryId)?.TreatmentConsequences.ToList();
             if (treatmentConsequences == null)
                 return consequencesToReturn;
             foreach (var consequence in treatmentConsequences)
             {
                 var compiler = new CalculateEvaluateCompiler();
-                if(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin == null)
+                if(consequence.CriterionLibraryConditionalTreatmentConsequenceJoin == null)
                 {
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue });
                     continue;
                 }
-                var attributes = InstantiateCompilerAndGetExpressionAttributes(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, compiler);
-
-                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-                .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
-                if (aggResults.Count != attributes.Count)
-                    continue;
-                var evaluator = compiler.GetEvaluator(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression);
-                var scope = new CalculateEvaluateScope();
-                InstantiateScope(aggResults, scope);
-                if (evaluator.Delegate(scope))
+                if (IsCriteriaValid(compiler, consequence.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, asset.Id))
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue});
             }
             return consequencesToReturn;
-        }
+        }   
 
-        public PagingPageModel<SectionCommittedProjectDTO> GetCommittedProjectPage(List<SectionCommittedProjectDTO> committedProjects, PagingRequestModel<SectionCommittedProjectDTO> request)
+        private bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId)
         {
-            var skip = 0;
-            var take = 0;
-            var items = new List<SectionCommittedProjectDTO>();
-            var budgetdict = new Dictionary<Guid, string>();
-            var totalItems = 0; 
-
-            request.search = request.search == null ? "" : request.search;
-            request.sortColumn = request.sortColumn == null ? "" : request.sortColumn;
-
-            
-
-            committedProjects = SyncedDataset(committedProjects, request.PagingSync);
-            committedProjects = committedProjects.OrderBy(_ => _.Id).ToList();
-            totalItems = committedProjects.Count;
-
-            if (request.search.Trim() != "" || request.sortColumn.Trim() != "")
+            var attributes = InstantiateCompilerAndGetExpressionAttributes(expression, compiler);
+            var attributeIds = attributes.Select(a => a.Id).ToList();
+            var aggResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(assetId);
+            var latestAggResults = new List<AggregatedResultDTO>();
+            foreach (var attr in attributes)
             {
-                var budgetIds = committedProjects.Select(_ => _.ScenarioBudgetId).Distinct();
-                budgetdict = _unitOfWork.Context.ScenarioBudget.AsNoTracking().Where(_ => budgetIds.Contains(_.Id)).ToDictionary(_ => _.Id, _ => _.Name);
+                var attrs = aggResults.Where(_ => _.Attribute.Id == attr.Id).ToList();
+                if (attrs.Count == 0)
+                    continue;
+                var latestYear = attrs.Max(_ => _.Year);
+                var latestAggResult = attrs.FirstOrDefault(_ => _.Year == latestYear);
+                latestAggResults.Add(latestAggResult);
             }
-
-            if (request.search.Trim() != "")
-                committedProjects = SearchCurves(committedProjects, request.search, budgetdict);
-            if (request.sortColumn.Trim() != "")
-                committedProjects = OrderByColumn(committedProjects, request.sortColumn, request.isDescending, budgetdict);            
-
-            if (request.RowsPerPage > 0)
-            {
-                take = request.RowsPerPage;
-                skip = request.RowsPerPage * (request.Page - 1);
-                items = committedProjects.Skip(skip).Take(take).ToList();
-            }
-            else
-            {
-                items = committedProjects;
-                return new PagingPageModel<SectionCommittedProjectDTO>()
-                {
-                    Items = items,
-                    TotalItems = items.Count
-                };
-            }
-
-            return new PagingPageModel<SectionCommittedProjectDTO>()
-            {
-                Items = items,
-                TotalItems = totalItems
-            };
+            if (latestAggResults.Count != attributes.Count)
+                return false;
+            var evaluator = compiler.GetEvaluator(expression);
+            var scope = new CalculateEvaluateScope();
+            InstantiateScope(latestAggResults, scope);
+            return evaluator.Delegate(scope);
         }
 
-        public List<SectionCommittedProjectDTO> GetSyncedDataset(Guid simulationId, PagingSyncModel<SectionCommittedProjectDTO> request)
-        {
-            var committedProjects = _unitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
-            return SyncedDataset(committedProjects, request);
-        }
-
-
-        private List<SectionCommittedProjectDTO> OrderByColumn(List<SectionCommittedProjectDTO> committedProjects,
-            string sortColumn,
-            bool isDescending,
-            Dictionary<Guid, string> budgetDict)
-        {
-            sortColumn = sortColumn?.ToLower();
-            switch (sortColumn)
-            {
-            case "brkey":
-                if (isDescending)
-                    return committedProjects.OrderByDescending(_ => _.LocationKeys[_networkKeyField], new AlphanumericComparator()).ToList();
-                else
-                    return committedProjects.OrderBy(_ => _.LocationKeys[_networkKeyField], new AlphanumericComparator()).ToList();
-            case "year":
-                if (isDescending)
-                    return committedProjects.OrderByDescending(_ => _.Year).ToList();
-                else
-                    return committedProjects.OrderBy(_ => _.Year).ToList();
-            case "treatment":
-                if(isDescending)
-                    return  committedProjects.OrderByDescending(_ => _.Treatment.ToLower()).ToList();
-                else
-                    return committedProjects.OrderBy(_ => _.Treatment.ToLower()).ToList();
-            case "category":
-                if (isDescending)
-                    return committedProjects.OrderByDescending(_ => _.Category.ToString().ToLower()).ToList();
-                else
-                    return committedProjects.OrderBy(_ => _.Category.ToString().ToLower()).ToList();
-            case "budget":
-                if (isDescending)
-                    return committedProjects.OrderByDescending(_ => _.ScenarioBudgetId == null ? "" : budgetDict[_.ScenarioBudgetId.Value].ToLower()).ToList();
-                else
-                    return committedProjects.OrderBy(_ => _.Category.ToString().ToLower()).ToList();
-            case "cost":
-                if (isDescending)
-                    return committedProjects.OrderByDescending(_ => _.Cost).ToList();
-                else
-                    return committedProjects.OrderBy(_ => _.Cost).ToList();
-            }
-            return committedProjects;
-        }
-
-        private List<SectionCommittedProjectDTO> SearchCurves(List<SectionCommittedProjectDTO> committedProjects,
-            string search,
-            Dictionary<Guid, string> budgetDict)
-        {
-            search = search.ToLower();
-            return committedProjects
-                .Where(_ => _.LocationKeys[_networkKeyField].ToLower().Contains(search) ||
-                    _.Year.ToString().Contains(search) ||
-                    _.Treatment.ToLower().Contains(search) ||
-                    _.Category.ToString().ToLower().Contains(search) ||
-                    (_.ScenarioBudgetId == null ? "" : budgetDict[_.ScenarioBudgetId.Value]).Contains(search) ||
-                    _.Cost.ToString().Contains(search)).ToList();
-        }
-
-        private List<SectionCommittedProjectDTO> SyncedDataset(List<SectionCommittedProjectDTO> committedProjects, PagingSyncModel<SectionCommittedProjectDTO> request)
-        {
-            committedProjects = committedProjects.Concat(request.AddedRows).ToList();
-
-            for (var i = 0; i < committedProjects.Count; i++)
-            {
-                var item = request.UpdateRows.FirstOrDefault(row => row.Id == committedProjects[i].Id);
-                if (item != null)
-                    committedProjects[i] = item;
-            }
-
-            return committedProjects;
-        }
-
-        private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
+        private List<AttributeDTO> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
         {
             var modifiedExpression = mergedCriteriaExpression
                     .Replace("[", "")
@@ -691,24 +582,17 @@ namespace BridgeCareCore.Services
             var pattern = "\\[[^\\]]*\\]";
             var rg = new Regex(pattern);
             var match = rg.Matches(mergedCriteriaExpression);
-            var hashMatch = new HashSet<string>();
+            var hashMatch = new List<string>();
             foreach (Match m in match)
             {
                 hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
             }
 
-            var attributes = _unitOfWork.Context.Attribute.AsNoTracking()
-                .Where(_ => hashMatch.Contains(_.Name))
-                .Select(attribute => new AttributeEntity
-                {
-                    Id = attribute.Id,
-                    Name = attribute.Name,
-                    DataType = attribute.DataType
-                }).AsNoTracking().ToList();
+            var attributes = _unitOfWork.AttributeRepo.GetAttributesWithNames(hashMatch);
 
             attributes.ForEach(attribute =>
             {
-                compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                compiler.ParameterTypes[attribute.Name] = attribute.Type == "NUMBER"
                     ? CalculateEvaluateParameterType.Number
                     : CalculateEvaluateParameterType.Text;
             });
@@ -716,11 +600,11 @@ namespace BridgeCareCore.Services
             return attributes;
         }
 
-        private void InstantiateScope(List<AggregatedResultEntity> results, CalculateEvaluateScope scope)
+        private void InstantiateScope(List<AggregatedResultDTO> results, CalculateEvaluateScope scope)
         {
             results.ForEach(_ =>
             {
-                if (_.Attribute.DataType == "NUMBER")
+                if (_.Attribute.Type == "NUMBER")
                 {
                     scope.SetNumber(_.Attribute.Name, _.NumericValue.Value);
                 }

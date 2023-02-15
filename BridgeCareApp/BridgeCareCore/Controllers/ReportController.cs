@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +12,13 @@ using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Controllers
 {
@@ -81,7 +82,7 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetFile(string reportName)
         {
             var parameters = await GetParameters();
-
+            var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(parameters);
             HubService.SendRealTimeMessage(UnitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, "", parameters);
 
             try
@@ -96,13 +97,13 @@ namespace BridgeCareCore.Controllers
 
                     if (report == null)
                     {
-                        SendRealTimeMessage($"Failed to generate report object for '{reportName}'");
+                        SendRealTimeMessage($"Failed to generate report object for '{reportName}' on simulation '{simulationName}'");
                     }
 
                     // Handle a completed run with errors
                     if (report.Errors.Any())
                     {
-                        SendRealTimeMessage($"Failed to generate '{reportName}'");
+                        SendRealTimeMessage($"Failed to generate '{reportName}' on simulation '{simulationName}'");
 
                         _log.Information($"Failed to generate '{reportName}'");
 
@@ -115,7 +116,7 @@ namespace BridgeCareCore.Controllers
                     // Handle an incomplete run without errors
                     if (!report.IsComplete)
                     {
-                        SendRealTimeMessage($"{reportName} ran but never completed");
+                        SendRealTimeMessage($"{reportName} on simulation '{simulationName}' ran but never completed");
                     }
 
                     //create report index repository
@@ -123,31 +124,10 @@ namespace BridgeCareCore.Controllers
 
                     if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
                     {
-                        SendRealTimeMessage($"Failed to create report repository index");
+                        SendRealTimeMessage($"Failed to create report repository index on {reportName}");
                     }
                 });
             }
-        }
-
-        [HttpGet]
-        [Route("ListReports/{simulationId}")]
-        [Authorize]
-        public async Task<IActionResult> GetSimulationReports(Guid simulationId)
-        {
-            // Since Guid cannot be null, if it is not provided, simulation ID will be Guid.Empty
-            if (simulationId == Guid.Empty)
-            {
-                var message = new List<string>() { $"No simulation ID provided." };
-                return CreateErrorListing(message);
-            }
-
-            if (UnitOfWork.SimulationRepo.GetSimulation(simulationId) == null)
-            {
-                var message = new List<string>() { $"A simulation with the ID of {simulationId} is not available in the database." };
-                return CreateErrorListing(message);
-            }
-
-            return Ok(UnitOfWork.ReportIndexRepository.GetAllForScenario(simulationId));
         }
 
         [HttpGet]
@@ -155,6 +135,7 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> DownloadReport(Guid simulationId, string reportName)
         {
+            var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
             if (simulationId == Guid.Empty || reportName == String.Empty)
             {
                 var message = new List<string>() { $"No simulation or report name provided." };
@@ -173,14 +154,14 @@ namespace BridgeCareCore.Controllers
                 .FirstOrDefault();
             if (report == null)
             {
-                var message = new List<string>() { $"No simulations of the specified type ({reportName}) exist for this simulation.  Did you run the report?" };
+                var message = new List<string>() { $"No simulations of the specified type ({reportName}) exist for simulation {simulationName}.  Did you run the report?" };
                 return CreateErrorListing(message);
             }
 
             var reportPath = Path.Combine(Environment.CurrentDirectory, report.Result);
             if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
             {
-                var message = new List<string>() { $"The report did not include any results" };
+                var message = new List<string>() { $"The report for {simulationName} did not include any results" };
                 return CreateErrorListing(message);
             }
 
@@ -188,39 +169,6 @@ namespace BridgeCareCore.Controllers
             try
             {
                 result = await GetReport(report);
-            }
-            catch (Exception e)
-            {
-                return CreateErrorListing(new List<string>() { e.Message });
-            }
-            return Ok(result);
-        }
-
-        [HttpGet]
-        [Route("DownloadSpecificReport/{reportIndexID}")]
-        [Authorize]
-        public async Task<IActionResult> DownloadSpecificReport(string reportIndexID)
-        {
-            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
-            {
-                var message = new List<string>() { $"Repository index identifier is missing or not set" };
-                return CreateErrorListing(message);
-            }
-
-            //get report path
-            var reportIndex = UnitOfWork.ReportIndexRepository.Get(Guid.Parse(reportIndexID));
-            var reportPath = reportIndex?.Result != null ? Path.Combine(Environment.CurrentDirectory, reportIndex.Result) : "";
-            if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
-            {
-                var message = new List<string>() { $"Failed to get report path using the specified repository index" };
-                return CreateErrorListing(message);
-            }
-
-            // return the download response
-            FileInfoDTO result;
-            try
-            {
-                result = await GetReport(reportIndex);
             }
             catch (Exception e)
             {
@@ -247,13 +195,14 @@ namespace BridgeCareCore.Controllers
 
         private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType, string parameters)
         {
+            var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(parameters);
             //generate report
             var reportObject = await _generator.Generate(reportName);
 
             if (reportObject == null)
             {
                 // Set the error string before creating the FailureReport output object as the report type will be overwritten
-                var errorMessage = $"Failed to generate specified report '{reportName}'";
+                var errorMessage = $"Failed to generate specified report '{reportName}' for simulation '{simulationName}'";
                 reportObject = new FailureReport();
                 await reportObject.Run(errorMessage);
             }

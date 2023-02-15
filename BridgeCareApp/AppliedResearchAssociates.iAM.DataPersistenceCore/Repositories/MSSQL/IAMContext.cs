@@ -176,6 +176,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<SimulationOutputEntity> SimulationOutput { get; set; }
 
+        public virtual DbSet<SimulationOutputJsonEntity> SimulationOutputJson { get; set; }
+
         public virtual DbSet<TargetConditionGoalEntity> TargetConditionGoal { get; set; }
 
         public virtual DbSet<TargetConditionGoalLibraryUserEntity> TargetConditionGoalLibraryUser { get; set; }
@@ -283,11 +285,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<AssetDetailEntity> AssetDetail { get; set; }
 
-        public virtual DbSet<AssetDetailValueEntity> AssetDetailValue { get; set; }
+        public virtual DbSet<AssetDetailValueEntityIntId> AssetDetailValueIntId { get; set; }
 
         public virtual DbSet<AssetSummaryDetailEntity> AssetSummaryDetail { get; set; }
 
-        public virtual DbSet<AssetSummaryDetailValueEntity> AssetSummaryDetailValue { get; set; }
+        public virtual DbSet<AssetSummaryDetailValueEntityIntId> AssetSummaryDetailValueIntId { get; set; }
 
         public virtual DbSet<BudgetDetailEntity> BudgetDetail { get; set; }
 
@@ -662,6 +664,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Year).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.treatmentCategory).IsRequired();
 
                 entity.HasOne(d => d.ScenarioBudget)
                     .WithMany(p => p.CommittedProjects)
@@ -1795,6 +1799,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+
+            modelBuilder.Entity<SimulationOutputJsonEntity>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasIndex(e => e.Id).IsUnique();
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.Property(e => e.OutputType).IsRequired();
+                entity.Property(e => e.Output).IsRequired();
+
+                entity.HasOne(e => e.Simulation)
+                    .WithMany(p => p.SimulationOutputJsons)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.SimulationOutput)
+                    .WithMany(p => p.SimulationOutputJsons)
+                    .HasForeignKey(d => d.SimulationOutputId);
+            });
+
             modelBuilder.Entity<TargetConditionGoalEntity>(entity =>
             {
                 entity.HasIndex(e => e.AttributeId);
@@ -2265,38 +2290,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .OnDelete(DeleteBehavior.ClientCascade);
             });
 
-            modelBuilder.Entity<AssetDetailValueEntity>(entity =>
+            modelBuilder.Entity<AssetDetailValueEntityIntId>(entity =>
             {
                 entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.HasOne(a => a.Attribute)
-                .WithMany(a => a.AssetDetailValues)
+                .WithMany(a => a.AssetDetailValuesIntId)
                 .HasForeignKey(a => a.AttributeId)
                 .OnDelete(DeleteBehavior.ClientCascade)
                 ;
                 entity.HasIndex(e => e.AttributeId);
 
                 entity.HasOne(e => e.AssetDetail)
-                .WithMany(a => a.AssetDetailValues)
+                .WithMany(a => a.AssetDetailValuesIntId)
                 .HasForeignKey(e => e.AssetDetailId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<AssetSummaryDetailValueEntity>(entity =>
+            modelBuilder.Entity<AssetSummaryDetailValueEntityIntId>(entity =>
             {
                 entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.HasOne(a => a.Attribute)
-                .WithMany(a => a.AssetSummaryDetailValues)
+                .WithMany(a => a.AssetSummaryDetailValuesIntId)
                 .HasForeignKey(a => a.AttributeId)
                 .OnDelete(DeleteBehavior.ClientCascade)
                 ;
                 entity.HasIndex(e => e.AttributeId);
 
                 entity.HasOne(e => e.AssetSummaryDetail)
-                .WithMany(a => a.AssetSummaryDetailValues)
+                .WithMany(a => a.AssetSummaryDetailValuesIntId)
                 .HasForeignKey(e => e.AssetSummaryDetailId)
                 .OnDelete(DeleteBehavior.Cascade);
             });

@@ -1,0 +1,149 @@
+Starting save                              0
+assetSummaries                             2,357
+assetSummaryDetails                        238
+assetSummaryDetailValues                   403
+Y2022                                      515
+ 109 assetDetails                          351
+ 13734 assetDetailValues batchSize: 100000 474
+ 94 treatmentOptionDetails                 351
+ 1650 treatmentRejectionDetails            628
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           270
+ 784 budgetUsageDetails                    466
+ 56 cashFlowConsiderationDetails           289
+ Committed                                 265
+ Cleared ChangeTracker                     1
+Y2023                                      8
+ 109 assetDetails                          20
+ 13734 assetDetailValues batchSize: 100000 189
+ 41 treatmentOptionDetails                 9
+ 1687 treatmentRejectionDetails            235
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           8
+ 392 budgetUsageDetails                    91
+ 27 cashFlowConsiderationDetails           5
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Y2024                                      6
+ 109 assetDetails                          19
+ 13734 assetDetailValues batchSize: 100000 192
+ 18 treatmentOptionDetails                 6
+ 1710 treatmentRejectionDetails            184
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           4
+ 182 budgetUsageDetails                    37
+ 12 cashFlowConsiderationDetails           5
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Y2025                                      6
+ 109 assetDetails                          17
+ 13734 assetDetailValues batchSize: 100000 202
+ 6 treatmentOptionDetails                  4
+ 1738 treatmentRejectionDetails            159
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           3
+ 84 budgetUsageDetails                     25
+ 6 cashFlowConsiderationDetails            4
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Y2026                                      7
+ 109 assetDetails                          19
+ 13734 assetDetailValues batchSize: 100000 190
+ 4 treatmentOptionDetails                  5
+ 1740 treatmentRejectionDetails            181
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           4
+ 56 budgetUsageDetails                     16
+ 4 cashFlowConsiderationDetails            4
+ Committed                                 5
+ Cleared ChangeTracker                     0
+Y2027                                      10
+ 109 assetDetails                          28
+ 13734 assetDetailValues batchSize: 100000 185
+ 8 treatmentOptionDetails                  4
+ 1736 treatmentRejectionDetails            114
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           5
+ 112 budgetUsageDetails                    21
+ 8 cashFlowConsiderationDetails            2
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Y2028                                      5
+ 109 assetDetails                          15
+ 13734 assetDetailValues batchSize: 100000 189
+ 15 treatmentOptionDetails                 4
+ 1713 treatmentRejectionDetails            114
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           5
+ 182 budgetUsageDetails                    35
+ 12 cashFlowConsiderationDetails           4
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Y2029                                      6
+ 109 assetDetails                          17
+ 13734 assetDetailValues batchSize: 100000 172
+ 11 treatmentOptionDetails                 6
+ 1733 treatmentRejectionDetails            93
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           4
+ 140 budgetUsageDetails                    23
+ 10 cashFlowConsiderationDetails           8
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Y2030                                      6
+ 109 assetDetails                          14
+ 13734 assetDetailValues batchSize: 100000 229
+ 23 treatmentOptionDetails                 7
+ 1721 treatmentRejectionDetails            84
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           7
+ 252 budgetUsageDetails                    42
+ 18 cashFlowConsiderationDetails           5
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Y2031                                      6
+ 109 assetDetails                          13
+ 13734 assetDetailValues batchSize: 100000 193
+ 21 treatmentOptionDetails                 6
+ 1723 treatmentRejectionDetails            80
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           4
+ 196 budgetUsageDetails                    33
+ 14 cashFlowConsiderationDetails           4
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Y2032                                      6
+ 109 assetDetails                          15
+ 13734 assetDetailValues batchSize: 100000 185
+ 18 treatmentOptionDetails                 4
+ 1726 treatmentRejectionDetails            69
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           8
+ 224 budgetUsageDetails                    36
+ 16 cashFlowConsiderationDetails           4
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Y2033                                      6
+ 109 assetDetails                          14
+ 13734 assetDetailValues batchSize: 100000 197
+ 11 treatmentOptionDetails                 5
+ 1733 treatmentRejectionDetails            90
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           6
+ 182 budgetUsageDetails                    44
+ 13 cashFlowConsiderationDetails           5
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Y2034                                      6
+ 109 assetDetails                          15
+ 13734 assetDetailValues batchSize: 100000 189
+ 10 treatmentOptionDetails                 5
+ 1718 treatmentRejectionDetails            67
+ 0 treatmentSchedulingCollisionDetails     0
+ 0 treatmentConsiderationDetails           4
+ 168 budgetUsageDetails                    26
+ 11 cashFlowConsiderationDetails           3
+ Committed                                 2
+ Cleared ChangeTracker                     0
+Save complete                              0
+Total: 11,368

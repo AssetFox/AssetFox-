@@ -16,7 +16,7 @@
                 </v-flex>
                 <div>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" outline>Add Remaining Life Limit</v-btn>
-                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" v-show="!hasScenario" outline>Create New Library</v-btn>
+                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" outline>Create New Library</v-btn>
                 </div>
             </v-layout>
         </v-flex>
@@ -275,7 +275,9 @@ export default class RemainingLifeLimitEditor extends Vue {
     @Action('upsertScenarioRemainingLifeLimits')
     upsertScenarioRemainingLifeLimitsAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
-
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
+    
     @Mutation('addedOrUpdatedRemainingLifeLimitLibraryMutator') addedOrUpdatedRemainingLifeLimitLibraryMutator: any;
     @Mutation('selectedRemainingLifeLimitLibraryMutator') selectedRemainingLifeLimitLibraryMutator: any;
 
@@ -387,7 +389,10 @@ export default class RemainingLifeLimitEditor extends Vue {
                         vm.$router.push('/Scenarios/');
                     }
                     vm.hasScenario = true;
-                    vm.initializePages();
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        vm.initializePages();  
+                    });                                      
                 }
             });
             
@@ -485,7 +490,7 @@ export default class RemainingLifeLimitEditor extends Vue {
         const request: PagingRequest<RemainingLifeLimit>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: this.librarySelectItemValue !== null ? this.librarySelectItemValue : null,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
@@ -589,12 +594,13 @@ export default class RemainingLifeLimitEditor extends Vue {
             const upsertRequest: LibraryUpsertPagingRequest<RemainingLifeLimitLibrary, RemainingLifeLimit> = {
                 library: library,    
                 isNewLibrary: true,           
-                 pagingSync: {
-                    libraryId: library.remainingLifeLimits.length == 0 ? null : this.selectedRemainingLifeLimitLibrary.id,
+                 syncModel: {
+                    libraryId: library.remainingLifeLimits.length == 0 || !this.hasSelectedLibrary ? null : this.selectedRemainingLifeLimitLibrary.id,
                     rowsForDeletion: library.remainingLifeLimits === [] ? [] : this.deletionIds,
                     updateRows: library.remainingLifeLimits === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.remainingLifeLimits === [] ? [] : this.addedRows,
-                 }
+                 },
+                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -687,12 +693,13 @@ export default class RemainingLifeLimitEditor extends Vue {
         const upsertRequest: LibraryUpsertPagingRequest<RemainingLifeLimitLibrary, RemainingLifeLimit> = {
                 library: this.selectedRemainingLifeLimitLibrary,
                 isNewLibrary: false,
-                pagingSync: {
+                syncModel: {
                 libraryId: this.selectedRemainingLifeLimitLibrary.id === this.uuidNIL ? null : this.selectedRemainingLifeLimitLibrary.id,
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 addedRows: this.addedRows
-                }
+                },
+                scenarioId: null
         }
         RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -844,7 +851,7 @@ export default class RemainingLifeLimitEditor extends Vue {
         const request: PagingRequest<RemainingLifeLimit>= {
             page: 1,
             rowsPerPage: 5,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],

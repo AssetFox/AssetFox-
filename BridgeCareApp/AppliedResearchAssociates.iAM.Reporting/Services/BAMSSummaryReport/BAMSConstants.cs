@@ -83,5 +83,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string TotalBridgeCareBudget = "Total Bridge Care Budget";
         public const string TotalSpent = "Total Spent";
         public const string Work = "Work";
+        public const string Yes = "Y";
+        public const string No = "N";
     }
 }

@@ -120,9 +120,9 @@ const actions = {
     async aggregateNetworkData({dispatch, commit}: any, payload: any){
         return await AggregationService.AggregateNetworkData(payload.attributes, payload.networkId)
             .then((response: AxiosResponse) => {
-                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {                 
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {               
                   dispatch('addSuccessNotification', {
-                      message: 'Network data was successfully aggregated',
+                      message: 'Aggregation Started',
                   });
               }
           });

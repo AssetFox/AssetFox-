@@ -19,9 +19,5 @@ namespace BridgeCareCore.Interfaces
             ExcelPackage excelPackage);
 
         FileInfoDTO ExportScenarioTreatmentsExcelFile(Guid simulationId);
-
-        TreatmentLibraryDTO GetSyncedLibraryDataset(LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO> upsertRequest);
-
-        List<TreatmentDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<TreatmentDTO> request);
     }
 }

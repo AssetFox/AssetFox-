@@ -13,7 +13,7 @@ namespace BridgeCareCoreTests.Helpers
     public static class NetworkTestSetupViaFactory
     {
 
-        public static TNetwork ModelForEntityInDbViaFactory(IUnitOfWork unitOfWork, DataAttribute attribute, NetworkCreationParameters parameters, string networkName)
+        public static TNetwork ModelViaFactory(IUnitOfWork unitOfWork, DataAttribute attribute, NetworkCreationParameters parameters, string networkName)
         {
             var allDataSource = parameters.NetworkDefinitionAttribute.DataSource;
             var mappedDataSource = AllDataSourceMapper.ToSpecificDto(allDataSource);
@@ -22,11 +22,7 @@ namespace BridgeCareCoreTests.Helpers
             var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
                   data, parameters.DefaultEquation);
             network.Name = networkName;
-
-            // insert network domain data into the data source
-            unitOfWork.NetworkRepo.CreateNetwork(network);
             return network;
         }
-
     }
 }

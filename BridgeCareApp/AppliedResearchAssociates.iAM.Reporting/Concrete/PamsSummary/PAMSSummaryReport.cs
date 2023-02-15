@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -178,7 +179,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 };
                 UpdateSimulationAnalysisDetail(dto);
             });
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
 
             var simulationYears = new List<int>();
@@ -195,7 +196,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var simulation = network.Simulations.First();
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
@@ -280,33 +282,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return functionReturnValue;
         }
 
-
-
-        private byte[] FetchFromFileLocation(Guid networkId, Guid simulationId)
-        {
-            var folderPathForSimulation = $"Reports\\{simulationId}";
-            var relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
-            var filePath = Path.Combine(relativeFolderPath, "SummaryReport.xlsx");
-            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
-
-            if (File.Exists(filePath))
-            {
-                reportDetailDto.Status = $"Gathering summary report data";
-                UpdateSimulationAnalysisDetail(reportDetailDto);
-                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-                Errors.Add(reportDetailDto.Status);
-
-                byte[] summaryReportData = File.ReadAllBytes(filePath);
-                return summaryReportData;
-            }
-
-            reportDetailDto.Status = $"Summary report is not available in the path {filePath}";
-            UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            Errors.Add(reportDetailDto.Status);
-
-            throw new FileNotFoundException($"Summary report is not available in the path {filePath}", "SummaryReport.xlsx");
-        }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 

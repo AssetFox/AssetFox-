@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using AppliedResearchAssociates.iAM.Analysis;
+using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -29,12 +30,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var mockedTestUOW = new Mock<IUnitOfWork>();
             _mockedContext = new Mock<IAMContext>();
 
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Simulation, TestDataForCommittedProjects.Simulations.AsQueryable());
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.MaintainableAsset, TestDataForCommittedProjects.MaintainableAssetEntities.AsQueryable());
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.CommittedProject, TestDataForCommittedProjects.CommittedProjectEntities.AsQueryable());
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, TestDataForCommittedProjects.AttribureEntities.AsQueryable());
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.InvestmentPlan, TestDataForCommittedProjects.InvestmentPlanEntities().AsQueryable());
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioBudget, TestDataForCommittedProjects.ScenarioBudgetEntities.AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Simulation, TestEntitiesForCommittedProjects.Simulations.AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.MaintainableAsset, TestEntitiesForCommittedProjects.MaintainableAssetEntities.AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.CommittedProject, TestEntitiesForCommittedProjects.CommittedProjectEntities.AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, TestEntitiesForCommittedProjects.AttribureEntities.AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.InvestmentPlan, TestEntitiesForCommittedProjects.InvestmentPlanEntities().AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioBudget, TestEntitiesForCommittedProjects.ScenarioBudgetEntities.AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioSelectableTreatment, TestEntitiesForCommittedProjects.FourYearScenarioNoTreatmentEntities().AsQueryable());
 
             _testUOW = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, _mockedContext.Object);
         }
@@ -44,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
-            var simulationDomain = CreateSimulation(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var simulationDomain = CreateSimulation(TestDataForCommittedProjects.SimulationId);
 
             // Act
             repo.GetSimulationCommittedProjects(simulationDomain);
@@ -54,12 +56,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.Equal(210000, simulationDomain.CommittedProjects.Sum(_ => _.Cost));
         }
 
+
+        [Fact(Skip = "Test is not dependent on the No Treatment Before Committed Project Flag")]
+        public void NoTreatmentBeforeCommittedProjects_GetSimulationCommittedProjects_Expected()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var inputSimulationEntity = TestEntitiesForCommittedProjects.Simulations.Single(_ => _.Name == "FourYearTest");
+            var simulationDomain = CreateSimulation(inputSimulationEntity.Id);
+            var simulationEntity = _testUOW.Context.Simulation.Single(s => s.Id == simulationDomain.Id);
+            simulationEntity.NoTreatmentBeforeCommittedProjects = true;
+            _testUOW.Context.Simulation.Update(simulationEntity);
+            _testUOW.Context.SaveChanges();
+
+            // Act
+            repo.GetSimulationCommittedProjects(simulationDomain);
+
+            // Assert
+            var committedProjectNames = simulationDomain.CommittedProjects.Select(cp => cp.Name).ToList();
+            Assert.Equal(4, simulationDomain.CommittedProjects.Count);
+            Assert.Equal(10000, simulationDomain.CommittedProjects.Sum(_ => _.Cost));
+            Assert.Equal(3, simulationDomain.CommittedProjects.Count(_ => _.Name != "Something"));
+        }
+
         [Fact]
         public void GetForSimulationWorksWithoutCommittedProjects()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
-            var simulationDomain = CreateSimulation(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+            var simulationDomain = CreateSimulation(TestDataForCommittedProjects.NoCommitSimulationId);
 
             // Act
             repo.GetSimulationCommittedProjects(simulationDomain);
@@ -86,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act
-            var result = repo.GetCommittedProjectsForExport(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var result = repo.GetCommittedProjectsForExport(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.Equal(2, result.Count);
@@ -103,10 +128,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act
-            var result = repo.GetCommittedProjectsForExport(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+            var result = repo.GetCommittedProjectsForExport(TestDataForCommittedProjects.NoCommitSimulationId);
 
             // Assert
-            Assert.Equal(0, result.Count);
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -125,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
             var newProjects = TestDataForCommittedProjects.ValidCommittedProjects;
-            newProjects.ForEach(_ => _.SimulationId = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+            newProjects.ForEach(_ => _.SimulationId = TestDataForCommittedProjects.NoCommitSimulationId);
 
             // Act
             repo.UpsertCommittedProjects(newProjects);
@@ -176,7 +201,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act
-            repo.DeleteSimulationCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            repo.DeleteSimulationCommittedProjects(TestDataForCommittedProjects.SimulationId);
         }
 
         [Fact]
@@ -196,7 +221,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act
-            repo.DeleteSimulationCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+            repo.DeleteSimulationCommittedProjects(TestDataForCommittedProjects.NoCommitSimulationId);
 
             // No assert required as long as it works
         }
@@ -230,7 +255,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act
-            var result = repo.GetSectionCommittedProjectDTOs(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var result = repo.GetSectionCommittedProjectDTOs(TestDataForCommittedProjects.SimulationId);
 
             // Assert
             Assert.Equal(2, result.Count);
@@ -246,7 +271,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act
-            var result = repo.GetSectionCommittedProjectDTOs(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+            var result = repo.GetSectionCommittedProjectDTOs(TestDataForCommittedProjects.NoCommitSimulationId);
 
             // Assert
             Assert.Equal(0, result.Count);
@@ -273,7 +298,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var result = repo.GetSimulationId(Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"));
 
             // Assert
-            Assert.Equal(TestDataForCommittedProjects.Simulations.First(_ => _.Name == "Test").Id, result);
+            Assert.Equal(TestDataForCommittedProjects.SimulationId, result);
         }
 
         [Fact]
@@ -293,7 +318,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var testNetwork = exp.AddNetwork();
             testNetwork.Id = TestDataForCommittedProjects.NetworkId;
             SectionMapper mapper = new(testNetwork);
-            foreach (var asset in TestDataForCommittedProjects.MaintainableAssetEntities)
+            foreach (var asset in TestEntitiesForCommittedProjects.MaintainableAssetEntities)
             {
                 mapper.CreateMaintainableAsset(asset);
             }

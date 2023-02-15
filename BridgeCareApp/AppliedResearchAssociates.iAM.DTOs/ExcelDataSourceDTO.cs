@@ -12,9 +12,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public string LocationColumn { get; set; }
         public string DateColumn { get; set; }
-
         public override bool Validate() => true;
     }
-
-    
 }

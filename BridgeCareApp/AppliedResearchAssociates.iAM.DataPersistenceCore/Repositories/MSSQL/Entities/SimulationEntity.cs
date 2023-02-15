@@ -28,6 +28,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string Name { get; set; }
 
+        public bool NoTreatmentBeforeCommittedProjects { get; set; }
+
         public int NumberOfYearsOfTreatmentOutlook { get; set; }
 
         public virtual NetworkEntity Network { get; set; }
@@ -37,6 +39,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual InvestmentPlanEntity InvestmentPlan { get; set; }
 
         public virtual ICollection<SimulationOutputEntity> SimulationOutputs { get; set; }
+
+        public virtual ICollection<SimulationOutputJsonEntity> SimulationOutputJsons { get; set; }
 
         public virtual SimulationAnalysisDetailEntity SimulationAnalysisDetail { get; set; }
 

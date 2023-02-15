@@ -37,6 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             AddDynamicDataCells(unfundedTreatmentTimeWorksheet, simulationOutput, currentCell);
 
             unfundedTreatmentTimeWorksheet.Cells.AutoFitColumns();
+            _unfundedTreatmentCommon.PerformPostAutofitAdjustments(unfundedTreatmentTimeWorksheet);
         }
 
         #region Private methods
@@ -49,20 +50,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             var firstYear = true;
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
-                var untreatedSections = _unfundedTreatmentCommon.GetUntreatedSections(year);
+                var untreatedSections = _unfundedTreatmentCommon.GetSectionsWithUnfundedTreatments(year);
+                var treatedSections = _unfundedTreatmentCommon.GetSectionsWithFundedTreatments(year);
 
                 if (firstYear)
                 {
-                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_"))));
+                    validFacilityIds.AddRange(year.Assets.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))
+                        .Except(treatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))));
                     firstYear = false;
-                    if (simulationOutput.Years.Count > 1)
-                    {
-                        continue;
-                    }
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))).ToList();
+                    validFacilityIds = validFacilityIds.Except(treatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))).ToList();
                 }
 
                 foreach (var section in untreatedSections)
@@ -78,14 +77,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                     {
                         var newTuple = new Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
 
-                        if (!validFacilityIds.Contains(facilityId))
-                        {
-                            if (treatmentsPerSection.ContainsKey(facilityId))
-                            {
-                                treatmentsPerSection.Remove(facilityId);
-                            }
-                        }
-                        else
+                        if (validFacilityIds.Contains(facilityId))
                         {
                             if (!treatmentsPerSection.ContainsKey(facilityId))
                             {

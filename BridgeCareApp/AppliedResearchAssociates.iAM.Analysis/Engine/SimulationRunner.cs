@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -143,7 +144,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var logMessage = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
                 Send(logMessage);
             }
-
             InParallel(AssetContexts, context =>
             {
                 context.RollForward();
@@ -189,6 +189,18 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             SimulationOutput output = new();
             output.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
             output.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
+
+            output.AssetTreatmentCategories = new();
+            foreach (var assetContext in AssetContexts)
+            {
+                var committedProject = Simulation.CommittedProjects.FirstOrDefault(c => c.Asset.Id == assetContext.Asset.Id);
+                if (committedProject != null)
+                {
+                    var assetTreatmentCategoryDetail = new AssetTreatmentCategoryDetail(committedProject.Asset.Id, committedProject.Asset.AssetName, committedProject.treatmentCategory);
+                    output.AssetTreatmentCategories.Add(assetTreatmentCategoryDetail);
+                }
+            }
+
             Simulation.ResultsOnDisk.Initialize(output);
             output = null;
 
@@ -981,7 +993,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             int processorCount = Environment.ProcessorCount;
 
-            if(processorCount >= 16)
+            if(processorCount >= 8)
             {
                 return processorCount - 2;
             }

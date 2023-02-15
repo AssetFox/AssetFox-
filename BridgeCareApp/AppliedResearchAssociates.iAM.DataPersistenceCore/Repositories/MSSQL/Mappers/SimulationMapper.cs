@@ -24,7 +24,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = dto.Id,
                 NetworkId = networkId,
                 Name = dto.Name,
-                NumberOfYearsOfTreatmentOutlook = 100
+                NumberOfYearsOfTreatmentOutlook = 100,
+                NoTreatmentBeforeCommittedProjects = dto.NoTreatmentBeforeCommittedProjects,
             };
 
         public static void CreateSimulation(this SimulationEntity entity, Network network, DateTime lastRun, DateTime lastModifiedDate)
@@ -45,6 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 NetworkId = entity.NetworkId,
                 NetworkName = entity.Network.Name,
                 Creator = creator?.Username,
+                NoTreatmentBeforeCommittedProjects = entity.NoTreatmentBeforeCommittedProjects,
                 Owner = entity.SimulationUserJoins?.FirstOrDefault(_ => _.IsOwner)?.User?.Username,
                 CreatedDate = entity.CreatedDate,
                 LastModifiedDate = entity.LastModifiedDate,

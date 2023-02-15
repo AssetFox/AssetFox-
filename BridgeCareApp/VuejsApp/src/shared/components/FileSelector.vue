@@ -9,8 +9,8 @@
                                 <img :src="require('@/assets/icons/upload.svg')"/>
                                 <v-layout column align-center>
                                     <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
-                                    <span class="span-center Montserrat-font-family">or</span>
-                                    <v-btn class="ghd-blue Montserrat-font-family a-0 ma-0" @click="chooseFiles()" flat> Click here to select files </v-btn>
+                                    <!--<span class="span-center Montserrat-font-family">or</span>
+                                    <v-btn class="ghd-blue Montserrat-font-family a-0 ma-0" @click="chooseFiles()" flat> Click here to select files </v-btn>-->
                                 </v-layout>
                             </v-layout>
                         </div>

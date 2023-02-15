@@ -30,10 +30,10 @@ namespace BridgeCareCore.Services
         private static IUnitOfWork _unitOfWork;
         private static ISimulationRepository _simulationRepository;
         private ISimulationAnalysis _simulationAnalysis;
-        private ISimulationService _simulationService;
+        private ISimulationPagingService _simulationService;
         private SequentialWorkQueue _sequentialWorkQueue;
 
-        public SimulationQueueService(IUnitOfWork unitOfWork, SequentialWorkQueue sequentialWorkQueue, ISimulationService simulationService, ISimulationAnalysis simulationAnalysis, ISimulationRepository simulationRepository)
+        public SimulationQueueService(IUnitOfWork unitOfWork, SequentialWorkQueue sequentialWorkQueue, ISimulationPagingService simulationService, ISimulationAnalysis simulationAnalysis, ISimulationRepository simulationRepository)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));

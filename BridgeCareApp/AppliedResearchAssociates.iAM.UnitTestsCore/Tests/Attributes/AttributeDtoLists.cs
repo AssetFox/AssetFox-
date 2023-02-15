@@ -17,6 +17,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
                 AttributeDtos.Age,
                 AttributeDtos.CulvSeeded,
                 AttributeDtos.DeckSeeded,
+                AttributeDtos.InternetReport,
+                AttributeDtos.Interstate,
                 AttributeDtos.SubSeeded,
                 AttributeDtos.SupSeeded,
                 AttributeDtos.CulvDurationN,

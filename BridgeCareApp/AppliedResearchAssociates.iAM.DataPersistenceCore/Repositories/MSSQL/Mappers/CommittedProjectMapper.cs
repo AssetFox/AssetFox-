@@ -7,6 +7,8 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -28,7 +30,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForAnyTreatment = domain.ShadowForAnyTreatment,
                 ShadowForSameTreatment = domain.ShadowForSameTreatment,
                 Cost = domain.Cost,
-                Year = domain.Year
+                Year = domain.Year,
+                treatmentCategory = domain.treatmentCategory
             };
 
             entity.CommittedProjectLocation = maintainableAsset.MaintainableAssetLocation.ToCommittedProjectLocation(entity);
@@ -36,9 +39,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity)
+        public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity, string networkKeyAttribute)
         {
-            TreatmentCategory convertedCategory = default(TreatmentCategory);
+            TreatmentCategory convertedCategory = entity.treatmentCategory!=default(TreatmentCategory) ? entity.treatmentCategory : default(TreatmentCategory);
             if (Enum.TryParse(typeof(TreatmentCategory), entity.Category, true, out var convertedCategoryOut))
             {
                 convertedCategory = (TreatmentCategory)convertedCategoryOut;
@@ -47,6 +50,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             switch (entity.CommittedProjectLocation.Discriminator)
             {
                 case DataPersistenceConstants.SectionLocation:
+                    if(entity.ScenarioBudgetId != null && entity.ScenarioBudget == null)
+                    {
+                        throw new InvalidOperationException($"Scenario budget is not present in committed project.");
+                    }
+
                     var commit = new SectionCommittedProjectDTO()
                     {
                         Id = entity.Id,
@@ -58,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         Category = convertedCategory,
-                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys()
+                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
                     };
                     foreach (var consequence in entity.CommittedProjectConsequences)
                     {
@@ -70,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes)
+        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes, string networkKeyAttribute)
         {
             var result = new CommittedProjectEntity
             {
@@ -89,18 +97,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 result.CommittedProjectConsequences.Add(consequence.ToEntity(attributes));
             }
-
+                        
             if (dto is SectionCommittedProjectDTO)
-            {
-                // TODO:  Switch to looking up key field in network object
-                string keyField = "BRKEY_";
-
-                if (dto.LocationKeys.ContainsKey(keyField) && dto.LocationKeys.ContainsKey("ID"))
+            {                
+                if (dto.VerifyLocation(networkKeyAttribute))
                 {
                     result.CommittedProjectLocation = new CommittedProjectLocationEntity(
                         Guid.Parse(dto.LocationKeys["ID"]),
                         DataPersistenceConstants.SectionLocation,
-                        dto.LocationKeys[keyField]
+                        dto.LocationKeys[networkKeyAttribute]
                         )
                     {
                         CommittedProjectId = result.Id,
@@ -131,40 +136,109 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
-        public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity)
+        public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity, string networkKeyAttribute)
         {
-            // TODO:  Switch to looking up key field in datasource object
-            string keyField = "BRKEY_";
-
+            const string IdKey = "ID";
             switch (entity.Discriminator)
             {
                 case DataPersistenceConstants.SectionLocation:
-                    var result = new Dictionary<string, string>();
-                    result.Add("ID", entity.Id.ToString());
-                    result.Add(keyField, entity.LocationIdentifier);
-                    return result;
+                var result = new Dictionary<string, string>
+                {
+                    { IdKey, entity.Id.ToString() },
+                    { networkKeyAttribute, entity.LocationIdentifier }
+                };
+                return result;
                 default:
                     throw new ArgumentException($"Location type of {entity.Discriminator} is not supported.");
             }
         }
 
-        public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation, Guid maintainableAssetId)
+        public static void CreateCommittedProject(
+            this CommittedProjectEntity entity,
+            Simulation simulation,
+            Guid maintainableAssetId,
+            bool noTreatmentForCommittedProjects,
+            double noTreatmentDefaultCost,
+            ScenarioSelectableTreatmentEntity noTreatmentEntity)
         {
             var asset = simulation.Network.Assets.Single(_ =>
                 _.Id == maintainableAssetId);
+
+            // Ensure a no treatment committed project does not already exist
+            try
+            {
+                var existingCommittedProject = simulation.CommittedProjects.SingleOrDefault(_ => _.Asset.Id == asset.Id && _.Year == entity.Year);
+                if (existingCommittedProject != null)
+                {
+                    if (existingCommittedProject.Name == noTreatmentEntity.Name)
+                    {
+                        simulation.CommittedProjects.Remove(existingCommittedProject);
+                    }
+                    else
+                    {
+                        throw new ArgumentException();
+                    }
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException($"{asset.Id} has multiple committed projects in year {entity.Year}");
+            }
+            catch (ArgumentException)
+            {
+                throw new InvalidOperationException($"{asset.Id} has a project type that was automatically added but is not the default treatment");
+            }
+            
 
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));
             committedProject.Id = entity.Id;
             committedProject.Name = entity.Name;
             committedProject.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
             committedProject.ShadowForSameTreatment = entity.ShadowForSameTreatment;
-            committedProject.Cost = entity.Cost;
+            committedProject.Cost = entity.Cost; 
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
+            committedProject.LastModifiedDate = entity.LastModifiedDate;
 
             if (entity.CommittedProjectConsequences.Any())
             {
                 entity.CommittedProjectConsequences.ForEach(_ => _.CreateCommittedProjectConsequence(committedProject));
             }
+            if (noTreatmentForCommittedProjects)
+            {
+                int startYear = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
+                for (int year = startYear; year < committedProject.Year; year++)
+                {
+                    var existingCommittedProject = simulation.CommittedProjects
+                        .Where(_ => _.Year == year && _.Asset.Id == committedProject.Asset.Id);
+                    if (!existingCommittedProject.Any())
+                    {
+                        var projectToAdd = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, year));
+                        projectToAdd.Id = Guid.NewGuid();
+                        projectToAdd.Name = noTreatmentEntity.Name;
+                        projectToAdd.ShadowForAnyTreatment = 0;
+                        projectToAdd.ShadowForSameTreatment = 0;
+                        projectToAdd.Cost = noTreatmentDefaultCost;
+                        projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
+                        //projectToAdd.Budget = null;  // This would be the better way, but it fails vaildation
+                        projectToAdd.LastModifiedDate = noTreatmentEntity.LastModifiedDate;
+                        projectToAdd.TemplateTreatment = noTreatmentEntity.ToDomain(simulation);
+                    }
+                    else
+                    {
+                        if (existingCommittedProject.Count() > 1)
+                        {
+                            throw new InvalidOperationException("Should not see more than one project per committed project query");
+                        }
+                    }
+                }
+                
+            }
+        }
+       
+        private static SelectableTreatment MapNoTreatmentToDomain(Simulation simulation, SelectableTreatmentEntity noTreatmentEntity)
+        {
+            var domain = simulation.AddTreatment();
+            throw new NotImplementedException();
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -33,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public static AttributeDTO NumericDto(BaseDataSourceDTO dataSourceDTO, Guid? id = null, string name = null, ConnectionType connectionType = ConnectionType.MSSQL)
         {
             var attribute = Numeric(id, name, dataSourceDTO.Id, connectionType);
-            var dto = AttributeMapper.ToDto(attribute, dataSourceDTO);
+            var dto = AttributeDtoDomainMapper.ToDto(attribute, dataSourceDTO);
             return dto;
         }
 

@@ -100,6 +100,7 @@ export const emptyBudget: Budget = {
     name: '',
     budgetAmounts: [],
     criterionLibrary: clone(emptyCriterionLibrary),
+    budgetOrder: 0
 };
 
 export const emptyBudgetAmount: BudgetAmount = {

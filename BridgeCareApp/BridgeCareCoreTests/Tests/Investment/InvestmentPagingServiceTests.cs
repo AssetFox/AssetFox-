@@ -202,6 +202,51 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public void GetSyncedScenarioDataSet_YearDeletedInRequest_BudgetAmountForYearNotInDataset()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            var amountId = Guid.NewGuid();
+            var budget = BudgetDtos.WithSingleAmount(budgetId, "Budget", 2023, 123456, amountId);
+            var budgets = new List<BudgetDTO> { budget };
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
+            var service = CreateInvestmentPagingService(unitOfWork);
+            var request = new InvestmentPagingSyncModel
+            {
+                Deletionyears = new List<int> { 2023 },
+            };
+
+            var result = service.GetSyncedScenarioDataSet(simulationId, request);
+
+            var resultBudget = result.Single();
+            Assert.Empty(resultBudget.BudgetAmounts);
+        }
+
+        [Fact]
+        public void GetSyncedScenarioDataSet_BudgetDeletedInRequest_BudgetNotInDataset()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            var amountId = Guid.NewGuid();
+            var budget = BudgetDtos.WithSingleAmount(budgetId, "Budget", 2023, 123456, amountId);
+            var budgets = new List<BudgetDTO> { budget };
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
+            var service = CreateInvestmentPagingService(unitOfWork);
+            var request = new InvestmentPagingSyncModel
+            {
+                BudgetsForDeletion = new List<Guid> { budgetId },
+            };
+
+            var result = service.GetSyncedScenarioDataSet(simulationId, request);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
         public void GetSyncedScenarioDataSetButRequestHasLibraryId_GetsForLibrary()
         {
             var unitOfWork = UnitOfWorkMocks.New();

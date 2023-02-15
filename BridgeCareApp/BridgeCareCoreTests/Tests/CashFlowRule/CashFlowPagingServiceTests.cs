@@ -12,7 +12,7 @@ using BridgeCareCoreTests.Helpers;
 using Moq;
 using Xunit;
 
-namespace BridgeCareCoreTests.Tests.CashFlowRule
+namespace BridgeCareCoreTests.Tests
 {
     public class CashFlowPagingServiceTests
     {
@@ -472,9 +472,6 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             var pagingService = CreatePagingService(unitOfWork);
             var libraryId = Guid.NewGuid();
             var library = CashFlowRuleLibraryDtos.Empty(libraryId);
-            var ruleId = Guid.NewGuid();
-            var criterionLibraryId = Guid.NewGuid();
-            var distributionRuleId = Guid.NewGuid();
             var rule1 = CashFlowRuleDtos.Rule();
             var rule2 = CashFlowRuleDtos.Rule();
             repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsList(rule1, rule2);
@@ -570,9 +567,6 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             var pagingService = CreatePagingService(unitOfWork);
             var libraryId = Guid.NewGuid();
             var library = CashFlowRuleLibraryDtos.Empty(libraryId);
-            var ruleId = Guid.NewGuid();
-            var criterionLibraryId = Guid.NewGuid();
-            var distributionRuleId = Guid.NewGuid();
             var rule1 = CashFlowRuleDtos.Rule();
             var rule2 = CashFlowRuleDtos.Rule();
             repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsList(rule1, rule2);

@@ -7,6 +7,7 @@ using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
+using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Tests.PerformanceCurve;
 using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
@@ -36,7 +37,8 @@ namespace BridgeCareCoreTests.Tests {
             Mock<IUnitOfWork> unitOfWork,
             IHttpContextAccessor contextAccessor,
             Mock<IHubService> hubServiceMock = null,
-            Mock<IPerformanceCurvesService> performanceCurveServiceMock = null
+            Mock<IPerformanceCurvesService> performanceCurveServiceMock = null,
+            Mock<IPerformanceCurvesPagingService> performanceCurvePagingServiceMock = null
             )
         {
             var resolveHubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
@@ -45,12 +47,14 @@ namespace BridgeCareCoreTests.Tests {
             var simulationQueueService = new Mock<ISimulationQueueService>();
             var claimHelper = new ClaimHelper(unitOfWork.Object, simulationQueueService.Object, contextAccessor);
             var resolvePerformanceCurveServiceMock = performanceCurveServiceMock ?? PerformanceCurveServiceMocks.New();
+            var resolvePerformanceCurvePagingServiceMock = performanceCurvePagingServiceMock ?? PerformanceCurvesPagingServiceMocks.New();
             var controller = new PerformanceCurveController(
                 security,
                 unitOfWork.Object,
                 resolveHubService.Object,
                 contextAccessor,
                 resolvePerformanceCurveServiceMock.Object,
+                resolvePerformanceCurvePagingServiceMock.Object,
                 claimHelper);
             return controller;
         }

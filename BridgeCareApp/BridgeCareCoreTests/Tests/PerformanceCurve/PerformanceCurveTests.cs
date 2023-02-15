@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using NuGet.Protocol.Core.Types;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests.PerformanceCurve
@@ -42,7 +43,8 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var performanceCurveRepo = PerformanceCurveRepositoryMocks.New();
             performanceCurveRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Owner);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.SetupPerformanceCurveRepo(performanceCurveRepo);
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
             var controller = PerformanceCurveControllerTestSetup.CreateNonAdminController(unitOfWork);
 
             var result = await controller.DeletePerformanceCurveLibrary(libraryId);
@@ -59,7 +61,8 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var performanceCurveRepo = PerformanceCurveRepositoryMocks.New();
             performanceCurveRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Modify);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.SetupPerformanceCurveRepo(performanceCurveRepo);
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
             var hubService = HubServiceMocks.DefaultMock();
             var controller = PerformanceCurveControllerTestSetup.CreateNonAdminController(unitOfWork, hubService);
 
@@ -91,7 +94,8 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var performacneCurveLibraryDtos = new List<PerformanceCurveLibraryDTO> { performanceCurveLibraryDto };
             performanceCurveRepo.SetupGetLibraryAccess(performanceCurveLibraryId, user1.Id, LibraryAccessLevel.Owner);
             var controller = PerformanceCurveControllerTestSetup.CreateNonAdminController(unitOfWork);
-            unitOfWork.SetupPerformanceCurveRepo(performanceCurveRepo);
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
 
             var result = await controller.GetPerformanceCurveLibraryUsers(performanceCurveLibraryId);
 
@@ -118,7 +122,8 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var performanceCurveLibraryDtos = new List<PerformanceCurveLibraryDTO> { performanceCurveLibraryDto };
             performanceCurveRepo.SetupGetLibraryAccess(performanceCurveLibraryId, user1.Id, LibraryAccessLevel.Read);
             var controller = PerformanceCurveControllerTestSetup.CreateAdminController(unitOfWork);
-            unitOfWork.SetupPerformanceCurveRepo(performanceCurveRepo);
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
 
             var result = await controller.GetPerformanceCurveLibraryUsers(performanceCurveLibraryId);
 
@@ -146,7 +151,8 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             performanceCurveRepo.SetupGetLibraryAccess(performanceCurveLibraryId, user1.Id, LibraryAccessLevel.Read);
             var hubService = HubServiceMocks.DefaultMock();
             var controller = PerformanceCurveControllerTestSetup.CreateNonAdminController(unitOfWork, hubService);
-            unitOfWork.SetupPerformanceCurveRepo(performanceCurveRepo);
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
 
             var result = await controller.GetPerformanceCurveLibraryUsers(performanceCurveLibraryId);
 

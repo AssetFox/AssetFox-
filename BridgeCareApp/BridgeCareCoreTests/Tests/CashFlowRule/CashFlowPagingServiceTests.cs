@@ -162,6 +162,62 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
         }
 
         [Fact]
+        public void GetScenarioPage_SortByName_Throws()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var scenarioId = Guid.NewGuid();
+            var dto1 = CashFlowRuleDtos.Rule();
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var dto2 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dto2Clone = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dtos = new List<CashFlowRuleDTO> { dto1, dto2 };
+            dto2.Name = "Aaaaaa";
+            repo.Setup(r => r.GetScenarioCashFlowRules(scenarioId)).Returns(dtos);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>();
+            var pagingRequest = new PagingRequestModel<CashFlowRuleDTO>
+            {
+                SyncModel = syncModel,
+                RowsPerPage = 1,
+                Page = 1,
+                sortColumn = "Name",
+            };
+
+            Assert.Throws<NotImplementedException>(() => pagingService.GetScenarioPage(scenarioId, pagingRequest));
+        }
+
+        [Fact]
+        public void GetScenarioPage_Search_Throws()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var scenarioId = Guid.NewGuid();
+            var dto1 = CashFlowRuleDtos.Rule();
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var dto2 = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dto2Clone = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId);
+            var dtos = new List<CashFlowRuleDTO> { dto1, dto2 };
+            dto2.Name = "Aaaaaa";
+            repo.Setup(r => r.GetScenarioCashFlowRules(scenarioId)).Returns(dtos);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>();
+            var pagingRequest = new PagingRequestModel<CashFlowRuleDTO>
+            {
+                SyncModel = syncModel,
+                RowsPerPage = 1,
+                Page = 1,
+                search = "Name",
+            };
+
+            Assert.Throws<NotImplementedException>(() => pagingService.GetScenarioPage(scenarioId, pagingRequest));
+        }
+
+        [Fact]
         public void GetScenarioPage_RequestSecondPage_Expected()
         {
             var unitOfWork = UnitOfWorkMocks.New();
@@ -442,6 +498,68 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             Assert.Equal(2, result.TotalItems);
             var returnedRule = result.Items.Single();
             ObjectAssertions.Equivalent(rule1, returnedRule);
+        }
+
+        [Fact]
+        public void GetLibraryPage_Sort_Throws()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            var rule1 = CashFlowRuleDtos.Rule();
+            var rule2 = CashFlowRuleDtos.Rule();
+            repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsList(rule1, rule2);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = false,
+                Library = library,
+                SyncModel = syncModel,
+            };
+            var pagingRequest = new PagingRequestModel<CashFlowRuleDTO>
+            {
+                Page = 1,
+                RowsPerPage = 1,
+                SyncModel = syncModel,
+                sortColumn = "Name",
+            };
+
+            Assert.Throws<NotImplementedException>(() => pagingService.GetLibraryPage(libraryId, pagingRequest));
+        }
+
+        [Fact]
+        public void GetLibraryPage_Search_Throws()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            var rule1 = CashFlowRuleDtos.Rule();
+            var rule2 = CashFlowRuleDtos.Rule();
+            repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsList(rule1, rule2);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = false,
+                Library = library,
+                SyncModel = syncModel,
+            };
+            var pagingRequest = new PagingRequestModel<CashFlowRuleDTO>
+            {
+                Page = 1,
+                RowsPerPage = 1,
+                SyncModel = syncModel,
+                search = "Name",
+            };
+
+            Assert.Throws<NotImplementedException>(() => pagingService.GetLibraryPage(libraryId, pagingRequest));
         }
 
         [Fact]

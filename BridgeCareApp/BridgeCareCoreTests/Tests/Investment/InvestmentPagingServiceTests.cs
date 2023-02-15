@@ -142,6 +142,66 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public void GetSyncedScenarioDataSet_BudgetAmountModifiedInRequest_ModifiedBudgetAmountInDataset()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            var amountId = Guid.NewGuid();
+            var budget = BudgetDtos.WithSingleAmount(budgetId, "Budget", 2023, 123456, amountId);
+            var budgets = new List<BudgetDTO> { budget };
+            var updatedAmount = BudgetAmountDtos.ForBudgetAndYear(budget, 2023, 654321, amountId);
+            var updatedAmounts = new List<BudgetAmountDTO> { updatedAmount };
+            var updatedAmountDictionary = new Dictionary<string, List<BudgetAmountDTO>> { { "Budget", updatedAmounts } };
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
+            var service = CreateInvestmentPagingService(unitOfWork);
+            var request = new InvestmentPagingSyncModel
+            {
+                UpdatedBudgetAmounts = updatedAmountDictionary,
+            };
+
+            var result = service.GetSyncedScenarioDataSet(simulationId, request);
+
+            var resultBudget = result.Single();
+            var resultAmount = resultBudget.BudgetAmounts.Single();
+            Assert.Equal(654321, resultAmount.Value);
+        }
+
+        [Fact]
+        public void GetSyncedScenarioDataSet_BudgetAmountAddedInRequest_AddedBudgetAmountInDataset()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            var amountId = Guid.NewGuid();
+            var amountId2 = Guid.NewGuid();
+            var budget = BudgetDtos.WithSingleAmount(budgetId, "Budget", 2023, 123456, amountId);
+            var amount2023 = budget.BudgetAmounts.Single();
+            var budgets = new List<BudgetDTO> { budget };
+            var addedAmount = BudgetAmountDtos.ForBudgetAndYear(budget, 2024, 654321, amountId2);
+            var addedAmounts = new List<BudgetAmountDTO> { addedAmount };
+            var addedAmountDictionary = new Dictionary<string, List<BudgetAmountDTO>> { { "Budget", addedAmounts } };
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
+            var service = CreateInvestmentPagingService(unitOfWork);
+            var request = new InvestmentPagingSyncModel
+            {
+                AddedBudgetAmounts = addedAmountDictionary,
+            };
+
+            var result = service.GetSyncedScenarioDataSet(simulationId, request);
+
+            var resultBudget = result.Single();
+            var resultAmounts = resultBudget.BudgetAmounts;
+            Assert.Equal(2, resultAmounts.Count);
+            var resultAmount2023 = resultAmounts.Single(x => x.Id == amountId);
+            var resultAmount2024 = resultAmounts.Single(x => x.Id == amountId2);
+            ObjectAssertions.Equivalent(amount2023, resultAmount2023);
+            ObjectAssertions.Equivalent(addedAmount, resultAmount2024);
+        }
+
+        [Fact]
         public void GetSyncedScenarioDataSetButRequestHasLibraryId_GetsForLibrary()
         {
             var unitOfWork = UnitOfWorkMocks.New();
@@ -256,7 +316,7 @@ namespace BridgeCareCoreTests.Tests
                 TotalItems = 3,
                 Items = expectedBudgets,
             };
-            ObjectAssertions.EquivalentExcluding(expected, result, x=> x.InvestmentPlan.Id);
+            ObjectAssertions.EquivalentExcluding(expected, result, x => x.InvestmentPlan.Id);
         }
 
         [Fact]
@@ -383,5 +443,43 @@ namespace BridgeCareCoreTests.Tests
             ObjectAssertions.EquivalentExcluding(expected, result, x => x.InvestmentPlan.Id);
         }
 
+        [Fact]
+        public void GetScenarioPage_SortIsNotBudgetName_Throws()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var investmentDefaultData = new InvestmentDefaultData
+            {
+                InflationRatePercentage = 3,
+                MinimumProjectCostLimit = 100000,
+            };
+            var investmentDefaultDataService = InvestmentDefaultDataServiceMocks.New(investmentDefaultData);
+            var simulationId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.New(budgetId, "Budget");
+            var amount2023 = BudgetAmountDtos.ForBudgetAndYear(budget, 2023, 1000000);
+            var amount2024 = BudgetAmountDtos.ForBudgetAndYear(budget, 2024, 100000);
+            var amount2025 = BudgetAmountDtos.ForBudgetAndYear(budget, 2025, 200000);
+            var amounts = new List<BudgetAmountDTO> { amount2023, amount2024, amount2025 };
+            budget.BudgetAmounts.AddRange(amounts);
+            var budgets = new List<BudgetDTO> { budget };
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
+            var pagingService = CreateInvestmentPagingService(unitOfWork, investmentDefaultDataService);
+            var request = new InvestmentPagingSyncModel
+            {
+                Investment = new InvestmentPlanDTO
+                {
+                    FirstYearOfAnalysisPeriod = 2023,
+                    NumberOfYearsInAnalysisPeriod = 1,
+                }
+            };
+            var pageRequest = new InvestmentPagingRequestModel
+            {
+                sortColumn = "Nonexistent budget",
+                SyncModel = request,
+            };
+
+            Assert.Throws<NullReferenceException>(() => pagingService.GetScenarioPage(simulationId, pageRequest));
+        }
     }
 }

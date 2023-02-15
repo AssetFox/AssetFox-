@@ -39,6 +39,24 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
 
             Assert.Empty(result);
         }
+        [Fact]
+        public void GetSyncedScenarioDataset_RowToDeleteNotInDatabase_Empty()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var scenarioId = Guid.NewGuid();
+            repo.Setup(r => r.GetScenarioCashFlowRules(scenarioId)).ReturnsEmptyList();
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+                RowsForDeletion = new List<Guid> { Guid.NewGuid() },
+            };
+
+            var result = pagingService.GetSyncedScenarioDataSet(
+                scenarioId, syncModel);
+
+            Assert.Empty(result);
+        }
 
         [Fact]
         public void GetSyncedScenarioDataset_RowToUpdate_ReturnsUpdatedRow()
@@ -132,7 +150,7 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             var pagingRequest = new PagingRequestModel<CashFlowRuleDTO>
             {
                 SyncModel = syncModel,
-                RowsPerPage= 1,
+                RowsPerPage = 1,
                 Page = 1,
             };
 
@@ -198,6 +216,121 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
         }
 
         [Fact]
+        public void GetSyncedLibraryDataset_EmptyLibraryWithRowForDeletion_Empty()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsEmptyList();
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+                RowsForDeletion = new List<Guid> { Guid.NewGuid() },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = false,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_RowInDbIsRowForDeletion_Empty()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            var rowId = Guid.NewGuid();
+            var dto = CashFlowRuleDtos.Rule(rowId);
+            repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsList(dto);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+                RowsForDeletion = new List<Guid> { rowId },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = false,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_RowInDbIsUpdatedRow_Updates()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            var rowId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var dto1 = CashFlowRuleDtos.Rule(rowId, distributionRuleId, criterionLibraryId);
+            var updatedDto = CashFlowRuleDtos.Rule(rowId, distributionRuleId, criterionLibraryId);
+            updatedDto.Name = "Updated Name";
+            repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsList(dto1);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+                UpdateRows = new List<CashFlowRuleDTO> { updatedDto },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = false,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedDto = result.Single();
+            Assert.Equal("Updated Name", returnedDto.Name);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_RowToAdd_Adds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsEmptyList();
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var rowToAdd = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId); ;
+            var rowToAddClone = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId); ;
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+                AddedRows = new List<CashFlowRuleDTO> { rowToAdd },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = false,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var addedRow = result.Single();
+            ObjectAssertions.Equivalent(rowToAddClone, addedRow);
+        }
+
+        [Fact]
         public void GetSyncedScenarioDataset_EmptyNewLibrary_Empty()
         {
             var unitOfWork = UnitOfWorkMocks.New();
@@ -218,6 +351,7 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
 
             Assert.Empty(result);
         }
+
         [Fact]
         public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
         {
@@ -248,6 +382,102 @@ namespace BridgeCareCoreTests.Tests.CashFlowRule
             Assert.NotEqual(ruleId, returnedRule.Id);
             Assert.NotEqual(criterionLibraryId, returnedRule.CriterionLibrary.Id);
             Assert.NotEqual(distributionRuleId, returnedRule.CashFlowDistributionRules.Single().Id);
+        }
+
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithDeletedRow_Empty()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+                RowsForDeletion = new List<Guid> { Guid.NewGuid() },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetLibraryPage_NumberOfRowsGoesBeyondPageSize_TruncatesReturnedList()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var rule1 = CashFlowRuleDtos.Rule();
+            var rule2 = CashFlowRuleDtos.Rule();
+            repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsList(rule1, rule2);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = false,
+                Library = library,
+                SyncModel = syncModel,
+            };
+            var pagingRequest = new PagingRequestModel<CashFlowRuleDTO>
+            {
+                Page = 1,
+                RowsPerPage = 1,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetLibraryPage(libraryId, pagingRequest);
+            Assert.Equal(2, result.TotalItems);
+            var returnedRule = result.Items.Single();
+            ObjectAssertions.Equivalent(rule1, returnedRule);
+        }
+
+        [Fact]
+        public void GetLibraryPage2_NumberOfRowsGoesBeyondPageSize_SkipsPage1()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            var ruleId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var distributionRuleId = Guid.NewGuid();
+            var rule1 = CashFlowRuleDtos.Rule();
+            var rule2 = CashFlowRuleDtos.Rule();
+            repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).ReturnsList(rule1, rule2);
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = false,
+                Library = library,
+                SyncModel = syncModel,
+            };
+            var pagingRequest = new PagingRequestModel<CashFlowRuleDTO>
+            {
+                Page = 2,
+                RowsPerPage = 1,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetLibraryPage(libraryId, pagingRequest);
+            Assert.Equal(2, result.TotalItems);
+            var returnedRule = result.Items.Single();
+            ObjectAssertions.Equivalent(rule2, returnedRule);
         }
     }
 }

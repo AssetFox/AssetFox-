@@ -87,7 +87,7 @@
                             </v-btn>
                             </div>
                             <!-- <v-divider v-if='hasSelectedLibrary && !hasScenario' class="owner-shared-divider" style="margin-left:10px;" inset vertical>
-                            </v-divider>                        
+                            </v-divider>                        -->
                             <v-switch style="margin-left:10px;margin-top:4px;"
                                 class="sharing ghd-checkbox"
                                 label="Shared"

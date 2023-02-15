@@ -4,6 +4,6 @@
     {
         public string AttributeID { get; set; }
 
-        public string AttributeValueChangeExpression { get; set; }
+        public string ChangeExpression { get; set; }
     }
 }

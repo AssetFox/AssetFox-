@@ -8,6 +8,6 @@
 
     public class Attribute<T> : Attribute
     {
-        public double DefaultValue { get; set; }
+        public T DefaultValue { get; set; }
     }
 }

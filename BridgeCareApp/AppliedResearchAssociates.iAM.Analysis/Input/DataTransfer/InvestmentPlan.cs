@@ -6,6 +6,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
     {
         public List<Budget> Budgets { get; set; }
 
+        public List<BudgetCondition> BudgetConditions { get; set; }
+
         public List<CashFlowRule> CashFlowRules { get; set; }
 
         public int FirstYearOfAnalysisPeriod { get; set; }

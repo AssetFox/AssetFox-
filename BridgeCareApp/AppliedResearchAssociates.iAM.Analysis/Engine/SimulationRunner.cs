@@ -1,11 +1,17 @@
+//#define dump_analysis_input
+
+#if dump_analysis_input
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
+#endif
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
 
@@ -20,7 +26,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
 #if !DEBUG
-        private static int maxThreadsForSimulation = GetMaxThreadsForSimulation();
+        private static readonly int MaxThreadsForSimulation = GetMaxThreadsForSimulation();
+
+        private static int GetMaxThreadsForSimulation()
+        {
+            int processorCount = Environment.ProcessorCount;
+            return processorCount >= 8 ? processorCount - 2 : processorCount - 1;
+        }
 #endif
 
         public Simulation Simulation { get;  }
@@ -63,9 +75,24 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
         }
 
-
-        public void Run(bool withValidation = true, CancellationToken cancellationToken = default(CancellationToken))
+        public void Run(bool withValidation = true, CancellationToken cancellationToken = default)
         {
+#if dump_analysis_input
+            var inputDumpPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                $"{DateTime.Now:yyyy-MM-dd HH-mm-ss-fff} scenario dump.json");
+
+            var dto = Scenario.Convert(Simulation);
+            var json = JsonSerializer.Serialize(dto, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Converters = { new JsonStringEnumConverter() },
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            });
+
+            File.WriteAllText(inputDumpPath, json);
+#endif
+
             // During the execution of this method and its dependencies, the "SimulationException"
             // type is used for errors that are caused by invalid user input. Other types like
             // "InvalidOperationException" are used for errors that are caused by internal or
@@ -127,7 +154,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             AssetContexts = Simulation.Network.Assets
 #if !DEBUG
                 .AsParallel()
-                .WithDegreeOfParallelism(maxThreadsForSimulation)
+                .WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif
                 .Select(asset => new AssetContext(asset, this))
                 .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))
@@ -152,35 +179,16 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;
 
-            switch (Simulation.AnalysisMethod.SpendingStrategy)
+            ConditionGoalsEvaluator = Simulation.AnalysisMethod.SpendingStrategy switch
             {
-            case SpendingStrategy.NoSpending:
-                ConditionGoalsEvaluator = () => false;
-                break;
-
-            case SpendingStrategy.UnlimitedSpending:
-                ConditionGoalsEvaluator = () => false;
-                break;
-
-            case SpendingStrategy.UntilTargetAndDeficientConditionGoalsMet:
-                ConditionGoalsEvaluator = () => GoalsAreMet(TargetConditionActuals) && GoalsAreMet(DeficientConditionActuals);
-                break;
-
-            case SpendingStrategy.UntilTargetConditionGoalsMet:
-                ConditionGoalsEvaluator = () => GoalsAreMet(TargetConditionActuals);
-                break;
-
-            case SpendingStrategy.UntilDeficientConditionGoalsMet:
-                ConditionGoalsEvaluator = () => GoalsAreMet(DeficientConditionActuals);
-                break;
-
-            case SpendingStrategy.AsBudgetPermits:
-                ConditionGoalsEvaluator = () => false;
-                break;
-
-            default:
-                throw new InvalidOperationException(MessageStrings.InvalidSpendingStrategy);
-            }
+                SpendingStrategy.NoSpending => () => false,
+                SpendingStrategy.UnlimitedSpending => () => false,
+                SpendingStrategy.UntilTargetAndDeficientConditionGoalsMet => () => GoalsAreMet(TargetConditionActuals) && GoalsAreMet(DeficientConditionActuals),
+                SpendingStrategy.UntilTargetConditionGoalsMet => () => GoalsAreMet(TargetConditionActuals),
+                SpendingStrategy.UntilDeficientConditionGoalsMet => () => GoalsAreMet(DeficientConditionActuals),
+                SpendingStrategy.AsBudgetPermits => () => false,
+                _ => throw new InvalidOperationException(MessageStrings.InvalidSpendingStrategy),
+            };
 
             ObjectiveFunction = Simulation.AnalysisMethod.ObjectiveFunction;
 
@@ -206,13 +214,35 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
-                if (CheckCanceled(cancellationToken)) return;
+                if (CheckCanceled(cancellationToken))
+                {
+                    return;
+                }
+
                 var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod * 100;
                 ReportProgress(ProgressStatus.Running, percentComplete, year);
 
-                var unhandledContexts = ApplyRequiredEvents(year); if (CheckCanceled(cancellationToken)) return;
-                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year); if (CheckCanceled(cancellationToken)) return;
-                ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year); if (CheckCanceled(cancellationToken)) return;
+                var unhandledContexts = ApplyRequiredEvents(year);
+
+                if (CheckCanceled(cancellationToken))
+                {
+                    return;
+                }
+
+                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
+
+                if (CheckCanceled(cancellationToken))
+                {
+                    return;
+                }
+
+                ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
+
+                if (CheckCanceled(cancellationToken))
+                {
+                    return;
+                }
+
                 treatmentOptions = null;
 
                 InParallel(AssetContexts, context =>
@@ -220,7 +250,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     context.ApplyTreatmentMetadataIfPending(year);
                     context.UnfixCalculatedFieldValues();
                 });
-                if (CheckCanceled(cancellationToken)) return;
+
+                if (CheckCanceled(cancellationToken))
+                {
+                    return;
+                }
 
                 Snapshot(year);
             }
@@ -324,7 +358,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 action(item);
             }
 #else
-            _ = System.Threading.Tasks.Parallel.ForEach(items, new ParallelOptions { MaxDegreeOfParallelism = maxThreadsForSimulation }, action);
+            _ = System.Threading.Tasks.Parallel.ForEach(items, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = MaxThreadsForSimulation }, action);
 #endif
         }
 
@@ -646,7 +680,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var goalContexts = AssetContexts
 #if !DEBUG
                     .AsParallel().
-                    WithDegreeOfParallelism(maxThreadsForSimulation)
+                    WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
@@ -676,7 +710,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var goalContexts = AssetContexts
 #if !DEBUG
                     .AsParallel().
-                    WithDegreeOfParallelism(maxThreadsForSimulation)
+                    WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
@@ -780,7 +814,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 }
 
                 var budgetConditions = ConditionsPerBudget[budgetContext.Budget];
-                var budgetConditionIsMet = treatment is CommittedProject || budgetConditions.Count() == 0 || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(assetContext));
+                var budgetConditionIsMet = treatment is CommittedProject || !budgetConditions.Any() || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(assetContext));
                 if (!budgetConditionIsMet)
                 {
                     budgetUsageDetail.Status = BudgetUsageStatus.ConditionNotMet;
@@ -863,7 +897,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                             var workingBudgetDetails = futureYearConsideration.BudgetUsages.Where(detail => applicableBudgetNames.Contains(detail.BudgetName));
                             var workingBudgets = Zip.Strict(workingBudgetContexts, workingBudgetDetails).ToList();
 
-                            if (firstYearBudget is object)
+                            if (firstYearBudget is not null)
                             {
                                 _ = workingBudgets.RemoveAll(pair => pair.Item1 != firstYearBudget);
                             }
@@ -915,7 +949,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     }
                 }
 
-                if (scheduleCashFlowEvents is object)
+                if (scheduleCashFlowEvents is not null)
                 {
                     scheduleCashFlowEvents();
                     return CostCoverage.CashFlow;
@@ -991,18 +1025,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             TargetConditionActuals = GetTargetConditionActuals(year);
             DeficientConditionActuals = GetDeficientConditionActuals();
-        }
-
-        private static int GetMaxThreadsForSimulation()
-        {
-            int processorCount = Environment.ProcessorCount;
-
-            if(processorCount >= 8)
-            {
-                return processorCount - 2;
-            }
-
-            return processorCount - 1;
         }
     }
 }

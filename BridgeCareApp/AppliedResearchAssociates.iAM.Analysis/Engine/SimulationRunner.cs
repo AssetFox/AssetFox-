@@ -1,6 +1,7 @@
 //#define dump_analysis_input
+//#define dump_analysis_output
 
-#if dump_analysis_input
+#if dump_analysis_input || dump_analysis_output
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -80,17 +81,17 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 #if dump_analysis_input
             var inputDumpPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-                $"{DateTime.Now:yyyy-MM-dd HH-mm-ss-fff} scenario dump.json");
+                $"{DateTime.Now:yyyy-MM-dd HH-mm-ss-fff} analysis input dump.json");
 
-            var dto = Scenario.Convert(Simulation);
-            var json = JsonSerializer.Serialize(dto, new JsonSerializerOptions
+            var inputData = Scenario.Convert(Simulation);
+            var inputJson = JsonSerializer.Serialize(inputData, new JsonSerializerOptions
             {
                 WriteIndented = true,
                 Converters = { new JsonStringEnumConverter() },
                 Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             });
 
-            File.WriteAllText(inputDumpPath, json);
+            File.WriteAllText(inputDumpPath, inputJson);
 #endif
 
             // During the execution of this method and its dependencies, the "SimulationException"
@@ -268,7 +269,21 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
 
+#if dump_analysis_output
+            var outputDumpPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                $"{DateTime.Now:yyyy-MM-dd HH-mm-ss-fff} analysis output dump.json");
 
+            var outputData = Simulation.Results;
+            var outputJson = JsonSerializer.Serialize(outputData, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Converters = { new JsonStringEnumConverter() },
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            });
+
+            File.WriteAllText(outputDumpPath, outputJson);
+#endif
 
             bool CheckCanceled(CancellationToken cancellationToken)
             {

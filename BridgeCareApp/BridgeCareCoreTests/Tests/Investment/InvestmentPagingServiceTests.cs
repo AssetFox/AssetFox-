@@ -365,6 +365,129 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public void GetScenarioPage_InvestmentPlanYearIsZero_ReturnsCurrentYear()
+        {
+            var year = DateTime.Now.Year;
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var investmentDefaultData = new InvestmentDefaultData
+            {
+                InflationRatePercentage = 3,
+                MinimumProjectCostLimit = 100000,
+            };
+            var investmentDefaultDataService = InvestmentDefaultDataServiceMocks.New(investmentDefaultData);
+            var simulationId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            var budgetName = RandomStrings.Length11();
+            var budget = BudgetDtos.New(budgetId);
+            var thisYearAmount = BudgetAmountDtos.ForBudgetAndYear(budget, year);
+            var amounts = new List<BudgetAmountDTO> { thisYearAmount, };
+            budget.BudgetAmounts.AddRange(amounts);
+            var budgets = new List<BudgetDTO> { budget };
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
+            var pagingService = CreateInvestmentPagingService(unitOfWork, investmentDefaultDataService);
+            var request = new InvestmentPagingSyncModel
+            {
+                Investment = new InvestmentPlanDTO
+                {
+                    FirstYearOfAnalysisPeriod = 0,
+                    NumberOfYearsInAnalysisPeriod = 1,
+                }
+            };
+            var pageRequest = new InvestmentPagingRequestModel
+            {
+                SyncModel = request,
+            };
+
+            var result = pagingService.GetScenarioPage(simulationId, pageRequest);
+
+            if (DateTime.Now.Year!=year)
+            {
+                return;
+            }
+            var expectedBudget = BudgetDtos.New(budgetId);
+            var expectedAmounts = new List<BudgetAmountDTO> { thisYearAmount };
+            expectedBudget.BudgetAmounts.AddRange(expectedAmounts);
+            var expectedInvestmentPlan = new InvestmentPlanDTO
+            {
+                FirstYearOfAnalysisPeriod = year,
+                NumberOfYearsInAnalysisPeriod = 1,
+                InflationRatePercentage = 3,
+                MinimumProjectCostLimit = 100000,
+                ShouldAccumulateUnusedBudgetAmounts = false,
+            };
+            var expectedBudgets = new List<BudgetDTO> { expectedBudget };
+            var expected = new InvestmentPagingPageModel
+            {
+                FirstYear = year,
+                LastYear = year,
+                InvestmentPlan = expectedInvestmentPlan,
+                TotalItems = 1,
+                Items = expectedBudgets,
+            };
+            ObjectAssertions.EquivalentExcluding(expected, result, x => x.InvestmentPlan.Id);
+        }
+        [Fact]
+        public void GetScenarioPage_ZeroRowsPerPage_ReturnsAllBudgets()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var investmentDefaultData = new InvestmentDefaultData
+            {
+                InflationRatePercentage = 3,
+                MinimumProjectCostLimit = 100000,
+            };
+            var investmentDefaultDataService = InvestmentDefaultDataServiceMocks.New(investmentDefaultData);
+            var simulationId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            var budgetName = RandomStrings.Length11();
+            var budget = BudgetDtos.New(budgetId);
+            var thisYearAmount = BudgetAmountDtos.ForBudgetAndYear(budget, 2023);
+            var amounts = new List<BudgetAmountDTO> { thisYearAmount, };
+            budget.BudgetAmounts.AddRange(amounts);
+            var budgets = new List<BudgetDTO> { budget };
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
+            var pagingService = CreateInvestmentPagingService(unitOfWork, investmentDefaultDataService);
+            var request = new InvestmentPagingSyncModel
+            {
+                Investment = new InvestmentPlanDTO
+                {
+                    FirstYearOfAnalysisPeriod = 0,
+                    NumberOfYearsInAnalysisPeriod = 1,
+                }
+            };
+            var pageRequest = new InvestmentPagingRequestModel
+            {
+                RowsPerPage = 0,
+                SyncModel = request,
+            };
+
+            var result = pagingService.GetScenarioPage(simulationId, pageRequest);
+
+            var expectedBudget = BudgetDtos.New(budgetId);
+            var expectedAmounts = new List<BudgetAmountDTO> { thisYearAmount };
+            expectedBudget.BudgetAmounts.AddRange(expectedAmounts);
+            var expectedInvestmentPlan = new InvestmentPlanDTO
+            {
+                FirstYearOfAnalysisPeriod = 2023,
+                NumberOfYearsInAnalysisPeriod = 1,
+                InflationRatePercentage = 3,
+                MinimumProjectCostLimit = 100000,
+                ShouldAccumulateUnusedBudgetAmounts = false,
+            };
+            var expectedBudgets = new List<BudgetDTO> { expectedBudget };
+            var expected = new InvestmentPagingPageModel
+            {
+                FirstYear = 2023,
+                LastYear = 2023,
+                InvestmentPlan = expectedInvestmentPlan,
+                TotalItems = 0,
+                Items = expectedBudgets,
+            };
+            ObjectAssertions.EquivalentExcluding(expected, result, x => x.InvestmentPlan.Id);
+        }
+
+        [Fact]
         public void GetScenarioPage_SortByYearDescending_AmountsSortedByYearDescending()
         {
             var unitOfWork = UnitOfWorkMocks.New();

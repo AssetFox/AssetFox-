@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.Hubs;
 
 namespace BridgeCareCore.Controllers
 {
@@ -99,6 +100,10 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                // temp remove later
+                code = "IncorrectCode";
+                //  
+
                 // These two lines should be removed as soon as the ESEC site's certificates start working
                 var handler = new HttpClientHandler
                 {
@@ -132,8 +137,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _log.Error(e.Message);
-                return StatusCode(500, e.Message);
+                _log.Error(e.Message);                
+                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"The authorization system is not available at the moment");
+                throw;
             }
         }
 

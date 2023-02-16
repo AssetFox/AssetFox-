@@ -9,13 +9,14 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
 {
     public static class BudgetPriorityDtos
     {
-        public static BudgetPriorityDTO New(Guid? id = null)
+        public static BudgetPriorityDTO New(Guid? id = null, int priorityLevel = 0)
         {
             var resolveId = id ?? Guid.NewGuid();
             var dto = new BudgetPriorityDTO
             {
                 Id = resolveId,
                 BudgetPercentagePairs = new List<BudgetPercentagePairDTO>(),
+                PriorityLevel = priorityLevel,
             };
             return dto;
         }

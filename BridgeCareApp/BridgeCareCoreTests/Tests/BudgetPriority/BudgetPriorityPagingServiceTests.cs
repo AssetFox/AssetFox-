@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
@@ -228,6 +223,164 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             };
             ObjectAssertions.Equivalent(expected, result);
         }
+
+
+        [Fact]
+        public void GetScenarioPage_SortByPriorityLevel_Does()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var scenarioBudgetPriorityId = Guid.NewGuid();
+            var budgetPriorityDto = BudgetPriorityDtos.New(scenarioBudgetPriorityId, 80);
+            var criterionLibraryId = Guid.NewGuid();
+            var budgetPriorityDto2 = BudgetPriorityDtos.New(null, 90);
+            var budgetPriorityDto3 = BudgetPriorityDtos.New(null, 100);
+            budgetPriorityRepo.Setup(b => b.GetScenarioBudgetPriorities(simulationId)).ReturnsList(budgetPriorityDto2, budgetPriorityDto3, budgetPriorityDto);
+            var service = CreatePagingService(unitOfWork);
+            var syncModel = new PagingSyncModel<BudgetPriorityDTO>();
+            var request = new PagingRequestModel<BudgetPriorityDTO>
+            {
+                sortColumn = "prioritylevel",
+            };
+
+            var result = service.GetScenarioPage(simulationId, request);
+            var expectedItem = new BudgetPriorityDTO
+            {
+                Id = budgetPriorityDto.Id,
+                BudgetPercentagePairs = new List<BudgetPercentagePairDTO>(),
+                PriorityLevel = 80,
+            };
+            Assert.Equal(3, result.TotalItems);
+            var actualPriorities = result.Items.Select(i => i.PriorityLevel).ToList();
+            var expectedPriorities = new List<int> { 80, 90, 100 };
+            ObjectAssertions.Equivalent(expectedPriorities, actualPriorities);
+        }
+
+        [Fact]
+        public void GetScenarioPage_SortByPriorityDescending_Does()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var scenarioBudgetPriorityId = Guid.NewGuid();
+            var budgetPriorityDto = BudgetPriorityDtos.New(scenarioBudgetPriorityId, 80);
+            var criterionLibraryId = Guid.NewGuid();
+            var budgetPriorityDto2 = BudgetPriorityDtos.New(null, 90);
+            var budgetPriorityDto3 = BudgetPriorityDtos.New(null, 100);
+            budgetPriorityRepo.Setup(b => b.GetScenarioBudgetPriorities(simulationId)).ReturnsList(budgetPriorityDto2, budgetPriorityDto3, budgetPriorityDto);
+            var service = CreatePagingService(unitOfWork);
+            var syncModel = new PagingSyncModel<BudgetPriorityDTO>();
+            var request = new PagingRequestModel<BudgetPriorityDTO>
+            {
+                sortColumn = "prioritylevel",
+                isDescending = true,
+            };
+
+            var result = service.GetScenarioPage(simulationId, request);
+            var expectedItem = new BudgetPriorityDTO
+            {
+                Id = budgetPriorityDto.Id,
+                BudgetPercentagePairs = new List<BudgetPercentagePairDTO>(),
+                PriorityLevel = 80,
+            };
+            Assert.Equal(3, result.TotalItems);
+            var actualPriorities = result.Items.Select(i => i.PriorityLevel).ToList();
+            var expectedPriorities = new List<int> { 100, 90, 80 };
+            ObjectAssertions.Equivalent(expectedPriorities, actualPriorities);
+        }
+
+        [Fact]
+        public void GetScenarioPage_SortByPercentage_Does()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var scenarioBudgetPriorityId = Guid.NewGuid();
+            var budgetPriorityDto = BudgetPriorityDtos.New(scenarioBudgetPriorityId);
+            var budgetPriorityDto2 = BudgetPriorityDtos.New();
+            var budgetPriorityDto3 = BudgetPriorityDtos.New();
+            var percentagePair1 = new BudgetPercentagePairDTO
+            {
+                Percentage = 10,
+                BudgetName = "Budget"
+            };
+            var percentagePair2 = new BudgetPercentagePairDTO
+            {
+                Percentage = 20,
+                BudgetName = "Budget"
+            };
+            var percentagePair3 = new BudgetPercentagePairDTO
+            {
+                Percentage = 30,
+                BudgetName = "Budget"
+            };
+            budgetPriorityDto.BudgetPercentagePairs.Add(percentagePair1);
+            budgetPriorityDto2.BudgetPercentagePairs.Add(percentagePair2);
+            budgetPriorityDto3.BudgetPercentagePairs.Add(percentagePair3);
+            budgetPriorityRepo.Setup(b => b.GetScenarioBudgetPriorities(simulationId)).ReturnsList(budgetPriorityDto2, budgetPriorityDto3, budgetPriorityDto);
+            var service = CreatePagingService(unitOfWork);
+            var syncModel = new PagingSyncModel<BudgetPriorityDTO>();
+            var request = new PagingRequestModel<BudgetPriorityDTO>
+            {
+                sortColumn = "budget",
+            };
+
+            var result = service.GetScenarioPage(simulationId, request);
+            Assert.Equal(3, result.TotalItems);
+            var actualPriorities = result.Items.Select(i => i.BudgetPercentagePairs.Single().Percentage).ToList();
+            var expectedPriorities = new List<int> { 10, 20, 30 };
+            ObjectAssertions.Equivalent(expectedPriorities, actualPriorities);
+        }
+
+        [Fact]
+        public void GetScenarioPage_SortByPercentageDescending_Does()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var scenarioBudgetPriorityId = Guid.NewGuid();
+            var budgetPriorityDto = BudgetPriorityDtos.New(scenarioBudgetPriorityId);
+            var budgetPriorityDto2 = BudgetPriorityDtos.New();
+            var budgetPriorityDto3 = BudgetPriorityDtos.New();
+            var percentagePair1 = new BudgetPercentagePairDTO
+            {
+                Percentage = 10,
+                BudgetName = "Budget"
+            };
+            var percentagePair2 = new BudgetPercentagePairDTO
+            {
+                Percentage = 20,
+                BudgetName = "Budget"
+            };
+            var percentagePair3 = new BudgetPercentagePairDTO
+            {
+                Percentage = 30,
+                BudgetName = "Budget"
+            };
+            budgetPriorityDto.BudgetPercentagePairs.Add(percentagePair1);
+            budgetPriorityDto2.BudgetPercentagePairs.Add(percentagePair2);
+            budgetPriorityDto3.BudgetPercentagePairs.Add(percentagePair3);
+            budgetPriorityRepo.Setup(b => b.GetScenarioBudgetPriorities(simulationId)).ReturnsList(budgetPriorityDto2, budgetPriorityDto3, budgetPriorityDto);
+            var service = CreatePagingService(unitOfWork);
+            var syncModel = new PagingSyncModel<BudgetPriorityDTO>();
+            var request = new PagingRequestModel<BudgetPriorityDTO>
+            {
+                sortColumn = "budget",
+                isDescending = true,
+            };
+
+            var result = service.GetScenarioPage(simulationId, request);
+            Assert.Equal(3, result.TotalItems);
+            var actualPriorities = result.Items.Select(i => i.BudgetPercentagePairs.Single().Percentage).ToList();
+            var expectedPriorities = new List<int> { 30, 20, 10 };
+            ObjectAssertions.Equivalent(expectedPriorities, actualPriorities);
+        }
+
         [Fact]
         public void GetScenarioPage_Search_SearchesMergedCriteriaExpression()
         {
@@ -262,7 +415,7 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             var expected = new PagingPageModel<BudgetPriorityDTO>
             {
                 TotalItems = 1,
-                Items = new List<BudgetPriorityDTO> { expectedItem},                
+                Items = new List<BudgetPriorityDTO> { expectedItem },
             };
             ObjectAssertions.Equivalent(expected, result);
         }

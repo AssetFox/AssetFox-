@@ -88,13 +88,13 @@
                             </div>
                             <!-- <v-divider v-if='hasSelectedLibrary && !hasScenario' class="owner-shared-divider" style="margin-left:10px;" inset vertical>
                             </v-divider>      -->                  
-                            <v-switch style="margin-left:10px;margin-top:4px;"
+                            <!-- <v-switch style="margin-left:10px;margin-top:4px;"
                                 class="sharing ghd-checkbox"
                                 label="Shared"
                                 v-if="hasSelectedLibrary && !hasScenario"
                                 v-model="selectedPerformanceCurveLibrary.isShared"
                                 @change="checkHasUnsavedChanges()"
-                            />               
+                            />                -->
                     </v-layout>
                 </v-flex>
                 <v-flex xs9 v-show="hasScenario">
@@ -604,7 +604,7 @@ export default class PerformanceCurveEditor extends Vue {
     totalItems = 0;
     currentPage: PerformanceCurve[] = [];
     isRunning: boolean = true;
-
+    isShared: boolean = false;
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
@@ -683,6 +683,8 @@ export default class PerformanceCurveEditor extends Vue {
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
     showImportExportPerformanceCurvesDialog: boolean = false;    
+
+    sharePerformanceCurveLibraryDialogData: SharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {

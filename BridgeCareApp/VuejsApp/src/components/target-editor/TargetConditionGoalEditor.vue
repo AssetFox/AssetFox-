@@ -413,7 +413,7 @@ export default class TargetConditionGoalEditor extends Vue {
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.targetConditionGoalModule.hasPermittedAccess) hasPermittedAccess: boolean;
     @State(state => state.targetConditionGoalModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedLibrary') getIsSharedLibraryAction: any;
+    @Action('getIsSharedTargetConditionGoalLibrary') getIsSharedLibraryAction: any;
 
     @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;

@@ -17,6 +17,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BridgeCareCore.Controllers
 {
@@ -329,13 +330,14 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     var users = UnitOfWork.TargetConditionGoalRepo.GetLibraryUsers(targetConditionGoalLibraryId);
-                    if (users.Count <= 0)
+                    var nonOwnerUsers = users.Any(x => x.AccessLevel != AppliedResearchAssociates.iAM.DTOs.Enums.LibraryAccessLevel.Owner);
+                    if (nonOwnerUsers)
                     {
-                        result = false;
+                        result = true;
                     }
                     else
                     {
-                        result = true;
+                        result = false;
                     }
                 });
                 return Ok(result);

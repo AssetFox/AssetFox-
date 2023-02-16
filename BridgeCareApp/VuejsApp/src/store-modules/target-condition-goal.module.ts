@@ -91,7 +91,7 @@ const mutations = {
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
     },
-    IsSharedLibraryMutator(state: any, status: boolean) {
+    IsSharedTargetConditionGoalLibraryMutator(state: any, status: boolean) {
         state.isSharedLibrary = status;
     }
 };
@@ -145,14 +145,14 @@ const actions = {
             }
         });
     },
-    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
+    async getIsSharedTargetConditionGoalLibrary({ dispatch, commit }: any, payload: any) {
         await TargetConditionGoalService.getIsSharedLibrary(payload.id).then(
             (response: AxiosResponse) => {
                 if (
                 hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
-                commit('IsSharedLibraryMutator', response.data as boolean);
+                commit('IsSharedTargetConditionGoalLibraryMutator', response.data as boolean);
             }
         });
     },

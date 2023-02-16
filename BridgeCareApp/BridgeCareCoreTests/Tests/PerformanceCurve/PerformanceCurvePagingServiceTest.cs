@@ -447,5 +447,204 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var returnedCurve = returnedCurves.Single();
             ObjectAssertions.Equivalent(curveBClone, returnedCurve);
         }
+
+        [Fact]
+        public void GetSyncedLibraryDataSet_Search_DtoIsThin_DoesNotThrow()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var hubService = HubServiceMocks.Default();
+            var expressionValidationService = ExpressionValidationServiceMocks.New();
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
+            var libraryId = Guid.NewGuid();
+            var curveIdA = Guid.NewGuid();
+            var curveIdB = Guid.NewGuid();
+            var curveA = new PerformanceCurveDTO
+            {
+                Id = curveIdA,
+            };
+            var curveB = new PerformanceCurveDTO
+            {
+                Id = curveIdB,
+                Name = "b",
+                Attribute = "",
+                Equation = new EquationDTO(),
+                CriterionLibrary = new CriterionLibraryDTO(),
+            };
+            var curveBClone = new PerformanceCurveDTO
+            {
+                Id = curveIdB,
+                Name = "b",
+                Attribute = "",
+                Equation = new EquationDTO(),
+                CriterionLibrary = new CriterionLibraryDTO()
+            };
+            var curves = new List<PerformanceCurveDTO> { curveA, curveB };
+            var request = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                LibraryId = libraryId,
+            };
+            var pagingRequest = new PagingRequestModel<PerformanceCurveDTO>
+            {
+                SyncModel = request,
+                search = "B",
+            };
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
+
+            var dataset = service.GetLibraryPage(libraryId, pagingRequest);
+
+            var returnedCurves = dataset.Items;
+            var returnedCurve = returnedCurves.Single();
+            ObjectAssertions.Equivalent(curveBClone, returnedCurve);
+        }
+
+
+        [Fact]
+        public void GetSyncedLibraryDataSet_Search_SearchesAttribute()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var hubService = HubServiceMocks.Default();
+            var expressionValidationService = ExpressionValidationServiceMocks.New();
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
+            var libraryId = Guid.NewGuid();
+            var curveIdA = Guid.NewGuid();
+            var curveIdB = Guid.NewGuid();
+            var curveA = new PerformanceCurveDTO
+            {
+                Id = curveIdA,
+            };
+            var curveB = new PerformanceCurveDTO
+            {
+                Id = curveIdB,
+                Attribute = "b",
+            };
+            var curveBClone = new PerformanceCurveDTO
+            {
+                Id = curveIdB,
+                Attribute = "b",
+            };
+            var curves = new List<PerformanceCurveDTO> { curveA, curveB };
+            var request = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                LibraryId = libraryId,
+            };
+            var pagingRequest = new PagingRequestModel<PerformanceCurveDTO>
+            {
+                SyncModel = request,
+                search = "B",
+            };
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
+
+            var dataset = service.GetLibraryPage(libraryId, pagingRequest);
+
+            var returnedCurves = dataset.Items;
+            var returnedCurve = returnedCurves.Single();
+            ObjectAssertions.Equivalent(curveBClone, returnedCurve);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataSet_Search_SearchesEquation()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var hubService = HubServiceMocks.Default();
+            var expressionValidationService = ExpressionValidationServiceMocks.New();
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
+            var libraryId = Guid.NewGuid();
+            var curveIdA = Guid.NewGuid();
+            var curveIdB = Guid.NewGuid();
+            var curveA = new PerformanceCurveDTO
+            {
+                Id = curveIdA,
+            };
+            var curveB = new PerformanceCurveDTO
+            {
+                Id = curveIdB,
+                Equation = new EquationDTO
+                {
+                    Expression = "B",
+                }
+            };
+            var curveBClone = new PerformanceCurveDTO
+            {
+                Id = curveIdB,
+                Equation = new EquationDTO
+                {
+                    Expression = "B",
+                }
+            };
+            var curves = new List<PerformanceCurveDTO> { curveA, curveB };
+            var request = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                LibraryId = libraryId,
+            };
+            var pagingRequest = new PagingRequestModel<PerformanceCurveDTO>
+            {
+                SyncModel = request,
+                search = "B",
+            };
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
+
+            var dataset = service.GetLibraryPage(libraryId, pagingRequest);
+
+            var returnedCurves = dataset.Items;
+            var returnedCurve = returnedCurves.Single();
+            ObjectAssertions.Equivalent(curveBClone, returnedCurve);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataSet_Search_SearchesCriterionLibrary()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var hubService = HubServiceMocks.Default();
+            var expressionValidationService = ExpressionValidationServiceMocks.New();
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
+            var libraryId = Guid.NewGuid();
+            var curveIdA = Guid.NewGuid();
+            var curveIdB = Guid.NewGuid();
+            var curveA = new PerformanceCurveDTO
+            {
+                Id = curveIdA,
+            };
+            var curveB = new PerformanceCurveDTO
+            {
+                Id = curveIdB,
+                CriterionLibrary = new CriterionLibraryDTO
+                {
+                    MergedCriteriaExpression = "b",
+                },
+            };
+            var curveBClone = new PerformanceCurveDTO
+            {
+                Id = curveIdB,
+                CriterionLibrary = new CriterionLibraryDTO
+                {
+                    MergedCriteriaExpression = "b",
+                },
+            };
+            var curves = new List<PerformanceCurveDTO> { curveA, curveB };
+            var request = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                LibraryId = libraryId,
+            };
+            var pagingRequest = new PagingRequestModel<PerformanceCurveDTO>
+            {
+                SyncModel = request,
+                search = "B",
+            };
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
+
+            var dataset = service.GetLibraryPage(libraryId, pagingRequest);
+
+            var returnedCurves = dataset.Items;
+            var returnedCurve = returnedCurves.Single();
+            ObjectAssertions.Equivalent(curveBClone, returnedCurve);
+        }
     }
 }

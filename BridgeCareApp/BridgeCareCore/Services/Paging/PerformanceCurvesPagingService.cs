@@ -42,10 +42,11 @@ namespace BridgeCareCore.Services
         {
             var lowerCaseSearch = search.ToLower();
             return curves
-                .Where(_ => _.Name.ToLower().Contains(lowerCaseSearch) ||
-                    _.Attribute.ToLower().Contains(lowerCaseSearch) ||
-                    (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(lowerCaseSearch)) ||
-                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(lowerCaseSearch))).ToList();
+                .Where(_ => (
+                _.Name!=null && _.Name.ToLower().Contains(lowerCaseSearch)) ||
+                (_.Attribute!=null && _.Attribute.ToLower().Contains(lowerCaseSearch)) ||
+                (_.Equation!=null && _.Equation.Expression!=null &&    (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(lowerCaseSearch))) ||
+                    (_.CriterionLibrary!=null && _.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(lowerCaseSearch))).ToList();
         }
 
         protected override List<PerformanceCurveDTO> GetScenarioRows(Guid scenarioId) => _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurvesOrderedById(scenarioId);

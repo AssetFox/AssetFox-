@@ -26,6 +26,13 @@ export default class DataSourceService {
             data
         );
     }
+    static DeleteDataSource(
+        id: string,
+    ): AxiosPromise {
+        return coreAxiosInstance.delete(
+            `${API.DataSource}/DeleteDataSource/${id}`
+        );
+    }
     static getExcelSpreadsheetColumnHeaders(
         datasourceId: string
     ): AxiosPromise {

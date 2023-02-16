@@ -694,8 +694,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             {
                 var goalContexts = AssetContexts
 #if !DEBUG
-                    .AsParallel().
-                    WithDegreeOfParallelism(MaxThreadsForSimulation)
+                    .AsParallel()
+                    .WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
@@ -724,8 +724,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                 var goalContexts = AssetContexts
 #if !DEBUG
-                    .AsParallel().
-                    WithDegreeOfParallelism(MaxThreadsForSimulation)
+                    .AsParallel()
+                    .WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();

@@ -24,6 +24,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
         public bool ShouldPreapplyPassiveTreatment { get; set; }
 
+        public Simulation Convert() => throw new NotImplementedException();
+
         public static Scenario Convert(Simulation source) => new()
         {
             AnalysisMethod = Convert(source.AnalysisMethod),
@@ -37,10 +39,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
             ShouldPreapplyPassiveTreatment = source.ShouldPreapplyPassiveTreatment,
         };
 
-        public Simulation Convert()
-        {
-            throw new NotImplementedException();
-        }
+        #region Conversion-from-this
+
+        // TODO
+
+        #endregion
 
         #region Conversion-to-this
 

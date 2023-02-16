@@ -205,23 +205,6 @@ namespace BridgeCareCore.Services
         }
 
         /**
-         * Gets SimulationEntity data for a Committed Project Import
-         */
-        private SimulationEntity GetSimulationEntityForCommittedProjectImport(Guid simulationId)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new ArgumentException($"No simulation was found for the given scenario.");
-            }
-
-            return _unitOfWork.Context.Simulation
-                .Include(_ => _.InvestmentPlan)
-                .Include(_ => _.Budgets)
-                .ThenInclude(_ => _.ScenarioBudgetAmounts)
-                .Single(_ => _.Id == simulationId);
-        }
-
-        /**
          * Gets a Dictionary of AttributeEntity Id per AttributeEntity Name
          */
         private Dictionary<string, Guid> GetAttributeIdsPerAttributeName(List<string> consequenceAttributeNames)
@@ -277,9 +260,15 @@ namespace BridgeCareCore.Services
             ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
             // First, get the simulation
-            var simulationEntity = GetSimulationEntityForCommittedProjectImport(simulationId);
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
+            if (simulation == null)
+            {
+                throw new ArgumentException($"No simulation was found for the given scenario.");
+            }
+            var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
+            var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
 
-            if (simulationEntity.InvestmentPlan == null)
+            if (investmentPlan == null)
             {
                 throw new RowNotInTableException("Simulation has no investment plan.");
             }
@@ -295,7 +284,7 @@ namespace BridgeCareCore.Services
             var end = worksheet.Dimension.End;  // Contains both column and row ends
 
             // Get the location => asset ID lookup for all maintainable assets in the network
-            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulationEntity.NetworkId);
+            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulation.NetworkId);
 
             // Get the column ID for the network's key field
             if (!headers.Contains(_networkKeyField))
@@ -360,12 +349,12 @@ namespace BridgeCareCore.Services
 
                 if (!budgetNameIsEmpty)
                 {
-                    if (simulationEntity.Budgets.All(_ => _.Name != budgetName))
+                    if (budgets.All(_ => _.Name != budgetName))
                     {
                         throw new RowNotInTableException(
                             $"Budget {budgetName} does not exist in the applied budget library.");
                     }
-                    budgetId = simulationEntity.Budgets.Single(_ => _.Name == budgetName).Id;
+                    budgetId = budgets.Single(_ => _.Name == budgetName).Id;
                 }
 
                 // This to convert the incoming string to a TreatmentCategory
@@ -383,7 +372,7 @@ namespace BridgeCareCore.Services
                 var project = new SectionCommittedProjectDTO
                 {
                     Id = Guid.NewGuid(),
-                    SimulationId = simulationEntity.Id,
+                    SimulationId = simulation.Id,
                     ScenarioBudgetId = budgetId,
                     LocationKeys = locationInformation,
                     Treatment = worksheet.GetCellValue<string>(row, _keyFields.Count + 1), // Assumes that InitialHeaders stays constant
@@ -416,19 +405,19 @@ namespace BridgeCareCore.Services
 
             // Apply required no treatment entries if required by the user
             if (applyNoTreatment && projectsPerLocationIdentifierAndYearTuple.Keys.Any(_ =>
-                _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod))
+                _.Item2 > investmentPlan.FirstYearOfAnalysisPeriod))
             {
                 // Loop through committed projects that do not start in the initial year
                 // (Projects in the initial year do not require No Treatment variables)
                 var locationIdentifierAndYearTuples = projectsPerLocationIdentifierAndYearTuple.Keys
-                    .Where(_ => _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod).ToList();
+                    .Where(_ => _.Item2 > investmentPlan.FirstYearOfAnalysisPeriod).ToList();
                 locationIdentifierAndYearTuples.ForEach(locationIdentifierAndYearTuple =>
                 {
                     var project = projectsPerLocationIdentifierAndYearTuple[locationIdentifierAndYearTuple];
 
                     // Add no treatment projects for each year from the first year of the analysis to the year
                     // prior to the committed project
-                    var year = simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod;
+                    var year = investmentPlan.FirstYearOfAnalysisPeriod;
                     while (year < project.Year &&
                            !projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifierAndYearTuple.Item1,
                                year)))
@@ -507,12 +496,11 @@ namespace BridgeCareCore.Services
                 compiler = new CalculateEvaluateCompiler();
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.TreatmentCostEquationJoin.Equation.Expression, compiler);
 
-                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-                    .Where(_ => _.MaintainableAssetId == asset.Id).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
-                var latestAggResults = new List<AggregatedResultEntity>();
+                var aggResultEntities = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(asset.Id);
+                var latestAggResults = new List<AggregatedResultDTO>();
                 foreach(var attr in attributes)
                 {
-                    var attrs = aggResults.Where(_ => _.AttributeId == attr.Id).ToList();
+                    var attrs = aggResultEntities.Where(_ => _.Attribute.Id == attr.Id).ToList();
                     if (attrs.Count == 0)
                         continue;
                     var latestYear = attrs.Max(_ => _.Year);
@@ -562,13 +550,12 @@ namespace BridgeCareCore.Services
         private bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId)
         {
             var attributes = InstantiateCompilerAndGetExpressionAttributes(expression, compiler);
-
-            var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-                    .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
-            var latestAggResults = new List<AggregatedResultEntity>();
+            var attributeIds = attributes.Select(a => a.Id).ToList();
+            var aggResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(assetId);
+            var latestAggResults = new List<AggregatedResultDTO>();
             foreach (var attr in attributes)
             {
-                var attrs = aggResults.Where(_ => _.AttributeId == attr.Id).ToList();
+                var attrs = aggResults.Where(_ => _.Attribute.Id == attr.Id).ToList();
                 if (attrs.Count == 0)
                     continue;
                 var latestYear = attrs.Max(_ => _.Year);
@@ -583,7 +570,7 @@ namespace BridgeCareCore.Services
             return evaluator.Delegate(scope);
         }
 
-        private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
+        private List<AttributeDTO> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
         {
             var modifiedExpression = mergedCriteriaExpression
                     .Replace("[", "")
@@ -595,24 +582,17 @@ namespace BridgeCareCore.Services
             var pattern = "\\[[^\\]]*\\]";
             var rg = new Regex(pattern);
             var match = rg.Matches(mergedCriteriaExpression);
-            var hashMatch = new HashSet<string>();
+            var hashMatch = new List<string>();
             foreach (Match m in match)
             {
                 hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
             }
 
-            var attributes = _unitOfWork.Context.Attribute.AsNoTracking()
-                .Where(_ => hashMatch.Contains(_.Name))
-                .Select(attribute => new AttributeEntity
-                {
-                    Id = attribute.Id,
-                    Name = attribute.Name,
-                    DataType = attribute.DataType
-                }).AsNoTracking().ToList();
+            var attributes = _unitOfWork.AttributeRepo.GetAttributesWithNames(hashMatch);
 
             attributes.ForEach(attribute =>
             {
-                compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                compiler.ParameterTypes[attribute.Name] = attribute.Type == "NUMBER"
                     ? CalculateEvaluateParameterType.Number
                     : CalculateEvaluateParameterType.Text;
             });
@@ -620,11 +600,11 @@ namespace BridgeCareCore.Services
             return attributes;
         }
 
-        private void InstantiateScope(List<AggregatedResultEntity> results, CalculateEvaluateScope scope)
+        private void InstantiateScope(List<AggregatedResultDTO> results, CalculateEvaluateScope scope)
         {
             results.ForEach(_ =>
             {
-                if (_.Attribute.DataType == "NUMBER")
+                if (_.Attribute.Type == "NUMBER")
                 {
                     scope.SetNumber(_.Attribute.Name, _.NumericValue.Value);
                 }

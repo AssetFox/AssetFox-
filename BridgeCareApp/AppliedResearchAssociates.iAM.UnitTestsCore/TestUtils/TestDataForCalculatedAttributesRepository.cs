@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CalculatedAttribute;
@@ -12,17 +9,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class TestDataForCalculatedAttributesRepository
     {
+        public static Guid FirstSimulationId => new Guid("440ab4bb-da87-4aee-868b-4272910fae9b");
+        public static Guid SecondSimulationId => new Guid("bf8984b8-4fbf-4b54-9035-b20b349a6808");
         public static IQueryable<SimulationEntity> GetSimulations()
         {
             var simulationList = new List<SimulationEntity>();
             simulationList.Add(new SimulationEntity()
             {
-                Id = new Guid("440ab4bb-da87-4aee-868b-4272910fae9b"),
+                Id = FirstSimulationId,
                 Name = "First"
             });
             simulationList.Add(new SimulationEntity()
             {
-                Id = new Guid("bf8984b8-4fbf-4b54-9035-b20b349a6808"),
+                Id = SecondSimulationId,
                 Name = "Second"
             });
 

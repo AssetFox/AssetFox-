@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
                 "DISTRICT",
                 AggregationRuleTypeNames.Predominant,
                 testCommand,
-                Data.ConnectionType.MSSQL,
+                Data.ConnectionType.EXCEL,
                 "",
                 false,
                 false,

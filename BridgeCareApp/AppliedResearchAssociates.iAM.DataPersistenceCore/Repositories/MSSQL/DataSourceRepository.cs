@@ -7,6 +7,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using System.Data;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using Microsoft.EntityFrameworkCore;
+using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -42,12 +45,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteDataSource(Guid id)
         {
-            if (!_unitOfWork.Context.DataSource.Any(_ => _.Id == id))
+            var dataSource = _unitOfWork.Context.DataSource.Include(_ => _.ExcelRawData).FirstOrDefault(_ => _.Id == id);
+            if (dataSource == null)
                 throw new RowNotInTableException("The specified data source was not found.");
 
-            // If an attribute uses this data source, do not delete the datasource
-            if (_unitOfWork.Context.Attribute.Where(_ => _.DataSource != null).Any(_ => _.DataSource.Id == id))
-                throw new ArgumentException("The specified data source has an attribute associated with it and cannot be deleted");
+            // Setting all related attributes's datasource to none
+            var attributes = _unitOfWork.Context.Attribute.Where(_ => _.DataSourceId == id).ToList();
+
+            attributes.ForEach(_ => _.DataSourceId = null);
+            _unitOfWork.Context.UpsertAll(attributes);
 
             _unitOfWork.Context.DeleteEntity<DataSourceEntity>(_ => _.Id == id);
             return;
@@ -62,7 +68,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new ArgumentException("The data source could not be validated");                
 
             _unitOfWork.Context.Upsert(dataSource.ToEntity(_unitOfWork.EncryptionKey), dataSource.Id, _unitOfWork.UserEntity?.Id);
-        }
-            
+        }           
     }
 }

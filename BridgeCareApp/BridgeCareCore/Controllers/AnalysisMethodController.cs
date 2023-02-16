@@ -26,7 +26,7 @@ namespace BridgeCareCore.Controllers
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public AnalysisMethodController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+        public AnalysisMethodController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IAnalysisDefaultDataService analysisDefaultDataService, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {            
             _analysisDefaultDataService = analysisDefaultDataService ?? throw new ArgumentNullException(nameof(analysisDefaultDataService));

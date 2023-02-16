@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -362,15 +363,16 @@ namespace BridgeCareCore.Services
                 attributeNames.Add(attribute.name);
             }
 
-            var valuePerAttributeNamePerMaintainableAssetId =
+            var results =
                 _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(networkId,
-                attributeNames)
+                attributeNames);
+            var valuePerAttributeNamePerMaintainableAssetId = results
                 .GroupBy(_ => _.MaintainableAssetId, _ => _)
                 .ToDictionary(_ => _.Key, aggregatedResults =>
                 {
                     var value = aggregatedResults.ToDictionary(_ => _.Attribute.Name, _ =>
                     {
-                        var data = _.Attribute.Type == DataPersistenceConstants.AttributeNumericDataType
+                        var data = _.Attribute.Type == AttributeTypeNames.Number
                             ? _.NumericValue?.ToString()
                             : _.TextValue;
 
@@ -384,6 +386,5 @@ namespace BridgeCareCore.Services
 
             return flattenedDataTable.Select(expression).Length;
         }
-
     }
 }

@@ -103,6 +103,8 @@
                 <v-btn v-show="showMssql" @click="checkSQLConnection" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
                 <v-btn v-show="showMssql || showExcel" :disabled="disableCrudButtons() || !hasUnsavedChanges" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
                 <v-btn v-show="showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
+                <v-btn v-show="showMssql || showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onDeleteClick">Delete</v-btn>
+
             </v-flex>
         </v-layout>
 
@@ -137,6 +139,9 @@ import CreateDataSourceDialog from '@/components/data-source/data-source-dialogs
 import { getUserName } from '@/shared/utils/get-user-info';
 import { NIL } from 'uuid';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import DataSourceService from '@/services/data-source.service';
+import { AxiosResponse } from 'axios';
+import { http2XX } from '@/shared/utils/http-utils';
 
 @Component({
     components: {
@@ -155,6 +160,7 @@ export default class DataSource extends Vue {
     @Action('getDataSourceTypes') getDataSourceTypesAction: any;
     @Action('upsertSqlDataSource') upsertSqlDataSourceAction: any;
     @Action('upsertExcelDataSource') upsertExcelDataSourceAction: any;
+    @Action('deleteDataSource') deleteDataSourceAction: any;
 
     @Action('importExcelSpreadsheetFile') importExcelSpreadsheetFileAction: any;
     @Action('getExcelSpreadsheetColumnHeaders') getExcelSpreadsheetColumnHeadersAction: any;
@@ -369,6 +375,12 @@ export default class DataSource extends Vue {
                 });
             });
         }
+    }
+
+    onDeleteClick(){
+        this.deleteDataSourceAction(this.currentDatasource.id).then(() => {
+            this.resetDataSource();
+        })
     }
     onShowCreateDataSourceDialog() {
         this.createDataSourceDialogData = {

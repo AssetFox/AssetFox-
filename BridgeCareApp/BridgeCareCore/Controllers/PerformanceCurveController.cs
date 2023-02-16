@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -170,7 +171,7 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertPerformanceCurveLibrary - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertPerformanceCurveLibrary - {e.Message}");
@@ -238,7 +239,7 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DeletePerformanceCurveLibrary - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DeletePerformanceCurveLibrary - {e.Message}");
@@ -307,7 +308,7 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ImportLibraryPerformanceCurvesExcelFile - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ImportLibraryPerformanceCurvesExcelFile - {e.Message}");
                 throw;
@@ -367,7 +368,7 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ImportScenarioPerformanceCurvesExcelFile - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ImportScenarioPerformanceCurvesExcelFile - {e.Message}");
                 throw;
@@ -392,7 +393,7 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportScenarioPerformanceCurvesExcelFile for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportScenarioPerformanceCurvesExcelFile for {simulationName} - {e.Message}");
@@ -417,7 +418,7 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportLibraryPerformanceCurvesExcelFile - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportLibraryPerformanceCurvesExcelFile - {e.Message}");
                 throw;
@@ -447,7 +448,7 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DownloadPerformanceCurvesTemplate - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DownloadPerformanceCurvesTemplate - {e.Message}");
                 throw;

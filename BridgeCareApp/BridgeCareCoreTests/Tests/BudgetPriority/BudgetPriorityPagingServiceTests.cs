@@ -17,7 +17,6 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
 {
     public class BudgetPriorityPagingServiceTests
     {
-
         private BudgetPriorityPagingService CreatePagingService(Mock<IUnitOfWork> unitOfWork)
         {
             var service = new BudgetPriorityPagingService(unitOfWork.Object);
@@ -28,7 +27,6 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
         public void GetSyncedScenarioDataset_EverythingIsEmpty_Empty()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
@@ -45,12 +43,10 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             Assert.Empty(result);
         }
 
-
         [Fact]
         public void GetSyncedScenarioDataset_ReposReturnBudgetAndPriority_CreatesPercentagePair()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
@@ -86,12 +82,10 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             ObjectAssertions.EquivalentExcluding(expected, resultDto, x => x.BudgetPercentagePairs[0].Id);
         }
 
-
         [Fact]
         public void GetSyncedScenarioDataset_PercentagePairDoesNotCorrespondToABudget_RemovesPercentagePair()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
@@ -131,6 +125,26 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
                 PriorityLevel = 0,
             };
             ObjectAssertions.EquivalentExcluding(expected, resultDto, x => x.BudgetPercentagePairs[0].Id);
+        }
+
+        [Fact]
+        public void GetScenarioPage_Sort_Sorts()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var scenarioBudgetPriorityId = Guid.NewGuid();
+            var budgetPriorityDto = BudgetPriorityDtos.New(scenarioBudgetPriorityId);
+            budgetPriorityRepo.Setup(b => b.GetScenarioBudgetPriorities(simulationId)).ReturnsList(budgetPriorityDto);
+            var service = CreatePagingService(unitOfWork);
+            var syncModel = new PagingSyncModel<BudgetPriorityDTO>();
+            var request = new PagingRequestModel<BudgetPriorityDTO>
+            {
+                search = "name",
+            };
+
+            var result = service.GetScenarioPage(simulationId, request);
         }
     }
 }

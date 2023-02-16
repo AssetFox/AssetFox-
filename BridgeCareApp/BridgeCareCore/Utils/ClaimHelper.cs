@@ -88,13 +88,14 @@ namespace BridgeCareCore.Utils
         /// <param name="checkSimulationAccess"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
         public void CheckUserSimulationCancelAnalysisAuthorization(Guid simulationId, string userName, bool checkSimulationAccess)
-        {
+        {            
             if (RequirePermittedCheck() && !(checkSimulationAccess && HasSimulationAccess()))
             {
-                var simulation = GetQueuedSimulation(simulationId);
-                if (simulation.QueueingUser == userName)
+                var simulation = UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+                var simulationOwner = simulation.Owner;
+                if (userName != simulationOwner)
                 {
-                    throw new UnauthorizedAccessException("You are not authorized to cancel this simulation analysis.");
+                    throw new UnauthorizedAccessException(userName + " is not authorized to cancel analysis for simulation - " + simulation.Name + ".");
                 }
             }
         }
@@ -105,8 +106,9 @@ namespace BridgeCareCore.Utils
         /// </summary>
         /// <param name="owner"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
-        public void OldWayCheckUserLibraryModifyAuthorization(Guid owner, Guid userId)
-        {//
+        [Obsolete("Should not be used in new library sharing.")]
+        public void CheckIfAdminOrOwner(Guid owner, Guid userId)
+        {
             if (RequirePermittedCheck() && owner != userId)
             {
                 throw new UnauthorizedAccessException(LibraryModifyUnauthorizedMessage);

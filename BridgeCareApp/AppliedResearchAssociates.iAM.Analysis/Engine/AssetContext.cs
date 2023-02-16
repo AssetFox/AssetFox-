@@ -250,6 +250,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private readonly Stack<string> GetNumber_ActiveKeysOfCurrentInvocation = new Stack<string>();
 
+        private readonly Dictionary<Attribute, double> MostRecentAdjustmentFactorsForPerformanceCurves = new();
+
         private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(KeyComparer);
 
         private readonly IDictionary<string, double> NumberCache_Override = new Dictionary<string, double>(KeyComparer);
@@ -308,9 +310,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             Detail.AppliedTreatment = treatment.Name;
             Detail.TreatmentStatus = TreatmentStatus.Applied;
+
+            foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
+            {
+                MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
+            }
         }
 
-        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve);
+        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve, MostRecentAdjustmentFactorsForPerformanceCurves);
 
         private double CalculateValueOnCurve(PerformanceCurve curve, Action<double> handle)
         {

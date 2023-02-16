@@ -6,6 +6,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
@@ -123,6 +128,21 @@ namespace BridgeCareCore.Services
                     if (!WorkCompletion.IsFaulted)
                     {
                         WorkCompletionSource.SetResult();
+                    }
+                    else
+                    {
+                        // Send a message
+                        using var scope = serviceProvider.CreateScope();
+                        var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+                        var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                        var message = new SimulationAnalysisDetailDTO()
+                        {
+                            SimulationId = Guid.Parse(WorkItem.WorkId),
+                            Status = $"Run Failed. {WorkCompletion.Exception.InnerException.Message}",
+                            LastRun = DateTime.Now
+                        };
+                        _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, message);
+                        _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(message);
                     }
 
                     RemoveFromQueue();

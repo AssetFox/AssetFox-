@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
@@ -15,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var dataAttributes = new List<DataAttribute>();
             foreach (var dto in dtos)
             {
-                var mappedDto = AttributeMapper.ToDomain(dto, repository.GetEncryptionKey());
+                var mappedDto = AttributeDtoDomainMapper.ToDomain(dto, repository.GetEncryptionKey());
                 var valid = AttributeValidityChecker.IsValid(mappedDto);
                 if (!valid)
                 {

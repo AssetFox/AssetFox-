@@ -19,7 +19,8 @@ namespace BridgeCareCoreTests.Tests
             Mock<IUnitOfWork> unitOfWork,
             IHttpContextAccessor contextAccessor,
             Mock<IHubService> hubServiceMock = null,
-            Mock<IInvestmentBudgetsService> investmentBudgetServiceMock = null
+            Mock<IInvestmentBudgetsService> investmentBudgetServiceMock = null,
+            Mock<IInvestmentPagingService> investmentPagingServiceMock = null
             )
         {
             var resolveHubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
@@ -28,8 +29,10 @@ namespace BridgeCareCoreTests.Tests
             var simulationQueueService = new Mock<ISimulationQueueService>();
             var claimHelper = new ClaimHelper(unitOfWork.Object, simulationQueueService.Object, contextAccessor);
             var resolveInvestmentBudgetServiceMock = investmentBudgetServiceMock ?? InvestmentBudgetServiceMocks.New();
+            var resolveInvestmentPagingServiceMock = investmentPagingServiceMock ?? new Mock<IInvestmentPagingService>();
             var controller = new InvestmentController(
                 resolveInvestmentBudgetServiceMock.Object,
+                resolveInvestmentPagingServiceMock.Object,
                 security,
                 unitOfWork.Object,
                 resolveHubService.Object,

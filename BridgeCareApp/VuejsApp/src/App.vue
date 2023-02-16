@@ -17,7 +17,7 @@
                         Scenarios
                     </v-btn>                   
                      <v-btn
-                        @click="onNavigate('/EditLibrary')"
+                        @click="onNavigate('/EditLibrary/')"
                         class="ara-blue-pantone-281"
                         flat
                     >
@@ -77,7 +77,9 @@
                                     :size="30"
                                     :count="notificationCounter"
                                     :upperLimit="50"
-                                    counterLocation="right"
+                                    left="8px"
+                                    top="8px"
+                                    counterPadding="2px"
                                     fontSize="10px"
                                     counterStyle="roundRectangle"
                                     counterBackgroundColor="#FF0000"
@@ -247,7 +249,6 @@ import {
     setAuthHeader,
     setContentTypeCharset,
 } from '@/shared/utils/http-utils';
-//import ReportsService from './services/reports.service';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { clone } from 'ramda';
@@ -304,6 +305,7 @@ export default class AppComponent extends Vue {
     @Action('addWarningNotification') addWarningNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('addInfoNotification') addInfoNotificationAction: any;
+    @Action('addTaskCompletedNotification') addTaskCompletedNotificationAction: any;
     @Action('removeNotification') removeNotificationAction: any;
     @Action('clearNotificationCounter') clearNotificationCounterAction: any;
     @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
@@ -501,6 +503,15 @@ export default class AppComponent extends Vue {
             Hub.BroadcastEventType.BroadcastWarningEvent,
             this.onAddWarningNotification,
         );
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastInfoEvent,
+            this.onAddInfoNotification,
+        );
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastTaskCompletedEvent,
+            this.onAddTaskCompletedNotification
+        );
+        
         this.currentURL = this.$router.currentRoute.name;
     }
 
@@ -527,12 +538,27 @@ export default class AppComponent extends Vue {
         }
     }
 
+    onAddInfoNotification(data: any) {
+        this.addInfoNotificationAction({
+            message: 'Server Update',
+            longMessage: data.info
+        });
+    }
+
     onAddWarningNotification(data: any) {
         this.addWarningNotificationAction({
             message: 'Server Warning',
-            longMessage: data.warning,
+            longMessage: data.info,
         });
     }
+
+    onAddTaskCompletedNotification(data: any) {
+        this.addTaskCompletedNotificationAction({
+            message: 'Task Completed',
+            longMessage: data.task
+        });
+    }
+
 
     onAlertResult(submit: boolean) {
         this.alertDialogData = clone(emptyAlertData);
@@ -576,17 +602,15 @@ export default class AppComponent extends Vue {
      */
     onLogout() {
         this.logOutAction().then(() => {
-            clearRefreshIntervalID();
-            if (
-                window.location.host.toLowerCase().indexOf('penndot.gov') === -1
-            ) {
+            clearRefreshIntervalID(); 
+            if (window.location.host.toLowerCase().indexOf('penndot.gov') === -1) {
                 /*
                  * In order to log out properly, the browser must visit the /iAM page of a penndot deployment, as iam-deploy.com cannot
                  * modify browser cookies for penndot.gov. So, the current host is sent as part of the query to the penndot site
                  * to allow the landing page to redirect the browser to the original host.
                  */
                 window.location.href =
-                    'http://bamssyst.penndot.gov/iAM?host=' +
+                    'http://www.bamssyst.penndot.gov/iAM?host=' +
                     encodeURI(window.location.host);
             } else {
                 this.onNavigate('/iAM/');

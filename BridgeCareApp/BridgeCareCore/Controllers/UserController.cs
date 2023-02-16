@@ -34,7 +34,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::GetAllUsers - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::GetAllUsers - {e.Message}");
                 throw;
             }
         }
@@ -51,7 +51,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::GetUserByUserName - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::GetUserByUserName - {e.Message}");
                 throw;
             }
         }
@@ -68,7 +68,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::GetUserById - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::GetUserById - {e.Message}");
                 throw;
             }
         }
@@ -90,7 +90,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::UpdateLastNewsAccessDate - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::UpdateLastNewsAccessDate - {e.Message}");
                 throw;
             }
         }
@@ -100,13 +100,14 @@ namespace BridgeCareCore.Controllers
         [ClaimAuthorize("AdminAccess")]
         public async Task<IActionResult> UpdateUser([FromBody] UserDTO dto)
         {
+            var username = dto?.Username ?? "null";
             try
             {
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::UpdateUser - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::UpdateUser {username} - {e.Message}");
                 throw;
             }
         }
@@ -122,7 +123,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::DeleteUser - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::DeleteUser {username} - {e.Message}");
                 throw;
             }
         }

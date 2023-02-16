@@ -139,7 +139,7 @@
                 <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn v-if="selectedAttribute.dataSource.type != 'Excel'" :disabled="selectedAttribute.dataSource.type == ''" 
+                <v-btn v-if="selectedAttribute.dataSource.type == 'SQL'" :disabled="selectedAttribute.dataSource.type != 'SQL'" 
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'
                     @click="CheckSqlCommand">
                     Test
@@ -342,6 +342,7 @@ export default class Attributes extends Vue {
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.defaultValue) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isCalculated) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isAscending) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.dataSource.type) === true
             if(this.selectedAttribute.type === 'NUMBER'){
                 if(isNaN(+this.selectedAttribute.defaultValue)){
                     allValid = false;
@@ -358,11 +359,11 @@ export default class Attributes extends Vue {
                 allValid = allValid &&
                 this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true &&
                 this.checkedCommand === this.selectedAttribute.command &&
-                this.commandIsValid
+                this.commandIsValid;
             }
             else if(this.selectedAttribute.dataSource.type === 'Excel'){
                 allValid = allValid &&
-                this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true 
+                this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true;
             }
 
         return !allValid;

@@ -16,7 +16,7 @@
                 </v-flex>
 
                 <v-flex xs12>
-                    <v-checkbox class='ghd-checkbox' label='No Treatments Before Committed Projects' />
+                    <v-checkbox class='ghd-checkbox' label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
                 </v-flex>
 
                 <v-flex xs12 class="ghd-constant-header">
@@ -91,7 +91,11 @@
                                             large
                                             lazy
                                             persistent>
-                                            <v-text-field v-if="header.value !== 'budget' && header.value !== 'year' && header.value !== 'brkey' && header.value !== 'treatment'"
+                                            <v-text-field v-if="header.value !== 'budget' 
+                                                && header.value !== 'year' 
+                                                && header.value !== 'brkey' 
+                                                && header.value !== 'treatment'
+                                                && header.value !== 'cost'"
                                                 readonly
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"
@@ -113,6 +117,10 @@
                                                 :mask="'##########'"
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"
                                                 :error-messages="props.item.yearErrors"/>
+
+                                            <v-text-field v-if="header.value === 'cost'"
+                                                :value='formatAsCurrency(props.item[header.value])'
+                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'brkey'"
@@ -145,8 +153,8 @@
                                                 <v-text-field v-if="header.value === 'cost'"
                                                     label="Edit"
                                                     single-line
-                                                    v-model="props.item[header.value]"
-                                                    :mask="'##########'"
+                                                    v-model.number="props.item[header.value]"
+                                                    v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                             </template>
@@ -289,7 +297,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import { CommittedProjectConsequence, emptyCommittedProjectConsequence, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
+import { CommittedProjectConsequence, CommittedProjectFillTreatmentReturnValues, emptyCommittedProjectConsequence, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { Action, Getter, State } from 'vuex-class';
 import { Watch } from 'vue-property-decorator';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
@@ -302,7 +310,7 @@ import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AxiosPromise, AxiosResponse } from 'axios';
-import { any, clone, find, findIndex, isEmpty, isNil, map, propEq, update } from 'ramda';
+import { any, clone, find, findIndex, isEmpty, isNil, map, mathMod, propEq, update } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { http2XX } from '@/shared/utils/http-utils';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
@@ -324,6 +332,8 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import InvestmentService from '@/services/investment.service';
+import { formatAsCurrency } from '@/shared/utils/currency-formatter';
+import { isNullOrUndefined } from 'util';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -386,6 +396,8 @@ export default class CommittedProjectsEditor extends Vue  {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
@@ -394,7 +406,6 @@ export default class CommittedProjectsEditor extends Vue  {
     selectedCpItems: SectionCommittedProjectTableData[] = [];
     sectionCommittedProjects: SectionCommittedProject[] = [];
     selectedConsequences: CommittedProjectConsequence[] = [];
-    idsForDeletion: string[] = [];
     committedProjectsCount: number = 0;
     showImportExportCommittedProjectsDialog: boolean = false;
     selectedCommittedProject: string  = '';
@@ -406,6 +417,13 @@ export default class CommittedProjectsEditor extends Vue  {
     
     brkey_: string = 'BRKEY_'
 
+    investmentYears: number[] = [];
+    lastYear: number = 0;
+    firstYear: number = 0;
+
+    isNoTreatmentBefore: boolean = true
+    isNoTreatmentBeforeCache: boolean = true
+    
     cpGridHeaders: DataTableHeader[] = [
         {
             text: 'BRKEY',
@@ -513,20 +531,43 @@ export default class CommittedProjectsEditor extends Vue  {
             }
      
             vm.getNetworksAction().then(() => {
-                vm.getInvestmentPlanAction({scenarioId: vm.scenarioId}).then(() => {   
-                    vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId}).then(() =>{
-                        vm.getAttributesAction().then(() => {                       
-                            vm.getTreatmentLibrariesAction().then(() => {
-                                vm.initializePages();                            
-                            });   
-                        });
-                    })                                          
+                InvestmentService.getScenarioBudgetYears(vm.scenarioId).then(response => {  
+                    if(response.data)
+                        vm.investmentYears = response.data;
+                    ScenarioService.getNoTreatmentBeforeCommitted(vm.scenarioId).then(response => {
+                        if(!isNil(response.data)){
+                            vm.isNoTreatmentBeforeCache = response.data;
+                            vm.isNoTreatmentBefore = response.data;
+                        }
+                            
+                        vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId}).then(() =>{
+                            vm.getAttributesAction().then(() => {                       
+                                vm.getTreatmentLibrariesAction().then(() => {
+                                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.scenarioId}).then(() => {         
+                                        vm.selectScenarioAction({ scenarioId: vm.scenarioId });        
+                                        vm.initializePages();
+                                    });                                                                
+                                });   
+                            });
+                        }) 
+                    })                                                           
                 })
             });                     
         });
     }
 
     //Watch
+    @Watch('isNoTreatmentBefore')
+    onIsNoTreatmentBeforeChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
+    @Watch('investmentYears')
+    onInvestmentYearsChanged(){
+        this.lastYear = Math.max(...this.investmentYears);
+        this.firstYear = Math.min(...this.investmentYears);
+    }
+
     @Watch('networks')
     onStateNetworksChanged(){
         const network = this.networks.find(o => o.id == this.networkId)
@@ -626,7 +667,7 @@ export default class CommittedProjectsEditor extends Vue  {
         const request: PagingRequest<SectionCommittedProject>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
@@ -666,6 +707,7 @@ export default class CommittedProjectsEditor extends Vue  {
         this.resetPage();
         this.selectedCommittedProject = '';
         this.selectedCpItems = [];
+        this.isNoTreatmentBefore = this.isNoTreatmentBeforeCache
     }
 
     OnExportProjectsClick(){
@@ -697,10 +739,6 @@ export default class CommittedProjectsEditor extends Vue  {
         newRow.simulationId = this.scenarioId;
         this.addedRows.push(newRow)
         this.onPaginationChanged();
-        // this.sectionCommittedProjects.push(newRow);
-        // const newCpRow: SectionCommittedProjectTableData = this.cpItemFactory(newRow)
-        // newCpRow.errors = ['BRKEY does not exist']
-        // this.cpItems.push(newCpRow);
      }
      
      OnAddConsequenceClick(){
@@ -719,9 +757,12 @@ export default class CommittedProjectsEditor extends Vue  {
                     updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: this.addedRows           
                 }
-
-        if(this.deletionIds.length > 0){
-            CommittedProjectsService.deleteSpecificCommittedProjects(this.idsForDeletion).then((response: AxiosResponse) => {
+        if(!this.committedProjectsAreChanged())
+        {
+            this.updateNoTreatment();
+        }
+        else if(this.deletionIds.length > 0){
+            CommittedProjectsService.deleteSpecificCommittedProjects(this.deletionIds).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     this.deletionIds = [];
                     this.addSuccessNotificationAction({message:'Deleted committed projects'})              
@@ -732,7 +773,10 @@ export default class CommittedProjectsEditor extends Vue  {
                         this.addedRows = [];
                         this.updatedRowsMap.clear();
                     }
-                    this.resetPage()
+                    if(this.isNoTreatmentBefore != this.isNoTreatmentBeforeCache)
+                        this.updateNoTreatment()
+                    else
+                        this.resetPage()
                 })
             })         
         }
@@ -743,8 +787,28 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.addedRows = [];
                     this.updatedRowsMap.clear();
                 }
-                this.resetPage()
+                if(this.isNoTreatmentBefore != this.isNoTreatmentBeforeCache)
+                        this.updateNoTreatment()
+                else
+                    this.resetPage()
             })   
+     }
+
+     updateNoTreatment(){
+        if(this.isNoTreatmentBefore)
+                ScenarioService.setNoTreatmentBeforeCommitted(this.scenarioId).then((response: AxiosResponse) => {
+                    if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                        this.isNoTreatmentBeforeCache = this.isNoTreatmentBefore
+                    }
+                    this.resetPage()
+                })
+            else
+                ScenarioService.removeNoTreatmentBeforeCommitted(this.scenarioId).then((response: AxiosResponse) => {
+                    if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                        this.isNoTreatmentBeforeCache = this.isNoTreatmentBefore
+                    }
+                    this.resetPage()
+                })
      }
 
      OnDeleteAllClick(){
@@ -758,7 +822,7 @@ export default class CommittedProjectsEditor extends Vue  {
      }
 
      OnDeleteClick(id: string){
-        if(!isNil(find(propEq('id', id), this.addedRows)))
+        if(isNil(this.addedRows.find(_ => _.id === id)))
             this.deletionIds.push(id);
         else
             this.addedRows = this.addedRows.filter((scp: SectionCommittedProject) => scp.id !== id)
@@ -835,7 +899,7 @@ export default class CommittedProjectsEditor extends Vue  {
                             longMessage:
                                 'Successfully uploaded committed projects.',
                         });
-                        this.getCommittedProjects(this.scenarioId);
+                        this.onCancelClick() ;
                     }
                 });
             } else {
@@ -867,8 +931,7 @@ export default class CommittedProjectsEditor extends Vue  {
             CommittedProjectsService.deleteSimulationCommittedProjects(this.scenarioId).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     this.addSuccessNotificationAction({message:'Added deterioration model library'})   
-                    this.clearChanges();
-                    this.projectPagination.page = 1
+                    this.onCancelClick();
                 }
             })
         }
@@ -879,11 +942,18 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     //Subroutines
+    formatAsCurrency(value: any) {
+        if (hasValue(value)) {
+            return formatAsCurrency(value);
+        }
 
+        return null;
+    }
     disableCrudButtons() {
         const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
             (scp: SectionCommittedProject) => {
+                if (isNullOrUndefined( scp.consequences )) scp.consequences = [];
                 return (
                     this.rules['generalRules'].valueIsNotEmpty(
                         scp.simulationId,
@@ -958,12 +1028,21 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
-        row.treatment = treatmentName
+        row.treatment = treatmentName;
         this.updateCommittedProject(row, treatmentName, 'treatment')  
-        CommittedProjectsService.FillTreatmentValues(row, row.locationKeys[this.brkey_])
+        CommittedProjectsService.FillTreatmentValues({
+            committedProjectId: row.id,
+            treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : getBlankGuid(),
+            treatmentName: treatmentName,
+            brkey_Value: row.locationKeys[this.brkey_],
+            networkId: this.networkId
+        })
         .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
-                row = response.data
+                var values = response.data as CommittedProjectFillTreatmentReturnValues
+                row.cost = values.treatmentCost;
+                row.consequences = values.validTreatmentConsequences;
+                row.category = values.treatmentCategory;
                 scp.cost = row.cost;
                 let cat = this.reverseCatMap.get(row.category);
                 if(!isNil(cat))
@@ -1039,9 +1118,7 @@ export default class CommittedProjectsEditor extends Vue  {
     checkYear(scp:SectionCommittedProjectTableData){
         if(!hasValue(scp.year))
             scp.yearErrors = ['Value cannot be empty'];
-        else if(!isNil(this.stateInvestmentPlan) &&(
-            scp.year < this.stateInvestmentPlan.firstYearOfAnalysisPeriod 
-            || scp.year >= this.stateInvestmentPlan.firstYearOfAnalysisPeriod + this.stateInvestmentPlan.numberOfYearsInAnalysisPeriod))
+        else if(scp.year < this.firstYear || scp.year > this.lastYear)
             scp.yearErrors = ['Year is outside of Analysis period'];
         else
             scp.yearErrors = [];
@@ -1106,6 +1183,7 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     onUpdateRow(rowId: string, updatedRow: SectionCommittedProject){
+        updatedRow.cost = +updatedRow.cost.toString().replace(/(\$*)(\,*)/g, '')
         if(any(propEq('id', rowId), this.addedRows)){
             const index = this.addedRows.findIndex(item => item.id == updatedRow.id)
             this.addedRows[index] = updatedRow;
@@ -1140,18 +1218,21 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     checkHasUnsavedChanges(){
-        const hasUnsavedChanges: boolean = 
-            this.deletionIds.length > 0 || 
+        const hasUnsavedChanges: boolean = this.committedProjectsAreChanged() || this.isNoTreatmentBeforeCache != this.isNoTreatmentBefore
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    committedProjectsAreChanged() : boolean{
+        return  this.deletionIds.length > 0 || 
             this.addedRows.length > 0 ||
             this.updatedRowsMap.size > 0 || (this.hasScenario && this.hasSelectedLibrary)
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
     initializePages(){
         const request: PagingRequest<SectionCommittedProject>= {
             page: 1,
             rowsPerPage: 5,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],

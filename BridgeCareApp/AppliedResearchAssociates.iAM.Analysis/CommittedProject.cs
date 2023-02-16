@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis
@@ -38,10 +39,20 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     consequence.Change.Expression = templateConsequence.Change.Expression;
                     Consequences.Add(consequence);
                 }
+
+                PerformanceCurveAdjustmentFactors.Clear();
+                foreach (var (attribute, factor) in TemplateTreatment.PerformanceCurveAdjustmentFactors)
+                {
+                    PerformanceCurveAdjustmentFactors.Add(attribute, factor);
+                }
             }
         }
 
         public int Year { get; }
+
+        public DateTime LastModifiedDate { get; set; }
+
+        public TreatmentCategory treatmentCategory { get; set; }
 
         public override ValidationResultBag GetDirectValidationResults()
         {

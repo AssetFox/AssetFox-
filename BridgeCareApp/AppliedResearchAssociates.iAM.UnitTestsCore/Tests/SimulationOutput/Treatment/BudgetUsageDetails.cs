@@ -18,8 +18,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             return detail;
         }
-
-        public static BudgetUsageDetail Detail(SimulationOutputSetupContext context)
-            => Detail(context.BudgetName);
     }
 }

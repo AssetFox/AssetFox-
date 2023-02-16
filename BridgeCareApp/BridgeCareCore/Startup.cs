@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.Reporting;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Hubs.Services;
-using BridgeCareCore.Logging;
+
 using BridgeCareCore.Services.Aggregation;
 using BridgeCareCore.StartupExtension;
 using Microsoft.AspNetCore.Builder;
@@ -100,6 +100,7 @@ namespace BridgeCareCore
             reportFactoryList.Add(new BAMSSummaryReportFactory());
             reportFactoryList.Add(new ScenarioOutputReportFactory());
             reportFactoryList.Add(new PAMSSummaryReportFactory());
+            reportFactoryList.Add(new BAMSAuditReportFactory());
             services.AddSingleton<IReportLookupLibrary>(service => new ReportLookupLibrary(reportFactoryList));
         }
 

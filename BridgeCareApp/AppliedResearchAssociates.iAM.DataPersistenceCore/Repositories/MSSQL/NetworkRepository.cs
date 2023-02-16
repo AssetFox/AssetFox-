@@ -100,6 +100,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 networkEntity.MaintainableAssets = _unitOfWork.Context.MaintainableAsset
                     .Include(a => a.MaintainableAssetLocation)
                     .Include(a => a.AggregatedResults)
+                    .AsSplitQuery()
                     .Where(_ => _.NetworkId == networkId)
                     .Select(asset => new MaintainableAssetEntity
                     {
@@ -166,6 +167,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.Upsert(networkRollupDetailEntity, _ => _.NetworkId == networkId,
                 _unitOfWork.UserEntity?.Id);
+        }
+
+        public string GetNetworkName(Guid networkId)
+        {
+            var entity = _unitOfWork.Context.Network.SingleOrDefault(n => n.Id == networkId);
+            return entity.Name;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AppliedResearchAssociates.iAM.TestHelpers;
+using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
 namespace BridgeCareCoreTests.Helpers
@@ -15,6 +16,12 @@ namespace BridgeCareCoreTests.Helpers
         public static void Ok(IActionResult result)
         {
             Assert.IsType<OkResult>(result);
+        }
+
+        public static void Singleton<T>(T expected, IActionResult result)
+        {
+            var ok = OkObject(result);
+            ObjectAssertions.Singleton(expected, ok);
         }
 
         public static void BadRequest(IActionResult result)

@@ -334,6 +334,8 @@ export default class CashFlowEditor extends Vue {
     @Action('getScenarioCashFlowRules') getScenarioCashFlowRulesAction: any;
     @Action('upsertScenarioCashFlowRules') upsertScenarioCashFlowRulesAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Mutation('cashFlowRuleLibraryMutator') cashFlowRuleLibraryMutator: any;
     @Mutation('selectedCashFlowRuleLibraryMutator') selectedCashFlowRuleLibraryMutator: any;
@@ -447,6 +449,7 @@ export default class CashFlowEditor extends Vue {
     showRuleEditorDialog: boolean = false;
     showAddCashFlowRuleDialog: boolean = false;
     importLibraryDisabled: boolean = true;
+    scenarioHasCreatedNew: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -464,7 +467,10 @@ export default class CashFlowEditor extends Vue {
                         }
 
                         vm.hasScenario = true;
-                        vm.initializePages();
+                        vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                            vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                            vm.initializePages();
+                        });                                                
                     }
                 });
             })  
@@ -499,11 +505,21 @@ export default class CashFlowEditor extends Vue {
         this.librarySelectItemValueAllowedChanged = true;
     }
     onLibrarySelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue
+        this.trueLibrarySelectItemValue = this.librarySelectItemValue;
+        
         if(!this.hasScenario || isNil(this.librarySelectItemValue))
+        {    
             this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
-        else if(!isNil(this.librarySelectItemValue))
-            this.importLibraryDisabled = false;
+        }
+        else
+        {
+            if(!isNil(this.librarySelectItemValue) && !this.scenarioHasCreatedNew)
+            {
+                this.importLibraryDisabled = false;
+            }
+
+            this.scenarioHasCreatedNew = false;
+        }
     }
 
     importLibrary() {
@@ -528,25 +544,6 @@ export default class CashFlowEditor extends Vue {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
         }
-
-        // if (this.hasScenario) {
-        //     this.cashFlowRuleGridData = this.selectedCashFlowRuleLibrary.cashFlowRules.map(
-        //         (cashFlowRule: CashFlowRule) => ({
-        //             ...cashFlowRule,
-        //             id: getNewGuid(),
-        //             cashFlowDistributionRules: cashFlowRule.cashFlowDistributionRules.map(
-        //                 (distributionRule: CashFlowDistributionRule) => ({
-        //                     ...distributionRule,
-        //                     id: getNewGuid(),
-        //                 }),
-        //             ),
-        //         }),
-        //     );
-        // } else {
-        //     this.cashFlowRuleGridData = clone(
-        //         this.selectedCashFlowRuleLibrary.cashFlowRules,
-        //     );
-        // }
         this.initializing = false;
         if(this.hasSelectedLibrary)
             this.onPaginationChanged();
@@ -583,7 +580,7 @@ export default class CashFlowEditor extends Vue {
         const request: PagingRequest<CashFlowRule>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: this.librarySelectItemValue !== null && this.importLibraryDisabled ? this.librarySelectItemValue : null,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
@@ -656,12 +653,13 @@ export default class CashFlowEditor extends Vue {
             const upsertRequest: LibraryUpsertPagingRequest<CashFlowRuleLibrary, CashFlowRule> = {
                 library: cashFlowRuleLibrary,    
                 isNewLibrary: true,           
-                 pagingSync: {
-                    libraryId: cashFlowRuleLibrary.cashFlowRules.length == 0 ? null : this.selectedCashFlowRuleLibrary.id,
+                 syncModel: {
+                    libraryId: cashFlowRuleLibrary.cashFlowRules.length == 0 || !this.hasSelectedLibrary ? null : this.selectedCashFlowRuleLibrary.id,
                     rowsForDeletion: cashFlowRuleLibrary.cashFlowRules === [] ? [] : this.deletionIds,
                     updateRows: cashFlowRuleLibrary.cashFlowRules === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: cashFlowRuleLibrary.cashFlowRules === [] ? [] : this.addedRows,
-                 }
+                 },
+                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             CashFlowService.upsertCashFlowRuleLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -670,6 +668,11 @@ export default class CashFlowEditor extends Vue {
                     
                     if(cashFlowRuleLibrary.cashFlowRules === []){
                         this.clearChanges();
+                    }
+
+                    if(this.hasScenario){
+                        this.scenarioHasCreatedNew = true;
+                        this.importLibraryDisabled = true;
                     }
 
                     this.cashFlowRuleLibraryMutator(cashFlowRuleLibrary);
@@ -870,12 +873,13 @@ export default class CashFlowEditor extends Vue {
         const upsertRequest: LibraryUpsertPagingRequest<CashFlowRuleLibrary, CashFlowRule> = {
                 library: this.selectedCashFlowRuleLibrary,
                 isNewLibrary: false,
-                pagingSync: {
+                syncModel: {
                 libraryId: this.selectedCashFlowRuleLibrary.id === this.uuidNIL ? null : this.selectedCashFlowRuleLibrary.id,
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 addedRows: this.addedRows
-                }
+                },
+                scenarioId: null
         }
         CashFlowService.upsertCashFlowRuleLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -1057,7 +1061,7 @@ export default class CashFlowEditor extends Vue {
         const request: PagingRequest<CashFlowRule>= {
             page: 1,
             rowsPerPage: 5,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],

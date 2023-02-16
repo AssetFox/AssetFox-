@@ -148,8 +148,86 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             var result = service.GetScenarioPage(simulationId, request);
 
             Assert.Empty(result.Items);
+            Assert.Equal(0, result.TotalItems);
         }
 
+        [Fact]
+        public void GetScenarioPage_SearchByYear_Does()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var scenarioBudgetPriorityId = Guid.NewGuid();
+            var budgetPriorityDto = BudgetPriorityDtos.New(scenarioBudgetPriorityId);
+            var criterionLibraryId = Guid.NewGuid();
+            var criterionLibraryDto = CriterionLibraryDtos.Dto(criterionLibraryId, "mergedExpression");
+            var criterionLibraryDtoClone = CriterionLibraryDtos.Dto(criterionLibraryId, "mergedExpression");
+            var criterionLibraryDto2 = CriterionLibraryDtos.Dto(null, "not found");
+            var budgetPriorityDto2 = BudgetPriorityDtos.New();
+            budgetPriorityDto.CriterionLibrary = criterionLibraryDto;
+            budgetPriorityDto2.CriterionLibrary = criterionLibraryDto2;
+            budgetPriorityDto.Year = 2023;
+            budgetPriorityDto2.Year = 2024;
+            budgetPriorityRepo.Setup(b => b.GetScenarioBudgetPriorities(simulationId)).ReturnsList(budgetPriorityDto, budgetPriorityDto2);
+            var service = CreatePagingService(unitOfWork);
+            var syncModel = new PagingSyncModel<BudgetPriorityDTO>();
+            var request = new PagingRequestModel<BudgetPriorityDTO>
+            {
+                search = "2023",
+            };
+
+            var result = service.GetScenarioPage(simulationId, request);
+            var expectedItem = new BudgetPriorityDTO
+            {
+                Year = 2023,
+                CriterionLibrary = criterionLibraryDtoClone,
+                Id = budgetPriorityDto.Id,
+                BudgetPercentagePairs = new List<BudgetPercentagePairDTO>(),
+            };
+            var expected = new PagingPageModel<BudgetPriorityDTO>
+            {
+                TotalItems = 1,
+                Items = new List<BudgetPriorityDTO> { expectedItem },
+            };
+            ObjectAssertions.Equivalent(expected, result);
+        }
+
+        [Fact]
+        public void GetScenarioPage_SearchByPriority_Does()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var scenarioBudgetPriorityId = Guid.NewGuid();
+            var budgetPriorityDto = BudgetPriorityDtos.New(scenarioBudgetPriorityId);
+            var criterionLibraryId = Guid.NewGuid();
+            var budgetPriorityDto2 = BudgetPriorityDtos.New();
+            budgetPriorityDto.PriorityLevel = 80;
+            budgetPriorityDto2.PriorityLevel = 90;
+            budgetPriorityRepo.Setup(b => b.GetScenarioBudgetPriorities(simulationId)).ReturnsList(budgetPriorityDto, budgetPriorityDto2);
+            var service = CreatePagingService(unitOfWork);
+            var syncModel = new PagingSyncModel<BudgetPriorityDTO>();
+            var request = new PagingRequestModel<BudgetPriorityDTO>
+            {
+                search = "8",
+            };
+
+            var result = service.GetScenarioPage(simulationId, request);
+            var expectedItem = new BudgetPriorityDTO
+            {
+                Id = budgetPriorityDto.Id,
+                BudgetPercentagePairs = new List<BudgetPercentagePairDTO>(),
+                PriorityLevel = 80,
+            };
+            var expected = new PagingPageModel<BudgetPriorityDTO>
+            {
+                TotalItems = 1,
+                Items = new List<BudgetPriorityDTO> { expectedItem },
+            };
+            ObjectAssertions.Equivalent(expected, result);
+        }
         [Fact]
         public void GetScenarioPage_Search_SearchesMergedCriteriaExpression()
         {

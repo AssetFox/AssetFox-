@@ -127,8 +127,9 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             ObjectAssertions.EquivalentExcluding(expected, resultDto, x => x.BudgetPercentagePairs[0].Id);
         }
 
+
         [Fact]
-        public void GetScenarioPage_Sort_Sorts()
+        public void GetScenarioPage_Search_ThinDto_DoesNotThrow()
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
@@ -145,6 +146,47 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             };
 
             var result = service.GetScenarioPage(simulationId, request);
+
+            Assert.Empty(result.Items);
+        }
+
+        [Fact]
+        public void GetScenarioPage_Search_SearchesMergedCriteriaExpression()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var scenarioBudgetPriorityId = Guid.NewGuid();
+            var budgetPriorityDto = BudgetPriorityDtos.New(scenarioBudgetPriorityId);
+            var criterionLibraryId = Guid.NewGuid();
+            var criterionLibraryDto = CriterionLibraryDtos.Dto(criterionLibraryId, "mergedExpression");
+            var criterionLibraryDtoClone = CriterionLibraryDtos.Dto(criterionLibraryId, "mergedExpression");
+            var criterionLibraryDto2 = CriterionLibraryDtos.Dto(null, "not found");
+            var budgetPriorityDto2 = BudgetPriorityDtos.New();
+            budgetPriorityDto.CriterionLibrary = criterionLibraryDto;
+            budgetPriorityDto2.CriterionLibrary = criterionLibraryDto2;
+            budgetPriorityRepo.Setup(b => b.GetScenarioBudgetPriorities(simulationId)).ReturnsList(budgetPriorityDto, budgetPriorityDto2);
+            var service = CreatePagingService(unitOfWork);
+            var syncModel = new PagingSyncModel<BudgetPriorityDTO>();
+            var request = new PagingRequestModel<BudgetPriorityDTO>
+            {
+                search = "merge",
+            };
+
+            var result = service.GetScenarioPage(simulationId, request);
+            var expectedItem = new BudgetPriorityDTO
+            {
+                CriterionLibrary = criterionLibraryDtoClone,
+                Id = budgetPriorityDto.Id,
+                BudgetPercentagePairs = new List<BudgetPercentagePairDTO>(),
+            };
+            var expected = new PagingPageModel<BudgetPriorityDTO>
+            {
+                TotalItems = 1,
+                Items = new List<BudgetPriorityDTO> { expectedItem},                
+            };
+            ObjectAssertions.Equivalent(expected, result);
         }
     }
 }

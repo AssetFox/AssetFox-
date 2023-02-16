@@ -88,8 +88,8 @@ namespace BridgeCareCore.Services
         {
             return rows
                 .Where(_ => _.PriorityLevel.ToString().Contains(search) ||
-                    _.Year.ToString().Contains(search) ||
-                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(search))).ToList();
+                    _.Year!=null && _.Year.ToString().Contains(search) ||
+                    (_.CriterionLibrary!=null && _.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(search))).ToList();
         }
 
         protected override List<BudgetPriorityDTO> GetScenarioRows(Guid scenarioId) => _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(scenarioId);

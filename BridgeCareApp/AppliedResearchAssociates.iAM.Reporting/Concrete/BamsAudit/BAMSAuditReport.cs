@@ -222,9 +222,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var decisionsWorksheet = excelPackage.Workbook.Worksheets.Add(AuditReportConstants.DecisionsTab);
-            _decisionsTab.Fill(decisionsWorksheet, simulationOutput, simulation);                        
+            _decisionsTab.Fill(decisionsWorksheet, simulationOutput, simulation);
 
             // Check and generate folder
+            reportDetailDto.Status = $"Creating Report file";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
             reportPath = Path.Combine(folderPathForSimulation, "AuditReport.xlsx");

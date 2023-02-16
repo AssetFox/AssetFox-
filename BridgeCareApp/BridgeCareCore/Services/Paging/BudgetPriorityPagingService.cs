@@ -9,11 +9,11 @@ using BridgeCareCore.Services.Paging.Generics;
 
 namespace BridgeCareCore.Services
 {
-    public class BudgetPriortyPagingService : PagingService<BudgetPriorityDTO, BudgetPriorityLibraryDTO>,  IBudgetPriortyPagingService
+    public class BudgetPriorityPagingService : PagingService<BudgetPriorityDTO, BudgetPriorityLibraryDTO>,  IBudgetPriortyPagingService
     {
         private static IUnitOfWork _unitOfWork;
 
-        public BudgetPriortyPagingService(IUnitOfWork unitOfWork)
+        public BudgetPriorityPagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
@@ -36,6 +36,7 @@ namespace BridgeCareCore.Services
             //this gets rid of percentage pairs that shouldn't be there and adds the ones that should
             rows.ForEach(row =>
             {
+                row.BudgetPercentagePairs ??= new List<BudgetPercentagePairDTO>();
                 row.BudgetPercentagePairs = row.BudgetPercentagePairs.Where(_ => budgets.Any(__ => __.Name == _.BudgetName)).ToList();
                 budgets.ForEach(_ =>
                 {

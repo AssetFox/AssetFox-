@@ -7,15 +7,15 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCoreTests.Tests.BudgetPriority
 {
-    public static class BudgetPriorityDtos
+    public static class SimpleBudgetDetailDtos
     {
-        public static BudgetPriorityDTO New(Guid? id = null)
+        public static SimpleBudgetDetailDTO Dto(Guid? id = null, string name = "Budget")
         {
             var resolveId = id ?? Guid.NewGuid();
-            var dto = new BudgetPriorityDTO
+            var dto = new SimpleBudgetDetailDTO
             {
                 Id = resolveId,
-                BudgetPercentagePairs = new List<BudgetPercentagePairDTO>(),
+                Name = name
             };
             return dto;
         }

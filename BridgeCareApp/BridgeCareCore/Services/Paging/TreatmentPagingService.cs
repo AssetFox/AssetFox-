@@ -11,9 +11,9 @@ namespace BridgeCareCore.Services
 {
     public class TreatmentPagingService : PagingService<TreatmentDTO, TreatmentLibraryDTO>,  ITreatmentPagingService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TreatmentPagingService(UnitOfDataPersistenceWork unitOfWork)
+        public TreatmentPagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }

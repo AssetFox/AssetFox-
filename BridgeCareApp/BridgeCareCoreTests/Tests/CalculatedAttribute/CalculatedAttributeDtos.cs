@@ -17,6 +17,18 @@ namespace BridgeCareCoreTests.Tests
             return calculatedAttribute;
         }
 
+        public static CalculatedAttributeDTO EmptyForAttribute(AttributeDTO attribute, Guid? id = null)
+        {
+            var resolveId = id ?? Guid.NewGuid();
+            var dto = new CalculatedAttributeDTO
+            {
+                Id = resolveId,
+                Attribute = attribute.Name,
+                CalculationTiming = 1,
+            };
+            return dto;
+        }
+
         public static CalculatedAttributeDTO ForAttribute(AttributeDTO attribute, Guid? id = null, Guid? equationCriterionPairId = null, Guid? equationId = null)
         {
             var resolveId = id ?? Guid.NewGuid();

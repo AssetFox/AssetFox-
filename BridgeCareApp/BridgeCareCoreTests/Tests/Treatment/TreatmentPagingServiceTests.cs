@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCoreTests.Tests.Treatment
 {
@@ -145,7 +146,6 @@ namespace BridgeCareCoreTests.Tests.Treatment
             var cost = TreatmentCostDtos.WithEquationAndCriterionLibrary(costId, costEquationId, costCriterionLibraryId);
             var consequence = TreatmentConsequenceDtos.WithEquationAndCriterionLibrary(consequenceId, consequenceEquationId, consequenceCriterionLibraryId);
             cost.Equation = EquationDtos.AgePlus1();
-            
             dto.Costs = new List<TreatmentCostDTO> { cost };
             dto.Consequences = new List<TreatmentConsequenceDTO> { consequence };
             var dtoClone = TreatmentDtos.Dto(treatmentId);
@@ -173,6 +173,51 @@ namespace BridgeCareCoreTests.Tests.Treatment
             Assert.NotEqual(returnedConsequence.Id, consequenceId);
             Assert.NotEqual(returnedConsequence.Equation.Id, consequenceEquationId);
             Assert.NotEqual(returnedConsequence.CriterionLibrary.Id, consequenceCriterionLibraryId);
+        }
+
+        [Fact]
+        public void CreateNewLibrary_InitializesIds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var selectableTreatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var service = CreatePagingService(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var libraryId = Guid.NewGuid();
+            selectableTreatmentRepo.Setup(s => s.GetSelectableTreatments(libraryId)).ReturnsEmptyList();
+            var treatmentId = Guid.NewGuid();
+            var dto = TreatmentDtos.Dto(treatmentId);
+            var cost = TreatmentCostDtos.WithEquationAndCriterionLibrary(Guid.Empty, Guid.Empty, Guid.Empty);
+            var consequence = TreatmentConsequenceDtos.WithEquationAndCriterionLibrary(Guid.Empty, Guid.Empty, Guid.Empty);
+            var criterionLibrary = CriterionLibraryDtos.Dto(Guid.Empty);
+            dto.CriterionLibrary = criterionLibrary;
+            dto.Costs = new List<TreatmentCostDTO> { cost };
+            dto.Consequences = new List<TreatmentConsequenceDTO> { consequence };
+            var syncModel = new PagingSyncModel<TreatmentDTO>
+            {
+                LibraryId = libraryId,
+                AddedRows = new List<TreatmentDTO> { dto },
+            };
+            var libraryDto = TreatmentLibraryDtos.Empty();
+            var request = new LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>
+            {
+                IsNewLibrary = true,
+                Library = libraryDto,
+                SyncModel = syncModel,
+            };
+
+            var returnedDtos = service.GetSyncedLibraryDataset(request);
+            var returnedDto = returnedDtos.Single();
+            Assert.NotEqual(Guid.Empty, returnedDto.Id);
+            Assert.NotEqual(Guid.Empty, returnedDto.CriterionLibrary.Id);
+            var returnedCost = returnedDto.Costs.Single();
+            Assert.NotEqual(Guid.Empty, returnedCost.Id);
+            Assert.NotEqual(Guid.Empty, returnedCost.Equation.Id);
+            Assert.NotEqual(Guid.Empty, returnedCost.CriterionLibrary.Id);
+            var returnedConsequence = returnedDto.Consequences.Single();
+            Assert.NotEqual(Guid.Empty, returnedConsequence.Id);
+            Assert.NotEqual(Guid.Empty, returnedConsequence.Equation.Id);
+            Assert.NotEqual(Guid.Empty, returnedConsequence.CriterionLibrary.Id);
         }
     }
 }

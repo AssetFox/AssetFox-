@@ -13,6 +13,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var dto = new CalculatedAttributeEquationCriteriaPairDTO
             {
+                Id = Guid.NewGuid(),
                 CriteriaLibrary = CriterionLibraryDtos.Dto(criterionLibraryId),
                 Equation = EquationDtos.AgePlus1(equationId),
             };

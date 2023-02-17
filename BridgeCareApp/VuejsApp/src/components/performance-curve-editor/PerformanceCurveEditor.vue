@@ -563,7 +563,7 @@ export default class PerformanceCurveEditor extends Vue {
     @State(state => state.performanceCurveModule.hasPermittedAccess) hasPermittedAccess: boolean;
     @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @State(state => state.performanceCurveModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedLibrary') getIsSharedLibraryAction: any;
+    @Action('getIsSharedPerformanceCurveLibrary') getIsSharedLibraryAction: any;
     
     @Action('getPerformanceCurveLibraries')
     getPerformanceCurveLibrariesAction: any;
@@ -1238,7 +1238,7 @@ export default class PerformanceCurveEditor extends Vue {
                 //add library user to an array
                 libraryUserData.push(libraryUser);
             });
-            this.selectedPerformanceCurveLibrary.isShared = this.sharePerformanceCurveLibraryDialogData.performanceCurveLibrary.isShared;
+            //this.selectedPerformanceCurveLibrary.isShared = this.sharePerformanceCurveLibraryDialogData.performanceCurveLibrary.isShared;
             if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
                 this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
             }

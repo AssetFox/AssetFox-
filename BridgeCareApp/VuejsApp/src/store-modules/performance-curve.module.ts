@@ -82,7 +82,7 @@ const mutations = {
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
     },
-    IsSharedLibraryMutator(state: any, status: boolean) {
+    IsSharedPerformanceCurveLibraryMutator(state: any, status: boolean) {
         state.isSharedLibrary = status;
     }
 };
@@ -180,14 +180,14 @@ const actions = {
             }
         });
     },
-    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
+    async getIsSharedPerformanceCurveLibrary({ dispatch, commit }: any, payload: any) {
         await PerformanceCurveService.getIsSharedLibrary(payload.id).then(
             (response: AxiosResponse) => {
                 if (
                 hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
-                commit('IsSharedLibraryMutator', response.data as boolean);
+                commit('IsSharedPerformanceCurveLibraryMutator', response.data as boolean);
             }
         });
     },

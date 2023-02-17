@@ -33,20 +33,41 @@ namespace BridgeCareCore.Services
                 rows.ForEach(_ =>
                 {
                     _.Id = Guid.NewGuid();
-                    _.CriterionLibrary.Id = Guid.NewGuid();
-                    _.Consequences.ForEach(__ =>
+                    if (_.CriterionLibrary != null)
                     {
-                        __.Id = Guid.NewGuid();
-                        __.CriterionLibrary.Id = Guid.NewGuid();
-                        __.Equation.Id = Guid.NewGuid();
-                    });
-                    _.Costs.ForEach(__ =>
+                        _.CriterionLibrary.Id = Guid.NewGuid();
+                    }
+                    if (_.Consequences != null)
                     {
-                        __.Id = Guid.NewGuid();
-                        __.Equation.Id = Guid.NewGuid();
-                        __.CriterionLibrary.Id = Guid.NewGuid();
-                    });
-                    if (!_.BudgetIds.Any())
+                        _.Consequences.ForEach(__ =>
+                        {
+                            __.Id = Guid.NewGuid();
+                            if (__.CriterionLibrary != null)
+                            {
+                                __.CriterionLibrary.Id = Guid.NewGuid();
+                            }
+                            if (__.Equation != null)
+                            {
+                                __.Equation.Id = Guid.NewGuid();
+                            }
+                        });
+                    }
+                    if (_.Costs != null)
+                    {
+                        _.Costs.ForEach(__ =>
+                        {
+                            __.Id = Guid.NewGuid();
+                            if (__.Equation != null)
+                            {
+                                __.Equation.Id = Guid.NewGuid();
+                            }
+                            if (__.CriterionLibrary != null)
+                            {
+                                __.CriterionLibrary.Id = Guid.NewGuid();
+                            }
+                        });
+                    }
+                    if (_.BudgetIds == null || !_.BudgetIds.Any())
                     {
                         _.BudgetIds = budgetIds;
                     }

@@ -94,6 +94,92 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public void GetCommittedProjectPageSizeTwoSortColumnTreatment_Nulls_DoesNotThrow()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var service = CreatePagingService(unitOfWork);
+            var sectionCommittedProjectId1 = Guid.NewGuid();
+            var sectionCommittedProjectId2 = Guid.NewGuid();
+            var sectionCommittedProjectId3 = Guid.NewGuid();
+            var scenarioBudgetId1 = Guid.NewGuid();
+            var scenarioBudgetId2 = Guid.NewGuid();
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1);
+            sectionCommittedProject1.Treatment = null;
+            sectionCommittedProject2.Treatment = "";
+            sectionCommittedProject3.Treatment = "Treatmenty";
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2, sectionCommittedProject3 };
+            var returnDictionary = new Dictionary<Guid, string>
+            {
+                {
+                    scenarioBudgetId1, "Interstate"
+                },
+                {
+                    scenarioBudgetId2, "Local"
+                }
+            };
+            budgetRepo.Setup(br => br.GetScenarioBudgetDictionary(It.Is<List<Guid>>(
+                list => list.Contains(scenarioBudgetId1) && list.Contains(scenarioBudgetId2)
+                        && list.Count == 2))).Returns(returnDictionary);
+            var request = new PagingRequestModel<SectionCommittedProjectDTO>()
+            {
+                Page = 1,
+                RowsPerPage = 2,
+                isDescending = false,
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>(),
+                search = "",
+                sortColumn = "treatment"
+            };
+
+            var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);
+            Assert.Equal(3, page.TotalItems);
+            Assert.Equal(page.Items.Count, request.RowsPerPage);
+        }
+
+        [Fact]
+        public void GetCommittedProjectPageSizeTwoSearch_Nulls_DoesNotThrow()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var service = CreatePagingService(unitOfWork);
+            var sectionCommittedProjectId1 = Guid.NewGuid();
+            var sectionCommittedProjectId2 = Guid.NewGuid();
+            var sectionCommittedProjectId3 = Guid.NewGuid();
+            var scenarioBudgetId1 = Guid.NewGuid();
+            var scenarioBudgetId2 = Guid.NewGuid();
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1);
+            sectionCommittedProject1.Treatment = null;
+            sectionCommittedProject2.Consequences = null;
+            sectionCommittedProject3.LocationKeys = null;
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2, sectionCommittedProject3 };
+            var returnDictionary = new Dictionary<Guid, string>
+            {
+                {
+                    scenarioBudgetId1, "Interstate"
+                },
+                {
+                    scenarioBudgetId2, "Local"
+                }
+            };
+            budgetRepo.Setup(br => br.GetScenarioBudgetDictionary(It.Is<List<Guid>>(
+                list => list.Contains(scenarioBudgetId1) && list.Contains(scenarioBudgetId2)
+                        && list.Count == 2))).Returns(returnDictionary);
+            var request = new PagingRequestModel<SectionCommittedProjectDTO>()
+            {
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>(),
+                search = "won't find",
+            };
+
+            var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);
+            Assert.Equal(3, page.TotalItems);
+            Assert.Empty(page.Items);
+        }
+
+        [Fact]
         public void GetCommittedProjectPageSizetwoSearchItemsCountOne()
         {
             var unitOfWork = UnitOfWorkMocks.New();

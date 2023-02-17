@@ -169,5 +169,136 @@ namespace BridgeCareCoreTests.Tests
             var expectedExpressions = new List<string> { "a", "b", "c" };
             ObjectAssertions.Equivalent(expectedExpressions, expressions);
         }
+
+        [Fact]
+        public void GetScenarioPage_SortDescendingByCriteriaExpression_Does()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CalculatedAttributeRepositoryMocks.New(unitOfWork);
+            var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var simulationId = Guid.NewGuid();
+            var attributeId1 = Guid.NewGuid();
+            var attributeId2 = Guid.NewGuid();
+            var equationCriterionPairId1 = Guid.NewGuid();
+            var equationCriterionPairId2 = Guid.NewGuid();
+            var equationId1 = Guid.NewGuid();
+            var equationId2 = Guid.NewGuid();
+            var attribute = AttributeDtos.Age;
+            attributeRepo.Setup(a => a.GetSingleById(attribute.Id)).Returns(attribute);
+            var dto = CalculatedAttributeDtos.EmptyForAttribute(attribute);
+            var pair1 = CalculatedAttributeEquationCriteriaPairDtos.New();
+            var pair2 = CalculatedAttributeEquationCriteriaPairDtos.New();
+            var pair3 = CalculatedAttributeEquationCriteriaPairDtos.New();
+            pair1.CriteriaLibrary.MergedCriteriaExpression = "a";
+            pair2.CriteriaLibrary.MergedCriteriaExpression = "b";
+            pair3.CriteriaLibrary.MergedCriteriaExpression = "c";
+            dto.Equations = new List<CalculatedAttributeEquationCriteriaPairDTO> { pair1, pair3, pair2 };
+            repo.Setup(r => r.GetScenarioCalculatedAttributes(simulationId)).Returns(new List<CalculatedAttributeDTO> { dto });
+            var request = new CalculatedAttributePagingSyncModel
+            {
+                AddedCalculatedAttributes = new List<CalculatedAttributeDTO> { dto },
+            };
+            var pagingRequest = new CalculatedAttributePagingRequestModel
+            {
+                AttributeId = attribute.Id,
+                SyncModel = request,
+                sortColumn = "criteriaexpression",
+                isDescending = true,
+            };
+
+            var result = pagingService.GetScenarioPage(libraryId, pagingRequest);
+            var items = result.Items;
+            var criterionExpressions = items.Select(i => i.CriteriaLibrary.MergedCriteriaExpression).ToList();
+            var expectedExpressions = new List<string> { "c", "b", "a" };
+            ObjectAssertions.Equivalent(expectedExpressions, criterionExpressions);
+        }
+
+
+        [Fact]
+        public void GetScenarioPage_Search_FindsInEquation()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CalculatedAttributeRepositoryMocks.New(unitOfWork);
+            var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var simulationId = Guid.NewGuid();
+            var attributeId1 = Guid.NewGuid();
+            var attributeId2 = Guid.NewGuid();
+            var equationCriterionPairId1 = Guid.NewGuid();
+            var equationCriterionPairId2 = Guid.NewGuid();
+            var equationId1 = Guid.NewGuid();
+            var equationId2 = Guid.NewGuid();
+            var attribute = AttributeDtos.Age;
+            attributeRepo.Setup(a => a.GetSingleById(attribute.Id)).Returns(attribute);
+            var dto = CalculatedAttributeDtos.EmptyForAttribute(attribute);
+            var pair1 = CalculatedAttributeEquationCriteriaPairDtos.New();
+            var pair2 = CalculatedAttributeEquationCriteriaPairDtos.New();
+            var pair3 = CalculatedAttributeEquationCriteriaPairDtos.New();
+            pair1.Equation.Expression = "aAa";
+            pair2.Equation.Expression = "bBb";
+            pair3.Equation.Expression = "cCc";
+            dto.Equations = new List<CalculatedAttributeEquationCriteriaPairDTO> { pair1, pair3, pair2 };
+            repo.Setup(r => r.GetScenarioCalculatedAttributes(simulationId)).Returns(new List<CalculatedAttributeDTO> { dto });
+            var request = new CalculatedAttributePagingSyncModel
+            {
+                AddedCalculatedAttributes = new List<CalculatedAttributeDTO> { dto },
+            };
+            var pagingRequest = new CalculatedAttributePagingRequestModel
+            {
+                AttributeId = attribute.Id,
+                SyncModel = request,
+                search = "bbB",
+            };
+
+            var result = pagingService.GetScenarioPage(libraryId, pagingRequest);
+            var item = result.Items.Single();
+            Assert.Equal("bBb", item.Equation.Expression);
+        }
+        [Fact]
+        public void GetScenarioPage_Search_FindsInMergedCriteriaExpression()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = CalculatedAttributeRepositoryMocks.New(unitOfWork);
+            var attributeRepo = AttributeRepositoryMocks.New(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var simulationId = Guid.NewGuid();
+            var attributeId1 = Guid.NewGuid();
+            var attributeId2 = Guid.NewGuid();
+            var equationCriterionPairId1 = Guid.NewGuid();
+            var equationCriterionPairId2 = Guid.NewGuid();
+            var equationId1 = Guid.NewGuid();
+            var equationId2 = Guid.NewGuid();
+            var attribute = AttributeDtos.Age;
+            attributeRepo.Setup(a => a.GetSingleById(attribute.Id)).Returns(attribute);
+            var dto = CalculatedAttributeDtos.EmptyForAttribute(attribute);
+            var pair1 = CalculatedAttributeEquationCriteriaPairDtos.New();
+            var pair2 = CalculatedAttributeEquationCriteriaPairDtos.New();
+            var pair3 = CalculatedAttributeEquationCriteriaPairDtos.New();
+            pair1.CriteriaLibrary.MergedCriteriaExpression = "aAa";
+            pair2.CriteriaLibrary.MergedCriteriaExpression = "bBb";
+            pair3.CriteriaLibrary.MergedCriteriaExpression = "cCc";
+            dto.Equations = new List<CalculatedAttributeEquationCriteriaPairDTO> { pair1, pair3, pair2 };
+            repo.Setup(r => r.GetScenarioCalculatedAttributes(simulationId)).Returns(new List<CalculatedAttributeDTO> { dto });
+            var request = new CalculatedAttributePagingSyncModel
+            {
+                AddedCalculatedAttributes = new List<CalculatedAttributeDTO> { dto },
+            };
+            var pagingRequest = new CalculatedAttributePagingRequestModel
+            {
+                AttributeId = attribute.Id,
+                SyncModel = request,
+                search = "bbB",
+            };
+
+            var result = pagingService.GetScenarioPage(libraryId, pagingRequest);
+
+            var item = result.Items.Single();
+            Assert.Equal("bBb", item.CriteriaLibrary.MergedCriteriaExpression);
+        }
+
     }
 }

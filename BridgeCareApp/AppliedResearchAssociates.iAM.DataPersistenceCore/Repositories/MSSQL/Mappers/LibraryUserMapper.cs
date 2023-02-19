@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static RemainingLifeLimitLibraryUserEntity ToRemainingLifeLimitLibraryUserEntity(this LibraryUserDTO dto, Guid remainingLifeLimitLibraryId) =>
             new RemainingLifeLimitLibraryUserEntity
             {
-                RemainingLifeLimitLibraryId = remainingLifeLimitLibraryId,
+                LibraryId = remainingLifeLimitLibraryId,
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel,
             };

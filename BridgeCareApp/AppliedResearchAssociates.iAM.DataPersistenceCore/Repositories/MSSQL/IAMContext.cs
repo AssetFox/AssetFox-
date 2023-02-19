@@ -2505,17 +2505,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<RemainingLifeLimitLibraryUserEntity>(entity =>
             {
-                entity.HasKey(e => new { e.RemainingLifeLimitLibraryId, e.UserId });
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
 
                 entity.ToTable("RemainingLifeLimitLibrary_User");
 
-                entity.HasIndex(e => e.RemainingLifeLimitLibraryId);
+                entity.HasIndex(e => e.LibraryId);
 
                 entity.HasIndex(e => e.UserId);
 
                 entity.HasOne(d => d.RemainingLifeLimitLibrary)
                     .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.RemainingLifeLimitLibraryId)
+                    .HasForeignKey(d => d.LibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.User)

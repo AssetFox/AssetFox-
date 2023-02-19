@@ -2525,17 +2525,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
             modelBuilder.Entity<DeficientConditionGoalLibraryUserEntity>(entity =>
             {
-                entity.HasKey(e => new { e.DeficientConditionGoalLibraryId, e.UserId });
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
 
                 entity.ToTable("DeficientConditionGoalLibrary_User");
 
-                entity.HasIndex(e => e.DeficientConditionGoalLibraryId);
+                entity.HasIndex(e => e.LibraryId);
 
                 entity.HasIndex(e => e.UserId);
 
                 entity.HasOne(d => d.DeficientConditionGoalLibrary)
                     .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.DeficientConditionGoalLibraryId)
+                    .HasForeignKey(d => d.LibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.User)

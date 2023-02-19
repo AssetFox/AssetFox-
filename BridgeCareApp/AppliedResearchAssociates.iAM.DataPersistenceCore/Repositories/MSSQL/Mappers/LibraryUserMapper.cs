@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static DeficientConditionGoalLibraryUserEntity ToDeficientConditionGoalLibraryUserEntity(this LibraryUserDTO dto, Guid deficientConditionGoalLibraryId) =>
             new DeficientConditionGoalLibraryUserEntity
             {
-                DeficientConditionGoalLibraryId = deficientConditionGoalLibraryId,
+                LibraryId = deficientConditionGoalLibraryId,
                 UserId = dto.UserId,
                 AccessLevel= (int)dto.AccessLevel,
             };

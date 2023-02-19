@@ -1782,7 +1782,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient.DeficientConditionGoalLibraryUserEntity", b =>
                 {
-                    b.Property<Guid>("DeficientConditionGoalLibraryId")
+                    b.Property<Guid>("LibraryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
@@ -1803,9 +1803,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("DeficientConditionGoalLibraryId", "UserId");
+                    b.HasKey("LibraryId", "UserId");
 
-                    b.HasIndex("DeficientConditionGoalLibraryId");
+                    b.HasIndex("LibraryId");
 
                     b.HasIndex("UserId");
 
@@ -5097,7 +5097,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient.DeficientConditionGoalLibraryEntity", "DeficientConditionGoalLibrary")
                         .WithMany("Users")
-                        .HasForeignKey("DeficientConditionGoalLibraryId")
+                        .HasForeignKey("LibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

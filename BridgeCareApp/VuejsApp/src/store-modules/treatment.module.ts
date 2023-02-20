@@ -335,7 +335,7 @@ const actions = {
             }
         );
     },
-    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
+    async getIsSharedTreatmentLibrary({ dispatch, commit }: any, payload: any) {
         await TreatmentService.getIsSharedLibrary(payload.id).then(
             (response: AxiosResponse) => {
                 if (

@@ -413,7 +413,7 @@ export default class TreatmentEditor extends Vue {
     importLibraryTreatmentsFileAction: any;
     @Action('deleteTreatment') deleteTreatmentAction: any;
     @Action('deleteScenarioSelectableTreatment') deleteScenarioSelectableTreatmentAction: any;
-    @Action('getIsSharedLibrary') getIsSharedLibraryAction: any;
+    @Action('getIsSharedTreatmentLibrary') getIsSharedLibraryAction: any;
     @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
     @Action('selectScenario') selectScenarioAction: any;
     

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20230220184841_CreatePerformanceCurveLibraryUser")]
+    [Migration("20230220205404_CreatePerformanceCurveLibraryUser")]
     partial class CreatePerformanceCurveLibraryUser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

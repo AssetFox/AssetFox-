@@ -4,7 +4,6 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
-
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics
 {
     public static class LibraryUserDtolists

@@ -90,6 +90,18 @@ export default {
             });
         });
 
+        connection.on(Hub.BroadcastType.BroadcastInfo, info => {
+            statusHub.$emit(Hub.BroadcastEventType.BroadcastInfoEvent, {
+                info,
+            });
+        });
+        
+        connection.on(Hub.BroadcastType.BroadcastTaskCompleted, task => {
+            statusHub.$emit(Hub.BroadcastEventType.BroadcastTaskCompletedEvent, {
+                task,
+            });
+        });
+
         let startedPromise: any | null = null;
 
         function start() {
@@ -126,7 +138,9 @@ export default {
 export const Hub = {
     BroadcastType: {
         BroadcastError: 'BroadcastError',
+        BroadcastInfo: 'BroadcastInfo',
         BroadcastWarning: 'BroadcastWarning',
+        BroadcastTaskCompleted: 'BroadcastTaskCompleted',
         BroadcastAssignDataStatus: 'BroadcastAssignDataStatus',
         BroadcastReportGenerationStatus:
             'BroadcastReportGenerationStatus',
@@ -138,6 +152,8 @@ export const Hub = {
     BroadcastEventType: {
         BroadcastErrorEvent: 'BroadcastErrorEvent',
         BroadcastWarningEvent: 'BroadcastWarningEvent',
+        BroadcastInfoEvent: 'BroadcastInfoEvent',
+        BroadcastTaskCompletedEvent: 'BroadcastTaskCompleted',
         BroadcastAssignDataStatusEvent: 'BroadcastAssignDataStatusEvent',
         BroadcastReportGenerationStatusEvent:
             'BroadcastReportGenerationStatusEvent',

@@ -57,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 TreatmentFundingIgnoresSpendingLimit = entity.TreatmentFundingIgnoresSpendingLimit,
                 TreatmentStatus = (TreatmentStatus)entity.TreatmentStatus,                
             };
-            AssetDetailValueMapper.AddToDictionaries(entity.AssetDetailValues, domain.ValuePerTextAttribute, domain.ValuePerNumericAttribute, attributeNameLookup);
+            AssetDetailValueMapper.AddToDictionaries(entity.AssetDetailValuesIntId, domain.ValuePerTextAttribute, domain.ValuePerNumericAttribute, attributeNameLookup);
             var treatmentConsiderationDetails = TreatmentConsiderationDetailMapper.ToDomainList(entity.TreatmentConsiderationDetails);
             domain.TreatmentConsiderations.AddRange(treatmentConsiderationDetails);
             var treatmentOptionDetails = TreatmentOptionDetailMapper.ToDomainList(entity.TreatmentOptionDetails);
@@ -80,6 +80,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 var domain = ToDomain(entity, year, attributeNameLookup, assetNameLookup);
                 dictionary[entity.Id] = domain;
+            }
+        }
+
+        internal static void AppendToDomainDictionaryWithValues(
+            Dictionary<Guid, AssetDetail> dictionary,
+            ICollection<AssetDetailEntity> entityCollection,
+            int year,
+            Dictionary<Guid, string> attributeNameLookup,
+            Dictionary<Guid, string> assetNameLookup)
+        {
+            foreach (var entity in entityCollection)
+            {
+                var domain = ToDomain(entity, year, attributeNameLookup, assetNameLookup);
+                dictionary[entity.Id] = domain;
+                foreach (var assetDetailValue in entity.AssetDetailValuesIntId)
+                {
+                    AssetDetailValueMapper.AddToDictionary(assetDetailValue, domain.ValuePerTextAttribute, domain.ValuePerNumericAttribute, attributeNameLookup);
+                }
             }
         }
 

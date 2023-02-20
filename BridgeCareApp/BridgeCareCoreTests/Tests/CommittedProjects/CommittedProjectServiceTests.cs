@@ -1,22 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Moq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using System.Data;
 using OfficeOpenXml;
-using System.IO;
 using AppliedResearchAssociates.iAM.DTOs;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace BridgeCareCoreTests.Tests
@@ -36,11 +28,12 @@ namespace BridgeCareCoreTests.Tests
 
             var mockedTestUOW = new Mock<IUnitOfWork>();
             _mockedContext = new Mock<IAMContext>();
-
+            var mockInvestmentPlanRepo = new Mock<IInvestmentPlanRepository>();
+            mockedTestUOW.Setup(u => u.InvestmentPlanRepo).Returns(mockInvestmentPlanRepo.Object);
+            mockInvestmentPlanRepo.Setup(i => i.GetInvestmentPlan(TestDataForCommittedProjects.SimulationId)).Returns(TestDataForCommittedProjects.TestInvestmentPlan);
             var mockAssetDataRepository = new Mock<IAssetData>();
             mockAssetDataRepository.Setup(_ => _.KeyProperties).Returns(TestDataForCommittedProjects.KeyProperties);
             mockedTestUOW.Setup(_ => _.AssetDataRepository).Returns(mockAssetDataRepository.Object);
-
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
             _mockCommittedProjectRepo.Setup(_ => _.GetCommittedProjectsForExport(It.IsAny<Guid>()))
                 .Returns<Guid>(_ => TestDataForCommittedProjects.ValidCommittedProjects
@@ -50,7 +43,7 @@ namespace BridgeCareCoreTests.Tests
             mockedTestUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
             _mockedSimulationRepo = new Mock<ISimulationRepository>();
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Simulation, TestDataForCommittedProjects.Simulations.AsQueryable());
+            _mockedSimulationRepo.Setup(s => s.GetSimulation(TestDataForCommittedProjects.SimulationId)).Returns(TestDataForCommittedProjects.TestSimulationDTO);
             _mockedSimulationRepo.Setup(_ => _.GetSimulationName(It.Is<Guid>(_ => _ != _badScenario))).Returns("Test");
             _mockedSimulationRepo.Setup(_ => _.GetSimulationName(It.Is<Guid>(_ => _ == _badScenario))).Returns<string>(null);
             mockedTestUOW.Setup(_ => _.SimulationRepo).Returns(_mockedSimulationRepo.Object);
@@ -80,7 +73,7 @@ namespace BridgeCareCoreTests.Tests
             var service = new CommittedProjectService(_testUOW);
 
             // Act
-            var result = service.ExportCommittedProjectsFile(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var result = service.ExportCommittedProjectsFile(TestDataForCommittedProjects.SimulationId);
 
             // Asset
             Assert.False(string.IsNullOrEmpty(result.FileName));
@@ -89,7 +82,10 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(excel.Workbook.Worksheets.Count > 0);
             var cells = excel.Workbook.Worksheets[0].Cells.Value;
             Assert.NotNull(cells);
-            Assert.Equal(TestDataForCommittedProjects.ValidCommittedProjects.Count + 1, ((Array)cells).GetLength(0));
+            var cellArray = (Array)cells;
+            var cellArrayLength = cellArray.GetLength(0);
+            var committedProjectsForThisSimulation = TestDataForCommittedProjects.ValidCommittedProjects.Where(cp => cp.SimulationId == TestDataForCommittedProjects.SimulationId).ToList();
+            Assert.Equal(committedProjectsForThisSimulation.Count + 1, cellArrayLength);
         }
 
         [Fact]
@@ -142,15 +138,15 @@ namespace BridgeCareCoreTests.Tests
                     testInput = _;
                 });
             var service = new CommittedProjectService(_testUOW);
-
+            const string networkKeyAttribute = "BRKEY_";
             // Act - The result is delivered through the callback
-            service.ImportCommittedProjectFiles(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), _excelData, "GoodFile", false);
+            service.ImportCommittedProjectFiles(TestDataForCommittedProjects.SimulationId, _excelData, "GoodFile", false);
 
             // Assert
             Assert.True(testInput.Count == 2, "Number of comitted projects is wrong");
             Assert.Equal("f286b7cf-445d-4291-9167-0f225b170cae", testInput[0].LocationKeys.Single(_ => _.Key == "ID").Value);
             Assert.True(testInput[0] is SectionCommittedProjectDTO, "Provided value is not a Section type");
-            Assert.True(((SectionCommittedProjectDTO)testInput[0]).VerifyLocation(), "Could not verify location");
+            Assert.True(testInput[0].VerifyLocation(networkKeyAttribute), "Could not verify location");
             Assert.Equal(8, testInput[0].Consequences.Count);
             Assert.Equal(2023, testInput[1].Year);
         }
@@ -165,15 +161,15 @@ namespace BridgeCareCoreTests.Tests
                     testInput = _;
                 });
             var service = new CommittedProjectService(_testUOW);
-
+            const string networkKeyAttribute = "BRKEY_";
             // Act - The result is delivered through the callback
-            service.ImportCommittedProjectFiles(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), _excelData, "GoodFileWithNoTreatment", true);
+            service.ImportCommittedProjectFiles(TestDataForCommittedProjects.SimulationId, _excelData, "GoodFileWithNoTreatment", true);
 
             // Assert
             Assert.True(testInput.Count == 3, "Number of comitted projects is wrong");
             Assert.Equal("cf28e62e-0a02-4195-8d28-5cdb9646dd58", testInput[1].LocationKeys.Single(_ => _.Key == "ID").Value);
             Assert.True(testInput[1] is SectionCommittedProjectDTO, "Provided value is not a Section type");
-            Assert.True(((SectionCommittedProjectDTO)testInput[1]).VerifyLocation(), "Could not verify location");
+            Assert.True(testInput[1].VerifyLocation(networkKeyAttribute), "Could not verify location");
             Assert.Equal(8, testInput[1].Consequences.Count);
             Assert.Equal(2023, testInput[1].Year);
             Assert.Equal(TreatmentCategory.CapacityAdding, testInput[1].Category);

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
@@ -19,190 +20,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 
             //return value
             return itemValue;
-        }
-
-        // Identifying 185 Bridges
-        public bool BridgeFunding185(AssetDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-            var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
-
-            return
-                fedAid == "1" ||
-                fedAid == "2" ||
-                fedAid == "0" && bridgeLength >= 20 ||
-                fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
-        }
-
-        // Identifying 581 Bridges
-        public bool BridgeFunding581(AssetDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-            var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
-
-            return
-                fedAid == "1" ||
-                fedAid == "2" ||
-                fedAid == "0" && bridgeLength >= 20 ||
-                fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
-        }
-
-        // Identifing STP Bridges
-        public bool BridgeFundingSTP(AssetDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-
-            return
-                fedAid == "1" && bridgeLength >= 20 ||
-                fedAid == "2" && bridgeLength >= 20 ||
-                fedAid == "0" && bridgeLength >= 20;
-        }
-
-        // Identifying NHPP Bridges
-        public bool BridgeFundingNHPP(AssetDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var functionalClass = "";
-            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
-            {
-                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
-            }
-
-            return
-                (fedAid == "1" || fedAid == "2") &&
-                (functionalClass == "01" || functionalClass == "02" || functionalClass == "11" || functionalClass == "12" || functionalClass == "14");
-        }
-
-        // Identifying BOF Bridges
-        public bool BridgeFundingBOF(AssetDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var functionalClass = "";
-            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
-            {
-                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
-            }
-            var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-
-            return
-                fedAid == "0" && bridgeLength >= 20 &&
-                (functionalClass == "08" || functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
-        }
-
-        // Identifying 183 Bridges
-        public bool BridgeFunding183(AssetDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var functionalClass = "";
-            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
-            {
-                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
-            }
-            var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-
-            return
-                fedAid == "0" && bridgeLength >= 8 &&
-                (functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
-        }
-
-        public bool BridgeFunding183(AssetSummaryDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var functionalClass = "";
-            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
-            {
-                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
-            }
-            var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-
-            return
-                fedAid == "0" && bridgeLength >= 8 &&
-                (functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
-        }
-
-        public bool BridgeFunding185(AssetSummaryDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-            var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
-
-            return
-                fedAid == "1" ||
-                fedAid == "2" ||
-                fedAid == "0" && bridgeLength >= 20 ||
-                fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
-        }
-
-        public bool BridgeFunding581(AssetSummaryDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-            var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
-
-            return
-                fedAid == "1" ||
-                fedAid == "2" ||
-                fedAid == "0" && bridgeLength >= 20 ||
-                fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
-        }
-
-        public bool BridgeFundingBOF(AssetSummaryDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var functionalClass = "";
-            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
-            {
-                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
-            }
-            var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-
-            return
-                fedAid == "0" && bridgeLength >= 20 &&
-                (functionalClass == "08" || functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
-        }
-
-        public bool BridgeFundingNHPP(AssetSummaryDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var functionalClass = "";
-            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
-            {
-                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
-            }
-
-            return
-                (fedAid == "1" || fedAid == "2") &&
-                (functionalClass == "01" || functionalClass == "02" || functionalClass == "11" || functionalClass == "12" || functionalClass == "14");
-        }
-
-        public bool BridgeFundingSTP(AssetSummaryDetail section)
-        {
-            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
-            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-
-            return
-                fedAid == "1" && bridgeLength >= 20 ||
-                fedAid == "2" && bridgeLength >= 20 ||
-                fedAid == "0" && bridgeLength >= 20;
         }
 
         private static readonly Dictionary<string, string> FunctionalClassDescriptions =
@@ -229,5 +46,153 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         {
             return FunctionalClassDescriptions.ContainsKey(functionalClassAbbreviation) ? FunctionalClassDescriptions[functionalClassAbbreviation] : FunctionalClassDescriptions["NN"];
         }
+
+        public bool BridgeFundingBOF(AssetDetail section)
+        {
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+            var NBISlen = section.ValuePerTextAttribute["NBISLEN"];
+
+            return
+                NBISlen is "Y" &&
+                functionalClass is "08" or "09" or "18" or "19";
+        }
+
+        public bool BridgeFundingNHPP(AssetDetail section)
+        {
+            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+
+            return
+                (fedAid is "1" && functionalClass is "01" or "02" or "03" or "06" or "07" or "11" or "12" or "14" or "16" or "17") ||
+                (fedAid is "0" && functionalClass is "99");
+        }
+
+        public bool BridgeFundingSTP(AssetDetail section)
+        {
+            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+
+            return fedAid is "1" or "2";
+        }
+
+        public bool BridgeFundingBRIP(AssetDetail section)
+        {
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+            var NBISlen = section.ValuePerTextAttribute["NBISLEN"];
+
+            return
+                NBISlen is "Y" &&
+                functionalClass is "01" or "02";
+        }
+
+        public bool BridgeFundingState(AssetDetail section)
+        {
+            var internetReport = section.ValuePerTextAttribute["INTERNET_REPORT"];
+
+            return internetReport is "State" or "Local";
+        }
+
+        public bool BridgeFundingNotApplicable(AssetDetail section)
+        {
+            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+
+            return
+                (fedAid is "0" && functionalClass is "01" or "02" or "03" or "06" or "07" or "11" or "12" or "14" or "16" or "17") ||
+                functionalClass is "NN";
+        }
+
+
+        public bool BridgeFundingBOF(AssetSummaryDetail section)
+        {
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+            var NBISlen = section.ValuePerTextAttribute["NBISLEN"];
+
+            return
+                NBISlen is "Y" &&
+                functionalClass is "08" or "09" or "18" or "19";
+        }
+
+        public bool BridgeFundingNHPP(AssetSummaryDetail section)
+        {
+            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+
+            return
+                (fedAid is "1" && functionalClass is "01" or "02" or "03" or "06" or "07" or "11" or "12" or "14" or "16" or "17") ||
+                (fedAid is "0" && functionalClass is "99");
+        }
+
+        public bool BridgeFundingSTP(AssetSummaryDetail section)
+        {
+            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+
+            return fedAid is "1" or "2";
+        }
+
+        public bool BridgeFundingBRIP(AssetSummaryDetail section)
+        {
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+            var NBISlen = section.ValuePerTextAttribute["NBISLEN"];
+
+            return
+                NBISlen is "Y" &&
+                functionalClass is "01" or "02";
+        }
+
+        public bool BridgeFundingState(AssetSummaryDetail section)
+        {
+            var internetReport = section.ValuePerTextAttribute["INTERNET_REPORT"];
+
+            return internetReport is "State" or "Local";
+        }
+
+        public bool BridgeFundingNotApplicable(AssetSummaryDetail section)
+        {
+            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+
+            return
+                (fedAid is "0" && functionalClass is "01" or "02" or "03" or "06" or "07" or "11" or "12" or "14" or "16" or "17") ||
+                functionalClass is "NN";
+        }
+
     }
 }

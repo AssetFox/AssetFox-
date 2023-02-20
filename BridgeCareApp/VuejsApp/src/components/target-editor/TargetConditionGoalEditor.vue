@@ -407,6 +407,8 @@ export default class TargetConditionGoalEditor extends Vue {
     @Action('getScenarioTargetConditionGoals') getScenarioTargetConditionGoalsAction: any;
     @Action('upsertScenarioTargetConditionGoals') upsertScenarioTargetConditionGoalsAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Mutation('addedOrUpdatedTargetConditionGoalLibraryMutator') addedOrUpdatedTargetConditionGoalLibraryMutator: any;
     @Mutation('selectedTargetConditionGoalLibraryMutator') selectedTargetConditionGoalLibraryMutator: any;
@@ -526,7 +528,10 @@ export default class TargetConditionGoalEditor extends Vue {
                     }
 
                     vm.hasScenario = true;
-                    vm.initializePages();
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        vm.initializePages();
+                    });                                        
                 }
             });
 
@@ -625,7 +630,7 @@ export default class TargetConditionGoalEditor extends Vue {
         const request: PagingRequest<TargetConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: this.librarySelectItemValue !== null ? this.librarySelectItemValue : null,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
@@ -698,12 +703,13 @@ export default class TargetConditionGoalEditor extends Vue {
             const upsertRequest: LibraryUpsertPagingRequest<TargetConditionGoalLibrary, TargetConditionGoal> = {
                 library: library,    
                 isNewLibrary: true,           
-                 pagingSync: {
-                    libraryId: library.targetConditionGoals.length == 0 ? null : this.selectedTargetConditionGoalLibrary.id,
+                 syncModel: {
+                    libraryId: library.targetConditionGoals.length == 0 || !this.hasSelectedLibrary ? null : this.selectedTargetConditionGoalLibrary.id,
                     rowsForDeletion: library.targetConditionGoals === [] ? [] : this.deletionIds,
                     updateRows: library.targetConditionGoals === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.targetConditionGoals === [] ? [] : this.addedRows,
-                 }
+                 },
+                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             TargetConditionGoalService.upsertTargetConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -788,12 +794,13 @@ export default class TargetConditionGoalEditor extends Vue {
         const upsertRequest: LibraryUpsertPagingRequest<TargetConditionGoalLibrary, TargetConditionGoal> = {
                 library: this.selectedTargetConditionGoalLibrary,
                 isNewLibrary: false,
-                pagingSync: {
+                syncModel: {
                 libraryId: this.selectedTargetConditionGoalLibrary.id === this.uuidNIL ? null : this.selectedTargetConditionGoalLibrary.id,
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 addedRows: this.addedRows
-                }
+                },
+                scenarioId: null
         }
         TargetConditionGoalService.upsertTargetConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -970,7 +977,7 @@ export default class TargetConditionGoalEditor extends Vue {
         const request: PagingRequest<TargetConditionGoal>= {
             page: 1,
             rowsPerPage: 5,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],

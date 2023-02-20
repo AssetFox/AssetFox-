@@ -12,6 +12,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
+using AppliedResearchAssociates.iAM.Data.Mappers;
+using AppliedResearchAssociates.iAM;
 
 namespace BridgeCareCore.Services
 {
@@ -33,26 +35,6 @@ namespace BridgeCareCore.Services
             )
         {
             _unitOfWork = unitOfWork;
-        }
-
-        [Obsolete("Probably get rid of this once the real attribute import is working.")]
-        public AttributesImportResultDTO ImportExcelAttributes(
-            string keyColumnName,
-            string inspectionDateColumnName,
-            string spatialWeightingValue,
-            Guid excelPackageId
-            )
-        {
-            var excelRepo = _unitOfWork.ExcelWorksheetRepository;
-            var excelWorkbook = excelRepo.GetExcelRawData(excelPackageId);
-            var deserializationResult = ExcelRawDataSpreadsheetSerializer.Deserialize(excelWorkbook.SerializedWorksheetContent);
-            var worksheet = deserializationResult.Worksheet;
-            var returnValue = ImportExcelAttributes(
-                keyColumnName,
-                inspectionDateColumnName,
-                spatialWeightingValue,
-                worksheet);
-            return returnValue;
         }
 
         public AttributesImportResultDTO ImportExcelAttributes(
@@ -149,8 +131,12 @@ namespace BridgeCareCore.Services
                     {
                         var attribute = columnIndexAttributeDictionary[attributeColumnIndex];
                         var attributeValue = GetCellValueOrNull(worksheet, attributeColumnIndex, assetRowIndex);
-                        var attributeDatum = CreateAttributeDatum(attribute, attributeValue, maintainableAssetId, location, inspectionDate);
-                        if (attributeDatum == null)
+                        IAttributeDatum attributeDatum = null;
+                        try
+                        {
+                            attributeDatum = CreateAttributeDatum(attribute, attributeValue, maintainableAssetId, location, inspectionDate);
+                        }
+                        catch
                         {
                             var warningMessage = $@"{FailedToCreateAValidAttributeDatum} at row {assetRowIndex} column {attributeColumnIndex}. The spreadsheet value was ""{attributeValue}.""";
                             return new AttributesImportResultDTO
@@ -158,7 +144,7 @@ namespace BridgeCareCore.Services
                                 WarningMessage = warningMessage,
                             };
                         }
-                        if (attribute.Type == DataPersistenceConstants.AttributeNumericDataType)
+                        if (attribute.Type == AttributeTypeNames.Number)
                         {
                             if (attributeDatum is AttributeDatum<double> doubleAttributeDatum)
                             {
@@ -208,17 +194,16 @@ namespace BridgeCareCore.Services
 
         private IAttributeDatum CreateAttributeDatum(AttributeDTO attribute, object attributeValue, Guid maintainableAssetId, Location location, DateTime inspectionDate)
         {
-            // Currently returns null if we fail. Not sure if that's the right end state.
-            var domainAttribute = AttributeMapper.ToDomain(attribute, _unitOfWork.EncryptionKey);
+            var domainAttribute = AttributeDtoDomainMapper.ToDomain(attribute, _unitOfWork.EncryptionKey);
             var attributeId = Guid.NewGuid();
             var attributeType = domainAttribute.DataType;
             IAttributeDatum returnValue = null;
             switch (attributeType)
             {
-            case DataPersistenceConstants.AttributeTextDataType:
+            case AttributeTypeNames.String:
                 returnValue = new AttributeDatum<string>(attributeId, domainAttribute, attributeValue.ToString(), location, inspectionDate);
                 break;
-            case DataPersistenceConstants.AttributeNumericDataType:
+            case AttributeTypeNames.Number:
                 double? nullableDoubleValue = null;
                 if (attributeValue == null || attributeValue is string attributeValueString && string.IsNullOrWhiteSpace(attributeValueString))
                 {

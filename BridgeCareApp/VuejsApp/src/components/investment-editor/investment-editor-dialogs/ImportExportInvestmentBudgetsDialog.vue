@@ -29,7 +29,7 @@
             </v-card>
         </v-dialog>
 
-        <v-dialog max-width='400px' persistent v-model='showReminder'>
+        <v-dialog max-width='400px' persistent v-model='isSuccessfulImport'>
             <v-card>
                 <v-card-title class="title-padding">
                     <v-layout justify-center>
@@ -38,7 +38,7 @@
                 </v-card-title>
                 <v-card-actions class="bottom-portion-padding">
                     <v-layout justify-space-between row>
-                        <v-btn @click="showReminder = false" outline class="ghd-blue ghd-button-text">Ok</v-btn>
+                        <v-btn @click="flipVisible()" outline class="ghd-blue ghd-button-text">Ok</v-btn>
                     </v-layout>
                 </v-card-actions>
                 
@@ -50,7 +50,7 @@
 <script lang='ts'>
 import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action } from 'vuex-class';
+import { Action, Mutation, State } from 'vuex-class';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportInvestmentBudgetsDialogResult } from '@/shared/models/modals/import-export-investment-budgets-dialog-result';
 import {clone} from 'ramda';
@@ -62,14 +62,19 @@ import { watch } from 'fs';
 })
 export default class ImportExportInvestmentBudgetsDialog extends Vue {
     @Prop() showDialog: boolean;
-    @Prop() showReminder: boolean;
 
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
+    @Mutation('isSuccessfulImportMutator') isSuccessfulImportMutator: any;
+    @State(state => state.investmentModule.isSuccessfulImport) isSuccessfulImport: boolean
 
     investmentBudgetsFile: File | null = null;
     overwriteBudgets: boolean = true;
     closed: boolean = false;
+
+    flipVisible(){
+        this.isSuccessfulImportMutator(!this.isSuccessfulImport)
+    }
 
     @Watch('showDialog')
     onShowDialogChanged() {

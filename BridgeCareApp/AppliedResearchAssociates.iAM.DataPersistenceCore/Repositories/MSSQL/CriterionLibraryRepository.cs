@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
@@ -399,6 +400,39 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfWork.Context.DeleteEntity<CriterionLibraryEntity>(_ => _.Id == libraryId);
+        }
+
+        public void DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForSimulation(Guid simulationId, List<string> budgetNames)
+        {
+            _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
+                _.IsSingleUse && _.CriterionLibraryScenarioBudgetJoins.Any(join =>
+                    join.ScenarioBudget.SimulationId == simulationId &&
+                    budgetNames.Contains(join.ScenarioBudget.Name)));
+        }
+
+        public void DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(Guid budgetLibraryId, List<string> budgetNames)
+        {
+            _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
+                _.IsSingleUse && _.CriterionLibraryBudgetJoins.Any(join =>
+                    join.Budget.BudgetLibraryId == budgetLibraryId &&
+                    budgetNames.Contains(join.Budget.Name)));
+        }
+
+        public void AddLibraries(List<CriterionLibraryDTO> criteria)
+        {
+            var entities = criteria.Select(c => c.ToEntity()).ToList();
+            _unitOfWork.Context.AddAll(entities, _unitOfWork.CurrentUser?.Id);
+        }
+
+        public void AddLibraryScenarioBudgetJoins(List<CriterionLibraryScenarioBudgetDTO> criteriaJoins)
+        {
+            var entities = criteriaJoins.Select(c => c.ToEntity()).ToList();
+            _unitOfWork.Context.AddAll(entities, _unitOfWork.CurrentUser?.Id);
+        }
+        public void AddLibraryBudgetJoins(List<CriterionLibraryBudgetDTO> criteriaJoins)
+        {
+            var entities = criteriaJoins.Select(c => c.ToEntity()).ToList();
+            _unitOfWork.Context.AddAll(entities, _unitOfWork.CurrentUser?.Id);
         }
     }
 }

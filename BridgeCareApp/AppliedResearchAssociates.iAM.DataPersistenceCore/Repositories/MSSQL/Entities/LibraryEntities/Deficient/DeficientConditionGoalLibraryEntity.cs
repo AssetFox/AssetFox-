@@ -9,10 +9,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         {
             DeficientConditionGoals = new HashSet<DeficientConditionGoalEntity>();
             //DeficientConditionGoalLibrarySimulationJoins = new HashSet<DeficientConditionGoalLibrarySimulationEntity>();
+            Users = new HashSet<DeficientConditionGoalLibraryUserEntity>();
         }
 
         public virtual ICollection<DeficientConditionGoalEntity> DeficientConditionGoals { get; set; }
-
+        public virtual ICollection<DeficientConditionGoalLibraryUserEntity> Users { get; set; }
         //public virtual ICollection<DeficientConditionGoalLibrarySimulationEntity> DeficientConditionGoalLibrarySimulationJoins { get; set; }
     }
 }

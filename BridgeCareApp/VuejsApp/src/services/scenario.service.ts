@@ -2,6 +2,7 @@ import {AxiosPromise} from 'axios';
 import {CloneScenarioData, Scenario, QueuedSimulation} from '@/shared/models/iAM/scenario';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import { PagingRequest } from '@/shared/models/iAM/paging';
+import { BlobOptions } from 'buffer';
 
 export default class ScenarioService {
     static getScenarios(): AxiosPromise {
@@ -14,6 +15,10 @@ export default class ScenarioService {
 
     static getSharedScenariosPage(data:PagingRequest<Scenario>): AxiosPromise {
         return coreAxiosInstance.post(`${API.Scenario}/GetSharedScenariosPage/`, data);
+    }
+
+    static getCurrentUserOrSharedScenario(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetCurrentUserOrSharedScenario/${simulationId}`);
     }
 
     static getSimulationQueuePage(data:PagingRequest<QueuedSimulation>): AxiosPromise {
@@ -47,4 +52,20 @@ export default class ScenarioService {
     static migrateLegacySimulationData(simulationId: number): AxiosPromise {
         return coreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacySimulation/${simulationId}`);
     }
+
+    static setNoTreatmentBeforeCommitted(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/setNoTreatmentBeforeCommitted/${simulationId}`);
+    }
+
+    static removeNoTreatmentBeforeCommitted(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/RemoveNoTreatmentBeforeCommitted/${simulationId}`);
+    }
+    
+    static getNoTreatmentBeforeCommitted(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Scenario}/GetNoTreatmentBeforeCommitted/${simulationId}`);
+    }
+
+    static ConvertSimulationOutputToRelational(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/ConvertSimulationOutputToRelational/${simulationId}`);
+    } 
 }

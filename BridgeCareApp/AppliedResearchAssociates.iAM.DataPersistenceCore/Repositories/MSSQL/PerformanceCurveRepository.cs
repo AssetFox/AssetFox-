@@ -112,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
-        public void GetScenarioPerformanceCurves(Simulation simulation)
+        public void GetScenarioPerformanceCurves(Simulation simulation, Dictionary<Guid, string> attributeNameLookupDictionary)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
@@ -120,14 +120,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfWork.Context.ScenarioPerformanceCurve.AsNoTracking()
-                .Include(_ => _.Attribute)
                 .Include(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioPerformanceCurveEquationJoin)
                 .ThenInclude(_ => _.Equation)
+                .AsSplitQuery()
                 .Where(_ => _.SimulationId == simulation.Id)
                 .ToList()
-                .ForEach(_ => _.CreatePerformanceCurve(simulation));
+                .ForEach(_ => _.CreatePerformanceCurve(simulation, attributeNameLookupDictionary));
         }
 
         public List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibraries()

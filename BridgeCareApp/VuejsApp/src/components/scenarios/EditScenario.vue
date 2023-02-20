@@ -124,8 +124,8 @@ import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
 export default class EditScenario extends Vue {
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.scenarioModule.selectedScenario)
-    stateSelectedScenario: Scenario;
+    @State(state => state.authenticationModule.hasSimulationAccess) hasSimulationAccess: boolean;
+    @State(state => state.scenarioModule.selectedScenario) stateSelectedScenario: Scenario;
     @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
     @State(state => state.scenarioModule.currentUserScenarioPage) stateUserScenariosPage: Scenario[];
     @State(state => state.authenticationModule.userId) userId: string;
@@ -134,7 +134,7 @@ export default class EditScenario extends Vue {
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('selectScenario') selectScenarioAction: any;
     @Action('runSimulation') runSimulationAction: any;
-    @Action('runNewSimulation') runNewSimulationAction: any;
+    @Action('runNewSimulation') runNewSimulationAction: any;    
 
     selectedScenarioId: string = getBlankGuid();
     showImportExportCommittedProjectsDialog: boolean = false;
@@ -238,7 +238,7 @@ export default class EditScenario extends Vue {
                     message: 'Found no selected scenario for edit',
                 });
                 vm.$router.push('/Scenarios/');
-            } else {
+            } else {                
                 vm.navigationTabs = vm.navigationTabs.map(
                     (navTab: NavigationTab) => {
                         const navigationTab = {
@@ -263,7 +263,7 @@ export default class EditScenario extends Vue {
 
                         return navigationTab;
                     },
-                );
+                );          
 
                 // get the window href
                 const href = window.location.href;
@@ -276,7 +276,7 @@ export default class EditScenario extends Vue {
                 // if no matching navigation path was found in the href, then route with path of first navigationTabs entry
                 if (!hasChildPath) {
                     vm.$router.push(vm.navigationTabs[0].navigation);
-                }
+                }                
             }
         });
     }
@@ -305,7 +305,7 @@ export default class EditScenario extends Vue {
     }
 
     mounted() {
-        if (this.selectedScenarioId !== getBlankGuid()) {
+        if (this.selectedScenarioId !== getBlankGuid()) {            
             this.selectScenarioAction({
                 scenarioId: this.selectedScenarioId,
             });

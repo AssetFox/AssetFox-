@@ -13,9 +13,8 @@
         <v-layout column>
           <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
           <v-text-field outline v-model="newBudgetLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].nameIsNotUnique(newBudgetLibrary.name, libraryNames)]"
                         class="ghd-text-field-border ghd-text-field"/>
-
           <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
           <v-textarea no-resize outline rows="3"
                       v-model="newBudgetLibrary.description"
@@ -26,7 +25,7 @@
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row>
           <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' flat>Cancel</v-btn>
-          <v-btn :disabled="newBudgetLibrary.name === ''" @click="onSubmit(true)"
+          <v-btn :disabled="canDisableSave()" @click="onSubmit(true)"
                  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
             Save
           </v-btn>          
@@ -38,6 +37,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import {contains} from 'ramda';
 import {Getter} from 'vuex-class';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {CreateBudgetLibraryDialogData} from '@/shared/models/modals/create-budget-library-dialog-data';
@@ -49,7 +49,7 @@ import { getUserName } from '@/shared/utils/get-user-info';
 @Component
 export default class CreateBudgetLibraryDialog extends Vue {
   @Prop() dialogData: CreateBudgetLibraryDialogData;
-
+  @Prop() libraryNames: string[];
   @Getter('getIdByUserName') getIdByUserNameGetter: any;
 
   newBudgetLibrary: BudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};
@@ -58,7 +58,6 @@ export default class CreateBudgetLibraryDialog extends Vue {
   @Watch('dialogData')
   onDialogDataChanged() {
     let currentUser: string = getUserName();
-
     this.newBudgetLibrary = {
       ...this.newBudgetLibrary,
       budgets: this.dialogData.budgets.map((budget: Budget) => ({
@@ -72,7 +71,12 @@ export default class CreateBudgetLibraryDialog extends Vue {
       owner: this.getIdByUserNameGetter(currentUser)
     };
   }
-
+  canDisableSave() : boolean {
+    let check: boolean = false;
+    if (this.newBudgetLibrary.name === '') return true;
+    if (contains(this.newBudgetLibrary.name, this.libraryNames)) return true;
+    return  check;
+  }
   onSubmit(submit: boolean) {
     if (submit) {
       this.$emit('submit', this.newBudgetLibrary);

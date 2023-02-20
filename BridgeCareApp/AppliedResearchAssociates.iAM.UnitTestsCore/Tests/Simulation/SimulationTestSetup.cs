@@ -50,11 +50,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return returnValue;
         }
 
-        public static SimulationDTO CreateSimulation(UnitOfDataPersistenceWork unitOfWork, Guid? id = null, string name = null, Guid? owner = null)
+        public static SimulationDTO CreateSimulation(UnitOfDataPersistenceWork unitOfWork, Guid? id = null, string name = null, Guid? owner = null, Guid? networkId = null)
         {
+            var resolveNetworkId = networkId ?? NetworkTestSetup.NetworkId;
             CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(unitOfWork);
             var dto = TestSimulation(id, name, owner);
-            unitOfWork.SimulationRepo.CreateSimulation(NetworkTestSetup.NetworkId, dto);;
+            unitOfWork.SimulationRepo.CreateSimulation(resolveNetworkId, dto);
             return dto;
         }
 

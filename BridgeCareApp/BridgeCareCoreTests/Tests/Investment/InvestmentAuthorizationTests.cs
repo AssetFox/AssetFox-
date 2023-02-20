@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Utils;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -10,17 +11,6 @@ namespace BridgeCareCoreTests.Tests
 {
     public class InvestmentAuthorizationTests
     {
-        private static ClaimsPrincipal CreateTestUser(List<string> userClaims)
-        {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            return testUser;
-        }
 
         [Fact]
         public async Task UserIsViewInvestmentFromScenarioAuthorized()
@@ -37,8 +27,9 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator});
-            var user = CreateTestUser(claims);
+            var roles = new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator };
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, roles);
+            var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
             var allowed = await authorizationService.AuthorizeAsync(user, Policy.ViewInvestmentFromScenario);
             // Assert
@@ -60,8 +51,9 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor });
-            var user = CreateTestUser(claims);
+            var roles = new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor };
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, roles);
+            var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
             var allowed = await authorizationService.AuthorizeAsync(user, Policy.ModifyInvestmentFromLibrary);
             // Assert
@@ -83,8 +75,10 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly });
-            var user = CreateTestUser(claims);
+
+            var roles = new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly };
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, roles);
+            var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
             var allowed = await authorizationService.AuthorizeAsync(user, Policy.ImportInvestmentFromScenario);
             // Assert
@@ -105,8 +99,9 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator });
-            var user = CreateTestUser(claims);
+            var roles = new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator };
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, roles);
+            var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
             var allowed = await authorizationService.AuthorizeAsync(user, Policy.ViewInvestmentFromScenario);
             // Assert

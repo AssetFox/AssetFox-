@@ -8,8 +8,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public RemainingLifeLimitLibraryEntity()
         {
             RemainingLifeLimits = new HashSet<RemainingLifeLimitEntity>();
+            Users = new HashSet<RemainingLifeLimitLibraryUserEntity>();
         }
 
         public virtual ICollection<RemainingLifeLimitEntity> RemainingLifeLimits { get; set; }
+        public virtual ICollection<RemainingLifeLimitLibraryUserEntity> Users { get; set; }
     }
 }

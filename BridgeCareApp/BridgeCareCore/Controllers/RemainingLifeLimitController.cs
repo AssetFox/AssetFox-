@@ -343,13 +343,5 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-        [HttpGet]
-        [Route("GetHasPermittedAccess")]
-        [Authorize]
-        [Authorize(Policy = Policy.ModifyRemainingLifeLimitFromLibrary)]
-        public async Task<IActionResult> GetHasPermittedAccess()
-        {
-            return Ok(true);
-        }
     }
 }

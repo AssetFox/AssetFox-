@@ -36,3 +36,16 @@ export const emptyDeficientConditionGoalLibrary: DeficientConditionGoalLibrary =
     deficientConditionGoals: [],
     isShared: false
 };
+export interface DeficientConditionGoalLibraryUser {
+    userId: string;
+    username: string;
+    canModify: boolean;
+    isOwner: boolean;
+}
+export const emptyDeficientConditionGoalLibraryUsers: DeficientConditionGoalLibraryUser[] = [{
+    userId: '',
+    username: '',
+    canModify: false,
+    isOwner: false
+}];
+

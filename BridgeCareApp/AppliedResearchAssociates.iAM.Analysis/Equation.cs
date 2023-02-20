@@ -76,11 +76,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
-        public double Compute(CalculateEvaluateScope scope) => Compute(scope, null);
+        public double Compute(CalculateEvaluateScope scope) => Compute(scope, null, null);
 
-        public double Compute(CalculateEvaluateScope scope, PerformanceCurve curve)
+        public double Compute(CalculateEvaluateScope scope, PerformanceCurve curve, IReadOnlyDictionary<Attribute, double> curveAdjustmentFactors)
         {
             EnsureCompiled();
+
             if (Format == EquationFormat.PiecewiseExpression)
             {
                 var actualAge = scope.GetNumber(Explorer.AgeAttribute.Name);
@@ -90,11 +91,16 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
                 else
                 {
+                    var adjustmentFactor =
+                        curveAdjustmentFactors is not null && curveAdjustmentFactors.TryGetValue(curve.Attribute, out var factor)
+                        ? factor
+                        : 1;
+
                     var previousValue = scope.GetNumber(curve.Attribute.Name);
                     var apparentPreviousAge = AgeVersusValue.Interpolate(previousValue);
 
-                    var previousAge = actualAge - 1;
-                    if (curve.Shift && previousAge != 0)
+                    var previousAge = actualAge - 1 / adjustmentFactor;
+                    if (curve.Shift && previousAge > 0)
                     {
                         var shiftFactor = apparentPreviousAge / previousAge;
                         var shiftedAge = actualAge * shiftFactor;
@@ -102,7 +108,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
                     else
                     {
-                        var apparentAge = apparentPreviousAge + 1;
+                        var apparentAge = apparentPreviousAge + 1 / adjustmentFactor;
                         return ValueVersusAge.Interpolate(apparentAge);
                     }
                 }

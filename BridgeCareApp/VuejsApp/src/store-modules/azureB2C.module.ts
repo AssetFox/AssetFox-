@@ -43,6 +43,13 @@ const actions = {
                 }
             })
             .catch(async (error: any) => {
+                // TODO ask Jake to make B2C down and test what comes here Is it "Internal Server Error??", 
+                // check if below will work                
+                if(error.response!.status === 500)
+                {
+                    throw new Error('The authorization system is not available at the moment');
+                }
+                
                 dispatch('getAzureAccountDetails');
 
                 if (

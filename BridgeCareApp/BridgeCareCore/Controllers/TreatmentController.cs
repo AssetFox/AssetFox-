@@ -723,29 +723,6 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-        [HttpGet]
-        [Route("GetHasOwnerAccess/{LibraryId}")]
-        [Authorize(Policy=Policy.ModifyOrDeleteTreatmentFromLibrary)]
-        public async Task<IActionResult> GetHasOwnerAccess(Guid LibraryId)
-        {
-            try
-            {
-                await Task.Factory.StartNew(() =>
-                {
-                    // Check if user is owner of library
-                    var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == LibraryId);
-                    if (dto == null) throw new Exception();
-                    if (dto.Owner != UserId) throw new UnauthorizedAccessException();
-                });
-                return Ok();
-            }
-            catch (Exception)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetHasOwnerAccess - {HubService.errorList["Exception"]}");
-                throw;
-            }
-
-        }
         private List<TreatmentLibraryDTO> GetAllTreatmentLibraries()
         {
             return UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();

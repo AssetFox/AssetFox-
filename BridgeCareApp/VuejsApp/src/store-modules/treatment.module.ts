@@ -320,21 +320,6 @@ const actions = {
             }
         });
     },
-    async getHasOwnerAccess({ dispatch, commit }: any, payload: Treatment) {
-        await TreatmentService.getHasOwnerAccess(payload).then(
-            (response: AxiosResponse) => {
-                if (
-                    hasValue(response, 'status') &&
-                    http2XX.test(response.status.toString())
-                ) {
-                    commit('OwnerAccessMutator', response.data as boolean);
-                    dispatch('addSuccessNotification', {
-                        message: 'User is owner of this library.'
-                    });
-                }
-            }
-        );
-    },
     async getIsSharedTreatmentLibrary({ dispatch, commit }: any, payload: any) {
         await TreatmentService.getIsSharedLibrary(payload.id).then(
             (response: AxiosResponse) => {

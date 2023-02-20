@@ -13,7 +13,6 @@
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
                 </v-layout>
-                
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
                 <div style="padding-top: 15px !important">
@@ -25,16 +24,22 @@
                     </v-btn>
                 </div>
                 
-                <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 11px">
+                <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 11px; padding-left: 10px">
                     <div class="header-text-content owner-padding" style="padding-top: 7px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
-                    <v-divider class="owner-shared-divider" inset vertical
+                    <v-divider class="owner-shared-divider" vertical
                         v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
                     </v-divider>
-                    <v-checkbox class='sharing header-text-content' label="Shared"
-                        v-model="selectedDeficientConditionGoalLibrary.isShared"
-                        @change="checkHasUnsavedChanges()"/>      
+                    <v-badge v-show="isShared" style="padding: 10px">
+                    <template v-slot: badge>
+                        <span>Shared</span>
+                        </template>
+                        </v-badge>
+                        <v-btn @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                            v-show='!hasScenario'>
+                            Share Library
+                    </v-btn>
                 </v-layout>
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
@@ -266,7 +271,9 @@
             "
             @submit="onAddDeficientConditionGoal"
         />
-
+        <ShareDeficientConditionGoalLibraryDialog :dialogData="shareDeficientConditionGoalLibraryDialogData"
+            @submit="onShareDeficientConditionGoalDialogSubmit" 
+        />
         <GeneralCriterionEditorDialog
             :dialogData="criterionEditorDialogData"
             @submit="onEditDeficientConditionGoalCriterionLibrary"
@@ -282,6 +289,7 @@ import { Action, Getter, Mutation, State } from 'vuex-class';
 import {
     DeficientConditionGoal,
     DeficientConditionGoalLibrary,
+    DeficientConditionGoalLibraryUser,
     emptyDeficientConditionGoal,
     emptyDeficientConditionGoalLibrary,
 } from '@/shared/models/iAM/deficient-condition-goal';
@@ -306,6 +314,7 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import CreateDeficientConditionGoalLibraryDialog from '@/components/deficient-condition-goal-editor/deficient-condition-goal-editor-dialogs/CreateDeficientConditionGoalLibraryDialog.vue';
+import ShareDeficientConditionGoalLibraryDialog from '@/components/deficient-condition-goal-editor/deficient-condition-goal-editor-dialogs/ShareDeficientConditionGoalLibraryDialog.vue';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
@@ -315,10 +324,6 @@ import {
     rules,
 } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import {
-    getAppliedLibraryId,
-    hasAppliedLibrary,
-} from '@/shared/utils/library-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
@@ -330,12 +335,15 @@ import DeficientConditionGoalService from '@/services/deficient-condition-goal.s
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
-import deficientConditionGoalModule from '@/store-modules/deficient-condition-goal.module';
+import { isNullOrUndefined } from 'util';
+import { LibraryUser } from '@/shared/models/iAM/user';
+import { emptyShareDeficientConditionGoalLibraryDialogData, ShareDeficientConditionGoalLibraryDialogData } from '@/shared/models/modals/share-deficient-condition-goal-data';
 
 @Component({
     components: {
         CreateDeficientConditionGoalLibraryDialog,
         CreateDeficientConditionGoalDialog,
+        ShareDeficientConditionGoalLibraryDialog,
         GeneralCriterionEditorDialog,
         ConfirmBeforeDeleteAlert: Alert,
     },
@@ -363,6 +371,9 @@ export default class DeficientConditionGoalEditor extends Vue {
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.deficientConditionGoalModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @State(state => state.deficientConditionGoalModule.isSharedLibrary) isSharedLibrary: boolean;
+    @Action('getIsSharedDeficientConditionGoalLibrary') getIsSharedLibraryAction: any;
+
     @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getDeficientConditionGoalLibraries')
@@ -480,6 +491,9 @@ export default class DeficientConditionGoalEditor extends Vue {
     totalItems = 0;
     currentPage: DeficientConditionGoal[] = [];
     initializing: boolean = true;
+    isShared: boolean = false;
+
+    shareDeficientConditionGoalLibraryDialogData: ShareDeficientConditionGoalLibraryDialogData = clone(emptyShareDeficientConditionGoalLibraryDialogData);
 
     unsavedDialogAllowed: boolean = true;
     trueLibrarySelectItemValue: string | null = ''
@@ -565,8 +579,13 @@ export default class DeficientConditionGoalEditor extends Vue {
 
     @Watch('selectedDeficientConditionGoalLibrary')
     onSelectedDeficientConditionGoalLibraryChanged() {
-        this.hasSelectedLibrary = this.selectedDeficientConditionGoalLibrary.id !== this.uuidNIL;
-
+        if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary)) {
+            this.hasSelectedLibrary = this.selectedDeficientConditionGoalLibrary.id !== this.uuidNIL;
+            
+        }
+        if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
+            this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
+        }    
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
@@ -601,6 +620,13 @@ export default class DeficientConditionGoalEditor extends Vue {
     onCurrentPageChanged() {
 
     }
+    @Watch('isSharedLibrary')
+    onStateSharedAccessChanged() {
+        this.isShared = this.isSharedLibrary;
+        if (!isNullOrUndefined(this.selectDeficientConditionGoalLibrary)) {
+            this.selectDeficientConditionGoalLibrary.isShared = this.isShared;
+        } 
+    }
 
     @Watch('pagination')
     onPaginationChanged() {
@@ -608,6 +634,9 @@ export default class DeficientConditionGoalEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
+        if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
+            this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
+        }
 
         const request: PagingRequest<DeficientConditionGoal>= {
             page: page,
@@ -939,6 +968,52 @@ export default class DeficientConditionGoalEditor extends Vue {
             next();
         }
     };
+
+    onShowShareDeficientConditionGoalLibraryDialog(deficientConditionGoalLibrary: DeficientConditionGoalLibrary) {
+        this.shareDeficientConditionGoalLibraryDialogData = {
+            showDialog:true,
+            deficientConditionGoalLibrary: clone(deficientConditionGoalLibrary)
+        }
+    }
+
+    onShareDeficientConditionGoalDialogSubmit(deficientConditionGoalLibraryUsers: DeficientConditionGoalLibraryUser[]) {
+        this.shareDeficientConditionGoalLibraryDialogData = clone(emptyShareDeficientConditionGoalLibraryDialogData);
+
+                if (!isNil(deficientConditionGoalLibraryUsers) && this.selectedDeficientConditionGoalLibrary.id !== getBlankGuid())
+                {
+                    let libraryUserData: LibraryUser[] = [];
+
+                    //create library users
+                    deficientConditionGoalLibraryUsers.forEach((deficientConditionGoalLibraryUser, index) =>
+                    {   
+                        //determine access level
+                        let libraryUserAccessLevel: number = 0;
+                        if (libraryUserAccessLevel == 0 && deficientConditionGoalLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
+                        if (libraryUserAccessLevel == 0 && deficientConditionGoalLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
+
+                        //create library user object
+                        let libraryUser: LibraryUser = {
+                            userId: deficientConditionGoalLibraryUser.userId,
+                            userName: deficientConditionGoalLibraryUser.username,
+                            accessLevel: libraryUserAccessLevel
+                        }
+
+                        //add library user to an array
+                        libraryUserData.push(libraryUser);
+                    });
+                    if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
+                    //update budget library sharing
+                    DeficientConditionGoalService.upsertOrDeleteDeficientConditionGoalLibraryUsers(this.selectedDeficientConditionGoalLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
+                        {
+                            this.resetPage();
+                        }
+                    });
+                }
+    }
+
 
     initializePages(){
         const request: PagingRequest<DeficientConditionGoal>= {

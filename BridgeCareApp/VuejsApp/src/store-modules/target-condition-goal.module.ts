@@ -169,6 +169,17 @@ const actions = {
             }
         });
     },
+    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
+        await TargetConditionGoalService.getIsSharedLibrary(payload.id).then(
+            (response: AxiosResponse) => {
+                if (
+                hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                commit('IsSharedLibraryMutator', response.data as boolean);
+            }
+        });
+    },
 };
 
 const getters = {};

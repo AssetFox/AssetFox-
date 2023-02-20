@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
@@ -10,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
     public class BridgeWorkSummaryComputationHelper
     {
         private ISummaryReportHelper _summaryReportHelper;
-        private IReportHelper _reportHelper;
+        private ReportHelper _reportHelper;
 
         public BridgeWorkSummaryComputationHelper()
         {

@@ -1,19 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
-    public class BridgesUnfundedTreatments : IBridgesUnfundedTreatments
+    public class BridgesUnfundedTreatments
     {
-        private IReportHelper _reportHelper;
-        private IBridgesTreatments _bridgesTreatments;
+        private ReportHelper _reportHelper;
+        private BridgesTreatments _bridgesTreatments;
         private const string BRIDGE_FUNDING = "Bridge Funding";
 
         public BridgesUnfundedTreatments()
@@ -177,26 +174,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
             currentCell = new CurrentCell { Row = headerRow + 2, Column = worksheet.Dimension.Columns + 1 };
             return currentCell;
-        }
-
-        public List<AssetDetail> GetSectionsWithUnfundedTreatments(SimulationYearDetail simulationYearDetail)
-        {
-            var untreatedSections =
-                    simulationYearDetail.Assets.Where(
-                        section => section.TreatmentCause == TreatmentCause.NoSelection && section.TreatmentOptions.Count > 0
-                        &&
-                        ((!string.IsNullOrEmpty(_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) && int.Parse(_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) == 1)
-                        ||
-                        _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA") > 28500
-                        )).ToList();
-            return untreatedSections;
-        }
-
-        public List<AssetDetail> GetSectionsWithFundedTreatments(SimulationYearDetail simulationYearDetail)
-        {
-            var treatedSections = simulationYearDetail.Assets.Where(section => section.TreatmentCause is not TreatmentCause.NoSelection);
-            return treatedSections.ToList();
-        }        
+        }            
 
         private List<string> GetHeadersRow1()
         {

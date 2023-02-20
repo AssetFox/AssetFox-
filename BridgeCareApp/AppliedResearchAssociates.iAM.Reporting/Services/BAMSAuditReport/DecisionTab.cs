@@ -5,23 +5,21 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
-    public class DecisionsTab : IDecisionsTab
+    public class DecisionTab
     {
-        private IReportHelper _reportHelper;
+        private ReportHelper _reportHelper;
         private const int headerRow1 = 1;
         private const int headerRow2 = 2;
         private List<int> columnNumbersBudgetsUsed;
 
-        public DecisionsTab()
-        {     
+        public DecisionTab()
+        {
             _reportHelper = new ReportHelper();
         }
 
@@ -29,20 +27,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation)
         {
             columnNumbersBudgetsUsed = new List<int>();
-            var currentAttributes = new HashSet<string>();
-            // Distinct performance curve attributes
-            foreach(var performanceCurve in simulation.PerformanceCurves)
-            {
-                currentAttributes.Add(performanceCurve.Attribute.Name);
-            }
-            currentAttributes.Add(simulation.AnalysisMethod.Benefit.Attribute.Name);
+            // Distinct performance curves' attributes
+            var currentAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
+
+            // Benefit attribute
+            currentAttributes.Add(_reportHelper.GetBenefitAttribute(simulation));
 
             // Distinct budgets            
-            var budgets = new HashSet<string>();            
-            foreach (var item in simulationOutput.Years.FirstOrDefault()?.Budgets)
-            {
-                budgets.Add(item.BudgetName);
-            }
+            var budgets = _reportHelper.GetBudgets(simulationOutput.Years);
 
             var treatments = new List<string>();
             treatments = simulation.Treatments.Where(_=>_.Name != "No Treatment")?.OrderBy(_ => _.Name).Select(_ => _.Name).ToList();

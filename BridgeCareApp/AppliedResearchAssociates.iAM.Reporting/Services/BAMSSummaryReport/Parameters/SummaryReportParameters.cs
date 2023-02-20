@@ -7,18 +7,16 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Parameters
 {
     public class SummaryReportParameters
     {        
-        private IReportHelper _reportHelper;
+        private ReportHelper _reportHelper;
 
         public SummaryReportParameters()
         {            

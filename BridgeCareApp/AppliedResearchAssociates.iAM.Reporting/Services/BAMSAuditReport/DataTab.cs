@@ -2,22 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
-    public class BridgesTab : IBridgesTab
+    public class DataTab
     {
-        private IBridgesUnfundedTreatments _bridgesUnfundedTreatments;
-        private IReportHelper _reportHelper;
+        private BridgesUnfundedTreatments _bridgesUnfundedTreatments;
+        private ReportHelper _reportHelper;
 
-        public BridgesTab()
-        {
-            _bridgesUnfundedTreatments = new BridgesUnfundedTreatments();
+        public DataTab()
+        {            
             _reportHelper = new ReportHelper();
+            _bridgesUnfundedTreatments = new BridgesUnfundedTreatments();
         }
 
         public void Fill(ExcelWorksheet bridgesWorksheet, SimulationOutput simulationOutput)
@@ -49,8 +47,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             var firstYear = true;
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
-                var untreatedSections = _bridgesUnfundedTreatments.GetSectionsWithUnfundedTreatments(year);
-                var treatedSections = _bridgesUnfundedTreatments.GetSectionsWithFundedTreatments(year);
+                var untreatedSections = _reportHelper.GetSectionsWithUnfundedTreatments(year);
+                var treatedSections = _reportHelper.GetSectionsWithFundedTreatments(year);
 
                 if (firstYear)
                 {

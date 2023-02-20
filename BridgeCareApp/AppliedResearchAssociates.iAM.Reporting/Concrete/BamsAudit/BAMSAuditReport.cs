@@ -8,8 +8,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport;
 using BridgeCareCore.Services;
@@ -21,19 +19,19 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         protected readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private Guid _networkId;
-        private readonly IReportHelper _reportHelper;
-        private readonly IBridgesTab _bridgesTab;
-        private readonly IDecisionsTab _decisionsTab;
+        private Guid _networkId;       
+        private readonly DataTab _bridgesTab;
+        private readonly DecisionTab _decisionsTab;
+        private readonly ReportHelper _reportHelper;
 
         public BAMSAuditReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;            
+            _bridgesTab = new DataTab();
+            _decisionsTab = new DecisionTab();
             _reportHelper = new ReportHelper();
-            _bridgesTab = new BridgesTab();
-            _decisionsTab = new DecisionsTab();
 
             // check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -144,46 +142,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 Status = $"Generating..."
             };
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-
-            var requiredSections = new HashSet<string>()
-            {
-                $"{AuditReportConstants.DeckSeeded}",
-                $"{AuditReportConstants.SupSeeded}",
-                $"{AuditReportConstants.SubSeeded}",
-                $"{AuditReportConstants.CulvSeeded}",
-                $"{AuditReportConstants.DeckDurationN}",
-                $"{AuditReportConstants.SupDurationN}",
-                $"{AuditReportConstants.SubDurationN}",
-                $"{AuditReportConstants.CulvDurationN}"
-            };
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);           
 
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
-            var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
-
-            // Validation
-            var initialSectionValues = simulationOutput.InitialAssetSummaries[0].ValuePerNumericAttribute;
-            var sectionValueAttribute = simulationOutput.Years[0].Assets[0].ValuePerNumericAttribute;
-            foreach (var item in requiredSections)
-            {
-                if (!initialSectionValues.ContainsKey(item))
-                {
-                    reportDetailDto.Status = $"{item} was not found in initial section";
-                    UpdateSimulationAnalysisDetail(reportDetailDto);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-                    Errors.Add(reportDetailDto.Status);
-                    throw new KeyNotFoundException($"{item} was not found in initial section");
-                }
-
-                if (!sectionValueAttribute.ContainsKey(item))
-                {
-                    reportDetailDto.Status = $"{item} was not found in sections";
-                    UpdateSimulationAnalysisDetail(reportDetailDto);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-                    Errors.Add(reportDetailDto.Status);
-                    throw new KeyNotFoundException($"{item} was not found in sections");
-                }
-            }
+            var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);            
 
             // Sort data
             simulationOutput.InitialAssetSummaries.Sort(

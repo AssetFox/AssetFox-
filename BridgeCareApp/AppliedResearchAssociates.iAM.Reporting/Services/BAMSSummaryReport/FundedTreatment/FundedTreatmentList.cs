@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using MoreLinq;
@@ -15,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
     public class FundedTreatmentList : IFundedTreatmentList
     {
         private ITreatmentCommon _treatmentCommon;
-        private IReportHelper _reportHelper;
+        private ReportHelper _reportHelper;
 
         public FundedTreatmentList()
         {

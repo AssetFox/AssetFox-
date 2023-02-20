@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Drawing;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
-    public class BridgesTreatments : IBridgesTreatments
+    public class BridgesTreatments
     {
-        private IReportHelper _reportHelper;
+        private ReportHelper _reportHelper;
 
         public BridgesTreatments()
         {

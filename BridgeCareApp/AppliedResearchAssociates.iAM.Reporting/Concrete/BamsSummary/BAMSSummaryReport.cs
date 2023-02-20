@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly SummaryReportGlossary _summaryReportGlossary;
         private readonly SummaryReportParameters _summaryReportParameters;
         private readonly IAddGraphsInTabs _addGraphsInTabs;
-        private readonly IReportHelper _reportHelper;
+        private readonly ReportHelper _reportHelper;
 
         private Guid _networkId;
 

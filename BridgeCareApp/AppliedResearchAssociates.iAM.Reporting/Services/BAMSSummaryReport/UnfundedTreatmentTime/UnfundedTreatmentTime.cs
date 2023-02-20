@@ -7,14 +7,13 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentTime
 {
     public class UnfundedTreatmentTime : IUnfundedTreatmentTime
     {
         private IUnfundedTreatmentCommon _unfundedTreatmentCommon;
-        private IReportHelper _reportHelper;
+        private ReportHelper _reportHelper;
 
         public UnfundedTreatmentTime()
         {
@@ -49,8 +48,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             var firstYear = true;
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
-                var untreatedSections = _unfundedTreatmentCommon.GetSectionsWithUnfundedTreatments(year);
-                var treatedSections = _unfundedTreatmentCommon.GetSectionsWithFundedTreatments(year);
+                var untreatedSections = _reportHelper.GetSectionsWithUnfundedTreatments(year);
+                var treatedSections = _reportHelper.GetSectionsWithFundedTreatments(year);
 
                 if (firstYear)
                 {

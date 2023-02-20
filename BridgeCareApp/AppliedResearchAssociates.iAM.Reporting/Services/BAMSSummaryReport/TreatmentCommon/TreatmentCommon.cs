@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
@@ -17,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
     public class TreatmentCommon : ITreatmentCommon
     {
         private ISummaryReportHelper _summaryReportHelper;
-        private IReportHelper _reportHelper;
+        private ReportHelper _reportHelper;
 
         public TreatmentCommon()
         {

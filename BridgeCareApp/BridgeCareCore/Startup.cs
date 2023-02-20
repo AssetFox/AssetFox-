@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Authentication;
 using BridgeCareCore.Security;
 using Microsoft.AspNetCore.Authorization;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.Reporting.Services;
 
 namespace BridgeCareCore
 {

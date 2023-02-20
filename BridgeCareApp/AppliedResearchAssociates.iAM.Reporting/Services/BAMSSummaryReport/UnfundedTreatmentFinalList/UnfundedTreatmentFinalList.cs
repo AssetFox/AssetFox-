@@ -9,14 +9,13 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentFinalList
 {
     public class UnfundedTreatmentFinalList : IUnfundedTreatmentFinalList
     {
         private IUnfundedTreatmentCommon _unfundedTreatmentCommon;
-        private IReportHelper _reportHelper;
+        private ReportHelper _reportHelper;
 
         public UnfundedTreatmentFinalList()
         {
@@ -64,8 +63,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             var firstYear = true;
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
-                var untreatedSections = _unfundedTreatmentCommon.GetSectionsWithUnfundedTreatments(year);
-                var treatedSections = _unfundedTreatmentCommon.GetSectionsWithFundedTreatments(year);
+                var untreatedSections = _reportHelper.GetSectionsWithUnfundedTreatments(year);
+                var treatedSections = _reportHelper.GetSectionsWithFundedTreatments(year);
 
                 if (firstYear)
                 {

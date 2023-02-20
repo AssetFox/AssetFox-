@@ -9,7 +9,6 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentCommon
 {
@@ -17,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
     {
         private ISummaryReportHelper _summaryReportHelper;
         private ITreatmentCommon _treatmentCommon;
-        private IReportHelper _reportHelper;
+        private ReportHelper _reportHelper;
 
         public UnfundedTreatmentCommon()
         {
@@ -179,26 +178,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
             currentCell = new CurrentCell { Row = headerRow + 2, Column = worksheet.Dimension.Columns + 1 };
             return currentCell;
-        }
-
-        public List<AssetDetail> GetSectionsWithUnfundedTreatments(SimulationYearDetail simulationYearDetail)
-        {
-            var untreatedSections =
-                    simulationYearDetail.Assets.Where(
-                        section => section.TreatmentCause == TreatmentCause.NoSelection && section.TreatmentOptions.Count > 0
-                        &&
-                        ((!string.IsNullOrEmpty(_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) && int.Parse(_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) == 1)
-                        ||
-                        _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA") > 28500
-                        )).ToList();
-            return untreatedSections;
-        }
-
-        public List<AssetDetail> GetSectionsWithFundedTreatments(SimulationYearDetail simulationYearDetail)
-        {
-            var treatedSections = simulationYearDetail.Assets.Where(section => section.TreatmentCause is not TreatmentCause.NoSelection);
-            return treatedSections.ToList();
-        }
+        }        
 
         private const string BRIDGE_FUNDING = "Bridge Funding";
         private const string INTERSTATE = "Interstate";

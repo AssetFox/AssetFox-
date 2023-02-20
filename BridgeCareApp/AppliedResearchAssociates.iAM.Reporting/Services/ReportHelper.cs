@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services
 {
-    public class ReportHelper : IReportHelper
+    public class ReportHelper
     {
         public T CheckAndGetValue<T>(IDictionary itemsArray, string itemName)
         {
@@ -116,6 +118,48 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
             return
                 (fedAid is "0" && functionalClass is "01" or "02" or "03" or "06" or "07" or "11" or "12" or "14" or "16" or "17") ||
                 functionalClass is "NN";
+        }
+
+        public HashSet<string> GetPerformanceCurvesAttributes(Simulation simulation)
+        {
+            var currentAttributes = new HashSet<string>();
+            // Distinct performance curve attributes
+            foreach (var performanceCurve in simulation.PerformanceCurves)
+            {
+                currentAttributes.Add(performanceCurve.Attribute.Name);
+            }
+            return currentAttributes;
+        }
+
+        public string GetBenefitAttribute(Simulation simulation) => simulation.AnalysisMethod.Benefit.Attribute.Name;
+
+        public HashSet<string> GetBudgets(List<SimulationYearDetail> years)
+        {
+            var budgets = new HashSet<string>();
+            foreach (var item in years.FirstOrDefault()?.Budgets)
+            {
+                budgets.Add(item.BudgetName);
+            }
+            return budgets;
+        }
+
+        public List<AssetDetail> GetSectionsWithUnfundedTreatments(SimulationYearDetail simulationYearDetail)
+        {
+            var untreatedSections =
+                    simulationYearDetail.Assets.Where(
+                        section => section.TreatmentCause == TreatmentCause.NoSelection && section.TreatmentOptions.Count > 0
+                        &&
+                        ((!string.IsNullOrEmpty(CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) && int.Parse(CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) == 1)
+                        ||
+                        CheckAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA") > 28500
+                        )).ToList();
+            return untreatedSections;
+        }
+
+        public List<AssetDetail> GetSectionsWithFundedTreatments(SimulationYearDetail simulationYearDetail)
+        {
+            var treatedSections = simulationYearDetail.Assets.Where(section => section.TreatmentCause is not TreatmentCause.NoSelection);
+            return treatedSections.ToList();
         }
     }
 }

@@ -23,6 +23,7 @@ export interface RemainingLifeLimitLibrary {
     remainingLifeLimits: RemainingLifeLimit[];
     appliedScenarioIds: string[];
     owner?: string;
+    users: RemainingLifeLimitLibraryUser[];
     shared?: boolean;
 }
 
@@ -31,5 +32,19 @@ export const emptyRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = {
     name: '',
     description: '',
     remainingLifeLimits: [],
-    appliedScenarioIds: []
+    appliedScenarioIds: [],
+    users: []
 };
+
+export interface RemainingLifeLimitLibraryUser {
+    userId: string;
+    username: string;
+    canModify: boolean;
+    isOwner: boolean;
+}
+export const emptyRemainingLifeLimitLibraryUsers: RemainingLifeLimitLibraryUser[] = [{
+    userId: '',
+    username: '',
+    canModify: false,
+    isOwner: false
+}];

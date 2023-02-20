@@ -672,7 +672,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
         public void UpsertOrDeleteUsers(Guid performanceCurveLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
-            var existingEntities = _unitOfWork.Context.PerformanceCurveLibraryUser.Where(u => u.PerformanceCurveLibraryId == performanceCurveLibraryId).ToList();
+            var existingEntities = _unitOfWork.Context.PerformanceCurveLibraryUser.Where(u => u.LibraryId == performanceCurveLibraryId).ToList();
             var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
             var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
             var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
@@ -700,7 +700,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public List<LibraryUserDTO> GetAccessForUser(Guid performanceCurveLibraryId, Guid userId)
         {
             var dtos = _unitOfWork.Context.PerformanceCurveLibraryUser
-                .Where(u => u.PerformanceCurveLibraryId == performanceCurveLibraryId && u.UserId == userId)
+                .Where(u => u.LibraryId == performanceCurveLibraryId && u.UserId == userId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;
@@ -709,7 +709,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var dtos = _unitOfWork.Context.PerformanceCurveLibraryUser
                 .Include(u => u.User)
-                .Where(u => u.PerformanceCurveLibraryId == performanceCurveLibraryId)
+                .Where(u => u.LibraryId == performanceCurveLibraryId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;

@@ -44,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static PerformanceCurveLibraryUserEntity ToPerformanceCurveLibraryUserEntity(this LibraryUserDTO dto, Guid performanceCurveLibraryId) =>
             new PerformanceCurveLibraryUserEntity
             {
-                PerformanceCurveLibraryId = performanceCurveLibraryId,
+                LibraryId = performanceCurveLibraryId,
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel
             };

@@ -2571,17 +2571,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<PerformanceCurveLibraryUserEntity>(entity =>
             {
-                entity.HasKey(e => new { e.PerformanceCurveLibraryId, e.UserId });
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
 
                 entity.ToTable("PerformanceCurveLibrary_User");
 
-                entity.HasIndex(e => e.PerformanceCurveLibraryId);
+                entity.HasIndex(e => e.LibraryId);
 
                 entity.HasIndex(e => e.UserId);
 
                 entity.HasOne(d => d.PerformanceCurveLibrary)
                     .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.PerformanceCurveLibraryId)
+                    .HasForeignKey(d => d.LibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.PerformanceCurveLibraryUsers)

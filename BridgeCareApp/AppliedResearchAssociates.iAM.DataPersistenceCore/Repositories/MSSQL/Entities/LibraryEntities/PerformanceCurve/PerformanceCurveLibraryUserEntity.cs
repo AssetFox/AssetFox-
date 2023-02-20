@@ -7,13 +7,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve
 {
-    public class PerformanceCurveLibraryUserEntity : BaseEntity
+    public class PerformanceCurveLibraryUserEntity : LibraryUserBaseEntity
     {
-        public Guid PerformanceCurveLibraryId { get; set; }
-        public Guid UserId { get; set; }
-        public int AccessLevel { get; set; }
-
         public virtual PerformanceCurveLibraryEntity PerformanceCurveLibrary { get; set; }
-        public virtual UserEntity User { get; set; }
     }
 }

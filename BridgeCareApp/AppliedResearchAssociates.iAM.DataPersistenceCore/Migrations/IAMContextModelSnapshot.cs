@@ -1948,7 +1948,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryUserEntity", b =>
                 {
-                    b.Property<Guid>("PerformanceCurveLibraryId")
+                    b.Property<Guid>("LibraryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
@@ -1972,9 +1972,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid?>("UserEntityId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("PerformanceCurveLibraryId", "UserId");
+                    b.HasKey("LibraryId", "UserId");
 
-                    b.HasIndex("PerformanceCurveLibraryId");
+                    b.HasIndex("LibraryId");
 
                     b.HasIndex("UserEntityId");
 
@@ -5242,7 +5242,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryEntity", "PerformanceCurveLibrary")
                         .WithMany("Users")
-                        .HasForeignKey("PerformanceCurveLibraryId")
+                        .HasForeignKey("LibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -6888,10 +6888,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("CriterionLibraryUserJoin");
 
+                    b.Navigation("DeficientConditionGoalLibraryUsers");
+
                     b.Navigation("PerformanceCurveLibraryUserJoins");
 
                     b.Navigation("PerformanceCurveLibraryUsers");
-                    b.Navigation("DeficientConditionGoalLibraryUsers");
 
                     b.Navigation("RemainingLifeLimitLibraryUsers");
 

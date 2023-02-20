@@ -2613,17 +2613,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<TargetConditionGoalLibraryUserEntity>(entity =>
             {
-                entity.HasKey(e => new { e.TargetConditionGoalLibraryId, e.UserId });
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
 
                 entity.ToTable("TargetConditionGoalLibrary_User");
 
-                entity.HasIndex(e => e.TargetConditionGoalLibraryId);
+                entity.HasIndex(e => e.LibraryId);
 
                 entity.HasIndex(e => e.UserId);
 
                 entity.HasOne(d => d.TargetConditionGoalLibrary)
                     .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.TargetConditionGoalLibraryId)
+                    .HasForeignKey(d => d.LibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.User)

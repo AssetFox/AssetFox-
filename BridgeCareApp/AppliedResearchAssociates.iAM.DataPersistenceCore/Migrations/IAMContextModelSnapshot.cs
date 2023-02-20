@@ -1969,14 +1969,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("UserEntityId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("PerformanceCurveLibraryId", "UserId");
 
                     b.HasIndex("PerformanceCurveLibraryId");
-
-                    b.HasIndex("UserEntityId");
 
                     b.HasIndex("UserId");
 
@@ -2222,7 +2217,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.TargetConditionGoalLibraryUserEntity", b =>
                 {
-                    b.Property<Guid>("TargetConditionGoalLibraryId")
+                    b.Property<Guid>("LibraryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
@@ -2243,9 +2238,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("TargetConditionGoalLibraryId", "UserId");
+                    b.HasKey("LibraryId", "UserId");
 
-                    b.HasIndex("TargetConditionGoalLibraryId");
+                    b.HasIndex("LibraryId");
 
                     b.HasIndex("UserId");
 
@@ -5278,10 +5273,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", null)
-                        .WithMany("PerformanceCurveLibraryUserJoins")
-                        .HasForeignKey("UserEntityId");
-
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
                         .WithMany("PerformanceCurveLibraryUsers")
                         .HasForeignKey("UserId")
@@ -5392,7 +5383,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.TargetConditionGoalLibraryEntity", "TargetConditionGoalLibrary")
                         .WithMany("Users")
-                        .HasForeignKey("TargetConditionGoalLibraryId")
+                        .HasForeignKey("LibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -6941,10 +6932,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("CriterionLibraryUserJoin");
 
-                    b.Navigation("PerformanceCurveLibraryUserJoins");
+                    b.Navigation("DeficientConditionGoalLibraryUsers");
 
                     b.Navigation("PerformanceCurveLibraryUsers");
-                    b.Navigation("DeficientConditionGoalLibraryUsers");
 
                     b.Navigation("RemainingLifeLimitLibraryUsers");
 

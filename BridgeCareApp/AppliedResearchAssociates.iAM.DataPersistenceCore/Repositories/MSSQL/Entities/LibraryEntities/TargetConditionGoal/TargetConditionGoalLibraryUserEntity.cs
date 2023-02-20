@@ -8,13 +8,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal
 {
-    public class TargetConditionGoalLibraryUserEntity : BaseEntity
+    public class TargetConditionGoalLibraryUserEntity : LibraryUserBaseEntity
     {
-        public Guid TargetConditionGoalLibraryId { get; set; }
-        public Guid UserId { get; set; }
-        public int AccessLevel { get; set; }
-
         public virtual TargetConditionGoalLibraryEntity TargetConditionGoalLibrary { get; set; }
-        public virtual UserEntity User { get; set; }
     }
 }

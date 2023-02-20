@@ -41,5 +41,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public ICollection<BudgetLibraryUserEntity> BudgetLibraryUsers { get; set; }
         public ICollection<PerformanceCurveLibraryUserEntity> PerformanceCurveLibraryUsers { get; set; }
         public ICollection<TargetConditionGoalLibraryUserEntity> TargetConditionGoalLibraryUsers { get; set; }
+        public ICollection<TreatmentLibraryUserEntity> TreatmentLibraryUsers { get; set; }
     }
 }

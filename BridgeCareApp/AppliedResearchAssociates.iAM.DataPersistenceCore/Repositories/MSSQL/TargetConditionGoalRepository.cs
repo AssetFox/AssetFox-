@@ -343,7 +343,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
         public void UpsertOrDeleteUsers(Guid targetConditionGoalLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
-            var existingEntities = _unitOfWork.Context.TargetConditionGoalLibraryUser.Where(u => u.TargetConditionGoalLibraryId == targetConditionGoalLibraryId).ToList();
+            var existingEntities = _unitOfWork.Context.TargetConditionGoalLibraryUser.Where(u => u.LibraryId == targetConditionGoalLibraryId).ToList();
             var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
             var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
             var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
@@ -371,7 +371,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private List<LibraryUserDTO> GetAccessForUser(Guid targetConditionGoalLibraryId, Guid userId)
         {
             var dtos = _unitOfWork.Context.TargetConditionGoalLibraryUser
-                .Where(u => u.TargetConditionGoalLibraryId == targetConditionGoalLibraryId && u.UserId == userId)
+                .Where(u => u.LibraryId == targetConditionGoalLibraryId && u.UserId == userId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;
@@ -380,7 +380,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var dtos = _unitOfWork.Context.TargetConditionGoalLibraryUser
                 .Include(u => u.User)
-                .Where(u => u.TargetConditionGoalLibraryId == targetConditionGoalLibraryId)
+                .Where(u => u.LibraryId == targetConditionGoalLibraryId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;

@@ -52,9 +52,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static TargetConditionGoalLibraryUserEntity ToTargetConditionGoalLibraryUserEntity(this LibraryUserDTO dto, Guid targetConditionGoalLibraryId) =>
             new TargetConditionGoalLibraryUserEntity
             {
-                TargetConditionGoalLibraryId = targetConditionGoalLibraryId,
+                LibraryId = targetConditionGoalLibraryId,
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel
+            };
         public static LibraryUserDTO ToDto(this RemainingLifeLimitLibraryUserEntity entity) =>
             new LibraryUserDTO
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -20,8 +21,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
         protected readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private Guid _networkId;       
-        private readonly DataTab _bridgesTab;
-        private readonly DecisionTab _decisionsTab;
+        private readonly DataTab _dataTab;
+        private readonly DecisionTab _decisionTab;
         private readonly ReportHelper _reportHelper;
 
         public BAMSAuditReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
@@ -29,8 +30,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;            
-            _bridgesTab = new DataTab();
-            _decisionsTab = new DecisionTab();
+            _dataTab = new DataTab();
+            _decisionTab = new DecisionTab();
             _reportHelper = new ReportHelper();
 
             // check for existing report id
@@ -173,18 +174,22 @@ namespace AppliedResearchAssociates.iAM.Reporting
             using var excelPackage = new ExcelPackage(new FileInfo("AuditReportData.xlsx"));
             
             // Bridge Data TAB
-            reportDetailDto.Status = $"Creating Bridges TAB";
+            reportDetailDto.Status = $"Creating Data TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var bridgesWorksheet = excelPackage.Workbook.Worksheets.Add(AuditReportConstants.BridgesTab);
-            _bridgesTab.Fill(bridgesWorksheet, simulationOutput);
+            var dataTabRequiredAttributes = _dataTab.GetRequiredAttributes();
+            ValidateSections(simulationOutput, reportDetailDto, simulationId, dataTabRequiredAttributes);
+            _dataTab.Fill(bridgesWorksheet, simulationOutput);
 
             // Fill Decisions TAB
-            reportDetailDto.Status = $"Creating Decisions TAB";
+            reportDetailDto.Status = $"Creating Decision TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var decisionsWorksheet = excelPackage.Workbook.Worksheets.Add(AuditReportConstants.DecisionsTab);
-            _decisionsTab.Fill(decisionsWorksheet, simulationOutput, simulation);
+            var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
+            ValidateSections(simulationOutput, reportDetailDto, simulationId, new HashSet<string>(performanceCurvesAttributes.Except(dataTabRequiredAttributes)));
+            _decisionTab.Fill(decisionsWorksheet, simulationOutput, simulation, performanceCurvesAttributes);
 
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";
@@ -202,6 +207,32 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                         
             return reportPath;
+        }
+
+        private void ValidateSections(SimulationOutput simulationOutput,SimulationReportDetailDTO reportDetailDto, Guid simulationId, HashSet<string> requiredAttributes)
+        {
+            var initialSectionValues = simulationOutput.InitialAssetSummaries[0].ValuePerNumericAttribute;
+            var sectionValueAttribute = simulationOutput.Years[0].Assets[0].ValuePerNumericAttribute;
+            foreach (var item in requiredAttributes)
+            {
+                if (!initialSectionValues.ContainsKey(item))
+                {
+                    reportDetailDto.Status = $"{item} was not found in initial section";
+                    UpdateSimulationAnalysisDetail(reportDetailDto);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+                    Errors.Add(reportDetailDto.Status);
+                    throw new KeyNotFoundException($"{item} was not found in initial section");
+                }
+
+                if (!sectionValueAttribute.ContainsKey(item))
+                {
+                    reportDetailDto.Status = $"{item} was not found in sections";
+                    UpdateSimulationAnalysisDetail(reportDetailDto);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+                    Errors.Add(reportDetailDto.Status);
+                    throw new KeyNotFoundException($"{item} was not found in sections");
+                }
+            }
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);

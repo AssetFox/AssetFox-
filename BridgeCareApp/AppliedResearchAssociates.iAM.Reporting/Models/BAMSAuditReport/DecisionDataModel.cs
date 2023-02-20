@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
 {
-    public class DecisionsDataModel
+    public class DecisionDataModel
     {
         public double BRKey { get; set; }
 

@@ -97,5 +97,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 currentCell.Column = 1;
             }
         }
+
+        public HashSet<string> GetRequiredAttributes() => new HashSet<string>()
+        {
+            $"{AuditReportConstants.DeckSeeded}",
+            $"{AuditReportConstants.SupSeeded}",
+            $"{AuditReportConstants.SubSeeded}",
+            $"{AuditReportConstants.CulvSeeded}",
+            $"{AuditReportConstants.DeckDurationN}",
+            $"{AuditReportConstants.SupDurationN}",
+            $"{AuditReportConstants.SubDurationN}",
+            $"{AuditReportConstants.CulvDurationN}"
+        };
     }
 }

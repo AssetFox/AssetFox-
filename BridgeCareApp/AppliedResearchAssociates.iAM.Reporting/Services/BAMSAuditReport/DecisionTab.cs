@@ -22,13 +22,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         {
             _reportHelper = new ReportHelper();
         }
-
+                
         // TODO Budgets data to be tested later when engine side updates ready
-        public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation)
+        public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation, HashSet<string> performanceCurvesAttributes)
         {
             columnNumbersBudgetsUsed = new List<int>();
             // Distinct performance curves' attributes
-            var currentAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
+            var currentAttributes = performanceCurvesAttributes;
 
             // Benefit attribute
             currentAttributes.Add(_reportHelper.GetBenefitAttribute(simulation));
@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     }
 
                     // Generate data model
-                    var decisionsDataModel = GenerateDecisionsDataModel(currentAttributes, budgets, treatments, brKey, year, section, prevYearCIImprovement);
+                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, brKey, year, section, prevYearCIImprovement);
                     prevYearCIImprovement = decisionsDataModel.CurrentAttributesValues.Last();
 
                     // Fill in excel
@@ -75,9 +75,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
         }
 
-        private DecisionsDataModel GenerateDecisionsDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section, double prevYearCIImprovement)
+        private DecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section, double prevYearCIImprovement)
         {
-            var decisionsDataModel = new DecisionsDataModel
+            var decisionDataModel = new DecisionDataModel
             {
                 BRKey = brKey,
                 AnalysisYear = year.Year,                
@@ -93,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
             // analysis benefit attribute
             currentAttributesValues.Add(CheckGetValue(section.ValuePerNumericAttribute, currentAttributes.Last()));
-            decisionsDataModel.CurrentAttributesValues = currentAttributesValues;
+            decisionDataModel.CurrentAttributesValues = currentAttributesValues;
 
             // Budget levels
             var budgetsAtDecisionTime = section.BudgetsAtDecisionTime ?? new List<BudgetDetail>();
@@ -113,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     }
                 }
             }
-            decisionsDataModel.BudgetLevels = budgetLevels;           
+            decisionDataModel.BudgetLevels = budgetLevels;           
 
             // Treatments
             var decisionsTreatments = new List<DecisionTreatment>();
@@ -122,7 +122,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 var decisionsTreatment = new DecisionTreatment();                
                 var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Feasiable = isCashFlowProject ? "-" : (treatmentRejection == null ? AuditReportConstants.Yes : AuditReportConstants.No);
-                var currentCIImprovement = Convert.ToDouble(decisionsDataModel.CurrentAttributesValues.Last());
+                var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());
                 decisionsTreatment.CIImprovement = Math.Abs(prevYearCIImprovement - currentCIImprovement);
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
@@ -137,13 +137,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
                 decisionsTreatments.Add(decisionsTreatment);
             }
-            decisionsDataModel.DecisionsTreatments = decisionsTreatments;
-            return decisionsDataModel;
+            decisionDataModel.DecisionsTreatments = decisionsTreatments;
+            return decisionDataModel;
         }
 
         private double CheckGetValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);
 
-        private CurrentCell FillDataInWorkSheet(ExcelWorksheet decisionsWorksheet, DecisionsDataModel decisionsDataModel, int budgetsCount, CurrentCell currentCell)
+        private CurrentCell FillDataInWorkSheet(ExcelWorksheet decisionsWorksheet, DecisionDataModel decisionsDataModel, int budgetsCount, CurrentCell currentCell)
         {
             var row = currentCell.Row;
             int column = 1;

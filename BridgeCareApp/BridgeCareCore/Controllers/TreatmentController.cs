@@ -18,6 +18,7 @@ using BridgeCareCore.Utils.Interfaces;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace BridgeCareCore.Controllers
 {
@@ -413,7 +414,7 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatmentLibrary - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatmentLibrary - {e.Message}");

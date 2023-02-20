@@ -2569,17 +2569,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<TreatmentLibraryUserEntity>(entity =>
             {
-                entity.HasKey(e => new { e.TreatmentLibraryId, e.UserId });
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
 
                 entity.ToTable("TreatmentLibrary_User");
 
-                entity.HasIndex(e => e.TreatmentLibraryId);
+                entity.HasIndex(e => e.LibraryId);
 
                 entity.HasIndex(e => e.UserId);
 
                 entity.HasOne(d => d.TreatmentLibrary)
                     .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.TreatmentLibraryId)
+                    .HasForeignKey(d => d.LibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.TreatmentLibraryUsers)

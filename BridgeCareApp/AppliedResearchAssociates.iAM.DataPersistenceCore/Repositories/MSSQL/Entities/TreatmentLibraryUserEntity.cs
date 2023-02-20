@@ -8,16 +8,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class TreatmentLibraryUserEntity: BaseEntity
+    public class TreatmentLibraryUserEntity: LibraryUserBaseEntity
     {
-        public Guid TreatmentLibraryId { get; set; }
-
-        public Guid UserId { get; set; }
-
-        public int AccessLevel { get; set; }
-
         public virtual TreatmentLibraryEntity TreatmentLibrary { get; set; }
-
-        public virtual UserEntity User { get; set; }
     }
 }

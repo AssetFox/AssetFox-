@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static TreatmentLibraryUserEntity ToTreatmentLibraryUserEntity(this LibraryUserDTO dto, Guid treatmentLibraryId) =>
             new TreatmentLibraryUserEntity
             {
-                TreatmentLibraryId = treatmentLibraryId,
+                LibraryId = treatmentLibraryId,
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel
             };

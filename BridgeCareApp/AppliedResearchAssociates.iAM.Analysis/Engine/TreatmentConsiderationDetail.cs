@@ -34,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             TreatmentName = original.TreatmentName;
             BudgetUsages.AddRange(original.BudgetUsages.Select(_ => new BudgetUsageDetail(_)));
             CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
+            BudgetsAtDecisionTime.AddRange(original.BudgetsAtDecisionTime.Select(_ => new BudgetDetail(_)));
 
             BudgetPriorityLevel = original.BudgetPriorityLevel;
         }

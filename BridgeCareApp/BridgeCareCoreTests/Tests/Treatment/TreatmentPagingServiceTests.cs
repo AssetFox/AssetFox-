@@ -219,5 +219,79 @@ namespace BridgeCareCoreTests.Tests.Treatment
             Assert.NotEqual(Guid.Empty, returnedConsequence.Equation.Id);
             Assert.NotEqual(Guid.Empty, returnedConsequence.CriterionLibrary.Id);
         }
+
+
+        [Fact]
+        public void CreateNewLibrary_DtoHasNullProperties_DoesNotThrow()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var selectableTreatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var service = CreatePagingService(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var libraryId = Guid.NewGuid();
+            selectableTreatmentRepo.Setup(s => s.GetSelectableTreatments(libraryId)).ReturnsEmptyList();
+            var treatmentId = Guid.NewGuid();
+            var dto = TreatmentDtos.Dto(treatmentId);
+            var syncModel = new PagingSyncModel<TreatmentDTO>
+            {
+                LibraryId = libraryId,
+                AddedRows = new List<TreatmentDTO> { dto },
+            };
+            var libraryDto = TreatmentLibraryDtos.Empty();
+            var request = new LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>
+            {
+                IsNewLibrary = true,
+                Library = libraryDto,
+                SyncModel = syncModel,
+            };
+
+            var returnedDtos = service.GetSyncedLibraryDataset(request);
+            var returnedDto = returnedDtos.Single();
+            Assert.NotEqual(Guid.Empty, returnedDto.Id);
+        }
+
+        [Fact]
+        public void CreateNewLibrary_DtoHasNullGrandchildren_DoesNotThrow()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var selectableTreatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var service = CreatePagingService(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var libraryId = Guid.NewGuid();
+            selectableTreatmentRepo.Setup(s => s.GetSelectableTreatments(libraryId)).ReturnsEmptyList();
+            var treatmentId = Guid.NewGuid();
+            var dto = TreatmentDtos.Dto(treatmentId);
+            var cost = TreatmentCostDtos.Dto(Guid.Empty);
+            var consequence = TreatmentConsequenceDtos.Dto(Guid.Empty);
+            var criterionLibrary = CriterionLibraryDtos.Dto(Guid.Empty, null);
+            dto.CriterionLibrary = criterionLibrary;
+            dto.Costs = new List<TreatmentCostDTO> { cost };
+            dto.Consequences = new List<TreatmentConsequenceDTO> { consequence };
+            var syncModel = new PagingSyncModel<TreatmentDTO>
+            {
+                LibraryId = libraryId,
+                AddedRows = new List<TreatmentDTO> { dto },
+            };
+            var libraryDto = TreatmentLibraryDtos.Empty();
+            var request = new LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>
+            {
+                IsNewLibrary = true,
+                Library = libraryDto,
+                SyncModel = syncModel,
+            };
+
+            var returnedDtos = service.GetSyncedLibraryDataset(request);
+            var returnedDto = returnedDtos.Single();
+            Assert.NotEqual(Guid.Empty, returnedDto.Id);
+            Assert.NotEqual(Guid.Empty, returnedDto.CriterionLibrary.Id);
+            var returnedCost = returnedDto.Costs.Single();
+            Assert.NotEqual(Guid.Empty, returnedCost.Id);
+            var returnedConsequence = returnedDto.Consequences.Single();
+            Assert.NotEqual(Guid.Empty, returnedConsequence.Id);
+        }
+
+
     }
 }

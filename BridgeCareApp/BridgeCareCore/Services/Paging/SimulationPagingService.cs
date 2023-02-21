@@ -49,7 +49,8 @@ namespace BridgeCareCore.Services
                 _.Creator!=null && _.Creator.ToLower().Contains(search.Trim().ToLower()) ||
                 _.Owner!=null && _.Owner.ToLower().Contains(search.Trim().ToLower()) ||
                 _.CreatedDate.ToString().Contains(search.Trim()) ||
-                _.LastModifiedDate.ToString().Contains(search.Trim())).ToList();
+                _.LastModifiedDate.ToString().Contains(search.Trim()) ||
+                _.LastRun.ToString().Contains(search.Trim())).ToList();
         }
 
         protected override List<SimulationDTO> OrderByColumn(List<SimulationDTO> simulations, string sortColumn, bool isDescending)

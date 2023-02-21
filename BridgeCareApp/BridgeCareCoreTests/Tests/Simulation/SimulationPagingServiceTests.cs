@@ -217,5 +217,125 @@ namespace BridgeCareCoreTests.Tests
             };
             ObjectAssertions.Equivalent(expected, result);
         }
+
+        private void RunGetUserScenarioPage_Search_FindsDate(Action<SimulationDTO, DateTime> dtoModifier)
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var simulationId1 = Guid.NewGuid();
+            var simulationId2 = Guid.NewGuid();
+            var simulation1 = SimulationDtos.Dto(simulationId1, "simulation1");
+            var simulation2 = SimulationDtos.Dto(simulationId2, "simulation2");
+            var simulation2Clone = SimulationDtos.Dto(simulationId2, "simulation2");
+            dtoModifier(simulation1, new DateTime(2022, 4, 1));
+            dtoModifier(simulation2, new DateTime(2021, 4, 1));
+            dtoModifier(simulation2Clone, new DateTime(2021, 4, 1));
+            repo.Setup(r => r.GetUserScenarios()).ReturnsList(simulation1, simulation2);
+            var syncModel = new PagingSyncModel<SimulationDTO>
+            {
+            };
+            var request = new PagingRequestModel<SimulationDTO>
+            {
+                Page = 1,
+                search = "2021",
+            };
+
+            var result = pagingService.GetUserScenarioPage(request);
+
+            var expected = new PagingPageModel<SimulationDTO>
+            {
+                Items = new List<SimulationDTO> { simulation2Clone },
+                TotalItems = 1,
+            };
+            ObjectAssertions.Equivalent(expected, result);
+        }
+        private void RunGetUserScenarioPage_Search_FindsString(Action<SimulationDTO, string> dtoModifier)
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var simulationId1 = Guid.NewGuid();
+            var simulationId2 = Guid.NewGuid();
+            var simulation1 = SimulationDtos.Dto(simulationId1, "simulation1");
+            var simulation2 = SimulationDtos.Dto(simulationId2, "simulation2");
+            var simulation2Clone = SimulationDtos.Dto(simulationId2, "simulation2");
+            dtoModifier(simulation1, "Apple");
+            dtoModifier(simulation2, "Banana");
+            dtoModifier(simulation2Clone, "Banana");
+            repo.Setup(r => r.GetUserScenarios()).ReturnsList(simulation1, simulation2);
+            var syncModel = new PagingSyncModel<SimulationDTO>
+            {
+            };
+            var request = new PagingRequestModel<SimulationDTO>
+            {
+                Page = 1,
+                search = "baNANA",
+            };
+
+            var result = pagingService.GetUserScenarioPage(request);
+
+            var expected = new PagingPageModel<SimulationDTO>
+            {
+                Items = new List<SimulationDTO> { simulation2Clone },
+                TotalItems = 1,
+            };
+            ObjectAssertions.Equivalent(expected, result);
+        }
+
+        [Fact]
+        public void GetUserScenarioPage_Search_FindsInNetworkName()
+        {
+            RunGetUserScenarioPage_Search_FindsString((dto, str) => dto.NetworkName = str);
+        }
+
+        [Fact]
+        public void GetUserScenarioPage_Search_FindsInOwner()
+        {
+            RunGetUserScenarioPage_Search_FindsString((dto, str) => dto.Owner = str);
+        }
+
+        [Fact]
+        public void GetUserScenarioPage_Search_FindsInCreator()
+        {
+            RunGetUserScenarioPage_Search_FindsString((dto, str) => dto.Creator = str);
+        }
+
+        [Fact]
+        public void GetUserScenarioPage_Search_FindsInStatus()
+        {
+            RunGetUserScenarioPage_Search_FindsString((dto, str) => dto.Status = str);
+        }
+
+        [Fact]
+        public void GetUserScenarioPage_Search_FindsInReportStatus()
+        {
+            RunGetUserScenarioPage_Search_FindsString((dto, str) => dto.ReportStatus = str);
+        }
+
+        [Fact]
+        public void GetUserScenarioPage_Search_FindsInRuntime()
+        {
+            RunGetUserScenarioPage_Search_FindsString((dto, str) => dto.RunTime = str);
+        }
+
+        [Fact]
+        public void GetUserScenarioPage_Search_FindsInLastRun()
+        {
+            RunGetUserScenarioPage_Search_FindsDate((dto, dateTime) => dto.LastRun = dateTime);
+        }
+
+
+        [Fact]
+        public void GetUserScenarioPage_Search_FindsInCreatedDate()
+        {
+            RunGetUserScenarioPage_Search_FindsDate((dto, dateTime) => dto.CreatedDate = dateTime);
+        }
+
+        [Fact]
+        public void GetUserScenarioPage_Search_FindsInLastModifiedDate()
+        {
+            RunGetUserScenarioPage_Search_FindsDate((dto, dateTime) => dto.LastModifiedDate = dateTime);
+        }
     }
 }

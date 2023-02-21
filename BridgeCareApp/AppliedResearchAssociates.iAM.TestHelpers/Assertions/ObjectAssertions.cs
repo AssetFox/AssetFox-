@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.TestHelpers
     {
         public static void Equivalent(object expected, object actual)
         {
-            actual.Should().BeEquivalentTo(expected);
+            actual.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
         }
 
         public static void EquivalentExcluding<T>(T expected, T actual, params Expression<Func<T, object>>[] exclusions)

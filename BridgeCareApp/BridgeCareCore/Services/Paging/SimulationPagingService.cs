@@ -1,26 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using System.Text;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Models.Validation;
-using OfficeOpenXml;
-using MoreLinq;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
 using BridgeCareCore.Models;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using System.Data;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using BridgeCareCore.Services.Paging.Generics;
-using System.Configuration;
+using MoreLinq;
 
 namespace BridgeCareCore.Services
 {

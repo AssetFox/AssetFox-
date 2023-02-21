@@ -291,7 +291,5 @@ namespace BridgeCareCoreTests.Tests.Treatment
             var returnedConsequence = returnedDto.Consequences.Single();
             Assert.NotEqual(Guid.Empty, returnedConsequence.Id);
         }
-
-
     }
 }

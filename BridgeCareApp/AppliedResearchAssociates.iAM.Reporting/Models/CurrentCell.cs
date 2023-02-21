@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport
+﻿namespace AppliedResearchAssociates.iAM.Reporting.Models
 {
     public class CurrentCell
     {

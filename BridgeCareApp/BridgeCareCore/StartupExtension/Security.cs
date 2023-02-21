@@ -191,6 +191,11 @@ namespace BridgeCareCore.StartupExtension
                                                                    Claim.SimulationRunAnyAccess,
                                                                    Claim.SimulationAccess));
 
+                options.AddPolicy(Policy.CloneSimulation,
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationClonePermittedAccess,
+                                                                   Claim.SimulationCloneAnyAccess,
+                                                                   Claim.SimulationAccess));
+
                 // Budget Priority
                 options.AddPolicy(Policy.ViewBudgetPriorityFromLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityViewAnyFromLibraryAccess, Claim.BudgetPriorityViewPermittedFromLibraryAccess));                

@@ -18,6 +18,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public int? BudgetPriorityLevel { get; set; }
 
+        /// <summary>
+        ///     These are the amounts in each budget prior to this consideration being decided.
+        /// </summary>
+        public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
+
         public List<BudgetUsageDetail> BudgetUsages { get; } = new List<BudgetUsageDetail>();
 
         public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new List<CashFlowConsiderationDetail>();
@@ -29,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             TreatmentName = original.TreatmentName;
             BudgetUsages.AddRange(original.BudgetUsages.Select(_ => new BudgetUsageDetail(_)));
             CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
+            BudgetsAtDecisionTime.AddRange(original.BudgetsAtDecisionTime.Select(_ => new BudgetDetail(_)));
 
             BudgetPriorityLevel = original.BudgetPriorityLevel;
         }

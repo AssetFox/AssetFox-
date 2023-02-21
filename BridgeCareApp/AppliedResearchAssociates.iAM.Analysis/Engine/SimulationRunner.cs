@@ -529,9 +529,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                         var optionContextIsPending = workingContextPerBaselineContext.TryGetValue(option.Context, out var workingContext);
                         if (optionContextIsPending && priority.Criterion.EvaluateOrDefault(workingContext))
                         {
-                            workingContext.Detail.BudgetsAtDecisionTime.AddRange(
-                                BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.CurrentAmount)));
-
                             var costCoverage = TryToPayForTreatment(
                                 workingContext,
                                 option.CandidateTreatment,
@@ -802,6 +799,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             var remainingCost = (decimal)(treatmentCost * GetInflationFactor(year));
 
             var treatmentConsideration = new TreatmentConsiderationDetail(treatment.Name);
+
+            treatmentConsideration.BudgetsAtDecisionTime.AddRange(
+                BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.CurrentAmount)));
 
             treatmentConsideration.BudgetUsages.AddRange(BudgetContexts.Select(budgetContext => new BudgetUsageDetail(budgetContext.Budget.Name)
             {

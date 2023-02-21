@@ -13,6 +13,7 @@ import {
     reject,
     update,
 } from 'ramda';
+import { LibraryUpsertPagingRequest } from '@/shared/models/iAM/paging';
 import CashFlowService from '@/services/cash-flow.service';
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -86,7 +87,7 @@ const actions = {
     },
     async upsertCashFlowRuleLibrary(
         { dispatch, commit }: any,
-        library: CashFlowRuleLibrary,
+        library: LibraryUpsertPagingRequest<CashFlowRuleLibrary, CashFlowRule>,
     ) {
         await CashFlowService.upsertCashFlowRuleLibrary(library).then(
             (response: AxiosResponse) => {
@@ -95,14 +96,14 @@ const actions = {
                     http2XX.test(response.status.toString())
                 ) {
                     const message: string = any(
-                        propEq('id', library.id),
+                        propEq('id', library.syncModel.libraryId),
                         state.cashFlowRuleLibraries,
                     )
                         ? 'Updated cash flow rule library'
                         : 'Added cash flow rule library';
 
                     commit('cashFlowRuleLibraryMutator', library);
-                    commit('selectedCashFlowRuleLibraryMutator', library.id);
+                    commit('selectedCashFlowRuleLibraryMutator', library.syncModel.libraryId);
 
                     dispatch('addSuccessNotification', { message: message });
                 }

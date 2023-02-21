@@ -2547,17 +2547,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
             modelBuilder.Entity<CashFlowRuleLibraryUserEntity>(entity =>
             {
-                entity.HasKey(e => new { e.CashFlowRuleLibraryId, e.UserId });
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
 
                 entity.ToTable("CashFlowRuleLibrary_User");
 
-                entity.HasIndex(e => e.CashFlowRuleLibraryId);
+                entity.HasIndex(e => e.LibraryId);
 
                 entity.HasIndex(e => e.UserId);
 
                 entity.HasOne(d => d.CashFlowRuleLibrary)
                     .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.CashFlowRuleLibraryId)
+                    .HasForeignKey(d => d.LibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.User)

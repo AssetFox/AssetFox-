@@ -17,6 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             RemainingLifeLimitLibraryUsers = new HashSet<RemainingLifeLimitLibraryUserEntity>();
             DeficientConditionGoalLibraryUsers = new HashSet<DeficientConditionGoalLibraryUserEntity>();
             CalculatedAttributeLibraryUsers= new HashSet<CalculatedAttributeLibraryUserEntity>();
+            CashFlowRuleLibraryUsers = new HashSet<CashFlowRuleLibraryUserEntity>();
             BudgetLibraryUsers = new HashSet<BudgetLibraryUserEntity>();
         }
 

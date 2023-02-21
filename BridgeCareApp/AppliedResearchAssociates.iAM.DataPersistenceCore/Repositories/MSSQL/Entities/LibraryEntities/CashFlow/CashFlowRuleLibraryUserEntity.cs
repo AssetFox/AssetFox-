@@ -7,12 +7,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow
 {
-    public class CashFlowRuleLibraryUserEntity : BaseEntity
+    public class CashFlowRuleLibraryUserEntity : LibraryUserBaseEntity
     {
-        public Guid CashFlowRuleLibraryId { get; set; }
-        public Guid UserId { get; set; }
-        public int AccessLevel { get; set; }
         public virtual CashFlowRuleLibraryEntity CashFlowRuleLibrary { get; set; }
-        public virtual UserEntity User { get; set; }
     }
 }

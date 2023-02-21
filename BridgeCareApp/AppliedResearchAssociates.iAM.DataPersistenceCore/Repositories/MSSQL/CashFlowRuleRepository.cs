@@ -309,7 +309,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
         public void UpsertOrDeleteUsers(Guid cashFlowRuleLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
-            var existingEntities = _unitOfWork.Context.CashFlowRuleLibraryUser.Where(u => u.CashFlowRuleLibraryId == cashFlowRuleLibraryId).ToList();
+            var existingEntities = _unitOfWork.Context.CashFlowRuleLibraryUser.Where(u => u.LibraryId == cashFlowRuleLibraryId).ToList();
             var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
             var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
             var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
@@ -337,7 +337,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private List<LibraryUserDTO> GetAccessForUser(Guid cashFlowRuleLibraryId, Guid userId)
         {
             var dtos = _unitOfWork.Context.CashFlowRuleLibraryUser
-                .Where(u => u.CashFlowRuleLibraryId == cashFlowRuleLibraryId && u.UserId == userId)
+                .Where(u => u.LibraryId == cashFlowRuleLibraryId && u.UserId == userId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;
@@ -347,7 +347,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var dtos = _unitOfWork.Context.CashFlowRuleLibraryUser
                 .Include(u => u.User)
-                .Where(u => u.CashFlowRuleLibraryId == cashFlowRuleLibraryId)
+                .Where(u => u.LibraryId == cashFlowRuleLibraryId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;

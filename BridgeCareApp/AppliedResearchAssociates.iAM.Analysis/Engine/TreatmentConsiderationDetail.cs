@@ -18,6 +18,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public int? BudgetPriorityLevel { get; set; }
 
+        /// <summary>
+        ///     These are the amounts in each budget prior to this consideration being decided.
+        /// </summary>
+        public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
+
         public List<BudgetUsageDetail> BudgetUsages { get; } = new List<BudgetUsageDetail>();
 
         public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new List<CashFlowConsiderationDetail>();

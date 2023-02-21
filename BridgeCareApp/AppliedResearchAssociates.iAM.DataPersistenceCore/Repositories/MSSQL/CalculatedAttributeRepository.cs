@@ -483,7 +483,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
         public void UpsertOrDeleteUsers(Guid calculatedAttributeLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
-            var existingEntities = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibraryUser.Where(u => u.CalculatedAttributeLibraryId == calculatedAttributeLibraryId).ToList();
+            var existingEntities = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibraryUser.Where(u => u.LibraryId == calculatedAttributeLibraryId).ToList();
             var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
             var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
             var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
@@ -512,7 +512,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private List<LibraryUserDTO> GetAccessForUser(Guid calculatedAttributeLibraryId, Guid userId)
         {
             var dtos = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibraryUser
-                .Where(u => u.CalculatedAttributeLibraryId == calculatedAttributeLibraryId && u.UserId == userId)
+                .Where(u => u.LibraryId == calculatedAttributeLibraryId && u.UserId == userId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;
@@ -522,7 +522,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var dtos = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibraryUser
                 .Include(u => u.User)
-                .Where(u => u.CalculatedAttributeLibraryId == calculatedAttributeLibraryId)
+                .Where(u => u.LibraryId == calculatedAttributeLibraryId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;

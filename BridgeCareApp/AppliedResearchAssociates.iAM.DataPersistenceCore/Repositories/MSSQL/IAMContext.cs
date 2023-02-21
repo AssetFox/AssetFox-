@@ -2567,17 +2567,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
             modelBuilder.Entity<CalculatedAttributeLibraryUserEntity>(entity =>
             {
-                entity.HasKey(e => new { e.CalculatedAttributeLibraryId, e.UserId });
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
 
                 entity.ToTable("CalculatedAttributeLibrary_User");
 
-                entity.HasIndex(e => e.CalculatedAttributeLibraryId);
+                entity.HasIndex(e => e.LibraryId);
 
                 entity.HasIndex(e => e.UserId);
 
                 entity.HasOne(d => d.CalculatedAttributeLibrary)
                     .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.CalculatedAttributeLibraryId)
+                    .HasForeignKey(d => d.LibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.User)

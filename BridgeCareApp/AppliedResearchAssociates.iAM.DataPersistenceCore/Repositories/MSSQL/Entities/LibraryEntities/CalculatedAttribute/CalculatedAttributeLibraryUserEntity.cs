@@ -7,13 +7,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute
 {
-    public class CalculatedAttributeLibraryUserEntity : BaseEntity
+    public class CalculatedAttributeLibraryUserEntity : LibraryUserBaseEntity
     {
-        public Guid CalculatedAttributeLibraryId { get; set; }
-        public Guid UserId { get; set; }
-        public int AccessLevel { get; set; }
-
         public virtual CalculatedAttributeLibraryEntity CalculatedAttributeLibrary { get; set; }
-        public virtual UserEntity User { get; set; }
     }
 }

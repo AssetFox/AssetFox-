@@ -44,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static CalculatedAttributeLibraryUserEntity ToCalculatedAttributeLibraryUserEntity(this LibraryUserDTO dto, Guid calculatedAttributeLibraryId) =>
             new CalculatedAttributeLibraryUserEntity
             {
-                CalculatedAttributeLibraryId = calculatedAttributeLibraryId,
+                LibraryId = calculatedAttributeLibraryId,
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel,
             };

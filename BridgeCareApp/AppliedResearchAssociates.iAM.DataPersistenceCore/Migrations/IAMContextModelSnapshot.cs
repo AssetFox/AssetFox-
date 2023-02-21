@@ -1646,7 +1646,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CashFlowRuleLibraryUserEntity", b =>
                 {
-                    b.Property<Guid>("CashFlowRuleLibraryId")
+                    b.Property<Guid>("LibraryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
@@ -1667,9 +1667,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("CashFlowRuleLibraryId", "UserId");
+                    b.HasKey("LibraryId", "UserId");
 
-                    b.HasIndex("CashFlowRuleLibraryId");
+                    b.HasIndex("LibraryId");
 
                     b.HasIndex("UserId");
 
@@ -5072,7 +5072,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CashFlowRuleLibraryEntity", "CashFlowRuleLibrary")
                         .WithMany("Users")
-                        .HasForeignKey("CashFlowRuleLibraryId")
+                        .HasForeignKey("LibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -6822,8 +6822,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", b =>
                 {
-                    b.Navigation("CashFlowRuleLibraryUsers");
                     b.Navigation("BudgetLibraryUsers");
+
+                    b.Navigation("CashFlowRuleLibraryUsers");
 
                     b.Navigation("CriterionLibraryUserJoin");
 

@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static CashFlowRuleLibraryUserEntity ToCashFlowRuleLibraryUserEntity(this LibraryUserDTO dto, Guid cashFlowRuleLibraryId) =>
             new CashFlowRuleLibraryUserEntity
             {
-                CashFlowRuleLibraryId= cashFlowRuleLibraryId,
+                LibraryId= cashFlowRuleLibraryId,
                 UserId = dto.UserId,
                 AccessLevel= (int)dto.AccessLevel,  
             };

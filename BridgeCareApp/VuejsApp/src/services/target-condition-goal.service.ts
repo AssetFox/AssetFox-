@@ -55,7 +55,11 @@ export default class TargetConditionGoalService {
             data,
         );
     }
-
+    static getIsSharedLibrary(targetConditionGoalLibraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.TargetConditionGoal}/GetIsSharedLibrary/${targetConditionGoalLibraryId}`
+        );
+    }
     static getHasPermittedAccess(): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.TargetConditionGoal}/GetHasPermittedAccess`,

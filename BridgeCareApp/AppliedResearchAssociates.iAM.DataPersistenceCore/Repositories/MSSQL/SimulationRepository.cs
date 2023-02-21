@@ -1340,6 +1340,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
         }
 
+        public void DeleteSimulationsByNetworkId(Guid networkId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.NetworkId == networkId))
+            {
+                return;
+            }
+
+            var ids = _unitOfWork.Context.Simulation.Where(_ => _.NetworkId == networkId).Select(_ => _.Id);
+
+            _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
+                ids.Contains(_.ScenarioBudgetPriority.SimulationId) || ids.Contains(_.ScenarioBudget.SimulationId));
+
+            _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                ids.Contains(_.ScenarioSelectableTreatment.SimulationId) || ids.Contains(_.ScenarioBudget.SimulationId));
+
+            var count = _unitOfWork.Context.CommittedProject.Where(_ =>
+                ids.Contains(_.SimulationId) || ids.Contains(_.ScenarioBudget.SimulationId)).Count();
+
+            var committedEntities = _unitOfWork.Context.CommittedProject.Where(_ =>
+                ids.Contains(_.SimulationId) || ids.Contains(_.ScenarioBudget.SimulationId)).ToList();
+
+            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
+                ids.Contains(_.SimulationId) || ids.Contains(_.ScenarioBudget.SimulationId));
+
+            var index = 0;
+            while (index < committedEntities.Count)
+            {
+                _unitOfWork.Context.Entry(committedEntities[index]).Reload();
+                index++;
+            }
+
+            _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => ids.Contains(_.Id));
+        }
+
         // the method is used only by other repositories.
         public void UpdateLastModifiedDate(SimulationEntity entity)
         {

@@ -55,6 +55,17 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
         }
 
         /// <summary>
+        ///     Apply style to given cells
+        /// </summary>
+        /// <param name="cells"></param>
+        public static void ApplyStyleNoWrap(ExcelRange cells)
+        {
+            cells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            cells.Style.Font.Bold = true;
+        }
+
+        /// <summary>
         ///     Apply border to given cells
         /// </summary>
         /// <param name="cells"></param>

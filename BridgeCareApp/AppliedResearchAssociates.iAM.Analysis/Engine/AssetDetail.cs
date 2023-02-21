@@ -17,7 +17,17 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
         }
 
+        // TODO check later: name might be different
+        public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
+
         public string AppliedTreatment { get; set; }
+
+        /// <summary>
+        ///     These are the amounts in each budget prior to the decision being made on what
+        ///     treatment (if any) to apply. If this is empty, it means that the consideration logic
+        ///     terminated prior to handling any option associated with this asset.
+        /// </summary>
+        public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
 
         public TreatmentCause TreatmentCause { get; set; }
 

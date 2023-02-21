@@ -187,5 +187,30 @@ namespace BridgeCareCoreTests.Tests
             var returnedSimulation = result.Items.Single();
             ObjectAssertions.Equivalent(simulation2, returnedSimulation);
         }
+
+        [Fact]
+        public void GetUserScenarioPage_Search_FindsInName()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var pagingService = CreatePagingService(unitOfWork);
+            var simulationId1 = Guid.NewGuid();
+            var simulationId2 = Guid.NewGuid();
+            var simulation1 = SimulationDtos.Dto(simulationId1, "Apple");
+            var simulation2 = SimulationDtos.Dto(simulationId2, "Banana");
+            repo.Setup(r => r.GetUserScenarios()).ReturnsList(simulation1, simulation2);
+            var syncModel = new PagingSyncModel<SimulationDTO>
+            {
+            };
+            var request = new PagingRequestModel<SimulationDTO>
+            {
+                Page = 1,
+                search = "baNANA",
+            };
+
+            var result = pagingService.GetUserScenarioPage(request);
+
+
+        }
     }
 }

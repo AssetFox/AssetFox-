@@ -210,7 +210,12 @@ namespace BridgeCareCoreTests.Tests
 
             var result = pagingService.GetUserScenarioPage(request);
 
-
+            var expected = new PagingPageModel<SimulationDTO>
+            {
+                Items = new List<SimulationDTO> { simulation2 },
+                TotalItems = 1,
+            };
+            ObjectAssertions.Equivalent(expected, result);
         }
     }
 }

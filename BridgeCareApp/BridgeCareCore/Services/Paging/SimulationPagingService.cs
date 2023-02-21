@@ -41,13 +41,13 @@ namespace BridgeCareCore.Services
         {
             return simulations
                 .Where(_ =>
-                _.Name.ToLower().Contains(search.Trim().ToLower()) ||
-                _.NetworkName.ToLower().Contains(search.Trim().ToLower()) ||
+                _.Name!=null && _.Name.ToLower().Contains(search.Trim().ToLower()) ||
+                _.NetworkName!=null && _.NetworkName.ToLower().Contains(search.Trim().ToLower()) ||
                 (_.Status?.ToLower().Contains(search.Trim().ToLower()) ?? false) ||
                 (_.ReportStatus?.ToLower().Contains(search.Trim().ToLower()) ?? false) ||
                 (_.RunTime?.ToLower().Contains(search.Trim().ToLower()) ?? false) ||
-                _.Creator.ToLower().Contains(search.Trim().ToLower()) ||
-                _.Owner.ToLower().Contains(search.Trim().ToLower()) ||
+                _.Creator!=null && _.Creator.ToLower().Contains(search.Trim().ToLower()) ||
+                _.Owner!=null && _.Owner.ToLower().Contains(search.Trim().ToLower()) ||
                 _.CreatedDate.ToString().Contains(search.Trim()) ||
                 _.LastModifiedDate.ToString().Contains(search.Trim())).ToList();
         }

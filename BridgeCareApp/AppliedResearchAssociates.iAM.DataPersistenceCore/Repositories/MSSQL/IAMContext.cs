@@ -79,6 +79,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<BudgetEntity> Budget { get; set; }
 
         public virtual DbSet<BudgetLibraryEntity> BudgetLibrary { get; set; }
+        public virtual DbSet<BudgetLibraryUserEntity> BudgetLibraryUser { get; set; }
 
         public virtual DbSet<BudgetAmountEntity> BudgetAmount { get; set; }
 
@@ -661,6 +662,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Year).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.treatmentCategory).IsRequired();
 
                 entity.HasOne(d => d.ScenarioBudget)
                     .WithMany(p => p.CommittedProjects)
@@ -2503,17 +2506,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<RemainingLifeLimitLibraryUserEntity>(entity =>
             {
-                entity.HasKey(e => new { e.RemainingLifeLimitLibraryId, e.UserId });
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
 
                 entity.ToTable("RemainingLifeLimitLibrary_User");
 
-                entity.HasIndex(e => e.RemainingLifeLimitLibraryId);
+                entity.HasIndex(e => e.LibraryId);
 
                 entity.HasIndex(e => e.UserId);
 
                 entity.HasOne(d => d.RemainingLifeLimitLibrary)
                     .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.RemainingLifeLimitLibraryId)
+                    .HasForeignKey(d => d.LibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.User)
@@ -2523,17 +2526,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
             modelBuilder.Entity<DeficientConditionGoalLibraryUserEntity>(entity =>
             {
-                entity.HasKey(e => new { e.DeficientConditionGoalLibraryId, e.UserId });
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
 
                 entity.ToTable("DeficientConditionGoalLibrary_User");
 
-                entity.HasIndex(e => e.DeficientConditionGoalLibraryId);
+                entity.HasIndex(e => e.LibraryId);
 
                 entity.HasIndex(e => e.UserId);
 
                 entity.HasOne(d => d.DeficientConditionGoalLibrary)
                     .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.DeficientConditionGoalLibraryId)
+                    .HasForeignKey(d => d.LibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.User)
@@ -2558,6 +2561,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.CashFlowRuleLibraryUsers)
+            });
+            modelBuilder.Entity<BudgetLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.BudgetLibraryId, e.UserId });
+
+                entity.ToTable("BudgetLibrary_User");
+
+                entity.HasIndex(e => e.BudgetLibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.BudgetLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.BudgetLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.BudgetLibraryUsers)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

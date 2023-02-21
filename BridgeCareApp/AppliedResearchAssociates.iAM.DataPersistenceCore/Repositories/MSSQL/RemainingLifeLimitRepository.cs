@@ -126,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteUsers(Guid remainingLifeLimitLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
-            var existingEntities = _unitOfWork.Context.RemainingLifeLimitLibraryUser.Where(u => u.RemainingLifeLimitLibraryId == remainingLifeLimitLibraryId).ToList();
+            var existingEntities = _unitOfWork.Context.RemainingLifeLimitLibraryUser.Where(u => u.LibraryId == remainingLifeLimitLibraryId).ToList();
             var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
             var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
             var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
@@ -155,7 +155,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private List<LibraryUserDTO> GetAccessForUser(Guid remainingLifeLimitLibraryId, Guid userId)
         {
             var dtos = _unitOfWork.Context.RemainingLifeLimitLibraryUser
-                .Where(u => u.RemainingLifeLimitLibraryId == remainingLifeLimitLibraryId && u.UserId == userId)
+                .Where(u => u.LibraryId == remainingLifeLimitLibraryId && u.UserId == userId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;
@@ -165,7 +165,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var dtos = _unitOfWork.Context.RemainingLifeLimitLibraryUser
                 .Include(u => u.User)
-                .Where(u => u.RemainingLifeLimitLibraryId == remainingLifeLimitLibraryId)
+                .Where(u => u.LibraryId == remainingLifeLimitLibraryId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;

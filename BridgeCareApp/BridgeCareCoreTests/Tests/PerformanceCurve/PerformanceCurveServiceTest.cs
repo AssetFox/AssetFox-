@@ -20,7 +20,6 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
         [Fact]
         public void GetLibrarySyncedDataSet_NoCurvesInLibrary_ReturnsEmptyListOfCurves()
         {
-            // wjwjwj also this test
             var unitOfWork = UnitOfWorkMocks.New();
             var repository = new Mock<IPerformanceCurveRepository>();
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
@@ -43,7 +42,6 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
         [Fact]
         public void GetLibrarySyncedDataSet_OneCurveInLibrary_ReturnsTheCurve()
         {
-            // wjwjwj also this test
             var unitOfWork = UnitOfWorkMocks.New();
             var repository = new Mock<IPerformanceCurveRepository>();
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
@@ -64,6 +62,69 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
 
             var dataset = service.GetSyncedLibraryDataset(libraryRequest);
+            var returnedCurve = dataset.Single();
+            ObjectAssertions.Equivalent(curve, returnedCurve);
+        }
+
+        [Fact]
+        public void GetLibrarySyncedDataSet_OneCurveInLibraryButMarkedForDeletion_DoesNotReturnTheCurve()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var hubService = HubServiceMocks.Default();
+            var expressionValidationService = ExpressionValidationServiceMocks.New();
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
+            var libraryId = Guid.NewGuid();
+            var curveId = Guid.NewGuid();
+            var curve = new PerformanceCurveDTO
+            {
+                Id = curveId,
+            };
+            var curves = new List<PerformanceCurveDTO> { curve };
+            var request = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                LibraryId = libraryId,
+                RowsForDeletion = new List<Guid> { curveId },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>
+            {
+                SyncModel = request,
+            };
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
+
+            var dataset = service.GetSyncedLibraryDataset(upsertRequest);
+            Assert.Empty(dataset);
+        }
+
+        [Fact]
+        public void GetLibrarySyncedDataSet_NoCurvesInLibraryButOneMarkedForAdd_ReturnsTheCurve()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var hubService = HubServiceMocks.Default();
+            var expressionValidationService = ExpressionValidationServiceMocks.New();
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
+            var libraryId = Guid.NewGuid();
+            var curveId = Guid.NewGuid();
+            var curve = new PerformanceCurveDTO
+            {
+                Id = curveId,
+            };
+            var curves = new List<PerformanceCurveDTO> { curve };
+            var request = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                LibraryId = libraryId,
+                AddedRows = curves,
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>
+            {
+                SyncModel = request,
+            };
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(new List<PerformanceCurveDTO>());
+
+            var dataset = service.GetSyncedLibraryDataset(upsertRequest);
             var returnedCurve = dataset.Single();
             ObjectAssertions.Equivalent(curve, returnedCurve);
         }

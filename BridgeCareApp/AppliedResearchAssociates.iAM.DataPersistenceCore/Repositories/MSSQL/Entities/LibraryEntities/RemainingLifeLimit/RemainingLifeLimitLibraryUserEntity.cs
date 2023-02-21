@@ -7,12 +7,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit
 {
-    public class RemainingLifeLimitLibraryUserEntity : BaseEntity
+    public class RemainingLifeLimitLibraryUserEntity : LibraryUserBaseEntity
     {
-        public Guid RemainingLifeLimitLibraryId { get; set; }
-        public Guid UserId {  get; set; }
-        public int AccessLevel { get; set; }
         public virtual RemainingLifeLimitLibraryEntity RemainingLifeLimitLibrary { get; set; }
-        public virtual UserEntity User { get; set; }
     }
 }

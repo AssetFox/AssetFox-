@@ -15,9 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using BridgeCareCore.Utils.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
@@ -36,7 +34,7 @@ namespace BridgeCareCore.Controllers
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         public TreatmentController(ITreatmentService treatmentService, ITreatmentPagingService treatmentPagingService,
             IEsecSecurity esecSecurity,
-            UnitOfDataPersistenceWork unitOfWork,
+            IUnitOfWork unitOfWork,
             IHubService hubService,
             IHttpContextAccessor httpContextAccessor,
             IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
@@ -108,37 +106,17 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-
                 var result = new TreatmentDTO();
                 await Task.Factory.StartNew(() =>
                 {
-                    var entity = UnitOfWork.Context.SelectableTreatment.AsNoTracking()
-                    .Include(_ => _.TreatmentCosts)
-                    .ThenInclude(_ => _.TreatmentCostEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.TreatmentCosts)
-                    .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.TreatmentConsequences.OrderBy(__ => __.Attribute.Name))
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.TreatmentConsequences)
-                    .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.TreatmentConsequences)
-                    .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.TreatmentLibrary)
-                    .Single(_ => _.Id == id);
-                    var library = entity.TreatmentLibrary.ToDto();
+                    var library = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraryWithSingleTreatmentByTreatmentId(id);
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         if (library.Owner == UserId || library.IsShared == true)
-                            result = entity.ToDto();
+                            result = library.Treatments[0];
                     }
                     else
-                        result = entity.ToDto();
+                        result = library.Treatments[0];
                 });
 
                 return Ok(result);
@@ -192,32 +170,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-
                 var result = new TreatmentDTO();
                 await Task.Factory.StartNew(() =>
                 {
-                    var entity = UnitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
-                    .Include(_ => _.ScenarioTreatmentCosts)
-                    .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.ScenarioTreatmentCosts)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.ScenarioTreatmentConsequences.OrderBy(__ => __.Attribute.Name))
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.ScenarioTreatmentConsequences)
-                    .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.ScenarioTreatmentConsequences)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
-                    .ThenInclude(_ => _.ScenarioBudget)
-                    .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Single(_ => _.Id == id);
-                    _claimHelper.CheckUserSimulationReadAuthorization(entity.SimulationId, UserId);
-                    result = entity.ToDto();
+                    var scenarioTreatment = UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentById(id);
+                    _claimHelper.CheckUserSimulationReadAuthorization(scenarioTreatment.SimulationId, UserId);
+                    result = scenarioTreatment.Treatment;
                 });
 
                 return Ok(result);
@@ -279,7 +237,7 @@ namespace BridgeCareCore.Controllers
                     dto.Treatments = treatments;
                     if (dto != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
@@ -373,7 +331,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
                     UnitOfWork.Commit();
@@ -427,7 +385,7 @@ namespace BridgeCareCore.Controllers
                         var existingTreatmentLibrary = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
                         if (existingTreatmentLibrary != null)
                         {
-                            _claimHelper.CheckUserLibraryModifyAuthorization(existingTreatmentLibrary.Owner, UserId);
+                            _claimHelper.CheckIfAdminOrOwner(existingTreatmentLibrary.Owner, UserId);
                         }
                     }
                     result = _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
@@ -468,7 +426,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null || treatment == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatment, libraryId);
                     UnitOfWork.Commit();

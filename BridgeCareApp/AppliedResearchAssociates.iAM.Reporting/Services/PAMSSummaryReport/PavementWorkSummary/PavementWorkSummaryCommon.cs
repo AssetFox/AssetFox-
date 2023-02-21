@@ -131,13 +131,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             column = startColumn;
         }
 
-        public void AddPavementHeaders(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, string sectionName, bool showPrevYearHeader)
-        {
-            AddMergePavementSectionHeader(worksheet, sectionName, simulationYears.Count + 1, currentCell);
-            AddPavementYearsHeaderRow(worksheet, simulationYears, currentCell, showPrevYearHeader);
-        }
-
-
         internal void SetPavementTreatmentExcelString(ExcelWorksheet worksheet,
             List<string> simulationTreatments, ref int row, ref int column)
         {

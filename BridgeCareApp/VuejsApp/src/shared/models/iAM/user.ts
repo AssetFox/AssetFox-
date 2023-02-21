@@ -26,4 +26,4 @@ export interface LibraryUser {
     userId: string;
     userName: string;
     accessLevel: number;
-};
+}

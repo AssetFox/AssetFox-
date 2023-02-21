@@ -9,7 +9,7 @@ public class LibraryUserAccessModel
 
     public Guid UserId { get; set; }
 
-    public LibraryUserDTO Access { get; set; }
+    public LibraryUserDTO Access { get; set; } 
 }
 
 public static class LibraryAccessModels

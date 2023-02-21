@@ -514,7 +514,6 @@ export default class RemainingLifeLimitEditor extends Vue {
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
         this.isShared = this.isSharedLibrary;
-        console.log("shared: " + this.isShared);
     }
     
     @Watch('stateNumericAttributes')

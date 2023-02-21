@@ -4,7 +4,7 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
-    public partial class CreateCashFlowRuleLibraryUser : Migration
+    public partial class UpdateCashFlowRuleLibraryUser : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

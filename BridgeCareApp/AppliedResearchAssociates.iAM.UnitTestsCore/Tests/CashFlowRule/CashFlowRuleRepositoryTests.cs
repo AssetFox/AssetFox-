@@ -236,6 +236,39 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
                     _.Id == rule.CashFlowDistributionRules[0].Id));
         }
         [Fact]
+        public async Task UpdateCashFlowRuleLibraryWithUserAccessChange_Does()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = CashFlowRuleLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            CashFlowRuleLibraryUserTestSetup.SetUsersOfCashFlowRuleLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+            var libraryUsersBefore = TestHelper.UnitOfWork.CashFlowRuleRepo.GetLibraryUsers(library.Id);
+            var libraryUserBefore = libraryUsersBefore.Single();
+            Assert.Equal(LibraryAccessLevel.Modify, libraryUserBefore.AccessLevel);
+            libraryUserBefore.AccessLevel = LibraryAccessLevel.Read;
+
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteUsers(library.Id, libraryUsersBefore);
+
+            var libraryUsersAfter = TestHelper.UnitOfWork.CashFlowRuleRepo.GetLibraryUsers(library.Id);
+            var libraryUserAfter = libraryUsersAfter.Single();
+            Assert.Equal(LibraryAccessLevel.Read, libraryUserAfter.AccessLevel);
+        }
+        [Fact]
+        public async Task UpdateCashFlowRuleLibraryUsers_RequestAccessRemoval_Does()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = CashFlowRuleLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            CashFlowRuleLibraryUserTestSetup.SetUsersOfCashFlowRuleLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+            var libraryUsersBefore = TestHelper.UnitOfWork.CashFlowRuleRepo.GetLibraryUsers(library.Id);
+            var libraryUserBefore = libraryUsersBefore.Single();
+            libraryUsersBefore.Remove(libraryUserBefore);
+
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteUsers(library.Id, libraryUsersBefore);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+
+            var libraryUsersAfter = TestHelper.UnitOfWork.CashFlowRuleRepo.GetLibraryUsers(library.Id);
+            Assert.Empty(libraryUsersAfter);
+        }
+        [Fact]
         public async Task UpdateLibraryUsers_AddAccessForUser_Does()
         {
             var user1 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);

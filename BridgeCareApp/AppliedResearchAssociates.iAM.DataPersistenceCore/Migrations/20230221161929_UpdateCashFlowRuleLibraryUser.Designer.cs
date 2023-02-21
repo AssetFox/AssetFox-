@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20230219235254_CreateDeficientConditionGoalLibraryUser")]
-    partial class CreateDeficientConditionGoalLibraryUser
+    [Migration("20230221161929_UpdateCashFlowRuleLibraryUser")]
+    partial class UpdateCashFlowRuleLibraryUser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1644,6 +1644,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CashFlowRuleLibrary");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CashFlowRuleLibraryUserEntity", b =>
+                {
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("LibraryId", "UserId");
+
+                    b.HasIndex("LibraryId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CashFlowRuleLibrary_User", (string)null);
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CriterionLibraryCashFlowRuleEntity", b =>
@@ -5038,6 +5070,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("CashFlowRuleLibrary");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CashFlowRuleLibraryUserEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CashFlowRuleLibraryEntity", "CashFlowRuleLibrary")
+                        .WithMany("Users")
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
+                        .WithMany("CashFlowRuleLibraryUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CashFlowRuleLibrary");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CriterionLibraryCashFlowRuleEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CashFlowRuleEntity", "CashFlowRule")
@@ -6491,6 +6542,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CashFlowRuleLibraryEntity", b =>
                 {
                     b.Navigation("CashFlowRules");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient.DeficientConditionGoalEntity", b =>
@@ -6772,6 +6825,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", b =>
                 {
                     b.Navigation("BudgetLibraryUsers");
+
+                    b.Navigation("CashFlowRuleLibraryUsers");
 
                     b.Navigation("CriterionLibraryUserJoin");
 

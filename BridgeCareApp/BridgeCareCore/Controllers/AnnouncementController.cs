@@ -17,7 +17,7 @@ namespace BridgeCareCore.Controllers
     public class AnnouncementController : BridgeCareCoreBaseController
     {
         public const string AnnouncementError = "Announcement Error";
-        public AnnouncementController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public AnnouncementController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
         }

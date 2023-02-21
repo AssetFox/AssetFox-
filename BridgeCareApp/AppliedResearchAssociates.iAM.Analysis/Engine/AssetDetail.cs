@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
@@ -15,6 +16,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         public AssetDetail(string assetName, Guid assetId) : base(assetName, assetId)
         {
         }
+
+        // TODO check later: name might be different
+        public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
 
         public string AppliedTreatment { get; set; }
 

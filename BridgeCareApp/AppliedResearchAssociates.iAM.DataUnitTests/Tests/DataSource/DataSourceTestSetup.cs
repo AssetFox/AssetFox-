@@ -22,20 +22,6 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
             var dataSource = ExcelDataSourceDtos.WithColumnNames("Inspection_Date", "BRKEY");
             unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
             return dataSource;
-        }
-
-        public static Guid ResolveToValidDataSourceId(IUnitOfWork unitOfWork, Guid? possibleDataSourceId)
-        {
-            Guid returnValue;
-            if (possibleDataSourceId.HasValue)
-            {
-                returnValue = possibleDataSourceId.Value;
-            } else
-            {
-                var dto = DtoForExcelDataSourceInDb(unitOfWork);
-                returnValue = dto.Id;
-            }
-            return returnValue;
-        }
+        }       
     }
 }

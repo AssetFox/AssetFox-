@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -41,22 +42,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
                     currentCell.Row += 1;
                 }
-            }
 
-            foreach (var item in costForBridgeBudgets)
-            {
-                var rowNum = treatmentTracker[item.Treatment];
-                var cellToEnterCost = item.Year - startYear;
+                var rowNum = treatmentTracker[treatment.Treatment];
+                var cellToEnterCost = treatment.Year - startYear;
                 var cellValue = worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value;
                 var totalAmount = 0.0;
                 if (cellValue != null)
                 {
                     totalAmount = (double)cellValue;
                 }
-                totalAmount += item.Amount;
+                totalAmount += treatment.Amount;
                 worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
-
-                WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
+                WorkTypeTotalHelper.FillWorkTypeTotals(treatment, workTypeTotal);
             }
 
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.BridgeTotal;

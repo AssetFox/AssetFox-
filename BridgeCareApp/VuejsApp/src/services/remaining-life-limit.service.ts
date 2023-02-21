@@ -70,9 +70,4 @@ export default class RemainingLifeLimitService {
             `${API.RemainingLifeLimit}/GetIsSharedLibrary/${remainingLifeLimitLibraryId}`
         );
     }
-    static getHasPermittedAccess(): AxiosPromise {
-        return coreAxiosInstance.get(
-            `${API.RemainingLifeLimit}/GetHasPermittedAccess`,
-        );
-    }
 }

@@ -426,6 +426,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             }
             simulationOutput.Years.Sort((a, b) => a.Year.CompareTo(b.Year));
+            simulationOutput.LastModifiedDate = simulationOutputObjects.FirstOrDefault().Simulation.LastModifiedDate;
 
             return simulationOutput;
         }
@@ -453,25 +454,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw;
             }
             
-        }
-
-        private static string GuidsToStringList(List<Guid> assetDetailIds)
-        {
-            var assetDetailCommaSeparatedListBuilder = new StringBuilder();
-            assetDetailCommaSeparatedListBuilder.Append("(");
-            bool first = true;
-            foreach (var guid in assetDetailIds)
-            {
-                if (!first)
-                {
-                    assetDetailCommaSeparatedListBuilder.Append(',');
-                }
-                first = false;
-                assetDetailCommaSeparatedListBuilder.Append($"'{guid.ToString()}'");
-            }
-            assetDetailCommaSeparatedListBuilder.Append(')');
-            var assetDetailCommaSeparatedList = assetDetailCommaSeparatedListBuilder.ToString();
-            return assetDetailCommaSeparatedList;
         }
 
         private static void WriteTimingsToFile(List<EventMemoModel> memos, string filename)

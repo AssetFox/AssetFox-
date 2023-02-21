@@ -114,10 +114,11 @@ namespace BridgeCareCore.Services
             UpdateWarningForMissingAttributes(performanceCurvesWithMissingAttributes, warningSb);
             UpdateWarningForInvalidCriteria(performanceCurvesWithInvalidCriteria, warningSb);
             UpdateWarningForInvalidEquation(performanceCurvesWithInvalidEquation, warningSb);
+            var scenarioCurves = performanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
 
             return new ScenarioPerformanceCurvesImportResultDTO
             {
-                PerformanceCurves = performanceCurveRepo.GetScenarioPerformanceCurves(simulationId),
+                PerformanceCurves = scenarioCurves,
                 WarningMessage = !string.IsNullOrEmpty(warningSb.ToString())
                     ? warningSb.ToString()
                     : null
@@ -258,8 +259,6 @@ namespace BridgeCareCore.Services
                 FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
                 MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             };
-        }
-
-        
+        }      
     }
 }

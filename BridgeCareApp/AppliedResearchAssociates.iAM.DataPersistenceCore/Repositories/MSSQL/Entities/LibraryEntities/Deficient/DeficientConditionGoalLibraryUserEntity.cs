@@ -8,13 +8,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient
 {
-    public class DeficientConditionGoalLibraryUserEntity : BaseEntity
+    public class DeficientConditionGoalLibraryUserEntity : LibraryUserBaseEntity
     {
-        public Guid DeficientConditionGoalLibraryId { get; set; }
-        public Guid UserId { get; set; }
-        public int AccessLevel { get; set; }
         public virtual DeficientConditionGoalLibraryEntity DeficientConditionGoalLibrary { get; set; }
-        public virtual UserEntity User { get; set; }
-
     }
 }

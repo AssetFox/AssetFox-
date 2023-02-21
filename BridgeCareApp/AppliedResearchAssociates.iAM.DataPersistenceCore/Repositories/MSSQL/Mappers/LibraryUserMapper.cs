@@ -4,8 +4,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using System.Security.Principal;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -14,14 +16,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static RemainingLifeLimitLibraryUserEntity ToRemainingLifeLimitLibraryUserEntity(this LibraryUserDTO dto, Guid remainingLifeLimitLibraryId) =>
             new RemainingLifeLimitLibraryUserEntity
             {
-                RemainingLifeLimitLibraryId = remainingLifeLimitLibraryId,
+                LibraryId = remainingLifeLimitLibraryId,
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel,
             };
         public static DeficientConditionGoalLibraryUserEntity ToDeficientConditionGoalLibraryUserEntity(this LibraryUserDTO dto, Guid deficientConditionGoalLibraryId) =>
             new DeficientConditionGoalLibraryUserEntity
             {
-                DeficientConditionGoalLibraryId = deficientConditionGoalLibraryId,
+                LibraryId = deficientConditionGoalLibraryId,
+                UserId = dto.UserId,
+                AccessLevel= (int)dto.AccessLevel,
+            };
+        public static BudgetLibraryUserEntity ToBudgetLibraryUserEntity(this LibraryUserDTO dto, Guid budgetLibraryId) =>
+            new BudgetLibraryUserEntity
+            {
+                BudgetLibraryId = budgetLibraryId,
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel,
             };
@@ -61,6 +70,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AccessLevel = (LibraryAccessLevel)entity.AccessLevel,
             };
         public static LibraryUserDTO ToDto(this CalculatedAttributeLibraryUserEntity entity) =>
+            new LibraryUserDTO
+            {
+                UserId = entity.UserId,
+                UserName = entity.User?.UserName,
+                AccessLevel = (LibraryAccessLevel)entity.AccessLevel
+            };
+        public static LibraryUserDTO ToDto(this BudgetLibraryUserEntity entity) =>
             new LibraryUserDTO
             {
                 UserId = entity.UserId,

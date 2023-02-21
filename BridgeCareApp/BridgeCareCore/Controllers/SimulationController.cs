@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -15,8 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
-
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -31,7 +30,7 @@ namespace BridgeCareCore.Controllers
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
@@ -155,15 +154,15 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CloneScenario/")]
-        [Authorize]
+        [Authorize(Policy = Policy.CloneSimulation)]
         public async Task<IActionResult> CloneSimulation([FromBody] CloneSimulationDTO dto)
         {
             try
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
-                    // Copied comment TODO (the user should only be able to clone scenarios that they have access to)
+                    UnitOfWork.BeginTransaction();
+                    _claimHelper.CheckUserSimulationModifyAuthorization(dto.scenarioId, UserId);
                     var cloneResult = UnitOfWork.SimulationRepo.CloneSimulation(dto.scenarioId, dto.networkId, dto.scenarioName);
                     UnitOfWork.Commit();
                     return cloneResult;

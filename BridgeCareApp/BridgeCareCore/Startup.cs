@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.Reporting;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Hubs.Services;
-using BridgeCareCore.Logging;
+
 using BridgeCareCore.Services.Aggregation;
 using BridgeCareCore.StartupExtension;
 using Microsoft.AspNetCore.Builder;
@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Authentication;
 using BridgeCareCore.Security;
 using Microsoft.AspNetCore.Authorization;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.Reporting.Services;
 
 namespace BridgeCareCore
 {

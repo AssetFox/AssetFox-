@@ -15,7 +15,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;using MoreLinq;
+using System.Linq;
+
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -99,8 +101,11 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                // copied comment for // TODO:  Replace with query to find all shared simulations
-                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetAllScenario());
+                var result = await Task.Factory.StartNew(() => {
+                    var scenariosToReturn = UnitOfWork.SimulationRepo.GetSharedScenarios(UserInfo.HasAdminAccess, UserInfo.HasSimulationAccess);
+                    scenariosToReturn = scenariosToReturn.Concat(UnitOfWork.SimulationRepo.GetUserScenarios()).ToList();
+                    return scenariosToReturn;
+                });
                 return Ok(result);
             }
             catch (Exception e)

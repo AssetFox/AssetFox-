@@ -18,6 +18,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using BridgeCareCore.Utils;
 using BridgeCareCore.Security;
 using AppliedResearchAssociates.iAM.Data.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BridgeCareCore.Controllers
 {
@@ -102,6 +104,42 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::CreateNetwork {networkName} - {e.Message}");
                 throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("DeleteNetwork/{networkId}")]
+        [ClaimAuthorize("NetworkDeleteAccess")]
+        public async Task<IActionResult> DeleteNetwork(Guid networkId)
+        {
+            try
+            {
+                return Ok();
+            }
+            finally
+            {
+                Response.OnCompleted(async () =>
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastInfo, $"Started network deletion");
+                    try
+                    {
+                        await Task.Factory.StartNew(() =>
+                        {
+                            UnitOfWork.NetworkRepo.DeleteNetwork(networkId);
+                        });
+                    }
+                    catch (UnauthorizedAccessException e)
+                    {
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error deleting network::{e.Message}");
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error deleting network::{e.Message}");
+                        throw;
+                    }
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, $"Completed network deletion");
+                });
             }
         }
 

@@ -2,6 +2,7 @@
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
@@ -418,6 +419,33 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
                 Items = new List<BudgetPriorityDTO> { expectedItem },
             };
             ObjectAssertions.Equivalent(expected, result);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = BudgetPriorityLibraryDtos.New(libraryId);
+            var budgetPriorityDto = BudgetPriorityDtos.New(Guid.Empty, 1);
+            var syncModel = new PagingSyncModel<BudgetPriorityDTO>
+            {
+                AddedRows = new List<BudgetPriorityDTO> { budgetPriorityDto },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<BudgetPriorityLibraryDTO, BudgetPriorityDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedRule = result.Single();
+            Assert.Equal(1, returnedRule.PriorityLevel);
+            Assert.NotEqual(Guid.Empty, returnedRule.Id);
+            Assert.NotEqual(Guid.Empty, returnedRule.CriterionLibrary.Id);
         }
     }
 }

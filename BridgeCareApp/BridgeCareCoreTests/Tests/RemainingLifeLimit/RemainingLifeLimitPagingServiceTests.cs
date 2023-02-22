@@ -2,6 +2,7 @@
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.RemainingLifeLimit;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
@@ -176,6 +177,32 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(2, result.TotalItems);
             var returnedLimit = result.Items.Single();
             ObjectAssertions.Equivalent(limit2, returnedLimit);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            var rule = RemainingLifeLimitDtos.Dto("attribute", Guid.Empty, 4);
+            var syncModel = new PagingSyncModel<RemainingLifeLimitDTO>
+            {
+                AddedRows = new List<RemainingLifeLimitDTO> { rule },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<RemainingLifeLimitLibraryDTO, RemainingLifeLimitDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedRule = result.Single();
+            Assert.NotEqual(Guid.Empty, returnedRule.Id);
+            Assert.NotEqual(Guid.Empty, returnedRule.CriterionLibrary.Id);
         }
     }
 }

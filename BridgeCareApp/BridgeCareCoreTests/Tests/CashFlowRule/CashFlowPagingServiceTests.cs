@@ -415,10 +415,7 @@ namespace BridgeCareCoreTests.Tests
             var pagingService = CreatePagingService(unitOfWork);
             var libraryId = Guid.NewGuid();
             var library = CashFlowRuleLibraryDtos.Empty(libraryId);
-            var ruleId = Guid.NewGuid();
-            var criterionLibraryId = Guid.NewGuid();
-            var distributionRuleId = Guid.NewGuid();
-            var rule = CashFlowRuleDtos.Rule(ruleId, distributionRuleId, criterionLibraryId); ;
+            var rule = CashFlowRuleDtos.Rule(Guid.Empty, Guid.Empty, Guid.Empty); ;
             var ruleName = rule.Name;
             var syncModel = new PagingSyncModel<CashFlowRuleDTO>
             {
@@ -435,9 +432,9 @@ namespace BridgeCareCoreTests.Tests
 
             var returnedRule = result.Single();
             Assert.Equal(ruleName, returnedRule.Name);
-            Assert.NotEqual(ruleId, returnedRule.Id);
-            Assert.NotEqual(criterionLibraryId, returnedRule.CriterionLibrary.Id);
-            Assert.NotEqual(distributionRuleId, returnedRule.CashFlowDistributionRules.Single().Id);
+            Assert.NotEqual(Guid.Empty, returnedRule.Id);
+            Assert.NotEqual(Guid.Empty, returnedRule.CriterionLibrary.Id);
+            Assert.NotEqual(Guid.Empty, returnedRule.CashFlowDistributionRules.Single().Id);
         }
 
 

@@ -68,6 +68,8 @@ namespace BridgeCareCoreTests.Tests.Treatment
             var treatmentId = Guid.NewGuid();
             var dto = TreatmentDtos.Dto(treatmentId);
             var dtoClone = TreatmentDtos.Dto(treatmentId);
+            dtoClone.Consequences = new List<TreatmentConsequenceDTO>();
+            dtoClone.Costs = new List<TreatmentCostDTO>();
             selectableTreatmentRepo.Setup(s => s.GetSelectableTreatments(libraryId)).ReturnsList(dto);
             var budgetId = Guid.NewGuid();
             var budget = BudgetDtos.New(budgetId);
@@ -120,8 +122,6 @@ namespace BridgeCareCoreTests.Tests.Treatment
             Assert.Equal(budgetId, returnedBudgetId);
             Assert.NotEqual(treatmentId, returnedDto.Id);
         }
-
-
 
         [Fact]
         public void GetScenarioDataset_LibraryIdInRequest_IdsAreRegenerated()

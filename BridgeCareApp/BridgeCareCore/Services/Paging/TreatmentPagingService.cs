@@ -9,13 +9,19 @@ using BridgeCareCore.Services.Paging.Generics;
 
 namespace BridgeCareCore.Services
 {
-    public class TreatmentPagingService : PagingService<TreatmentDTO, TreatmentLibraryDTO>,  ITreatmentPagingService
+    public class TreatmentPagingService : PagingService<TreatmentDTO, TreatmentLibraryDTO>, ITreatmentPagingService
     {
         private readonly IUnitOfWork _unitOfWork;
 
         public TreatmentPagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
+        }
+
+        private void FixNullLists(TreatmentDTO dto)
+        {
+            dto.Consequences ??= new List<TreatmentConsequenceDTO>();
+            dto.Costs ??= new List<TreatmentCostDTO>();
         }
 
         public override List<TreatmentDTO> GetSyncedScenarioDataSet(Guid simulationId, PagingSyncModel<TreatmentDTO> request)
@@ -32,41 +38,36 @@ namespace BridgeCareCore.Services
 
                 rows.ForEach(_ =>
                 {
+                    FixNullLists(_);
                     _.Id = Guid.NewGuid();
                     if (_.CriterionLibrary != null)
                     {
                         _.CriterionLibrary.Id = Guid.NewGuid();
                     }
-                    if (_.Consequences != null)
+                    _.Consequences.ForEach(__ =>
                     {
-                        _.Consequences.ForEach(__ =>
+                        __.Id = Guid.NewGuid();
+                        if (__.CriterionLibrary != null)
                         {
-                            __.Id = Guid.NewGuid();
-                            if (__.CriterionLibrary != null)
-                            {
-                                __.CriterionLibrary.Id = Guid.NewGuid();
-                            }
-                            if (__.Equation != null)
-                            {
-                                __.Equation.Id = Guid.NewGuid();
-                            }
-                        });
-                    }
-                    if (_.Costs != null)
+                            __.CriterionLibrary.Id = Guid.NewGuid();
+                        }
+                        if (__.Equation != null)
+                        {
+                            __.Equation.Id = Guid.NewGuid();
+                        }
+                    });
+                    _.Costs.ForEach(__ =>
                     {
-                        _.Costs.ForEach(__ =>
+                        __.Id = Guid.NewGuid();
+                        if (__.Equation != null)
                         {
-                            __.Id = Guid.NewGuid();
-                            if (__.Equation != null)
-                            {
-                                __.Equation.Id = Guid.NewGuid();
-                            }
-                            if (__.CriterionLibrary != null)
-                            {
-                                __.CriterionLibrary.Id = Guid.NewGuid();
-                            }
-                        });
-                    }
+                            __.Equation.Id = Guid.NewGuid();
+                        }
+                        if (__.CriterionLibrary != null)
+                        {
+                            __.CriterionLibrary.Id = Guid.NewGuid();
+                        }
+                    });
                     if (_.BudgetIds == null || !_.BudgetIds.Any())
                     {
                         _.BudgetIds = budgetIds;

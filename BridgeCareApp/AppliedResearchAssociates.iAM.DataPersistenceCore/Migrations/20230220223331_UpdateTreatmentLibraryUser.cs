@@ -4,7 +4,7 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
-    public partial class CreateTreatmentLibraryUser : Migration
+    public partial class UpdateTreatmentLibraryUser : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

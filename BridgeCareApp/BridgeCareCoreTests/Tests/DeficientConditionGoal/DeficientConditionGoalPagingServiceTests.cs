@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.BudgetPriority;
 using Moq;
 using Xunit;
 
@@ -181,6 +182,32 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(2, result.TotalItems);
             var returnedGoal = result.Items.Single();
             ObjectAssertions.Equivalent(goal2, returnedGoal);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = DeficientConditionGoalLibraryDtos.Empty(libraryId);
+            var goal = DeficientConditionGoalDtos.CulvDurationN(Guid.Empty, Guid.Empty);
+            var syncModel = new PagingSyncModel<DeficientConditionGoalDTO>
+            {
+                AddedRows = new List<DeficientConditionGoalDTO> { goal },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<DeficientConditionGoalLibraryDTO, DeficientConditionGoalDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedGoal = result.Single();
+            Assert.NotEqual(Guid.Empty, returnedGoal.Id);
+            Assert.NotEqual(Guid.Empty, returnedGoal.CriterionLibrary.Id);
         }
     }
 }

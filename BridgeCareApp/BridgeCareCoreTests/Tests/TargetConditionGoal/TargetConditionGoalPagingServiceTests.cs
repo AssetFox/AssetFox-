@@ -177,5 +177,32 @@ namespace BridgeCareCoreTests.Tests
             var returnedLimit = result.Items.Single();
             ObjectAssertions.Equivalent(limit2, returnedLimit);
         }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = TargetConditionGoalLibraryDtos.Dto(libraryId, "library");
+            var goal = TargetConditionGoalDtos.Dto("attribute", Guid.Empty, "goalName");
+            var syncModel = new PagingSyncModel<TargetConditionGoalDTO>
+            {
+                AddedRows = new List<TargetConditionGoalDTO> { goal },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedGoal = result.Single();
+            Assert.NotEqual(Guid.Empty, returnedGoal.Id);
+            Assert.NotEqual(Guid.Empty, returnedGoal.CriterionLibrary.Id);
+            Assert.Equal("goalName", returnedGoal.Name);
+        }
     }
 }

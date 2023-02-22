@@ -6,17 +6,26 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
 using Moq;
 using Xunit;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace BridgeCareCoreTests.Tests.PerformanceCurve
 {
     public class PerformanceCurvePagingServiceTests
     {
+        private PerformanceCurvesPagingService CreatePagingService(Mock<IUnitOfWork> unitOfWork)
+        {
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
+            return service;
+        }
+
         [Fact]
         public void GetSyncedLibraryDataset_NoCurvesInLibrary_ReturnsEmptyListOfCurves()
         {
@@ -645,6 +654,37 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var returnedCurves = dataset.Items;
             var returnedCurve = returnedCurves.Single();
             ObjectAssertions.Equivalent(curveBClone, returnedCurve);
+        }
+
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = PerformanceCurveLibraryDtos.Empty(libraryId);
+            var curve = new PerformanceCurveDTO
+            {
+                Attribute = "Attribute",
+                Id = Guid.Empty,
+            };
+            var syncModel = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                AddedRows = new List<PerformanceCurveDTO> { curve },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedCurve = result.Single();
+            Assert.NotEqual(Guid.Empty, returnedCurve.Id);
+            Assert.NotEqual(Guid.Empty, returnedCurve.CriterionLibrary.Id);
         }
     }
 }

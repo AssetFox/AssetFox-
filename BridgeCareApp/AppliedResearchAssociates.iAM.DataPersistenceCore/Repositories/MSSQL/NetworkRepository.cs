@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
+using AppliedResearchAssociates.iAM.Data.Networking;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -18,8 +19,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public NetworkRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ??
-                                         throw new ArgumentNullException(nameof(unitOfWork));
+        public NetworkRepository(UnitOfDataPersistenceWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        } 
 
         public void CreateNetwork(Network network)
         {
@@ -154,6 +157,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.Database.ExecuteSqlRaw(
                 $"DELETE FROM [dbo].[MaintainableAsset] WHERE [dbo].[MaintainableAsset].[NetworkId] = '{DataPersistenceConstants.PennDotNetworkId}'");
             _unitOfWork.Context.SaveChanges();
+        }
+
+        public void DeleteNetwork(Guid networkId)
+        {
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                _unitOfWork.BenefitQuantifierRepo.DeleteBenefitQuantifier(networkId);
+                _unitOfWork.SimulationRepo.DeleteSimulationsByNetworkId(networkId);
+                _unitOfWork.Context.DeleteEntity<NetworkEntity>(_ => _.Id == networkId);
+                _unitOfWork.Commit();
+            }
+            catch (Exception e)
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
         }
 
         public void UpsertNetworkRollupDetail(Guid networkId, string status)

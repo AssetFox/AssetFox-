@@ -1,26 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.TreatmentCommon
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
-    public class TreatmentCommon : ITreatmentCommon
+    public class BridgesTreatments
     {
-        private ISummaryReportHelper _summaryReportHelper;
         private ReportHelper _reportHelper;
 
-        public TreatmentCommon()
+        public BridgesTreatments()
         {
-            _summaryReportHelper = new SummaryReportHelper();
             _reportHelper = new ReportHelper();
         }
 
@@ -29,7 +22,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
             // Row 1
             int headerRow = 1;
             var headersRow = GetHeadersRow();
-
 
             worksheet.Cells.Style.WrapText = false;
 
@@ -40,7 +32,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
             }
 
             var row = headerRow;
-
             worksheet.Row(row).Height = 15;
             worksheet.Row(row + 1).Height = 15;
             // Autofit before the merges
@@ -53,7 +44,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
             }
 
             ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, 1, headerRow + 1, worksheet.Dimension.Columns]);
-            //ExcelHelper.ApplyStyle(worksheet.Cells[headerRow + 1, bridgeFundingColumn, headerRow + 1, analysisColumn - 1]);
             worksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             return new CurrentCell { Row = 3, Column = headersRow.Count + 1 };
@@ -70,7 +60,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
             var longitude = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "LONG");
 
             // LAT and LONG appear to be in Degree/Minute/Second form, but concatenated into a single number without delimiters.
-
             var lat_degrees = Math.Floor(latitude / 10_000);
             var lat_minutes = Math.Floor((latitude - 10_000 * lat_degrees) / 100);
             var lat_seconds = latitude - 10_000 * lat_degrees - 100 * lat_minutes;
@@ -110,7 +99,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
             worksheet.Cells[row, columnNo++].Value = deckArea;
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? BAMSConstants.Yes : BAMSConstants.No; // Large Bridge
+            var family = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FAMILY_ID");
+            worksheet.Cells[row, columnNo++].Value = int.TryParse(family, out var familyNumber) ? familyNumber : family;
 
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "STRUCTURE_TYPE");
 
@@ -129,10 +119,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
                 worksheet.Cells[row, columnNo++].Value = bpn_string;
             }
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND") == "0" ? "N" : "Y";
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND") == "0" ? AuditReportConstants.No : AuditReportConstants.Yes;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "INTERSTATE");
-
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "###,###,###,###,##0";
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "RISK_SCORE");
 
@@ -146,7 +135,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
         }
 
         private const string INTERSTATE = "Interstate";
-
         private static List<string> GetHeadersRow()
         {
             return new List<string>
@@ -158,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Tre
                 "MPO/RPO",
                 "Bridge\r\nLength",
                 "Deck\r\nArea",
-                "Large\r\nBridge",
+                "Family",
                 "Structure\r\nType",
                 "Functional\r\nClass",
                 "BPN",

@@ -1,49 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentCommon
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
-    public class UnfundedTreatmentCommon : IUnfundedTreatmentCommon
+    public class BridgesUnfundedTreatments
     {
-        private ISummaryReportHelper _summaryReportHelper;
-        private ITreatmentCommon _treatmentCommon;
         private ReportHelper _reportHelper;
+        private BridgesTreatments _bridgesTreatments;
+        private const string BRIDGE_FUNDING = "Bridge Funding";
 
-        public UnfundedTreatmentCommon()
+        public BridgesUnfundedTreatments()
         {
-            _summaryReportHelper = new SummaryReportHelper();
-            _treatmentCommon = new TreatmentCommon.TreatmentCommon();
             _reportHelper = new ReportHelper();
+            _bridgesTreatments = new BridgesTreatments();
         }
 
-        public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment)
+        public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year)
         {
-            _treatmentCommon.FillDataInWorkSheet(worksheet, currentCell, section, Year);
+            _bridgesTreatments.FillDataInWorkSheet(worksheet, currentCell, section, Year);
 
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingNHPP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingSTP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingBOF(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBRIP(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingBRIP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingState(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingState(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNotApplicable(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingNotApplicable(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = Year;
@@ -54,9 +48,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_SEEDED");
+
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUP_SEEDED");
+
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
@@ -68,9 +64,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_DURATION_N");
+
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUP_DURATION_N");
+
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_DURATION_N");
@@ -84,9 +82,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = "N"; // DECK_SEEDED
+
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = "N"; // SUP_SEEDED
+
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = "N"; // SUB_SEEDED
@@ -98,9 +98,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = "N"; // DECK_DURATION_N
+
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = "N"; // SUP_DURATION_N
+
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = "N"; // SUB_DURATION_N
@@ -108,11 +110,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["CULV_DURATION_N"];
-            }
-
-            worksheet.Cells[row, columnNo++].Value = treatment?.TreatmentName;
-            worksheet.Cells[row, columnNo].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";
-            worksheet.Cells[row, columnNo++].Value = treatment?.Cost;
+            }            
 
             if (row % 2 == 0)
             {
@@ -125,8 +123,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet)
         {
-            var currentCell = _treatmentCommon.AddHeadersCells(worksheet);
-
+            var currentCell = _bridgesTreatments.AddHeadersCells(worksheet);
             var columnNo = currentCell.Column;
 
             // Row 1
@@ -151,7 +148,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             }
 
             var row = headerRow;
-
             worksheet.Row(row).Height = 15;
             worksheet.Row(row + 1).Height = 15;
             // Autofit before the merges
@@ -178,10 +174,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
             currentCell = new CurrentCell { Row = headerRow + 2, Column = worksheet.Dimension.Columns + 1 };
             return currentCell;
-        }        
-
-        private const string BRIDGE_FUNDING = "Bridge Funding";
-        private const string INTERSTATE = "Interstate";
+        }            
 
         private List<string> GetHeadersRow1()
         {
@@ -193,7 +186,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 "",
                 "",
                 "",
-
                 "Analysis\r\nYear",
                 "GCR\r\nDECK",
                 "GCR\r\nSUP",
@@ -203,16 +195,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 "SUP\r\nDUR",
                 "SUB\r\nDUR",
                 "CULV\r\nDUR",
-                "Unfunded Treatment",
-                "Cost",
             };
         }
 
         private List<string> GetHeadersRow2()
         {
+            // Six sub-sections for "Bridge Funding"
             return new List<string>
             {
-                "NHPP", // Six sub-sections for "Bridge Funding"
+                "NHPP",
                 "STP",
                 "BOF",
                 "BRIP", 
@@ -223,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
         public void PerformPostAutofitAdjustments(ExcelWorksheet worksheet)
         {
-            _treatmentCommon.PerformPostAutofitAdjustments(worksheet);
+            _bridgesTreatments.PerformPostAutofitAdjustments(worksheet);
         }
     }
 }

@@ -426,6 +426,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             }
             simulationOutput.Years.Sort((a, b) => a.Year.CompareTo(b.Year));
+            simulationOutput.LastModifiedDate = simulationOutputObjects.FirstOrDefault().Simulation.LastModifiedDate;
 
             return simulationOutput;
         }

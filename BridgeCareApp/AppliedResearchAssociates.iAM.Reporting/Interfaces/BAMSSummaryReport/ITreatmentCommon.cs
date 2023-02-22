@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport

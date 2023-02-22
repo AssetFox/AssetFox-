@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {

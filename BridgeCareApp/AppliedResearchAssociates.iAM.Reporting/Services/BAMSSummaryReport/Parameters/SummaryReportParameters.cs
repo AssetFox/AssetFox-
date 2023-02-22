@@ -7,20 +7,20 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Parameters
 {
     public class SummaryReportParameters
-    {
-        private ISummaryReportHelper _summaryReportHelper;
+    {        
+        private ReportHelper _reportHelper;
 
         public SummaryReportParameters()
-        {
-            _summaryReportHelper = new SummaryReportHelper();
+        {            
+            _reportHelper = new ReportHelper();
         }
 
         internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel, Simulation simulation, SimulationOutput reportOutputData)
@@ -162,13 +162,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells[rowNo + 8, currentCell.Column].Value = "Posted";
 
             // open
-            worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "OPEN") ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "OPEN") ? BAMSConstants.Yes : BAMSConstants.No;
             // closed
-            worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "CLOSED") ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "CLOSED") ? BAMSConstants.Yes : BAMSConstants.No;
             // P3
-            worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "P3") > 0) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "P3") > 0) ? BAMSConstants.Yes : BAMSConstants.No;
             // Posted
-            worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "POSTED") ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "POSTED") ? BAMSConstants.Yes : BAMSConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 5, currentCell.Column + 1, rowNo + 8, currentCell.Column + 1]);
 
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 8, currentCell.Column + 1]);
@@ -238,7 +238,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             foreach (var item in functionalClassValueTracker)
             {
                 ExcelHelper.MergeCells(worksheet, item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1, false);
-                worksheet.Cells[item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1].Value = _summaryReportHelper.FullFunctionalClassDescription(item.Key);
+                worksheet.Cells[item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1].Value = _reportHelper.FullFunctionalClassDescription(item.Key);
             }
 
             ExcelHelper.MergeCells(worksheet, rowForStyle + 10, colForStyle + 4, rowForStyle + 10, colForStyle + 6);
@@ -247,7 +247,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells[rowForStyle + 10, colForStyle + 4, rowForStyle + 10, colForStyle + 6].Value = "Urban";
 
             ExcelHelper.MergeCells(worksheet, rowForStyle + 17, colForStyle + 4, rowForStyle + 17, colForStyle + 5, false);
-            worksheet.Cells[rowForStyle + 17, colForStyle + 4, rowForStyle + 17, colForStyle + 5].Value = _summaryReportHelper.FullFunctionalClassDescription("NN");
+            worksheet.Cells[rowForStyle + 17, colForStyle + 4, rowForStyle + 17, colForStyle + 5].Value = _reportHelper.FullFunctionalClassDescription("NN");
 
             foreach (var item in functionalClassValueTracker)
             {

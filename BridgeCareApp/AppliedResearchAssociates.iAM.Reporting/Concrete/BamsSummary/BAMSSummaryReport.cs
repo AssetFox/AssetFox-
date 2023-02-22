@@ -25,6 +25,8 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Services;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -41,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly SummaryReportGlossary _summaryReportGlossary;
         private readonly SummaryReportParameters _summaryReportParameters;
         private readonly IAddGraphsInTabs _addGraphsInTabs;
-        private readonly ISummaryReportHelper _summaryReportHelper;
+        private readonly ReportHelper _reportHelper;
 
         private Guid _networkId;
 
@@ -92,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _summaryReportGlossary = new SummaryReportGlossary();
             _summaryReportParameters = new SummaryReportParameters();                        
             _addGraphsInTabs = new AddGraphsInTabs();
-            _summaryReportHelper = new SummaryReportHelper();
+            _reportHelper = new ReportHelper();
 
             //check for existing report id
             var reportId = results?.Id; if(reportId == null) { reportId = Guid.NewGuid(); }
@@ -228,13 +230,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             reportOutputData.InitialAssetSummaries.Sort(
-                    (a, b) => _summaryReportHelper.checkAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_summaryReportHelper.checkAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
+                    (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );
 
             foreach (var yearlySectionData in reportOutputData.Years)
             {
                 yearlySectionData.Assets.Sort(
-                    (a, b) => _summaryReportHelper.checkAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_summaryReportHelper.checkAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
+                    (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );
             }
 

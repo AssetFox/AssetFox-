@@ -15,10 +15,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         [JsonConstructor]
         public AssetDetail(string assetName, Guid assetId) : base(assetName, assetId)
         {
-        }
-
-        // TODO check later: name might be different
-        public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
+        }        
 
         public string AppliedTreatment { get; set; }
 

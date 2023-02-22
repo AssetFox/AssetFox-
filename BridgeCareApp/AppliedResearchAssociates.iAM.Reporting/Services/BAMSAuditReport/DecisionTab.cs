@@ -22,8 +22,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         {
             _reportHelper = new ReportHelper();
         }
-                
-        // TODO Budgets data to be tested later when engine side updates ready
+        
         public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation, HashSet<string> performanceCurvesAttributes)
         {
             columnNumbersBudgetsUsed = new List<int>();
@@ -96,18 +95,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             decisionDataModel.CurrentAttributesValues = currentAttributesValues;
 
             // Budget levels
-            var budgetsAtDecisionTime = section.BudgetsAtDecisionTime ?? new List<BudgetDetail>();
+            var budgetsAtDecisionTime = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment).BudgetsAtDecisionTime ?? new List<BudgetDetail>();
             var budgetLevels = new List<decimal>();
             if (budgetsAtDecisionTime.Count > 0)
             {
                 foreach (var budget in budgets)
                 {
                     var budgetAtDecisionTime = budgetsAtDecisionTime.FirstOrDefault(_ => _.BudgetName == budget);
-                    if (budgetAtDecisionTime == null)
-                    {
-                        // TODO any action here?
-                    }
-                    else
+                    if (budgetAtDecisionTime != null)
                     {
                         budgetLevels.Add(budgetAtDecisionTime.AvailableFunding);
                     }

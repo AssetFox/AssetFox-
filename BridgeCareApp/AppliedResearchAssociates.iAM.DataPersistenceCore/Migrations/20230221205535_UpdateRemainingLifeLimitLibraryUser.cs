@@ -4,13 +4,13 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
-    public partial class CreateRemainingLifeLimitLibraryUser : Migration
+    public partial class UpdateRemainingLifeLimitLibraryUser : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_RemainingLifeLimitLibrary_User_RemainingLifeLimitLibrary_RemainingLifeLimitLibraryId",
-                table: "RemainingLifeLimitLibrary_User");
+                            name: "FK_RemainingLifeLimitLibrary_User_RemainingLifeLimitLibrary_RemainingLifeLimitLibraryId",
+                            table: "RemainingLifeLimitLibrary_User");
 
             migrationBuilder.RenameColumn(
                 name: "RemainingLifeLimitLibraryId",
@@ -34,8 +34,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_RemainingLifeLimitLibrary_User_RemainingLifeLimitLibrary_LibraryId",
-                table: "RemainingLifeLimitLibrary_User");
+                            name: "FK_RemainingLifeLimitLibrary_User_RemainingLifeLimitLibrary_LibraryId",
+                            table: "RemainingLifeLimitLibrary_User");
 
             migrationBuilder.RenameColumn(
                 name: "LibraryId",

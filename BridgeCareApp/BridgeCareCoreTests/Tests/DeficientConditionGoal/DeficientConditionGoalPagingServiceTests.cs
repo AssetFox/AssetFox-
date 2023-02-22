@@ -183,9 +183,34 @@ namespace BridgeCareCoreTests.Tests
             var returnedGoal = result.Items.Single();
             ObjectAssertions.Equivalent(goal2, returnedGoal);
         }
-
         [Fact]
-        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshId()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = DeficientConditionGoalLibraryDtos.Empty(libraryId);
+            var goal = DeficientConditionGoalDtos.CulvDurationN(Guid.Empty, Guid.Empty);
+            goal.CriterionLibrary = null;
+            var syncModel = new PagingSyncModel<DeficientConditionGoalDTO>
+            {
+                AddedRows = new List<DeficientConditionGoalDTO> { goal },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<DeficientConditionGoalLibraryDTO, DeficientConditionGoalDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedGoal = result.Single();
+            Assert.NotEqual(Guid.Empty, returnedGoal.Id);
+            Assert.Null(returnedGoal.CriterionLibrary);
+        }
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRowWithCriterionLibrary_HasRowWithFreshIds()
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var pagingService = CreatePagingService(unitOfWork);

@@ -658,7 +658,7 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
 
 
         [Fact]
-        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshId()
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var pagingService = CreatePagingService(unitOfWork);
@@ -668,6 +668,37 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             {
                 Attribute = "Attribute",
                 Id = Guid.Empty,
+            };
+            var syncModel = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                AddedRows = new List<PerformanceCurveDTO> { curve },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedCurve = result.Single();
+            Assert.NotEqual(Guid.Empty, returnedCurve.Id);
+            Assert.Null(returnedCurve.CriterionLibrary);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRowWithCriterionLibrary_HasRowWithFreshIds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = PerformanceCurveLibraryDtos.Empty(libraryId);
+            var curve = new PerformanceCurveDTO
+            {
+                Attribute = "Attribute",
+                Id = Guid.Empty,
+                CriterionLibrary = CriterionLibraryDtos.Dto(Guid.Empty),
             };
             var syncModel = new PagingSyncModel<PerformanceCurveDTO>
             {

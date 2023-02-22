@@ -429,6 +429,7 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             var libraryId = Guid.NewGuid();
             var library = BudgetPriorityLibraryDtos.New(libraryId);
             var budgetPriorityDto = BudgetPriorityDtos.New(Guid.Empty, 1);
+            budgetPriorityDto.CriterionLibrary = CriterionLibraryDtos.Dto(Guid.Empty);
             var syncModel = new PagingSyncModel<BudgetPriorityDTO>
             {
                 AddedRows = new List<BudgetPriorityDTO> { budgetPriorityDto },
@@ -446,6 +447,34 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             Assert.Equal(1, returnedRule.PriorityLevel);
             Assert.NotEqual(Guid.Empty, returnedRule.Id);
             Assert.NotEqual(Guid.Empty, returnedRule.CriterionLibrary.Id);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRowWithNullCriterionLibrary_HasRowWithNullCriterionLibrary()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = BudgetPriorityLibraryDtos.New(libraryId);
+            var budgetPriorityDto = BudgetPriorityDtos.New(Guid.Empty, 1);
+            budgetPriorityDto.CriterionLibrary = null;
+            var syncModel = new PagingSyncModel<BudgetPriorityDTO>
+            {
+                AddedRows = new List<BudgetPriorityDTO> { budgetPriorityDto },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<BudgetPriorityLibraryDTO, BudgetPriorityDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedRule = result.Single();
+            Assert.Equal(1, returnedRule.PriorityLevel);
+            Assert.NotEqual(Guid.Empty, returnedRule.Id);
+            Assert.Null(returnedRule.CriterionLibrary);
         }
     }
 }

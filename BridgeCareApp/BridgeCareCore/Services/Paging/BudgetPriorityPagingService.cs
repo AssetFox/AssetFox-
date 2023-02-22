@@ -30,7 +30,10 @@ namespace BridgeCareCore.Services
                 rows.ForEach(_ =>
                 {
                     _.Id = Guid.NewGuid();
-                    _.CriterionLibrary.Id = Guid.NewGuid();
+                    if (_.CriterionLibrary != null)
+                    {
+                        _.CriterionLibrary.Id = Guid.NewGuid();
+                    }
                 });
             var budgets = _unitOfWork.BudgetRepo.GetScenarioSimpleBudgetDetails(simulationId);
             //this gets rid of percentage pairs that shouldn't be there and adds the ones that should
@@ -100,7 +103,10 @@ namespace BridgeCareCore.Services
             rows.ForEach(_ =>
             {
                 _.Id = Guid.NewGuid();
-                _.CriterionLibrary.Id = Guid.NewGuid();
+                if (_.CriterionLibrary != null)
+                {
+                    _.CriterionLibrary.Id = Guid.NewGuid();
+                }
             });
 
             return rows;

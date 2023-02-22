@@ -180,7 +180,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshId()
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var pagingService = CreatePagingService(unitOfWork);
@@ -200,9 +200,37 @@ namespace BridgeCareCoreTests.Tests
 
             var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
 
-            var returnedRule = result.Single();
-            Assert.NotEqual(Guid.Empty, returnedRule.Id);
-            Assert.NotEqual(Guid.Empty, returnedRule.CriterionLibrary.Id);
+            var returnedLifeLimit = result.Single();
+            Assert.NotEqual(Guid.Empty, returnedLifeLimit.Id);
+            Assert.Null(returnedLifeLimit.CriterionLibrary);
+        }
+
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRowWithCriterionLibrary_HasRowWithFreshIds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            var rule = RemainingLifeLimitDtos.Dto("attribute", Guid.Empty, 4);
+            rule.CriterionLibrary = CriterionLibraryDtos.Dto(Guid.Empty);
+            var syncModel = new PagingSyncModel<RemainingLifeLimitDTO>
+            {
+                AddedRows = new List<RemainingLifeLimitDTO> { rule },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<RemainingLifeLimitLibraryDTO, RemainingLifeLimitDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedLifeLimit = result.Single();
+            Assert.NotEqual(Guid.Empty, returnedLifeLimit.Id);
+            Assert.NotEqual(Guid.Empty, returnedLifeLimit.CriterionLibrary.Id);
         }
     }
 }

@@ -415,6 +415,36 @@ namespace BridgeCareCoreTests.Tests
             var pagingService = CreatePagingService(unitOfWork);
             var libraryId = Guid.NewGuid();
             var library = CashFlowRuleLibraryDtos.Empty(libraryId);
+            var rule = CashFlowRuleDtos.Rule(Guid.Empty, Guid.Empty, Guid.Empty);
+            rule.CriterionLibrary = null;
+            var ruleName = rule.Name;
+            var syncModel = new PagingSyncModel<CashFlowRuleDTO>
+            {
+                AddedRows = new List<CashFlowRuleDTO> { rule },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedRule = result.Single();
+            Assert.Equal(ruleName, returnedRule.Name);
+            Assert.NotEqual(Guid.Empty, returnedRule.Id);
+            Assert.Null(returnedRule.CriterionLibrary);
+            Assert.NotEqual(Guid.Empty, returnedRule.CashFlowDistributionRules.Single().Id);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRowWithCriterionLibrary_HasRowWithFreshIds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = CashFlowRuleLibraryDtos.Empty(libraryId);
             var rule = CashFlowRuleDtos.Rule(Guid.Empty, Guid.Empty, Guid.Empty); ;
             var ruleName = rule.Name;
             var syncModel = new PagingSyncModel<CashFlowRuleDTO>

@@ -179,13 +179,41 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public void GetSyncedLibraryDataset_NewLibraryWithAddedRow_HasRowWithFreshIds()
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRowWithNullCriterionLibrary_HasRowWithFreshId()
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var pagingService = CreatePagingService(unitOfWork);
             var libraryId = Guid.NewGuid();
             var library = TargetConditionGoalLibraryDtos.Dto(libraryId, "library");
             var goal = TargetConditionGoalDtos.Dto("attribute", Guid.Empty, "goalName");
+            var syncModel = new PagingSyncModel<TargetConditionGoalDTO>
+            {
+                AddedRows = new List<TargetConditionGoalDTO> { goal },
+            };
+            var upsertRequest = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>
+            {
+                IsNewLibrary = true,
+                Library = library,
+                SyncModel = syncModel,
+            };
+
+            var result = pagingService.GetSyncedLibraryDataset(upsertRequest);
+
+            var returnedGoal = result.Single();
+            Assert.NotEqual(Guid.Empty, returnedGoal.Id);
+            Assert.Null(returnedGoal.CriterionLibrary);
+            Assert.Equal("goalName", returnedGoal.Name);
+        }
+
+        [Fact]
+        public void GetSyncedLibraryDataset_NewLibraryWithAddedRowWithCriterionLibrary_HasRowWithFreshId()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var pagingService = CreatePagingService(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = TargetConditionGoalLibraryDtos.Dto(libraryId, "library");
+            var goal = TargetConditionGoalDtos.Dto("attribute", Guid.Empty, "goalName");
+            goal.CriterionLibrary = CriterionLibraryDtos.Dto(Guid.Empty);
             var syncModel = new PagingSyncModel<TargetConditionGoalDTO>
             {
                 AddedRows = new List<TargetConditionGoalDTO> { goal },

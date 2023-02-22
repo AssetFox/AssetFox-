@@ -2,7 +2,7 @@
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
@@ -11,11 +11,11 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class RemainingLifeLimitPagingServiceTests
+    public class TargetConditionGoalPagingServiceTests
     {
-        private RemainingLifeLimitPagingService CreatePagingService(Mock<IUnitOfWork> unitOfWork)
+        private TargetConditionGoalPagingService CreatePagingService(Mock<IUnitOfWork> unitOfWork)
         {
-            var service = new RemainingLifeLimitPagingService(unitOfWork.Object);
+            var service = new TargetConditionGoalPagingService(unitOfWork.Object);
             return service;
         }
 
@@ -23,11 +23,11 @@ namespace BridgeCareCoreTests.Tests
         public void GetSyncedScenarioDataset_EverythingIsEmpty_Empty()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var repo = RemainingLifeLimitRepositoryMocks.New(unitOfWork);
+            var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
             var pagingService = CreatePagingService(unitOfWork);
             var scenarioId = Guid.NewGuid();
-            repo.Setup(r => r.GetScenarioRemainingLifeLimits(scenarioId)).ReturnsEmptyList();
-            var syncModel = new PagingSyncModel<RemainingLifeLimitDTO>
+            repo.Setup(r => r.GetScenarioTargetConditionGoals(scenarioId)).ReturnsEmptyList();
+            var syncModel = new PagingSyncModel<TargetConditionGoalDTO>
             {
             };
 
@@ -41,18 +41,18 @@ namespace BridgeCareCoreTests.Tests
         public void GetSyncedScenarioDataset_RowToUpdate_ReturnsUpdatedRow()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var repo = RemainingLifeLimitRepositoryMocks.New(unitOfWork);
+            var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
             var pagingService = CreatePagingService(unitOfWork);
             var scenarioId = Guid.NewGuid();
             var limitId = Guid.NewGuid();
-            var dto1 = RemainingLifeLimitDtos.Dto("attribute", limitId, 1);
-            var dto2 = RemainingLifeLimitDtos.Dto("attribute", limitId, 2);
-            var dto2Clone = RemainingLifeLimitDtos.Dto("attribute", limitId, 2);
-            var dtos = new List<RemainingLifeLimitDTO> { dto1 };
-            repo.Setup(r => r.GetScenarioRemainingLifeLimits(scenarioId)).Returns(dtos);
-            var syncModel = new PagingSyncModel<RemainingLifeLimitDTO>
+            var dto1 = TargetConditionGoalDtos.Dto("attribute", limitId, "targetConditionGoal1");
+            var dto2 = TargetConditionGoalDtos.Dto("attribute", limitId, "targetConditionGoal2");
+            var dto2Clone = TargetConditionGoalDtos.Dto("attribute", limitId, "targetConditionGoal2");
+            var dtos = new List<TargetConditionGoalDTO> { dto1 };
+            repo.Setup(r => r.GetScenarioTargetConditionGoals(scenarioId)).Returns(dtos);
+            var syncModel = new PagingSyncModel<TargetConditionGoalDTO>
             {
-                UpdateRows = new List<RemainingLifeLimitDTO> { dto2 },
+                UpdateRows = new List<TargetConditionGoalDTO> { dto2 },
             };
 
             var result = pagingService.GetSyncedScenarioDataSet(
@@ -66,14 +66,14 @@ namespace BridgeCareCoreTests.Tests
         public void GetSyncedScenarioDataset_RowToDelete_DeletesRow()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var repo = RemainingLifeLimitRepositoryMocks.New(unitOfWork);
+            var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
             var pagingService = CreatePagingService(unitOfWork);
             var scenarioId = Guid.NewGuid();
             var limitId = Guid.NewGuid();
-            var dto = RemainingLifeLimitDtos.Dto("attribute", limitId);
-            var dtos = new List<RemainingLifeLimitDTO> { dto };
-            repo.Setup(r => r.GetScenarioRemainingLifeLimits(scenarioId)).Returns(dtos);
-            var syncModel = new PagingSyncModel<RemainingLifeLimitDTO>
+            var dto = TargetConditionGoalDtos.Dto("attribute", limitId);
+            var dtos = new List<TargetConditionGoalDTO> { dto };
+            repo.Setup(r => r.GetScenarioTargetConditionGoals(scenarioId)).Returns(dtos);
+            var syncModel = new PagingSyncModel<TargetConditionGoalDTO>
             {
                 RowsForDeletion = new List<Guid> { limitId },
             };
@@ -88,17 +88,17 @@ namespace BridgeCareCoreTests.Tests
         public void GetScenarioPage_RequestSecondPage_Expected()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var repo = RemainingLifeLimitRepositoryMocks.New(unitOfWork);
+            var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
             var pagingService = CreatePagingService(unitOfWork);
             var scenarioId = Guid.NewGuid();
             var limitId = Guid.NewGuid();
-            var dto1 = RemainingLifeLimitDtos.Dto("attribute1");
-            var dto2 = RemainingLifeLimitDtos.Dto("attribute2", limitId);
-            var dto2Clone = RemainingLifeLimitDtos.Dto("attribute2", limitId);
-            var dtos = new List<RemainingLifeLimitDTO> { dto1, dto2 };
-            repo.Setup(r => r.GetScenarioRemainingLifeLimits(scenarioId)).Returns(dtos);
-            var syncModel = new PagingSyncModel<RemainingLifeLimitDTO>();
-            var pagingRequest = new PagingRequestModel<RemainingLifeLimitDTO>
+            var dto1 = TargetConditionGoalDtos.Dto("attribute1");
+            var dto2 = TargetConditionGoalDtos.Dto("attribute2", limitId, "targetConditionGoal2");
+            var dto2Clone = TargetConditionGoalDtos.Dto("attribute2", limitId, "targetConditionGoal2");
+            var dtos = new List<TargetConditionGoalDTO> { dto1, dto2 };
+            repo.Setup(r => r.GetScenarioTargetConditionGoals(scenarioId)).Returns(dtos);
+            var syncModel = new PagingSyncModel<TargetConditionGoalDTO>();
+            var pagingRequest = new PagingRequestModel<TargetConditionGoalDTO>
             {
                 SyncModel = syncModel,
                 RowsPerPage = 1,
@@ -116,23 +116,23 @@ namespace BridgeCareCoreTests.Tests
         public void GetLibraryPage_NumberOfRowsGoesBeyondPageSize_TruncatesReturnedList()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var repo = RemainingLifeLimitRepositoryMocks.New(unitOfWork);
+            var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
             var pagingService = CreatePagingService(unitOfWork);
             var libraryId = Guid.NewGuid();
-            var library = RemainingLifeLimitLibraryDtos.Empty(libraryId);
-            var limit1 = RemainingLifeLimitDtos.Dto("attribute1");
-            var limit2 = RemainingLifeLimitDtos.Dto("attribute1");
-            repo.Setup(r => r.GetRemainingLifeLimitsByLibraryId(libraryId)).ReturnsList(limit1, limit2);
-            var syncModel = new PagingSyncModel<RemainingLifeLimitDTO>
+            var library = TargetConditionGoalLibraryDtos.Dto(libraryId);
+            var limit1 = TargetConditionGoalDtos.Dto("attribute1");
+            var limit2 = TargetConditionGoalDtos.Dto("attribute1");
+            repo.Setup(r => r.GetTargetConditionGoalsByLibraryId(libraryId)).ReturnsList(limit1, limit2);
+            var syncModel = new PagingSyncModel<TargetConditionGoalDTO>
             {
             };
-            var upsertRequest = new LibraryUpsertPagingRequestModel<RemainingLifeLimitLibraryDTO, RemainingLifeLimitDTO>
+            var upsertRequest = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>
             {
                 IsNewLibrary = false,
                 Library = library,
                 SyncModel = syncModel,
             };
-            var pagingRequest = new PagingRequestModel<RemainingLifeLimitDTO>
+            var pagingRequest = new PagingRequestModel<TargetConditionGoalDTO>
             {
                 Page = 1,
                 RowsPerPage = 1,
@@ -149,23 +149,23 @@ namespace BridgeCareCoreTests.Tests
         public void GetLibraryPage2_NumberOfRowsGoesBeyondPageSize_SkipsPage1()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var repo = RemainingLifeLimitRepositoryMocks.New(unitOfWork);
+            var repo = TargetConditionGoalRepositoryMocks.New(unitOfWork);
             var pagingService = CreatePagingService(unitOfWork);
             var libraryId = Guid.NewGuid();
-            var library = RemainingLifeLimitLibraryDtos.Empty(libraryId);
-            var limit1 = RemainingLifeLimitDtos.Dto("attribute1");
-            var limit2 = RemainingLifeLimitDtos.Dto("attribute2");
-            repo.Setup(r => r.GetRemainingLifeLimitsByLibraryId(libraryId)).ReturnsList(limit1, limit2);
-            var syncModel = new PagingSyncModel<RemainingLifeLimitDTO>
+            var library = TargetConditionGoalLibraryDtos.Dto(libraryId);
+            var limit1 = TargetConditionGoalDtos.Dto("attribute1");
+            var limit2 = TargetConditionGoalDtos.Dto("attribute2");
+            repo.Setup(r => r.GetTargetConditionGoalsByLibraryId(libraryId)).ReturnsList(limit1, limit2);
+            var syncModel = new PagingSyncModel<TargetConditionGoalDTO>
             {
             };
-            var upsertRequest = new LibraryUpsertPagingRequestModel<RemainingLifeLimitLibraryDTO, RemainingLifeLimitDTO>
+            var upsertRequest = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>
             {
                 IsNewLibrary = false,
                 Library = library,
                 SyncModel = syncModel,
             };
-            var pagingRequest = new PagingRequestModel<RemainingLifeLimitDTO>
+            var pagingRequest = new PagingRequestModel<TargetConditionGoalDTO>
             {
                 Page = 2,
                 RowsPerPage = 1,

@@ -95,7 +95,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             decisionDataModel.CurrentAttributesValues = currentAttributesValues;
 
             // Budget levels
-            var budgetsAtDecisionTime = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment).BudgetsAtDecisionTime ?? new List<BudgetDetail>();
+            var budgetsAtDecisionTime = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment)?.BudgetsAtDecisionTime ?? new List<BudgetDetail>();
             var budgetLevels = new List<decimal>();
             if (budgetsAtDecisionTime.Count > 0)
             {
@@ -154,14 +154,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 decisionsWorksheet.Cells[row, column++].Value = currentAttributesValue;
             }
 
-            foreach (var budgetLevel in decisionsDataModel.BudgetLevels)
+            var budgetsLevels = decisionsDataModel.BudgetLevels;
+            foreach (var budgetLevel in budgetsLevels)
             {
-                SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
+                SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = budgetLevel;
             }
-            // TODO remove this once decisionsDataModel.BudgetLevels starts getting data
-            if (decisionsDataModel.BudgetLevels.Count == 0)
+            if (budgetsLevels.Count == 0)
             {
+                // Adjust column to correct position for next data
                 column += budgetsCount;
             }
 

@@ -165,37 +165,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpdateBudgetLibraryAndUpsertOrDeleteBudgets(BudgetLibraryDTO dto)
         {
-            try
+            _unitOfWork.AsTransaction(u =>
             {
-                _unitOfWork.BeginTransaction();
                 UpsertBudgetLibrary(dto);
                 UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
-                _unitOfWork.Commit();
-            }
-            catch
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
+            });
         }
 
 
         public void CreateNewBudgetLibrary(BudgetLibraryDTO dto, Guid userId)
         {
-            try
+            var users = LibraryUserDtolists.OwnerAccess(userId);
+            _unitOfWork.AsTransaction(u =>
             {
-                _unitOfWork.BeginTransaction();
                 UpsertBudgetLibrary(dto);
                 UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
-                var users = LibraryUserDtolists.OwnerAccess(userId);
                 UpsertOrDeleteUsers(dto.Id, users);
-                _unitOfWork.Commit();
-            }
-            catch
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
+            });
         }
 
         public void DeleteAllBudgetsForLibrary(Guid budgetLibraryId)
@@ -401,18 +387,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteScenarioBudgetsWithInvestmentPlan(List<BudgetDTO> budgets, InvestmentPlanDTO investmentPlan, Guid simulationId)
         {
-            try
+            _unitOfWork.AsTransaction(u =>
             {
-                _unitOfWork.BeginTransaction();
                 UpsertOrDeleteScenarioBudgets(budgets, simulationId);
-                _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
-                _unitOfWork.Commit();
-            }
-            catch
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
+                u.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
+            });
         }
 
         public List<int> GetBudgetYearsBySimulationId(Guid simulationId)

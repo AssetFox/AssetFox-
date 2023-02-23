@@ -121,6 +121,72 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public async Task onlySharedScenarios()
+        {
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulation = SimulationDtos.Dto();
+            var simulations = new List<SimulationDTO> { simulation };
+            var emptySimulations = new List<SimulationDTO>();
+            repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(simulations);
+            repo.Setup(r => r.GetUserScenarios()).Returns(emptySimulations);
+
+            // Act
+            var result = await controller.GetSimulations();
+
+            // Assert
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as PagingPageModel<SimulationDTO>;
+            ObjectAssertions.Equivalent(simulations, castValue.Items);
+        }
+
+        [Fact]
+        public async Task sharedAndUserScenarios()
+        {
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulation = SimulationDtos.Dto();
+            var simulations = new List<SimulationDTO> { simulation };
+            var emptySimulations = new List<SimulationDTO>();
+            repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(simulations);
+            repo.Setup(r => r.GetUserScenarios()).Returns(emptySimulations);
+
+            // Act
+            var result = await controller.GetSimulations();
+
+            // Assert
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as PagingPageModel<SimulationDTO>;
+            ObjectAssertions.Equivalent(simulations, castValue.Items);
+        }
+
+        [Fact]
+        public async Task onlyUserScenarios()
+        {
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulation = SimulationDtos.Dto();
+            var simulations = new List<SimulationDTO> { simulation };
+            var emptySimulations = new List<SimulationDTO>();
+            repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(emptySimulations);
+            repo.Setup(r => r.GetUserScenarios()).Returns(simulations);
+
+            // Act
+            var result = await controller.GetSimulations();
+
+            // Assert
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as PagingPageModel<SimulationDTO>;
+            ObjectAssertions.Equivalent(simulations, castValue.Items);
+        }
+
+        [Fact]
         public async Task CreateSimulation_CallsCreateOnRepo()
         {
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();

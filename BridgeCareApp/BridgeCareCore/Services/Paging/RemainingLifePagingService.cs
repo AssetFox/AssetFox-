@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using System.Linq;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Models;
 using BridgeCareCore.Services.Paging.Generics;
-using Org.BouncyCastle.Asn1.Ocsp;
-using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Services
 {
@@ -33,7 +29,10 @@ namespace BridgeCareCore.Services
             rows.ForEach(_ =>
             {
                 _.Id = Guid.NewGuid();
-                _.CriterionLibrary.Id = Guid.NewGuid();
+                if (_.CriterionLibrary != null)
+                {
+                    _.CriterionLibrary.Id = Guid.NewGuid();
+                }
             });
 
             return rows;

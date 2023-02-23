@@ -1,23 +1,19 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using System;
-using BridgeCareCore.Interfaces;
-using BridgeCareCore.Models;
-using AppliedResearchAssociates.iAM.DTOs;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Services.Paging.Generics;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace BridgeCareCore.Services
 {
-    public class BudgetPriortyPagingService : PagingService<BudgetPriorityDTO, BudgetPriorityLibraryDTO>,  IBudgetPriortyPagingService
+    public class BudgetPriorityPagingService : PagingService<BudgetPriorityDTO, BudgetPriorityLibraryDTO>,  IBudgetPriortyPagingService
     {
         private static IUnitOfWork _unitOfWork;
 
-        public BudgetPriortyPagingService(IUnitOfWork unitOfWork)
+        public BudgetPriorityPagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
@@ -34,12 +30,16 @@ namespace BridgeCareCore.Services
                 rows.ForEach(_ =>
                 {
                     _.Id = Guid.NewGuid();
-                    _.CriterionLibrary.Id = Guid.NewGuid();
+                    if (_.CriterionLibrary != null)
+                    {
+                        _.CriterionLibrary.Id = Guid.NewGuid();
+                    }
                 });
             var budgets = _unitOfWork.BudgetRepo.GetScenarioSimpleBudgetDetails(simulationId);
             //this gets rid of percentage pairs that shouldn't be there and adds the ones that should
             rows.ForEach(row =>
             {
+                row.BudgetPercentagePairs ??= new List<BudgetPercentagePairDTO>();
                 row.BudgetPercentagePairs = row.BudgetPercentagePairs.Where(_ => budgets.Any(__ => __.Name == _.BudgetName)).ToList();
                 budgets.ForEach(_ =>
                 {
@@ -91,8 +91,8 @@ namespace BridgeCareCore.Services
         {
             return rows
                 .Where(_ => _.PriorityLevel.ToString().Contains(search) ||
-                    _.Year.ToString().Contains(search) ||
-                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(search))).ToList();
+                    _.Year!=null && _.Year.ToString().Contains(search) ||
+                    (_.CriterionLibrary!=null && _.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(search))).ToList();
         }
 
         protected override List<BudgetPriorityDTO> GetScenarioRows(Guid scenarioId) => _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(scenarioId);
@@ -103,7 +103,10 @@ namespace BridgeCareCore.Services
             rows.ForEach(_ =>
             {
                 _.Id = Guid.NewGuid();
-                _.CriterionLibrary.Id = Guid.NewGuid();
+                if (_.CriterionLibrary != null)
+                {
+                    _.CriterionLibrary.Id = Guid.NewGuid();
+                }
             });
 
             return rows;

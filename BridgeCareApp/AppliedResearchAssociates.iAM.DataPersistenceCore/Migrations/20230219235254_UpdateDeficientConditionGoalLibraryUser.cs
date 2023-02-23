@@ -4,7 +4,7 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
-    public partial class CreateDeficientConditionGoalLibraryUser : Migration
+    public partial class UpdateDeficientConditionGoalLibraryUser : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

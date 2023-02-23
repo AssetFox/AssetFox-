@@ -484,7 +484,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            var newSimulationDto = SimulationTestSetup.TestSimulation();
+            var newSimulationDto = SimulationDtos.Dto();
             var testUser = await AddTestUser();
 
             newSimulationDto.Users = new List<SimulationUserDTO>
@@ -527,7 +527,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationId = Guid.NewGuid();
             var ownerId = testUser1.Id;
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, owner: ownerId);
-            var updatedSimulation = SimulationTestSetup.TestSimulation(simulationId, owner: testUser2.Id);
+            var updatedSimulation = SimulationDtos.Dto(simulationId, owner: testUser2.Id);
 
             updatedSimulation.Name = "Updated Name";
             updatedSimulation.Users = new List<SimulationUserDTO>

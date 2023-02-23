@@ -129,7 +129,6 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
 
                     var dtos = _investmentPagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);
@@ -138,23 +137,19 @@ namespace BridgeCareCore.Controllers
                     investment.ScenarioBudgets = dtos;
                     investment.InvestmentPlan = investmentPlan;
 
-                    UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(dtos, simulationId);
-                    UnitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
-                    UnitOfWork.Commit();
+                    UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgetsWithInvestmentPlan(dtos, investmentPlan, simulationId);
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertInvestment for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertInvestment for {simulationName} - {e.Message}");
                 throw;

@@ -399,6 +399,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        public void UpsertOrDeleteScenarioBudgetsWithInvestmentPlan(List<BudgetDTO> budgets, InvestmentPlanDTO investmentPlan, Guid simulationId)
+        {
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                UpsertOrDeleteScenarioBudgets(budgets, simulationId);
+                _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
+                _unitOfWork.Commit();
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
         public List<int> GetBudgetYearsBySimulationId(Guid simulationId)
         {
             var years = new List<int>();

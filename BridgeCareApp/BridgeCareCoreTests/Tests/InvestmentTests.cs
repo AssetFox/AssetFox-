@@ -162,9 +162,11 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var upsertCall = investmentPlanRepo.SingleInvocationWithName(nameof(IInvestmentPlanRepository.UpsertInvestmentPlan));
-            ObjectAssertions.Equivalent(upsertCall.Arguments[0], investmentPlan);
-            Assert.Equal(simulationId, upsertCall.Arguments[1]);
+            var invocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteScenarioBudgetsWithInvestmentPlan));
+            var budgets = invocation.Arguments[0] as List<BudgetDTO>;
+            Assert.Empty(budgets);
+            ObjectAssertions.Equivalent(invocation.Arguments[1], investmentPlan);
+            Assert.Equal(simulationId, invocation.Arguments[2]);
         }
 
         [Fact]
@@ -290,11 +292,9 @@ namespace BridgeCareCoreTests.Tests
             // Act
             await controller.UpsertInvestment(simulationId, request);
 
-            var scenarioBudgetInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteScenarioBudgets));
-            var investmentPlanInvocation = investmentPlanRepo.SingleInvocationWithName(nameof(IInvestmentPlanRepository.UpsertInvestmentPlan));
-            Assert.Equal(simulationId, scenarioBudgetInvocation.Arguments[1]);
-            Assert.Equal(simulationId, investmentPlanInvocation.Arguments[1]);
-            var modifiedBudgetDtos = scenarioBudgetInvocation.Arguments[0] as List<BudgetDTO>;
+            var upsertInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteScenarioBudgetsWithInvestmentPlan));
+            Assert.Equal(simulationId, upsertInvocation.Arguments[2]);
+            var modifiedBudgetDtos = upsertInvocation.Arguments[0] as List<BudgetDTO>;
             var modifiedBudgetDto = modifiedBudgetDtos.Single();
             Assert.Equal("Updated Name", modifiedBudgetDto.Name);
             Assert.Equal(dto.ScenarioBudgets[0].CriterionLibrary.Id,
@@ -302,7 +302,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Single(modifiedBudgetDto.BudgetAmounts);
             Assert.Equal(1000000,
                modifiedBudgetDto.BudgetAmounts[0].Value);
-            var modifiedInvestmentPlan = investmentPlanInvocation.Arguments[0] as InvestmentPlanDTO;
+            var modifiedInvestmentPlan = upsertInvocation.Arguments[1] as InvestmentPlanDTO;
             Assert.Equal(1000000, modifiedInvestmentPlan.MinimumProjectCostLimit);
         }
 

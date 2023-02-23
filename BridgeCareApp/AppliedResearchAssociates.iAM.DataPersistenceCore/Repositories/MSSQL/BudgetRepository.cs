@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -181,13 +182,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateNewBudgetLibrary(BudgetLibraryDTO dto, Guid userId)
         {
-
             try
             {
                 _unitOfWork.BeginTransaction();
                 UpsertBudgetLibrary(dto);
                 UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
-                Up
+                var users = LibraryUserDtolists.OwnerAccess(userId);
+                UpsertOrDeleteUsers(dto.Id, users);
                 _unitOfWork.Commit();
             }
             catch

@@ -9,20 +9,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule
 {
     public static class CashFlowRuleDtos
     {
-        public static CashFlowRuleDTO Rule()
+        public static CashFlowRuleDTO Rule(Guid? id = null, Guid? distributionRuleId = null, Guid? criterionLibraryId = null)
         {
+            var ruleId = id ?? Guid.NewGuid();
+            var resolveLibraryId = criterionLibraryId ?? Guid.NewGuid();
             var rule = new CashFlowRuleDTO
             {
                 Name = "TestCashFlowRule",
-                Id = Guid.NewGuid(),
+                Id = ruleId,
                 CashFlowDistributionRules = new List<CashFlowDistributionRuleDTO>
                 {
-                    CashFlowDistributionRuleDtos.Dto(),
+                    CashFlowDistributionRuleDtos.Dto(distributionRuleId),
                 },
                 CriterionLibrary = new CriterionLibraryDTO
                 {
                     Name = "TestCriterionLibrary",
-                    Id = Guid.NewGuid(),
+                    Id = resolveLibraryId,
                     IsSingleUse = true,
                 },
             };

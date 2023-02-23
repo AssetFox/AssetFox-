@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs
+namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class NetworkRollupDetailDTO
     {

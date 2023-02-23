@@ -200,7 +200,7 @@ namespace BridgeCareCoreTests.Tests
             SetupLibraryForGet(libraryId, goalId);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var getResult = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesNoChildren();
-            var deficientConditionGoalLibraryDTO = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
+            var deficientConditionGoalLibraryDTO = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals().First(_ => _.Id == libraryId);
             deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary = criterionLibrary;
             TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(deficientConditionGoalLibraryDTO.DeficientConditionGoals, deficientConditionGoalLibraryDTO.Id);
             Assert.True(TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId));

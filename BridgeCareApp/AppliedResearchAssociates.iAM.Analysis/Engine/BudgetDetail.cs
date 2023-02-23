@@ -21,5 +21,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         public decimal AvailableFunding { get; }
 
         public string BudgetName { get; }
+
+        internal BudgetDetail(BudgetDetail original)
+        {
+            AvailableFunding = original.AvailableFunding;
+            BudgetName = original.BudgetName;
+        }
     }
 }

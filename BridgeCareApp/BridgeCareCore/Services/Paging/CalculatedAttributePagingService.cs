@@ -102,8 +102,8 @@ namespace BridgeCareCore.Services
         {
             var lowerCaseSearch = search.ToLower();
             return equations
-                .Where(_ => (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(lowerCaseSearch)) ||
-                    (_.CriteriaLibrary.MergedCriteriaExpression != null && _.CriteriaLibrary.MergedCriteriaExpression.ToLower().Contains(lowerCaseSearch))).ToList();
+                .Where(_ => (_.Equation != null && _.Equation.Expression!=null && _.Equation.Expression.ToLower().Contains(lowerCaseSearch)) ||
+                    (_.CriteriaLibrary != null && _.CriteriaLibrary.MergedCriteriaExpression!=null && _.CriteriaLibrary.MergedCriteriaExpression.ToLower().Contains(lowerCaseSearch))).ToList();
         }
 
         private List<CalculatedAttributeDTO> SyncedDataset(List<CalculatedAttributeDTO> attributes, CalculatedAttributePagingSyncModel syncModel)
@@ -166,7 +166,7 @@ namespace BridgeCareCore.Services
             }
             else
             {
-                defaultEquation = equations.FirstOrDefault(_ => (_.Equation != null && _.Equation.Expression.Trim() != "") &&
+                defaultEquation = equations.FirstOrDefault(_ => (_.Equation != null && _.Equation.Expression!=null && _.Equation.Expression.Trim() != "") &&
                 (_.CriteriaLibrary == null || _.CriteriaLibrary.MergedCriteriaExpression.Trim() == ""));
                 if (defaultEquation == null)
                 {

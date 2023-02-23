@@ -22,10 +22,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return dto;
         }
 
-        public static BudgetDTO WithSingleAmount(Guid id, string name, int year, decimal value)
+        public static BudgetDTO WithSingleAmount(Guid id, string name, int year, decimal value, Guid? amountId = null)
         {
             var budget = New(id, name);
-            var budgetAmount = BudgetAmountDtos.ForBudgetAndYear(budget, year, value);
+            var budgetAmount = BudgetAmountDtos.ForBudgetAndYear(budget, year, value, amountId);
             budget.BudgetAmounts.Add(budgetAmount);
             return budget;
         }

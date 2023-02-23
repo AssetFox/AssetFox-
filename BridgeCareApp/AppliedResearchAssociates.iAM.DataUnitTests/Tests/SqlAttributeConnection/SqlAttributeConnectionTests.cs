@@ -1,7 +1,7 @@
 ﻿using Xunit;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes
 {

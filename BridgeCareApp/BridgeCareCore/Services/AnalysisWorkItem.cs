@@ -153,7 +153,7 @@ namespace BridgeCareCore.Services
                 var message = eventArgs.MessageBuilder;
                 if (LoggedMessages.Add(message.Message))
                 {
-                    var dto = SimulationLogMapper.ToDTO(message);
+                    var dto = SimulationLogMessageBuilderMapper.ToDTO(message);
                     _unitOfWork.SimulationLogRepo.CreateLog(dto);
                 }
                 switch (message.Status)

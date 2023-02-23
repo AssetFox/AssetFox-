@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data.Mappers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public static class AttributeRepositoryExtensions
     {

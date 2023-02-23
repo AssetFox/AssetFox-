@@ -9,11 +9,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGo
 {
     public static class DeficientConditionGoalLibraryDtos
     {
-        public static DeficientConditionGoalLibraryDTO Empty()
+        public static DeficientConditionGoalLibraryDTO Empty(Guid? id = null)
         {
+            var resolveId = id ?? Guid.NewGuid();
             var dto = new DeficientConditionGoalLibraryDTO
             {
-                Id = Guid.NewGuid(),
+                Id = resolveId,
             };
             return dto;
         }

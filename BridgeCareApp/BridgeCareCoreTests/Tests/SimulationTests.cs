@@ -69,7 +69,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
             var controller = CreateController(unitOfWork);
-            var simulation = SimulationTestSetup.TestSimulation();
+            var simulation = SimulationDtos.Dto();
             var simulations = new List<SimulationDTO> { simulation };
             repo.Setup(r => r.GetUserScenarios()).Returns(simulations);
 
@@ -98,7 +98,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
             var controller = CreateController(unitOfWork);
-            var simulation = SimulationTestSetup.TestSimulation();
+            var simulation = SimulationDtos.Dto();
             var simulations = new List<SimulationDTO> { simulation };
             repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(simulations);
 
@@ -128,8 +128,8 @@ namespace BridgeCareCoreTests.Tests
             var networkId = Guid.NewGuid();
             var controller = CreateController(unitOfWork);
             var simulationId = Guid.NewGuid();
-            var newSimulationDto = SimulationTestSetup.TestSimulation(simulationId);
-            var simulationDtoAfter = SimulationTestSetup.TestSimulation(simulationId, newSimulationDto.Name);
+            var newSimulationDto = SimulationDtos.Dto(simulationId);
+            var simulationDtoAfter = SimulationDtos.Dto(simulationId, newSimulationDto.Name);
             var userId = Guid.NewGuid();
             var simulationUserDto = SimulationUserDtos.Dto(userId);
 
@@ -160,9 +160,9 @@ namespace BridgeCareCoreTests.Tests
             var controller = CreateController(unitOfWork);
             var userId = Guid.NewGuid();
             var simulationId = Guid.NewGuid();
-            var simulationDTO = SimulationTestSetup.TestSimulation(simulationId, SimulationName, userId);
-            var simulationDTO2 = SimulationTestSetup.TestSimulation(simulationId, SimulationName, userId);
-            var simulationDTO3 = SimulationTestSetup.TestSimulation(simulationId, SimulationName, userId);
+            var simulationDTO = SimulationDtos.Dto(simulationId, SimulationName, userId);
+            var simulationDTO2 = SimulationDtos.Dto(simulationId, SimulationName, userId);
+            var simulationDTO3 = SimulationDtos.Dto(simulationId, SimulationName, userId);
 
             repo.Setup(r => r.GetSimulation(simulationId)).Returns(simulationDTO2);
 
@@ -186,7 +186,7 @@ namespace BridgeCareCoreTests.Tests
             var networkId = Guid.NewGuid();
             var cloneSimulationId = Guid.NewGuid();
             var ownerId = Guid.NewGuid();
-            var simulationDto = SimulationTestSetup.TestSimulation(cloneSimulationId, SimulationName, ownerId);
+            var simulationDto = SimulationDtos.Dto(cloneSimulationId, SimulationName, ownerId);
             var cloneResult = new SimulationCloningResultDTO
             {
                 Simulation = simulationDto,

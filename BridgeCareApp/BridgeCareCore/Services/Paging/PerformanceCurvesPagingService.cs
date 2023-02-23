@@ -1,25 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using System.Text;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Models.Validation;
-using OfficeOpenXml;
-using MoreLinq;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
-using BridgeCareCore.Models;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using System.Data;
-using Newtonsoft.Json;
 using BridgeCareCore.Services.Paging.Generics;
-using AppliedResearchAssociates.iAM.Analysis;
-using Org.BouncyCastle.Asn1.Ocsp;
+using MoreLinq;
 
 namespace BridgeCareCore.Services
 {
@@ -31,8 +18,6 @@ namespace BridgeCareCore.Services
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
-
-
 
         protected override List<PerformanceCurveDTO> OrderByColumn(List<PerformanceCurveDTO> curves, string sortColumn, bool isDescending)
         {
@@ -57,10 +42,11 @@ namespace BridgeCareCore.Services
         {
             var lowerCaseSearch = search.ToLower();
             return curves
-                .Where(_ => _.Name.ToLower().Contains(lowerCaseSearch) ||
-                    _.Attribute.ToLower().Contains(lowerCaseSearch) ||
-                    (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(lowerCaseSearch)) ||
-                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(lowerCaseSearch))).ToList();
+                .Where(_ => 
+                _.Name!=null && _.Name.ToLower().Contains(lowerCaseSearch) ||
+                _.Attribute!=null && _.Attribute.ToLower().Contains(lowerCaseSearch) ||
+                _.Equation!=null && _.Equation.Expression!=null &&    _.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(lowerCaseSearch) ||
+                _.CriterionLibrary!=null && _.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(lowerCaseSearch)).ToList();
         }
 
         protected override List<PerformanceCurveDTO> GetScenarioRows(Guid scenarioId) => _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurvesOrderedById(scenarioId);
@@ -71,7 +57,10 @@ namespace BridgeCareCore.Services
             rows.ForEach(_ =>
             {
                 _.Id = Guid.NewGuid();
-                _.CriterionLibrary.Id = Guid.NewGuid();
+                if (_.CriterionLibrary != null)
+                {
+                    _.CriterionLibrary.Id = Guid.NewGuid();
+                }
             });
 
             return rows;

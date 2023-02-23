@@ -65,7 +65,7 @@ export default class RemainingLifeLimitService {
             , proposedUsers
         );
     }
-    static getIsSharedLibrary(remainingLifeLimitLibraryId: string): AxiosPromise {
+    static getIsSharedRemainingLifeLimitLibrary(remainingLifeLimitLibraryId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.RemainingLifeLimit}/GetIsSharedLibrary/${remainingLifeLimitLibraryId}`
         );

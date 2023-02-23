@@ -30,6 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _bridgeWorkCost = new BridgeWorkCost();
             _committedProjectCost = new CommittedProjectCost();
             _summaryReportHelper = new SummaryReportHelper();
+            _reportHelper = new ReportHelper();
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
@@ -72,6 +73,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
                         _.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget).Sum(bu => bu.CoveredCost));
 
+                        var bpnName = _reportHelper.CheckAndGetValue<string>(section?.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                             section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                         {
@@ -86,7 +88,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                 Treatment = section.AppliedTreatment,
                                 Amount = budgetAmount,
                                 isCommitted = true,
-                                costPerBPN = (_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
+                                costPerBPN = (bpnName, budgetAmount),
                                 TreatmentCategory = category
                             });
                             committedTreatments.Add(section.AppliedTreatment);
@@ -99,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             Year = yearData.Year,
                             Treatment = section.AppliedTreatment,
                             Amount = budgetAmount,
-                            costPerBPN = (_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
+                            costPerBPN = (bpnName, budgetAmount),
                             TreatmentCategory = treatmentData.Category,
                             AssetType = treatmentData.AssetCategory
                         });

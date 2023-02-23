@@ -159,6 +159,16 @@
                         </v-flex>
                         <v-spacer></v-spacer>
                     </v-layout>
+                    <v-layout>
+                        <v-flex xs4 class="ghd-constant-header">
+                            <v-switch style="margin-left:10px;margin-top:-10px;"
+                              class="ghd-checkbox"
+                              label="Allow Multi Budget Funding"
+                              :disabled="!hasAdminAccess"
+                              v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"
+                              @change='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
+                        </v-flex>        
+                    </v-layout>
                 </v-layout>
             </v-flex>
 

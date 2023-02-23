@@ -200,7 +200,6 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var libraryAccess = UnitOfWork.BudgetRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
                     if (libraryAccess.LibraryExists == upsertRequest.IsNewLibrary)
                     {
@@ -228,22 +227,20 @@ namespace BridgeCareCore.Controllers
                         });
                     var dto = upsertRequest.Library;
                     dto.Budgets = budgets;
-
-                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
-                    UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
                     if (upsertRequest.IsNewLibrary)
                     {
-                        var users = LibraryUserDtolists.OwnerAccess(UserId);
-                        UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(dto.Id, users);
+                        UnitOfWork.BudgetRepo.CreateNewBudgetLibrary(dto, UserId);
+
+                    } else
+                    {
+                        UnitOfWork.BudgetRepo.UpdateBudgetLibraryAndUpsertOrDeleteBudgets(dto);
                     }
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 return Ok();
             }
@@ -254,7 +251,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertBudgetLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
@@ -328,25 +324,21 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var access = UnitOfWork.BudgetRepo.GetLibraryAccess(libraryId, UserId);
                     _claimHelper.CheckUserLibraryDeleteAuthorization(access, UserId);
 
                     UnitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::DeleteBudgetLibrary - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::DeleteBudgetLibrary - {e.Message}");
                 throw;
             }

@@ -158,9 +158,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
 
         public void UpsertBudgetLibrary(BudgetLibraryDTO dto) {
-            var libraryExists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == dto.Id);
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
             _unitOfWork.Context.SaveChanges();
+        }
+
+        public void UpdateBudgetLibraryAndUpsertOrDeleteBudgets(BudgetLibraryDTO dto)
+        {
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                UpsertBudgetLibrary(dto);
+                UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
+                _unitOfWork.Commit();
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
+
+        public void CreateNewBudgetLibrary(BudgetLibraryDTO dto, Guid userId)
+        {
+
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                UpsertBudgetLibrary(dto);
+                UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
+                Up
+                _unitOfWork.Commit();
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
         }
 
         public void DeleteAllBudgetsForLibrary(Guid budgetLibraryId)

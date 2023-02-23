@@ -56,5 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void AddLibraryBudgetAmounts(List<BudgetAmountDTOWithBudgetId> newBudgetAmountEntities);
         void AddBudgets(List<BudgetDTOWithLibraryId> budgets);
         void UpdateLibraryBudgetAmounts(List<BudgetAmountDTOWithBudgetId> budgetAmounts);
+        void UpdateBudgetLibraryAndUpsertOrDeleteBudgets(BudgetLibraryDTO dto);
+        void CreateNewBudgetLibrary(BudgetLibraryDTO dto, Guid userId);
     }
 }

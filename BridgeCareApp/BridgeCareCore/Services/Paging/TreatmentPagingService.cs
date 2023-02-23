@@ -1,24 +1,27 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Models;
+﻿using System;
 using System.Collections.Generic;
-using System;
-using BridgeCareCore.Services.Treatment;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
-using AppliedResearchAssociates.iAM.Analysis;
+using BridgeCareCore.Models;
 using BridgeCareCore.Services.Paging.Generics;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace BridgeCareCore.Services
 {
-    public class TreatmentPagingService : PagingService<TreatmentDTO, TreatmentLibraryDTO>,  ITreatmentPagingService
+    public class TreatmentPagingService : PagingService<TreatmentDTO, TreatmentLibraryDTO>, ITreatmentPagingService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TreatmentPagingService(UnitOfDataPersistenceWork unitOfWork)
+        public TreatmentPagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
+        }
+
+        private void FixNullLists(TreatmentDTO dto)
+        {
+            dto.Consequences ??= new List<TreatmentConsequenceDTO>();
+            dto.Costs ??= new List<TreatmentCostDTO>();
         }
 
         public override List<TreatmentDTO> GetSyncedScenarioDataSet(Guid simulationId, PagingSyncModel<TreatmentDTO> request)
@@ -35,21 +38,37 @@ namespace BridgeCareCore.Services
 
                 rows.ForEach(_ =>
                 {
+                    FixNullLists(_);
                     _.Id = Guid.NewGuid();
-                    _.CriterionLibrary.Id = Guid.NewGuid();
+                    if (_.CriterionLibrary != null)
+                    {
+                        _.CriterionLibrary.Id = Guid.NewGuid();
+                    }
                     _.Consequences.ForEach(__ =>
                     {
                         __.Id = Guid.NewGuid();
-                        __.CriterionLibrary.Id = Guid.NewGuid();
-                        __.Equation.Id = Guid.NewGuid();
+                        if (__.CriterionLibrary != null)
+                        {
+                            __.CriterionLibrary.Id = Guid.NewGuid();
+                        }
+                        if (__.Equation != null)
+                        {
+                            __.Equation.Id = Guid.NewGuid();
+                        }
                     });
                     _.Costs.ForEach(__ =>
                     {
                         __.Id = Guid.NewGuid();
-                        __.Equation.Id = Guid.NewGuid();
-                        __.CriterionLibrary.Id = Guid.NewGuid();
+                        if (__.Equation != null)
+                        {
+                            __.Equation.Id = Guid.NewGuid();
+                        }
+                        if (__.CriterionLibrary != null)
+                        {
+                            __.CriterionLibrary.Id = Guid.NewGuid();
+                        }
                     });
-                    if (!_.BudgetIds.Any())
+                    if (_.BudgetIds == null || !_.BudgetIds.Any())
                     {
                         _.BudgetIds = budgetIds;
                     }
@@ -66,19 +85,40 @@ namespace BridgeCareCore.Services
             rows.ForEach(_ =>
             {
                 _.Id = Guid.NewGuid();
-                _.CriterionLibrary.Id = Guid.NewGuid();
-                _.Consequences.ForEach(__ =>
+                if (_.CriterionLibrary != null)
                 {
-                    __.Id = Guid.NewGuid();
-                    __.CriterionLibrary.Id = Guid.NewGuid();
-                    __.Equation.Id = Guid.NewGuid();
-                });
-                _.Costs.ForEach(__ =>
+                    _.CriterionLibrary.Id = Guid.NewGuid();
+                }
+                if (_.Consequences != null)
                 {
-                    __.Id = Guid.NewGuid();
-                    __.Equation.Id = Guid.NewGuid();
-                    __.CriterionLibrary.Id = Guid.NewGuid();
-                });
+                    _.Consequences.ForEach(__ =>
+                    {
+                        __.Id = Guid.NewGuid();
+                        if (__.CriterionLibrary != null)
+                        {
+                            __.CriterionLibrary.Id = Guid.NewGuid();
+                        }
+                        if (__.Equation != null)
+                        {
+                            __.Equation.Id = Guid.NewGuid();
+                        }
+                    });
+                }
+                if (_.Costs != null)
+                {
+                    _.Costs.ForEach(__ =>
+                    {
+                        __.Id = Guid.NewGuid();
+                        if (__.Equation != null)
+                        {
+                            __.Equation.Id = Guid.NewGuid();
+                        }
+                        if (__.CriterionLibrary != null)
+                        {
+                            __.CriterionLibrary.Id = Guid.NewGuid();
+                        }
+                    });
+                }
             });
 
             return rows;

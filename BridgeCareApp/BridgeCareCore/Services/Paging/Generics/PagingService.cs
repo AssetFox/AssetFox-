@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DTOs;
+using System.Security.Cryptography.X509Certificates;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using BridgeCareCore.Models;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace BridgeCareCore.Services.Paging.Generics
 {

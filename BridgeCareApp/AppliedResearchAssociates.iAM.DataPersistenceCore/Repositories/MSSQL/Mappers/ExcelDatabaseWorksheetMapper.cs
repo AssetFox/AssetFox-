@@ -33,18 +33,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return returnValue;
         }
 
-        public static ExcelRawDataDTO ToDTO (this ExcelRawDataSpreadsheet worksheet, Guid dataSourceID, Guid worksheetId)
-        {
-            var serializedContent = ExcelRawDataSpreadsheetSerializer.Serialize(worksheet);
-            var returnValue = new ExcelRawDataDTO
-            {
-                Id = worksheetId,
-                DataSourceId = dataSourceID,
-                SerializedWorksheetContent = serializedContent,
-            };
-            return returnValue;
-        }
-
         internal static ExcelRawDataDTO ToDTONullPropagating(ExcelRawDataEntity entity)
         {
             if (entity == null)

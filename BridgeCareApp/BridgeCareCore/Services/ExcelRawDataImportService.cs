@@ -97,7 +97,7 @@ namespace BridgeCareCore.Services
             }
             var workseet = ExcelRawDataSpreadsheets.WithColumns(columns);
             var newId = Guid.NewGuid();
-            var dto = ExcelDatabaseWorksheetMapper.ToDTO(workseet, dataSourceId, newId);
+            var dto = ExcelRawDataSpreadsheetSerializationMapper.ToDTO(workseet, dataSourceId, newId);
             var returnId = _unitOfWork.ExcelWorksheetRepository.AddExcelRawData(dto);
             return new ExcelRawDataImportResultDTO
             {

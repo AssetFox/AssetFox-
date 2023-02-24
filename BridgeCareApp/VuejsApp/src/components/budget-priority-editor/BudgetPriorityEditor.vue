@@ -29,10 +29,6 @@
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
-                        <!-- <v-checkbox class='sharing header-text-content' label='Shared'
-                            v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                            v-model='selectedBudgetPriorityLibrary.isShared'
-                            @change="checkHasUnsavedChanges()" /> -->
                     </v-layout>                               
                 </v-flex>                               
                 <v-flex xs4 class="ghd-constant-header">
@@ -434,12 +430,6 @@ export default class BudgetPriorityEditor extends Vue {
                 return;
             }
         }
-        // const hasUnsavedChanges: boolean = this.hasScenario
-        //     ? hasUnsavedChangesCore('', this.currentPage, this.stateScenarioBudgetPriorities)
-        //     : hasUnsavedChangesCore('',
-        //         {...clone(this.selectedBudgetPriorityLibrary), budgetPriorities: clone(this.currentPage)},
-        //         this.stateSelectedBudgetPriorityLibrary);
-        // this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
         this.setGridCriteriaColumnWidth();
         this.setGridHeaders();
         this.setGridData();

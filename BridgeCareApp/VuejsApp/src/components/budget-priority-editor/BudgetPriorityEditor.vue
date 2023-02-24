@@ -171,7 +171,10 @@
                 </v-btn>
             </v-layout>
         </v-flex>
-
+        <ShareBudgetPriorityLibraryDialog 
+            :dialogData='shareBudgetPriorityLibraryDialogData' 
+            @submit='onShareBudgetPriorityLibraryDialogSubmit'
+        />
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
 
         <CreatePriorityLibraryDialog :dialogData='createBudgetPriorityLibraryDialogData'
@@ -194,8 +197,10 @@ import {
     BudgetPriority,
     BudgetPriorityGridDatum,
     BudgetPriorityLibrary,
+    BudgetPriorityLibraryUser,
     emptyBudgetPriority,
     emptyBudgetPriorityLibrary,
+    emptyBudgetPriorityLibraryUsers
 } from '@/shared/models/iAM/budget-priority';
 import CreatePriorityDialog
     from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityDialog.vue';
@@ -209,6 +214,11 @@ import {
     CreateBudgetPriorityLibraryDialogData,
     emptyCreateBudgetPriorityLibraryDialogData,
 } from '@/shared/models/modals/create-budget-priority-library-dialog-data';
+import {
+    ShareBudgetPriorityLibraryDialogData,
+    emptyShareBudgetPriorityLibraryDialogData
+} from '@/shared/models/modals/share-budget-priority-library-dialog-data';
+import ShareBudgetPriorityLibraryDialog from './budget-priority-editor-dialogs/ShareBudgetPriorityLibraryDialog.vue';
 import CreatePriorityLibraryDialog
     from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityLibraryDialog.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
@@ -234,7 +244,7 @@ const ObjectID = require('bson-objectid');
 
 @Component({
     components: {
-        CreatePriorityLibraryDialog, CreatePriorityDialog, GeneralCriterionEditorDialog, ConfirmDeleteAlert: Alert,
+        CreatePriorityLibraryDialog, CreatePriorityDialog, GeneralCriterionEditorDialog, ConfirmDeleteAlert: Alert, ShareBudgetPriorityLibraryDialog
     },
 })
 export default class BudgetPriorityEditor extends Vue {

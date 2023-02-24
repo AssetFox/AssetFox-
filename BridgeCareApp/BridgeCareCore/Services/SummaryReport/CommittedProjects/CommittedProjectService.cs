@@ -491,8 +491,8 @@ namespace BridgeCareCore.Services
                 
                 compiler = new CalculateEvaluateCompiler();
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.TreatmentCostEquationJoin.Equation.Expression, compiler);
-
-                var aggResultEntities = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(asset.Id);
+                var attributeIds = attributes.Select(a => a.Id).ToList();
+                var aggResultEntities = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(asset.Id, attributeIds);
                 var latestAggResults = new List<AggregatedResultDTO>();
                 foreach(var attr in attributes)
                 {
@@ -547,7 +547,7 @@ namespace BridgeCareCore.Services
         {
             var attributes = InstantiateCompilerAndGetExpressionAttributes(expression, compiler);
             var attributeIds = attributes.Select(a => a.Id).ToList();
-            var aggResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(assetId);
+            var aggResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(assetId, attributeIds);
             var latestAggResults = new List<AggregatedResultDTO>();
             foreach (var attr in attributes)
             {

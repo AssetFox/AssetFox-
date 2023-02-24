@@ -37,7 +37,7 @@ namespace BridgeCareCore.Services
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfDataPersistenceWork>();
             if (!string.IsNullOrEmpty(userInfo.Name))
             {
-                if (!_unitOfWork.Context.User.Any(_ => _.Username == userInfo.Name))
+                if (!_unitOfWork.UserRepo.UserExists(userInfo.Name))
                 {
                     _unitOfWork.AddUser(userInfo.Name, userInfo.HasAdminAccess);
                 }

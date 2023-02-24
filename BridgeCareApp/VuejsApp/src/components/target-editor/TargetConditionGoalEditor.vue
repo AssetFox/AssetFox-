@@ -618,10 +618,6 @@ export default class TargetConditionGoalEditor extends Vue {
         this.initializing = false;
         if(this.hasSelectedLibrary)
             this.onPaginationChanged();
-
-        if (!isNullOrUndefined(this.selectedTargetConditionGoalLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedTargetConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
-        }
     }
 
     @Watch('selectedGridRows')
@@ -656,10 +652,6 @@ export default class TargetConditionGoalEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
-        if (!isNullOrUndefined(this.selectedTargetConditionGoalLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedTargetConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
-        }
-
         const request: PagingRequest<TargetConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -689,6 +681,9 @@ export default class TargetConditionGoalEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    if (!isNullOrUndefined(this.selectedTargetConditionGoalLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedTargetConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
                 }
             });     
     }

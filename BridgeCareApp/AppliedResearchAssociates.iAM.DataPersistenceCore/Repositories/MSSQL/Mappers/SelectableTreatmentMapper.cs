@@ -157,6 +157,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new List<TreatmentDTO>()
             };
 
+        public static TreatmentDTO ToDtoNullSafe(this SelectableTreatmentEntity entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+            return entity.ToDto();
+        }
+
         public static TreatmentDTO ToDto(this ScenarioSelectableTreatmentEntity entity) =>
             new TreatmentDTO
             {

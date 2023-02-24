@@ -14,8 +14,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class AggregatedResultTestSetup
     {
-        public static void AddAggregatedResultsToDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultAttributes, List<IAggregatedResult> results)
+        public static void AddNumericAggregatedResultsToDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultAttributes)
         {
+            var results = new List<IAggregatedResult>();
             foreach (var asset in maintainableAssets)
             {
                 var resultId = Guid.NewGuid();
@@ -37,6 +38,29 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
             unitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
         }
+        public static void AddTextAggregatedResultsToDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultAttributes)
+        {
+            var results = new List<IAggregatedResult>();
+            foreach (var asset in maintainableAssets)
+            {
+                var resultId = Guid.NewGuid();
+                var resultData = new List<(IamAttribute, (int, string))>();
 
+                foreach (var attribute in resultAttributes)
+                {
+                    var resultDatum = (
+                        attribute, (2022, "AggregatedResult"));
+                    resultData.Add(resultDatum);
+                }
+                var result = new AggregatedResult<string>(
+                    resultId,
+                    asset,
+                    resultData
+                    );
+
+                results.Add(result);
+            }
+            unitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
+        }
     }
 }

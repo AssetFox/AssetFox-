@@ -43,8 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
             TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId);
-            var results = new List<IAggregatedResult>();
-            AggregatedResultTestSetup.AddAggregatedResultsToDb(TestHelper.UnitOfWork, maintainableAssets, resultAttributes, results);
+            AggregatedResultTestSetup.AddNumericAggregatedResultsToDb(TestHelper.UnitOfWork, maintainableAssets, resultAttributes);
 
             var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);

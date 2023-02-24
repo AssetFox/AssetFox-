@@ -44,8 +44,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 
         private static bool AttributesHaveBeenCreated = false;
         private static readonly object AttributeLock = new object();
+        private static SQLDataSourceDTO CacheDataSourceForAttributes { get; set; }
 
-        public static void CreateAttributes(IUnitOfWork unitOfWork)
+        public static SQLDataSourceDTO CreateAttributes(IUnitOfWork unitOfWork)
         {
             if (!AttributesHaveBeenCreated)
             {
@@ -69,6 +70,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                         {
                             dataSourceToApply = (SQLDataSourceDTO)unitOfWork.DataSourceRepo.GetDataSources().First(_ => _.Type == "SQL");
                         }
+                        CacheDataSourceForAttributes = dataSourceToApply;
                         var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
                         foreach (var attribute in attributesToInsert)
                         {
@@ -79,6 +81,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                     }
                 }
             }
+            return CacheDataSourceForAttributes;
         }
 
     }

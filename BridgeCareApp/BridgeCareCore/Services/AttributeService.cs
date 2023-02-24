@@ -14,6 +14,8 @@ namespace BridgeCareCore.Services
     public class AttributeService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
+        public const string ValuesForAttribute = "Values for attribute";
+        public const string IsANumberUseTextInput = "is a number; use text input";
 
         public AttributeService(UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfWork =
             unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
@@ -67,7 +69,7 @@ namespace BridgeCareCore.Services
                             ? $"No values found for attribute {keyValuePair.Key}; use text input"
  //                           : values.Count > 100
                             : dtypes.Count > 0
-                                ? $"Values for attribute {keyValuePair.Key} is a number; use text input"
+                                ? $"{ValuesForAttribute} {keyValuePair.Key} {IsANumberUseTextInput}"
                                 : "Success",
                         ResultType = !values.Any() ? "warning" : "success"
                     };

@@ -324,5 +324,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
         }
+
+        public List<TreatmentConsequenceDTO> GetTreatmentConsequencesByLibraryIdAndTreatmentName(Guid treatmentLibraryId, string treatmentName)
+        {
+            var treatmentConsequences = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.TreatmentConsequences)
+            .ThenInclude(_ => _.Attribute)
+                .FirstOrDefault(_ => _.Name == treatmentName && _.TreatmentLibraryId == treatmentLibraryId)?.TreatmentConsequences?.ToList();
+            return treatmentConsequences?.Select(tc => tc.ToDto())?.ToList();
+        }
     }
 }

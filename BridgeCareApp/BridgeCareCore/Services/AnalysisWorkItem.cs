@@ -34,7 +34,7 @@ namespace BridgeCareCore.Services
 
             using var scope = serviceProvider.CreateScope();
 
-            var _unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfDataPersistenceWork>();
+            var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             if (!string.IsNullOrEmpty(userInfo.Name))
             {
                 if (!_unitOfWork.UserRepo.UserExists(userInfo.Name))

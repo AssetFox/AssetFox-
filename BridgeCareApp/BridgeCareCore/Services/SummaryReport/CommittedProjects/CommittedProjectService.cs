@@ -469,15 +469,7 @@ namespace BridgeCareCore.Services
             
             if (asset == null)
                 return 0;
-            var treatmentCosts = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
-                .Include(_ => _.TreatmentCosts)
-                .ThenInclude(_ => _.TreatmentCostEquationJoin)
-                .ThenInclude(_ => _.Equation)
-                .Include(_ => _.TreatmentCosts)
-                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .FirstOrDefault(_ => _.Name == treatment && _.TreatmentLibraryId == treatmentLibraryId)?.TreatmentCosts
-                .Where(_ => _.TreatmentCostEquationJoin != null);
+            var treatmentCosts = _unitOfWork.TreatmentCostRepo.GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName(treatmentLibraryId, treatment);
 
             double totalCost = 0;
             if (treatmentCosts == null)
@@ -486,11 +478,11 @@ namespace BridgeCareCore.Services
             {
                 var compiler = new CalculateEvaluateCompiler();
 
-                if (cost.CriterionLibraryTreatmentCostJoin != null && !IsCriteriaValid(compiler, cost.CriterionLibraryTreatmentCostJoin.CriterionLibrary.MergedCriteriaExpression, asset.Id))               
+                if (cost.CriterionLibrary.Id != Guid.Empty && !IsCriteriaValid(compiler, cost.CriterionLibrary.MergedCriteriaExpression, asset.Id))               
                     continue;
                 
                 compiler = new CalculateEvaluateCompiler();
-                var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.TreatmentCostEquationJoin.Equation.Expression, compiler);
+                var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.Equation.Expression, compiler);
                 var attributeIds = attributes.Select(a => a.Id).ToList();
                 var aggResultEntities = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(asset.Id, attributeIds);
                 var latestAggResults = new List<AggregatedResultDTO>();
@@ -503,7 +495,7 @@ namespace BridgeCareCore.Services
                     var latestAggResult = attrs.FirstOrDefault(_ => _.Year == latestYear);
                     latestAggResults.Add(latestAggResult);
                 }                             
-                var calculator = compiler.GetCalculator(cost.TreatmentCostEquationJoin.Equation.Expression);
+                var calculator = compiler.GetCalculator(cost.Equation.Expression);
                 var scope = new CalculateEvaluateScope();
                 if (latestAggResults.Count != attributes.Count)
                     continue;
@@ -514,31 +506,25 @@ namespace BridgeCareCore.Services
             return totalCost;
         }
 
-        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentLIbraryId, string assetKeyData, string treatment, Guid networkId)
+        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentLibraryId, string assetKeyData, string treatment, Guid networkId)
         {
             var consequencesToReturn = new List<CommittedProjectConsequenceDTO>();
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
             if (asset == null)
                 return consequencesToReturn;
-            var treatmentConsequences = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
-                .Include(_ => _.TreatmentConsequences)
-                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.TreatmentConsequences)
-                .ThenInclude(_ => _.Attribute)
-                .FirstOrDefault(_ => _.Name == treatment && _.TreatmentLibraryId == treatmentLIbraryId)?.TreatmentConsequences.ToList();
+            var treatmentConsequences = _unitOfWork.TreatmentConsequenceRepo.GetTreatmentConsequencesByLibraryIdAndTreatmentName(treatmentLibraryId, treatment);
             if (treatmentConsequences == null)
                 return consequencesToReturn;
             foreach (var consequence in treatmentConsequences)
             {
                 var compiler = new CalculateEvaluateCompiler();
-                if(consequence.CriterionLibraryConditionalTreatmentConsequenceJoin == null)
+                if(consequence.CriterionLibrary.Id == Guid.Empty)
                 {
-                    consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue });
+                    consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute, ChangeValue = consequence.ChangeValue });
                     continue;
                 }
-                if (IsCriteriaValid(compiler, consequence.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, asset.Id))
-                    consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue});
+                if (IsCriteriaValid(compiler, consequence.CriterionLibrary.MergedCriteriaExpression, asset.Id))
+                    consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute, ChangeValue = consequence.ChangeValue});
             }
             return consequencesToReturn;
         }   

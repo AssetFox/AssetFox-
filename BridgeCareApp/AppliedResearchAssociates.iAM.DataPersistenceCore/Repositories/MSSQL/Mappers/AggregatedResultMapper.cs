@@ -80,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     AttributeId = attributeId,
                     Year = historyEnumerator.Current.Key,
                     TextValue = typeof(T) == typeof(string) ? historyEnumerator.Current.Value.ToString() : null,
-                    NumericValue = typeof(T) == typeof(double) ? Convert.ToDouble(historyEnumerator.Current.Value) : (double?) null,
+                    NumericValue = typeof(T) == typeof(double) ? Convert.ToDouble(historyEnumerator.Current.Value) : (double?)null,
                     Discriminator = typeof(T) == typeof(double)
                         ? DataPersistenceConstants.AggregatedResultNumericDiscriminator
                         : DataPersistenceConstants.AggregatedResultTextDiscriminator
@@ -114,6 +114,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 TextValue = entity.TextValue,
                 NumericValue = entity.NumericValue,
                 Year = entity.Year,
+                Discriminator = entity.Discriminator,
                 Attribute = new AttributeDTO
                 {
                     Name = entity.Attribute.Name,

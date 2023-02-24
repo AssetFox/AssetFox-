@@ -76,7 +76,6 @@ namespace BridgeCareCoreTests.Tests.Integration
             ObjectAssertions.Equivalent(expectedValue, theValue);
         }
 
-
         [Fact]
         public void GetAttributeSelectValues_TextAggregatedResultInDatabase_Gets()
         {

@@ -407,10 +407,6 @@ export default class BudgetPriorityEditor extends Vue {
         this.initializing = false;
         if(this.hasSelectedLibrary)
             this.onPaginationChanged();
-        
-        if (!isNullOrUndefined(this.selectedBudgetPriorityLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedBudgetPriorityLibrary).then(this.isShared = this.isSharedLibrary);
-        }
     }
 
     @Watch('stateScenarioBudgetPriorities')
@@ -453,9 +449,6 @@ export default class BudgetPriorityEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
-        if (!isNullOrUndefined(this.selectedBudgetPriorityLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedBudgetPriorityLibrary).then(this.isShared = this.isSharedLibrary);
-        }
         const request: PagingRequest<BudgetPriority>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -485,6 +478,10 @@ export default class BudgetPriorityEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+
+                    if (!isNullOrUndefined(this.selectedBudgetPriorityLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedBudgetPriorityLibrary).then(this.isShared = this.isSharedLibrary);
+                    }           
                 }
             });     
     }

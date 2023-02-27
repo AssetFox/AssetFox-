@@ -21,17 +21,18 @@ namespace BridgeCareCoreTests.Tests.Integration
         [Fact]
         public void GetTreatmentCost_Behaves()
         {
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = Guid.NewGuid();
+            NetworkTestSetup.CreateNetworkWithKeyAttribute(TestHelper.UnitOfWork, networkId);
             var service = CreateCommittedProjectService();
             var treatmentLibraryId = Guid.NewGuid();
-            var assetKeyData = "";
+            var assetKeyData = "key";
             var treatmentName = "treatment";
 
             var cost = service.GetTreatmentCost(
                 treatmentLibraryId,
                 assetKeyData,
                 treatmentName,
-                NetworkTestSetup.NetworkId);
+                networkId);
         }
     }
 }

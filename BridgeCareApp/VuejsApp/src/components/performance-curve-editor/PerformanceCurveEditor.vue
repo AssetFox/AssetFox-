@@ -730,10 +730,6 @@ export default class PerformanceCurveEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.performancePagination;
-
-        if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
-        }
         const request: PagingRequest<PerformanceCurve>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -768,6 +764,9 @@ export default class PerformanceCurveEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                     this.isRunning = false;
+                    if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
                 }
             });  
         }
@@ -1238,7 +1237,6 @@ export default class PerformanceCurveEditor extends Vue {
                 //add library user to an array
                 libraryUserData.push(libraryUser);
             });
-            //this.selectedPerformanceCurveLibrary.isShared = this.sharePerformanceCurveLibraryDialogData.performanceCurveLibrary.isShared;
             if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
                 this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
             }

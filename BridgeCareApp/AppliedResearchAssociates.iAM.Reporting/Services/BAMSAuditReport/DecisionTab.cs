@@ -95,7 +95,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             decisionDataModel.CurrentAttributesValues = currentAttributesValues;
 
             // Budget levels
-            var budgetsAtDecisionTime = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment)?.BudgetsAtDecisionTime ?? new List<BudgetDetail>();
+            var budgetsAtDecisionTime = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment)?.BudgetsAtDecisionTime ?? (section.TreatmentConsiderations.FirstOrDefault()?.BudgetsAtDecisionTime ?? new List<BudgetDetail>());
             var budgetLevels = new List<decimal>();
             if (budgetsAtDecisionTime.Count > 0)
             {

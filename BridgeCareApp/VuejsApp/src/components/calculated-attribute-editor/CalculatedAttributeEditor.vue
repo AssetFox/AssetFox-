@@ -554,9 +554,6 @@ export default class CalculatedAttributeEditor extends Vue {
             search: this.currentSearch,
             attributeId: this.stateCalculatedAttributes.find(_ => _.name === this.selectedAttribute.attribute)!.id
         };
-        if (!isNullOrUndefined(this.selectedCalculatedAttributeLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedCalculatedAttributeLibrary).then(this.isShared = this.isSharedLibrary);
-        }
         if((!this.hasSelectedLibrary && this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
             CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
@@ -580,7 +577,10 @@ export default class CalculatedAttributeEditor extends Vue {
                     this.pairsCache = this.currentPage.equations;
                     this.totalItems = data.totalItems;
                     this.defaultEquation = data.defaultEquation;
-                    this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.currentPage)
+                    this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.currentPage);
+                    if (!isNullOrUndefined(this.selectedCalculatedAttributeLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedCalculatedAttributeLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
                 }
             });     
     }
@@ -783,9 +783,6 @@ export default class CalculatedAttributeEditor extends Vue {
         else {
             this.hasSelectedLibrary = false;
         }
-        if (!isNullOrUndefined(this.selectedCalculatedAttributeLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedCalculatedAttributeLibrary).then(this.isShared = this.isSharedLibrary);
-        }   
 
         this.clearChanges();
         if (this.hasScenario && this.hasSelectedLibrary) {

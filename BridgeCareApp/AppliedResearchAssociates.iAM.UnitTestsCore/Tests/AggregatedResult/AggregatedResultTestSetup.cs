@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
             unitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
         }
-        public static void AddTextAggregatedResultsToDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultAttributes)
+        public static void AddTextAggregatedResultsToDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultAttributes, string text = "AggregatedResult")
         {
             var results = new List<IAggregatedResult>();
             foreach (var asset in maintainableAssets)
@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 foreach (var attribute in resultAttributes)
                 {
                     var resultDatum = (
-                        attribute, (2022, "AggregatedResult"));
+                        attribute, (2022, text));
                     resultData.Add(resultDatum);
                 }
                 var result = new AggregatedResult<string>(

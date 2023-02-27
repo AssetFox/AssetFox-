@@ -46,8 +46,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
         }
 
-        public static void CreateNetworkWithKeyAttribute(
+        public static TNetwork ModelForEntityInDbWithKeyAttribute(
             IUnitOfWork unitOfWork,
+            List<MaintainableAsset> maintainableAssets,
             Guid? networkId = null,
             Guid? keyAttributeId = null,
             string keyAttributeName = null)
@@ -55,13 +56,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var name = RandomStrings.WithPrefix("Network");
             var resolveNetworkId = networkId ?? Guid.NewGuid();
             var attribute = AttributeTestSetup.CreateSingleTextAttribute(unitOfWork, keyAttributeId, keyAttributeName);
-            var network = new NetworkEntity
-            {
-                Id = resolveNetworkId,
-                Name = name,
-                KeyAttributeId = attribute.Id,
-            };
-            unitOfWork.Context.AddEntity(network);
+            var network = new TNetwork(maintainableAssets, resolveNetworkId, name);
+            network.KeyAttributeId = attribute.Id;
+            unitOfWork.NetworkRepo.CreateNetwork(network);
+            return network;
         }
     }
 }

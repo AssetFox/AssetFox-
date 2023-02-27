@@ -568,9 +568,6 @@ export default class CashFlowEditor extends Vue {
         }
         this.initializing = false;
 
-        if (!isNullOrUndefined(this.selectedCashFlowRuleLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedCashFlowRuleLibrary).then(this.isShared = this.isSharedLibrary);
-        }   
         if(this.hasSelectedLibrary)
             this.onPaginationChanged();
     }
@@ -608,9 +605,6 @@ export default class CashFlowEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
-        if (!isNullOrUndefined(this.selectedCashFlowRuleLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedCashFlowRuleLibrary).then(this.isShared = this.isSharedLibrary);
-        }
         const request: PagingRequest<CashFlowRule>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -640,6 +634,10 @@ export default class CashFlowEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    if (!isNullOrUndefined(this.selectedCashFlowRuleLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedCashFlowRuleLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
+
                 }
             });     
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -92,7 +92,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributeIds.Contains(_.AttributeId)).ToList();
             return entities.Select(AggregatedResultMapper.ToDto).ToList();
         }
-
-        public List<AggregatedResultDTO> GetAggregatedResultsForMaintainableAsset(Guid assetId) => throw new NotImplementedException();
     }
 }

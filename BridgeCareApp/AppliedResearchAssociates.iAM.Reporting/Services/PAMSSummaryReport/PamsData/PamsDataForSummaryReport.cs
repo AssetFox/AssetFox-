@@ -442,12 +442,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
         }
 
 
-        private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail intialsection)
+        private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail initialSection)
         {
             // Get NHS record for Parameter TAB
             if (_parametersModel.nHSModel.NHS == null || _parametersModel.nHSModel.NonNHS == null)
             {
-                int.TryParse(intialsection.ValuePerTextAttribute["NHS_IND"], out var numericValue);
+                int.TryParse(initialSection.ValuePerTextAttribute["NHS_IND"], out var numericValue);
+                //var numericValue = _summaryReportHelper.checkAndGetValue<int>(initialSection.ValuePerTextAttribute, "NHS_IND");
                 if (numericValue > 0)
                 {
                     _parametersModel.nHSModel.NHS = "Y";
@@ -460,9 +461,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 }
             }
             // Get BPN data for parameter TAB
-            if (!_parametersModel.BPNValues.Contains(intialsection.ValuePerTextAttribute["BUSIPLAN"]))
+            if (!_parametersModel.BPNValues.Contains(initialSection.ValuePerTextAttribute["BUSIPLAN"]))
             {
-                _parametersModel.BPNValues.Add(intialsection.ValuePerTextAttribute["BUSIPLAN"]);
+                _parametersModel.BPNValues.Add(initialSection.ValuePerTextAttribute["BUSIPLAN"]);
             }
         }
 

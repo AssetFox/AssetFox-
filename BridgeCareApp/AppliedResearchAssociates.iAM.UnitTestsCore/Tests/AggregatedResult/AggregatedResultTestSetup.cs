@@ -38,7 +38,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
             unitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
         }
-        public static void AddTextAggregatedResultsToDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultAttributes, string text = "AggregatedResult")
+        /// <summary>This deletes any former aggregated results.
+        /// Therefore, you can only call something like it once per test.</summary> 
+        public static void SetTextAggregatedResultsInDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultAttributes, string text = "AggregatedResult")
         {
             var results = new List<IAggregatedResult>();
             foreach (var asset in maintainableAssets)
@@ -51,6 +53,39 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     var resultDatum = (
                         attribute, (2022, text));
                     resultData.Add(resultDatum);
+                }
+                var result = new AggregatedResult<string>(
+                    resultId,
+                    asset,
+                    resultData
+                    );
+
+                results.Add(result);
+            }
+            unitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
+        }
+
+        public static void SetTextAggregatedResultsInDb(
+            IUnitOfWork unitOfWork,
+            List<MaintainableAsset> maintainableAssets,
+            Dictionary<string, List<IamAttribute>> resultsForAttributes
+            )
+        {
+            var results = new List<IAggregatedResult>();
+            foreach (var asset in maintainableAssets)
+            {
+                var resultId = Guid.NewGuid();
+                var resultData = new List<(IamAttribute, (int, string))>();
+
+                foreach (var key in resultsForAttributes.Keys)
+                {
+                    foreach (var attribute in resultsForAttributes
+                        [key])
+                    {
+                        var resultDatum = (
+                            attribute, (2022, key));
+                        resultData.Add(resultDatum);
+                    }
                 }
                 var result = new AggregatedResult<string>(
                     resultId,

@@ -108,6 +108,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static AggregatedResultDTO ToDto(this AggregatedResultEntity entity)
         {
+            var attribute = AttributeMapper.ToAbbreviatedDto(entity.Attribute);
             return new AggregatedResultDTO
             {
                 MaintainableAssetId = entity.MaintainableAssetId,
@@ -115,11 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 NumericValue = entity.NumericValue,
                 Year = entity.Year,
                 Discriminator = entity.Discriminator,
-                Attribute = new AttributeDTO
-                {
-                    Name = entity.Attribute.Name,
-                    Type = entity.Attribute.DataType
-                }
+                Attribute = attribute,
             };
         }
     }

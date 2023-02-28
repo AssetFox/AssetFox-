@@ -97,7 +97,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
-            AggregatedResultTestSetup.AddTextAggregatedResultsToDb(TestHelper.UnitOfWork, assetList, attributeList);
+            AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork, assetList, attributeList);
 
             var values = service.GetAttributeSelectValues(attributeNames);
 

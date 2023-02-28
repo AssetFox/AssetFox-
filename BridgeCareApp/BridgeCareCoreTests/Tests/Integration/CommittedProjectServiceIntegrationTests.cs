@@ -47,7 +47,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, attributeName);
             var attributes = new List<IamAttribute> { attribute };
-            AggregatedResultTestSetup.AddTextAggregatedResultsToDb(TestHelper.UnitOfWork,
+            AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork,
                 maintainableAssets, attributes, assetKeyData);
             var treatmentId = Guid.NewGuid();
             var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
@@ -85,29 +85,35 @@ namespace BridgeCareCoreTests.Tests.Integration
             var resultAttributeName = RandomStrings.WithPrefix("result");
             var resultAttributeId = Guid.NewGuid();
             var resultAttribute = AttributeTestSetup.Text(resultAttributeId, resultAttributeName); ;
+            AttributeTestSetup.CreateSingleTextAttribute(TestHelper.UnitOfWork,
+                resultAttributeId, resultAttributeName);
             maintainableAssets.Add(maintainableAsset);
             var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
             var attributes = new List<IamAttribute> { keyAttribute, resultAttribute };
-            AggregatedResultTestSetup.AddTextAggregatedResultsToDb(TestHelper.UnitOfWork,
+            AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork,
                 maintainableAssets, attributes, assetKeyData);
             var treatmentId = Guid.NewGuid();
             var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
             var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, treatmentId, treatmentLibraryId, mergedCriteriaExpression: $"[{resultAttributeName}]='ok'");
-            var resultAttributes = new List<IamAttribute> { resultAttribute };
-            AggregatedResultTestSetup.AddTextAggregatedResultsToDb(TestHelper.UnitOfWork,
-                maintainableAssets, resultAttributes, "ok");
             var keyAttributes = new List<IamAttribute> { keyAttribute };
-            AggregatedResultTestSetup.AddTextAggregatedResultsToDb(TestHelper.UnitOfWork,
-                maintainableAssets, keyAttributes, "key");
+            var resultAttributes = new List<IamAttribute> { resultAttribute };
+            var resultDictionary = new Dictionary<string, List<IamAttribute>>();
+            resultDictionary["ok"] = resultAttributes;
+            resultDictionary["key"] = keyAttributes;
+            AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork,
+                maintainableAssets, resultAttributes, "ok");
+            AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork,
+                maintainableAssets, resultDictionary);
 
             var cost = service.GetTreatmentCost(
                 treatmentLibraryId,
                 assetKeyData,
                 treatmentName,
                 networkId);
+            Assert.Equal(12345, cost);
         }
     }
 }

@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Antlr4.Runtime;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -46,11 +49,19 @@ namespace BridgeCareCoreTests.Tests.Integration
             var attributes = new List<IamAttribute> { attribute };
             AggregatedResultTestSetup.AddTextAggregatedResultsToDb(TestHelper.UnitOfWork,
                 maintainableAssets, attributes, assetKeyData);
-            var cost = service.GetTreatmentCost(
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
+                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
+            var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
+                TestHelper.UnitOfWork, treatmentId, treatmentLibraryId);
+
+            var exception = Assert.Throws<CalculateEvaluateCompilationException>(() => service.GetTreatmentCost(
                 treatmentLibraryId,
                 assetKeyData,
                 treatmentName,
-                networkId);
+                networkId));
+            var expectedMessage = @"Unknown reference ""True"".";
+            Assert.Equal(expectedMessage, exception.Message);
         }
     }
 }

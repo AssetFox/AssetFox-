@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
                 var resolveEquationId = equationId ?? Guid.NewGuid();
                 equationDto = EquationDtos.WithExpression(resolveEquationId, equation);
             }
-            var criterionLibrary = CriterionLibraryDtos.Dto(criterionLibraryId);
+            var criterionLibrary = CriterionLibraryDtos.Dto(criterionLibraryId, "True");
             var cost = new TreatmentCostDTO
             {
                 Id = resolveId,

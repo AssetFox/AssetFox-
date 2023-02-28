@@ -5,6 +5,8 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using TNetwork = AppliedResearchAssociates.iAM.Data.Networking.Network;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -42,6 +44,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     }
                 }
             }
+        }
+
+        public static TNetwork ModelForEntityInDbWithKeyAttribute(
+            IUnitOfWork unitOfWork,
+            List<MaintainableAsset> maintainableAssets,
+            Guid? networkId = null,
+            Guid? keyAttributeId = null,
+            string keyAttributeName = null)
+        {
+            var name = RandomStrings.WithPrefix("Network");
+            var resolveNetworkId = networkId ?? Guid.NewGuid();
+            var attribute = AttributeTestSetup.CreateSingleTextAttribute(unitOfWork, keyAttributeId, keyAttributeName);
+            var network = new TNetwork(maintainableAssets, resolveNetworkId, name);
+            network.KeyAttributeId = attribute.Id;
+            unitOfWork.NetworkRepo.CreateNetwork(network);
+            return network;
         }
     }
 }

@@ -11,6 +11,9 @@ using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
@@ -84,5 +87,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             return CacheDataSourceForAttributes;
         }
 
+        public static AttributeDTO CreateSingleTextAttribute(
+            IUnitOfWork unitOfWork,
+            Guid? id = null,
+            string name = null)
+        {
+            var resolveId = id ?? Guid.NewGuid();
+            var resolveName = name ?? RandomStrings.WithPrefix("attribute");
+            var dataSource = DataSourceDtos.TestConfigurationSql();
+            unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
+            var attribute = AttributeDtos.Text(resolveName, resolveId);
+            attribute.DataSource = dataSource;
+            var attributes = new List<AttributeDTO> { attribute };
+            unitOfWork.AttributeRepo.UpsertAttributes(attributes);
+            return attribute;
+        }
     }
 }

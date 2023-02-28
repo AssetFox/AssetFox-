@@ -27,7 +27,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public void GetTreatmentCost_Behaves()
+        public void GetTreatmentCost_CriteriaFailToEvaluate_Throws()
         {
             var networkId = Guid.NewGuid();
             var service = CreateCommittedProjectService();
@@ -53,15 +53,61 @@ namespace BridgeCareCoreTests.Tests.Integration
             var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
             var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
-                TestHelper.UnitOfWork, treatmentId, treatmentLibraryId);
+                TestHelper.UnitOfWork, treatmentId, treatmentLibraryId, mergedCriteriaExpression: "ThrowingCriteria");
 
             var exception = Assert.Throws<CalculateEvaluateCompilationException>(() => service.GetTreatmentCost(
                 treatmentLibraryId,
                 assetKeyData,
                 treatmentName,
                 networkId));
-            var expectedMessage = @"Unknown reference ""True"".";
+            var expectedMessage = @"Unknown reference ""ThrowingCriteria"".";
             Assert.Equal(expectedMessage, exception.Message);
+        }
+
+
+        [Fact]
+        public void GetTreatmentCost_CriteriaEvaluateToTrue_FindsCost()
+        {
+            var networkId = Guid.NewGuid();
+            var service = CreateCommittedProjectService();
+            var treatmentLibraryId = Guid.NewGuid();
+            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var assetKeyData = "key";
+            var treatmentName = "treatment";
+            var keyAttributeId = Guid.NewGuid();
+            var maintainableAssets = new List<MaintainableAsset>();
+            var assetId = Guid.NewGuid();
+            var locationIdentifier = RandomStrings.WithPrefix("Location");
+            var location = Locations.Section(locationIdentifier);
+            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+            var keyAttributeName = RandomStrings.WithPrefix("attribute");
+            var keyAttribute = AttributeTestSetup.Text(keyAttributeId, keyAttributeName);
+            var resultAttributeName = RandomStrings.WithPrefix("result");
+            var resultAttributeId = Guid.NewGuid();
+            var resultAttribute = AttributeTestSetup.Text(resultAttributeId, resultAttributeName); ;
+            maintainableAssets.Add(maintainableAsset);
+            var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
+                TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
+            var attributes = new List<IamAttribute> { keyAttribute, resultAttribute };
+            AggregatedResultTestSetup.AddTextAggregatedResultsToDb(TestHelper.UnitOfWork,
+                maintainableAssets, attributes, assetKeyData);
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
+                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
+            var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
+                TestHelper.UnitOfWork, treatmentId, treatmentLibraryId, mergedCriteriaExpression: $"[{resultAttributeName}]='ok'");
+            var resultAttributes = new List<IamAttribute> { resultAttribute };
+            AggregatedResultTestSetup.AddTextAggregatedResultsToDb(TestHelper.UnitOfWork,
+                maintainableAssets, resultAttributes, "ok");
+            var keyAttributes = new List<IamAttribute> { keyAttribute };
+            AggregatedResultTestSetup.AddTextAggregatedResultsToDb(TestHelper.UnitOfWork,
+                maintainableAssets, keyAttributes, "key");
+
+            var cost = service.GetTreatmentCost(
+                treatmentLibraryId,
+                assetKeyData,
+                treatmentName,
+                networkId);
         }
     }
 }

@@ -25,8 +25,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             Guid? id = null,
             Guid? equationId = null,
             Guid? criterionLibraryId = null,
-            string equation = null)
+            string equation = null,
+            string mergedCriteriaExpression = null)
         {
+            var resolveMergedCriteriaExpression = mergedCriteriaExpression ?? "mergedCriteriaExpression";
             var resolveId = id ?? Guid.NewGuid();
             EquationDTO equationDto;
             if (equation == null)
@@ -37,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
                 var resolveEquationId = equationId ?? Guid.NewGuid();
                 equationDto = EquationDtos.WithExpression(resolveEquationId, equation);
             }
-            var criterionLibrary = CriterionLibraryDtos.Dto(criterionLibraryId, "True");
+            var criterionLibrary = CriterionLibraryDtos.Dto(criterionLibraryId, resolveMergedCriteriaExpression);
             var cost = new TreatmentCostDTO
             {
                 Id = resolveId,

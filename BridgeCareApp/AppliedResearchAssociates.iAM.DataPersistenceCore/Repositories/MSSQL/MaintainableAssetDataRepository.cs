@@ -24,7 +24,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => keyDatumFieldNames.Contains(_.Name))
                 .Select(_ => new {_.Id, _.Name, Type = _.DataType})
                 .ToList();
-
+            var keyDatumFieldsNetwork = _unitOfWork.Context.Attribute
+                .Where(_ => _.Id == network.KeyAttributeId )
+                .Select(_ => new { _.Id, _.Name, Type = _.DataType })
+                .ToList();
+            foreach(var keyDatumField in keyDatumFieldsNetwork)
+            {
+                if (!keyDatumFields.Contains(keyDatumField))
+                {
+                    keyDatumFields.Add(keyDatumField);
+                }
+            }
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
             foreach (var attribute in keyDatumFields)
             {

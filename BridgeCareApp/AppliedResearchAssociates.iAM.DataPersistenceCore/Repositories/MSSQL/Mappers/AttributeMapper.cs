@@ -130,6 +130,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Name = entity.Name,
                 Type = entity.DataType,
+                Id = entity.Id,
             };
 
         public static AttributeDTO ToDto(this AttributeEntity entity, string encryptionKey) =>

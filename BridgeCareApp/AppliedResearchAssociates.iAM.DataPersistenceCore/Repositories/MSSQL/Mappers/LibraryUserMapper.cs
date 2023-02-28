@@ -32,7 +32,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel,
             };
-
         public static LibraryUserDTO ToDto(this RemainingLifeLimitLibraryUserEntity entity) =>
             new LibraryUserDTO
             {

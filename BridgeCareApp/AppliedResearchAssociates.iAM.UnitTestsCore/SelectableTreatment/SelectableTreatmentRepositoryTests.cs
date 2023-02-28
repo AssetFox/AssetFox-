@@ -14,6 +14,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using System.Runtime.InteropServices;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
 {
@@ -413,5 +416,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
                     _.Id == _testTreatmentConsequence.Id));
         }
 
+        [Fact]
+        public void GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName_ObjectsInDb_GetsTheCost()
+        {
+            var networkId = Guid.NewGuid();
+            var treatmentLibraryId = Guid.NewGuid();
+            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
+                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
+            var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
+                TestHelper.UnitOfWork, treatmentId, treatmentLibraryId);
+
+            var costs = TestHelper.UnitOfWork.TreatmentCostRepo.GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName(
+                treatmentLibraryId, "treatment");
+
+            var foundCost = costs.Single();
+            ObjectAssertions.EquivalentExcluding(treatmentCost, foundCost, x => x.CriterionLibrary, x => x.Equation.Id);
+        }
     }
 }

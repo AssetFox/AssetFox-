@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
@@ -37,10 +38,19 @@ namespace BridgeCareCoreTests.Tests.Integration
         [Fact]
         public void FillTreatmentValues_Does()
         {
+            var treatmentLibraryId = Guid.NewGuid();
+            var networkId = Guid.NewGuid();
+            var treatmentName = "TreatmentName";
+            var treatmentId = Guid.NewGuid();
+            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
+                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, treatmentName);
             var controller = CreateController();
             var fillModel = new CommittedProjectFillTreatmentValuesModel
             {
-
+                TreatmentLibraryId = treatmentLibraryId,
+                TreatmentName = treatmentName,
+                NetworkId = networkId,
             };
 
             var result = controller.FillTreatmentValues(fillModel);

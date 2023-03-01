@@ -92,40 +92,45 @@ namespace BridgeCareCore.Controllers
             {
                 Response.OnCompleted(async () =>
                 {
-                    var report = await GenerateReport(reportName, ReportType.File, parameters);
-
-                    if (report == null)
-                    {
-                        SendRealTimeMessage($"Failed to generate report object for '{reportName}' on simulation '{simulationName}'");
-                    }
-
-                    // Handle a completed run with errors
-                    if (report.Errors.Any())
-                    {
-                        SendRealTimeMessage($"Failed to generate '{reportName}' on simulation '{simulationName}'");
-
-                        _log.Information($"Failed to generate '{reportName}'");
-
-                        foreach (string message in report.Errors)
-                        {
-                            _log.Information($"Message: {message}");
-                        }
-                    }
-
-                    // Handle an incomplete run without errors
-                    if (!report.IsComplete)
-                    {
-                        SendRealTimeMessage($"{reportName} on simulation '{simulationName}' ran but never completed");
-                    }
-
-                    //create report index repository
-                    var reportIndexID = createReportIndexRepository(report);
-
-                    if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
-                    {
-                        SendRealTimeMessage($"Failed to create report repository index on {reportName}");
-                    }
+                    await HandleGetFileCompletion(reportName, parameters, simulationName);
                 });
+            }
+        }
+
+        public async Task HandleGetFileCompletion(string reportName, string parameters, string simulationName)
+        {
+            var report = await GenerateReport(reportName, ReportType.File, parameters);
+
+            if (report == null)
+            {
+                SendRealTimeMessage($"Failed to generate report object for '{reportName}' on simulation '{simulationName}'");
+            }
+
+            // Handle a completed run with errors
+            if (report.Errors.Any())
+            {
+                SendRealTimeMessage($"Failed to generate '{reportName}' on simulation '{simulationName}'");
+
+                _log.Information($"Failed to generate '{reportName}'");
+
+                foreach (string message in report.Errors)
+                {
+                    _log.Information($"Message: {message}");
+                }
+            }
+
+            // Handle an incomplete run without errors
+            if (!report.IsComplete)
+            {
+                SendRealTimeMessage($"{reportName} on simulation '{simulationName}' ran but never completed");
+            }
+
+            //create report index repository
+            var reportIndexID = createReportIndexRepository(report);
+
+            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
+            {
+                SendRealTimeMessage($"Failed to create report repository index on {reportName}");
             }
         }
 
@@ -183,6 +188,7 @@ namespace BridgeCareCore.Controllers
         {
             // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
             var parameters = string.Empty;
+            var accessor = ContextAccessor;
             if (Request.ContentLength > 0)
             {
                 using var reader = new StreamReader(Request.Body, Encoding.UTF8);

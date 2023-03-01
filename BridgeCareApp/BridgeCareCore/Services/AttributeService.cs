@@ -13,12 +13,12 @@ namespace BridgeCareCore.Services
 {
     public class AttributeService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         public const string ValuesForAttribute = "Values for attribute";
         public const string IsANumberUseTextInput = "is a number; use text input";
 
-        public AttributeService(UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfWork =
-            unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public AttributeService(IUnitOfWork unitOfWork) => _unitOfWork =
+            unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
         {

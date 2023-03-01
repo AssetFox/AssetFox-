@@ -38,52 +38,49 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             _bridgesUnfundedTreatments.PerformPostAutofitAdjustments(bridgesWorksheet);
         }
 
+        public HashSet<string> GetRequiredAttributes() => new HashSet<string>()
+        {
+            $"{BAMSAuditReportConstants.DeckSeeded}",
+            $"{BAMSAuditReportConstants.SupSeeded}",
+            $"{BAMSAuditReportConstants.SubSeeded}",
+            $"{BAMSAuditReportConstants.CulvSeeded}",
+            $"{BAMSAuditReportConstants.DeckDurationN}",
+            $"{BAMSAuditReportConstants.SupDurationN}",
+            $"{BAMSAuditReportConstants.SubDurationN}",
+            $"{BAMSAuditReportConstants.CulvDurationN}"
+        };
+
         private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
         {
-            // facilityId, year, section
+            // facilityId, year, section // TODO define datamodel obj for DataTab and fill that up here then pass those to FillExcel,
+            // TODO bridges in data tab need to match with bridges in Decision tab
             var treatmentsPerSection = new SortedDictionary<int, Tuple<SimulationYearDetail, AssetDetail>>();
-            // It will keep the Ids which has gone unfunded for all the years
-            var validFacilityIds = new List<int>();
-            var firstYear = true;
-            foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
+            foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
-                var untreatedSections = _reportHelper.GetSectionsWithUnfundedTreatments(year);
-                var treatedSections = _reportHelper.GetSectionsWithFundedTreatments(year);
-
-                if (firstYear)
+                var brKey = CheckGetValue(initialAssetSummary.ValuePerNumericAttribute, "BRKEY_");
+                foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
                 {
-                    validFacilityIds.AddRange(
-                        year.Assets.Select(_ => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))
-                            .Except(treatedSections.Select(_ => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_"))))
-                    );
-                    firstYear = false;
-                }
-                else
-                {
-                    validFacilityIds = validFacilityIds.Except(treatedSections.Select(_ => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))).ToList();
-                }
-
-                foreach (var section in untreatedSections)
-                {
-                    var facilityId = Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_"));
-                    // skip if we already have a treatment for this section
-                    if (!treatmentsPerSection.ContainsKey(facilityId))
-                    {
-                        var treatmentOptions = section.TreatmentOptions.
-                            Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
-                        treatmentOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
-                        var chosenTreatment = treatmentOptions.FirstOrDefault();
-                        if (chosenTreatment != null)
-                        {
-                            var newTuple = new Tuple<SimulationYearDetail, AssetDetail>(year, section);
-                            if (validFacilityIds.Contains(facilityId))
-                            {
-                                treatmentsPerSection.Add(facilityId, newTuple);
-                            }
-                        }
-                    }
+                    var section = year.Assets.FirstOrDefault(_ => CheckGetValue(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
+                    var facilityId = Convert.ToInt32(brKey);
+                    // Skip if we already have a treatment for this section
+                    //if (!treatmentsPerSection.ContainsKey(facilityId))
+                    //{
+                    //    var treatmentOptions = section.TreatmentOptions.
+                    //        Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
+                    //    treatmentOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
+                    //    var chosenTreatment = treatmentOptions.FirstOrDefault();
+                    //    if (chosenTreatment != null)
+                    //    {
+                    //        var newTuple = new Tuple<SimulationYearDetail, AssetDetail>(year, section);
+                    //        if (validFacilityIds.Contains(facilityId))
+                    //        {
+                    //            treatmentsPerSection.Add(facilityId, newTuple);
+                    //        }
+                    //    }
+                    //}
                 }
             }
+            
 
             currentCell.Row += 1; // Data starts here
             currentCell.Column = 1;
@@ -98,16 +95,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
         }
 
-        public HashSet<string> GetRequiredAttributes() => new HashSet<string>()
-        {
-            $"{AuditReportConstants.DeckSeeded}",
-            $"{AuditReportConstants.SupSeeded}",
-            $"{AuditReportConstants.SubSeeded}",
-            $"{AuditReportConstants.CulvSeeded}",
-            $"{AuditReportConstants.DeckDurationN}",
-            $"{AuditReportConstants.SupDurationN}",
-            $"{AuditReportConstants.SubDurationN}",
-            $"{AuditReportConstants.CulvDurationN}"
-        };
+        private double CheckGetValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);        
     }
 }

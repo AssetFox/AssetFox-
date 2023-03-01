@@ -27,17 +27,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             var columnNo = currentCell.Column;
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingNHPP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingNHPP(section) ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingSTP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingSTP(section) ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingBOF(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingBOF(section) ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingBRIP(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingBRIP(section) ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingState(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingState(section) ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingNotApplicable(section) ? AuditReportConstants.Yes : AuditReportConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.BridgeFundingNotApplicable(section) ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No;
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = Year;

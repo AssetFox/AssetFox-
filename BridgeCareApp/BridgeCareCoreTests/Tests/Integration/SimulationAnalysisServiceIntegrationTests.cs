@@ -12,6 +12,7 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using BridgeCareCore.Models;
+using System.Data;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {
@@ -27,7 +28,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public async Task CreateAndRunPermitted_Ok()
+        public async Task CreateAndRunPermitted_SimulationExists_Ok()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -50,9 +51,31 @@ namespace BridgeCareCoreTests.Tests.Integration
                 NetworkTestSetup.NetworkId, simulationId, userInfo);
 
             var result = service.CreateAndRunPermitted(NetworkTestSetup.NetworkId, simulationId, userInfo);
+
             var resultUserInfo = result.UserInfo;
-           
             ObjectAssertions.Equivalent(userInfo, resultUserInfo);
+        }
+
+        [Fact]
+        public async Task CreateAndRunPermitted_SimulationDoesNotExist_Throws()
+        {
+
+            var service = CreateService();
+            var simulationId = Guid.NewGuid();
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+
+            var userInfo = new UserInfo
+            {
+                Name = user.Username,
+                HasAdminAccess = true,
+                HasSimulationAccess = true,
+                Email = "Foo@bar.Com",
+            };
+            TestHelper.UnitOfWork.SetUser(user.Username);
+            var exception = Assert.Throws<RowNotInTableException>(() =>
+               service.CreateAndRunPermitted(NetworkTestSetup.NetworkId,
+               simulationId, userInfo));
+            Assert.Equal(SimulationAnalysisService.NoSimulationFoundForGivenScenario, exception.Message);
         }
     }
 }

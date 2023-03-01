@@ -13,6 +13,7 @@ namespace BridgeCareCore.Services
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly SequentialWorkQueue _sequentialWorkQueue;
+        public const string NoSimulationFoundForGivenScenario = $"No simulation found for given scenario.";
 
         public SimulationAnalysisService(UnitOfDataPersistenceWork unitOfWork, SequentialWorkQueue sequentialWorkQueue)
         {
@@ -24,7 +25,7 @@ namespace BridgeCareCore.Services
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException(NoSimulationFoundForGivenScenario);
             }
 
             if (!_unitOfWork.Context.Simulation.Any(_ =>

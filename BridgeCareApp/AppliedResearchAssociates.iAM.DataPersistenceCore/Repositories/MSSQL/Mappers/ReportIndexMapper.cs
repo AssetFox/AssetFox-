@@ -32,7 +32,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = dto.Id,
                 SimulationID = dto.SimulationId,
-                CreatedDate = dto.CreationDate,
                 ExpirationDate = dto.ExpirationDate,
                 Result = dto.Result,
                 ReportTypeName = dto.Type,

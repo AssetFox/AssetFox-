@@ -89,6 +89,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             };
 
             var result = await controller.FillTreatmentValues(fillModel);
+
             var value = ActionResultAssertions.OkObject(result);
             var castValue = value as CommittedProjectFillTreatmentReturnValuesModel;
             Assert.Equal(12345, castValue.TreatmentCost);

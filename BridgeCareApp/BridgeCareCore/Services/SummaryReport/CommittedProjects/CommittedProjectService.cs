@@ -13,7 +13,6 @@ using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Utils;
-using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using OfficeOpenXml;
 
@@ -201,7 +200,7 @@ namespace BridgeCareCore.Services
         }
 
         /**
-         * Gets a Dictionary of AttributeEntity Id per AttributeEntity Name
+         * Gets a Dictionary of Attribute Id per Attribute Name
          */
         private Dictionary<string, Guid> GetAttributeIdsPerAttributeName(List<string> consequenceAttributeNames)
         {
@@ -224,7 +223,7 @@ namespace BridgeCareCore.Services
         }
 
         /**
-         * Gets a Dictionary of MaintainableAssetEntity Id per MaintainableAssetLocationEntity LocationIdentifier
+         * Gets a Dictionary of MaintainableAsset Id per MaintainableAssetLocation LocationIdentifier
          */
         private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier(Guid networkId)
         {
@@ -250,7 +249,7 @@ namespace BridgeCareCore.Services
         }
 
         /**
-         * Creates CommittedProjectEntity data for Committed Project Import
+         * Creates CommittedProjectDTO data for Committed Project Import
          */
         private List<SectionCommittedProjectDTO> CreateSectionCommittedProjectsForImport(Guid simulationId,
             ExcelPackage excelPackage, string filename, bool applyNoTreatment)
@@ -338,7 +337,7 @@ namespace BridgeCareCore.Services
                     locationInformation.Add(locationColumnNames[column], worksheet.GetCellValue<string>(row, column));
                 }
 
-                // Determine the appropriate budget entity to assign if any
+                // Determine the appropriate budget to assign if any
                 var budgetName = worksheet.GetCellValue<string>(row, _keyFields.Count + 5); // Assumes that InitialHeaders stays constant
                 var budgetNameIsEmpty = string.IsNullOrWhiteSpace(budgetName);
                 Guid? budgetId = null;

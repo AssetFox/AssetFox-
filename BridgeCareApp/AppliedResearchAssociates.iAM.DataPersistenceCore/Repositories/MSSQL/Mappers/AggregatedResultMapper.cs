@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -108,17 +108,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static AggregatedResultDTO ToDto(this AggregatedResultEntity entity)
         {
+            var attribute = AttributeMapper.ToAbbreviatedDto(entity.Attribute);
             return new AggregatedResultDTO
             {
                 MaintainableAssetId = entity.MaintainableAssetId,
                 TextValue = entity.TextValue,
                 NumericValue = entity.NumericValue,
                 Year = entity.Year,
-                Attribute = new AttributeDTO
-                {
-                    Name = entity.Attribute.Name,
-                    Type = entity.Attribute.DataType
-                }
+                Attribute = attribute,
             };
         }
     }

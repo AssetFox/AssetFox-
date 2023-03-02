@@ -18,6 +18,7 @@ using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace BridgeCareCore.Controllers
 {

@@ -930,7 +930,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                                 firstYearFractionPerBudget,
                                 out var costCoverageFractionsWereSatisfied);
 
-                            if (!costCoverageFractionsWereSatisfied)
+                            if (firstYearFractionPerBudget is not null && !costCoverageFractionsWereSatisfied)
                             {
                                 return ReasonAgainstCashFlow.FirstYearFundingPatternFailedInFutureYear;
                             }

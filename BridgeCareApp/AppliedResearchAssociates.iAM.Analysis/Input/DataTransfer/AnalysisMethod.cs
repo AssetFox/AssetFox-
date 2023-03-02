@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
         public bool ShouldDeteriorateDuringCashFlow { get; set; }
 
-        public bool ShouldRestrictCashFlowToFirstYearBudget { get; set; }
+        public bool ShouldRestrictCashFlowToFirstYearBudgets { get; set; }
 
         public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
 

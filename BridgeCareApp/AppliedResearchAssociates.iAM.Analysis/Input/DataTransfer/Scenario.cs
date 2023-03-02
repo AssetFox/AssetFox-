@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
             RemainingLifeLimits = source.RemainingLifeLimits.Select(Convert).ToList(),
             ShouldApplyMultipleFeasibleCosts = source.ShouldApplyMultipleFeasibleCosts,
             ShouldDeteriorateDuringCashFlow = source.ShouldDeteriorateDuringCashFlow,
-            ShouldRestrictCashFlowToFirstYearBudget = source.ShouldRestrictCashFlowToFirstYearBudget,
+            ShouldRestrictCashFlowToFirstYearBudgets = source.ShouldRestrictCashFlowToFirstYearBudgets,
             ShouldUseExtraFundsAcrossBudgets = source.ShouldUseExtraFundsAcrossBudgets,
             SpendingStrategy = source.SpendingStrategy,
             TargetConditionGoals = source.TargetConditionGoals.Select(Convert).ToList(),

@@ -17,6 +17,37 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public class BudgetRepositoryTests
     {
         [Fact]
+        public async Task CreateNewBudgetLibrary_Does()
+        {
+            var libraryId = Guid.NewGuid();
+            var dto = BudgetLibraryDtos.New(libraryId);
+            var dtoClone = BudgetLibraryDtos.New(libraryId);
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var userId = user.Id;
+
+            TestHelper.UnitOfWork.BudgetRepo.CreateNewBudgetLibrary(dto, userId);
+
+            var libraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(libraryId);
+            ObjectAssertions.Equivalent(dtoClone, libraryAfter);
+        }
+
+        [Fact]
+        public void UpsertBudgetLibraryAndUpsertOrDeleteBudgets_LibraryInDb_Does()
+        {
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, "Old name");
+            var libraryId = library.Id;
+            library.Name = "Updated name";
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.New(budgetId);
+            library.Budgets.Add(budget);
+
+            TestHelper.UnitOfWork.BudgetRepo.UpdateBudgetLibraryAndUpsertOrDeleteBudgets(library);
+
+            var libraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(libraryId);
+            ObjectAssertions.EquivalentExcluding(library, libraryAfter, x => x.Budgets[0].CriterionLibrary);
+        }
+
+        [Fact]
         public void CreateScenarioBudgets_SuccessfulWithValidInput()
         {
             //setup

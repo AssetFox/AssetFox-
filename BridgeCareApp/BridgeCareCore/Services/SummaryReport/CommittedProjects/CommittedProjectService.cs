@@ -233,18 +233,6 @@ namespace BridgeCareCore.Services
                 throw new RowNotInTableException("There are no maintainable assets in the database.");
             }
 
-            // Not sure if there is something else going on here
-            //var oldReturn = _unitOfWork.Context.MaintainableAssetLocation
-            //    .Where(_ => maintainableAssetsInNetwork.Any(__ => __.Id == _.MaintainableAssetId))
-            //    .Select(maintainableAssetLocation => new MaintainableAssetEntity
-            //    {
-            //        Id = maintainableAssetLocation.MaintainableAssetId,
-            //        MaintainableAssetLocation = new MaintainableAssetLocationEntity
-            //        {
-            //            LocationIdentifier = maintainableAssetLocation.LocationIdentifier
-            //        }
-            //    }).ToDictionary(_ => _.MaintainableAssetLocation.LocationIdentifier, _ => _.Id);
-
             return assets.ToDictionary(_ => _.Location.LocationIdentifier, _ => _.Id);
         }
 

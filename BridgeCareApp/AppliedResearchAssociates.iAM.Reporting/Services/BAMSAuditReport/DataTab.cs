@@ -85,14 +85,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             currentCell.Row += 1; // Data starts here
             currentCell.Column = 1;
 
-            foreach (var facilityTuple in treatmentsPerSection.Values)
-            {
-                var section = facilityTuple.Item2;
-                var year = facilityTuple.Item1;                
-                _bridgesUnfundedTreatments.FillDataInWorkSheet(worksheet, currentCell, section, year.Year);
+            //foreach (var facilityTuple in treatmentsPerSection.Values)
+            //{
+            //    var section = facilityTuple.Item2;
+            //    var year = facilityTuple.Item1;                
+            //    _bridgesUnfundedTreatments.FillDataInWorkSheet(worksheet, currentCell, section, year.Year);
                 currentCell.Row++;
                 currentCell.Column = 1;
-            }
+            //}
         }
 
         private double CheckGetValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);        

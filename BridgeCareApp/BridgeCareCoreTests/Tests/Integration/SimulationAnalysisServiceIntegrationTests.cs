@@ -13,6 +13,7 @@ using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using BridgeCareCore.Models;
 using System.Data;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {
@@ -59,7 +60,6 @@ namespace BridgeCareCoreTests.Tests.Integration
         [Fact]
         public async Task CreateAndRunPermitted_SimulationDoesNotExist_Throws()
         {
-
             var service = CreateService();
             var simulationId = Guid.NewGuid();
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
@@ -75,7 +75,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var exception = Assert.Throws<RowNotInTableException>(() =>
                service.CreateAndRunPermitted(NetworkTestSetup.NetworkId,
                simulationId, userInfo));
-            Assert.Equal(SimulationAnalysisService.NoSimulationFoundForGivenScenario, exception.Message);
+            Assert.Equal(SimulationRepository.NoSimulationWasFoundForTheGivenScenario, exception.Message);
         }
 
         [Theory]

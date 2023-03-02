@@ -18,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class SimulationRepository : ISimulationRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
+        public const string NoSimulationWasFoundForTheGivenScenario = "No simulation was found for the given scenario.";
 
         public SimulationRepository(UnitOfDataPersistenceWork unitOfWork)
         {
@@ -122,7 +123,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return simulations;
         }
 
-
         public void GetSimulationInNetwork(Guid simulationId, Network network)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
@@ -201,7 +201,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException("No simulation was found for the given scenario.");
+                throw new RowNotInTableException(NoSimulationWasFoundForTheGivenScenario);
             }
 
             var users = _unitOfWork.Context.User.ToList();

@@ -24,10 +24,7 @@ namespace BridgeCareCore.Services
 
         public IQueuedWorkHandle CreateAndRunPermitted(Guid networkId, Guid simulationId, UserInfo userInfo)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException(NoSimulationFoundForGivenScenario);
-            }
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
 
             if (!_unitOfWork.Context.Simulation.Any(_ =>
                 _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.CurrentUser.Id && __.CanModify)))

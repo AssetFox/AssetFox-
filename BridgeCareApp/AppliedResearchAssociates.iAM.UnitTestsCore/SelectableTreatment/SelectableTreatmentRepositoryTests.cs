@@ -434,5 +434,39 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
             var foundCost = costs.Single();
             ObjectAssertions.EquivalentExcluding(treatmentCost, foundCost, x => x.CriterionLibrary, x => x.Equation.Id);
         }
+
+        [Fact]
+        public void GetSelectableTreatmentByLibraryIdAndName_Does()
+        {
+            var networkId = Guid.NewGuid();
+            var treatmentLibraryId = Guid.NewGuid();
+            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatmentId = Guid.NewGuid();
+            var treatmentName = RandomStrings.WithPrefix("treatment");
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
+                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, treatmentName);
+
+            var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatmentByLibraryIdAndName(treatmentLibraryId, treatmentName);
+
+            treatment.BudgetIds = new List<Guid>();
+            ObjectAssertions.EquivalentExcluding(treatment, result, x => x.CriterionLibrary);
+
+        }
+
+        [Fact]
+        public void GetSelectableTreatmentByLibraryIdAndName_TreatmentInDbWithDifferentName_DoesNotFind()
+        {
+            var networkId = Guid.NewGuid();
+            var treatmentLibraryId = Guid.NewGuid();
+            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatmentId = Guid.NewGuid();
+            var treatmentName = RandomStrings.WithPrefix("treatment");
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
+                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, treatmentName);
+
+            var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatmentByLibraryIdAndName(treatmentLibraryId, "wrongName");
+
+            Assert.Null(result);
+        }
     }
 }

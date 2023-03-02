@@ -5,8 +5,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
     public enum BudgetUsageStatus
     {
         /// <summary>
-        ///     If present in final output, this indicates missing or incorrect logic in the
-        ///     analysis engine.
+        ///     Indicates the existence of incomplete logic in the analysis engine.
         /// </summary>
         Undefined,
 

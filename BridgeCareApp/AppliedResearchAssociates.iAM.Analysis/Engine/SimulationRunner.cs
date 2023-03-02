@@ -927,7 +927,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                                 workingBudgets,
                                 ref remainingYearCost,
                                 addFutureCostAllocator,
-                                firstYearFractionPerBudget);
+                                firstYearFractionPerBudget,
+                                out var costCoverageFractionsWereSatisfied);
+
+                            if (!costCoverageFractionsWereSatisfied)
+                            {
+                                return ReasonAgainstCashFlow.FirstYearFundingPatternFailedInFutureYear;
+                            }
 
                             if (remainingYearCost > 0)
                             {
@@ -988,7 +994,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 applicableBudgets,
                 ref remainingCost,
                 addCostAllocator,
-                null);
+                null,
+                out _);
 
             if (remainingCost > 0)
             {
@@ -1006,8 +1013,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 IEnumerable<BudgetInfo> budgets,
                 ref decimal cost,
                 Action<decimal, BudgetContext> costAllocationAction,
-                IReadOnlyDictionary<BudgetContext, decimal> costCoverageFractionPerBudget)
+                IReadOnlyDictionary<BudgetContext, decimal> costCoverageFractionPerBudget,
+                out bool costCoverageFractionsWereSatisfied)
             {
+                // Assumed (or irrelevant, if no fractions are provided)
+                costCoverageFractionsWereSatisfied = true;
+
                 // "cost" is a variable that is being *indirectly* updated by "costAllocationAction".
 
                 var originalCost = cost;
@@ -1045,7 +1056,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                         }
                         else
                         {
-                            // Any unmet coverage fraction means the whole cost allocation has failed.
+                            // Any unsatisfied coverage fraction means the whole cost allocation has failed.
+                            costCoverageFractionsWereSatisfied = false;
                             return;
                         }
                     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +14,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using BridgeCareCore.Models;
 using System.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {
@@ -83,7 +84,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         [InlineData(true, false)]   
         [InlineData(false, true)]
         [InlineData(false, false)]
-        public async Task CreateAndRunPermitted_SimulationExistsButUserCantModify_Throws(bool isAdmin, bool hasSimulationAccess)
+        public async Task CreateAndRunPermitted_SimulationExistsButNoUser_Throws(bool isAdmin, bool hasSimulationAccess)
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -105,6 +106,76 @@ namespace BridgeCareCoreTests.Tests.Integration
                service.CreateAndRunPermitted(NetworkTestSetup.NetworkId,
                simulationId, user2Info));
             Assert.Equal(SimulationAnalysisService.YouAreNotAuthorizedToModifyThisSimulation, exception.Message);
+        }
+
+
+        [Fact]
+        public async Task CreateAndRunPermitted_SimulationExistsButUserCantModify_Throws()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var service = CreateService();
+            var simulationId = Guid.NewGuid();
+            var simulationName = RandomStrings.WithPrefix("Simulation");
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var user2 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user.Id);
+            var user2Info = new UserInfo
+            {
+                Name = user2.Username,
+                HasAdminAccess = false,
+                HasSimulationAccess = false,
+                Email = "Foo@bar.Com",
+            };
+            TestHelper.UnitOfWork.SetUser(user2.Username);
+            var simulationUser2 = new SimulationUserEntity
+            {
+                CanModify = false,
+                IsOwner = false,
+                SimulationId = simulationId,
+                UserId = user2.Id
+            };
+            TestHelper.UnitOfWork.Context.Add(simulationUser2);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+            var exception = Assert.Throws<UnauthorizedAccessException>(() =>
+               service.CreateAndRunPermitted(NetworkTestSetup.NetworkId,
+               simulationId, user2Info));
+            Assert.Equal(SimulationAnalysisService.YouAreNotAuthorizedToModifyThisSimulation, exception.Message);
+        }
+
+        [Fact]
+        public async Task CreateAndRunPermitted_SimulationExistsAndUserCanModify_Succeeds()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var service = CreateService();
+            var simulationId = Guid.NewGuid();
+            var simulationName = RandomStrings.WithPrefix("Simulation");
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var user2 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user.Id);
+            var user2Info = new UserInfo
+            {
+                Name = user2.Username,
+                HasAdminAccess = false,
+                HasSimulationAccess = false,
+                Email = "Foo@bar.Com",
+            };
+            TestHelper.UnitOfWork.SetUser(user2.Username);
+            var simulationUser2 = new SimulationUserEntity
+            {
+                CanModify = true,
+                IsOwner = false,
+                SimulationId = simulationId,
+                UserId = user2.Id
+            };
+            TestHelper.UnitOfWork.Context.Add(simulationUser2);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+
+            var result = service.CreateAndRunPermitted(NetworkTestSetup.NetworkId, simulationId, user2Info);
+
+            var resultUserInfo = result.UserInfo;
+            ObjectAssertions.Equivalent(user2Info, resultUserInfo);
         }
     }
 }

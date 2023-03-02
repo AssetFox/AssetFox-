@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
-namespace BridgeCareCoreTests.Tests.Treatment
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class TreatmentConsequenceDtos
     {

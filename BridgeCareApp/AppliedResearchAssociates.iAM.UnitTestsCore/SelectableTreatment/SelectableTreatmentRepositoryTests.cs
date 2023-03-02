@@ -268,7 +268,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public async Task ShouldGetScenarioTreatmentData()
+        public void ShouldGetScenarioTreatmentData()
         {
             // Arrange
             Setup();

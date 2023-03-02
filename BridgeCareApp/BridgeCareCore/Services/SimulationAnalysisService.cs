@@ -14,6 +14,7 @@ namespace BridgeCareCore.Services
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly SequentialWorkQueue _sequentialWorkQueue;
         public const string NoSimulationFoundForGivenScenario = $"No simulation found for given scenario.";
+        public const string YouAreNotAuthorizedToModifyThisSimulation = "You are not authorized to modify this simulation.";
 
         public SimulationAnalysisService(UnitOfDataPersistenceWork unitOfWork, SequentialWorkQueue sequentialWorkQueue)
         {
@@ -31,7 +32,7 @@ namespace BridgeCareCore.Services
             if (!_unitOfWork.Context.Simulation.Any(_ =>
                 _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.CurrentUser.Id && __.CanModify)))
             {
-                throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
+                throw new UnauthorizedAccessException(YouAreNotAuthorizedToModifyThisSimulation);
             }
 
             return CreateAndRun(networkId, simulationId, userInfo);

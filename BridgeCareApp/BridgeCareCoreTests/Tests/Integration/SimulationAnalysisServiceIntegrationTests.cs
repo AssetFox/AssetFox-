@@ -77,5 +77,34 @@ namespace BridgeCareCoreTests.Tests.Integration
                simulationId, userInfo));
             Assert.Equal(SimulationAnalysisService.NoSimulationFoundForGivenScenario, exception.Message);
         }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]   
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public async Task CreateAndRunPermitted_SimulationExistsButUserCantModify_Throws(bool isAdmin, bool hasSimulationAccess)
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var service = CreateService();
+            var simulationId = Guid.NewGuid();
+            var simulationName = RandomStrings.WithPrefix("Simulation");
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var user2 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user.Id);
+            var user2Info = new UserInfo
+            {
+                Name = user2.Username,
+                HasAdminAccess = isAdmin,
+                HasSimulationAccess = hasSimulationAccess,
+                Email = "Foo@bar.Com",
+            };
+            TestHelper.UnitOfWork.SetUser(user2.Username);
+            var exception = Assert.Throws<UnauthorizedAccessException>(() =>
+               service.CreateAndRunPermitted(NetworkTestSetup.NetworkId,
+               simulationId, user2Info));
+            Assert.Equal(SimulationAnalysisService.YouAreNotAuthorizedToModifyThisSimulation, exception.Message);
+        }
     }
 }

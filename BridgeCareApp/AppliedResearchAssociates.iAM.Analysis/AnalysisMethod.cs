@@ -16,6 +16,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Filter = new Criterion(Simulation.Network.Explorer);
         }
 
+        /// <summary>
+        ///     When this is enabled, the order in which the budgets are considered for funding is
+        ///     determined by the order of <see cref="InvestmentPlan.Budgets"/>.
+        /// </summary>
+        public bool AllowFundingFromMultipleBudgets { get; set; }
+
         public Benefit Benefit { get; } = new Benefit();
 
         public IReadOnlyCollection<BudgetPriority> BudgetPriorities => _BudgetPriorities;
@@ -35,12 +41,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public bool ShouldDeteriorateDuringCashFlow { get; set; }
 
         public bool ShouldRestrictCashFlowToFirstYearBudgets { get; set; } = true;
-
-        /// <summary>
-        ///     When this is enabled, the order in which the budgets are considered for funding is
-        ///     determined by the order of <see cref="InvestmentPlan.Budgets"/>.
-        /// </summary>
-        public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
 
         public SpendingStrategy SpendingStrategy { get; set; } = SpendingStrategy.AsBudgetPermits;
 

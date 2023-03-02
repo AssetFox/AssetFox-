@@ -1029,7 +1029,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                             break;
                         }
 
-                        if (Simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets && availableAmount > 0)
+                        if (Simulation.AnalysisMethod.AllowFundingFromMultipleBudgets && availableAmount > 0)
                         {
                             coverCost(availableAmount);
                         }

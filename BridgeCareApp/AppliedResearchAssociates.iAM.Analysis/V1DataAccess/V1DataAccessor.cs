@@ -351,7 +351,7 @@ order by simulationid
 
                                     simulation.AnalysisMethod.Benefit.Limit = reader.GetDouble(7);
                                     simulation.AnalysisMethod.ShouldApplyMultipleFeasibleCosts = reader.GetNullableBoolean(8) ?? false;
-                                    simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets = reader.GetNullableBoolean(9) ?? false;
+                                    simulation.AnalysisMethod.AllowFundingFromMultipleBudgets = reader.GetNullableBoolean(9) ?? false;
                                 }
                             }
                         }

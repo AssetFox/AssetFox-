@@ -5,6 +5,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 {
     public sealed class AnalysisMethod
     {
+        public bool AllowFundingFromMultipleBudgets { get; set; }
+
         public string BenefitAttributeID { get; set; }
 
         public double BenefitLimit { get; set; }
@@ -26,8 +28,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
         public bool ShouldDeteriorateDuringCashFlow { get; set; }
 
         public bool ShouldRestrictCashFlowToFirstYearBudgets { get; set; }
-
-        public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
 
         public SpendingStrategy SpendingStrategy { get; set; }
 

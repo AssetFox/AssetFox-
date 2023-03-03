@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using Org.BouncyCastle.Bcpg;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -20,15 +21,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public async Task CreateNewBudgetLibrary_Does()
         {
             var libraryId = Guid.NewGuid();
-            var dto = BudgetLibraryDtos.New(libraryId);
-            var dtoClone = BudgetLibraryDtos.New(libraryId);
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var userId = user.Id;
+            var dto = BudgetLibraryDtos.New(libraryId);
+            var dtoClone = BudgetLibraryDtos.New(libraryId);
+            TestHelper.UnitOfWork.SetUser(user.Username);
 
             TestHelper.UnitOfWork.BudgetRepo.CreateNewBudgetLibrary(dto, userId);
 
             var libraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(libraryId);
-            ObjectAssertions.Equivalent(dtoClone, libraryAfter);
+            ObjectAssertions.EquivalentExcluding(dtoClone, libraryAfter, x => x.Owner);
         }
 
         [Fact]

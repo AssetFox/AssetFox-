@@ -24,10 +24,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         public static TreatmentConsequenceDTO WithEquationAndCriterionLibrary(
             Guid? id = null,
+            string attribute = "attribute",
             Guid? equationId = null,
             Guid? criterionLibraryId = null)
         {
-            var dto = Dto(id);
+            var dto = Dto(id, attribute);
             var equation = EquationDtos.AgePlus1(equationId);
             var criterionLibrary = CriterionLibraryDtos.Dto(criterionLibraryId);
             dto.Equation = equation;

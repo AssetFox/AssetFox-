@@ -143,7 +143,7 @@ namespace BridgeCareCoreTests.Tests.Treatment
             var consequenceEquationId = Guid.NewGuid();
             var consequenceCriterionLibraryId = Guid.NewGuid();
             var cost = TreatmentCostDtos.WithEquationAndCriterionLibrary(costId, costEquationId, costCriterionLibraryId);
-            var consequence = TreatmentConsequenceDtos.WithEquationAndCriterionLibrary(consequenceId, consequenceEquationId, consequenceCriterionLibraryId);
+            var consequence = TreatmentConsequenceDtos.WithEquationAndCriterionLibrary(consequenceId, "attribute", consequenceEquationId, consequenceCriterionLibraryId);
             cost.Equation = EquationDtos.AgePlus1();
             dto.Costs = new List<TreatmentCostDTO> { cost };
             dto.Consequences = new List<TreatmentConsequenceDTO> { consequence };
@@ -187,7 +187,7 @@ namespace BridgeCareCoreTests.Tests.Treatment
             var treatmentId = Guid.NewGuid();
             var dto = TreatmentDtos.Dto(treatmentId);
             var cost = TreatmentCostDtos.WithEquationAndCriterionLibrary(Guid.Empty, Guid.Empty, Guid.Empty);
-            var consequence = TreatmentConsequenceDtos.WithEquationAndCriterionLibrary(Guid.Empty, Guid.Empty, Guid.Empty);
+            var consequence = TreatmentConsequenceDtos.WithEquationAndCriterionLibrary(Guid.Empty, "attribute", Guid.Empty, Guid.Empty);
             var criterionLibrary = CriterionLibraryDtos.Dto(Guid.Empty);
             dto.CriterionLibrary = criterionLibrary;
             dto.Costs = new List<TreatmentCostDTO> { cost };

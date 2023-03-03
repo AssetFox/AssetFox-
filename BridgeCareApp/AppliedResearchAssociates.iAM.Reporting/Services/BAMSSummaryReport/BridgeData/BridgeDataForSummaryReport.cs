@@ -591,7 +591,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     foreach (var item in treatmentConsideration)
                     {
-                        budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull || _.Status == BudgetUsageStatus.CostCoveredInPart);
+                        budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCovered);
                     }
 
                     var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName;

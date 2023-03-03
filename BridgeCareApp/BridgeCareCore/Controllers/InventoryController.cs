@@ -10,6 +10,8 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
+using NuGet.Packaging;
 
 namespace BridgeCareCore.Controllers
 {
@@ -60,6 +62,22 @@ namespace BridgeCareCore.Controllers
                     .ToList();
             }
 
+            return Ok(data.OrderBy(_ => _.BrKey.Length).ThenBy(_ => _.BrKey));
+        }
+        [HttpGet]
+        [Route("GetInventory/{keyProperty}")]
+        [Authorize]
+        public async Task<IActionResult> GetInventory(string keyProperty)
+        {
+            var data = new List<KeyIDs>();
+            if (_assetData.KeyProperties.ContainsKey(keyProperty))
+            {
+                data = _assetData.KeyProperties[keyProperty].Join(
+                    _assetData.KeyProperties["BRKEY_"],
+                    assetKp => assetKp.AssetId,
+                    assetBrKey => assetBrKey.AssetId,
+                    (keyid, brkey) => new KeyIDs { BrKey = brkey.KeyValue.TextValue, BmsId = keyid.KeyValue.TextValue }).ToList();
+            }
             return Ok(data.OrderBy(_ => _.BrKey.Length).ThenBy(_ => _.BrKey));
         }
     }

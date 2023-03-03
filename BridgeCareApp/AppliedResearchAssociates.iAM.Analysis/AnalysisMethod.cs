@@ -107,11 +107,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 results.Add(ValidationStatus.Error, "Optimization strategy uses remaining life, but no remaining life limits are defined.", this);
             }
 
-            if (ShouldRestrictCashFlowToFirstYearBudget && ShouldUseExtraFundsAcrossBudgets)
-            {
-                results.Add(ValidationStatus.Error, "Using extra funds across budgets and restricting cash flow future budgets are currently incompatible settings.", this);
-            }
-
             return results;
         }
 

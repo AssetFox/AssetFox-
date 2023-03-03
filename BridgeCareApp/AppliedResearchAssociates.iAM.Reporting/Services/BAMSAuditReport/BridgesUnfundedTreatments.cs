@@ -19,12 +19,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             _bridgesTreatments = new BridgesTreatments();
         }
 
-        public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, BridgeDataModel bridgeDataModel)
+        public void FillDataInWorksheet(ExcelWorksheet worksheet, CurrentCell currentCell, BridgeDataModel bridgeDataModel)
         {
             currentCell.Row ++;
             currentCell.Column = 1;
 
-            _bridgesTreatments.FillDataInWorkSheet(worksheet, currentCell, bridgeDataModel);
+            _bridgesTreatments.FillDataInWorksheet(worksheet, currentCell, bridgeDataModel);
 
             var row = currentCell.Row;
             var columnNo = currentCell.Column;

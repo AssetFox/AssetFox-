@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             return new CurrentCell { Row = 3, Column = headersRow.Count + 1 };
         }
 
-        public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, BridgeDataModel bridgeDataModel)
+        public void FillDataInWorksheet(ExcelWorksheet worksheet, CurrentCell currentCell, BridgeDataModel bridgeDataModel)
         {
             var row = currentCell.Row;
             var columnNo = currentCell.Column;

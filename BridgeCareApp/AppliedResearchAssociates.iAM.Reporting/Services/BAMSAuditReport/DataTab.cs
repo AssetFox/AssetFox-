@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 var bridgeDataModel = GenerateBridgeDataModel(brKey, initialAssetSummary);
 
                 // Fill in excel
-                _bridgesUnfundedTreatments.FillDataInWorkSheet(worksheet, currentCell, bridgeDataModel);
+                _bridgesUnfundedTreatments.FillDataInWorksheet(worksheet, currentCell, bridgeDataModel);
             }
         }
 

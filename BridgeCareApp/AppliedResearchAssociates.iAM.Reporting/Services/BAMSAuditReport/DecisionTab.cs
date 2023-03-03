@@ -55,8 +55,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             {
                 var brKey = CheckGetValue(initialAssetSummary.ValuePerNumericAttribute, "BRKEY_");
                 var familyId = int.Parse(_reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "FAMILY_ID"));
+
+                // Year 0
+                var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, 0, initialAssetSummary);
+                FillInitialDataInWorksheet(decisionsWorksheet, decisionDataModel, currentAttributes, familyId, currentCell.Row, 1);
+                
                 // For initial compute
                 var prevYearCIImprovement = CheckGetValue(initialAssetSummary.ValuePerNumericAttribute, currentAttributes.Last());
+
+                var yearZeroRow = currentCell.Row++;                
                 foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
                 {
                     var section = year.Assets.FirstOrDefault(_ => CheckGetValue(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
@@ -70,30 +77,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     prevYearCIImprovement = decisionsDataModel.CurrentAttributesValues.Last();
 
                     // Fill in excel
-                    currentCell = FillDataInWorkSheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, familyId, currentCell);
+                    currentCell = FillDataInWorksheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, familyId, currentCell);
                 }
+                ExcelHelper.ApplyBorder(decisionsWorksheet.Cells[yearZeroRow, 1, yearZeroRow, currentCell.Column]);
             }
         }
 
         private DecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section, double prevYearCIImprovement)
         {
-            var decisionDataModel = new DecisionDataModel
-            {
-                BRKey = brKey,
-                AnalysisYear = year.Year,
-            };
-
-            var isCashFlowProject = section.TreatmentCause == TreatmentCause.CashFlowProject;
-            // Current
-            var currentAttributesValues = new List<double>();
-            for (int index = 0; index < currentAttributes.Count - 1; index++)
-            {                
-                var attributeValue = CheckGetValue(section.ValuePerNumericAttribute, currentAttributes.ElementAt(index));
-                currentAttributesValues.Add(attributeValue);
-            }
-            // analysis benefit attribute
-            currentAttributesValues.Add(CheckGetValue(section.ValuePerNumericAttribute, currentAttributes.Last()));
-            decisionDataModel.CurrentAttributesValues = currentAttributesValues;
+            var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
 
             // Budget levels
             var budgetsAtDecisionTime = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment)?.BudgetsAtDecisionTime ?? (section.TreatmentConsiderations.FirstOrDefault()?.BudgetsAtDecisionTime ?? new List<BudgetDetail>());
@@ -112,6 +104,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             decisionDataModel.BudgetLevels = budgetLevels;
 
             // Treatments
+            var isCashFlowProject = section.TreatmentCause == TreatmentCause.CashFlowProject;
             var decisionsTreatments = new List<DecisionTreatment>();
             foreach (var treatment in treatments)
             {
@@ -137,40 +130,36 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             return decisionDataModel;
         }
 
-        private string ApplyApplicableFiller(int familyId, string attribute, double attributeValue)
+        private DecisionDataModel GetInitialDecisionDataModel(HashSet<string> currentAttributes, double brKey, int year, AssetSummaryDetail section)
         {
-            return familyId < 11
-                ? attribute switch
-                {
-                    "CULV_SEEDED" or "CULV_DURATION_N" => BAMSAuditReportConstants.No,
-                    _ => attributeValue.ToString(),
-                }
-                : attribute switch
-                {
-                    "DECK_SEEDED" or "SUP_SEEDED" or "SUB_SEEDED" or "DECK_DURATION_N" or "SUP_DURATION_N" or "SUB_DURATION_N" => BAMSAuditReportConstants.No,
-                    _ => attributeValue.ToString(),
-                };
+            var decisionDataModel = new DecisionDataModel
+            {
+                BRKey = brKey,
+                AnalysisYear = year,
+            };
+
+            // Current
+            var currentAttributesValues = new List<double>();
+            for (int index = 0; index < currentAttributes.Count - 1; index++)
+            {
+                var attributeValue = CheckGetValue(section.ValuePerNumericAttribute, currentAttributes.ElementAt(index));
+                currentAttributesValues.Add(attributeValue);
+            }
+            // analysis benefit attribute
+            currentAttributesValues.Add(CheckGetValue(section.ValuePerNumericAttribute, currentAttributes.Last()));
+            decisionDataModel.CurrentAttributesValues = currentAttributesValues;
+
+            return decisionDataModel;
         }
 
         private double CheckGetValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);
 
-        private CurrentCell FillDataInWorkSheet(ExcelWorksheet decisionsWorksheet, DecisionDataModel decisionsDataModel, int budgetsCount, HashSet<string> currentAttributes, int familyId, CurrentCell currentCell)
+        private CurrentCell FillDataInWorksheet(ExcelWorksheet decisionsWorksheet, DecisionDataModel decisionsDataModel, int budgetsCount, HashSet<string> currentAttributes, int familyId, CurrentCell currentCell)
         {
             var row = currentCell.Row;
             int column = 1;
 
-            ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
-            decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.BRKey;
-            ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
-            decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.AnalysisYear;
-
-            for (int index = 0; index < decisionsDataModel.CurrentAttributesValues.Count; index++)
-            {
-                SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
-                var attribute = currentAttributes.ElementAt(index);
-                var currentAttributesValue = decisionsDataModel.CurrentAttributesValues[index];
-                decisionsWorksheet.Cells[row, column++].Value = ApplyApplicableFiller(familyId, attribute, currentAttributesValue);
-            }
+            column = FillInitialDataInWorksheet(decisionsWorksheet, decisionsDataModel, currentAttributes, familyId, row, column);
 
             var budgetsLevels = decisionsDataModel.BudgetLevels;
             foreach (var budgetLevel in budgetsLevels)
@@ -203,7 +192,42 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.RejectionReason;
             }
             ExcelHelper.ApplyBorder(decisionsWorksheet.Cells[row, 1, row, column - 1]);
+
             return new CurrentCell { Row = row + 1, Column = column - 1 };
+        }
+
+        private int FillInitialDataInWorksheet(ExcelWorksheet decisionsWorksheet, DecisionDataModel decisionsDataModel, HashSet<string> currentAttributes, int familyId, int row, int column)
+        {
+            ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
+            decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.BRKey;
+            ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
+            decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.AnalysisYear;
+
+            for (int index = 0; index < decisionsDataModel.CurrentAttributesValues.Count; index++)
+            {
+                SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
+                var attribute = currentAttributes.ElementAt(index);
+                var currentAttributesValue = decisionsDataModel.CurrentAttributesValues[index];
+                var fillerValue = ApplyApplicableFiller(familyId, attribute, currentAttributesValue);
+                decisionsWorksheet.Cells[row, column++].Value = fillerValue != null ? fillerValue : currentAttributesValue;
+            }
+
+            return column;
+        }
+
+        private string ApplyApplicableFiller(int familyId, string attribute, double attributeValue)
+        {
+            return familyId < 11
+                ? attribute switch
+                {
+                    "CULV_SEEDED" or "CULV_DURATION_N" => BAMSAuditReportConstants.No,
+                    _ => null,
+                }
+                : attribute switch
+                {
+                    "DECK_SEEDED" or "SUP_SEEDED" or "SUB_SEEDED" or "DECK_DURATION_N" or "SUP_DURATION_N" or "SUB_DURATION_N" => BAMSAuditReportConstants.No,
+                    _ => null,
+                };
         }
 
         private static void SetDecimalFormat(ExcelRange cell) => ExcelHelper.SetCustomFormat(cell, ExcelHelperCellFormat.DecimalPrecision3);
@@ -242,9 +266,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             var treatmentsColumn = column;
             // Fixed treatment headers for row 2 per treatment
             var treatmentHeaders = GetTreatmentsHeaders();
+            bool fillColor = false;
             // Dynamic headers for row 1 based on simulation treatments
             foreach (var treatment in treatments)
             {
+                fillColor = !fillColor;
                 worksheet.Cells[headerRow1, treatmentsColumn].Value = treatment;
                 // Repeat treatmentHeaders for row 2 per treatment
                 foreach (var treatmentHeader in treatmentHeaders)
@@ -255,10 +281,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     }
                     worksheet.Cells[headerRow2, column++].Value = treatmentHeader;                    
                 }
+                
+                if (fillColor)
+                {
+                    ExcelHelper.ApplyColor(worksheet.Cells[headerRow1, treatmentsColumn], Color.LightGray);
+                }
                 // Merge cells for each treatment
                 ExcelHelper.MergeCells(worksheet, headerRow1, treatmentsColumn, headerRow1, column - 1);
                 treatmentsColumn += treatmentHeaders.Count;
             }
+
             return column;
         }
 

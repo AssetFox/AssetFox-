@@ -49,9 +49,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.AnnouncementRepo.UpsertAnnouncement(dto);
-                    UnitOfWork.Commit();
                 });
 
 
@@ -74,9 +72,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.AnnouncementRepo.DeleteAnnouncement(announcementId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();

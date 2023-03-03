@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         /// <summary>
         ///     When this is enabled, the order in which the budgets are considered for funding is
-        ///     determined by the order of <see cref="InvestmentPlan.Budgets"/>.
+        ///     determined by the order of <see cref="InvestmentPlan.Budgets"/>. Formerly named "ShouldUseExtraFundsAcrossBudgets".
         /// </summary>
         public bool AllowFundingFromMultipleBudgets { get; set; }
 

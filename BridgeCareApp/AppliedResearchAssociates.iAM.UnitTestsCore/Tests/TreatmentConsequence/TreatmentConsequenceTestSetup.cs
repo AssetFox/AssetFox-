@@ -14,10 +14,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             IUnitOfWork unitOfWork,
             Guid treatmentLibraryId,
             Guid treatmentId,
-            Guid? id
+            Guid? id = null,
+            string attribute = "attribute"
             )
         {
-            var consequence = TreatmentConsequenceDtos.Dto(id);
+            var consequence = TreatmentConsequenceDtos.Dto(id, attribute);
             var consequences = new List<TreatmentConsequenceDTO> { consequence };
             var dictionary = new Dictionary<Guid, List<TreatmentConsequenceDTO>>{
                 { treatmentId, consequences }

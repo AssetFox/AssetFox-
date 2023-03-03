@@ -102,5 +102,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             unitOfWork.AttributeRepo.UpsertAttributes(attributes);
             return attribute;
         }
+        public static AttributeDTO CreateSingleNumericAttribute(
+            IUnitOfWork unitOfWork,
+            Guid? id = null,
+            string name = null)
+        {
+            var resolveId = id ?? Guid.NewGuid();
+            var resolveName = name ?? RandomStrings.WithPrefix("attribute");
+            var dataSource = DataSourceDtos.TestConfigurationSql();
+            unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
+            var attribute = AttributeDtos.Numeric(resolveName, resolveId);
+            attribute.DataSource = dataSource;
+            var attributes = new List<AttributeDTO> { attribute };
+            unitOfWork.AttributeRepo.UpsertAttributes(attributes);
+            return attribute;
+        }
     }
 }

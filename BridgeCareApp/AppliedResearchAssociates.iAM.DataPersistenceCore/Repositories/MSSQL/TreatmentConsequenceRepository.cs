@@ -334,7 +334,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.TreatmentConsequences)
             .ThenInclude(_ => _.Attribute)
                 .FirstOrDefault(_ => _.Name == treatmentName && _.TreatmentLibraryId == treatmentLibraryId)?.TreatmentConsequences?.ToList();
-            return treatmentConsequences?.Select(tc => tc.ToDto())?.ToList();
+            if (treatmentConsequences == null)
+            {
+                return new List<TreatmentConsequenceDTO>();
+            }
+            return treatmentConsequences.Select(tc => tc.ToDto())?.ToList();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class TreatmentTestSetup
     {
-        public static TreatmentDTO ModelForSingleTreatmentOfLibraryInDb(IUnitOfWork unitOfWork, Guid treatmentLibraryId, Guid? id = null, string name = null)
+        public static TreatmentDTO ModelForSingleTreatmentOfLibraryInDb(IUnitOfWork unitOfWork, Guid treatmentLibraryId, Guid? id = null, string name = "Treatment name")
         {
             var dto = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(id, name);
             var dtos = new List<TreatmentDTO> { dto };

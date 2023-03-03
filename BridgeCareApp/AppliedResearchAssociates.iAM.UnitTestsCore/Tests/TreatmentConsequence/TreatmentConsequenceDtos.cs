@@ -10,13 +10,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class TreatmentConsequenceDtos
     {
-        public static TreatmentConsequenceDTO Dto(Guid? id = null)
+        public static TreatmentConsequenceDTO Dto(Guid? id = null, string attribute = "attribute")
         {
             var resolveId = id ?? Guid.NewGuid();
             var dto = new TreatmentConsequenceDTO
             {
                 Id = resolveId,
-                Attribute = "attribute",
+                Attribute = attribute,
                 ChangeValue = "1",
             };
             return dto;

@@ -27,9 +27,6 @@ namespace AppliedResearchAssociates
             }
         }
 
-        [Obsolete(NET_STANDARD_2_1_AVAILABILITY)]
-        public static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> keyValue, out TKey key, out TValue value) => (key, value) = (keyValue.Key, keyValue.Value);
-
         public static void DecrementIndexOf<T>(this IList<T> list, T item)
         {
             var index = list.IndexOf(item);
@@ -122,14 +119,9 @@ namespace AppliedResearchAssociates
             list[index2] = item1;
         }
 
-        [Obsolete(NET_STANDARD_2_1_AVAILABILITY)]
-        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source, IEqualityComparer<T> equalityComparer = null) => new HashSet<T>(source, equalityComparer);
-
         public static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> source, Func<TValue, TKey> keySelector, IComparer<TKey> comparer = null) => new SortedDictionary<TKey, TValue>(source.ToDictionary(keySelector), comparer);
 
         public static SortedSet<T> ToSortedSet<T>(this IEnumerable<T> source, IComparer<T> comparer = null) => new SortedSet<T>(source, comparer);
-
-        private const string NET_STANDARD_2_1_AVAILABILITY = "Already present in netstandard2.1. Remove after upgrading.";
 
         private static IEnumerable<int> TowardNegativeInfinity(int start, int end, int stride)
         {

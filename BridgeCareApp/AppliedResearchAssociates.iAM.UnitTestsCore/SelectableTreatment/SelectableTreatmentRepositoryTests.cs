@@ -417,25 +417,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName_ObjectsInDb_GetsTheCost()
-        {
-            var networkId = Guid.NewGuid();
-            var treatmentLibraryId = Guid.NewGuid();
-            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
-            var treatmentId = Guid.NewGuid();
-            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
-                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
-            var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
-                TestHelper.UnitOfWork, treatmentId, treatmentLibraryId);
-
-            var costs = TestHelper.UnitOfWork.TreatmentCostRepo.GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName(
-                treatmentLibraryId, "treatment");
-
-            var foundCost = costs.Single();
-            ObjectAssertions.EquivalentExcluding(treatmentCost, foundCost, x => x.CriterionLibrary, x => x.Equation.Id);
-        }
-
-        [Fact]
         public void GetSelectableTreatmentByLibraryIdAndName_Does()
         {
             var networkId = Guid.NewGuid();

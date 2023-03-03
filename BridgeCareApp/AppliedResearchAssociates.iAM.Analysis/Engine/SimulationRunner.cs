@@ -928,7 +928,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                                 futureCostAllocators.Add(() => originalBudgetContext.AllocateCost(cost, futureYear));
                             }
 
-                            tryToAllocateCost(workingBudgets, ref remainingYearCost, addFutureCostAllocator);
+                            tryToAllocateCost(
+                                workingBudgets,
+                                ref remainingYearCost,
+                                addFutureCostAllocator,
+                                false);
 
                             if (futureYear == year && Simulation.AnalysisMethod.ShouldRestrictCashFlowToFirstYearBudget)
                             {
@@ -983,7 +987,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 costAllocators.Add(() => budgetContext.AllocateCost(cost));
             }
 
-            tryToAllocateCost(applicableBudgets, ref remainingCost, addCostAllocator);
+            tryToAllocateCost(
+                applicableBudgets,
+                ref remainingCost,
+                addCostAllocator,
+                Simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets);
 
             if (remainingCost > 0)
             {
@@ -997,9 +1005,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             return CostCoverage.Full;
 
-            void tryToAllocateCost(IEnumerable<(BudgetContext, BudgetUsageDetail)> budgets, ref decimal cost, Action<decimal, BudgetContext> costAllocationAction)
-            // "cost" is a variable that is being *indirectly* updated by "costAllocationAction".
+            void tryToAllocateCost(
+                IEnumerable<(BudgetContext, BudgetUsageDetail)> budgets,
+                ref decimal cost,
+                Action<decimal, BudgetContext> costAllocationAction,
+                bool multipleBudgetsAreAllowed)
             {
+                // "cost" is a variable that is being *indirectly* updated by "costAllocationAction".
+
                 foreach (var (budgetContext, budgetUsageDetail) in budgets)
                 {
                     if (cost <= 0)
@@ -1017,7 +1030,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                         break;
                     }
 
-                    if (Simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets && availableAmount > 0)
+                    if (multipleBudgetsAreAllowed && availableAmount > 0)
                     {
                         budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInPart;
                         budgetUsageDetail.CoveredCost = availableAmount;

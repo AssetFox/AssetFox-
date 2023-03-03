@@ -18,11 +18,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class BAMSPBExportReport : IReport
     {
         protected readonly IHubService _hubService;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private Guid _networkId;        
         private readonly ReportHelper _reportHelper;
 
-        public BAMSPBExportReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
+        public BAMSPBExportReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Check for the parameters
             if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
-                Errors.Add("Parameters string is empty OR there are no parameters defined");
+                Errors.Add("No simulation ID provided in the parameters of BAMS Simulation Report runner");
                 IndicateError();
                 return;
             }
@@ -72,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Set simulation id
             if (!Guid.TryParse(parameters, out Guid _simulationId))
             {
-                Errors.Add("Simulation ID could not be parsed to a Guid");
+                Errors.Add("Provided simulation ID is not a GUID");
                 IndicateError();
                 return;
             }
@@ -143,17 +143,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
             var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
 
-            // Sort data
-            simulationOutput.InitialAssetSummaries.Sort(
-                    (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
-                    );
-
-            foreach (var yearlySectionData in simulationOutput.Years)
-            {
-                yearlySectionData.Assets.Sort(
-                    (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
-                    );
-            }
+            // Sort data if needed..
+            
 
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);

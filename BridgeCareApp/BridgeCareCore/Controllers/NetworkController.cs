@@ -17,12 +17,6 @@ using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using BridgeCareCore.Utils;
-using BridgeCareCore.Security;
-using AppliedResearchAssociates.iAM.Data.Mappers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
-using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 
 namespace BridgeCareCore.Controllers

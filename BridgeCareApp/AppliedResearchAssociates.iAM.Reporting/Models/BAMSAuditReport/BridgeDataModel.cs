@@ -6,8 +6,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
     {
         public double BRKey { get; set; }
 
-        public SimulationYearDetail SimulationYearDetail { get; set; }
-
-        public AssetDetail Section { get; set; }
+        public AssetSummaryDetail AssetSummaryDetail { get; set; }
     }
 }

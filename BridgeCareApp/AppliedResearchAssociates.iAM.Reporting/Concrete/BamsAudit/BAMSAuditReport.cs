@@ -19,13 +19,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class BAMSAuditReport : IReport
     {
         protected readonly IHubService _hubService;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private Guid _networkId;       
         private readonly DataTab _dataTab;
         private readonly DecisionTab _decisionTab;
         private readonly ReportHelper _reportHelper;
 
-        public BAMSAuditReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
+        public BAMSAuditReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
@@ -178,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var bridgesWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.BridgesTab);
-            var dataTabRequiredAttributes = _dataTab.GetRequiredAttributes();
+            var dataTabRequiredAttributes = DataTab.GetRequiredAttributes();
             ValidateSections(simulationOutput, reportDetailDto, simulationId, dataTabRequiredAttributes);
             _dataTab.Fill(bridgesWorksheet, simulationOutput);
 

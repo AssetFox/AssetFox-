@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
     {
         public string Feasiable { get; set; }
 
-        public double CIImprovement { get; set; }
+        public double? CIImprovement { get; set; } // TODO remove nullable once work item #21733 is done.
 
         public double Cost { get; set; }
 

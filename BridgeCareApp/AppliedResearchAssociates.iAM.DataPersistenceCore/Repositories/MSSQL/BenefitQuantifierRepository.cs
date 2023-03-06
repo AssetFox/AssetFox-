@@ -108,8 +108,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteBenefitQuantifier(Guid networkId)
         {
-            _unitOfWork.Context.DeleteEntity<EquationEntity>(_ => _.BenefitQuantifier.NetworkId == networkId);
-
             _unitOfWork.Context.DeleteEntity<BenefitQuantifierEntity>(_ => _.NetworkId == networkId);
         }
     }

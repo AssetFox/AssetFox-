@@ -200,10 +200,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssets = _unitOfWork.Context.MaintainableAsset
+            var maintainableAssets = _unitOfWork.Context.MaintainableAsset.AsNoTracking()
                 .Where(_ => _.NetworkId == networkId);
 
-            var attributes = _unitOfWork.Context.AggregatedResult
+            var attributes = _unitOfWork.Context.AggregatedResult.AsNoTracking()
                 .Where(_ => maintainableAssets.Any(__ => __.Id == _.MaintainableAssetId))
                 .Select(_ => _.AttributeId)
                 .Distinct()

@@ -60,7 +60,7 @@
                     </v-layout>
                     <v-layout justify-center>
                         <v-spacer />
-                         <v-flex xs6>
+                         <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
                             <v-select
                                 class="ghd-select ghd-control-text ghd-control-border"
@@ -75,7 +75,7 @@
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs6>
+                        <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
                             <v-text-field
                                 style="margin:0px"
@@ -94,6 +94,14 @@
                                 :disabled="!hasAdminAccess"
                             >
                             </v-text-field>
+                        </v-flex>
+                        <v-flex xs4 class="ghd-constant-header">
+                            <v-switch style="margin-left:10px;margin-top:30px;"
+                              class="ghd-checkbox"
+                              label="Allow Multi Budget Funding"
+                              :disabled="!hasAdminAccess"
+                              v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"
+                              @change='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
                         </v-flex>
                         <v-spacer />
                     </v-layout>

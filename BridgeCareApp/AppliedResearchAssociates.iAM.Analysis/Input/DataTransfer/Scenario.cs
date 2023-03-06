@@ -49,6 +49,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
         private static AnalysisMethod Convert(Analysis.AnalysisMethod source) => new()
         {
+            AllowFundingFromMultipleBudgets = source.AllowFundingFromMultipleBudgets,
             BenefitAttributeID = source.Benefit.Attribute.Name,
             BenefitLimit = source.Benefit.Limit,
             BenefitWeightAttributeID = source.Weighting.Name,
@@ -59,8 +60,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
             RemainingLifeLimits = source.RemainingLifeLimits.Select(Convert).ToList(),
             ShouldApplyMultipleFeasibleCosts = source.ShouldApplyMultipleFeasibleCosts,
             ShouldDeteriorateDuringCashFlow = source.ShouldDeteriorateDuringCashFlow,
-            ShouldRestrictCashFlowToFirstYearBudget = source.ShouldRestrictCashFlowToFirstYearBudget,
-            ShouldUseExtraFundsAcrossBudgets = source.ShouldUseExtraFundsAcrossBudgets,
+            ShouldRestrictCashFlowToFirstYearBudgets = source.ShouldRestrictCashFlowToFirstYearBudgets,
             SpendingStrategy = source.SpendingStrategy,
             TargetConditionGoals = source.TargetConditionGoals.Select(Convert).ToList(),
         };

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20230220223331_UpdateTreatmentLibraryUser")]
-    partial class UpdateTreatmentLibraryUser
+    [Migration("20230220223331_CreateTreatmentLibraryUser")]
+    partial class CreateTreatmentLibraryUser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

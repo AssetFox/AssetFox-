@@ -69,7 +69,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
             var controller = CreateController(unitOfWork);
-            var simulation = SimulationTestSetup.TestSimulation();
+            var simulation = SimulationDtos.Dto();
             var simulations = new List<SimulationDTO> { simulation };
             repo.Setup(r => r.GetUserScenarios()).Returns(simulations);
 
@@ -98,7 +98,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
             var controller = CreateController(unitOfWork);
-            var simulation = SimulationTestSetup.TestSimulation();
+            var simulation = SimulationDtos.Dto();
             var simulations = new List<SimulationDTO> { simulation };
             repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(simulations);
 
@@ -121,6 +121,74 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public async Task GetSimulations_CallShouldGetAllScenariosInRepo_RepoOnlyhasSharedScenarios()
+        {
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulation = SimulationDtos.Dto();
+            var simulations = new List<SimulationDTO> { simulation };
+            var emptySimulations = new List<SimulationDTO>();
+            repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(simulations);
+            repo.Setup(r => r.GetUserScenarios()).Returns(emptySimulations);
+
+            // Act
+            var result = await controller.GetSimulations();
+
+            // Assert
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as List<SimulationDTO>;
+            ObjectAssertions.Equivalent(simulations, castValue);
+        }
+
+        [Fact]
+        public async Task GetSimulations_CallShouldGetAllScenariosInRepo_RepoHasSharedAndUserScenarios()
+        {
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulation1 = SimulationDtos.Dto();
+            var simulation2 = SimulationDtos.Dto();
+            var simulations1 = new List<SimulationDTO> { simulation1 };
+            var simulations2 = new List<SimulationDTO> { simulation2 };
+            var expected = simulations1.Concat(simulations2).ToList();
+            repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(simulations1);
+            repo.Setup(r => r.GetUserScenarios()).Returns(simulations2);
+
+            // Act
+            var result = await controller.GetSimulations();
+
+            // Assert
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as List<SimulationDTO>;
+            ObjectAssertions.Equivalent(expected, castValue);
+        }
+
+        [Fact]
+        public async Task GetSimulations_CallShouldGetAllScenariosInRepo_RepoOnlyhasUserScenarios()
+        {
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulation = SimulationDtos.Dto();
+            var simulations = new List<SimulationDTO> { simulation };
+            var emptySimulations = new List<SimulationDTO>();
+            repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(emptySimulations);
+            repo.Setup(r => r.GetUserScenarios()).Returns(simulations);
+
+            // Act
+            var result = await controller.GetSimulations();
+
+            // Assert
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as List<SimulationDTO>;
+            ObjectAssertions.Equivalent(simulations, castValue);
+        }
+
+        [Fact]
         public async Task CreateSimulation_CallsCreateOnRepo()
         {
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
@@ -128,8 +196,8 @@ namespace BridgeCareCoreTests.Tests
             var networkId = Guid.NewGuid();
             var controller = CreateController(unitOfWork);
             var simulationId = Guid.NewGuid();
-            var newSimulationDto = SimulationTestSetup.TestSimulation(simulationId);
-            var simulationDtoAfter = SimulationTestSetup.TestSimulation(simulationId, newSimulationDto.Name);
+            var newSimulationDto = SimulationDtos.Dto(simulationId);
+            var simulationDtoAfter = SimulationDtos.Dto(simulationId, newSimulationDto.Name);
             var userId = Guid.NewGuid();
             var simulationUserDto = SimulationUserDtos.Dto(userId);
 
@@ -160,9 +228,9 @@ namespace BridgeCareCoreTests.Tests
             var controller = CreateController(unitOfWork);
             var userId = Guid.NewGuid();
             var simulationId = Guid.NewGuid();
-            var simulationDTO = SimulationTestSetup.TestSimulation(simulationId, SimulationName, userId);
-            var simulationDTO2 = SimulationTestSetup.TestSimulation(simulationId, SimulationName, userId);
-            var simulationDTO3 = SimulationTestSetup.TestSimulation(simulationId, SimulationName, userId);
+            var simulationDTO = SimulationDtos.Dto(simulationId, SimulationName, userId);
+            var simulationDTO2 = SimulationDtos.Dto(simulationId, SimulationName, userId);
+            var simulationDTO3 = SimulationDtos.Dto(simulationId, SimulationName, userId);
 
             repo.Setup(r => r.GetSimulation(simulationId)).Returns(simulationDTO2);
 
@@ -186,7 +254,7 @@ namespace BridgeCareCoreTests.Tests
             var networkId = Guid.NewGuid();
             var cloneSimulationId = Guid.NewGuid();
             var ownerId = Guid.NewGuid();
-            var simulationDto = SimulationTestSetup.TestSimulation(cloneSimulationId, SimulationName, ownerId);
+            var simulationDto = SimulationDtos.Dto(cloneSimulationId, SimulationName, ownerId);
             var cloneResult = new SimulationCloningResultDTO
             {
                 Simulation = simulationDto,

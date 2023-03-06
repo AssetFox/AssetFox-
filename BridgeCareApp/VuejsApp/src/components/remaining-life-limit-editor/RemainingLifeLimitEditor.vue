@@ -481,25 +481,10 @@ export default class RemainingLifeLimitEditor extends Vue {
     onSelectedRemainingLifeLimitLibraryChanged() {
         this.hasSelectedLibrary =
             this.selectedRemainingLifeLimitLibrary.id !== this.uuidNIL;
-
-        // if (this.hasScenario) {
-        //     this.currentPage = this.selectedRemainingLifeLimitLibrary.remainingLifeLimits.map((remainingLifeLimit: RemainingLifeLimit) => ({
-        //         ...remainingLifeLimit, id: getNewGuid()
-        //     }));
-        // } else {
-        //     this.currentPage = clone(
-        //         this.selectedRemainingLifeLimitLibrary.remainingLifeLimits,
-        //     );
-        // }
-
         this.clearChanges();
         this.initializing = false;
         if(this.hasSelectedLibrary)
             this.onPaginationChanged();
-        
-        if (!isNullOrUndefined(this.selectedRemainingLifeLimitLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedRemainingLifeLimitLibrary).then(this.isShared = this.isSharedLibrary);
-        }    
     }
 
     @Watch('stateScenarioRemainingLifeLimits')
@@ -528,10 +513,6 @@ export default class RemainingLifeLimitEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
-        if (!isNullOrUndefined(this.selectedRemainingLifeLimitLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedRemainingLifeLimitLibrary).then(this.isShared = this.isSharedLibrary);
-        }
-
         const request: PagingRequest<RemainingLifeLimit>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -561,6 +542,9 @@ export default class RemainingLifeLimitEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    if (!isNullOrUndefined(this.selectedRemainingLifeLimitLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedRemainingLifeLimitLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
                 }
             });     
     }

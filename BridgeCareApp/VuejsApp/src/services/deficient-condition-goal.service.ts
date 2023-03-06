@@ -1,5 +1,6 @@
 import {AxiosPromise} from 'axios';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
+import { LibraryUser } from '@/shared/models/iAM/user';
 import {DeficientConditionGoal, DeficientConditionGoalLibrary} from '@/shared/models/iAM/deficient-condition-goal';
 import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
@@ -41,6 +42,21 @@ export default class DeficientConditionGoalService {
         return coreAxiosInstance.post(
             `${API.DeficientConditionGoal}/UpsertScenarioDeficientConditionGoals/${scenarioId}`,
             data,
+        );
+    }
+    static getDeficientConditionGaolLibraryUsers(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.DeficientConditionGoal}/GetDeficientConditionGoalLibraryUsers/${libraryId}`);
+    }
+
+    static upsertOrDeleteDeficientConditionGoalLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.DeficientConditionGoal}/UpsertOrDeleteDeficientConditionGoalLibraryUsers/${libraryId}`
+            , proposedUsers
+        );
+    }
+    static getIsSharedDeficientConditionGoalLibrary(deficientConditionGoalLibraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.DeficientConditionGoal}/GetIsSharedLibrary/${deficientConditionGoalLibraryId}`
         );
     }
 

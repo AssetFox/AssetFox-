@@ -8,6 +8,7 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -20,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private DeckAreaBridgeWorkSummary _deckAreaBridgeWorkSummary;
         private PostedClosedBridgeWorkSummary _postedClosedBridgeWorkSummary;
         private ProjectsCompletedCount _projectsCompletedCount;
-        private ISummaryReportHelper _summaryReportHelper;
+        private ReportHelper _reportHelper;
 
         public BridgeWorkSummary(IList<string> Warnings)
         {
@@ -32,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _deckAreaBridgeWorkSummary = new DeckAreaBridgeWorkSummary();
             _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel);
             _projectsCompletedCount = new ProjectsCompletedCount(Warnings);
-            _summaryReportHelper = new SummaryReportHelper();
+            _reportHelper = new ReportHelper();
         }
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
@@ -111,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 foreach (var section in yearData.Assets)
                 {
                     //get business plan network
-                    var busPlanNetwork = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
+                    var busPlanNetwork = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
 
                     if (!costPerBPNPerYear[yearData.Year].ContainsKey(busPlanNetwork))
                     {
@@ -173,7 +174,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var culvert = BAMSConstants.CulvertBridgeType;
                 var nonCulvert = BAMSConstants.NonCulvertBridgeType;
                 // If Bridge type is culvert
-                if (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BRIDGE_TYPE") == culvert)
+                if (_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BRIDGE_TYPE") == culvert)
                 {
                     AddKeyValueForWorkedOn(costAndCountPerTreatmentPerYear[year], culvert, section.AppliedTreatment, cost);
                 }
@@ -206,7 +207,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var culvert = BAMSConstants.CulvertBridgeType;
                 // If Bridge type is culvert
-                if (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BRIDGE_TYPE") == culvert)
+                if (_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BRIDGE_TYPE") == culvert)
                 {
                     AddKeyValue(countForCompletedProject[year], culvert, section.AppliedTreatment);
                 }

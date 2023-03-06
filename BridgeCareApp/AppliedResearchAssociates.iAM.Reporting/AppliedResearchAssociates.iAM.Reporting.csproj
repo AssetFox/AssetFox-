@@ -16,9 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\BAMSAuditReport\" />
     <Folder Include="Properties\" />
-    <Folder Include="Services\BAMSAuditReport\" />
   </ItemGroup>
 
 </Project>

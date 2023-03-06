@@ -17,6 +17,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
         }
 
+        // TODO check later: name might be different
+        public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
+
         public string AppliedTreatment { get; set; }
 
         public TreatmentCause TreatmentCause { get; set; }

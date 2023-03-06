@@ -39,6 +39,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     consequence.Change.Expression = templateConsequence.Change.Expression;
                     Consequences.Add(consequence);
                 }
+
+                PerformanceCurveAdjustmentFactors.Clear();
+                foreach (var (attribute, factor) in TemplateTreatment.PerformanceCurveAdjustmentFactors)
+                {
+                    PerformanceCurveAdjustmentFactors.Add(attribute, factor);
+                }
             }
         }
 

@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using System.Security.Principal;
@@ -48,6 +49,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel
             };
+        public static TargetConditionGoalLibraryUserEntity ToTargetConditionGoalLibraryUserEntity(this LibraryUserDTO dto, Guid targetConditionGoalLibraryId) =>
+            new TargetConditionGoalLibraryUserEntity
+            {
+                LibraryId = targetConditionGoalLibraryId,
+                UserId = dto.UserId,
+                AccessLevel = (int)dto.AccessLevel
+            };
         public static LibraryUserDTO ToDto(this RemainingLifeLimitLibraryUserEntity entity) =>
             new LibraryUserDTO
             {
@@ -81,6 +89,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 UserId = entity.UserId,
                 UserName = entity?.User?.Username,
+                AccessLevel = (LibraryAccessLevel)entity.AccessLevel
+            };
+        public static LibraryUserDTO ToDto(this TargetConditionGoalLibraryUserEntity entity) =>
+            new LibraryUserDTO
+            {
+                UserId = entity.UserId,
+                UserName = entity.User?.Username,
                 AccessLevel = (LibraryAccessLevel)entity.AccessLevel
             };
     }

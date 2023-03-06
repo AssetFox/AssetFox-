@@ -583,9 +583,6 @@ export default class DeficientConditionGoalEditor extends Vue {
             this.hasSelectedLibrary = this.selectedDeficientConditionGoalLibrary.id !== this.uuidNIL;
             
         }
-        if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
-        }    
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
@@ -623,9 +620,6 @@ export default class DeficientConditionGoalEditor extends Vue {
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
         this.isShared = this.isSharedLibrary;
-        if (!isNullOrUndefined(this.selectDeficientConditionGoalLibrary)) {
-            this.selectDeficientConditionGoalLibrary.isShared = this.isShared;
-        } 
     }
 
     @Watch('pagination')
@@ -634,10 +628,6 @@ export default class DeficientConditionGoalEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
-        if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
-        }
-
         const request: PagingRequest<DeficientConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -667,6 +657,10 @@ export default class DeficientConditionGoalEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
+                    }      
+
                 }
             });     
     }

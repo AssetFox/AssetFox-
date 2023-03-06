@@ -21,19 +21,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                           throw new ArgumentNullException(nameof(unitOfWork));
         public void UpsertTreatmentLibraryUser(TreatmentLibraryDTO dto, Guid userId) => _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, userId);
 
-        //public List<TreatmentLibraryUserDTO> GetAllTreatmentLibraryUsers()
-        //{
-        //    if (!_unitOfWork.Context.TreatmentLibraryUser.Any())
-        //    {
-        //        return new List<TreatmentLibraryUserDTO>();
-        //    }
-
-        //    return _unitOfWork.Context.TreatmentLibraryUser.AsNoTracking()
-        //        .Include(_ => _.TreatmentLibrary)
-        //        .OrderBy(_ => _.UserId)
-        //        .Select(_ => _.TreatmentLibrary.ToDto())
-        //        .ToList();
-        //}
         public void UpsertOrDeleteUsers(Guid treatmentLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
             var existingEntities = _unitOfWork.Context.TreatmentLibraryUser.Where(u => u.TreatmentLibraryId == treatmentLibraryId).ToList();

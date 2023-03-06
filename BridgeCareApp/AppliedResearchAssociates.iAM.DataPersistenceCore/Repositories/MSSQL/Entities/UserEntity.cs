@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -18,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             BudgetLibraryUsers = new HashSet<BudgetLibraryUserEntity>();
             PerformanceCurveLibraryUsers = new HashSet<PerformanceCurveLibraryUserEntity>();
             TreatmentLibraryUsers = new HashSet<TreatmentLibraryUserEntity>();
+            TargetConditionGoalLibraryUsers = new HashSet<TargetConditionGoalLibraryUserEntity>();
         }
 
         public Guid Id { get; set; }
@@ -40,5 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public ICollection<DeficientConditionGoalLibraryUserEntity> DeficientConditionGoalLibraryUsers { get; set; }
         public ICollection<BudgetLibraryUserEntity> BudgetLibraryUsers { get; set; }
         public ICollection<PerformanceCurveLibraryUserEntity> PerformanceCurveLibraryUsers { get; set; }
+        public ICollection<TargetConditionGoalLibraryUserEntity> TargetConditionGoalLibraryUsers { get; set; }
+        public ICollection<TreatmentLibraryUserEntity> TreatmentLibraryUsers { get; set; }
     }
 }

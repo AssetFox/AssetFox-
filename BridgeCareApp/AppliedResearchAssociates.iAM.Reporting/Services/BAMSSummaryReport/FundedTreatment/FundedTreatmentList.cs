@@ -148,8 +148,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             var budget = section.TreatmentConsiderations
                 .Where(c => c.TreatmentName == treatmentName)
-                .FirstOrDefault(c => c.BudgetUsages.Any(b => b.Status is BudgetUsageStatus.CostCoveredInFull or BudgetUsageStatus.CostCoveredInPart))
-                ?.BudgetUsages?.First(b => b.Status is BudgetUsageStatus.CostCoveredInFull or BudgetUsageStatus.CostCoveredInPart);
+                .FirstOrDefault(c => c.BudgetUsages.Any(b => b.Status is BudgetUsageStatus.CostCovered))
+                ?.BudgetUsages?.First(b => b.Status is BudgetUsageStatus.CostCovered);
 
             var budgetName = budget?.BudgetName ?? string.Empty;
 

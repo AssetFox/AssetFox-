@@ -38,6 +38,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.NetworkId == networkId).ToDto();
         }
 
+        public void UpsertBenefitQuantifierAtomically(BenefitQuantifierDTO dto)
+        {
+            _unitOfWork.AsTransaction(u => u.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto));
+        }
+
         public void UpsertBenefitQuantifier(BenefitQuantifierDTO dto)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == dto.NetworkId))

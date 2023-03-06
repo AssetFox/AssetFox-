@@ -10,5 +10,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertBenefitQuantifier(BenefitQuantifierDTO dto);
 
         void DeleteBenefitQuantifier(Guid networkId);
+        void UpsertBenefitQuantifierAtomically(BenefitQuantifierDTO dto);
     }
 }

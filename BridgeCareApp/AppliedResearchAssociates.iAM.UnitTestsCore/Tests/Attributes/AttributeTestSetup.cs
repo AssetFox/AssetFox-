@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             var existingAttribute = TestHelper.UnitOfWork.AttributeRepo.GetSingleByName(dto.Name);
             if (existingAttribute == null)
             {
-                TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(dto);
+                TestHelper.UnitOfWork.AttributeRepo.UpsertAttributesAtomically(dto);
             }
         }
 

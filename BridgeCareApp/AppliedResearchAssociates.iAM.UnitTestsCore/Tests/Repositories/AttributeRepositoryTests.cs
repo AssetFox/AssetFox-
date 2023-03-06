@@ -249,7 +249,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 Name = attributeName,
                 Type = "STRING"//AppliedResearchAssociates.iAM.AttributeTypeNames.String
             };
-            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attributeDto);
+            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributesAtomically(attributeDto);
             var attributeAfter = TestHelper.UnitOfWork.AttributeRepo.GetSingleById(attributeId);
             var sqlDataSourceAfter = attributeAfter.DataSource as SQLDataSourceDTO;
             Assert.Equal("data source=Test;initial catalog=TestDB;persist security info=True;user id=TestId;password=TestPassword;MultipleActiveResultSets=True;App=EntityFramework", sqlDataSourceAfter.ConnectionString);

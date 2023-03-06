@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
             repository.UpsertAttributesAtomically(dataAttributes);
         }
 
-        public static void UpsertAttributes(this IAttributeRepository repository, params AttributeDTO[] dtos)
+        public static void UpsertAttributesAtomically(this IAttributeRepository repository, params AttributeDTO[] dtos)
         {
             repository.UpsertAttributesAtomically(dtos.ToList());
         }

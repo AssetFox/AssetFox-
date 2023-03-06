@@ -150,16 +150,13 @@ namespace BridgeCareCore.Controllers
                 var convertedAttributeDto = AttributeService.ConvertAllAttribute(attributeDto);
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
-                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto);
-                    UnitOfWork.Commit();
+                    UnitOfWork.AttributeRepo.UpsertAttributesAtomically(convertedAttributeDto);
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttribute {attributeDto.Name} - {e.Message}");
                 throw;
             }

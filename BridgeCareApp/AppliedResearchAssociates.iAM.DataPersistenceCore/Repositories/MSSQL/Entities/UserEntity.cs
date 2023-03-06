@@ -6,6 +6,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -19,6 +21,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             CalculatedAttributeLibraryUsers= new HashSet<CalculatedAttributeLibraryUserEntity>();
             CashFlowRuleLibraryUsers = new HashSet<CashFlowRuleLibraryUserEntity>();
             BudgetLibraryUsers = new HashSet<BudgetLibraryUserEntity>();
+            PerformanceCurveLibraryUsers = new HashSet<PerformanceCurveLibraryUserEntity>();
+            TreatmentLibraryUsers = new HashSet<TreatmentLibraryUserEntity>();
+            TargetConditionGoalLibraryUsers = new HashSet<TargetConditionGoalLibraryUserEntity>();
         }
 
         public Guid Id { get; set; }
@@ -34,11 +39,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual UserCriteriaFilterEntity UserCriteriaFilterJoin { get; set; }
 
         public ICollection<SimulationUserEntity> SimulationUserJoins { get; set; }
+        public ICollection<PerformanceCurveLibraryUserEntity> PerformanceCurveLibraryUserJoins { get; set; }
+        public ICollection<TreatmentLibraryUserEntity> TreatmentLibraryUsers { get; set; }
 
         public ICollection<RemainingLifeLimitLibraryUserEntity> RemainingLifeLimitLibraryUsers { get; set; }
         public ICollection<DeficientConditionGoalLibraryUserEntity> DeficientConditionGoalLibraryUsers { get; set; }
         public ICollection<CashFlowRuleLibraryUserEntity> CashFlowRuleLibraryUsers { get; set; }
         public ICollection<CalculatedAttributeLibraryUserEntity> CalculatedAttributeLibraryUsers { get; set; }
         public ICollection<BudgetLibraryUserEntity> BudgetLibraryUsers { get; set; }
+        public ICollection<PerformanceCurveLibraryUserEntity> PerformanceCurveLibraryUsers { get; set; }
+        public ICollection<TargetConditionGoalLibraryUserEntity> TargetConditionGoalLibraryUsers { get; set; }
     }
 }

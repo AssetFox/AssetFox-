@@ -16,6 +16,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Filter = new Criterion(Simulation.Network.Explorer);
         }
 
+        /// <summary>
+        ///     When this is enabled, the order in which the budgets are considered for funding is
+        ///     determined by the order of <see cref="InvestmentPlan.Budgets"/>. Formerly named "ShouldUseExtraFundsAcrossBudgets".
+        /// </summary>
+        public bool AllowFundingFromMultipleBudgets { get; set; }
+
         public Benefit Benefit { get; } = new Benefit();
 
         public IReadOnlyCollection<BudgetPriority> BudgetPriorities => _BudgetPriorities;
@@ -34,13 +40,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public bool ShouldDeteriorateDuringCashFlow { get; set; }
 
-        public bool ShouldRestrictCashFlowToFirstYearBudget { get; set; } = true;
-
-        /// <summary>
-        ///     When this is enabled, the order in which the budgets are considered for funding is
-        ///     determined by the order of <see cref="InvestmentPlan.Budgets"/>.
-        /// </summary>
-        public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
+        public bool ShouldRestrictCashFlowToFirstYearBudgets { get; set; } = true;
 
         public SpendingStrategy SpendingStrategy { get; set; } = SpendingStrategy.AsBudgetPermits;
 
@@ -107,11 +107,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 results.Add(ValidationStatus.Error, "Optimization strategy uses remaining life, but no remaining life limits are defined.", this);
             }
 
-            if (ShouldRestrictCashFlowToFirstYearBudget && ShouldUseExtraFundsAcrossBudgets)
-            {
-                results.Add(ValidationStatus.Error, "Using extra funds across budgets and restricting cash flow future budgets are currently incompatible settings.", this);
-            }
-
             return results;
         }
 
@@ -127,23 +122,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             get
             {
-                switch (OptimizationStrategy)
+                return OptimizationStrategy switch
                 {
-                case OptimizationStrategy.Benefit:
-                    return option => option.Benefit;
-
-                case OptimizationStrategy.BenefitToCostRatio:
-                    return option => option.Benefit / option.Cost;
-
-                case OptimizationStrategy.RemainingLife:
-                    return option => option.RemainingLife.Value;
-
-                case OptimizationStrategy.RemainingLifeToCostRatio:
-                    return option => option.RemainingLife.Value / option.Cost;
-
-                default:
-                    throw new InvalidOperationException(MessageStrings.InvalidOptimizationStrategy);
-                }
+                    OptimizationStrategy.Benefit => option => option.Benefit,
+                    OptimizationStrategy.BenefitToCostRatio => option => option.Benefit / option.Cost,
+                    OptimizationStrategy.RemainingLife => option => option.RemainingLife.Value,
+                    OptimizationStrategy.RemainingLifeToCostRatio => option => option.RemainingLife.Value / option.Cost,
+                    _ => throw new InvalidOperationException(MessageStrings.InvalidOptimizationStrategy),
+                };
             }
         }
 
@@ -151,29 +137,16 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             get
             {
-                switch (SpendingStrategy)
+                return SpendingStrategy switch
                 {
-                case SpendingStrategy.NoSpending:
-                    return SpendingLimit.Zero;
-
-                case SpendingStrategy.UnlimitedSpending:
-                    return SpendingLimit.NoLimit;
-
-                case SpendingStrategy.UntilTargetAndDeficientConditionGoalsMet:
-                    return SpendingLimit.NoLimit;
-
-                case SpendingStrategy.UntilTargetConditionGoalsMet:
-                    return SpendingLimit.NoLimit;
-
-                case SpendingStrategy.UntilDeficientConditionGoalsMet:
-                    return SpendingLimit.NoLimit;
-
-                case SpendingStrategy.AsBudgetPermits:
-                    return SpendingLimit.Budget;
-
-                default:
-                    throw new InvalidOperationException(MessageStrings.InvalidSpendingStrategy);
-                }
+                    SpendingStrategy.NoSpending => SpendingLimit.Zero,
+                    SpendingStrategy.UnlimitedSpending => SpendingLimit.NoLimit,
+                    SpendingStrategy.UntilTargetAndDeficientConditionGoalsMet => SpendingLimit.NoLimit,
+                    SpendingStrategy.UntilTargetConditionGoalsMet => SpendingLimit.NoLimit,
+                    SpendingStrategy.UntilDeficientConditionGoalsMet => SpendingLimit.NoLimit,
+                    SpendingStrategy.AsBudgetPermits => SpendingLimit.Budget,
+                    _ => throw new InvalidOperationException(MessageStrings.InvalidSpendingStrategy),
+                };
             }
         }
 

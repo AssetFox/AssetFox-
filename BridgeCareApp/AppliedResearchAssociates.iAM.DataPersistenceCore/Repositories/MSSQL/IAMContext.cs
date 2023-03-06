@@ -185,6 +185,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<TargetConditionGoalEntity> TargetConditionGoal { get; set; }
 
+        public virtual DbSet<TargetConditionGoalLibraryUserEntity> TargetConditionGoalLibraryUser { get; set; }
+
         public virtual DbSet<ScenarioTargetConditionGoalEntity> ScenarioTargetConditionGoals { get; set; }
 
         public virtual DbSet<TargetConditionGoalLibraryEntity> TargetConditionGoalLibrary { get; set; }
@@ -202,6 +204,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<TreatmentCostEquationEntity> TreatmentCostEquation { get; set; }
 
         public virtual DbSet<TreatmentLibraryEntity> TreatmentLibrary { get; set; }
+
+        public virtual DbSet<TreatmentLibraryUserEntity> TreatmentLibraryUser { get; set; }
+
+        public virtual DbSet<PerformanceCurveLibraryUserEntity> PerformanceCurveLibraryUser { get; set; }
 
         public virtual DbSet<TreatmentSchedulingEntity> TreatmentScheduling { get; set; }
 
@@ -2032,7 +2038,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
-
+            
             modelBuilder.Entity<TreatmentSchedulingEntity>(entity =>
             {
                 entity.HasIndex(e => e.TreatmentId);
@@ -2603,6 +2609,67 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.BudgetLibraryUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<PerformanceCurveLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
+
+                entity.ToTable("PerformanceCurveLibrary_User");
+
+                entity.HasIndex(e => e.LibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.PerformanceCurveLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.LibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.PerformanceCurveLibraryUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TreatmentLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
+
+                entity.ToTable("TreatmentLibrary_User");
+
+                entity.HasIndex(e => e.LibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.TreatmentLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.LibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.TreatmentLibraryUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TargetConditionGoalLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
+
+                entity.ToTable("TargetConditionGoalLibrary_User");
+
+                entity.HasIndex(e => e.LibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.TargetConditionGoalLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.LibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.TargetConditionGoalLibraryUsers)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

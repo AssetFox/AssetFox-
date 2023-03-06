@@ -56,9 +56,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var exception = await Assert.ThrowsAsync<SqlException>(async () => await controller.CreateAttributes(allAttributes));
 
             var attributeNames = new List<string> { attributeName1 };
-            var attributesAfter = TestHelper.UnitOfWork.AttributeRepo.GetAttributesWithNames(attributeNames);
-            var attributeAfter = attributesAfter.Single();
-            Assert.Null(attributeAfter.Minimum);
+            var attributeAfter = TestHelper.UnitOfWork.AttributeRepo.GetSingleById(attributeId1);
+            Assert.Equal(0, attributeAfter.Minimum);
         }
     }
 }

@@ -10,11 +10,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule
 {
     public static class CashFlowDistributionRuleDtos
     {
-        public static CashFlowDistributionRuleDTO Dto()
+        public static CashFlowDistributionRuleDTO Dto(Guid? id = null)
         {
+            var resolveId = id ?? Guid.NewGuid();
             var dto = new CashFlowDistributionRuleDTO
             {
-                Id = Guid.NewGuid(),
+                Id = resolveId,
                 DurationInYears = 1,
                 CostCeiling = 500000,
                 YearlyPercentages = "100"

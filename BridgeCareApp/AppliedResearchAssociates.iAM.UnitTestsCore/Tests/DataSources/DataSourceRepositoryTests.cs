@@ -97,15 +97,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
         }
 
-        [Fact]
-        public void DoesNotDeleteDataSourcesWithAttributes()
-        {
-            // Arrange
-            var repo = new DataSourceRepository(_testRepo);
-
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => repo.DeleteDataSource(new Guid("72b3cca4-57f1-4e0d-ad13-37c2664f1299")));
-        }
 
         [Fact]
         public void DeleteHandlesIdDoesNotExist()

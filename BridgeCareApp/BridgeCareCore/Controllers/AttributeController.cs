@@ -117,9 +117,7 @@ namespace BridgeCareCore.Controllers
                 var convertedAttributes = attributeDTOs.Select(AttributeService.ConvertAllAttribute).ToList();
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
-                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributes);
-                    UnitOfWork.Commit();
+                    UnitOfWork.AttributeRepo.UpsertAttributesAtomically(convertedAttributes);
                 });
 
                 return Ok();
@@ -138,7 +136,6 @@ namespace BridgeCareCore.Controllers
                 {
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {e.Message}");
                 }
-                UnitOfWork.Rollback();
                 throw;
             }
         }

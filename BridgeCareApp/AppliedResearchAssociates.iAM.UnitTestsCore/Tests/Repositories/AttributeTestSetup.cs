@@ -79,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                         {
                             attribute.DataSource = dataSourceToApply;
                         }
-                        unitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
+                        unitOfWork.AttributeRepo.UpsertAttributesAtomically(attributesToInsert);
                         AttributesHaveBeenCreated = true;
                     }
                 }
@@ -99,7 +99,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attribute = AttributeDtos.Text(resolveName, resolveId);
             attribute.DataSource = dataSource;
             var attributes = new List<AttributeDTO> { attribute };
-            unitOfWork.AttributeRepo.UpsertAttributes(attributes);
+            unitOfWork.AttributeRepo.UpsertAttributesAtomically(attributes);
             return attribute;
         }
         public static AttributeDTO CreateSingleNumericAttribute(
@@ -114,7 +114,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attribute = AttributeDtos.Numeric(resolveName, resolveId);
             attribute.DataSource = dataSource;
             var attributes = new List<AttributeDTO> { attribute };
-            unitOfWork.AttributeRepo.UpsertAttributes(attributes);
+            unitOfWork.AttributeRepo.UpsertAttributesAtomically(attributes);
             return attribute;
         }
     }

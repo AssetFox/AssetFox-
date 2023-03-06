@@ -24,6 +24,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AttributeRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
+
+        public void UpsertAttributesAtomically(List<Attribute> attributes)
+        {
+            _unitOfWork.AsTransaction(u =>
+              u.AttributeRepo.UpsertAttributes(attributes));
+        }
+
         public void UpsertAttributes(List<Attribute> attributes)
         {
             var upsertAttributeEntities = attributes.Select(_ => _.ToEntity(_unitOfWork.DataSourceRepo, _unitOfWork.EncryptionKey)).ToList();

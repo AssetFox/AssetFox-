@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public static class AttributeRepositoryExtensions
     {
-        public static void UpsertAttributes(this IAttributeRepository repository, List<AttributeDTO> dtos)
+        public static void UpsertAttributesAtomically(this IAttributeRepository repository, List<AttributeDTO> dtos)
         {
             var dataAttributes = new List<DataAttribute>();
             foreach (var dto in dtos)
@@ -30,12 +30,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
                     throw new AttributeMappingFailureException($"Invalid attribute {dto.Name}");
                 }
             }
-            repository.UpsertAttributes(dataAttributes);
+            repository.UpsertAttributesAtomically(dataAttributes);
         }
 
         public static void UpsertAttributes(this IAttributeRepository repository, params AttributeDTO[] dtos)
         {
-            repository.UpsertAttributes(dtos.ToList());
+            repository.UpsertAttributesAtomically(dtos.ToList());
         }
 
         public static void UpsertAttributes(this IAttributeRepository repo, params DataAttribute[] attributes)

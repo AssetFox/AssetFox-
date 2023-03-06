@@ -143,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 IsCalculated = false,
             };
             var invalidAttributeList = new List<AttributeDTO> { attributeDto };
-            Assert.Throws<InvalidOperationException>(() => repo.UpsertAttributes(invalidAttributeList));
+            Assert.Throws<InvalidOperationException>(() => repo.UpsertAttributesAtomically(invalidAttributeList));
             var attributesAfter = await repo.GetAttributesAsync();
             var addedAttribute = attributesAfter.SingleOrDefault(a => a.Id == attributeId);
             Assert.Null(addedAttribute);
@@ -193,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var validAttribute = AttributeTestSetup.NumericDto(dataSourceDto);
 
             var invalidAttributeList = new List<AttributeDTO> { attributeDto };
-            Assert.Throws<InvalidOperationException>(() => repo.UpsertAttributes(invalidAttributeList));
+            Assert.Throws<InvalidOperationException>(() => repo.UpsertAttributesAtomically(invalidAttributeList));
             var attributesAfter = await repo.GetAttributesAsync();
             var addedAttribute = attributesAfter.FirstOrDefault(a =>
                a.Id == attributeId

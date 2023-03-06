@@ -72,16 +72,13 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.BenefitQuantifierRepo.DeleteBenefitQuantifier(networkId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 var networkName = UnitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::DeleteBenefitQuantifier {networkName} - {e.Message}");
                 throw;

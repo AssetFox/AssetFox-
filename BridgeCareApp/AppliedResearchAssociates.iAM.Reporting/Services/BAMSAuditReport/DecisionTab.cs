@@ -55,16 +55,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             {
                 var brKey = CheckGetValue(initialAssetSummary.ValuePerNumericAttribute, "BRKEY_");
                 var familyId = int.Parse(_reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "FAMILY_ID"));
+                var years = simulationOutput.Years.OrderBy(yr => yr.Year);
 
                 // Year 0
-                var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, 0, initialAssetSummary);
+                var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, years.FirstOrDefault().Year - 1, initialAssetSummary);
                 FillInitialDataInWorksheet(decisionsWorksheet, decisionDataModel, currentAttributes, familyId, currentCell.Row, 1);
-                
-                // For initial compute
-                var prevYearCIImprovement = CheckGetValue(initialAssetSummary.ValuePerNumericAttribute, currentAttributes.Last());
 
-                var yearZeroRow = currentCell.Row++;                
-                foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
+                var yearZeroRow = currentCell.Row++;
+                foreach (var year in years)
                 {
                     var section = year.Assets.FirstOrDefault(_ => CheckGetValue(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
                     if (section.TreatmentCause == TreatmentCause.CommittedProject)
@@ -73,8 +71,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     }
 
                     // Generate data model                    
-                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, brKey, year, section, prevYearCIImprovement);
-                    prevYearCIImprovement = decisionsDataModel.CurrentAttributesValues.Last();
+                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, brKey, year, section);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, familyId, currentCell);
@@ -83,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
         }
 
-        private DecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section, double prevYearCIImprovement)
+        private DecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section)
         {
             var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
 
@@ -112,7 +109,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Feasiable = isCashFlowProject ? "-" : (treatmentRejection == null ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);
                 var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());
-                decisionsTreatment.CIImprovement = Math.Abs(prevYearCIImprovement - currentCIImprovement);
+                // TODO decisionsTreatment.CIImprovement = Assign value from TreatmentOptionDetail once it is implemented. Work item #21733
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;

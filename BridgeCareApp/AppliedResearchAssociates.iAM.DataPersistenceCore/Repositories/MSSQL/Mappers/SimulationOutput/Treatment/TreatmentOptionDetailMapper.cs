@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = id,
                 AssetDetailId = assetDetailId,
-                Benefit = domain.Benefit,
+                Benefit = domain.CumulativeBenefit,
                 Cost = domain.Cost,
                 RemainingLife = domain.RemainingLife,
                 TreatmentName = domain.TreatmentName,

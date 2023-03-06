@@ -124,8 +124,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 return OptimizationStrategy switch
                 {
-                    OptimizationStrategy.Benefit => option => option.Benefit,
-                    OptimizationStrategy.BenefitToCostRatio => option => option.Benefit / option.Cost,
+                    OptimizationStrategy.Benefit => option => option.CumulativeBenefit,
+                    OptimizationStrategy.BenefitToCostRatio => option => option.CumulativeBenefit / option.Cost,
                     OptimizationStrategy.RemainingLife => option => option.RemainingLife.Value,
                     OptimizationStrategy.RemainingLifeToCostRatio => option => option.RemainingLife.Value / option.Cost,
                     _ => throw new InvalidOperationException(MessageStrings.InvalidOptimizationStrategy),

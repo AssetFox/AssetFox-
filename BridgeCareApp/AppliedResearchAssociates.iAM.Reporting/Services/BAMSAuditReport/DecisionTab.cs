@@ -126,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 decisionsTreatment.CIImprovement = Math.Abs(prevYearCIImprovement - currentCIImprovement);
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
-                decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
+                decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.CumulativeBenefit / treatmentOption.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? AuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? AuditReportConstants.Yes : AuditReportConstants.No);
                 var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.BudgetUsages.Sum(_ => _.CoveredCost) : 0;

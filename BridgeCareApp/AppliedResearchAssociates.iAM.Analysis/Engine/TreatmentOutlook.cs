@@ -37,7 +37,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 InitialTreatment,
                 CumulativeCost - baseline.CumulativeCost,
                 CumulativeBenefit - baseline.CumulativeBenefit,
-                RemainingLife - baseline.RemainingLife);
+                RemainingLife - baseline.RemainingLife,
+                InstantaneousBenefit);
         }
 
         private readonly SimulationRunner SimulationRunner;
@@ -49,6 +50,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private double CumulativeBenefit;
         private double CumulativeCost;
+        private double InstantaneousBenefit;
         private double MostRecentBenefit;
         private double? RemainingLife;
 
@@ -106,9 +108,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 };
             }
 
+            var benefitBeforeTreatment = AccumulationContext.GetBenefit();
             ApplyTreatment(InitialTreatment, InitialYear);
+            var benefitAfterTreatment = AccumulationContext.GetBenefit();
 
-            MostRecentBenefit = AccumulationContext.GetBenefit();
+            InstantaneousBenefit = benefitAfterTreatment - benefitBeforeTreatment;
+
+            MostRecentBenefit = benefitAfterTreatment;
             updateRemainingLife?.Invoke();
 
             foreach (var year in Enumerable.Range(InitialYear + 1, AccumulationContext.SimulationRunner.Simulation.NumberOfYearsOfTreatmentOutlook))

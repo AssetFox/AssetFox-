@@ -68,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
                     var treatmentOptions = section.TreatmentOptions.
                         Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
-                    treatmentOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
+                    treatmentOptions.Sort((a, b) => b.CumulativeBenefit.CompareTo(a.CumulativeBenefit));
 
                     var chosenTreatment = treatmentOptions.FirstOrDefault();
                     if (chosenTreatment != null)

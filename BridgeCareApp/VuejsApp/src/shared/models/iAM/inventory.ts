@@ -1,8 +1,11 @@
 export interface InventoryItem {
+    key1: string;
+    key2: number;
+}
+export interface MappedInventoryItem {
     bmsId: string;
     brKey: number;
 }
-
 export interface LabelValue {
     label: string;
     value: any;

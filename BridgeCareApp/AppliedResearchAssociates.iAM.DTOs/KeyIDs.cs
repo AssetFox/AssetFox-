@@ -1,8 +1,8 @@
 ﻿namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class KeyIDs
-    {
-        public string BmsId { get; set; }
-        public string BrKey { get; set; }
+    { 
+        public string Key1 { get; set; }
+        public string Key2 { get; set; }
     }
 }

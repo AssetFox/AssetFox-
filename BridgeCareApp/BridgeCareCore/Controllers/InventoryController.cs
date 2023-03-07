@@ -43,42 +43,21 @@ namespace BridgeCareCore.Controllers
             return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
         }
 
-        // TODO: Remove this once front end can handle generic properties
         [HttpGet]
-        [Route("GetPennDOTInventory")]
+        [Route("GetInventory/{keyProperty1}/{keyProperty2}")]
         [Authorize]
-        public async Task<IActionResult> GetPennDOTInventory()
+        public async Task<IActionResult> GetInventory(string keyProperty1, string keyProperty2)
         {
             var data = new List<KeyIDs>();
-
-            if (_assetData.KeyProperties.ContainsKey("BRKEY_") && _assetData.KeyProperties.ContainsKey("BMSID"))
+            if (_assetData.KeyProperties.ContainsKey(keyProperty1))
             {
-                data = _assetData.KeyProperties["BMSID"].Join(
-                    _assetData.KeyProperties["BRKEY_"],
-                    assetIDBMS => assetIDBMS.AssetId,
-                    assetBrKey => assetBrKey.AssetId,
-                    (bmsid, brkey)
-                    => new KeyIDs { BrKey = brkey.KeyValue.TextValue, BmsId = bmsid.KeyValue.TextValue })
-                    .ToList();
+                data = _assetData.KeyProperties[keyProperty1].Join(
+                    _assetData.KeyProperties[keyProperty2],
+                    assetKp1 => assetKp1.AssetId,
+                    assetKp2 => assetKp2.AssetId,
+                    (keyid1, keyid2) => new KeyIDs { Key2 = keyid2.KeyValue.TextValue, Key1 = keyid1.KeyValue.TextValue }).ToList();
             }
-
-            return Ok(data.OrderBy(_ => _.BrKey.Length).ThenBy(_ => _.BrKey));
-        }
-        [HttpGet]
-        [Route("GetInventory/{keyProperty}")]
-        [Authorize]
-        public async Task<IActionResult> GetInventory(string keyProperty)
-        {
-            var data = new List<KeyIDs>();
-            if (_assetData.KeyProperties.ContainsKey(keyProperty))
-            {
-                data = _assetData.KeyProperties[keyProperty].Join(
-                    _assetData.KeyProperties["BRKEY_"],
-                    assetKp => assetKp.AssetId,
-                    assetBrKey => assetBrKey.AssetId,
-                    (keyid, brkey) => new KeyIDs { BrKey = brkey.KeyValue.TextValue, BmsId = keyid.KeyValue.TextValue }).ToList();
-            }
-            return Ok(data.OrderBy(_ => _.BrKey.Length).ThenBy(_ => _.BrKey));
+            return Ok(data.OrderBy(_ => _.Key2.Length).ThenBy(_ => _.Key2));
         }
     }
 }

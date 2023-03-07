@@ -1,4 +1,4 @@
-import {emptyInventoryItemDetail, InventoryItem, InventoryItemDetail} from '@/shared/models/iAM/inventory';
+import {emptyInventoryItemDetail, InventoryItem, InventoryItemDetail, MappedInventoryItem} from '@/shared/models/iAM/inventory';
 import InventoryService from '@/services/inventory.service';
 import {append, clone, contains} from 'ramda';
 import {AxiosResponse} from 'axios';
@@ -64,6 +64,23 @@ const actions = {
                 }
             });
     },
+    async getInventory({commit}: any, payload: any) {
+        await InventoryService.getInventory(payload.key1, payload.key2)
+            .then((response: AxiosResponse<InventoryItem[]>) => {
+                if (hasValue(response, 'data')) {
+                    var mappedItems: MappedInventoryItem[] = [];
+                    var r = response.data;
+                    r.forEach(resp => {
+                        var mappedItem: MappedInventoryItem = {bmsId:"", brKey:0};
+                        mappedItem.bmsId = resp.key1;
+                        mappedItem.brKey = resp.key2;
+                        mappedItems.push(mappedItem);
+                    });
+                    commit('inventoryItemsMutator', mappedItems);
+                }
+            });
+    },
+
     async getInventoryItemDetailByBMSId({commit}: any, payload: any) {
         await InventoryService.getInventoryItemDetailByBMSId(payload.bmsId)
             .then((response: AxiosResponse<InventoryItemDetail>) => {

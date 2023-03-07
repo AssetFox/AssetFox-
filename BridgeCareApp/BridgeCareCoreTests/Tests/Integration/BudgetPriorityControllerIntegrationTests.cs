@@ -7,6 +7,7 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Tests.BudgetPriority;
+using Microsoft.Data.SqlClient;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests.Integration
@@ -57,7 +58,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var syncModel = new PagingSyncModel<BudgetPriorityDTO> { AddedRows = budgetPriorities };
             upsertRequest.SyncModel = syncModel;
 
-            var exception = await Assert.ThrowsAnyAsync<Exception>(async () =>
+            var exception = await Assert.ThrowsAsync<SqlException>(async () =>
             await controller.UpsertBudgetPriorityLibrary(upsertRequest));
 
             var librariesAfter = TestHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries();

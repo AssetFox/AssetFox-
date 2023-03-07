@@ -20,6 +20,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.Analysis;
 using Microsoft.SqlServer.Management.Smo;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using Microsoft.Data.SqlClient;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -292,6 +294,37 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.False(TestHelper.UnitOfWork.Context.BudgetPriority.Any(_ => _.Id == _testBudgetPriority.Id));
             Assert.False(TestHelper.UnitOfWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
                     _.BudgetPriorityId == _testBudgetPriority.Id));
+        }
+
+
+        [Fact]
+        public void UpsertBudgetPriorityLibraryAtomically_ChildUpdateFails_NoChanges()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = BudgetPriorityLibraryDtos.New(libraryId);
+            var library2 = BudgetPriorityLibraryDtos.New(libraryId);
+            library2.Description = "Updated description";
+            var priorityId = Guid.NewGuid();
+            var childDto = BudgetPriorityDtos.New(priorityId);
+            var childDto2 = BudgetPriorityDtos.New(priorityId);
+            var budgetId = Guid.NewGuid();
+            var budgetName = RandomStrings.WithPrefix("Budget");
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            criterionLibrary.Name = null;
+            childDto.CriterionLibrary = criterionLibrary;
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(library);
+            var budgetPriorities = new List<BudgetPriorityDTO> { childDto, childDto2 };
+            library2.BudgetPriorities = budgetPriorities;
+
+            var exception = Assert.Throws<SqlException>(() =>
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorityLibraryAndPrioritiesAtomically(library2));
+
+            var librariesAfter = TestHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries();
+            var libraryAfter = librariesAfter.Single(
+                lib => lib.Id == libraryId);
+            Assert.Equal(library.Description, libraryAfter.Description);
         }
     }
 }

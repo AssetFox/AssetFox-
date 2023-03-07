@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 TemplateContext,
                 InitialTreatment,
                 CumulativeCost - baseline.CumulativeCost,
-                Benefit - baseline.Benefit,
+                CumulativeBenefit - baseline.CumulativeBenefit,
                 RemainingLife - baseline.RemainingLife,
                 ConditionChange);
         }
@@ -48,8 +48,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         private readonly int InitialYear;
         private readonly IReadOnlyCollection<RemainingLifeCalculator> RemainingLifeCalculators;
 
-        private double Benefit;
         private double ConditionChange;
+        private double CumulativeBenefit;
         private double CumulativeCost;
         private double MostRecentBenefit;
         private double? RemainingLife;
@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             MostRecentBenefit = AccumulationContext.GetBenefit(); // Update benefit_1.
             additionalBenefit += (MostRecentBenefit - additionalBenefit) / 2; // Add the right triangle area of ((b_1 - b_0) * 1 year) / 2.
 
-            Benefit += additionalBenefit;
+            CumulativeBenefit += additionalBenefit;
         }
 
         private void ApplyTreatment(Treatment treatment, int year)

@@ -46,11 +46,10 @@
 <script lang="ts">
 import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+import {State} from 'vuex-class';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {ScenarioUser} from '@/shared/models/iAM/scenario';
 import {User} from '@/shared/models/iAM/user';
-import {hasValue} from '@/shared/utils/has-value-util';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';

@@ -63,9 +63,6 @@
                     </v-data-table>
                     </div>
                     <v-layout row align-end style="margin:0 !important">
-                        <!-- <v-btn @click='reorderList' class='ghd-blue ghd-button' flat>
-                            Apply
-                        </v-btn> -->
                         <v-btn @click='onAddBudget' class='ghd-blue ghd-button' flat>
                             Add
                         </v-btn>
@@ -102,9 +99,8 @@ import {
 } from '@/shared/models/modals/edit-budgets-dialog';
 import { Budget, emptyBudget } from '@/shared/models/iAM/investment';
 import { rules, InputValidationRules } from '@/shared/utils/input-validation-rules';
-import ObjectID from 'bson-objectid';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { CriterionLibrary, emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
+import { emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
 import { isNull, isNullOrUndefined } from 'util';
 
 @Component({

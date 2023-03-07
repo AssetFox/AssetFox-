@@ -47,9 +47,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
-import { any, clone, isNil, propEq } from 'ramda';
-import { Network } from '@/shared/models/iAM/network';
+import { State } from 'vuex-class';
+import { any } from 'ramda';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import BudgetPrioritySvg from '@/shared/icons/BudgetPrioritySvg.vue';

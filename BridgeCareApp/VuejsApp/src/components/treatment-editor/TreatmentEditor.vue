@@ -274,7 +274,6 @@ import {
     emptyCreateTreatmentLibraryDialogData,
 } from '@/shared/models/modals/create-treatment-library-dialog-data';
 import {
-    emptyConsequence,
     emptyTreatment,
     emptyTreatmentDetails,
     emptyTreatmentLibrary,
@@ -291,10 +290,8 @@ import {
     any,
     append,
     clone,
-    find,
     findIndex,
     isNil,
-    map,
     prepend,
     propEq,
     reject,
@@ -662,7 +659,7 @@ export default class TreatmentEditor extends Vue {
     }
 
 
-    onDeleteTreatment(treatmentId: string | number) {// take a look at this
+    onDeleteTreatment(treatmentId: string | number) {
         if(this.hasScenario)
         {         
             const treatments : SimpleTreatment[] = reject(propEq('id', treatmentId.toString()), this.simpleTreatments);
@@ -864,12 +861,6 @@ export default class TreatmentEditor extends Vue {
     }
 
     modifySelectedTreatment(treatment: Treatment) {
-        // this.treatments = update(
-        //     findIndex(propEq('id', this.selectedTreatment.id), this.treatments),
-        //     treatment,
-        //     this.treatments
-        // );
-
         this.selectedTreatment = treatment;
 
         this.onUpdateRow(treatment.id, treatment);

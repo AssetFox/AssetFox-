@@ -465,12 +465,10 @@ import {
     any,
     prepend,
     clone,
-    contains,
     find,
     findIndex,
     isNil,
     propEq,
-    reject,
     update,
 } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -485,14 +483,12 @@ import {
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
-import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import {
     InputValidationRules,
     rules,
 } from '@/shared/utils/input-validation-rules';
-import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
-import { CriterionLibrary } from '@/shared/models/iAM/criteria';
+import { Equation } from '@/shared/models/iAM/equation';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';

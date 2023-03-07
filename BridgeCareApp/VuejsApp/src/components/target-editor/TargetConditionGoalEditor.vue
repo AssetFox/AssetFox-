@@ -1,60 +1,58 @@
 <template>
 
     <v-layout column>
-        <!-- <v-flex xs12> -->
-           <v-layout justify-start align-center>
-                <v-card-title>
-                    <v-layout row align-center class="px-4">
-                            <v-layout column>
-                                <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
-                                <v-select
-                                    class="ghd-select ghd-text-field ghd-text-field-border"
-                                    :items="librarySelectItems"
-                                    append-icon=$vuetify.icons.ghd-down
-                                    outline
-                                    v-model="librarySelectItemValue"
-                                    outlined
-                                >
-                                </v-select>
-                            </v-layout>
-                        <v-divider vertical 
-                            class="mx-3"
-                            v-if="hasSelectedLibrary && !hasScenario"
-                        >
-                        </v-divider>
-                        <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                        </div>
-                        <v-divider vertical 
-                            class="mx-3"
-                            v-if="hasSelectedLibrary && !hasScenario"
-                        >
-                        </v-divider>
-                        <v-switch
-                            label="Shared"
-                            class="ghd-control-label ghd-md-gray my-2"
-                            v-if="hasSelectedLibrary && !hasScenario"
-                            v-model="selectedTargetConditionGoalLibrary.isShared"
-                            @change="checkHasUnsavedChanges()"
-                        />
-                    </v-layout>
-                </v-card-title>
-                <v-layout justify-end align-center class="ma-2">
-                    <v-btn outline
-                        @click="showCreateTargetConditionGoalDialog = true"
-                        class="ghd-control-border ghd-blue"
-                        v-show="hasSelectedLibrary || hasScenario" 
-                    >Add Target Condition Goal</v-btn>
-                    <v-btn outline
-                        @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
-                        class="ghd-control-border ghd-blue"
-                        v-show="!hasScenario"
+        <v-layout justify-start align-center>
+            <v-card-title>
+                <v-layout row align-center class="px-4">
+                        <v-layout column>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
+                            <v-select
+                                class="ghd-select ghd-text-field ghd-text-field-border"
+                                :items="librarySelectItems"
+                                append-icon=$vuetify.icons.ghd-down
+                                outline
+                                v-model="librarySelectItemValue"
+                                outlined
+                            >
+                            </v-select>
+                        </v-layout>
+                    <v-divider vertical 
+                        class="mx-3"
+                        v-if="hasSelectedLibrary && !hasScenario"
                     >
-                    Create New Library
-                    </v-btn>
+                    </v-divider>
+                    <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                    </div>
+                    <v-divider vertical 
+                        class="mx-3"
+                        v-if="hasSelectedLibrary && !hasScenario"
+                    >
+                    </v-divider>
+                    <v-switch
+                        label="Shared"
+                        class="ghd-control-label ghd-md-gray my-2"
+                        v-if="hasSelectedLibrary && !hasScenario"
+                        v-model="selectedTargetConditionGoalLibrary.isShared"
+                        @change="checkHasUnsavedChanges()"
+                    />
                 </v-layout>
+            </v-card-title>
+            <v-layout justify-end align-center class="ma-2">
+                <v-btn outline
+                    @click="showCreateTargetConditionGoalDialog = true"
+                    class="ghd-control-border ghd-blue"
+                    v-show="hasSelectedLibrary || hasScenario" 
+                >Add Target Condition Goal</v-btn>
+                <v-btn outline
+                    @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
+                    class="ghd-control-border ghd-blue"
+                    v-show="!hasScenario"
+                >
+                Create New Library
+                </v-btn>
             </v-layout>
-        <!-- </v-flex> -->
+        </v-layout>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="targets-data-table">
                 <v-data-table
@@ -326,21 +324,14 @@ import {
 import {
   any,
     clone,
-    contains,
     find,
-    findIndex,
     isNil,
-    prepend,
     propEq,
-    reject,
-    update,
 } from 'ramda';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
 import CreateTargetConditionGoalDialog from '@/components/target-editor/target-editor-dialogs/CreateTargetConditionGoalDialog.vue';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
-import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import {
     CreateTargetConditionGoalLibraryDialogData,
     emptyCreateTargetConditionGoalLibraryDialogData,
@@ -355,9 +346,6 @@ import {
     rules,
 } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import {
-    CriterionLibrary,
-} from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
@@ -742,19 +730,6 @@ export default class TargetConditionGoalEditor extends Vue {
         property: string,
         value: any,
     ) {
-        // this.currentPage = update(
-        //     findIndex(
-        //         propEq('id', targetConditionGoal.id),
-        //         this.currentPage,
-        //     ),
-        //     setItemPropertyValue(
-        //         property,
-        //         value,
-        //         targetConditionGoal,
-        //     ) as TargetConditionGoal,
-        //     this.currentPage,
-        // );
-
         this.onUpdateRow(targetConditionGoal.id, clone(targetConditionGoal))
         this.onPaginationChanged();
     }
@@ -786,11 +761,6 @@ export default class TargetConditionGoalEditor extends Vue {
     }
 
     onUpsertTargetConditionGoalLibrary() {
-        const targetConditionGoalLibrary: TargetConditionGoalLibrary = {
-            ...clone(this.selectedTargetConditionGoalLibrary),
-            targetConditionGoals: clone(this.currentPage),
-        };
-
         const upsertRequest: LibraryUpsertPagingRequest<TargetConditionGoalLibrary, TargetConditionGoal> = {
                 library: this.selectedTargetConditionGoalLibrary,
                 isNewLibrary: false,

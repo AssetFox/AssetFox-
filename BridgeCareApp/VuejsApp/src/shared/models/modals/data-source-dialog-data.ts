@@ -1,5 +1,3 @@
-import { Datasource, emptyDatasource } from "../iAM/data-source";
-
 export interface CreateDataSourceDialogData {
     showDialog: boolean;
 }

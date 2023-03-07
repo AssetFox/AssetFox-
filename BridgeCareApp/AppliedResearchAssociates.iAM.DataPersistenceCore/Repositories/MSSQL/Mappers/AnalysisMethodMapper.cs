@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 SpendingStrategy = domain.SpendingStrategy,
                 ShouldApplyMultipleFeasibleCosts = domain.ShouldApplyMultipleFeasibleCosts,
                 ShouldDeteriorateDuringCashFlow = domain.ShouldDeteriorateDuringCashFlow,
-                ShouldUseExtraFundsAcrossBudgets = domain.ShouldUseExtraFundsAcrossBudgets
+                ShouldUseExtraFundsAcrossBudgets = domain.AllowFundingFromMultipleBudgets
             };
 
         public static void FillSimulationAnalysisMethod(this AnalysisMethodEntity entity, Simulation simulation, string userCriteria)
@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             simulation.AnalysisMethod.SpendingStrategy = entity.SpendingStrategy;
             simulation.AnalysisMethod.ShouldApplyMultipleFeasibleCosts = entity.ShouldApplyMultipleFeasibleCosts;
             simulation.AnalysisMethod.ShouldDeteriorateDuringCashFlow = entity.ShouldDeteriorateDuringCashFlow;
-            simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets = entity.ShouldUseExtraFundsAcrossBudgets;
+            simulation.AnalysisMethod.AllowFundingFromMultipleBudgets = entity.ShouldUseExtraFundsAcrossBudgets;
 
             var specifiedFilter = entity.CriterionLibraryAnalysisMethodJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
             var combinedCriteria = string.IsNullOrEmpty(specifiedFilter) ? userCriteria : $"({userCriteria}) AND ({specifiedFilter})";

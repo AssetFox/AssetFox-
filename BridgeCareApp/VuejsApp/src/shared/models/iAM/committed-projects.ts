@@ -1,6 +1,5 @@
 import { getBlankGuid } from "@/shared/utils/uuid-utils";
-import { TreatmentConsequence, TreatmentCategory } from "./treatment";
-import {ValidationParameter} from "./expression-validation"
+import { TreatmentCategory } from "./treatment";
 
 export interface BaseCommittedProject {
     id: string;

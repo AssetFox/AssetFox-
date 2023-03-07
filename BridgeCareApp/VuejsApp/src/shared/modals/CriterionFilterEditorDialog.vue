@@ -15,7 +15,6 @@
       </v-card-text>
       <v-card-actions>
         <v-layout justify-space-between row>
-          <!-- <v-btn :disabled="stateSelectedCriterionLibrary.id === uuidNIL || !stateSelectedCriterionIsValid" -->
             <v-btn
                  class="ara-blue-bg white--text"
                  @click="onBeforeSubmit(true)">
@@ -36,14 +35,12 @@
 <script lang="ts">
 import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+import {Action} from 'vuex-class';
 import {CriterionFilterEditorDialogData} from '../models/modals/criterion-filter-editor-dialog-data';
-import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
 import {hasValue} from '@/shared/utils/has-value-util';
 import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
 import {clone} from 'ramda';
-import {hasUnsavedChangesCore} from '@/shared/utils/has-unsaved-changes-helper';
 import Alert from '@/shared/modals/Alert.vue';
 import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 import CriteriaEditor from '@/shared/components/CriteriaEditor.vue';

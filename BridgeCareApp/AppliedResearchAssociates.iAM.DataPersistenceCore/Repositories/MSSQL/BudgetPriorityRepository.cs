@@ -273,5 +273,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
         }
+
+        public void UpsertOrDeleteBudgetPriorityLibraryAndPrioritiesAtomically(BudgetPriorityLibraryDTO dto)
+        {
+            _unitOfWork.AsTransaction(u =>
+            {
+                u.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
+                u.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
+            });
+        }
     }
 }

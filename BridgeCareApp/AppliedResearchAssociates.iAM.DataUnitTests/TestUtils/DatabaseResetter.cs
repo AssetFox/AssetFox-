@@ -9,13 +9,13 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests
 {
     public static class DatabaseResetter
     {
-        public static void ResetDatabase(IUnitOfWork unitOfWork)
+        public static void ResetDatabase(UnitOfDataPersistenceWork unitOfWork)
         {
             unitOfWork.Context.Database.EnsureDeleted();
             unitOfWork.Context.Database.EnsureCreated();
         }
 
-        public static void EnsureDatabaseExists(IUnitOfWork unitOfWork)
+        public static void EnsureDatabaseExists(UnitOfDataPersistenceWork unitOfWork)
         {
             unitOfWork.Context.Database.EnsureCreated();
         }

@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         private static readonly object NetworkCreationLock = new object();
 
-        public static void CreateNetwork(IUnitOfWork unitOfWork)
+        public static void CreateNetwork(UnitOfDataPersistenceWork unitOfWork)
         {
             if (!unitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
             {

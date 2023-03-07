@@ -170,7 +170,6 @@
                 key1: "BMSID",
                 key2: "BRKEY_"
             };
-            //this.getInventoryAction({network: {}});
             this.getInventoryAction(inventoryDetail);
         }
 

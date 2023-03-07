@@ -66,12 +66,12 @@ const actions = {
     },
     async getInventory({commit}: any, payload: any) {
         await InventoryService.getInventory(payload.key1, payload.key2)
-            .then((response: AxiosResponse<InventoryItem[]>) => {
+            .then((response: AxiosResponse<MappedInventoryItem[]>) => {
                 if (hasValue(response, 'data')) {
-                    var mappedItems: MappedInventoryItem[] = [];
+                    var mappedItems: InventoryItem[] = [];
                     var r = response.data;
                     r.forEach(resp => {
-                        var mappedItem: MappedInventoryItem = {bmsId:"", brKey:0};
+                        var mappedItem: InventoryItem = {bmsId:"", brKey:0};
                         mappedItem.bmsId = resp.key1;
                         mappedItem.brKey = resp.key2;
                         mappedItems.push(mappedItem);

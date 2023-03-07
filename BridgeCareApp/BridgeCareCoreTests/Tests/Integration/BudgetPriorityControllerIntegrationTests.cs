@@ -38,8 +38,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var libraryId = Guid.NewGuid();
             var library = BudgetPriorityLibraryDtos.New(libraryId);
-            var library2 = BudgetPriorityLibraryDtos.New();
-            library2.Name = "Updated name";
+            var library2 = BudgetPriorityLibraryDtos.New(libraryId);
+            library2.Description = "Updated description";
             var priorityId = Guid.NewGuid();
             var childDto = BudgetPriorityDtos.New(priorityId);
             var childDto2 = BudgetPriorityDtos.New(priorityId);
@@ -53,7 +53,7 @@ namespace BridgeCareCoreTests.Tests.Integration
 
             var controller = CreateController();
             var upsertRequest = new LibraryUpsertPagingRequestModel<BudgetPriorityLibraryDTO, BudgetPriorityDTO>();
-            upsertRequest.Library = library;
+            upsertRequest.Library = library2;
             var syncModel = new PagingSyncModel<BudgetPriorityDTO> { AddedRows = budgetPriorities };
             upsertRequest.SyncModel = syncModel;
 
@@ -63,7 +63,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var librariesAfter = TestHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries();
             var libraryAfter = librariesAfter.Single(
                 lib => lib.Id == libraryId);
-            Assert.Equal(library.Name, libraryAfter.Name);
+            Assert.Equal(library.Description, libraryAfter.Description);
         }
     }
 }

@@ -91,8 +91,7 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryInvocation = budgetPriorityRepo.SingleInvocationWithName(nameof(IBudgetPriorityRepository.UpsertBudgetPriorityLibrary));
-            var budgetPriorityInvocation = budgetPriorityRepo.SingleInvocationWithName(nameof(IBudgetPriorityRepository.UpsertOrDeleteBudgetPriorities));
+            var libraryInvocation = budgetPriorityRepo.SingleInvocationWithName(nameof(IBudgetPriorityRepository.UpsertOrDeleteBudgetPriorityLibraryAndPrioritiesAtomically));
         }
 
         [Fact]

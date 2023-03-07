@@ -24,12 +24,6 @@ const mutations = {
     usersMutator(state: any, users: User[]) {
         state.users = clone(users);
     },
-    // updatedUserMutator(state: any, user: User) {
-    //     state.users = update(
-    //         findIndex(propEq('id', user.id), state.users),
-    //         user, state.users
-    //     );
-    // },
     deletedUserMutator(state: any, id: string) {
         // this is to delete the user entry from criteria filter. Because the user is getting deleted from the system
         state.usersCriteriaFilter = reject(
@@ -39,7 +33,6 @@ const mutations = {
 
         state.users = reject(propEq('id', id), state.users);
     },
-    /////////////////////
     currentUserMutator(state: any, currentUser: User) {
         state.currentUser = currentUser;
     },
@@ -112,15 +105,7 @@ const actions = {
             },
         );
     },
-    // async updateUser({commit, dispatch}: any, payload: any) {
-    //     await UserService.updateUser(payload.user)
-    //         .then((response: AxiosResponse) => {
-    //             if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-    //                 commit('updatedUserMutator', payload.user);
-    //                 dispatch('addSuccessNotification', {message: 'Updated user'});
-    //             }
-    //         });
-    // },
+
     async deleteUser({ commit, dispatch }: any, payload: any) {
         await UserService.deleteUser(payload.userId).then(
             (response: AxiosResponse) => {
@@ -136,7 +121,6 @@ const actions = {
             },
         );
     },
-    //////////////////////////////
     async getUserCriteriaFilter({ commit, dispatch }: any) {
             // @ts-ignore
             if (!store.state.userModule.checkedForCriteria) {

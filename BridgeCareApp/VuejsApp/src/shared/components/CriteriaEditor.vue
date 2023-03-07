@@ -263,7 +263,6 @@ import {
     CriteriaEditorData,
     CriteriaRule,
     CriteriaType,
-    CriteriaValidationResult,
     emptyCriteria,
 } from '../models/iAM/criteria';
 import {
@@ -297,11 +296,10 @@ import {
     ValidationParameter,
 } from '@/shared/models/iAM/expression-validation';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
-import CriteriaCombo from './CriteriaCombo.vue';
 import { getBlankGuid } from '../utils/uuid-utils';
 
 @Component({
-    components: { VueQueryBuilder, CriteriaCombo },
+    components: { VueQueryBuilder },
 })
 export default class CriteriaEditor extends Vue {
     @Prop() criteriaEditorData: CriteriaEditorData;
@@ -784,68 +782,21 @@ export default class CriteriaEditor extends Vue {
             return;
         }
 
-        const validationParameter = {
-            expression: criteria,
-            currentUserCriteriaFilter: this.currentUserCriteriaFilter,
-        } as ValidationParameter;
+        this.subCriteriaClauses = update(
+            this.selectedSubCriteriaClauseIndex,
+            criteria,
+            this.subCriteriaClauses,
+        );
+        this.resetCriteriaValidationProperties();
+        this.checkOutput = true;
+        this.resetSubCriteriaValidationProperties();
 
-                    this.subCriteriaClauses = update(
-                        this.selectedSubCriteriaClauseIndex,
-                        criteria,
-                        this.subCriteriaClauses,
-                    );
-                    this.resetCriteriaValidationProperties();
-                    this.checkOutput = true;
-                    this.resetSubCriteriaValidationProperties();
-
-                    if (this.criteriaEditorData.isLibraryContext) {
-                        this.$emit('submitCriteriaEditorResult', {
-                            validated: false,
-                            criteria: null,
-                        });
-                    }
-
-        // ValidationService.getCriterionValidationResult(
-        //     validationParameter,
-        // ).then((response: AxiosResponse) => {
-        //     this.resetSubCriteriaValidationProperties();
-
-        //     if (hasValue(response, 'data')) {
-        //         const result: CriterionValidationResult = response.data as CriterionValidationResult;
-        //         const message = `${result.resultsCount} result(s) returned`;
-        //         if (result.isValid) {
-        //             this.validSubCriteriaMessage = message;
-        //             this.subCriteriaClauses = update(
-        //                 this.selectedSubCriteriaClauseIndex,
-        //                 criteria,
-        //                 this.subCriteriaClauses,
-        //             );
-        //             this.resetCriteriaValidationProperties();
-        //             this.checkOutput = true;
-
-        //             if (this.criteriaEditorData.isLibraryContext) {
-        //                 this.$emit('submitCriteriaEditorResult', {
-        //                     validated: false,
-        //                     criteria: null,
-        //                 });
-        //             }
-        //         } else {
-        //             if (result.resultsCount === 0) {
-        //                 this.invalidSubCriteriaMessage = message;
-        //                 this.subCriteriaClauses = update(
-        //                     this.selectedSubCriteriaClauseIndex,
-        //                     criteria,
-        //                     this.subCriteriaClauses,
-        //                 );
-        //                 this.resetCriteriaValidationProperties();
-        //                 this.checkOutput = true;
-        //             } else {
-        //                 this.invalidSubCriteriaMessage =
-        //                     result.validationMessage;
-        //             }
-        //         }
-        //     }
-        // });
+        if (this.criteriaEditorData.isLibraryContext) {
+            this.$emit('submitCriteriaEditorResult', {
+                validated: false,
+                criteria: null,
+            });
+        }
     }
 
     getSubCriteriaValueToCheck() {

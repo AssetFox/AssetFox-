@@ -54,7 +54,6 @@ import {getUserName} from '@/shared/utils/get-user-info';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {clone} from 'ramda';
 import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
-import {hasValue} from '@/shared/utils/has-value-util';
 
 @Component
 export default class CreatePerformanceCurveLibraryDialog extends Vue {

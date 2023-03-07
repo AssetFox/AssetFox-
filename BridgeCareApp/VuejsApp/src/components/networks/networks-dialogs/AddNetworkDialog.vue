@@ -34,8 +34,7 @@
 import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
-import {getNewGuid} from '@/shared/utils/uuid-utils';
-import { emptyCreateNetworkData, emptyNetwork, Network, NetworkCreationData } from '@/shared/models/iAM/network';
+import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { clone } from 'ramda';
 import { AddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
 

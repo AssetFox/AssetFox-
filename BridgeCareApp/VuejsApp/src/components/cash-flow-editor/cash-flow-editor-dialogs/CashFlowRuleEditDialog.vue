@@ -182,7 +182,6 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {Action, Getter, State} from 'vuex-class';
 import Component from 'vue-class-component';
 import {Prop, Watch} from 'vue-property-decorator';
 import {
@@ -195,7 +194,7 @@ import {
 } from '@/shared/models/iAM/cash-flow';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
-import {append, clone, find, findIndex, propEq, update, isNil} from 'ramda';
+import {clone, isNil} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';

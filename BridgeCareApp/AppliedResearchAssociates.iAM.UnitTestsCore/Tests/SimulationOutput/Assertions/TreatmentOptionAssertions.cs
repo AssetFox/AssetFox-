@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public static void Same(TreatmentOptionDetail expected, TreatmentOptionDetail actual)
         {
             Assert.Equal(expected.TreatmentName, actual.TreatmentName);
-            DoubleAssertions.ApproximatelyEqual(expected.CumulativeBenefit, actual.CumulativeBenefit);
+            DoubleAssertions.ApproximatelyEqual(expected.Benefit, actual.Benefit);
             DoubleAssertions.ApproximatelyEqual(expected.Cost, actual.Cost);
             NullableDoubleAssertions.ApproximatelyEqual(expected.RemainingLife, actual.RemainingLife);
         }

@@ -4,27 +4,27 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     internal sealed class TreatmentOption
     {
-        public TreatmentOption(AssetContext context, SelectableTreatment candidateTreatment, double cost, double cumulativeBenefit, double? remainingLife, double instantaneousBenefit)
+        public TreatmentOption(AssetContext context, SelectableTreatment candidateTreatment, double cost, double benefit, double? remainingLife, double conditionChange)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
             CandidateTreatment = candidateTreatment ?? throw new ArgumentNullException(nameof(candidateTreatment));
             Cost = cost;
-            CumulativeBenefit = cumulativeBenefit;
+            Benefit = benefit;
             RemainingLife = remainingLife;
-            InstantaneousBenefit = instantaneousBenefit;
+            ConditionChange = conditionChange;
         }
 
-        public double CumulativeBenefit { get; }
+        public double Benefit { get; }
 
         public SelectableTreatment CandidateTreatment { get; }
+
+        public double ConditionChange { get; }
 
         public AssetContext Context { get; }
 
         public double Cost { get; }
 
-        public TreatmentOptionDetail Detail => new TreatmentOptionDetail(CandidateTreatment.Name, Cost, CumulativeBenefit, RemainingLife, InstantaneousBenefit);
-
-        public double InstantaneousBenefit { get; }
+        public TreatmentOptionDetail Detail => new TreatmentOptionDetail(CandidateTreatment.Name, Cost, Benefit, RemainingLife, ConditionChange);
 
         public double? RemainingLife { get; }
     }

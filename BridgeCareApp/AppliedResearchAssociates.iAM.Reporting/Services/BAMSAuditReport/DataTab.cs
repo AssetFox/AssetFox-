@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     {
                         var treatmentOptions = section.TreatmentOptions.
                             Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
-                        treatmentOptions.Sort((a, b) => b.CumulativeBenefit.CompareTo(a.CumulativeBenefit));
+                        treatmentOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
                         var chosenTreatment = treatmentOptions.FirstOrDefault();
                         if (chosenTreatment != null)
                         {

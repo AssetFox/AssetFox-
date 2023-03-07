@@ -19,10 +19,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = id,
                 AssetDetailId = assetDetailId,
-                Benefit = domain.CumulativeBenefit,
+                Benefit = domain.Benefit,
                 Cost = domain.Cost,
                 RemainingLife = domain.RemainingLife,
                 TreatmentName = domain.TreatmentName,
+                ConditionChange = domain.ConditionChange,
             };
             return entity;
         }
@@ -43,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static TreatmentOptionDetail ToDomain(TreatmentOptionDetailEntity entity)
         {
-            var domain = new TreatmentOptionDetail(entity.TreatmentName, entity.Cost, entity.Benefit, entity.RemainingLife);
+            var domain = new TreatmentOptionDetail(entity.TreatmentName, entity.Cost, entity.Benefit, entity.RemainingLife, entity.ConditionChange);
             return domain;
         }
 

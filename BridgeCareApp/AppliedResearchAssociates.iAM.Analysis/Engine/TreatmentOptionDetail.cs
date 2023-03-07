@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     public sealed class TreatmentOptionDetail
     {
-        public TreatmentOptionDetail(string treatmentName, double cost, double cumulativeBenefit, double? remainingLife, double instantaneousBenefit)
+        public TreatmentOptionDetail(string treatmentName, double cost, double benefit, double? remainingLife, double conditionChange)
         {
             if (string.IsNullOrWhiteSpace(treatmentName))
             {
@@ -13,16 +13,16 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             TreatmentName = treatmentName;
             Cost = cost;
-            CumulativeBenefit = cumulativeBenefit;
+            Benefit = benefit;
             RemainingLife = remainingLife;
-            InstantaneousBenefit = instantaneousBenefit;
+            ConditionChange = conditionChange;
         }
 
-        public double CumulativeBenefit { get; }
+        public double Benefit { get; }
+
+        public double ConditionChange { get; }
 
         public double Cost { get; }
-
-        public double InstantaneousBenefit { get; }
 
         public double? RemainingLife { get; }
 
@@ -32,9 +32,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             TreatmentName = original.TreatmentName;
             Cost = original.Cost;
-            CumulativeBenefit = original.CumulativeBenefit;
+            Benefit = original.Benefit;
             RemainingLife = original.RemainingLife;
-            InstantaneousBenefit = original.InstantaneousBenefit;
+            ConditionChange = original.ConditionChange;
         }
     }
 }

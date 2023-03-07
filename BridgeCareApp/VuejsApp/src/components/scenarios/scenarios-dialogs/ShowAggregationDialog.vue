@@ -125,23 +125,9 @@
                                         </v-flex>
                                     </v-layout>
                                 </td>
-                                <!--                   <td>
-                                                          <v-layout row wrap>
-                                                              <v-flex>
-                                                                  <v-btn @click="onShowConfirmRollupAlert" class="green&#45;&#45;text darken-2"
-                                                                         icon>
-                                                                      <v-icon>fas fa-play</v-icon>
-                                                                  </v-btn>
-                                                              </v-flex>
-                                                          </v-layout>
-                                                      </td>-->
                             </template>
                         </v-data-table>
                     </div>
-                    <!-- <div class="pad-button" v-if="hasAdminAccess">
-                            <v-btn @click="showCreateNetworkDialog = true" color="green darken-2 white--text" round>Create network
-                            </v-btn>
-                        </div> -->
                 </v-layout>
                 <EquationEditorDialog
                     :dialogData="equationEditorDialogData"
@@ -316,8 +302,6 @@ export default class ShowAggregationDialog extends Vue {
                 this.networks,
             );
         }
-
-        //this.networkDataAssignmentPercentage = data.percentage;
     }
     beforeDestroy() {
         this.$statusHub.$off(

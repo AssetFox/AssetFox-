@@ -52,7 +52,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+import { State } from 'vuex-class';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -61,7 +61,6 @@ import {
     ScenarioUser,
 } from '@/shared/models/iAM/scenario';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { hasValue } from '@/shared/utils/has-value-util';
 import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 

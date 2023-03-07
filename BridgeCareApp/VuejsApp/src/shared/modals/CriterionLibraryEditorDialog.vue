@@ -82,10 +82,8 @@ export default class CriterionLibraryEditorDialog extends Vue {
     stateScenarioRelatedCriteria: CriterionLibrary;
 
     @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-    //@Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
     @Action('setSelectedCriterionIsValid')
     setSelectedCriterionIsValidAction: any;
-    //@Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('selectScenarioRelatedCriterion')
     selectScenarioRelatedCriterionAction: any;
     @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;

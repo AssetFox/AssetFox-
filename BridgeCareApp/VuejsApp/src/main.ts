@@ -22,7 +22,6 @@ import VueSanitize from 'vue-sanitize';
 // @ts-ignore
 import VuejsDialog from 'vuejs-dialog';
 // @ts-ignore
-import VuejsDialogMixin from 'vuejs-dialog/dist/vuejs-dialog-mixin.min.js';
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
 import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 import GhdDownSvg from '@/shared/icons/GhdDownSvg.vue';

@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using System.Security.Principal;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -35,6 +36,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 BudgetLibraryId = budgetLibraryId,
                 UserId = dto.UserId,
                 AccessLevel = (int)dto.AccessLevel,
+            };
+        public static BudgetPriorityLibraryUserEntity ToBudgetPriorityLibraryUserEntity(this LibraryUserDTO dto, Guid budgetPriorityLibraryId) =>
+            new BudgetPriorityLibraryUserEntity
+            {
+                LibraryId = budgetPriorityLibraryId,
+                UserId = dto.UserId,
+                AccessLevel = (int)dto.AccessLevel
             };
         public static CashFlowRuleLibraryUserEntity ToCashFlowRuleLibraryUserEntity(this LibraryUserDTO dto, Guid cashFlowRuleLibraryId) =>
             new CashFlowRuleLibraryUserEntity
@@ -100,6 +108,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AccessLevel = (LibraryAccessLevel)entity.AccessLevel
             };
         public static LibraryUserDTO ToDto(this BudgetLibraryUserEntity entity) =>
+            new LibraryUserDTO
+            {
+                UserId = entity.UserId,
+                UserName = entity.User?.Username,
+                AccessLevel = (LibraryAccessLevel)entity.AccessLevel,
+            };
+        public static LibraryUserDTO ToDto(this BudgetPriorityLibraryUserEntity entity) =>
             new LibraryUserDTO
             {
                 UserId = entity.UserId,

@@ -81,6 +81,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<BudgetLibraryEntity> BudgetLibrary { get; set; }
         public virtual DbSet<BudgetLibraryUserEntity> BudgetLibraryUser { get; set; }
 
+        public virtual DbSet<BudgetPriorityLibraryUserEntity> BudgetPriorityLibraryUser { get; set; }
+
         public virtual DbSet<BudgetAmountEntity> BudgetAmount { get; set; }
 
         public virtual DbSet<BudgetPercentagePairEntity> BudgetPercentagePair { get; set; }
@@ -2614,7 +2616,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<BudgetPriorityLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.LibraryId, e.UserId });
 
+                entity.ToTable("BudgetPriorityLibrary_User");
+                
+                entity.HasIndex(e => e.LibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.BudgetPriorityLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.LibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.BudgetPriorityLibraryUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
             modelBuilder.Entity<PerformanceCurveLibraryUserEntity>(entity =>
             {
                 entity.HasKey(e => new { e.LibraryId, e.UserId });

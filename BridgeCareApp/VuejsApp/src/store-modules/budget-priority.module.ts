@@ -13,6 +13,7 @@ import {
     reject,
     update,
 } from 'ramda';
+import { LibraryUser } from '@/shared/models/iAM/user';
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
@@ -25,6 +26,8 @@ const state = {
     ) as BudgetPriorityLibrary,
     scenarioBudgetPriorities: [] as BudgetPriority[],
     hasPermittedAccess: false,
+    libraryUsers: [] as LibraryUser[],
+    isSharedLibrary: false
 };
 
 const mutations = {
@@ -61,6 +64,12 @@ const mutations = {
               )
             : append(library, state.budgetPriorityLibraries);
     },
+    budgetPriorityLibraryUserMutator(
+        state: any,
+        libraries: LibraryUser[]
+    ) {
+        state.libraryUsers = clone(libraries);
+    },
     scenarioBudgetPrioritiesMutator(
         state: any,
         budgetPriorities: BudgetPriority[],
@@ -70,6 +79,9 @@ const mutations = {
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
     },
+    IsSharedLibraryMutator(state: any, status: boolean) {
+        state.isSharedLibrary = status;
+    }
 };
 
 const actions = {
@@ -137,6 +149,27 @@ const actions = {
             ) {
                 const hasPermittedAccess: boolean = response.data as boolean;
                 commit('PermittedAccessMutator', hasPermittedAccess);
+            }
+        });
+    },
+    async getBudgetPriorityLibraryUsers({ commit }: any, libraryId: string) {
+        await BudgetPriorityService.GetBudgetPriorityLibraryUsers(libraryId)
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') && http2XX.test(response.status.toString())
+            ) {
+                commit('budgetPriorityLibraryUserMutator', response.data);                
+            }
+        });
+    },
+    async getIsSharedBudgetPriorityLibrary({ dispatch, commit }: any, payload: any) {
+        await BudgetPriorityService.getIsSharedBudgetPriorityLibrary(payload.id).then(
+            (response: AxiosResponse) => {
+                if (
+                hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                commit('IsSharedLibraryMutator', response.data as boolean);
             }
         });
     },

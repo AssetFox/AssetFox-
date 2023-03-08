@@ -298,7 +298,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
 
         [Fact]
-        public void UpsertBudgetPriorityLibraryAtomically_ChildUpdateFails_NoChanges()
+        public void UpsertBudgetPriorityLibraryAndPriorities_ChildUpdateFails_NoChanges()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -319,7 +319,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             library2.BudgetPriorities = budgetPriorities;
 
             var exception = Assert.Throws<SqlException>(() =>
-            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorityLibraryAndPrioritiesAtomically(library2));
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorityLibraryAndPriorities(library2));
 
             var librariesAfter = TestHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries();
             var libraryAfter = librariesAfter.Single(

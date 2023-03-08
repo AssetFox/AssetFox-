@@ -181,7 +181,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
 
-        public void UpsertDeficientConditionGoalLibraryAndGoalsAtomically(DeficientConditionGoalLibraryDTO dto)
+        public void UpsertDeficientConditionGoalLibraryAndGoals(DeficientConditionGoalLibraryDTO dto)
         {
             _unitOfWork.AsTransaction(u =>
             {

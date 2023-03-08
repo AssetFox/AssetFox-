@@ -409,7 +409,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public void UpsertAtomically_SecondPartFails_NothingHappens()
+        public void UpsertDeficientConditionGoalLibraryAndGoals_SecondPartFails_NothingHappens()
         {
             var library = DeficientConditionGoalLibraryTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork);
@@ -420,7 +420,7 @@ namespace BridgeCareCoreTests.Tests
             library.DeficientConditionGoals.Add(goal);
             library.Description = "Updated description";
 
-            var exception = Assert.ThrowsAny<Exception>(() => TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibraryAndGoalsAtomically(
+            var exception = Assert.ThrowsAny<Exception>(() => TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibraryAndGoals(
                 library));
 
             var libraryAfter = TestHelper.UnitOfWork.DeficientConditionGoalRepo

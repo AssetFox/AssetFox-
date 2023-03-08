@@ -274,7 +274,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertOrDeleteBudgetPriorityLibraryAndPrioritiesAtomically(BudgetPriorityLibraryDTO dto)
+        public void UpsertOrDeleteBudgetPriorityLibraryAndPriorities(BudgetPriorityLibraryDTO dto)
         {
             _unitOfWork.AsTransaction(u =>
             {

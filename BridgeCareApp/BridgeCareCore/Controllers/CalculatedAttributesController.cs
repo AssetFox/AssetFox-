@@ -163,7 +163,7 @@ namespace BridgeCareCore.Controllers
                         });
                     var dto = upsertRequest.Library;
                     dto.CalculatedAttributes = attributes;
-                    calculatedAttributesRepo.UpsertCalculatedAttributeLibraryAtomically(dto);
+                    calculatedAttributesRepo.UpsertCalculatedAttributeLibrary(dto);
                 });
                 return Ok();
 

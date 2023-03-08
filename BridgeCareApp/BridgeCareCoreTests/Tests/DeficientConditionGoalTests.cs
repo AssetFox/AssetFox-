@@ -74,7 +74,7 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertDeficientConditionGoalLibraryAndGoalsAtomically));
+            var libraryInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertDeficientConditionGoalLibraryAndGoals));
             Assert.Equal(library, libraryInvocation.Arguments[0]);
             Assert.Empty(library.DeficientConditionGoals);
         }
@@ -147,7 +147,7 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertDeficientConditionGoalLibraryAndGoalsAtomically));
+            var libraryInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertDeficientConditionGoalLibraryAndGoals));
             var upsertedLibrary = libraryInvocation.Arguments[0] as DeficientConditionGoalLibraryDTO;
             var upsertedGoals = upsertedLibrary.DeficientConditionGoals;
             Assert.Equal("Updated Name", upsertedGoals[0].Name);

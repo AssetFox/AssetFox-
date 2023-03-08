@@ -118,7 +118,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             .Single(_ => _.Id == id).ToDto();
         }
 
-        public void UpsertCalculatedAttributeLibraryAtomically(CalculatedAttributeLibraryDTO library)
+        public void UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO library)
         {
             _unitOfDataPersistenceWork.AsTransaction(u =>
             {

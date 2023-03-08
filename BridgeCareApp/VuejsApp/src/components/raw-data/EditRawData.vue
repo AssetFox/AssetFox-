@@ -26,9 +26,6 @@
                             <v-list-tile-content>
                                 <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
                             </v-list-tile-content>
-                            <!-- <v-list-tile-icon class="selected-sidebar-icon">
-                                    <v-icon class="mx-2 ghd-blue" slot="prependIcon">fa-thin fa-angle-right</v-icon>
-                            </v-list-tile-icon> -->
                         </v-list-tile>
                     </v-list-item-group>
                 </v-list>

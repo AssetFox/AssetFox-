@@ -5,7 +5,6 @@ import {
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { clone } from 'ramda';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
-import { Attribute } from './attribute';
 
 // order is important
 export enum TreatmentCategory {

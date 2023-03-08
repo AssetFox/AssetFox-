@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AssetDetailId = assetDetailId,
                 TreatmentName = domain.TreatmentName,
                 TreatmentRejectionReason = (int)domain.TreatmentRejectionReason,
+                PotentialConditionChange = domain.PotentialConditionChange,
             };
             return entity;
         }
@@ -41,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static TreatmentRejectionDetail ToDomain(TreatmentRejectionDetailEntity entity)
         {
             var treatmentRejectionReason = (TreatmentRejectionReason)entity.TreatmentRejectionReason;
-            var domain = new TreatmentRejectionDetail(entity.TreatmentName, treatmentRejectionReason);
+            var domain = new TreatmentRejectionDetail(entity.TreatmentName, treatmentRejectionReason, entity.PotentialConditionChange);
             return domain;
         }
 

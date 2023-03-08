@@ -479,12 +479,10 @@ import {
     any,
     prepend,
     clone,
-    contains,
     find,
     findIndex,
     isNil,
     propEq,
-    reject,
     update,
     fromPairs,
 } from 'ramda';
@@ -505,7 +503,6 @@ import {
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
-import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import {
     InputValidationRules,

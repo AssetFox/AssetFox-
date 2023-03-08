@@ -579,7 +579,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             {
                 if (context.YearIsWithinShadowForAnyTreatment(year))
                 {
-                    var rejections = ActiveTreatments.Select(treatment => new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForAnyTreatment));
+                    var rejections = ActiveTreatments.Select(treatment => new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForAnyTreatment, getBenefitImprovement(context, treatment)));
                     context.Detail.TreatmentRejections.AddRange(rejections);
                     return;
                 }
@@ -591,7 +591,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     var isRejected = context.YearIsWithinShadowForSameTreatment(year, treatment);
                     if (isRejected)
                     {
-                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForSameTreatment));
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForSameTreatment, getBenefitImprovement(context, treatment)));
                     }
 
                     return isRejected;
@@ -602,7 +602,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     var isFeasible = treatment.IsFeasible(context);
                     if (!isFeasible)
                     {
-                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.NotFeasible));
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.NotFeasible, getBenefitImprovement(context, treatment)));
                     }
 
                     return !isFeasible;
@@ -621,7 +621,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     var isSuperseded = supersededTreatments.Contains(treatment);
                     if (isSuperseded)
                     {
-                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.Superseded));
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.Superseded, getBenefitImprovement(context, treatment)));
                     }
 
                     return isSuperseded;
@@ -634,18 +634,27 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     {
                         if (convertedCost < Simulation.InvestmentPlan.MinimumProjectCostLimit)
                         {
-                            context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit));
+                            context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit, getBenefitImprovement(context, treatment)));
                             return true;
                         }
 
                         return false;
                     }
 
-                    context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
+                    context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost, getBenefitImprovement(context, treatment)));
                     var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Asset, treatment, cost, context.SimulationRunner.Simulation.Id);
                     Send(messageBuilder);
                     return true;
                 });
+
+                static double getBenefitImprovement(AssetContext context, Treatment treatment)
+                {
+                    var copyOfContext = new AssetContext(context);
+                    var benefitBeforeTreatment = copyOfContext.GetBenefit();
+                    copyOfContext.ApplyTreatmentConsequences(treatment);
+                    var benefitAfterTreatment = copyOfContext.GetBenefit();
+                    return benefitAfterTreatment - benefitBeforeTreatment;
+                }
 
                 if (feasibleTreatments.Count > 0)
                 {

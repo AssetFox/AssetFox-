@@ -2478,6 +2478,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.Property(e => e.Benefit).IsRequired();
+                entity.Property(e => e.ConditionChange).IsRequired();
 
                 entity.Property(e => e.Cost).IsRequired();
 
@@ -2493,6 +2494,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.Property(e => e.TreatmentRejectionReason).IsRequired();
+                entity.Property(e => e.PotentialConditionChange).IsRequired();
 
                 entity.HasOne(e => e.AssetDetail)
                 .WithMany(ad => ad.TreatmentRejectionDetails)

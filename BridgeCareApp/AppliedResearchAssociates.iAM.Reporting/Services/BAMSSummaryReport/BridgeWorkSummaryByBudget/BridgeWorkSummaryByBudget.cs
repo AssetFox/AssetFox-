@@ -20,7 +20,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private CulvertCost _culvertCost;
         private BridgeWorkCost _bridgeWorkCost;
         private CommittedProjectCost _committedProjectCost;
-        private ISummaryReportHelper _summaryReportHelper;
         private ReportHelper _reportHelper;
 
         public BridgeWorkSummaryByBudget()
@@ -29,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _culvertCost = new CulvertCost();
             _bridgeWorkCost = new BridgeWorkCost();
             _committedProjectCost = new CommittedProjectCost();
-            _summaryReportHelper = new SummaryReportHelper();
+            _reportHelper = new ReportHelper();
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,

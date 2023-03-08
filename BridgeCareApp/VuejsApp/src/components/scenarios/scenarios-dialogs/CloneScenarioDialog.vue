@@ -62,7 +62,6 @@ import {
     ScenarioUser,
 } from '@/shared/models/iAM/scenario';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { hasValue } from '@/shared/utils/has-value-util';
 import { find, isNil, propEq, clone } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import {CloneScenarioDialogData} from '@/shared/models/modals/clone-scenario-dialog-data';

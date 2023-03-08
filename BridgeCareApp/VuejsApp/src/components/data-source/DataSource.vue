@@ -450,8 +450,6 @@ export default class DataSource extends Vue {
             this.showSqlMessage = false;
             this.showSaveMessage = false;
             let connStr: string = this.currentDatasource.connectionString;
-            //const regex1 = new RegExp(/\\/,'g');
-            //connStr = connStr.replace(regex1, "%5C");
 
             let testConnection: TestStringData = {testString: connStr};
 

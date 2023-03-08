@@ -18,7 +18,6 @@ import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
 import TreatmentService from '@/services/treatment.service';
-import { name } from 'msal/lib-commonjs/packageMetadata';
 
 const state = {
     treatmentLibraries: [] as TreatmentLibrary[],

@@ -38,12 +38,6 @@
                             v-show='!hasScenario'>
                             Share Library
                     </v-btn>
-                        <!-- <v-checkbox
-                            class='sharing header-text-content'
-                            label="Shared"
-                            v-if="hasSelectedLibrary && !hasScenario"
-                            v-model="selectedCashFlowRuleLibrary.isShared"
-                            @change="checkHasUnsavedChanges()"/> -->
                     </v-layout>  
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">                   
@@ -260,16 +254,10 @@ import { Watch } from 'vue-property-decorator';
 import { Action, State, Getter, Mutation } from 'vuex-class';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
-    append,
     clone,
     find,
-    findIndex,
     isNil,
-    prepend,
     propEq,
-    update,
-    reject,
-    contains,
     any,
 } from 'ramda';
 import {
@@ -308,7 +296,6 @@ import {
     rules,
 } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
@@ -737,11 +724,6 @@ export default class CashFlowEditor extends Vue {
             id: getNewGuid(),
         };
 
-        // this.currentPage = prepend(
-        //     newCashFlowRule,
-        //     this.currentPage,
-        // );
-
         this.addedRows.push(newCashFlowRule);
         this.onPaginationChanged()
     }
@@ -749,11 +731,6 @@ export default class CashFlowEditor extends Vue {
     onSubmitAddCashFlowRule(newCashFlowRule: CashFlowRule){
         if(!isNil(newCashFlowRule))
         {
-            // this.currentPage = prepend(
-            //     newCashFlowRule,
-            //     this.currentPage,
-            // );
-
             this.addedRows.push(newCashFlowRule);
             this.onPaginationChanged()
         }
@@ -761,17 +738,11 @@ export default class CashFlowEditor extends Vue {
     }
 
     onDeleteCashFlowRule(cashFlowRuleId: string) {
-        // this.currentPage = reject(
-        //     propEq('id', cashFlowRuleId),
-        //     this.currentPage,
-        // );
         this.removeRowLogic(cashFlowRuleId);
         this.onPaginationChanged();
     }
 
     onDeleteSelectedCashFlowRules() {
-        // this.currentPage = this.currentPage
-        //     .filter((cf: CashFlowRule) => !contains(cf, this.selectedCashRuleGridRows));
         this.selectedCashRuleGridRows.forEach(_ => {
             this.removeRowLogic(_.id);
         });
@@ -828,18 +799,6 @@ export default class CashFlowEditor extends Vue {
         if (!isNil(criterionExpression) && this.selectedCashFlowRuleForCriteriaEdit.id !== this.uuidNIL) {
             if(this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id === getBlankGuid())
                 this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id = getNewGuid();
-            // this.currentPage = update(
-            //     findIndex(
-            //         propEq('id', this.selectedCashFlowRuleForCriteriaEdit.id),
-            //         this.currentPage,
-            //     ),
-            //     {
-            //         ...this.selectedCashFlowRuleForCriteriaEdit,
-            //         criterionLibrary: criterionLibrary,
-            //     },
-            //     this.currentPage,
-            // );
-
             this.onUpdateRow(this.selectedCashFlowRuleForCriteriaEdit.id, 
             {
                 ...this.selectedCashFlowRuleForCriteriaEdit,
@@ -854,11 +813,6 @@ export default class CashFlowEditor extends Vue {
     onEditSelectedLibraryListData(data: any, property: string) {
         switch (property) {
             case 'description':
-                // this.currentPage = update(
-                //     findIndex(propEq('id', data.id), this.currentPage),
-                //     data as CashFlowRule,
-                //     this.currentPage,
-                // );
                 this.onUpdateRow(data.id, clone(data))
                 this.onPaginationChanged();
                 break;

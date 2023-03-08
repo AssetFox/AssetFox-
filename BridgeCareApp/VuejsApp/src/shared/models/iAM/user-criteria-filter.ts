@@ -1,5 +1,4 @@
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
-import {clone} from 'ramda';
 
 export interface UserCriteriaFilter {
     criteriaId: string;

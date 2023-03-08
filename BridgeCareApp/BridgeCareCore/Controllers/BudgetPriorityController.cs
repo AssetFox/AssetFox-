@@ -142,6 +142,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
+                    UnitOfWork.BeginTransaction();
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         var dto = GetAllBudgetPriorityLibraries().FirstOrDefault(_ => _.Id == libraryId);
@@ -149,6 +150,7 @@ namespace BridgeCareCore.Controllers
                         _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                     }
                     UnitOfWork.BudgetPriorityRepo.DeleteBudgetPriorityLibrary(libraryId);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();

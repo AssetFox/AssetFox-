@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
@@ -420,7 +421,7 @@ namespace BridgeCareCoreTests.Tests
             library.DeficientConditionGoals.Add(goal);
             library.Description = "Updated description";
 
-            var exception = Assert.ThrowsAny<Exception>(() => TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibraryAndGoals(
+            var exception = Assert.Throws<RowNotInTableException>(() => TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibraryAndGoals(
                 library));
 
             var libraryAfter = TestHelper.UnitOfWork.DeficientConditionGoalRepo

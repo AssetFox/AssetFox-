@@ -134,7 +134,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"The authorization system is not available at the moment.");
+                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"The authorization system is not available at the moment: " + e.Message);
                 throw;
             }
         }

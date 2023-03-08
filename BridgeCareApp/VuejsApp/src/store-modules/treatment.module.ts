@@ -18,6 +18,10 @@ import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
 import TreatmentService from '@/services/treatment.service';
+import { stat } from 'fs';
+import { stringify } from 'querystring';
+import { LibraryUser } from '@/shared/models/iAM/user';
+import { name } from 'msal/lib-commonjs/packageMetadata';
 
 const state = {
     treatmentLibraries: [] as TreatmentLibrary[],
@@ -300,9 +304,6 @@ const actions = {
                 hasValue(response, 'status') &&
                 http2XX.test(response.status.toString())
                 ) {
-                    dispatch('addSuccessNotification', {
-                        message: 'Treatment Library Users Changed.',
-                    });
                 }
         });
     },
@@ -319,22 +320,7 @@ const actions = {
             }
         });
     },
-    async getHasOwnerAccess({ dispatch, commit }: any, payload: Treatment) {
-        await TreatmentService.getHasOwnerAccess(payload).then(
-            (response: AxiosResponse) => {
-                if (
-                    hasValue(response, 'status') &&
-                    http2XX.test(response.status.toString())
-                ) {
-                    commit('OwnerAccessMutator', response.data as boolean);
-                    dispatch('addSuccessNotification', {
-                        message: 'User is owner of this library.'
-                    });
-                }
-            }
-        );
-    },
-    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
+    async getIsSharedTreatmentLibrary({ dispatch, commit }: any, payload: any) {
         await TreatmentService.getIsSharedLibrary(payload.id).then(
             (response: AxiosResponse) => {
                 if (

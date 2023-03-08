@@ -14,8 +14,30 @@
                     >
                     </v-select>
                 </v-flex>
-                <v-flex xs7>
-                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 30px !important">
+                <v-flex>                       
+                    <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
+                    <v-select
+                        :items='treatmentSelectItems'
+                        append-icon=$vuetify.icons.ghd-down
+                        class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
+                        label='Select'
+                        outline                        
+                        v-model='treatmentSelectItemValue'
+                    >
+                    </v-select>
+                </v-flex>
+                <v-flex style="padding-top:30px;">
+                    <v-btn
+                        @click='onShowConfirmDeleteTreatmentAlert'
+                        depressed
+                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'                        
+                        v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
+                    >
+                        Delete Treatment
+                    </v-btn>
+                </v-flex>
+                <v-flex xs4>
+                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 11px !important">
                         <div class="ghd-control-label" style="padding-top: 12px !important">
                         Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |    
                         <v-badge v-show="isShared">
@@ -29,14 +51,6 @@
                         </v-btn>
 
                         </div>  
-                        <!-- <div style="margin-top: -8px !important">                     
-                        <v-checkbox
-                            class='sharing ghd-control-text ghd-padding'
-                            label='Shared'                            
-                            v-model='selectedTreatmentLibrary.isShared'
-                            @change="checkHasUnsavedChanges()" 
-                        /> 
-                        </div> -->
                     </v-layout>
                 </v-flex>
                 <v-flex xs2>
@@ -397,6 +411,7 @@ export default class TreatmentEditor extends Vue {
     importLibraryTreatmentsFileAction: any;
     @Action('deleteTreatment') deleteTreatmentAction: any;
     @Action('deleteScenarioSelectableTreatment') deleteScenarioSelectableTreatmentAction: any;
+    @Action('getIsSharedTreatmentLibrary') getIsSharedLibraryAction: any;
     @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
     @Action('selectScenario') selectScenarioAction: any;
     
@@ -705,7 +720,7 @@ export default class TreatmentEditor extends Vue {
                 });
                 //update budget library sharing
                 this.upsertOrDeleteTreatmentLibraryUsersAction({libraryId: this.selectedTreatmentLibrary.id, proposedUsers: libraryUserData});
-                this.selectedTreatmentLibrary.isShared = this.shareTreatmentLibraryDialogData.treatmentLibrary.isShared;
+                this.getIsSharedLibraryAction(this.selectedTreatmentLibrary).then(this.isShared = this.isSharedLibrary);
                 this.onUpsertTreatmentLibrary();
         }
     }
@@ -820,7 +835,6 @@ export default class TreatmentEditor extends Vue {
                 this.clearChanges();              
                 this.addedOrUpdatedTreatmentLibraryMutator(this.selectedTreatmentLibrary);
                 this.selectedTreatmentLibraryMutator(this.selectedTreatmentLibrary.id);
-                this.addSuccessNotificationAction({message: "Updated treatment library",});
             }
         });
     }

@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteUsers(Guid treatmentLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
-            var existingEntities = _unitOfWork.Context.TreatmentLibraryUser.Where(u => u.TreatmentLibraryId == treatmentLibraryId).ToList();
+            var existingEntities = _unitOfWork.Context.TreatmentLibraryUser.Where(u => u.LibraryId == treatmentLibraryId).ToList();
             var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
             var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
             var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
@@ -51,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private List<LibraryUserDTO> GetAccessForUser(Guid treatmentLibraryId, Guid userId)
         {
             var dtos = _unitOfWork.Context.TreatmentLibraryUser
-                .Where(u => u.TreatmentLibraryId == treatmentLibraryId && u.UserId == userId)
+                .Where(u => u.LibraryId == treatmentLibraryId && u.UserId == userId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;
@@ -72,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var dtos = _unitOfWork.Context.TreatmentLibraryUser
                 .Include(u => u.User)
-                .Where(u => u.TreatmentLibraryId == treatmentLibraryId)
+                .Where(u => u.LibraryId == treatmentLibraryId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;

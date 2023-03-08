@@ -18,6 +18,7 @@ using BridgeCareCore.Utils.Interfaces;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace BridgeCareCore.Controllers
 {
@@ -54,10 +55,13 @@ namespace BridgeCareCore.Controllers
                 var result = new List<TreatmentLibraryDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
+                        result = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibrariesNoChildrenAccessibleToUser(UserId);
+                    }
+                    else
+                    {
+                        result = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();
                     }
                 });
 
@@ -301,6 +305,11 @@ namespace BridgeCareCore.Controllers
                     }
                     UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
+                    if (upsertRequest.IsNewLibrary)
+                    {
+                        var users = LibraryUserDtolists.OwnerAccess(UserId);
+                        UnitOfWork.TreatmentLibraryUserRepo.UpsertOrDeleteUsers(dto.Id, users);
+                    }
                     UnitOfWork.Commit();
                 });
 
@@ -401,6 +410,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
+                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatmentLibrary - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
@@ -690,6 +700,7 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetIsSharedLibrary(Guid treatmentLibraryId)
         {
+            bool result = true;
             try
             {
                 await Task.Factory.StartNew(() =>
@@ -697,43 +708,20 @@ namespace BridgeCareCore.Controllers
                     var users = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryUsers(treatmentLibraryId);
                     if (users.Count > 0)
                     {
-                        return new JsonResult(true);
+                        result = true;
                     }
                     else
                     {
-                        return new JsonResult(false);
+                        result = false;
                     }
                 });
-                return Ok();
+                return Ok(result);
             }
             catch (Exception)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetIsSharedLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
-        }
-        [HttpGet]
-        [Route("GetHasOwnerAccess/{LibraryId}")]
-        [Authorize(Policy=Policy.ModifyOrDeleteTreatmentFromLibrary)]
-        public async Task<IActionResult> GetHasOwnerAccess(Guid LibraryId)
-        {
-            try
-            {
-                await Task.Factory.StartNew(() =>
-                {
-                    // Check if user is owner of library
-                    var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == LibraryId);
-                    if (dto == null) throw new Exception();
-                    if (dto.Owner != UserId) throw new UnauthorizedAccessException();
-                });
-                return Ok();
-            }
-            catch (Exception)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetHasOwnerAccess - {HubService.errorList["Exception"]}");
-                throw;
-            }
-
         }
         private List<TreatmentLibraryDTO> GetAllTreatmentLibraries()
         {

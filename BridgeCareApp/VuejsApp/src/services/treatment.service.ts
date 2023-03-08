@@ -140,11 +140,6 @@ export default class TreatmentService {
             `${API.Treatment}/GetHasPermittedAccess`,
         );
     }
-    static getHasOwnerAccess(treatment: Treatment) {
-        return coreAxiosInstance.get(
-            `${API.Treatment}/GetHasOwnerAccess/${treatment.id}`
-        );
-    }
     static getIsSharedLibrary(treatmentId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.Treatment}/GetIsSharedLibrary/${treatmentId}`

@@ -13,23 +13,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentLibrary_User",
                 columns: table => new
                 {
-                    TreatmentLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AccessLevel = table.Column<int>(type: "int", nullable: false),
+                    UserEntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccessLevel = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TreatmentLibrary_User", x => new { x.TreatmentLibraryId, x.UserId });
+                    table.PrimaryKey("PK_TreatmentLibrary_User", x => new { x.LibraryId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_TreatmentLibrary_User_TreatmentLibrary_TreatmentLibraryId",
-                        column: x => x.TreatmentLibraryId,
+                        name: "FK_TreatmentLibrary_User_TreatmentLibrary_LibraryId",
+                        column: x => x.LibraryId,
                         principalTable: "TreatmentLibrary",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TreatmentLibrary_User_User_UserEntityId",
+                        column: x => x.UserEntityId,
+                        principalTable: "User",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_TreatmentLibrary_User_User_UserId",
                         column: x => x.UserId,
@@ -39,9 +45,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_TreatmentLibrary_User_TreatmentLibraryId",
+                name: "IX_TreatmentLibrary_User_LibraryId",
                 table: "TreatmentLibrary_User",
-                column: "TreatmentLibraryId");
+                column: "LibraryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TreatmentLibrary_User_UserEntityId",
+                table: "TreatmentLibrary_User",
+                column: "UserEntityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TreatmentLibrary_User_UserId",
@@ -52,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "TreatmentLibrary_User");
+               name: "TreatmentLibrary_User");
         }
     }
 }

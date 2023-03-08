@@ -194,7 +194,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     e.Equation.Id = Guid.NewGuid();
                 });
             });
-            _calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(defaultLibrary[0].CalculatedAttributes, simulationEntity.Id);
+            _calculatedAttributesRepo.UpsertScenarioCalculatedAttributesAtomically(defaultLibrary[0].CalculatedAttributes, simulationEntity.Id);
         }
 
         public SimulationDTO GetSimulation(Guid simulationId)

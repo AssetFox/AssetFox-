@@ -184,7 +184,7 @@ namespace BridgeCareCore.Controllers
             var dtoList = new List<CalculatedAttributeDTO>() { dto };
             try
             {
-                calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dtoList, simulationId);
+                calculatedAttributesRepo.UpsertScenarioCalculatedAttributesAtomically(dtoList, simulationId);
             }
             catch (Exception e)
             {
@@ -206,16 +206,13 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     var dto = _calulatedAttributeService.GetSyncedScenarioDataSet(simulationId, syncModel);
-                    UnitOfWork.BeginTransaction();
                     
-                    calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);
-                    UnitOfWork.Commit();
+                    calculatedAttributesRepo.UpsertScenarioCalculatedAttributesAtomically(dto, simulationId);
                 });
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertScenarioAttributes for {simulationName} - {e.Message}");
                 throw;

@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         public List<CalculatedAttributeDTO> GetCalcuatedAttributesByScenarioIdNoChildren(Guid scenarioId);
 
-        void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid simulationId);
+        void UpsertScenarioCalculatedAttributesAtomically(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid simulationId);
 
         void PopulateScenarioCalculatedFields(Simulation simulation);
 

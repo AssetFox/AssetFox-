@@ -1,5 +1,6 @@
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { AxiosPromise } from 'axios';
+import { LibraryUser } from '@/shared/models/iAM/user';
 import {
     CashFlowRule,
     CashFlowRuleLibrary,
@@ -53,7 +54,21 @@ export default class CashFlowService {
             data,
         );
     }
+    static getCashFlowRuleLibraryUsers(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.CashFlow}/GetCashFlowRuleLibraryUsers/${libraryId}`);
+    }
 
+    static upsertOrDeleteCashFlowRuleLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.CashFlow}/UpsertOrDeleteCashFlowRuleLibraryUsers/${libraryId}`
+            , proposedUsers
+        );
+    }
+    static getIsSharedCashFlowRuleLibrary(cashFlowRuleLibraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.CashFlow}/GetIsSharedLibrary/${cashFlowRuleLibraryId}`
+        );
+    }
     static getHasPermittedAccess(): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.CashFlow}/GetHasPermittedAccess`,

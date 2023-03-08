@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.Calculate
                             Name = "Default Test Calculated Attribute Library",
                             CalculatedAttributes = { },
                         };
-                        unitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibrary(dto);
+                        unitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibraryAtomically(dto);
                         DefaultCalculatedAttributeLibraryHasBeenCreated = true;
                     }
                 }

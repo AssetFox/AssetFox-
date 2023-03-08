@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         public List<CalculatedAttributeDTO> GetCalcuatedAttributesByLibraryIdNoChildren(Guid libraryid);
 
-        void UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO library);
+        void UpsertCalculatedAttributeLibraryAtomically(CalculatedAttributeLibraryDTO library);
 
         void UpsertCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid libraryId);
 

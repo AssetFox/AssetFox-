@@ -666,12 +666,6 @@ export default class BudgetPriorityEditor extends Vue {
             } else {
                 budgetPriority = setItemPropertyValue(property, value, budgetPriority) as BudgetPriority;
             }
-
-            // this.currentPage = update(
-            //     findIndex(propEq('id', budgetPriority.id), this.currentPage),
-            //     budgetPriority,
-            //     this.currentPage,
-            // );
             this.onUpdateRow(budgetPriority.id, clone(budgetPriority))
             this.onPaginationChanged();
         }
@@ -685,18 +679,6 @@ export default class BudgetPriorityEditor extends Vue {
         const budgetPercentagePair: BudgetPercentagePair = find(
             propEq('budgetName', budgetName), budgetPriority.budgetPercentagePairs,
         ) as BudgetPercentagePair;
-
-        // this.currentPage = update(
-        //     findIndex(propEq('id', budgetPriority.id), this.currentPage),
-        //     {
-        //         ...budgetPriority, budgetPercentagePairs: update(
-        //             findIndex(propEq('id', budgetPercentagePair.id), budgetPriority.budgetPercentagePairs),
-        //             setItemPropertyValue('percentage', percentage, budgetPercentagePair) as BudgetPercentagePair,
-        //             budgetPriority.budgetPercentagePairs,
-        //         ),
-        //     } as BudgetPriority,
-        //     this.currentPage,
-        // );
 
         this.onUpdateRow(budgetPriority.id, {
                 ...budgetPriority, budgetPercentagePairs: update(
@@ -729,10 +711,7 @@ export default class BudgetPriorityEditor extends Vue {
             this.onUpdateRow(this.selectedBudgetPriorityForCriteriaEdit.id, 
             { ...this.selectedBudgetPriorityForCriteriaEdit, 
             criterionLibrary: {...this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
-            // this.currentPage = update(
-            //     findIndex(propEq('id', this.selectedBudgetPriorityForCriteriaEdit.id), this.currentPage),
-            //     setItemPropertyValue('criterionLibrary', criterionLibrary, this.selectedBudgetPriorityForCriteriaEdit) as BudgetPriority,
-            //     this.currentPage);
+
             this.onPaginationChanged();
         }
 
@@ -740,11 +719,6 @@ export default class BudgetPriorityEditor extends Vue {
     }
 
     onUpsertScenarioBudgetPriorities() {
-        // this.upsertScenarioBudgetPrioritiesAction({
-        //     scenarioBudgetPriorities: this.currentPage,
-        //     scenarioId: this.selectedScenarioId,
-        // }).then(() => this.librarySelectItemValue = null);
-
         BudgetPriorityService.upsertScenarioBudgetPriorities({
             libraryId: this.selectedBudgetPriorityLibrary.id === this.uuidNIL ? null : this.selectedBudgetPriorityLibrary.id,
             rowsForDeletion: this.deletionIds,

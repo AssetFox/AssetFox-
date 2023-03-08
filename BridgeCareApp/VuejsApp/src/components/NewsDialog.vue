@@ -105,8 +105,6 @@ import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcemen
 import moment from 'moment';
 import { hasValue } from '@/shared/utils/has-value-util';
 
-const ObjectID = require('bson-objectid');
-
 @Component
 export default class NewsDialog extends Vue {
     @Prop() showDialog: boolean;

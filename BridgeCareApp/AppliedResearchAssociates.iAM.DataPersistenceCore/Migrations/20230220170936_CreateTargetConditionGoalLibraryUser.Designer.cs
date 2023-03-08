@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    partial class IAMContextModelSnapshot : ModelSnapshot
+    [Migration("20230220170936_CreateTargetConditionGoalLibraryUser")]
+    partial class CreateTargetConditionGoalLibraryUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4396,9 +4398,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<double>("Benefit")
                         .HasColumnType("float");
 
-                    b.Property<double>("ConditionChange")
-                        .HasColumnType("float");
-
                     b.Property<double>("Cost")
                         .HasColumnType("float");
 
@@ -4426,9 +4425,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<Guid>("AssetDetailId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("PotentialConditionChange")
-                        .HasColumnType("float");
 
                     b.Property<string>("TreatmentName")
                         .HasColumnType("nvarchar(max)");

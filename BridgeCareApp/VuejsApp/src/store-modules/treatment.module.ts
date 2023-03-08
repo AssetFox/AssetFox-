@@ -26,6 +26,9 @@ const state = {
     simpleScenarioSelectableTreatments: [] as SimpleTreatment[],
     simpleSelectableTreatments: [] as SimpleTreatment[],
     hasPermittedAccess: false,
+    hasOwnerAccess: false,
+    hasViewAccess: false,
+    isSharedLibrary: false
 };
 
 const mutations = {
@@ -86,6 +89,15 @@ const mutations = {
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
     },
+    ViewAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
+    OwnerAccessMutator(state: any, status: boolean) {
+        state.hasOwnerAccess = status;
+    },
+    IsSharedLibraryMutator(state: any, status: boolean) {
+        state.isSharedLibrary = status;
+    }
 };
 
 const actions = {
@@ -280,6 +292,20 @@ const actions = {
             },
         );
     },
+    async upsertOrDeleteTreatmentLibraryUsers({dispatch, commit}: any, payload: any) 
+    {
+        await TreatmentService.upsertOrDeleteTreatmentLibraryUsers(payload.libraryId, payload.proposedUsers)
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+                ) {
+                    dispatch('addSuccessNotification', {
+                        message: 'Treatment Library Users Changed.',
+                    });
+                }
+        });
+    },
     async getHasPermittedAccess({ commit }: any)
     {
         await TreatmentService.getHasPermittedAccess()
@@ -293,6 +319,32 @@ const actions = {
             }
         });
     },
+    async getHasOwnerAccess({ dispatch, commit }: any, payload: Treatment) {
+        await TreatmentService.getHasOwnerAccess(payload).then(
+            (response: AxiosResponse) => {
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    commit('OwnerAccessMutator', response.data as boolean);
+                    dispatch('addSuccessNotification', {
+                        message: 'User is owner of this library.'
+                    });
+                }
+            }
+        );
+    },
+    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
+        await TreatmentService.getIsSharedLibrary(payload.id).then(
+            (response: AxiosResponse) => {
+                if (
+                hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                commit('IsSharedLibraryMutator', response.data as boolean);
+            }
+            });
+        }
 };
 
 const getters = {};

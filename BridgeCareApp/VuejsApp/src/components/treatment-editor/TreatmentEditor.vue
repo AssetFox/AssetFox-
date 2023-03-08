@@ -17,16 +17,26 @@
                 <v-flex xs7>
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 30px !important">
                         <div class="ghd-control-label" style="padding-top: 12px !important">
-                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |                         
+                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |    
+                        <v-badge v-show="isShared">
+                            <template v-slot: badge>
+                                <span>Shared</span>
+                            </template>
+                        </v-badge>
+                        <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                               v-show='!hasScenario'>
+                            Share Library
+                        </v-btn>
+
                         </div>  
-                        <div style="margin-top: -8px !important">                     
+                        <!-- <div style="margin-top: -8px !important">                     
                         <v-checkbox
                             class='sharing ghd-control-text ghd-padding'
                             label='Shared'                            
                             v-model='selectedTreatmentLibrary.isShared'
                             @change="checkHasUnsavedChanges()" 
                         /> 
-                        </div>                                              
+                        </div> -->
                     </v-layout>
                 </v-flex>
                 <v-flex xs2>
@@ -247,6 +257,8 @@
             @submit='onSubmitCreateTreatmentLibraryDialogResult'
         />
 
+        <ShareTreatmentLibraryDialog :dialogData='shareTreatmentLibraryDialogData' @submit='onShareTreatmentLibraryDialogSubmit' />
+
         <CreateTreatmentDialog
             :showDialog='showCreateTreatmentDialog'
             @submit='onAddTreatment'
@@ -274,6 +286,13 @@ import {
     emptyCreateTreatmentLibraryDialogData,
 } from '@/shared/models/modals/create-treatment-library-dialog-data';
 import {
+    ShareTreatmentLibraryDialogData,
+    emptyShareTreatmentLibraryDialogData,
+} from '@/shared/models/modals/share-treatment-library-dialog-data';
+import ShareTreatmentLibraryDialog from '@/components/treatment-editor/treatment-editor-dialogs/ShareTreatmentLibraryDialog.vue';
+import { LibraryUser } from '@/shared/models/iAM/user';
+import {
+    emptyConsequence,
     emptyTreatment,
     emptyTreatmentDetails,
     emptyTreatmentLibrary,
@@ -283,6 +302,7 @@ import {
     TreatmentCost,
     TreatmentDetails,
     TreatmentLibrary,
+    TreatmentLibraryUser,
     TreatmentsFileImport
 } from '@/shared/models/iAM/treatment';
 import CreateTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentDialog.vue';
@@ -315,19 +335,19 @@ import { hasUnsavedChangesCore, isEqual } from '@/shared/utils/has-unsaved-chang
 import { getUserName } from '@/shared/utils/get-user-info';
 import ImportExportTreatmentsDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportExportTreatmentsDialog.vue';
 import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/import-export-treatments-dialog-result';
-import Treatmentservice from '@/services/treatment.service';
+import TreatmentService from '@/services/treatment.service';
 import { AxiosResponse } from 'axios';
 import { FileInfo } from '@/shared/models/iAM/file-info';
 import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
-import TreatmentService from '@/services/treatment.service';
 import { LibraryUpsertPagingRequest } from '@/shared/models/iAM/paging';
 import { http2XX } from '@/shared/utils/http-utils';
 
 @Component({
     components: {
         ImportExportTreatmentsDialog,
+        ShareTreatmentLibraryDialog,
         BudgetsTab,
         ConsequencesTab,
         CostsTab,
@@ -352,7 +372,7 @@ export default class TreatmentEditor extends Vue {
     @State(state => state.treatmentModule.hasPermittedAccess) hasPermittedAccess: boolean;
     @State(state => state.treatmentModule.simpleScenarioSelectableTreatments) stateSimpleScenarioSelectableTreatments: SimpleTreatment[];
     @State(state => state.treatmentModule.simpleSelectableTreatments) stateSimpleSelectableTreatments: SimpleTreatment[];
-    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
+    @State(state => state.treatmentModule.isSharedLibrary) isSharedLibrary: boolean;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addWarningNotification') addWarningNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
@@ -370,6 +390,7 @@ export default class TreatmentEditor extends Vue {
     getScenarioSelectableTreatmentsAction: any;
     @Action('upsertScenarioSelectableTreatments')
     upsertScenarioSelectableTreatmentsAction: any;
+    @Action('upsertOrDeleteTreatmentLibraryUsers') upsertOrDeleteTreatmentLibraryUsersAction: any;
     @Action('importScenarioTreatmentsFile')
     importScenarioTreatmentsFileAction: any;
     @Action('importLibraryTreatmentsFile')
@@ -424,7 +445,7 @@ export default class TreatmentEditor extends Vue {
     initializing: boolean = true;
 
     simpleTreatments: SimpleTreatment[] = [];
-
+    isShared: boolean = false;
     treatmentCache: Treatment[] = [];
 
     unsavedDialogAllowed: boolean = true;
@@ -432,12 +453,12 @@ export default class TreatmentEditor extends Vue {
     librarySelectItemValueAllowedChanged: boolean = true;
     librarySelectItemValue: string | null = null;
 
+    shareTreatmentLibraryDialogData: ShareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
+
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getTreatmentLibrariesAction();
-            vm.getHasPermittedAccessAction();
-
             if (to.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
                 if (vm.selectedScenarioId === vm.uuidNIL) {
@@ -520,11 +541,15 @@ export default class TreatmentEditor extends Vue {
             this.stateSelectedTreatmentLibrary,
         );
     }
+    @Watch('isSharedLibrary')
+    onStateSharedAccessChanged() {
+        this.isShared = this.isSharedLibrary;
+    }
 
     @Watch('selectedTreatmentLibrary')
     onSelectedTreatmentLibraryChanged() {
         this.hasSelectedLibrary = this.selectedTreatmentLibrary.id !== this.uuidNIL;
-
+        this.getIsSharedLibraryAction(this.selectedTreatmentLibrary).then(this.isShared = this.isSharedLibrary);
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
@@ -569,7 +594,7 @@ export default class TreatmentEditor extends Vue {
                 this.selectedTreatment = clone(addedRow);
             }               
             else if(this.hasSelectedLibrary)
-                Treatmentservice.getSelectedTreatmentById(this.treatmentSelectItemValue).then((response: AxiosResponse) => {
+                TreatmentService.getSelectedTreatmentById(this.treatmentSelectItemValue).then((response: AxiosResponse) => {
                     if(hasValue(response, 'data')) {
                         var data = response.data as Treatment;
                         this.selectedTreatment = data;
@@ -650,6 +675,41 @@ export default class TreatmentEditor extends Vue {
         };
     }
 
+    onShowTreatmentLibraryDialog(treatmentLibrary: TreatmentLibrary) {
+        this.shareTreatmentLibraryDialogData = {
+            showDialog: true,
+            treatmentLibrary: clone(treatmentLibrary)
+        };
+    }
+
+    onShareTreatmentLibraryDialogSubmit(treatmentLibraryUsers: TreatmentLibraryUser[]) {
+        this.shareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
+        if (!isNil(treatmentLibraryUsers) && this.selectedTreatmentLibrary.id !== getBlankGuid()) {
+            let libraryUserData: LibraryUser[] = [];
+                treatmentLibraryUsers.forEach((treatmentLibraryUser, index) =>
+                {   
+                    //determine access level
+                    let libraryUserAccessLevel: number = 0;
+                    if (libraryUserAccessLevel == 0 && treatmentLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
+                    if (libraryUserAccessLevel == 0 && treatmentLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
+
+                    //create library user object
+                    let libraryUser: LibraryUser = {
+                        userId: treatmentLibraryUser.userId,
+                        userName: treatmentLibraryUser.username,
+                        accessLevel: libraryUserAccessLevel
+                    }
+
+                    //add library user to an array
+                    libraryUserData.push(libraryUser);
+                });
+                //update budget library sharing
+                this.upsertOrDeleteTreatmentLibraryUsersAction({libraryId: this.selectedTreatmentLibrary.id, proposedUsers: libraryUserData});
+                this.selectedTreatmentLibrary.isShared = this.shareTreatmentLibraryDialogData.treatmentLibrary.isShared;
+                this.onUpsertTreatmentLibrary();
+        }
+    }
+
     onSubmitConfirmDeleteTreatmentAlertResult(submit: boolean) {
         this.confirmBeforeDeleteTreatmentAlertData = clone(emptyAlertData);
 
@@ -705,7 +765,7 @@ export default class TreatmentEditor extends Vue {
                  },
                  scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
-            Treatmentservice.upsertTreatmentLibrary(upsertRequest).then((response: AxiosResponse) => {
+            TreatmentService.upsertTreatmentLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     this.hasCreatedLibrary = true;
                     this.librarySelectItemValue = library.id;
@@ -962,7 +1022,7 @@ export default class TreatmentEditor extends Vue {
 
      OnExportTreamentsClick(){
         const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedTreatmentLibrary.id;
-        Treatmentservice.exportTreatments(id, this.hasScenario)
+        TreatmentService.exportTreatments(id, this.hasScenario)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;
@@ -973,7 +1033,7 @@ export default class TreatmentEditor extends Vue {
 
      OnDownloadTemplateClick()
     {
-        Treatmentservice.downloadTreatmentsTemplate(this.hasScenario)
+        TreatmentService.downloadTreatmentsTemplate(this.hasScenario)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;

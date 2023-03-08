@@ -222,6 +222,66 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetTreatmentLibraryUsers/{libraryId}")]
+        [Authorize(Policy = Policy.ViewTreatmentFromLibrary)]
+        public async Task<IActionResult> GetTreatmentLibraryUsers(Guid libraryId)
+        {
+            try
+            {
+                List<LibraryUserDTO> users = new List<LibraryUserDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    var accessModel = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(libraryId, UserId);
+                    _claimHelper.CheckGetLibraryUsersValidity(accessModel, UserId);
+                    users = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryUsers(libraryId);
+                });
+                return Ok(users);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetTreatmentLibraryUsers - {HubService.errorList["Unauthorized"]}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertOrDeleteTreatmentLibraryUsers/{libraryId}")]
+        [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
+        public async Task<IActionResult> UpsertOrDeleteTreatmentLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var libraryUsers = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryUsers(libraryId);
+                    _claimHelper.CheckAccessModifyValidity(libraryUsers, proposedUsers, UserId);
+                    UnitOfWork.TreatmentLibraryUserRepo.UpsertOrDeleteUsers(libraryId, proposedUsers);
+                });
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                return Ok();
+            }
+            catch (InvalidOperationException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                return BadRequest();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
         [HttpPost]
         [Route("UpsertTreatmentLibrary")]
         [Authorize(Policy = Policy.ModifyTreatmentFromLibrary)]
@@ -620,13 +680,61 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetHasPermittedAccess")]
-        [Authorize]
         [Authorize(Policy = Policy.ModifyOrDeleteTreatmentFromLibrary)]
         public async Task<IActionResult> GetHasPermittedAccess()
         {
             return Ok(true);
         }
+        [HttpGet]
+        [Route("GetIsSharedLibrary/{treatmentLibraryId}")]
+        [Authorize]
+        public async Task<IActionResult> GetIsSharedLibrary(Guid treatmentLibraryId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var users = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryUsers(treatmentLibraryId);
+                    if (users.Count > 0)
+                    {
+                        return new JsonResult(true);
+                    }
+                    else
+                    {
+                        return new JsonResult(false);
+                    }
+                });
+                return Ok();
+            }
+            catch (Exception)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetIsSharedLibrary - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+        [HttpGet]
+        [Route("GetHasOwnerAccess/{LibraryId}")]
+        [Authorize(Policy=Policy.ModifyOrDeleteTreatmentFromLibrary)]
+        public async Task<IActionResult> GetHasOwnerAccess(Guid LibraryId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    // Check if user is owner of library
+                    var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == LibraryId);
+                    if (dto == null) throw new Exception();
+                    if (dto.Owner != UserId) throw new UnauthorizedAccessException();
+                });
+                return Ok();
+            }
+            catch (Exception)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetHasOwnerAccess - {HubService.errorList["Exception"]}");
+                throw;
+            }
 
+        }
         private List<TreatmentLibraryDTO> GetAllTreatmentLibraries()
         {
             return UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();

@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    partial class IAMContextModelSnapshot : ModelSnapshot
+    [Migration("20221114233319_CreateTreatmentLibraryUser")]
+    partial class CreateTreatmentLibraryUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,13 +226,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("AssetDetail");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetDetailValueEntityIntId", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetDetailValueEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("AssetDetailId")
                         .HasColumnType("uniqueidentifier");
@@ -257,7 +257,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("AssetDetailValueIntId");
+                    b.ToTable("AssetDetailValue");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetSummaryDetailEntity", b =>
@@ -284,13 +284,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("AssetSummaryDetail");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetSummaryDetailValueEntityIntId", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetSummaryDetailValueEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("AssetSummaryDetailId")
                         .HasColumnType("uniqueidentifier");
@@ -317,7 +315,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("AssetSummaryDetailValueIntId");
+                    b.ToTable("AssetSummaryDetailValue");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", b =>
@@ -781,9 +779,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.Property<int>("treatmentCategory")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -1780,38 +1775,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("DeficientConditionGoalLibrary");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient.DeficientConditionGoalLibraryUserEntity", b =>
-                {
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AccessLevel")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("LibraryId", "UserId");
-
-                    b.HasIndex("LibraryId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("DeficientConditionGoalLibrary_User", (string)null);
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.CriterionLibraryPerformanceCurveEntity", b =>
                 {
                     b.Property<Guid>("CriterionLibraryId")
@@ -1946,38 +1909,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("PerformanceCurveLibrary");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryUserEntity", b =>
-                {
-                    b.Property<Guid>("PerformanceCurveLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AccessLevel")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("PerformanceCurveLibraryId", "UserId");
-
-                    b.HasIndex("PerformanceCurveLibraryId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PerformanceCurveLibrary_User", (string)null);
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit.CriterionLibraryRemainingLifeLimitEntity", b =>
                 {
                     b.Property<Guid>("CriterionLibraryId")
@@ -2075,38 +2006,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RemainingLifeLimitLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit.RemainingLifeLimitLibraryUserEntity", b =>
-                {
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AccessLevel")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("LibraryId", "UserId");
-
-                    b.HasIndex("LibraryId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RemainingLifeLimitLibrary_User", (string)null);
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.CriterionLibraryTargetConditionGoalEntity", b =>
@@ -2213,38 +2112,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TargetConditionGoalLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.TargetConditionGoalLibraryUserEntity", b =>
-                {
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AccessLevel")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("LibraryId", "UserId");
-
-                    b.HasIndex("LibraryId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TargetConditionGoalLibrary_User", (string)null);
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEntity", b =>
@@ -4037,9 +3904,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid>("NetworkId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("NoTreatmentBeforeCommittedProjects")
-                        .HasColumnType("bit");
-
                     b.Property<int>("NumberOfYearsOfTreatmentOutlook")
                         .HasColumnType("int");
 
@@ -4119,49 +3983,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("SimulationId");
 
                     b.ToTable("SimulationOutput");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputJsonEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Output")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OutputType")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("SimulationOutputId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Id")
-                        .IsUnique();
-
-                    b.HasIndex("SimulationId");
-
-                    b.HasIndex("SimulationOutputId");
-
-                    b.ToTable("SimulationOutputJson");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationReportDetailEntity", b =>
@@ -4396,9 +4217,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<double>("Benefit")
                         .HasColumnType("float");
 
-                    b.Property<double>("ConditionChange")
-                        .HasColumnType("float");
-
                     b.Property<double>("Cost")
                         .HasColumnType("float");
 
@@ -4426,9 +4244,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<Guid>("AssetDetailId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("PotentialConditionChange")
-                        .HasColumnType("float");
 
                     b.Property<string>("TreatmentName")
                         .HasColumnType("nvarchar(max)");
@@ -4611,16 +4426,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("SimulationYearDetail");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetDetailValueEntityIntId", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetDetailValueEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetDetailEntity", "AssetDetail")
-                        .WithMany("AssetDetailValuesIntId")
+                        .WithMany("AssetDetailValues")
                         .HasForeignKey("AssetDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("AssetDetailValuesIntId")
+                        .WithMany("AssetDetailValues")
                         .HasForeignKey("AttributeId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
@@ -4649,16 +4464,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("SimulationOutput");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetSummaryDetailValueEntityIntId", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetSummaryDetailValueEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetSummaryDetailEntity", "AssetSummaryDetail")
-                        .WithMany("AssetSummaryDetailValuesIntId")
+                        .WithMany("AssetSummaryDetailValues")
                         .HasForeignKey("AssetSummaryDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("AssetSummaryDetailValuesIntId")
+                        .WithMany("AssetSummaryDetailValues")
                         .HasForeignKey("AttributeId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
@@ -5195,25 +5010,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("DeficientConditionGoalLibrary");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient.DeficientConditionGoalLibraryUserEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient.DeficientConditionGoalLibraryEntity", "DeficientConditionGoalLibrary")
-                        .WithMany("Users")
-                        .HasForeignKey("LibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
-                        .WithMany("DeficientConditionGoalLibraryUsers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DeficientConditionGoalLibrary");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.CriterionLibraryPerformanceCurveEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
@@ -5271,25 +5067,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("PerformanceCurve");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryUserEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryEntity", "PerformanceCurveLibrary")
-                        .WithMany("Users")
-                        .HasForeignKey("PerformanceCurveLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
-                        .WithMany("PerformanceCurveLibraryUsers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PerformanceCurveLibrary");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit.CriterionLibraryRemainingLifeLimitEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
@@ -5328,25 +5105,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("RemainingLifeLimitLibrary");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit.RemainingLifeLimitLibraryUserEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit.RemainingLifeLimitLibraryEntity", "RemainingLifeLimitLibrary")
-                        .WithMany("Users")
-                        .HasForeignKey("LibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
-                        .WithMany("RemainingLifeLimitLibraryUsers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RemainingLifeLimitLibrary");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.CriterionLibraryTargetConditionGoalEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
@@ -5383,25 +5141,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("Attribute");
 
                     b.Navigation("TargetConditionGoalLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.TargetConditionGoalLibraryUserEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.TargetConditionGoalLibraryEntity", "TargetConditionGoalLibrary")
-                        .WithMany("Users")
-                        .HasForeignKey("LibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
-                        .WithMany("TargetConditionGoalLibraryUsers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TargetConditionGoalLibrary");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEntity", b =>
@@ -6251,23 +5990,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("Simulation");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputJsonEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithMany("SimulationOutputJsons")
-                        .HasForeignKey("SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputEntity", "SimulationOutput")
-                        .WithMany("SimulationOutputJsons")
-                        .HasForeignKey("SimulationOutputId");
-
-                    b.Navigation("Simulation");
-
-                    b.Navigation("SimulationOutput");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationReportDetailEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
@@ -6439,7 +6161,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetDetailEntity", b =>
                 {
-                    b.Navigation("AssetDetailValuesIntId");
+                    b.Navigation("AssetDetailValues");
 
                     b.Navigation("TreatmentConsiderationDetails");
 
@@ -6452,7 +6174,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetSummaryDetailEntity", b =>
                 {
-                    b.Navigation("AssetSummaryDetailValuesIntId");
+                    b.Navigation("AssetSummaryDetailValues");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", b =>
@@ -6466,9 +6188,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("AnalysisMethods");
 
-                    b.Navigation("AssetDetailValuesIntId");
+                    b.Navigation("AssetDetailValues");
 
-                    b.Navigation("AssetSummaryDetailValuesIntId");
+                    b.Navigation("AssetSummaryDetailValues");
 
                     b.Navigation("AttributeData");
 
@@ -6658,8 +6380,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient.DeficientConditionGoalLibraryEntity", b =>
                 {
                     b.Navigation("DeficientConditionGoals");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEntity", b =>
@@ -6672,8 +6392,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryEntity", b =>
                 {
                     b.Navigation("PerformanceCurves");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit.RemainingLifeLimitEntity", b =>
@@ -6684,8 +6402,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit.RemainingLifeLimitLibraryEntity", b =>
                 {
                     b.Navigation("RemainingLifeLimits");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.TargetConditionGoalEntity", b =>
@@ -6696,8 +6412,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.TargetConditionGoalLibraryEntity", b =>
                 {
                     b.Navigation("TargetConditionGoals");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEntity", b =>
@@ -6894,8 +6608,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("SimulationLogs");
 
-                    b.Navigation("SimulationOutputJsons");
-
                     b.Navigation("SimulationOutputs");
 
                     b.Navigation("SimulationReportDetail");
@@ -6908,8 +6620,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputEntity", b =>
                 {
                     b.Navigation("InitialAssetSummaries");
-
-                    b.Navigation("SimulationOutputJsons");
 
                     b.Navigation("Years");
                 });
@@ -6938,15 +6648,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("CriterionLibraryUserJoin");
 
-                    b.Navigation("DeficientConditionGoalLibraryUsers");
-
-                    b.Navigation("PerformanceCurveLibraryUsers");
-
-                    b.Navigation("RemainingLifeLimitLibraryUsers");
-
                     b.Navigation("SimulationUserJoins");
-
-                    b.Navigation("TargetConditionGoalLibraryUsers");
 
                     b.Navigation("TreatmentLibraryUsers");
 

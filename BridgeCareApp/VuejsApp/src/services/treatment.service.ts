@@ -1,4 +1,5 @@
 import { AxiosPromise } from 'axios';
+import { LibraryUser } from '@/shared/models/iAM/user';
 import { Treatment, TreatmentLibrary } from '@/shared/models/iAM/treatment';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { LibraryUpsertPagingRequest, PaginSync } from '@/shared/models/iAM/paging';
@@ -138,5 +139,21 @@ export default class TreatmentService {
         return coreAxiosInstance.get(
             `${API.Treatment}/GetHasPermittedAccess`,
         );
+    }
+    static getHasOwnerAccess(treatment: Treatment) {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetHasOwnerAccess/${treatment.id}`
+        );
+    }
+    static getIsSharedLibrary(treatmentId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetIsSharedLibrary/${treatmentId}`
+        );
+    }
+    static getTreatmentLibraryUsers(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Treatment}/GetTreatmentLibraryUsers/${libraryId}`);
+    }
+    static upsertOrDeleteTreatmentLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Treatment}/UpsertOrDeleteTreatmentLibraryUsers/${libraryId}`, proposedUsers);
     }
 }

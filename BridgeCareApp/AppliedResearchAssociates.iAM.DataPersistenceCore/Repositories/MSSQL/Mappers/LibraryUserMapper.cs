@@ -1,5 +1,6 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
@@ -42,6 +43,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 UserId = dto.UserId,
                 AccessLevel= (int)dto.AccessLevel,  
             };
+        public static CalculatedAttributeLibraryUserEntity ToCalculatedAttributeLibraryUserEntity(this LibraryUserDTO dto, Guid calculatedAttributeLibraryId) =>
+            new CalculatedAttributeLibraryUserEntity
+            {
+                LibraryId = calculatedAttributeLibraryId,
+                UserId = dto.UserId,
+                AccessLevel = (int)dto.AccessLevel,
+            };
         public static TreatmentLibraryUserEntity ToTreatmentLibraryUserEntity(this LibraryUserDTO dto, Guid treatmentLibraryId) =>
             new TreatmentLibraryUserEntity
             {
@@ -78,6 +86,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AccessLevel = (LibraryAccessLevel)entity.AccessLevel,
             };
         public static LibraryUserDTO ToDto(this CashFlowRuleLibraryUserEntity entity) =>
+            new LibraryUserDTO
+            {
+                UserId = entity.UserId,
+                UserName = entity.User?.Username,
+                AccessLevel = (LibraryAccessLevel)entity.AccessLevel,
+            };
+        public static LibraryUserDTO ToDto(this CalculatedAttributeLibraryUserEntity entity) =>
             new LibraryUserDTO
             {
                 UserId = entity.UserId,

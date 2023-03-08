@@ -31,6 +31,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void PopulateScenarioCalculatedFields(Simulation simulation);
 
-        CalculatedAttributeDTO GetLibraryCalulatedAttributesByLibraryAndAttributeId(Guid libraryId, Guid attributeId);       
+        CalculatedAttributeDTO GetLibraryCalulatedAttributesByLibraryAndAttributeId(Guid libraryId, Guid attributeId);
+
+        List<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibrariesNoChildrenAccessibleToUser(Guid userId);
+
+        LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
+
+        void UpsertOrDeleteUsers(Guid calculatedAttribueLibraryId, IList<LibraryUserDTO> libraryUsers);
+
+        List<LibraryUserDTO> GetLibraryUsers(Guid calculatedAttributeLibraryId);
+
     }
 }

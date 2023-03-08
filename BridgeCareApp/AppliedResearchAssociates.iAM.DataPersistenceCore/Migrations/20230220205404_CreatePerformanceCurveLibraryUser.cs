@@ -13,21 +13,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "PerformanceCurveLibrary_User",
                 columns: table => new
                 {
-                    PerformanceCurveLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AccessLevel = table.Column<int>(type: "int", nullable: false),
                     UserEntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccessLevel = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PerformanceCurveLibrary_User", x => new { x.PerformanceCurveLibraryId, x.UserId });
+                    table.PrimaryKey("PK_PerformanceCurveLibrary_User", x => new { x.LibraryId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_PerformanceCurveLibrary_User_PerformanceCurveLibrary_PerformanceCurveLibraryId",
-                        column: x => x.PerformanceCurveLibraryId,
+                        name: "FK_PerformanceCurveLibrary_User_PerformanceCurveLibrary_LibraryId",
+                        column: x => x.LibraryId,
                         principalTable: "PerformanceCurveLibrary",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -45,9 +45,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PerformanceCurveLibrary_User_PerformanceCurveLibraryId",
+                name: "IX_PerformanceCurveLibrary_User_LibraryId",
                 table: "PerformanceCurveLibrary_User",
-                column: "PerformanceCurveLibraryId");
+                column: "LibraryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PerformanceCurveLibrary_User_UserEntityId",

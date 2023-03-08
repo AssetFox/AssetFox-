@@ -87,14 +87,14 @@
                             </v-btn>
                             </div>
                             <!-- <v-divider v-if='hasSelectedLibrary && !hasScenario' class="owner-shared-divider" style="margin-left:10px;" inset vertical>
-                            </v-divider>                        -->
-                            <v-switch style="margin-left:10px;margin-top:4px;"
+                            </v-divider>      -->                  
+                            <!-- <v-switch style="margin-left:10px;margin-top:4px;"
                                 class="sharing ghd-checkbox"
                                 label="Shared"
                                 v-if="hasSelectedLibrary && !hasScenario"
                                 v-model="selectedPerformanceCurveLibrary.isShared"
                                 @change="checkHasUnsavedChanges()"
-                            />               
+                            />                -->
                     </v-layout>
                 </v-flex>
                 <v-flex xs9 v-show="hasScenario">
@@ -560,7 +560,7 @@ export default class PerformanceCurveEditor extends Vue {
     @State(state => state.performanceCurveModule.hasPermittedAccess) hasPermittedAccess: boolean;
     @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @State(state => state.performanceCurveModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedLibrary') getIsSharedLibraryAction: any;
+    @Action('getIsSharedPerformanceCurveLibrary') getIsSharedLibraryAction: any;
     
     @Action('getPerformanceCurveLibraries')
     getPerformanceCurveLibrariesAction: any;
@@ -601,7 +601,7 @@ export default class PerformanceCurveEditor extends Vue {
     totalItems = 0;
     currentPage: PerformanceCurve[] = [];
     isRunning: boolean = true;
-
+    isShared: boolean = false;
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
@@ -681,6 +681,8 @@ export default class PerformanceCurveEditor extends Vue {
     hasLibraryEditPermission: boolean = false;
     showImportExportPerformanceCurvesDialog: boolean = false;    
 
+    sharePerformanceCurveLibraryDialogData: SharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
+
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;           
@@ -725,10 +727,6 @@ export default class PerformanceCurveEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.performancePagination;
-
-        if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
-        }
         const request: PagingRequest<PerformanceCurve>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -763,6 +761,9 @@ export default class PerformanceCurveEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                     this.isRunning = false;
+                    if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
                 }
             });  
         }
@@ -1233,7 +1234,6 @@ export default class PerformanceCurveEditor extends Vue {
                 //add library user to an array
                 libraryUserData.push(libraryUser);
             });
-            this.selectedPerformanceCurveLibrary.isShared = this.sharePerformanceCurveLibraryDialogData.performanceCurveLibrary.isShared;
             if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
                 this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
             }

@@ -1948,7 +1948,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryUserEntity", b =>
                 {
-                    b.Property<Guid>("PerformanceCurveLibraryId")
+                    b.Property<Guid>("LibraryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
@@ -1969,9 +1969,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("PerformanceCurveLibraryId", "UserId");
+                    b.Property<Guid?>("UserEntityId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("PerformanceCurveLibraryId");
+                    b.HasKey("LibraryId", "UserId");
+
+                    b.HasIndex("LibraryId");
 
                     b.HasIndex("UserId");
 
@@ -5275,7 +5278,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryEntity", "PerformanceCurveLibrary")
                         .WithMany("Users")
-                        .HasForeignKey("PerformanceCurveLibraryId")
+                        .HasForeignKey("LibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -6939,6 +6942,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("CriterionLibraryUserJoin");
 
                     b.Navigation("DeficientConditionGoalLibraryUsers");
+
+                    b.Navigation("PerformanceCurveLibraryUserJoins");
 
                     b.Navigation("PerformanceCurveLibraryUsers");
 

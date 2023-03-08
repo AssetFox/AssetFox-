@@ -408,6 +408,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(LibraryAccessLevel.Read, user2After.AccessLevel);
         }
 
+        [Fact]
         public void UpsertAtomically_SecondPartFails_NothingHappens()
         {
             var library = DeficientConditionGoalLibraryTestSetup.ModelForEntityInDb(
@@ -421,6 +422,11 @@ namespace BridgeCareCoreTests.Tests
 
             var exception = Assert.ThrowsAny<Exception>(() => TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibraryAndGoalsAtomically(
                 library));
+
+            var libraryAfter = TestHelper.UnitOfWork.DeficientConditionGoalRepo
+                .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()
+                .Single(lib => lib.Id == library.Id);
+            Assert.Null(libraryAfter.Description);
         }
     }
 }

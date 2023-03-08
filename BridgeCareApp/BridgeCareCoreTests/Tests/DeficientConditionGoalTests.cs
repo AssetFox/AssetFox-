@@ -74,11 +74,9 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertDeficientConditionGoalLibrary));
+            var libraryInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertDeficientConditionGoalLibraryAndGoalsAtomically));
             Assert.Equal(library, libraryInvocation.Arguments[0]);
-            var goalInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertOrDeleteDeficientConditionGoals));
-            var argument = goalInvocation.Arguments[0] as List<DeficientConditionGoalDTO>;
-            Assert.Empty(argument);
+            Assert.Empty(library.DeficientConditionGoals);
         }
 
         [Fact]
@@ -149,12 +147,10 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var goalInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertOrDeleteDeficientConditionGoals));
-            Assert.Equal(libraryDto.Id, goalInvocation.Arguments[1]);
-            var argumentZero = goalInvocation.Arguments[0];
-            var castArgumentZero = argumentZero as List<DeficientConditionGoalDTO>;
-            Assert.Equal("Updated Name", castArgumentZero[0].Name);
-            var libraryInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertDeficientConditionGoalLibrary));
+            var libraryInvocation = repo.SingleInvocationWithName(nameof(IDeficientConditionGoalRepository.UpsertDeficientConditionGoalLibraryAndGoalsAtomically));
+            var upsertedLibrary = libraryInvocation.Arguments[0] as DeficientConditionGoalLibraryDTO;
+            var upsertedGoals = upsertedLibrary.DeficientConditionGoals;
+            Assert.Equal("Updated Name", upsertedGoals[0].Name);
             Assert.Equal(libraryDto, libraryInvocation.Arguments[0]);
         }
 

@@ -180,6 +180,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.Upsert(deficientConditionGoalLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
         }
 
+
+        public void UpsertDeficientConditionGoalLibraryAndGoalsAtomically(DeficientConditionGoalLibraryDTO dto)
+        {
+            _unitOfWork.AsTransaction(u =>
+            {
+                UpsertDeficientConditionGoalLibrary(dto);
+                UpsertOrDeleteDeficientConditionGoals(dto.DeficientConditionGoals, dto.Id);
+            });
+        }
+
         public void UpsertOrDeleteDeficientConditionGoals(List<DeficientConditionGoalDTO> deficientConditionGoals,
             Guid libraryId)
         {

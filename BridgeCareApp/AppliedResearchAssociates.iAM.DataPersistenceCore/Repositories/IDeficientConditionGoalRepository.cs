@@ -31,5 +31,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertOrDeleteUsers(Guid deficientConditionGoalLibraryId, IList<LibraryUserDTO> libraryUsers);
 
         List<LibraryUserDTO> GetLibraryUsers(Guid deficientConditionGoalLibraryId);
+        void UpsertDeficientConditionGoalLibraryAndGoalsAtomically(DeficientConditionGoalLibraryDTO dto);
     }
 }

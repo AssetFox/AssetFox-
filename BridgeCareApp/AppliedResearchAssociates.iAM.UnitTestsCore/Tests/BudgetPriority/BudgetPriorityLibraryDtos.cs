@@ -7,7 +7,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    internal class BudgetPriorityLibraryDtos
+    public static class BudgetPriorityLibraryDtos
     {
 
         public const string BudgetPriorityLibraryName = "BudgetPriorityLibrary";

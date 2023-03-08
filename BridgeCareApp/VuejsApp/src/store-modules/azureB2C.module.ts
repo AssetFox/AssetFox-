@@ -42,7 +42,15 @@ const actions = {
                     );
                 }
             })
-            .catch(async (error: any) => {
+            .catch(async (error: any) => {             
+                if(error.response == undefined || error.response.status == 500)
+                {                   
+                    dispatch('addErrorNotification', {
+                        message: 'The authorization system is not available at the moment.',
+                        longMessage: error.errorMessage == undefined ? 'Unknown Error' : error.errorMessage
+                    });
+                }
+                
                 dispatch('getAzureAccountDetails');
 
                 if (

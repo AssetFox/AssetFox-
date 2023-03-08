@@ -334,14 +334,9 @@ import {
 import {
   any,
     clone,
-    contains,
     find,
-    findIndex,
     isNil,
-    prepend,
     propEq,
-    reject,
-    update,
 } from 'ramda';
 import {
     ShareTargetConditionGoalLibraryDialogData,
@@ -349,11 +344,9 @@ import {
 } from '@/shared/models/modals/share-target-condition-goals-data';
 import ShareTargetConditionGoalLibraryDialog from '@/components/target-editor/target-editor-dialogs/ShareTargetConditionGoalLibraryDialog.vue';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
 import CreateTargetConditionGoalDialog from '@/components/target-editor/target-editor-dialogs/CreateTargetConditionGoalDialog.vue';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
-import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import {
     CreateTargetConditionGoalLibraryDialogData,
     emptyCreateTargetConditionGoalLibraryDialogData,
@@ -368,9 +361,6 @@ import {
     rules,
 } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import {
-    CriterionLibrary,
-} from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
 import {LibraryUser} from '@/shared/models/iAM/user'
@@ -770,19 +760,6 @@ export default class TargetConditionGoalEditor extends Vue {
         property: string,
         value: any,
     ) {
-        // this.currentPage = update(
-        //     findIndex(
-        //         propEq('id', targetConditionGoal.id),
-        //         this.currentPage,
-        //     ),
-        //     setItemPropertyValue(
-        //         property,
-        //         value,
-        //         targetConditionGoal,
-        //     ) as TargetConditionGoal,
-        //     this.currentPage,
-        // );
-
         this.onUpdateRow(targetConditionGoal.id, clone(targetConditionGoal))
         this.onPaginationChanged();
     }
@@ -814,11 +791,6 @@ export default class TargetConditionGoalEditor extends Vue {
     }
 
     onUpsertTargetConditionGoalLibrary() {
-        const targetConditionGoalLibrary: TargetConditionGoalLibrary = {
-            ...clone(this.selectedTargetConditionGoalLibrary),
-            targetConditionGoals: clone(this.currentPage),
-        };
-
         const upsertRequest: LibraryUpsertPagingRequest<TargetConditionGoalLibrary, TargetConditionGoal> = {
                 library: this.selectedTargetConditionGoalLibrary,
                 isNewLibrary: false,

@@ -1,5 +1,4 @@
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
-import internal from 'stream';
 export interface ScenarioUser {
     userId: string;
     username: string;

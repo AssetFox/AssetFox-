@@ -1,7 +1,3 @@
-import {
-    CalculatedAttribute,
-    CalculatedAttributeLibrary,
-} from '@/shared/models/iAM/calculated-attribute';
 import { CalculatedAttributeLibraryUpsertPagingRequestModel, CalculatedAttributePagingRequestModel, CalculatedAttributePagingSyncModel } from '@/shared/models/iAM/paging';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { AxiosPromise } from 'axios';

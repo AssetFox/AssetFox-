@@ -1,10 +1,5 @@
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 
-export interface CriteriaEditorAttribute {
-    name: string;
-    values: string[];
-}
-
 export interface Criteria {
     logicalOperator: string;
     children?: CriteriaType[];
@@ -20,12 +15,6 @@ export interface CriteriaRule {
     selectedOperator?: string;
     selectedOperand: string;
     value?: string;
-}
-
-export interface CriteriaValidationResult {
-    isValid: boolean;
-    numberOfResults: number;
-    message: string;
 }
 
 export interface CriterionLibrary {

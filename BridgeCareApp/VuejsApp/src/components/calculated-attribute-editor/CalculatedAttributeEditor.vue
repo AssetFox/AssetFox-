@@ -282,10 +282,7 @@ import {
     find,
     findIndex,
     isNil,
-    map,
-    prepend,
     propEq,
-    reject,
     update,
 } from 'ramda';
 import {
@@ -295,10 +292,8 @@ import {
     CriterionAndEquationSet,
     emptyCalculatedAttribute,
     emptyCalculatedAttributeLibrary,
-    emptyCalculatedAttributeGridModel,
     emptyCriterionAndEquationSet,
     Timing,
-    TimingMap,
 } from '@/shared/models/iAM/calculated-attribute';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -312,20 +307,17 @@ import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
-import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
+import { Equation } from '@/shared/models/iAM/equation';
 import {
-    CriterionLibrary,
-    emptyCriteria,
     emptyCriterionLibrary,
 } from '@/shared/models/iAM/criteria';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
-import { emptySelectItem } from '@/shared/models/vue/select-item';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
-import { CalculatedAttributeLibraryUpsertPagingRequestModel, CalculatedAttributePagingRequestModel, CalculatedAttributePagingSyncModel, calculcatedAttributePagingPageModel, PagingPage } from '@/shared/models/iAM/paging';
+import { CalculatedAttributeLibraryUpsertPagingRequestModel, CalculatedAttributePagingRequestModel, CalculatedAttributePagingSyncModel, calculcatedAttributePagingPageModel} from '@/shared/models/iAM/paging';
 import { mapToIndexSignature } from '@/shared/utils/conversion-utils';
 import CalculatedAttributeService from '@/services/calculated-attribute.service';
 import { AxiosResponse } from 'axios';
@@ -552,7 +544,6 @@ export default class CalculatedAttributeEditor extends Vue {
                     let data = response.data as calculcatedAttributePagingPageModel;
                     this.currentPage.equations = data.items;
                     this.currentPage.calculationTiming = data.calculationTiming
-                    // this.CalcAttrCache = this.currentPage
                     this.pairsCache = this.currentPage.equations;
                     this.totalItems = data.totalItems;
                     this.defaultEquation = data.defaultEquation;
@@ -571,7 +562,6 @@ export default class CalculatedAttributeEditor extends Vue {
         this.checkHasUnsavedChanges();
     }
 
-    // @Watch('selectedAttribute')
     onSelectedAttributeChanged(){
         this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.currentPage)
     }
@@ -699,7 +689,7 @@ export default class CalculatedAttributeEditor extends Vue {
         }
     }
     @Watch('attributeTimingSelectItemValue')
-    onAttributeTimingSelectItemValue() {//(touched)
+    onAttributeTimingSelectItemValue() {
         // Change in timings select box
         if (
             isNil(this.attributeTimingSelectItemValue) ||
@@ -909,7 +899,7 @@ export default class CalculatedAttributeEditor extends Vue {
             attributeSelectItems: this.attributeSelectItems,
         };
     }
-    onSubmitCreateCalculatedAttributeLibraryDialogResult(//new library upsert stuff(touched)
+    onSubmitCreateCalculatedAttributeLibraryDialogResult(
         calculatedAttributeLibrary: CalculatedAttributeLibrary,
     ) {
         this.createCalculatedAttributeLibraryDialogData = clone(
@@ -955,7 +945,7 @@ export default class CalculatedAttributeEditor extends Vue {
         }
     }
 
-    disableCrudButton() {//gonna have to do something with this
+    disableCrudButton() {
         if (this.calculatedAttributeGridData == undefined) {
             return false;
         }
@@ -1100,19 +1090,6 @@ export default class CalculatedAttributeEditor extends Vue {
     }
 
     onShowEquationEditorDialogForDefaultEquation() {
-        // if(this.defaultEquation.id === getBlankGuid()){
-        //     var newSet = clone(emptyCriterionAndEquationSet);
-        //     newSet.id = getNewGuid();
-
-        //     newSet.equation.id = getNewGuid();
-
-        //     let pairs = this.addedPairs.get(this.selectedAttribute.id);
-        //     if(!isNil(pairs)){
-        //         pairs.push(newSet)
-        //     }
-        //     else
-        //         this.addedPairs.set(this.selectedAttribute.id, [newSet])
-        // }
         this.defaultSelected = true;
         this.equationEditorDialogData = {
             showDialog: true,
@@ -1252,7 +1229,7 @@ export default class CalculatedAttributeEditor extends Vue {
         this.attributeTimingSelectItemValue = selectedItem;
         this.isTimingSelectedItemValue = true;
     }
-    setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {//might want to look at
+    setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {
         this.attributeSelectItemValue = clone(
             localCalculatedAttribute.attribute,
         );
@@ -1450,7 +1427,6 @@ export default class CalculatedAttributeEditor extends Vue {
                     let data = response.data as calculcatedAttributePagingPageModel;
                     this.currentPage.equations = data.items;
                     this.currentPage.calculationTiming = data.calculationTiming
-                    // this.CalcAttrCache = this.currentPage
                     this.pairsCache = this.currentPage.equations;
                     this.totalItems = data.totalItems;
                     this.defaultEquation = data.defaultEquation;
@@ -1467,7 +1443,6 @@ export default class CalculatedAttributeEditor extends Vue {
                     let data = response.data as calculcatedAttributePagingPageModel;
                     this.currentPage.equations = data.items;
                     this.currentPage.calculationTiming = data.calculationTiming
-                    // this.CalcAttrCache = this.currentPage
                     this.pairsCache = this.currentPage.equations;
                     this.totalItems = data.totalItems;
                     this.defaultEquation = data.defaultEquation;

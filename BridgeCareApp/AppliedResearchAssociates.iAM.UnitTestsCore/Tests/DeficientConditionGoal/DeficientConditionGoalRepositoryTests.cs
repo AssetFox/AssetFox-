@@ -407,5 +407,20 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(LibraryAccessLevel.Modify, user1After.AccessLevel);
             Assert.Equal(LibraryAccessLevel.Read, user2After.AccessLevel);
         }
+
+        public void UpsertAtomically_SecondPartFails_NothingHappens()
+        {
+            var library = DeficientConditionGoalLibraryTestSetup.ModelForEntityInDb(
+                TestHelper.UnitOfWork);
+            var goalId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var attributeName = "nonexistentAttribute";
+            var goal = DeficientConditionGoalDtos.Dto(goalId, criterionLibraryId, attributeName);
+            library.DeficientConditionGoals.Add(goal);
+            library.Description = "Updated description";
+
+            var exception = Assert.ThrowsAny<Exception>(() => TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibraryAndGoalsAtomically(
+                library));
+        }
     }
 }

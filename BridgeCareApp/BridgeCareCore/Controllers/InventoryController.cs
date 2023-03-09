@@ -26,21 +26,6 @@ namespace BridgeCareCore.Controllers
             _assetData = unitOfWork.AssetDataRepository;
         }
 
-        [HttpGet]
-        [Route("GetKeyProperties")]
-        [Authorize]
-        public async Task<IActionResult> GetKeyProperties() =>
-            Ok(_assetData.KeyProperties.Keys.ToList());
-
-        [HttpGet]
-        [Route("GetValuesForKey/{propertyName}")]
-        [Authorize]
-        public async Task<IActionResult> GetValuesForKey(string propertyName)
-        {
-            if (!_assetData.KeyProperties.ContainsKey(propertyName)) return BadRequest($"Requested key property ({propertyName}) does not exist");
-            return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
-        }
-
         // TODO: Remove this once front end can handle generic properties
         [HttpGet]
         [Route("GetPennDOTInventory")]

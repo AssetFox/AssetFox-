@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     public sealed class TreatmentOptionDetail
     {
-        public TreatmentOptionDetail(string treatmentName, double cost, double benefit, double? remainingLife)
+        public TreatmentOptionDetail(string treatmentName, double cost, double benefit, double? remainingLife, double conditionChange)
         {
             if (string.IsNullOrWhiteSpace(treatmentName))
             {
@@ -15,9 +15,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             Cost = cost;
             Benefit = benefit;
             RemainingLife = remainingLife;
+            ConditionChange = conditionChange;
         }
 
         public double Benefit { get; }
+
+        public double ConditionChange { get; }
 
         public double Cost { get; }
 
@@ -31,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             Cost = original.Cost;
             Benefit = original.Benefit;
             RemainingLife = original.RemainingLife;
+            ConditionChange = original.ConditionChange;
         }
     }
 }

@@ -20,11 +20,17 @@ export interface PerformanceCurveLibrary {
     name: string;
     description: string;
     performanceCurves: PerformanceCurve[];
+    users: PerformanceCurveLibraryUser[];
     appliedScenarioIds: string[];
     owner?: string;
     isShared: boolean;
 }
-
+export interface PerformanceCurveLibraryUser {
+    userId: string;
+    username: string;
+    canModify: boolean;
+    isOwner: boolean;
+}
 export const emptyPerformanceCurve: PerformanceCurve = {
     id: getBlankGuid(),
     attribute: '',
@@ -34,12 +40,20 @@ export const emptyPerformanceCurve: PerformanceCurve = {
     criterionLibrary: clone(emptyCriterionLibrary),
 };
 
+export const emptyPerformanceCurveLibraryUsers: PerformanceCurveLibraryUser[] = [{
+    userId: '',
+    username: '',
+    canModify: false,
+    isOwner: false
+}];
+
 export const emptyPerformanceCurveLibrary: PerformanceCurveLibrary = {
     id: getBlankGuid(),
     name: '',
     description: '',
     performanceCurves: [],
     appliedScenarioIds: [],
+    users: [],
     isShared: false
 };
 

@@ -17,9 +17,6 @@
                         <div class="header-text-content invest-owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                         </div>
-                        <!--<v-divider class="owner-shared-divider" inset vertical>
-                        </v-divider>
-                        <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedBudgetLibrary.isShared' />-->
                         <v-btn @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                                v-show='!hasScenario'>
                             Share Library
@@ -180,7 +177,6 @@
                 </v-btn>
             </v-flex>
         </v-flex>
-        <!-- <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider> -->
         <v-flex v-show='hasSelectedLibrary && !hasScenario' xs12>
             <v-layout justify-center>
                 <v-flex>
@@ -264,12 +260,9 @@ import {
     BudgetYearsGridData,
     emptyBudgetLibrary,
     emptyInvestmentPlan, InvestmentBudgetFileImport,
-    InvestmentPlan,
-    emptyBudgetAmount,
-    LibraryInvestmentBudgetFileImport,
-    emptyBudgetLibraryUsers
+    InvestmentPlan
 } from '@/shared/models/iAM/investment';
-import { any, append, clone, find, findIndex, groupBy, isNil, keys, propEq, update, contains, sort } from 'ramda';
+import { any, clone, find, isNil, propEq } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -285,14 +278,13 @@ import {
 } from '@/shared/models/modals/share-budget-library-dialog-data';
 
 import { EditBudgetsDialogData, EmitedBudgetChanges, emptyEditBudgetsDialogData } from '@/shared/models/modals/edit-budgets-dialog';
-import { getLastPropertyValue, getPropertyValues } from '@/shared/utils/getter-utils';
+import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import { hasUnsavedChangesCore, isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
+import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { sorter } from '@/shared/utils/sorter-utils';
 import CreateBudgetLibraryDialog
     from '@/components/investment-editor/investment-editor-dialogs/CreateBudgetLibraryDialog.vue';
 import ShareBudgetLibraryDialog from '@/components/investment-editor/investment-editor-dialogs/ShareBudgetLibraryDialog.vue';
@@ -308,10 +300,9 @@ import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { getUserName } from '@/shared/utils/get-user-info';
-import { PagingRequest, PagingPage, InvestmentPagingRequestModel, InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingSyncModel, InvestmentPagingPage } from '@/shared/models/iAM/paging';
+import { InvestmentPagingRequestModel, InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingSyncModel, InvestmentPagingPage } from '@/shared/models/iAM/paging';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { http2XX } from '@/shared/utils/http-utils';
-import { BudgetGridRow } from '@/shared/models/iAM/treatment';
 import { LibraryUser } from '@/shared/models/iAM/user';
 import {
     mapToIndexSignature

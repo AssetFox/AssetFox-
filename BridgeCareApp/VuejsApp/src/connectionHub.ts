@@ -6,10 +6,8 @@ import {
 import { SimulationAnalysisDetail } from '@/shared/models/iAM/simulation-analysis-detail';
 import { SimulationReportDetail } from '@/shared/models/iAM/simulation-report-detail';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
-import AuthenticationModule from '@/store-modules/authentication.module';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { UserInfo } from '@/shared/models/iAM/authentication';
-import { parseLDAP } from '@/shared/utils/parse-ldap';
+
 import has = Reflect.has;
 import { getUserName } from '@/shared/utils/get-user-info';
 
@@ -19,7 +17,6 @@ export default {
             .withUrl(
                 `${process.env.VUE_APP_BRIDGECARE_CORE_URL}/bridgecarehub/`,
                 {
-                    //skipNegotiation: false,
                     transport: HttpTransportType.LongPolling,
                 },
             )

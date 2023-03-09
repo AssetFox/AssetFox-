@@ -72,7 +72,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IAssetData _assetDataRepository;
         private IAnnouncementRepository _announcementRepo;
         private IDataSourceRepository _dataSourceRepo;
+        private ITreatmentLibraryUserRepository _treatmentLibraryUserRepo;
 
+        public ITreatmentLibraryUserRepository TreatmentLibraryUserRepo => _treatmentLibraryUserRepo ??= new TreatmentLibraryUserRepository(this);
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
 
         public IAnalysisMethodRepository AnalysisMethodRepo => _analysisMethodRepo ??= new AnalysisMethodRepository(this);

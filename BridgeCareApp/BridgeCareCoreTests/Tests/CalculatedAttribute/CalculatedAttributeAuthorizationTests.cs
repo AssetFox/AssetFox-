@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Utils;
+using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 

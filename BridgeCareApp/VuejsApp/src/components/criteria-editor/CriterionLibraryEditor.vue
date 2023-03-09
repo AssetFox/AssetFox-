@@ -230,9 +230,6 @@ export default class CriterionLibraryEditor extends Vue {
                 value: library.id,
             }));
         if (!this.isLibraryContext && hasValue(this.librarySelectItemValue)) {
-            // this.selectCriterionLibraryAction({
-            //     libraryId: this.librarySelectItemValue,
-            // });
             this.getSelectedCriterionLibraryAction({
                 libraryId: this.librarySelectItemValue,
             });
@@ -251,9 +248,6 @@ export default class CriterionLibraryEditor extends Vue {
 
     @Watch('librarySelectItemValue')
     onLibrarySelectItemValueChanged() {
-        // this.selectCriterionLibraryAction({
-        //     libraryId: this.librarySelectItemValue,
-        // });
         this.getSelectedCriterionLibraryAction({
                 libraryId: this.librarySelectItemValue,
             });
@@ -321,7 +315,6 @@ export default class CriterionLibraryEditor extends Vue {
                 ),
             });
         } else {
-            //this.$emit('submit', this.selectedScenarioRelatedCriteria);
             this.$emit('submit', this.selectedCriterionLibrary);
         }
     }
@@ -339,9 +332,6 @@ export default class CriterionLibraryEditor extends Vue {
                 (!this.isLibraryContext || !this.dialogIsFromLibrary) &&
                 hasValue(this.librarySelectItemValue)
             ) {
-                // this.selectCriterionLibraryAction({
-                //     libraryId: this.librarySelectItemValue,
-                // });
                 this.getSelectedCriterionLibraryAction({
                     libraryId: this.librarySelectItemValue,
             });

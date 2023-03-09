@@ -187,17 +187,13 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
-                    UnitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto);
-                    UnitOfWork.Commit();
+                    UnitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifierAtomically(dto);
                 });
-
 
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::UpsertBenefitQuantifier - {e.Message}");
                 throw;
             }

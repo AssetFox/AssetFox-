@@ -480,7 +480,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
         public List<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibrariesNoChildrenAccessibleToUser(Guid userId)
         {
-            return _unitOfDataPersistanceWork.Context.CalculatedAttributeLibraryUser
+            return _unitOfDataPersistenceWork.Context.CalculatedAttributeLibraryUser
                 .AsNoTracking()
                 .Include(u => u.CalculatedAttributeLibrary)
                 .Where(u => u.UserId == userId)
@@ -489,7 +489,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
         public void UpsertOrDeleteUsers(Guid calculatedAttributeLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
-            var existingEntities = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibraryUser.Where(u => u.LibraryId == calculatedAttributeLibraryId).ToList();
+            var existingEntities = _unitOfDataPersistenceWork.Context.CalculatedAttributeLibraryUser.Where(u => u.LibraryId == calculatedAttributeLibraryId).ToList();
             var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
             var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
             var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
@@ -508,16 +508,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     entitiesToUpdate.Add(entityToUpdate);
                 }
             }
-            _unitOfDataPersistanceWork.Context.AddRange(entitiesToAdd);
-            _unitOfDataPersistanceWork.Context.UpdateRange(entitiesToUpdate);
+            _unitOfDataPersistenceWork.Context.AddRange(entitiesToAdd);
+            _unitOfDataPersistenceWork.Context.UpdateRange(entitiesToUpdate);
             var entitiesToDelete = existingEntities.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
-            _unitOfDataPersistanceWork.Context.RemoveRange(entitiesToDelete);
-            _unitOfDataPersistanceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.RemoveRange(entitiesToDelete);
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         private List<LibraryUserDTO> GetAccessForUser(Guid calculatedAttributeLibraryId, Guid userId)
         {
-            var dtos = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibraryUser
+            var dtos = _unitOfDataPersistenceWork.Context.CalculatedAttributeLibraryUser
                 .Where(u => u.LibraryId == calculatedAttributeLibraryId && u.UserId == userId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
@@ -526,7 +526,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<LibraryUserDTO> GetLibraryUsers(Guid calculatedAttributeLibraryId)
         {
-            var dtos = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibraryUser
+            var dtos = _unitOfDataPersistenceWork.Context.CalculatedAttributeLibraryUser
                 .Include(u => u.User)
                 .Where(u => u.LibraryId == calculatedAttributeLibraryId)
                 .Select(LibraryUserMapper.ToDto)
@@ -535,7 +535,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
         public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
         {
-            var exists = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary.Any(bl => bl.Id == libraryId);
+            var exists = _unitOfDataPersistenceWork.Context.CalculatedAttributeLibrary.Any(bl => bl.Id == libraryId);
             if (!exists)
             {
                 return LibraryAccessModels.LibraryDoesNotExist();

@@ -72,8 +72,8 @@ const actions = {
                     var r = response.data;
                     r.forEach(resp => {
                         var mappedItem: InventoryItem = {bmsId:"", brKey:0};
-                        mappedItem.bmsId = resp.key1;
-                        mappedItem.brKey = resp.key2;
+                        mappedItem.bmsId = resp.keyProperty1;
+                        mappedItem.brKey = resp.keyProperty2;
                         mappedItems.push(mappedItem);
                     });
                     commit('inventoryItemsMutator', mappedItems);

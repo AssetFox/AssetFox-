@@ -3,8 +3,8 @@ export interface InventoryItem {
     brKey: number;
 }
 export interface MappedInventoryItem {
-    key1: string;
-    key2: number;
+    keyProperty1: string;
+    keyProperty2: number;
 }
 export interface LabelValue {
     label: string;

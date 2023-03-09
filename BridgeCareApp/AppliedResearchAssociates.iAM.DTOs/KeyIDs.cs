@@ -2,7 +2,7 @@
 {
     public class KeyIDs
     { 
-        public string Key1 { get; set; }
-        public string Key2 { get; set; }
+        public string KeyProperty1 { get; set; }
+        public string KeyProperty2 { get; set; }
     }
 }

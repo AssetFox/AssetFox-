@@ -53,11 +53,11 @@ namespace BridgeCareCore.Controllers
             {
                 data = _assetData.KeyProperties[keyProperty1].Join(
                     _assetData.KeyProperties[keyProperty2],
-                    assetKp1 => assetKp1.AssetId,
-                    assetKp2 => assetKp2.AssetId,
-                    (keyid1, keyid2) => new KeyIDs { Key2 = keyid2.KeyValue.TextValue, Key1 = keyid1.KeyValue.TextValue }).ToList();
+                    assetKeyProperty1 => assetKeyProperty1.AssetId,
+                    assetKeyProperty2 => assetKeyProperty2.AssetId,
+                    (keyid1, keyid2) => new KeyIDs { KeyProperty2 = keyid2.KeyValue.TextValue, KeyProperty1 = keyid1.KeyValue.TextValue }).ToList();
             }
-            return Ok(data.OrderBy(_ => _.Key2.Length).ThenBy(_ => _.Key2));
+            return Ok(data.OrderBy(_ => _.KeyProperty2.Length).ThenBy(_ => _.KeyProperty2));
         }
     }
 }

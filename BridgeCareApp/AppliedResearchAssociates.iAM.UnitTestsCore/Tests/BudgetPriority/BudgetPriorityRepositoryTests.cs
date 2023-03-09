@@ -378,7 +378,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             library2.BudgetPriorities = budgetPriorities;
 
             var exception = Assert.Throws<SqlException>(() =>
-            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorityLibraryAndPriorities(library2));
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorityLibraryAndPriorities(library2, false, Guid.Empty));
 
             var librariesAfter = TestHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries();
             var libraryAfter = librariesAfter.Single(

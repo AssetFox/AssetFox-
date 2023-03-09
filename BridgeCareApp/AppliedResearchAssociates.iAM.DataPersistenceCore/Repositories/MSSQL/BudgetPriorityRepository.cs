@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -339,12 +340,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
 
-        public void UpsertOrDeleteBudgetPriorityLibraryAndPriorities(BudgetPriorityLibraryDTO dto)
+        public void UpsertOrDeleteBudgetPriorityLibraryAndPriorities(BudgetPriorityLibraryDTO dto, bool isNewLibrary, Guid ownerIdForNewLibrary)
         {
             _unitOfWork.AsTransaction(u =>
             {
                 u.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
                 u.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
+                if (isNewLibrary)
+                {
+                    var users = LibraryUserDtolists.OwnerAccess(ownerIdForNewLibrary);
+                    u.BudgetPriorityRepo.UpsertOrDeleteUsers(dto.Id, users);
+                }
             });
         }
     }

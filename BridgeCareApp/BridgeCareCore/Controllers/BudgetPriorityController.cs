@@ -117,14 +117,7 @@ namespace BridgeCareCore.Controllers
                         _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                         dto.BudgetPriorities = items;
                     }
-                    UnitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
-                    UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
-                    if (upsertRequest.IsNewLibrary)
-                    {
-                        var users = LibraryUserDtolists.OwnerAccess(UserId);
-                        UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteUsers(dto.Id, users);
-                    }
-                    UnitOfWork.Commit();
+                    UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorityLibraryAndPriorities(dto, upsertRequest.IsNewLibrary, UserId);
                 });
 
                 return Ok();

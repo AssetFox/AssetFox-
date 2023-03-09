@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.CellData;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using OfficeOpenXml;
@@ -97,7 +96,7 @@ namespace BridgeCareCore.Services
             }
             var workseet = ExcelRawDataSpreadsheets.WithColumns(columns);
             var newId = Guid.NewGuid();
-            var dto = ExcelDatabaseWorksheetMapper.ToDTO(workseet, dataSourceId, newId);
+            var dto = ExcelRawDataSpreadsheetSerializationMapper.ToDTO(workseet, dataSourceId, newId);
             var returnId = _unitOfWork.ExcelWorksheetRepository.AddExcelRawData(dto);
             return new ExcelRawDataImportResultDTO
             {

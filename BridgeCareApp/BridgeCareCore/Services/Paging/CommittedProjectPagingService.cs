@@ -1,14 +1,12 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Models;
-using BridgeCareCore.Utils;
+﻿using System;
 using System.Collections.Generic;
-using System;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Services.Paging.Generics;
+using BridgeCareCore.Utils;
 
 namespace BridgeCareCore.Services
 {

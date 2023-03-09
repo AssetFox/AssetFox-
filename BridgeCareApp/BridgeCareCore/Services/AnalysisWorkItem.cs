@@ -6,7 +6,6 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
@@ -153,7 +152,7 @@ namespace BridgeCareCore.Services
                 var message = eventArgs.MessageBuilder;
                 if (LoggedMessages.Add(message.Message))
                 {
-                    var dto = SimulationLogMapper.ToDTO(message);
+                    var dto = SimulationLogMessageBuilderMapper.ToDTO(message);
                     _unitOfWork.SimulationLogRepo.CreateLog(dto);
                 }
                 switch (message.Status)

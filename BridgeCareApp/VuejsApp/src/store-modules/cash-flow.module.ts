@@ -13,6 +13,7 @@ import {
     reject,
     update,
 } from 'ramda';
+import { LibraryUpsertPagingRequest } from '@/shared/models/iAM/paging';
 import CashFlowService from '@/services/cash-flow.service';
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -25,6 +26,7 @@ const state = {
     ) as CashFlowRuleLibrary,
     scenarioCashFlowRules: [] as CashFlowRule[],
     hasPermittedAccess: false,
+    isSharedLibrary: false,
 };
 
 const mutations = {
@@ -62,6 +64,9 @@ const mutations = {
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
     },
+    IsSharedLibraryMutator(state: any, status: boolean) {
+        state.isSharedLibrary = status;
+    }
 };
 
 const actions = {
@@ -82,7 +87,7 @@ const actions = {
     },
     async upsertCashFlowRuleLibrary(
         { dispatch, commit }: any,
-        library: CashFlowRuleLibrary,
+        library: LibraryUpsertPagingRequest<CashFlowRuleLibrary, CashFlowRule>,
     ) {
         await CashFlowService.upsertCashFlowRuleLibrary(library).then(
             (response: AxiosResponse) => {
@@ -91,14 +96,14 @@ const actions = {
                     http2XX.test(response.status.toString())
                 ) {
                     const message: string = any(
-                        propEq('id', library.id),
+                        propEq('id', library.syncModel.libraryId),
                         state.cashFlowRuleLibraries,
                     )
                         ? 'Updated cash flow rule library'
                         : 'Added cash flow rule library';
 
                     commit('cashFlowRuleLibraryMutator', library);
-                    commit('selectedCashFlowRuleLibraryMutator', library.id);
+                    commit('selectedCashFlowRuleLibraryMutator', library.syncModel.libraryId);
 
                     dispatch('addSuccessNotification', { message: message });
                 }
@@ -173,6 +178,17 @@ const actions = {
             ) {
                 const hasPermittedAccess: boolean = response.data as boolean;
                 commit('PermittedAccessMutator', hasPermittedAccess);
+            }
+        });
+    },
+    async getIsSharedCashFlowRuleLibrary({ dispatch, commit }: any, payload: any) {
+        await CashFlowService.getIsSharedCashFlowRuleLibrary(payload.id).then(
+            (response: AxiosResponse) => {
+                if (
+                hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                commit('IsSharedLibraryMutator', response.data as boolean);
             }
         });
     },

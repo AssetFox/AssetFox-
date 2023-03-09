@@ -64,6 +64,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         ISelectableTreatmentRepository SelectableTreatmentRepo { get; }
 
+        ITreatmentLibraryUserRepository TreatmentLibraryUserRepo { get; }
+
         ISimulationAnalysisDetailRepository SimulationAnalysisDetailRepo { get; }
 
         ISimulationLogRepository SimulationLogRepo { get; }

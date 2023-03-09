@@ -18,6 +18,10 @@ import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
 import TreatmentService from '@/services/treatment.service';
+import { stat } from 'fs';
+import { stringify } from 'querystring';
+import { LibraryUser } from '@/shared/models/iAM/user';
+import { name } from 'msal/lib-commonjs/packageMetadata';
 
 const state = {
     treatmentLibraries: [] as TreatmentLibrary[],
@@ -26,6 +30,9 @@ const state = {
     simpleScenarioSelectableTreatments: [] as SimpleTreatment[],
     simpleSelectableTreatments: [] as SimpleTreatment[],
     hasPermittedAccess: false,
+    hasOwnerAccess: false,
+    hasViewAccess: false,
+    isSharedLibrary: false
 };
 
 const mutations = {
@@ -86,6 +93,15 @@ const mutations = {
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
     },
+    ViewAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
+    OwnerAccessMutator(state: any, status: boolean) {
+        state.hasOwnerAccess = status;
+    },
+    IsSharedLibraryMutator(state: any, status: boolean) {
+        state.isSharedLibrary = status;
+    }
 };
 
 const actions = {
@@ -280,6 +296,17 @@ const actions = {
             },
         );
     },
+    async upsertOrDeleteTreatmentLibraryUsers({dispatch, commit}: any, payload: any) 
+    {
+        await TreatmentService.upsertOrDeleteTreatmentLibraryUsers(payload.libraryId, payload.proposedUsers)
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+                ) {
+                }
+        });
+    },
     async getHasPermittedAccess({ commit }: any)
     {
         await TreatmentService.getHasPermittedAccess()
@@ -293,6 +320,17 @@ const actions = {
             }
         });
     },
+    async getIsSharedTreatmentLibrary({ dispatch, commit }: any, payload: any) {
+        await TreatmentService.getIsSharedLibrary(payload.id).then(
+            (response: AxiosResponse) => {
+                if (
+                hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                commit('IsSharedLibraryMutator', response.data as boolean);
+            }
+            });
+        }
 };
 
 const getters = {};

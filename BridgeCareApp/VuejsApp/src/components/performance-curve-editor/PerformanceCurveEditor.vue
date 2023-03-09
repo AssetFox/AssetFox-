@@ -75,17 +75,26 @@
                                 v-if='hasSelectedLibrary && !hasScenario'
                                 class="ghd-control-label ghd-md-gray"
                             > 
-                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }} |
+                            <v-badge v-show="isShared">
+                            <template v-slot: badge>
+                                <span>Shared</span>
+                            </template>
+                            </v-badge>
+                            <v-btn @click='onShowSharePerformanceCurveLibraryDialog(selectedPerformanceCurveLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                                v-show='!hasScenario'>
+                                Share Library
+                            </v-btn>
                             </div>
-                            <v-divider v-if='hasSelectedLibrary && !hasScenario' class="owner-shared-divider" style="margin-left:10px;" inset vertical>
-                            </v-divider>                        
-                            <v-switch style="margin-left:10px;margin-top:4px;"
+                            <!-- <v-divider v-if='hasSelectedLibrary && !hasScenario' class="owner-shared-divider" style="margin-left:10px;" inset vertical>
+                            </v-divider>      -->                  
+                            <!-- <v-switch style="margin-left:10px;margin-top:4px;"
                                 class="sharing ghd-checkbox"
                                 label="Shared"
                                 v-if="hasSelectedLibrary && !hasScenario"
                                 v-model="selectedPerformanceCurveLibrary.isShared"
                                 @change="checkHasUnsavedChanges()"
-                            />               
+                            />                -->
                     </v-layout>
                 </v-flex>
                 <v-flex xs9 v-show="hasScenario">
@@ -424,6 +433,11 @@
             @submit="onSubmitCreatePerformanceCurveLibraryDialogResult"
         />
 
+        <SharePerformanceCurveLibraryDialog 
+            :dialogData='sharePerformanceCurveLibraryDialogData' 
+            @submit='onSharePerformanceCurveLibraryDialogSubmit'
+        />
+
         <CreatePerformanceCurveDialog
             :showDialog="showCreatePerformanceCurveDialog"
             @submit="onSubmitCreatePerformanceCurveDialogResult"
@@ -470,12 +484,18 @@ import {
     isNil,
     propEq,
     update,
+    fromPairs,
 } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import {
     CreatePerformanceCurveLibraryDialogData,
     emptyCreatePerformanceLibraryDialogData,
 } from '@/shared/models/modals/create-performance-curve-library-dialog-data';
+import {
+    SharePerformanceCurveLibraryDialogData,
+    emptySharePerformanceCurveLibraryDialogData
+} from '@/shared/models/modals/share-performance-curve-library-dialog-data';
+import SharePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/SharePerformanceCurveLibraryDialog.vue';
 import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
@@ -488,7 +508,10 @@ import {
     InputValidationRules,
     rules,
 } from '@/shared/utils/input-validation-rules';
-import { Equation } from '@/shared/models/iAM/equation';
+import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
+import { CriterionLibrary } from '@/shared/models/iAM/criteria';
+import { LibraryUser } from '@/shared/models/iAM/user';
+import { PerformanceCurveLibraryUser } from '@/shared/models/iAM/performance.ts';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
@@ -506,6 +529,7 @@ import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/
 import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { isNullOrUndefined } from 'util';
 
 @Component({
     components: {
@@ -515,6 +539,7 @@ import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData
         EquationEditorDialog,
         GeneralCriterionEditorDialog,
         ConfirmDeleteAlert: Alert,
+        SharePerformanceCurveLibraryDialog,
     },
 })
 export default class PerformanceCurveEditor extends Vue {
@@ -534,6 +559,9 @@ export default class PerformanceCurveEditor extends Vue {
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
     @State(state => state.performanceCurveModule.hasPermittedAccess) hasPermittedAccess: boolean;
     @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
+    @State(state => state.performanceCurveModule.isSharedLibrary) isSharedLibrary: boolean;
+    @Action('getIsSharedPerformanceCurveLibrary') getIsSharedLibraryAction: any;
+    
     @Action('getPerformanceCurveLibraries')
     getPerformanceCurveLibrariesAction: any;
     @Action('selectPerformanceCurveLibrary')
@@ -543,6 +571,9 @@ export default class PerformanceCurveEditor extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('updatePerformanceCurvesCriterionLibraries')
     updatePerformanceCurveCriterionLibrariesAction: any;
+    
+    @Action('upsertOrDeletePerformanceCurveLibraryUsers') upsertOrDeletePerformanceCurveLibraryUsersAction: any;
+
     @Action('importScenarioPerformanceCurvesFile')
     importScenarioPerformanceCurvesFileAction: any;
     @Action('importLibraryPerformanceCurvesFile')
@@ -570,7 +601,7 @@ export default class PerformanceCurveEditor extends Vue {
     totalItems = 0;
     currentPage: PerformanceCurve[] = [];
     isRunning: boolean = true;
-
+    isShared: boolean = false;
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
@@ -650,6 +681,8 @@ export default class PerformanceCurveEditor extends Vue {
     hasLibraryEditPermission: boolean = false;
     showImportExportPerformanceCurvesDialog: boolean = false;    
 
+    sharePerformanceCurveLibraryDialogData: SharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
+
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;           
@@ -694,7 +727,6 @@ export default class PerformanceCurveEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.performancePagination;
-
         const request: PagingRequest<PerformanceCurve>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -729,6 +761,9 @@ export default class PerformanceCurveEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                     this.isRunning = false;
+                    if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
                 }
             });  
         }
@@ -820,7 +855,10 @@ export default class PerformanceCurveEditor extends Vue {
     onAddedRowsChanged(){
         this.checkHasUnsavedChanges();
     }
-
+    @Watch('isSharedLibrary')
+    onStateSharedAccessChanged() {
+        this.isShared = this.isSharedLibrary;
+    }
     checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 
             this.deletionIds.length > 0 || 
@@ -1163,7 +1201,51 @@ export default class PerformanceCurveEditor extends Vue {
             }
         }
     }
+    onShowSharePerformanceCurveLibraryDialog(performanceCurveLibrary: PerformanceCurveLibrary)
+    {
+        this.sharePerformanceCurveLibraryDialogData =
+        {
+            showDialog: true,
+            performanceCurveLibrary: clone(performanceCurveLibrary),
+        };
+    }
+    onSharePerformanceCurveLibraryDialogSubmit(performanceCurveLibraryUsers: PerformanceCurveLibraryUser[]) {
+        this.sharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
 
+        if (!isNil(performanceCurveLibraryUsers) && this.selectedPerformanceCurveLibrary.id !== getBlankGuid())
+        {
+            let libraryUserData: LibraryUser[] = [];
+
+            //create library users
+            performanceCurveLibraryUsers.forEach((performanceCurveLibraryUser, index) =>
+            {   
+                //determine access level
+                let libraryUserAccessLevel: number = 0;
+                if (libraryUserAccessLevel == 0 && performanceCurveLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
+                if (libraryUserAccessLevel == 0 && performanceCurveLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
+
+                //create library user object
+                let libraryUser: LibraryUser = {
+                    userId: performanceCurveLibraryUser.userId,
+                    userName: performanceCurveLibraryUser.username,
+                    accessLevel: libraryUserAccessLevel
+                }
+
+                //add library user to an array
+                libraryUserData.push(libraryUser);
+            });
+            if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
+                this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
+            }
+            //update performance curve library sharing
+            PerformanceCurveService.upsertOrDeletePerformanceCurveLibraryUsers(this.selectedPerformanceCurveLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
+                {
+                    this.resetPage();
+                }
+            });
+        }
+    }
     onSearchClick(){
         this.currentSearch = this.gridSearchTerm;
         this.resetPage();

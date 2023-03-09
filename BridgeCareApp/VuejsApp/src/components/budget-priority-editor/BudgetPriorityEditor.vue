@@ -20,10 +20,15 @@
                         <v-divider class="owner-shared-divider" inset vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
                         </v-divider>
-                        <v-checkbox class='sharing header-text-content' label='Shared'
-                            v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                            v-model='selectedBudgetPriorityLibrary.isShared'
-                            @change="checkHasUnsavedChanges()" />
+                        <v-badge v-show="isShared" style="padding: 10px">
+                            <template v-slot: badge>
+                                <span>Shared</span>
+                            </template>
+                        </v-badge>
+                        <v-btn @click='onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                            v-show='!hasScenario'>
+                            Share Library
+                        </v-btn>
                     </v-layout>                               
                 </v-flex>                               
                 <v-flex xs4 class="ghd-constant-header">
@@ -171,7 +176,10 @@
                 </v-btn>
             </v-layout>
         </v-flex>
-
+        <ShareBudgetPriorityLibraryDialog 
+            :dialogData='shareBudgetPriorityLibraryDialogData' 
+            @submit='onShareBudgetPriorityLibraryDialogSubmit'
+        />
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
 
         <CreatePriorityLibraryDialog :dialogData='createBudgetPriorityLibraryDialogData'
@@ -194,8 +202,10 @@ import {
     BudgetPriority,
     BudgetPriorityGridDatum,
     BudgetPriorityLibrary,
+    BudgetPriorityLibraryUser,
     emptyBudgetPriority,
     emptyBudgetPriorityLibrary,
+    emptyBudgetPriorityLibraryUsers
 } from '@/shared/models/iAM/budget-priority';
 import CreatePriorityDialog
     from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityDialog.vue';
@@ -209,6 +219,11 @@ import {
     CreateBudgetPriorityLibraryDialogData,
     emptyCreateBudgetPriorityLibraryDialogData,
 } from '@/shared/models/modals/create-budget-priority-library-dialog-data';
+import {
+    ShareBudgetPriorityLibraryDialogData,
+    emptyShareBudgetPriorityLibraryDialogData
+} from '@/shared/models/modals/share-budget-priority-library-dialog-data';
+import ShareBudgetPriorityLibraryDialog from './budget-priority-editor-dialogs/ShareBudgetPriorityLibraryDialog.vue';
 import CreatePriorityLibraryDialog
     from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityLibraryDialog.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
@@ -229,12 +244,14 @@ import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { sortByProperty } from '../../shared/utils/sorter-utils';
+import {LibraryUser} from '@/shared/models/iAM/user'
+import { isNullOrUndefined } from 'util';
 
 const ObjectID = require('bson-objectid');
 
 @Component({
     components: {
-        CreatePriorityLibraryDialog, CreatePriorityDialog, GeneralCriterionEditorDialog, ConfirmDeleteAlert: Alert,
+        CreatePriorityLibraryDialog, CreatePriorityDialog, GeneralCriterionEditorDialog, ConfirmDeleteAlert: Alert, ShareBudgetPriorityLibraryDialog
     },
 })
 export default class BudgetPriorityEditor extends Vue {
@@ -245,6 +262,8 @@ export default class BudgetPriorityEditor extends Vue {
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.budgetPriorityModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @State(state => state.budgetPriorityModule.isSharedLibrary) isSharedLibrary: boolean;
+    @Action('getIsSharedBudgetPriorityLibrary') getIsSharedLibraryAction: any;
     @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getBudgetPriorityLibraries') getBudgetPriorityLibrariesAction: any;
@@ -283,7 +302,9 @@ export default class BudgetPriorityEditor extends Vue {
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
-    
+    shareBudgetPriorityLibraryDialogData: ShareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
+    isShared: boolean = false;
+
     selectedBudgetPriorityLibrary: BudgetPriorityLibrary = clone(emptyBudgetPriorityLibrary);
     budgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
     actionHeader: DataTableHeader = { text: 'Action', value: '', align: 'left', sortable: false, class: '', width: ''}
@@ -405,12 +426,6 @@ export default class BudgetPriorityEditor extends Vue {
                 return;
             }
         }
-        // const hasUnsavedChanges: boolean = this.hasScenario
-        //     ? hasUnsavedChangesCore('', this.currentPage, this.stateScenarioBudgetPriorities)
-        //     : hasUnsavedChangesCore('',
-        //         {...clone(this.selectedBudgetPriorityLibrary), budgetPriorities: clone(this.currentPage)},
-        //         this.stateSelectedBudgetPriorityLibrary);
-        // this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
         this.setGridCriteriaColumnWidth();
         this.setGridHeaders();
         this.setGridData();
@@ -423,6 +438,10 @@ export default class BudgetPriorityEditor extends Vue {
     onSelectedPriorityRowsChanged() {
         this.selectedBudgetPriorityIds = getPropertyValues('id', this.selectedBudgetPriorityGridRows) as string[];
     }
+    @Watch('isSharedLibrary')
+    onStateSharedAccessChanged() {
+        this.isShared = this.isSharedLibrary;
+    }
 
     @Watch('pagination')
     onPaginationChanged() {
@@ -430,7 +449,6 @@ export default class BudgetPriorityEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
-
         const request: PagingRequest<BudgetPriority>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -460,6 +478,10 @@ export default class BudgetPriorityEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+
+                    if (!isNullOrUndefined(this.selectedBudgetPriorityLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedBudgetPriorityLibrary).then(this.isShared = this.isSharedLibrary);
+                    }           
                 }
             });     
     }
@@ -899,6 +921,51 @@ export default class BudgetPriorityEditor extends Vue {
             next();
         }
     };
+    onShowShareBudgetPriorityLibraryDialog(budgetPriorityLibrary: BudgetPriorityLibrary) {
+        this.shareBudgetPriorityLibraryDialogData = {
+            showDialog:true,
+            budgetPriorityLibrary: clone(budgetPriorityLibrary)
+        }
+    }
+
+    onShareBudgetPriorityLibraryDialogSubmit(budgetPriorityLibraryUsers: BudgetPriorityLibraryUser[]) {
+            this.shareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
+
+            if (!isNil(budgetPriorityLibraryUsers) && this.selectedBudgetPriorityLibrary.id !== getBlankGuid())
+            {
+                let libraryUserData: LibraryUser[] = [];
+
+                //create library users
+                budgetPriorityLibraryUsers.forEach((budgetPriorityLibraryUser, index) =>
+                {   
+                    //determine access level
+                    let libraryUserAccessLevel: number = 0;
+                    if (libraryUserAccessLevel == 0 && budgetPriorityLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
+                    if (libraryUserAccessLevel == 0 && budgetPriorityLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
+
+                    //create library user object
+                    let libraryUser: LibraryUser = {
+                        userId: budgetPriorityLibraryUser.userId,
+                        userName: budgetPriorityLibraryUser.username,
+                        accessLevel: libraryUserAccessLevel
+                    }
+
+                    //add library user to an array
+                    libraryUserData.push(libraryUser);
+                });
+
+                if (!isNullOrUndefined(this.selectedBudgetPriorityLibrary.id) ) {
+                            this.getIsSharedLibraryAction(this.selectedBudgetPriorityLibrary).then(this.isShared = this.isSharedLibrary);
+                }
+                //update budget library sharing
+                BudgetPriorityService.upsertOrDeleteBudgetPriorityLibraryUsers(this.selectedBudgetPriorityLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                    if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
+                    {
+                        this.resetPage();
+                    }
+            });
+        }
+    }
 
     initializePages(){
         const { sortBy, descending, page, rowsPerPage } = this.pagination;

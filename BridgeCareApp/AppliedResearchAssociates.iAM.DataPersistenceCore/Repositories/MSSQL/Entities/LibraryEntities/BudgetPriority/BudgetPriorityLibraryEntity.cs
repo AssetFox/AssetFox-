@@ -5,8 +5,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class BudgetPriorityLibraryEntity : LibraryEntity
     {
-        public BudgetPriorityLibraryEntity() => BudgetPriorities = new HashSet<BudgetPriorityEntity>();
+        public BudgetPriorityLibraryEntity()
+        {
+            BudgetPriorities = new HashSet<BudgetPriorityEntity>();
+            Users = new HashSet<BudgetPriorityLibraryUserEntity>();
+        }
 
         public virtual ICollection<BudgetPriorityEntity> BudgetPriorities { get; set; }
+        public virtual ICollection<BudgetPriorityLibraryUserEntity> Users { get; set; }
     }
 }

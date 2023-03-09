@@ -17,6 +17,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public double Benefit { get; set; }
 
+        public double ConditionChange { get; set; }
+
         public double Cost { get; set; }
 
         public double? RemainingLife { get; set; }

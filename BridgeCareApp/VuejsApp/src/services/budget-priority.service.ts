@@ -5,6 +5,7 @@ import {
     BudgetPriorityLibrary,
 } from '@/shared/models/iAM/budget-priority';
 import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
+import { LibraryUser } from '@/shared/models/iAM/user';
 
 export default class BudgetPriorityService {
     static getBudgetPriorityLibraries(): AxiosPromise {
@@ -54,7 +55,20 @@ export default class BudgetPriorityService {
             data,
         );
     }
-
+    static  GetBudgetPriorityLibraryUsers(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.BudgetPriority}/GetBudgetPriorityLibraryUsers/${libraryId}`);
+    }
+    static getIsSharedBudgetPriorityLibrary(budgetPriorityLibraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.BudgetPriority}/GetIsSharedLibrary/${budgetPriorityLibraryId}`
+        );
+    }
+    static upsertOrDeleteBudgetPriorityLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.BudgetPriority}/UpsertOrDeleteBudgetPriorityLibraryUsers/${libraryId}`, 
+            proposedUsers
+        );
+    }
     static getHasPermittedAccess(): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.BudgetPriority}/GetHasPermittedAccess`,

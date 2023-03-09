@@ -28,13 +28,11 @@ namespace BridgeCareCore.Controllers
     {
         public const string AttributeError = "Attribute Error";
         private readonly AttributeService _attributeService;
-        private readonly AttributeImportService _attributeImportService;
 
-        public AttributeController(AttributeService attributeService, AttributeImportService attributeImportService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public AttributeController(AttributeService attributeService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
-            _attributeImportService = attributeImportService ?? throw new ArgumentNullException(nameof(attributeImportService));
         }
 
         [HttpGet]

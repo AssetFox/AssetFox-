@@ -66,5 +66,10 @@ namespace BridgeCareCoreTests.Tests.Integration
                 .Single(lib => lib.Id == library.Id);
             Assert.Null(libraryAfter.Description);
         }
+
+        public void UpsertScenarioDeficientConditionGoals_ThrowsDuringLaterDbCall_NothingChanges()
+        {
+
+        }
     }
 }

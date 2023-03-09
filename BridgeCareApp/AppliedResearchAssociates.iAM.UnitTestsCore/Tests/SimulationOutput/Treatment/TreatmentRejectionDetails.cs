@@ -13,7 +13,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var detail = new TreatmentRejectionDetail(
                 "Treatment",
-                TreatmentRejectionReason.Undefined);
+                TreatmentRejectionReason.Undefined,
+                default);
             return detail;
         }
     }

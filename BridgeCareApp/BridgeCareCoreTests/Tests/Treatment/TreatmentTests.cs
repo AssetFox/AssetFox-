@@ -95,6 +95,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.New();
             var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var treatementLibraryUserRepo = TreatmentLibraryUserMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
             var treatmentService = TreatmentServiceMocks.EmptyMock;

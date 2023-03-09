@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using Xunit;
-using BridgeCareCore.Controllers;
-using Microsoft.SqlServer.Dac.Model;
-using BridgeCareCore.Services;
-using BridgeCareCore.Models;
-using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
-using Microsoft.Data.SqlClient;
+﻿using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using BridgeCareCore.Controllers;
+using BridgeCareCore.Models;
+using BridgeCareCore.Services;
+using Microsoft.Data.SqlClient;
+using Xunit;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {

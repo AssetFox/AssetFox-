@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public static TreatmentOptionDetail Detail()
         {
             var detail = new TreatmentOptionDetail(
-                "Treatment", 100, 200, 3);
+                "Treatment", 100, 200, 3, 9);
             return detail;
         }
     }

@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -117,8 +118,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto)
         {
             var targetConditionGoalLibraryEntity = dto.ToEntity();
-
+            var libraryExists = _unitOfWork.Context.TargetConditionGoalLibrary.Any(t1 => t1.Id == dto.Id);
             _unitOfWork.Context.Upsert(targetConditionGoalLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void UpsertOrDeleteTargetConditionGoals(List<TargetConditionGoalDTO> targetConditionGoals,
@@ -328,6 +330,71 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
             _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+        }
+
+        public List<TargetConditionGoalLibraryDTO> GetTargetConditionGoalLibrariesNoChildrenAccessibleToUser(Guid userId)
+        {
+            return _unitOfWork.Context.TargetConditionGoalLibraryUser
+                .AsNoTracking()
+                .Include(u => u.TargetConditionGoalLibrary)
+                .Where(u => u.UserId == userId)
+                .Select(u => u.TargetConditionGoalLibrary.ToDto())
+                .ToList();
+        }
+        public void UpsertOrDeleteUsers(Guid targetConditionGoalLibraryId, IList<LibraryUserDTO> libraryUsers)
+        {
+            var existingEntities = _unitOfWork.Context.TargetConditionGoalLibraryUser.Where(u => u.LibraryId == targetConditionGoalLibraryId).ToList();
+            var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
+            var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
+            var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
+            var userIdsToUpdate = existingUserIds.Intersect(desiredUserIDs).ToList();
+            var userIdsToAdd = desiredUserIDs.Except(existingUserIds).ToList();
+            var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToTargetConditionGoalLibraryUserEntity(u, targetConditionGoalLibraryId)).ToList();
+            var dtosToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToMaybeUpdate = existingEntities.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToUpdate = new List<TargetConditionGoalLibraryUserEntity>();
+            foreach (var dto in dtosToUpdate)
+            {
+                var entityToUpdate = entitiesToMaybeUpdate.FirstOrDefault(e => e.UserId == dto.UserId);
+                if (entityToUpdate != null && entityToUpdate.AccessLevel != (int)dto.AccessLevel)
+                {
+                    entityToUpdate.AccessLevel = (int)dto.AccessLevel;
+                    entitiesToUpdate.Add(entityToUpdate);
+                }
+            }
+            _unitOfWork.Context.AddRange(entitiesToAdd);
+            _unitOfWork.Context.UpdateRange(entitiesToUpdate);
+            var entitiesToDelete = existingEntities.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
+            _unitOfWork.Context.RemoveRange(entitiesToDelete);
+            _unitOfWork.Context.SaveChanges();
+        }
+        private List<LibraryUserDTO> GetAccessForUser(Guid targetConditionGoalLibraryId, Guid userId)
+        {
+            var dtos = _unitOfWork.Context.TargetConditionGoalLibraryUser
+                .Where(u => u.LibraryId == targetConditionGoalLibraryId && u.UserId == userId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
+        public List<LibraryUserDTO> GetLibraryUsers(Guid targetConditionGoalLibraryId)
+        {
+            var dtos = _unitOfWork.Context.TargetConditionGoalLibraryUser
+                .Include(u => u.User)
+                .Where(u => u.LibraryId == targetConditionGoalLibraryId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
+        public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
+        {
+            var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);
+            if (!exists)
+            {
+                return LibraryAccessModels.LibraryDoesNotExist();
+            }
+            var users = GetAccessForUser(libraryId, userId);
+            var user = users.FirstOrDefault();
+            return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
     }
 }

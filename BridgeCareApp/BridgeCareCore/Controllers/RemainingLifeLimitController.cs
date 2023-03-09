@@ -262,9 +262,9 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = Policy.ViewRemainingLifeLimitFromLibrary)]
         public async Task<IActionResult> GetIsSharedLibrary(Guid remainingLifeLimitLibraryId)
         {
-            bool result = false;
             try
             {
+                bool result = false;
                 await Task.Factory.StartNew(() =>
                 {
                     var users = UnitOfWork.RemainingLifeLimitRepo.GetLibraryUsers(remainingLifeLimitLibraryId);

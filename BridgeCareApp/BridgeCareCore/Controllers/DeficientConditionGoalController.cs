@@ -263,9 +263,9 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = Policy.ViewDeficientConditionGoalFromlLibrary)]
         public async Task<IActionResult> GetIsSharedLibrary(Guid deficientConditionGoalLibraryId)
         {
-            bool result = false;
             try
             {
+                bool result = false;
                 await Task.Factory.StartNew(() =>
                 {
                     var users = UnitOfWork.DeficientConditionGoalRepo.GetLibraryUsers(deficientConditionGoalLibraryId);
@@ -351,6 +351,9 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = Policy.ModifyDeficientConditionGoalFromLibrary)]
         public async Task<IActionResult> GetHasPermittedAccess()
         {
+            await Task.Factory.StartNew(() =>
+            {
+            });
             return Ok(true);
         }
     }

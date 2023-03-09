@@ -30,6 +30,7 @@ export interface CalculatedAttributeLibrary {
     id: string;
     name: string;
     description: string;
+    users: CalculatedAttributeLibraryUser[];
     calculatedAttributes: CalculatedAttribute[];
     isDefault: boolean;
     owner?: string;
@@ -71,6 +72,19 @@ export const emptyCalculatedAttributeLibrary: CalculatedAttributeLibrary = {
     id: getBlankGuid(),
     name: '',
     description: '',
+    users: [],
     calculatedAttributes: [] as CalculatedAttribute[],
     isDefault: false,
 };
+export interface CalculatedAttributeLibraryUser {
+    userId: string;
+    username: string;
+    canModify: boolean;
+    isOwner: boolean;
+}
+export const emptyCalculatedAttributeLibraryUsers: CalculatedAttributeLibraryUser[] = [{
+    userId: '',
+    username: '',
+    canModify: false,
+    isOwner: false
+}];

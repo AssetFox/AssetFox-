@@ -22,6 +22,7 @@ export interface CashFlowRuleLibrary {
     description: string;
     cashFlowRules: CashFlowRule[];
     appliedScenarioIds: string[];
+    users: CashFlowRuleLibraryUser[];
     owner?: string;
     isShared: boolean;
 }
@@ -31,6 +32,7 @@ export const emptyCashFlowRuleLibrary: CashFlowRuleLibrary = {
     name: '',
     description: '',
     cashFlowRules: [],
+    users: [],
     appliedScenarioIds: [],
     isShared: false
 };
@@ -48,3 +50,15 @@ export const emptyCashFlowDistributionRule: CashFlowDistributionRule = {
     costCeiling: 0,
     yearlyPercentages: '100'
 };
+export interface CashFlowRuleLibraryUser {
+    userId: string;
+    username: string;
+    canModify: boolean;
+    isOwner: boolean;
+}
+export const emptyCashFlowRuleLibraryUsers: CashFlowRuleLibraryUser[] = [{
+    userId: '',
+    username: '',
+    canModify: false,
+    isOwner: false
+}];

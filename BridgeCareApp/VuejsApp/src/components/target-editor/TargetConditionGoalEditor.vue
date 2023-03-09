@@ -1,58 +1,62 @@
 <template>
-
     <v-layout column>
-        <v-layout justify-start align-center>
-            <v-card-title>
-                <v-layout row align-center class="px-4">
-                        <v-layout column>
-                            <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
-                            <v-select
-                                class="ghd-select ghd-text-field ghd-text-field-border"
-                                :items="librarySelectItems"
-                                append-icon=$vuetify.icons.ghd-down
-                                outline
-                                v-model="librarySelectItemValue"
-                                outlined
-                            >
-                            </v-select>
-                        </v-layout>
-                    <v-divider vertical 
-                        class="mx-3"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                    >
-                    </v-divider>
-                    <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                    </div>
-                    <v-divider vertical 
-                        class="mx-3"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                    >
-                    </v-divider>
-                    <v-switch
-                        label="Shared"
-                        class="ghd-control-label ghd-md-gray my-2"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedTargetConditionGoalLibrary.isShared"
-                        @change="checkHasUnsavedChanges()"
-                    />
-                </v-layout>
-            </v-card-title>
-            <v-layout justify-end align-center class="ma-2">
-                <v-btn outline
-                    @click="showCreateTargetConditionGoalDialog = true"
-                    class="ghd-control-border ghd-blue"
-                    v-show="hasSelectedLibrary || hasScenario" 
-                >Add Target Condition Goal</v-btn>
-                <v-btn outline
-                    @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
-                    class="ghd-control-border ghd-blue"
-                    v-show="!hasScenario"
-                >
-                Create New Library
-                </v-btn>
-            </v-layout>
-        </v-layout>
+        <v-flex xs12>
+           <v-layout justify-space-between>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout column>
+                        <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
+                        <v-select
+                            class="ghd-select ghd-text-field ghd-text-field-border"
+                            :items="librarySelectItems"
+                            append-icon=$vuetify.icons.ghd-down
+                            outline
+                            v-model="librarySelectItemValue"
+                            outlined
+                        >
+                        </v-select>
+                    </v-layout>
+                </v-flex>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout v-if="hasSelectedLibrary && ! hasScenario" style="padding-top: 10px; padding-left: 10px">
+                        <div v-if="hasSelectedLibrary && !hasScenario" class="header-text-content owner-padding" style="padding-top: 7px;">
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                        </div>
+                        <v-divider vertical 
+                            class="owner-shared-divider"
+                            v-if="hasSelectedLibrary && !hasScenario"
+                        >
+                        </v-divider>
+                        <v-badge v-show="isShared" style="padding: 10px">
+                            <template v-slot: badge>
+                                <span>Shared</span>
+                            </template>
+                        </v-badge>
+                        <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                            v-show='!hasScenario'>
+                            Share Library
+                        </v-btn>
+                    </v-layout>
+                </v-flex>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout align-end style="padding-top: 18px !important;">
+                        <v-spacer></v-spacer>
+                        <v-btn outline
+                            @click="showCreateTargetConditionGoalDialog = true"
+                            class="ghd-control-border ghd-blue"
+                            v-show="hasSelectedLibrary || hasScenario" 
+                        >Add Target Condition Goal</v-btn>
+                        <v-btn outline
+                            @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
+                            class="ghd-control-border ghd-blue"
+                            v-show="!hasScenario"
+                        >
+                        Create New Library
+                        </v-btn>
+                    </v-layout>
+                </v-flex>
+           </v-layout>
+        </v-flex>
+        <!-- </v-flex> -->
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="targets-data-table">
                 <v-data-table
@@ -284,7 +288,7 @@
                 </v-btn>
             </v-layout>
         </v-flex>
-
+    
         <ConfirmDeleteAlert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
@@ -303,10 +307,15 @@
             @submit="onAddTargetConditionGoal"
         />
 
+        <ShareTargetConditionGoalLibraryDialog :dialogData="shareTargetConditionGoalLibraryDialogData"
+            @submit="onShareTargetConditionGoalDialogSubmit" 
+        />
+
         <GeneralCriterionEditorDialog
             :dialogData="criterionEditorDialogData"
             @submit="onEditTargetConditionGoalCriterionLibrary"
         />
+    </v-layout>
     </v-layout>
 </template>
 
@@ -320,6 +329,7 @@ import {
     emptyTargetConditionGoalLibrary,
     TargetConditionGoal,
     TargetConditionGoalLibrary,
+    TargetConditionGoalLibraryUser
 } from '@/shared/models/iAM/target-condition-goal';
 import {
   any,
@@ -328,6 +338,11 @@ import {
     isNil,
     propEq,
 } from 'ramda';
+import {
+    ShareTargetConditionGoalLibraryDialogData,
+    emptyShareTargetConditionGoalLibraryDialogData
+} from '@/shared/models/modals/share-target-condition-goals-data';
+import ShareTargetConditionGoalLibraryDialog from '@/components/target-editor/target-editor-dialogs/ShareTargetConditionGoalLibraryDialog.vue';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import CreateTargetConditionGoalDialog from '@/components/target-editor/target-editor-dialogs/CreateTargetConditionGoalDialog.vue';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
@@ -348,6 +363,7 @@ import {
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
+import {LibraryUser} from '@/shared/models/iAM/user'
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import TargetConditionGoalService from '@/services/target-condition-goal.service';
@@ -356,11 +372,13 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { isNullOrUndefined } from 'util';
 
 @Component({
     components: {
         GeneralCriterionEditorDialog,
         CreateTargetConditionGoalLibraryDialog,
+        ShareTargetConditionGoalLibraryDialog,
         CreateTargetConditionGoalDialog,
         ConfirmDeleteAlert: Alert,
     },
@@ -384,6 +402,9 @@ export default class TargetConditionGoalEditor extends Vue {
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.targetConditionGoalModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @State(state => state.targetConditionGoalModule.isSharedLibrary) isSharedLibrary: boolean;
+    @Action('getIsSharedTargetConditionGoalLibrary') getIsSharedLibraryAction: any;
+
     @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getTargetConditionGoalLibraries') getTargetConditionGoalLibrariesAction: any;
@@ -423,6 +444,8 @@ export default class TargetConditionGoalEditor extends Vue {
 
     selectedScenarioId: string = getBlankGuid();
     librarySelectItems: SelectItem[] = [];
+    shareTargetConditionGoalLibraryDialogData: ShareTargetConditionGoalLibraryDialogData = clone(emptyShareTargetConditionGoalLibraryDialogData);
+    isShared: boolean = false;
     selectedTargetConditionGoalLibrary: TargetConditionGoalLibrary = clone(
         emptyTargetConditionGoalLibrary,
     );
@@ -607,14 +630,18 @@ export default class TargetConditionGoalEditor extends Vue {
     @Watch('currentPage')
     onCurrentPageChanged() {
     }
-
+    
+    @Watch('isSharedLibrary')
+    onStateSharedAccessChanged() {
+        this.isShared = this.isSharedLibrary;
+    }
+    
     @Watch('pagination')
     onPaginationChanged() {
         if(this.initializing)
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
-
         const request: PagingRequest<TargetConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -644,6 +671,9 @@ export default class TargetConditionGoalEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    if (!isNullOrUndefined(this.selectedTargetConditionGoalLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedTargetConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
                 }
             });     
     }
@@ -968,6 +998,57 @@ export default class TargetConditionGoalEditor extends Vue {
                 }
             });
     }
+
+    onShowShareTargetConditionGoalLibraryDialog(targetConditionGoalLibrary: TargetConditionGoalLibrary) {
+        this.shareTargetConditionGoalLibraryDialogData = {
+            showDialog:true,
+            targetConditionGoalLibrary: clone(targetConditionGoalLibrary)
+        }
+    }
+
+    onShareTargetConditionGoalDialogSubmit(targetConditionGoalLibraryUsers: TargetConditionGoalLibraryUser[]) {
+            this.shareTargetConditionGoalLibraryDialogData = clone(emptyShareTargetConditionGoalLibraryDialogData);
+
+            if (!isNil(targetConditionGoalLibraryUsers) && this.selectedTargetConditionGoalLibrary.id !== getBlankGuid())
+            {
+                let libraryUserData: LibraryUser[] = [];
+
+                //create library users
+                targetConditionGoalLibraryUsers.forEach((targetConditionGoalLibraryUser, index) =>
+                {   
+                    //determine access level
+                    let libraryUserAccessLevel: number = 0;
+                    if (libraryUserAccessLevel == 0 && targetConditionGoalLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
+                    if (libraryUserAccessLevel == 0 && targetConditionGoalLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
+
+                    //create library user object
+                    let libraryUser: LibraryUser = {
+                        userId: targetConditionGoalLibraryUser.userId,
+                        userName: targetConditionGoalLibraryUser.username,
+                        accessLevel: libraryUserAccessLevel
+                    }
+
+                    //add library user to an array
+                    libraryUserData.push(libraryUser);
+                });
+
+                if (!isNullOrUndefined(this.selectedTargetConditionGoalLibrary.id) ) {
+                            this.getIsSharedLibraryAction(this.selectedTargetConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
+                }
+                //update budget library sharing
+                TargetConditionGoalService.upsertOrDeleteTargetConditionGoalLibraryUsers(this.selectedTargetConditionGoalLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                    if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
+                    {
+                        this.resetPage();
+                    }
+            });
+        }
+    }
+
+
+
+
+
 }
 </script>
 

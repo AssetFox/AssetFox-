@@ -29,12 +29,15 @@
                         <v-divider class="owner-shared-divider" inset vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
                         </v-divider>
-                        <v-checkbox
-                            class='sharing header-text-content'
-                            label="Shared"
-                            v-if="hasSelectedLibrary && !hasScenario"
-                            v-model="selectedCashFlowRuleLibrary.isShared"
-                            @change="checkHasUnsavedChanges()"/>
+                         <v-badge v-show="isShared" style="padding: 10px">
+                    <template v-slot: badge>
+                        <span>Shared</span>
+                        </template>
+                        </v-badge>
+                        <v-btn @click='onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                            v-show='!hasScenario'>
+                            Share Library
+                    </v-btn>
                     </v-layout>  
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">                   
@@ -235,7 +238,9 @@
             :selectedCashFlowRule="selectedCashFlowRule"
             @submit="onSubmitCashFlowRuleEdit"
         />
-
+        <ShareCashFlowRuleLibraryDialog :dialogData="shareCashFlowRuleLibraryDialogData"
+            @submit="onShareCashFlowRuleDialogSubmit" 
+        />
         <AddCashFlowRuleDialog
             :showDialog="showAddCashFlowRuleDialog"
             @submit="onSubmitAddCashFlowRule"/>
@@ -259,10 +264,19 @@ import {
     CashFlowDistributionRule,
     CashFlowRule,
     CashFlowRuleLibrary,
+    CashFlowRuleLibraryUser,
+    emptyCashFlowDistributionRule,
     emptyCashFlowRule,
     emptyCashFlowRuleLibrary,
+    emptyCashFlowRuleLibraryUsers
 } from '@/shared/models/iAM/cash-flow';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
+import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
+import {
+    CriterionLibraryEditorDialogData,
+    emptyCriterionLibraryEditorDialogData,
+} from '@/shared/models/modals/criterion-library-editor-dialog-data';
+import { emptyShareCashFlowRuleLibraryDialogData, ShareCashFlowRuleLibraryDialogData } from '@/shared/models/modals/share-cash-flow-rule-data';
 import {
     CreateCashFlowRuleLibraryDialogData,
     emptyCreateCashFlowLibraryDialogData,
@@ -272,6 +286,8 @@ import CashFlowRuleEditDialog from '@/components/cash-flow-editor/cash-flow-edit
 import AddCashFlowRuleDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/AddCashFlowRuleDialog.vue';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { hasValue } from '@/shared/utils/has-value-util';
+import { getLastPropertyValue } from '@/shared/utils/getter-utils';
+import ShareCashFlowRuleLibraryDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/ShareCashFlowRuleLibraryDialog.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
@@ -289,6 +305,8 @@ import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/
 import CashFlowService from '@/services/cash-flow.service';
 import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
+import { isNullOrUndefined } from 'util';
+import { LibraryUser } from '@/shared/models/iAM/user';
 
 @Component({
     components: {
@@ -296,6 +314,7 @@ import { http2XX } from '@/shared/utils/http-utils';
         GeneralCriterionEditorDialog,
         ConfirmDeleteAlert: Alert,
         CashFlowRuleEditDialog,
+        ShareCashFlowRuleLibraryDialog,
         AddCashFlowRuleDialog
     },
 })
@@ -310,6 +329,8 @@ export default class CashFlowEditor extends Vue {
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.cashFlowModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @State(state => state.cashFlowModule.isSharedLibrary) isSharedLibrary: boolean;
+    @Action('getIsSharedCashFlowRuleLibrary') getIsSharedLibraryAction: any;
     @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('getCashFlowRuleLibraries') getCashFlowRuleLibrariesAction: any;
     @Action('selectCashFlowRuleLibrary') selectCashFlowRuleLibraryAction: any;
@@ -339,6 +360,9 @@ export default class CashFlowEditor extends Vue {
     totalItems = 0;
     currentPage: CashFlowRule[] = [];
     initializing: boolean = true;
+    isShared: boolean = false;
+
+    shareCashFlowRuleLibraryDialogData: ShareCashFlowRuleLibraryDialogData = clone(emptyShareCashFlowRuleLibraryDialogData);
 
     unsavedDialogAllowed: boolean = true;
     trueLibrarySelectItemValue: string | null = ''
@@ -518,7 +542,6 @@ export default class CashFlowEditor extends Vue {
         this.selectedCashFlowRuleLibrary = clone(
             this.stateSelectedCashRuleFlowLibrary,
         );
-        console.log('message');
     }
 
     @Watch('selectedCashFlowRuleLibrary')
@@ -531,6 +554,7 @@ export default class CashFlowEditor extends Vue {
             this.hasCreatedLibrary = false;
         }
         this.initializing = false;
+
         if(this.hasSelectedLibrary)
             this.onPaginationChanged();
     }
@@ -555,14 +579,19 @@ export default class CashFlowEditor extends Vue {
             ? clone(this.selectedCashFlowRule.cashFlowDistributionRules)
             : [];
     }
-
+    @Watch('isSharedLibrary')
+    onStateSharedAccessChanged() {
+        this.isShared = this.isSharedLibrary;
+        if (!isNullOrUndefined(this.selectCashFlowRuleLibrary)) {
+            this.selectCashFlowRuleLibrary.isShared = this.isShared;
+        } 
+    }
     @Watch('pagination')
     onPaginationChanged() {
         if(this.initializing)
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
-
         const request: PagingRequest<CashFlowRule>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -592,6 +621,10 @@ export default class CashFlowEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    if (!isNullOrUndefined(this.selectedCashFlowRuleLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedCashFlowRuleLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
+
                 }
             });     
     }
@@ -1034,6 +1067,51 @@ export default class CashFlowEditor extends Vue {
                     this.totalItems = data.totalItems;
                 }
             });
+    }
+
+    onShowShareCashFlowRuleLibraryDialog(cashFlowRuleLibrary: CashFlowRuleLibrary) {
+        this.shareCashFlowRuleLibraryDialogData = {
+            showDialog:true,
+            cashFlowRuleLibrary: clone(cashFlowRuleLibrary)
+        }
+    }
+
+    onShareCashFlowRuleDialogSubmit(cashFlowRuleLibraryUsers: CashFlowRuleLibraryUser[]) {
+        this.shareCashFlowRuleLibraryDialogData = clone(emptyShareCashFlowRuleLibraryDialogData);
+
+                if (!isNil(cashFlowRuleLibraryUsers) && this.selectedCashFlowRuleLibrary.id !== getBlankGuid())
+                {
+                    let libraryUserData: LibraryUser[] = [];
+
+                    //create library users
+                    cashFlowRuleLibraryUsers.forEach((cashFlowRuleLibraryUser, index) =>
+                    {   
+                        //determine access level
+                        let libraryUserAccessLevel: number = 0;
+                        if (libraryUserAccessLevel == 0 && cashFlowRuleLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
+                        if (libraryUserAccessLevel == 0 && cashFlowRuleLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
+
+                        //create library user object
+                        let libraryUser: LibraryUser = {
+                            userId: cashFlowRuleLibraryUser.userId,
+                            userName: cashFlowRuleLibraryUser.username,
+                            accessLevel: libraryUserAccessLevel
+                        }
+
+                        //add library user to an array
+                        libraryUserData.push(libraryUser);
+                    });
+                    if (!isNullOrUndefined(this.selectedCashFlowRuleLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedCashFlowRuleLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
+                    //update budget library sharing
+                    CashFlowService.upsertOrDeleteCashFlowRuleLibraryUsers(this.selectedCashFlowRuleLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
+                        {
+                            this.resetPage();
+                        }
+                    });
+                }
     }
 }
 </script>

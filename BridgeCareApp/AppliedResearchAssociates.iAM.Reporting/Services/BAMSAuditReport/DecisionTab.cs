@@ -108,9 +108,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 var decisionsTreatment = new DecisionTreatment();
                 var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Feasiable = isCashFlowProject ? "-" : (treatmentRejection == null ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);
-                var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());
-                // TODO decisionsTreatment.CIImprovement = Assign value from TreatmentOptionDetail once it is implemented: Work item #21733
+                var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());                
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
+                decisionsTreatment.CIImprovement = treatmentOption?.ConditionChange;
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? BAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);

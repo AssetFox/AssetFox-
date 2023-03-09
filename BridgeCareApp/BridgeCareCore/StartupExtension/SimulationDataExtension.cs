@@ -2,6 +2,7 @@
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.Treatment;
@@ -32,7 +33,8 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<ICommittedProjectService, CommittedProjectService>();
             services.AddScoped<ExcelTreatmentLoader>();
             services.AddScoped<UnitOfDataPersistenceWork>();
-            services.AddScoped<IUnitOfWork>(x => x.GetRequiredService<UnitOfDataPersistenceWork>());
+            services.AddScoped<IUnitOfWork>(x => x.GetRequiredService<UnitOfDataPersistenceWork>());
+
             services.AddScoped<ISimulationRepository, SimulationRepository>();
         }
     }

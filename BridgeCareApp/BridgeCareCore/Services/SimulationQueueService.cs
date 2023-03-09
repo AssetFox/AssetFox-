@@ -1,27 +1,14 @@
-﻿using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using BridgeCareCore.Interfaces;
-using BridgeCareCore.Models.Validation;
-using OfficeOpenXml;
-using MoreLinq;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
-using BridgeCareCore.Models;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using System.Data;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using System.Data;
 using System.Linq;
-using System.Text;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.Analysis;
-using BridgeCareCore.Services;
-using System.Xml.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.WorkQueue;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
+using MoreLinq;
 
 namespace BridgeCareCore.Services
 {
@@ -150,7 +137,7 @@ namespace BridgeCareCore.Services
 
                 QueueEntryTimestamp = queuedWorkHandle.QueueEntryTimestamp,
                 WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp,
-                QueueingUser = queuedWorkHandle.UserInfo.Name,
+                QueueingUser = queuedWorkHandle.UserId,
                 QueuePosition = queuedWorkHandle.QueueIndex,
             };
 

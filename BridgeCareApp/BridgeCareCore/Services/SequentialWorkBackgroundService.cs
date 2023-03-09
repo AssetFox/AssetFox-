@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.WorkQueue;
 using Microsoft.Extensions.Hosting;
 
 namespace BridgeCareCore.Services
@@ -21,7 +22,7 @@ namespace BridgeCareCore.Services
             while (!stoppingToken.IsCancellationRequested)
             {
                 var workItem = await _sequentialWorkQueue.Dequeue(stoppingToken);
-                workItem?.DoWork(_serviceProvider);
+                workItem?.DoWork(_serviceProvider, stoppingToken);
             }
         }
     }

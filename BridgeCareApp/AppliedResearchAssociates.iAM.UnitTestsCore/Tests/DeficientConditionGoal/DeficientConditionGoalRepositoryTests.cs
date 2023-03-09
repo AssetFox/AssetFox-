@@ -318,7 +318,6 @@ namespace BridgeCareCoreTests.Tests
                 serverUpdatedDeficientGoal.CriterionLibrary.MergedCriteriaExpression);
         }
 
-
         [Fact]
         public void UpsertOrDeleteScenarioDeficientConditionGoals_SomethingThrows_NoChange()
         {
@@ -452,7 +451,7 @@ namespace BridgeCareCoreTests.Tests
             var goalId = Guid.NewGuid();
             var criterionLibraryId = Guid.NewGuid();
             var attributeName = "nonexistentAttribute";
-            var goal = DeficientConditionGoalDtos.Dto(goalId, criterionLibraryId, attributeName);
+            var goal = DeficientConditionGoalDtos.Dto(goalId, attributeName,  criterionLibraryId);
             library.DeficientConditionGoals.Add(goal);
             library.Description = "Updated description";
 

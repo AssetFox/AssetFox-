@@ -6,6 +6,16 @@ export default class InventoryService {
     static getPennDOTInventory(): AxiosPromise {
         return coreAxiosInstance.get('/api/Inventory/GetPennDOTInventory');
     }
+    static getInventory(keyName1: string, keyName2: string) {
+        return coreAxiosInstance.get(`/api/Inventory/GetInventory/${keyName1}/${keyName2}`);
+    }
+    static getKeyProperties(): AxiosPromise {
+        return coreAxiosInstance.get('/api/Inventory/GetKeyProperties');
+    }
+
+    static getValuesForKey(propertyName: string): AxiosPromise {
+        return coreAxiosInstance.get(`/api/Inventory/GetValuesForKey/${propertyName}`);
+    }
 
     /**
      * Gets an inventory item's detail by bms id

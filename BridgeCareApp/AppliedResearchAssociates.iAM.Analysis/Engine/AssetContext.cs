@@ -94,12 +94,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PreDeterioration));
 
-        public double GetBenefit()
+        public double GetBenefit() => GetBenefit(true);
+
+        public double GetBenefit(bool withWeighting)
         {
             var rawBenefit = GetNumber(AnalysisMethod.Benefit.Attribute.Name);
             var benefit = AnalysisMethod.Benefit.GetValueRelativeToLimit(rawBenefit);
 
-            if (AnalysisMethod.Weighting != null)
+            if (withWeighting && AnalysisMethod.Weighting != null)
             {
                 var weight = GetNumber(AnalysisMethod.Weighting.Name);
                 benefit *= weight;

@@ -13,6 +13,8 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using Humanizer;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -715,5 +717,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return dtos;
         }
 
+        public void UpsertOrDeletePerformanceCurveLibraryAndCurves(PerformanceCurveLibraryDTO library, bool isNewLibrary, Guid ownerIdForNewLibrary)
+        {
+            _unitOfWork.AsTransaction(u =>
+            {
+                u.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(library);
+                u.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(library.PerformanceCurves, library.Id);
+                if (isNewLibrary)
+                {
+                    var users = LibraryUserDtolists.OwnerAccess(ownerIdForNewLibrary);
+                    u.PerformanceCurveRepo.UpsertOrDeleteUsers(library.Id, users);
+                };
+            });
+        }
     }
 }

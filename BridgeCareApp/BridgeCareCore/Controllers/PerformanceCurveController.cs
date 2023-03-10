@@ -145,7 +145,6 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var curves = _performanceCurvePagingService.GetSyncedLibraryDataset(upsertRequest);
                     var dto = upsertRequest.Library;
                     if (dto != null)
@@ -153,27 +152,18 @@ namespace BridgeCareCore.Controllers
                         _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                         dto.PerformanceCurves = curves;
                     }
-                    UnitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto);
-                    UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
-                    if (upsertRequest.IsNewLibrary)
-                    {
-                        var users = LibraryUserDtolists.OwnerAccess(UserId);
-                        UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteUsers(dto.Id, users);
-                    }
-                    UnitOfWork.Commit();
+                    UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurveLibraryAndCurves(dto, upsertRequest.IsNewLibrary, UserId);
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertPerformanceCurveLibrary - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertPerformanceCurveLibrary - {e.Message}");
                 throw;
             }

@@ -65,7 +65,6 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-
         public async Task UpsertPerformanceCurveLibrary_NewLibrary_Ok()
         {
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
@@ -98,7 +97,6 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-
         public async Task UpsertPerformanceCurveLibrary_NotNewLibrary_Ok()
         {
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();

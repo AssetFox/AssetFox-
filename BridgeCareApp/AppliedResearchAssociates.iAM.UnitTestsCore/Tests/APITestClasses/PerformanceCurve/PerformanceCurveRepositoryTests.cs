@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
     {
 
         [Fact]
-        public void Delete_PerformanceCurveLibraryExists_Deletes()
+        public void Delete_PerformanceCurveLibraryExistsWithCurveAndEquation_DeletesAll()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var performanceCurveLibraryId = Guid.NewGuid();
@@ -29,10 +29,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
 
             var performanceCurveLibraryDTO = dtos.Single(dto => dto.Id == performanceCurveLibraryId);
             curveDto.CriterionLibrary = criterionLibrary;
+            var equationInDb = TestHelper.UnitOfWork.Context.Equation
+                .SingleOrDefault(e => e.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == performanceCurveLibraryId);
+            Assert.NotNull(equationInDb);
 
             // Act
             TestHelper.UnitOfWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(performanceCurveLibraryId);
-
 
             Assert.False(TestHelper.UnitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == performanceCurveLibraryId));
             Assert.False(TestHelper.UnitOfWork.Context.PerformanceCurve.Any(_ => _.Id == performanceCurveId));
@@ -42,7 +44,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             Assert.False(
                 TestHelper.UnitOfWork.Context.PerformanceCurveEquation.Any(_ =>
                     _.PerformanceCurveId == performanceCurveId));
+            var equationInDbAfter = TestHelper.UnitOfWork.Context.Equation
+                .SingleOrDefault(e => e.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == performanceCurveLibraryId);
+            Assert.Null(equationInDbAfter);
         }
+
         private void Setup()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);

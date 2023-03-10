@@ -145,56 +145,60 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateSimulation(Guid networkId, SimulationDTO dto)
         {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
+            _unitOfWork.AsTransaction(u =>
             {
-                throw new RowNotInTableException($"No network found having id {networkId}");
-            }
-
-            var defaultLibrary = _unitOfWork.Context.CalculatedAttributeLibrary.Where(_ => _.IsDefault == true)
-                .Include(_ => _.CalculatedAttributes)
-                .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.CalculatedAttributes)
-                .ThenInclude(_ => _.Equations)
-                .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.CalculatedAttributes)
-                .ThenInclude(_ => _.Equations)
-                .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
-                .ThenInclude(_ => _.Equation)
-                .Select(_ => _.ToDto())
-                .ToList();
-
-            if (defaultLibrary.Count == 0)
-            {
-                throw new RowNotInTableException($"No default library for Calculated Attributes has been found. Please contact admin");
-            }
-
-            var simulationEntity = dto.ToEntity(networkId);
-            // if there are multiple default libraries (This should not happen). Take the first one
-
-            _unitOfWork.Context.AddEntity(simulationEntity, _unitOfWork.UserEntity?.Id);
-            if (dto.Users.Any())
-            {
-                var usersToAdd = dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList();
-                _unitOfWork.Context.AddAll(usersToAdd,
-                    _unitOfWork.UserEntity?.Id);
-            }
-            ICalculatedAttributesRepository _calculatedAttributesRepo = _unitOfWork.CalculatedAttributeRepo;
-            // Assiging new Ids because this object will be assiged to a simulation
-            defaultLibrary[0].CalculatedAttributes.ForEach(_ => {
-                _.Id = Guid.NewGuid();
-                _.Equations.ForEach(e =>
+                if (!u.Context.Network.Any(_ => _.Id == networkId))
                 {
-                    e.Id = Guid.NewGuid();
-                    if (e.CriteriaLibrary != null)
+                    throw new RowNotInTableException($"No network found having id {networkId}");
+                }
+
+                var defaultLibrary = u.Context.CalculatedAttributeLibrary.Where(_ => _.IsDefault == true)
+                    .Include(_ => _.CalculatedAttributes)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.CalculatedAttributes)
+                    .ThenInclude(_ => _.Equations)
+                    .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.CalculatedAttributes)
+                    .ThenInclude(_ => _.Equations)
+                    .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Select(_ => _.ToDto())
+                    .ToList();
+
+                if (defaultLibrary.Count == 0)
+                {
+                    throw new RowNotInTableException($"No default library for Calculated Attributes has been found. Please contact admin");
+                }
+
+                var simulationEntity = dto.ToEntity(networkId);
+                // if there are multiple default libraries (This should not happen). Take the first one
+
+                u.Context.AddEntity(simulationEntity, _unitOfWork.UserEntity?.Id);
+                if (dto.Users.Any())
+                {
+                    var usersToAdd = dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList();
+                    u.Context.AddAll(usersToAdd,
+                        u.UserEntity?.Id);
+                }
+                ICalculatedAttributesRepository _calculatedAttributesRepo = _unitOfWork.CalculatedAttributeRepo;
+                // Assiging new Ids because this object will be assiged to a simulation
+                defaultLibrary[0].CalculatedAttributes.ForEach(_ =>
+                {
+                    _.Id = Guid.NewGuid();
+                    _.Equations.ForEach(e =>
                     {
-                        e.CriteriaLibrary.Id = Guid.NewGuid();
-                        e.CriteriaLibrary.IsSingleUse = true;
-                    }
-                    e.Equation.Id = Guid.NewGuid();
+                        e.Id = Guid.NewGuid();
+                        if (e.CriteriaLibrary != null)
+                        {
+                            e.CriteriaLibrary.Id = Guid.NewGuid();
+                            e.CriteriaLibrary.IsSingleUse = true;
+                        }
+                        e.Equation.Id = Guid.NewGuid();
+                    });
                 });
+                _calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(defaultLibrary[0].CalculatedAttributes, simulationEntity.Id);
             });
-            _calculatedAttributesRepo.UpsertScenarioCalculatedAttributesAtomically(defaultLibrary[0].CalculatedAttributes, simulationEntity.Id);
         }
 
         public SimulationDTO GetSimulation(Guid simulationId)

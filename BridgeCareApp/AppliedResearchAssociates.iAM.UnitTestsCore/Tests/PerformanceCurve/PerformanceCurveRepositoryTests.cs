@@ -53,6 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.PerformanceCurve
             var libraryUsersAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetLibraryUsers(library.Id);
             Assert.Empty(libraryUsersAfter);
         }
+
         [Fact]
         public async Task UpdatePerformanceCurveLibraryWithUserAccessChange_Does()
         {
@@ -70,6 +71,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.PerformanceCurve
             var libraryUserAfter = libraryUsersAfter.Single();
             Assert.Equal(LibraryAccessLevel.Read, libraryUserAfter.AccessLevel);
         }
-
     }
 }

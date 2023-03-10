@@ -12,19 +12,20 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.WorkQueue;
 using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
 {
-    public record AnalysisWorkItem(Guid networkId, Guid simulationId, UserInfo userInfo) : IWorkItem
+    public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserInfo) : IWorkItem
     {
-        public string WorkId => simulationId.ToString();
+        public string WorkId => SimulationId.ToString();
 
         public DateTime StartTime { get; set; }
 
-        public UserInfo UserInfo { get; } = userInfo;
+        public string UserId => UserInfo.Name;
 
         public void DoWork(IServiceProvider serviceProvider, CancellationToken cancellationToken)
         {
@@ -35,14 +36,14 @@ namespace BridgeCareCore.Services
             using var scope = serviceProvider.CreateScope();
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfDataPersistenceWork>();
-            if (!string.IsNullOrEmpty(userInfo.Name))
+            if (!string.IsNullOrEmpty(UserInfo.Name))
             {
-                if (!_unitOfWork.Context.User.Any(_ => _.Username == userInfo.Name))
+                if (!_unitOfWork.Context.User.Any(_ => _.Username == UserInfo.Name))
                 {
-                    _unitOfWork.AddUser(userInfo.Name, userInfo.HasAdminAccess);
+                    _unitOfWork.AddUser(UserInfo.Name, UserInfo.HasAdminAccess);
                 }
 
-                _unitOfWork.SetUser(userInfo.Name);
+                _unitOfWork.SetUser(UserInfo.Name);
             }
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
@@ -62,16 +63,16 @@ namespace BridgeCareCore.Services
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
             if (CheckCanceled()) { return; }
-            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
+            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(NetworkId, explorer);
             memos.Mark("GetSimulationAnalysisNetwork");
-            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+            _unitOfWork.SimulationRepo.GetSimulationInNetwork(SimulationId, network);
 
             if (CheckCanceled()) { return; }
             simulationAnalysisDetail.Status = "Getting investment plan";
             UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
-            var simulation = network.Simulations.Single(_ => _.Id == simulationId);
+            var simulation = network.Simulations.Single(_ => _.Id == SimulationId);
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             memos.Mark("GetSimulationInvestmentPlan");
             var userCriteria = _unitOfWork.UserCriteriaRepo.GetUserCriteria(_unitOfWork.CurrentUser.Id);
@@ -114,7 +115,7 @@ namespace BridgeCareCore.Services
                     simulationAnalysisDetail.Status = "Simulation initializing...";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     break;
 
@@ -122,7 +123,7 @@ namespace BridgeCareCore.Services
                     simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete)}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     break;
 
@@ -133,10 +134,10 @@ namespace BridgeCareCore.Services
                     var hubServiceLogger = new HubServiceLogger(_hubService, HubConstant.BroadcastScenarioStatusUpdate, _unitOfWork.CurrentUser?.Username);
                     var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(message));
 
-                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutputViaJson(simulationId, simulation.Results);
+                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutputViaJson(SimulationId, simulation.Results);
                     simulationAnalysisDetail.Status = SimulationUserMessages.SimulationOutputSavedToDatabase;
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
                     break;
 
                 case ProgressStatus.Canceled:
@@ -158,7 +159,7 @@ namespace BridgeCareCore.Services
                 {
                 case SimulationLogStatus.Warning:
                     simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     break;
 
@@ -168,13 +169,13 @@ namespace BridgeCareCore.Services
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
                     break;
                 }
             };
 
             // resetting the report generation status.
-            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = SimulationId, Status = "" };
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
 
@@ -220,7 +221,7 @@ namespace BridgeCareCore.Services
             {
                 var detail = new SimulationAnalysisDetailDTO
                 {
-                    SimulationId = simulationId,
+                    SimulationId = SimulationId,
                     Status = "Canceled",
                     LastRun = StartTime,
                 };
@@ -246,9 +247,9 @@ namespace BridgeCareCore.Services
             }
         }
 
-        private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status, DateTime lastRun) => new SimulationAnalysisDetailDTO
+        private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status, DateTime lastRun) => new()
         {
-            SimulationId = simulationId,
+            SimulationId = SimulationId,
             LastRun = lastRun,
             Status = status,
         };

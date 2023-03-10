@@ -650,9 +650,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 static double getBenefitImprovement(AssetContext context, Treatment treatment)
                 {
                     var copyOfContext = new AssetContext(context);
-                    var benefitBeforeTreatment = copyOfContext.GetBenefit();
+                    var benefitBeforeTreatment = copyOfContext.GetBenefit(false);
                     copyOfContext.ApplyTreatmentConsequences(treatment);
-                    var benefitAfterTreatment = copyOfContext.GetBenefit();
+                    var benefitAfterTreatment = copyOfContext.GetBenefit(false);
                     return benefitAfterTreatment - benefitBeforeTreatment;
                 }
 

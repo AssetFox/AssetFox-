@@ -108,9 +108,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 };
             }
 
-            var benefitBeforeTreatment = AccumulationContext.GetBenefit();
+            var benefitBeforeTreatment = AccumulationContext.GetBenefit(false);
             ApplyTreatment(InitialTreatment, InitialYear);
-            var benefitAfterTreatment = AccumulationContext.GetBenefit();
+            var benefitAfterTreatment = AccumulationContext.GetBenefit(false);
 
             ConditionChange = benefitAfterTreatment - benefitBeforeTreatment;
 

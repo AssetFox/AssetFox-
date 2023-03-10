@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes

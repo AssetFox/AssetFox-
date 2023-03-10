@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public static SimulationDTO CreateSimulation(UnitOfDataPersistenceWork unitOfWork, Guid? id = null, string name = null, Guid? owner = null, Guid? networkId = null)
         {
             var resolveNetworkId = networkId ?? NetworkTestSetup.NetworkId;
-            CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(unitOfWork);
+            CalculatedAttributeTestSetup.CreateDefaultCalculatedAttributeLibrary(unitOfWork);
             var dto = SimulationDtos.Dto(id, name, owner);
             unitOfWork.SimulationRepo.CreateSimulation(resolveNetworkId, dto);
             return dto;

@@ -62,7 +62,7 @@
         @State(state => state.inventoryModule.lastFiveBrKeySearches) stateLastFiveBrKeySearches: number[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
 
-        @Action('getPennDOTInventory') getInventoryAction: any;
+        @Action('getInventory') getInventoryAction: any;
         @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
         @Action('getInventoryItemDetailByBMSId') getInventoryItemDetailByBMSIdAction: any;
         @Action('getInventoryItemDetailByBRKey') getInventoryItemDetailByBRKeyAction: any;
@@ -165,7 +165,12 @@
          * Vue component has been mounted
          */
         mounted() {
-            this.getInventoryAction({network: {}});
+            //this.$forceUpdate();
+            var inventoryDetail = {
+                key1: "BMSID",
+                key2: "BRKEY_"
+            };
+            this.getInventoryAction(inventoryDetail);
         }
 
         created() {

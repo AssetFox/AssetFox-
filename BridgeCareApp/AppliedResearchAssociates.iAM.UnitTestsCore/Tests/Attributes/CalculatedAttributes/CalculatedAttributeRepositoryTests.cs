@@ -144,29 +144,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
         //    _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
         //}
 
-        //[Fact]
-        //public void UpdatesRepositoryWithExistingLibrary()
-        //{
-        //    // TODO:  Ensure that calculated attribute changes are being reflected
-        //    // Arrange
-        //    var repo = new CalculatedAttributeRepository(_testRepo);
-
-        //    var attributes = TestDataForCalculatedAttributesRepository.GetAttributeRepo();
-
-        //    var library = new CalculatedAttributeLibraryDTO
-        //    {
-        //        Name = "First"
-        //    };
-
-        //    PopulateCalculatedAttributeLibraryDTO(library);
-
-        //    // Act
-        //    repo.UpsertCalculatedAttributeLibrary(library);
-
-        //    // Assert
-        //    _mockLibrary.Verify(_ => _.Update(It.IsAny<CalculatedAttributeLibraryEntity>()), Times.Once());
-        //    _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
-        //}
 
         //[Fact]
         //public void SwitchesDefaultLibrary()
@@ -189,56 +166,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
 
         //    // Assert
         //    _mockLibrary.Verify(_ => _.Update(It.IsAny<CalculatedAttributeLibraryEntity>()), Times.Exactly(2));
-        //    _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
-        //}
-
-        //[Fact]
-        //public void AddsAttributeListToExistingLibrary()
-        //{
-        //    // TODO:  Ensure existing attributes are preserved
-        //    // Arrange
-        //    var repo = new CalculatedAttributeRepository(_testRepo);
-        //    const string newAttributeName = "IsNew";
-
-        //    var attributeList = TestDataForCalculatedAttributesRepository.GetAttributeRepo().ToList();
-        //    attributeList.Add(new AttributeEntity()
-        //    {
-        //        Id = Guid.NewGuid(),
-        //        Name = newAttributeName
-        //    });
-        //    var attributes = attributeList.AsQueryable();
-
-        //    var changingLibraryDTO = _testRepo.Context.CalculatedAttributeLibrary.First(_ => _.Name == "Second").ToDto();
-        //    var newCalculationList = new List<CalculatedAttributeDTO>() { GetDefaultNewCalculation(attributes.First(_ => _.Name == newAttributeName)) };
-
-        //    // Act
-        //    repo.UpsertCalculatedAttributes(newCalculationList, changingLibraryDTO.Id);
-
-        //    // Assert
-        //    _mockLibrary.Verify(_ => _.Update(It.IsAny<CalculatedAttributeLibraryEntity>()), Times.Once());
-        //    _mockedContext.Verify(_ => _.CalculatedAttribute.Add(It.IsAny<CalculatedAttributeEntity>()));
-        //    _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
-        //}
-
-        //[Fact]
-        //public void UpdatesExistingCalculatedAttributeInLibrary()
-        //{
-        //    // TODO:  Ensure existing, non-modified attributes are preserved
-        //    // Arrange
-        //    var repo = new CalculatedAttributeRepository(_testRepo);
-
-        //    var attributes = TestDataForCalculatedAttributesRepository.GetAttributeRepo();
-
-        //    var changingLibraryDTO = _testRepo.Context.CalculatedAttributeLibrary.First(_ => _.Name == "Second").ToDto();
-        //    var revisedCalculation = changingLibraryDTO.CalculatedAttributes.First(_ => _.Attribute == "Description");
-        //    revisedCalculation.CalculationTiming = 2;
-
-        //    // Act
-        //    repo.UpsertCalculatedAttributes(new List<CalculatedAttributeDTO>() { revisedCalculation }, changingLibraryDTO.Id);
-
-        //    // Assert
-        //    _mockLibrary.Verify(_ => _.Update(It.IsAny<CalculatedAttributeLibraryEntity>()), Times.Once());
-        //    _mockedContext.Verify(_ => _.CalculatedAttribute.Update(It.IsAny<CalculatedAttributeEntity>()), Times.Once());
         //    _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
         //}
 
@@ -314,52 +241,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
 
             // Assert
             Assert.Empty(result);
-        }//
-
-        //[Fact]
-        //public void AddsNewScenarioAttributes()
-        //{
-        //    // TODO:  Ensure existing attributes are preserved
-        //    // Arrange
-        //    var repo = new CalculatedAttributeRepository(_testRepo);
-        //    const string newAttributeName = "IsNew";
-        //    var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
-
-        //    var attributeList = TestDataForCalculatedAttributesRepository.GetAttributeRepo().ToList();
-        //    attributeList.Add(new AttributeEntity()
-        //    {
-        //        Id = Guid.NewGuid(),
-        //        Name = newAttributeName
-        //    });
-        //    var attributes = attributeList.AsQueryable();
-
-        //    var newCalculationList = new List<CalculatedAttributeDTO>() { GetDefaultNewCalculation(attributes.First(_ => _.Name == newAttributeName)) };
-
-        //    // Act
-        //    repo.UpsertScenarioCalculatedAttributes(newCalculationList, simulationId);
-
-        //    // Assert
-        //    _mockScenarioCalculations.Verify(_ => _.Add(It.IsAny<ScenarioCalculatedAttributeEntity>()), Times.Once());
-        //    _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
-        //}
-
-        //[Fact]
-        //public void UpdateExistingScenarioAttributes()
-        //{
-        //    // TODO:  Ensure existing, non-modified attributes are preserved
-        //    // Arrange
-        //    var repo = new CalculatedAttributeRepository(_testRepo);
-        //    var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
-        //    var attributeToModify = _testRepo.Context.ScenarioCalculatedAttribute.First(_ => _.Attribute.Name == "Condition" && _.SimulationId == simulationId).ToDto();
-        //    attributeToModify.CalculationTiming = 2;
-
-        //    // Act
-        //    repo.UpsertScenarioCalculatedAttributes(new List<CalculatedAttributeDTO>() { attributeToModify }, simulationId);
-
-        //    // Assert
-        //    _mockScenarioCalculations.Verify(_ => _.Update(It.IsAny<ScenarioCalculatedAttributeEntity>()), Times.Once());
-        //    _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
-        //}
+        }
 
         [Fact (Skip = "Test is fried by adding a transaction. Not sure if it's been worked on in another branch.")]
         public void UpsertScenarioCalculatedAttributesHandlesNoScenarioFound()

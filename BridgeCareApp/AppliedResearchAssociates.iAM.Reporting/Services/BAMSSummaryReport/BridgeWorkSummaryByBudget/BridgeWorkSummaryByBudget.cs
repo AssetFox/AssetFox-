@@ -148,7 +148,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 currentCell.Column = 1;
                 currentCell.Row += 2;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = summaryData.Budget;
+
+                //set budget header name
+                var budgetHeaderName = summaryData.Budget;
+
+                ////check for multi year budget
+                //if (reportOutputData.) {
+
+                //}
+
+
+                worksheet.Cells[currentCell.Row, currentCell.Column].Value = budgetHeaderName;
                 ExcelHelper.MergeCells(worksheet, currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count);
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count + 2], Color.Gray);
                 currentCell.Row += 1;

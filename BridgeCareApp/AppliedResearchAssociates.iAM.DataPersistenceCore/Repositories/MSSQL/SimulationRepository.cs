@@ -230,6 +230,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public SimulationCloningResultDTO CloneSimulation(Guid simulationId, Guid networkId, string simulationName)
         {
+            SimulationCloningResultDTO result = null;
+            _unitOfWork.AsTransaction(u => result = CloneSimulationPrivate(simulationId, networkId, simulationName));
+            return result;
+        }
+
+        private SimulationCloningResultDTO CloneSimulationPrivate(Guid simulationId, Guid networkId, string simulationName)
+        {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");

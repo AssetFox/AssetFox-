@@ -163,10 +163,9 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
+
                     _claimHelper.CheckUserSimulationModifyAuthorization(dto.scenarioId, UserId);
                     var cloneResult = UnitOfWork.SimulationRepo.CloneSimulation(dto.scenarioId, dto.networkId, dto.scenarioName);
-                    UnitOfWork.Commit();
                     return cloneResult;
                 });
 
@@ -178,7 +177,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::CloneSimulation - {e.Message}");
                 throw;
             }

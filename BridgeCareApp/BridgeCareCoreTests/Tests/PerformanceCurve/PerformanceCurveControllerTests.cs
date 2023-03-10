@@ -92,11 +92,9 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryCall = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertPerformanceCurveLibrary));
-            ObjectAssertions.Equivalent(dto2, libraryCall.Arguments[0]);
-            var curveCall = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeletePerformanceCurves));
-            ObjectAssertions.EmptyEnumerable<PerformanceCurveDTO>(curveCall.Arguments[0]);
-            Assert.Equal(libraryId, curveCall.Arguments[1]);
+            var libraryCall = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeletePerformanceCurveLibraryAndCurves));
+            var argument = libraryCall.Arguments[0] as PerformanceCurveLibraryDTO;
+            ObjectAssertions.Equivalent(dto2, argument);
         }
 
         [Fact]
@@ -132,13 +130,9 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryCall = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertPerformanceCurveLibrary));
+            var libraryCall = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeletePerformanceCurveLibraryAndCurves));
             ObjectAssertions.Equivalent(dto2, libraryCall.Arguments[0]);
-            var curveCall = repo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeletePerformanceCurves));
-            ObjectAssertions.EmptyEnumerable<PerformanceCurveDTO>(curveCall.Arguments[0]);
-            Assert.Equal(libraryId, curveCall.Arguments[1]);
         }
-
 
         [Fact]
         public async Task DeletePerformanceCurveLibrary_PassesRequestToRepo()
@@ -255,10 +249,7 @@ namespace BridgeCareCoreTests.Tests
 
             await controller.UpsertPerformanceCurveLibrary(pagingRequest);
 
-            var libraryCalls = repositoryMock.Invocations.Where(i => i.Method.Name == nameof(IPerformanceCurveRepository.UpsertPerformanceCurveLibrary));
-            Assert.Single(libraryCalls);
-            var curveCalls = repositoryMock.Invocations.Where(i => i.Method.Name == nameof(IPerformanceCurveRepository.UpsertOrDeletePerformanceCurves));
-            Assert.Single(curveCalls);
+            repositoryMock.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeletePerformanceCurveLibraryAndCurves));
         }
 
         [Fact]

@@ -8,6 +8,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport
 {
     public interface IBridgeDataForSummaryReport
     {
-        WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, Dictionary<string, string> treatmentCategoryLookup);
+        WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData
+            , Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets);
     }
 }

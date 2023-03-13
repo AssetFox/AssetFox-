@@ -43,7 +43,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _reportHelper = new ReportHelper();
         }
 
-        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, Dictionary<string, string> treatmentCategoryLookup)
+        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData
+            , Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets)
         {
             //set default width
             worksheet.DefaultColWidth = 13;
@@ -66,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             AddBridgeDataModelsCells(worksheet, reportOutputData, currentCell);
-            AddDynamicDataCells(worksheet, reportOutputData, currentCell, treatmentCategoryLookup);
+            AddDynamicDataCells(worksheet, reportOutputData, currentCell, treatmentCategoryLookup, allowFundingFromMultipleBudgets);
 
             //autofit columns
             worksheet.Cells.AutoFitColumns();
@@ -331,7 +332,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             return column;
         }
 
-        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, Dictionary<string, string> treatmentCategoryLookup)
+        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets)
         {
             var initialRow = 6;
             var row = initialRow; // Data starts here
@@ -586,21 +587,72 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
 
                     var appliedTreatment = section.AppliedTreatment ?? "";
-                    var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == appliedTreatment);
-                    BudgetUsageDetail budgetUsage = null;
+                    var treatmentConsiderations = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == appliedTreatment);
 
-                    foreach (var item in treatmentConsideration)
+                    BudgetUsageDetail budgetUsage = null;
+                    foreach (var item in treatmentConsiderations)
                     {
                         budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCovered);
                     }
 
-                    var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName;
+                    var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName; // Budget
+                    var recommendedTreatment = section.AppliedTreatment; // Recommended Treatment
+                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis 
+
+                    //check for multi year budget
+                    if (allowFundingFromMultipleBudgets == true && cost > 0 && (string.IsNullOrEmpty(budgetName) && string.IsNullOrWhiteSpace(budgetName)))
+                    {
+                        //budgets used
+                        var multiYearBudgetAndCostList = new List<BudgetUsageDetail>();
+                        foreach (var treatment in section.TreatmentConsiderations)
+                        {
+                            var budgetUsages = treatment.BudgetUsages.Where(w => w.CoveredCost > 0).ToList();
+                            if (budgetUsages?.Any() == true) { multiYearBudgetAndCostList.AddRange(budgetUsages); }
+                        }
+
+                        if (multiYearBudgetAndCostList?.Any() == true)
+                        {
+                            foreach (var budgetAndCost in multiYearBudgetAndCostList)
+                            {
+                                var multiYearBudgetName = budgetAndCost?.BudgetName ?? "UnSpecified";
+                                var multiYearBudgetCost = budgetAndCost?.CoveredCost ?? 0;
+
+                                var budgetAmountAbbrName = "";
+                                if (multiYearBudgetCost > 0)
+                                {
+                                    //check budget and add abbreviation
+                                    budgetAmountAbbrName = multiYearBudgetCost.ToString();
+                                    if (multiYearBudgetCost > 1000000)
+                                    {
+                                        budgetAmountAbbrName = "$" + Math.Floor(multiYearBudgetCost / 1000000).ToString() + "M";
+                                    }
+                                    else if (cost > 1000)
+                                    {
+                                        budgetAmountAbbrName = "$" + Math.Floor(multiYearBudgetCost / 1000).ToString() + "K";
+                                    }
+
+                                    //set budget header name
+                                    if (!string.IsNullOrEmpty(budgetAmountAbbrName) && !string.IsNullOrWhiteSpace(budgetAmountAbbrName))
+                                    {
+                                        multiYearBudgetName += " (" + budgetAmountAbbrName + ")";
+                                    }
+
+                                    if(string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName)) {
+                                        budgetName = multiYearBudgetName;
+                                    }
+                                    else
+                                    {
+                                        budgetName += ", " + multiYearBudgetName;
+                                    }
+                                }
+                            }
+                        }                                                                      
+                    }
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
-                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Recommended Treatment
-                    var columnForAppliedTreatment = column;
+                    worksheet.Cells[row, ++column].Value = recommendedTreatment; // Recommended Treatment
+                    var columnForAppliedTreatment = column;                    
 
-                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis 
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column], ExcelFormatStrings.CurrencyWithoutCents);
 

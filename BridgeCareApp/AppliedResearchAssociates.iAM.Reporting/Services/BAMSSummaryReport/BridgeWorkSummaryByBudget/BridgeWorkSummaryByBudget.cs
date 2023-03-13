@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeW
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.StaticContent;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using System;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -32,7 +33,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
-            List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount, IReadOnlyCollection<SelectableTreatment> selectableTreatments)
+            List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount
+            , IReadOnlyCollection<SelectableTreatment> selectableTreatments)
         {
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
@@ -146,17 +148,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 currentCell.Column = 1;
                 currentCell.Row += 2;
-
-                //set budget header name
-                var budgetHeaderName = summaryData.Budget;
-
-                ////check for multi year budget
-                //if (reportOutputData.) {
-
-                //}
-
-
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = budgetHeaderName;
+                worksheet.Cells[currentCell.Row, currentCell.Column].Value = summaryData.Budget;
                 ExcelHelper.MergeCells(worksheet, currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count);
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count + 2], Color.Gray);
                 currentCell.Row += 1;

@@ -20,5 +20,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<TreatmentConsequenceDTO> GetTreatmentConsequencesByTreatmentId(Guid treatmentId);
 
         List<CommittedProjectConsequenceDTO> GetCommittedProjectConsequencesByProjectId(Guid projectId);
+
+        /// <summary>Returned consequences do NOT include their equations.</summary> 
+        List<TreatmentConsequenceDTO> GetTreatmentConsequencesByLibraryIdAndTreatmentName(Guid treatmentLibraryId, string treatmentName);
     }
 }

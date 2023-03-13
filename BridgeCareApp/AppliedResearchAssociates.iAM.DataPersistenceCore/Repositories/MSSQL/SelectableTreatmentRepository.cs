@@ -783,5 +783,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        public TreatmentDTO GetSelectableTreatmentByLibraryIdAndName(Guid treatmentLibraryId, string treatmentName)
+        {
+            var dbSet = _unitOfWork.Context.SelectableTreatment;
+            var entity = dbSet
+                        .FirstOrDefault(_ => _.Name == treatmentName && _.TreatmentLibraryId == treatmentLibraryId);
+            var dto = entity.ToDtoNullSafe();
+            return dto;
+        }
     }
 }

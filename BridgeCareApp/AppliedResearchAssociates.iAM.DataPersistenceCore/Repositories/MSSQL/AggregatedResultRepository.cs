@@ -86,6 +86,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .AsNoTracking().AsSplitQuery().ToList();
         }
 
+        public List<AggregatedResultDTO> GetAggregatedResultsForAttributeNames(List<string> attributeNames)
+        {
+            return _unitOfWork.Context.AggregatedResult
+                .Include(_ => _.MaintainableAsset)
+                .Include(_ => _.Attribute)
+                .Where(_ => attributeNames.Contains(_.Attribute.Name))
+                .Select(e => AggregatedResultMapper.ToDto(e))
+                .AsNoTracking().AsSplitQuery().ToList();
+        }
+
         public List<AggregatedResultDTO> GetAggregatedResultsForMaintainableAsset(Guid assetId, List<Guid> attributeIds)
         {
             var entities = _unitOfWork.Context.AggregatedResult.AsSplitQuery().AsNoTracking().Include(_ => _.Attribute)

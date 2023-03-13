@@ -179,8 +179,8 @@ namespace BridgeCareCore.Controllers
                 var result = await Task.Factory.StartNew(() =>
                 {
                     CommittedProjectFillTreatmentReturnValuesModel returnValues = new CommittedProjectFillTreatmentReturnValuesModel();
-                    var treatment = UnitOfWork.Context.SelectableTreatment
-                        .FirstOrDefault(_ => _.Name == treatmentValues.TreatmentName && _.TreatmentLibraryId == treatmentValues.TreatmentLibraryId);
+                    var treatment = UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatmentByLibraryIdAndName(
+                        treatmentValues.TreatmentLibraryId, treatmentValues.TreatmentName);
                     if (treatment == null)
                         return returnValues;
                     returnValues.ValidTreatmentConsequences =  _committedProjectService.GetValidConsequences(treatmentValues.CommittedProjectId, treatmentValues.TreatmentLibraryId,

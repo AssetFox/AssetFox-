@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public static class PerformanceCurveCriterionLibraryJoinTestSetup
     {
         public static void JoinPerformanceCurveToCriterionLibrary(
-            IUnitOfWork unitOfWork,
+            UnitOfDataPersistenceWork unitOfWork,
             Guid performanceCurveId,
             string simulationName,
             string mergedCriteriaExpression)

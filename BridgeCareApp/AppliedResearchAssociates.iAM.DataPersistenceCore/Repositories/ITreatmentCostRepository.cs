@@ -19,5 +19,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<TreatmentCostDTO> GetTreatmentCostByScenariotreatmentId(Guid treatmentId);
 
         List<TreatmentCostDTO> GetTreatmentCostByTreatmentId(Guid treatmentId);
+        List<TreatmentCostDTO> GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName(Guid treatmentLibraryId, string treatmentName);
     }
 }

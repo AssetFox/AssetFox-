@@ -240,7 +240,7 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var value = ActionResultAssertions.OkObject(result);
             ObjectAssertions.Equivalent(simulationDTO3, value);
-            var repoCall = repo.SingleInvocationWithName(nameof(ISimulationRepository.UpdateSimulation));
+            var repoCall = repo.SingleInvocationWithName(nameof(ISimulationRepository.UpdateSimulationAndPossiblyUsers));
             ObjectAssertions.Equivalent(simulationDTO3, repoCall.Arguments[0]);
         }
 

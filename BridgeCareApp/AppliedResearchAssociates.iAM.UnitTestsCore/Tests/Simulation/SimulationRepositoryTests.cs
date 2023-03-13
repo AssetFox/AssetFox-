@@ -543,7 +543,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 };
 
             // Act
-            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulation(updatedSimulation);
+            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulationAndPossiblyUsers(updatedSimulation);
             var dto = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(updatedSimulation.Id);
 
             // Assert
@@ -579,37 +579,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 {
                     new SimulationUserDTO
                     {
-                        UserId = testUser1.Id,
+                        UserId = testUser2.Id,
                         Username = "conflicting userId",
                         CanModify = true,
                         IsOwner = true
                     },
                     new SimulationUserDTO
                     {
-                        UserId = testUser1.Id,
+                        UserId = testUser2.Id,
                         Username = "other conflicting userId",
                         CanModify = true,
                         IsOwner = true
                     }
                 };
+            var dtoBefore = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(updateDto.Id);
 
             // Act
-            var exception = Assert.Throws<SqlException>(() => TestHelper.UnitOfWork.SimulationRepo.UpdateSimulation(updateDto));
+            var exception = Assert.Throws<SqlException>(() => TestHelper.UnitOfWork.SimulationRepo.UpdateSimulationAndPossiblyUsers(updateDto));
 
             // Assert
-            var dto = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(updateDto.Id);
-            Assert.NotEqual(updateDto.Name, dto.Name);
-            var simulationEntity = TestHelper.UnitOfWork.Context.Simulation
-                .Include(_ => _.SimulationUserJoins)
-                .ThenInclude(_ => _.User)
-                .Single(_ => _.Id == dto.Id);
-
-            Assert.Equal(dto.Name, simulationEntity.Name);
-
-            var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
-            Assert.True(simulationUsers.Count == 2);
-            Assert.Equal(testUser2.Id,
-                simulationUsers.Single(_ => _.UserId != ownerId).UserId);
+            TestHelper.UnitOfWork.
+                Context.ChangeTracker.Clear();
+            var dtoAfter = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(updateDto.Id);
+            ObjectAssertions.Equivalent(dtoBefore, dtoAfter);
+            Assert.NotEqual(updateDto.Name, dtoAfter.Name);
         }
         [Fact]
         public void SimulationInDb_Clone_Clones()

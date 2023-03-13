@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using Moq;
@@ -46,7 +47,7 @@ namespace BridgeCareCoreTests.Tests
         {
             public string WorkId { get; } = Id.ToString();
 
-            public UserInfo UserInfo => new();
+            public string UserId => "";
 
             public void DoWork(IServiceProvider serviceProvider, CancellationToken cancellationToken)
             {

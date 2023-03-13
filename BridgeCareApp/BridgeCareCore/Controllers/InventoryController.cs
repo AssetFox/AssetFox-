@@ -10,6 +10,8 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
+using NuGet.Packaging;
 
 namespace BridgeCareCore.Controllers
 {
@@ -41,26 +43,21 @@ namespace BridgeCareCore.Controllers
             return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
         }
 
-        // TODO: Remove this once front end can handle generic properties
         [HttpGet]
-        [Route("GetPennDOTInventory")]
+        [Route("GetInventory/{keyProperty1}/{keyProperty2}")]
         [Authorize]
-        public async Task<IActionResult> GetPennDOTInventory()
+        public async Task<IActionResult> GetInventory(string keyProperty1, string keyProperty2)
         {
             var data = new List<KeyIDs>();
-
-            if (_assetData.KeyProperties.ContainsKey("BRKEY_") && _assetData.KeyProperties.ContainsKey("BMSID"))
+            if (_assetData.KeyProperties.ContainsKey(keyProperty1))
             {
-                data = _assetData.KeyProperties["BMSID"].Join(
-                    _assetData.KeyProperties["BRKEY_"],
-                    assetIDBMS => assetIDBMS.AssetId,
-                    assetBrKey => assetBrKey.AssetId,
-                    (bmsid, brkey)
-                    => new KeyIDs { BrKey = brkey.KeyValue.TextValue, BmsId = bmsid.KeyValue.TextValue })
-                    .ToList();
+                data = _assetData.KeyProperties[keyProperty1].Join(
+                    _assetData.KeyProperties[keyProperty2],
+                    assetKeyProperty1 => assetKeyProperty1.AssetId,
+                    assetKeyProperty2 => assetKeyProperty2.AssetId,
+                    (keyid1, keyid2) => new KeyIDs { KeyProperty2 = keyid2.KeyValue.TextValue, KeyProperty1 = keyid1.KeyValue.TextValue }).ToList();
             }
-
-            return Ok(data.OrderBy(_ => _.BrKey.Length).ThenBy(_ => _.BrKey));
+            return Ok(data.OrderBy(_ => _.KeyProperty2.Length).ThenBy(_ => _.KeyProperty2));
         }
     }
 }

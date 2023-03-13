@@ -30,7 +30,7 @@
                 @click="onGenerateReport(true)"
                 :disabled="selectedReport === ''"
             >
-                Generate Summary Report
+                Generate Report
             </v-chip>
             <v-divider vertical></v-divider>
             <v-chip color='ara-blue-bg' text-color='white' @click="onDownloadSimulationLog(true)">
@@ -103,7 +103,7 @@ export default class ReportsDownloaderDialog extends Vue {
                     }
 
                     this.addSuccessNotificationAction({
-                        message: 'Summary report generation started for ' + this.dialogData.name + '.',
+                        message: this.selectedReport +  ' report generation started for ' + this.dialogData.name + '.',
                     });
                 } else {
                     this.addErrorNotificationAction({

@@ -7,8 +7,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public bool IsDefault { get; set; } = false;
 
-        public CalculatedAttributeLibraryEntity() => CalculatedAttributes = new HashSet<CalculatedAttributeEntity>();
-
+        public CalculatedAttributeLibraryEntity()
+        {
+            CalculatedAttributes = new HashSet<CalculatedAttributeEntity>();
+            Users = new HashSet<CalculatedAttributeLibraryUserEntity>();
+        }
         public virtual ICollection<CalculatedAttributeEntity> CalculatedAttributes { get; set; }
+        public virtual ICollection<CalculatedAttributeLibraryUserEntity> Users { get; set; }
     }
 }

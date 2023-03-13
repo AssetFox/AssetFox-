@@ -272,6 +272,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
         }
+        public List<TreatmentLibraryDTO> GetTreatmentLibrariesNoChildrenAccessibleToUser(Guid userId)
+        {
+            return _unitOfWork.Context.TreatmentLibraryUser
+                .AsNoTracking()
+                .Include(u => u.TreatmentLibrary)
+                .Where(u => u.UserId == userId)
+                .Select(u => u.TreatmentLibrary.ToDto())
+                .ToList();
+        }
 
         public void UpsertTreatmentLibrary(TreatmentLibraryDTO dto) =>
         _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);

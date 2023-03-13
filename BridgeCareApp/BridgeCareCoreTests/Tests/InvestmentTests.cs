@@ -116,7 +116,8 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task UpsertNewLibrary_Does()
         {
-            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var user = UserDtos.Admin();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var libraryId = Guid.NewGuid();
             var dto = new BudgetLibraryDTO { Id = libraryId, Name = "Library", Budgets = new List<BudgetDTO>() };
@@ -132,24 +133,15 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var upsertLibraryInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertBudgetLibrary));
-            var upsertBudgetsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteBudgets));
-            var upsertUsersInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteUsers));
-            ObjectAssertions.EmptyEnumerable<BudgetDTO>(upsertBudgetsInvocation.Arguments[0]);
+            var createLibraryInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.CreateNewBudgetLibrary));
             var expectedUpsertedLibrary = new BudgetLibraryDTO
             {
                 Id = libraryId,
                 Budgets = new List<BudgetDTO>(),
                 Name = "Library",
             };
-            ObjectAssertions.Equivalent(expectedUpsertedLibrary, upsertLibraryInvocation.Arguments[0]);
-            Assert.Equal(libraryId, upsertBudgetsInvocation.Arguments[1]);
-            var expectedUser = new LibraryUserDTO
-            {
-                AccessLevel = LibraryAccessLevel.Owner,
-            };
-            Assert.Equal(libraryId, upsertUsersInvocation.Arguments[0]);
-            ObjectAssertions.CheckEnumerable(upsertUsersInvocation.Arguments[1], expectedUser);
+            ObjectAssertions.Equivalent(expectedUpsertedLibrary, createLibraryInvocation.Arguments[0]);
+            Assert.Equal(user.Id, createLibraryInvocation.Arguments[1]);
         }
 
         [Fact]
@@ -170,9 +162,11 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var upsertCall = investmentPlanRepo.SingleInvocationWithName(nameof(IInvestmentPlanRepository.UpsertInvestmentPlan));
-            ObjectAssertions.Equivalent(upsertCall.Arguments[0], investmentPlan);
-            Assert.Equal(simulationId, upsertCall.Arguments[1]);
+            var invocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteScenarioBudgetsWithInvestmentPlan));
+            var budgets = invocation.Arguments[0] as List<BudgetDTO>;
+            Assert.Empty(budgets);
+            ObjectAssertions.Equivalent(invocation.Arguments[1], investmentPlan);
+            Assert.Equal(simulationId, invocation.Arguments[2]);
         }
 
         [Fact]
@@ -248,15 +242,14 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             var invocations = budgetRepo.Invocations.ToList();
-            var upsertLibraryInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertBudgetLibrary));
-            var budgetsInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteBudgets));
+            var upsertLibraryInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpdateBudgetLibraryAndUpsertOrDeleteBudgets));
             var upsertedLibrary = upsertLibraryInvocation.Arguments[0] as BudgetLibraryDTO;
             Assert.Equal("Updated Description", upsertedLibrary.Description);
-            var updatedBudgetDtos = budgetsInvocation.Arguments[0] as List<BudgetDTO>;
+            var updatedBudgetDtos = upsertedLibrary.Budgets;
             var updatedBudgetDto = updatedBudgetDtos.Single();
             Assert.Equal(1234m, updatedBudgetDto.BudgetAmounts[0].Value); // counterintuitive behavior. Verified that it is present in the repo back to at least Sept. 30, 2022 (commit 82e8df57004)
             ObjectAssertions.EquivalentExcluding(updatedBudgetDto, updatedBudget, x => x.BudgetAmounts[0].Id, x => x.BudgetAmounts[0].Value);
-            Assert.Equal(libraryId, budgetsInvocation.Arguments[1]);
+            Assert.Equal(libraryId, upsertedLibrary.Id);
         }
 
         [Fact]
@@ -299,11 +292,9 @@ namespace BridgeCareCoreTests.Tests
             // Act
             await controller.UpsertInvestment(simulationId, request);
 
-            var scenarioBudgetInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteScenarioBudgets));
-            var investmentPlanInvocation = investmentPlanRepo.SingleInvocationWithName(nameof(IInvestmentPlanRepository.UpsertInvestmentPlan));
-            Assert.Equal(simulationId, scenarioBudgetInvocation.Arguments[1]);
-            Assert.Equal(simulationId, investmentPlanInvocation.Arguments[1]);
-            var modifiedBudgetDtos = scenarioBudgetInvocation.Arguments[0] as List<BudgetDTO>;
+            var upsertInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteScenarioBudgetsWithInvestmentPlan));
+            Assert.Equal(simulationId, upsertInvocation.Arguments[2]);
+            var modifiedBudgetDtos = upsertInvocation.Arguments[0] as List<BudgetDTO>;
             var modifiedBudgetDto = modifiedBudgetDtos.Single();
             Assert.Equal("Updated Name", modifiedBudgetDto.Name);
             Assert.Equal(dto.ScenarioBudgets[0].CriterionLibrary.Id,
@@ -311,7 +302,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Single(modifiedBudgetDto.BudgetAmounts);
             Assert.Equal(1000000,
                modifiedBudgetDto.BudgetAmounts[0].Value);
-            var modifiedInvestmentPlan = investmentPlanInvocation.Arguments[0] as InvestmentPlanDTO;
+            var modifiedInvestmentPlan = upsertInvocation.Arguments[1] as InvestmentPlanDTO;
             Assert.Equal(1000000, modifiedInvestmentPlan.MinimumProjectCostLimit);
         }
 

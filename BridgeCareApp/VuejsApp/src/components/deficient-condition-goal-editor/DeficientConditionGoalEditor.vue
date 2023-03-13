@@ -295,22 +295,17 @@ import {
 } from '@/shared/models/iAM/deficient-condition-goal';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import {
-  any,
+    any,
     clone,
-    contains,
     find,
-    findIndex,
     isNil,
-    prepend,
     propEq,
-    update,
 } from 'ramda';
 import CreateDeficientConditionGoalDialog from '@/components/deficient-condition-goal-editor/deficient-condition-goal-editor-dialogs/CreateDeficientConditionGoalDialog.vue';
 import {
     CreateDeficientConditionGoalLibraryDialogData,
     emptyCreateDeficientConditionGoalLibraryDialogData,
 } from '@/shared/models/modals/create-deficient-condition-goal-library-dialog-data';
-import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import CreateDeficientConditionGoalLibraryDialog from '@/components/deficient-condition-goal-editor/deficient-condition-goal-editor-dialogs/CreateDeficientConditionGoalLibraryDialog.vue';
@@ -324,7 +319,6 @@ import {
     rules,
 } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
@@ -583,9 +577,6 @@ export default class DeficientConditionGoalEditor extends Vue {
             this.hasSelectedLibrary = this.selectedDeficientConditionGoalLibrary.id !== this.uuidNIL;
             
         }
-        if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
-        }    
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
@@ -623,9 +614,6 @@ export default class DeficientConditionGoalEditor extends Vue {
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
         this.isShared = this.isSharedLibrary;
-        if (!isNullOrUndefined(this.selectDeficientConditionGoalLibrary)) {
-            this.selectDeficientConditionGoalLibrary.isShared = this.isShared;
-        } 
     }
 
     @Watch('pagination')
@@ -634,10 +622,6 @@ export default class DeficientConditionGoalEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
-        if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
-            this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
-        }
-
         const request: PagingRequest<DeficientConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -667,6 +651,10 @@ export default class DeficientConditionGoalEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
+                    }      
+
                 }
             });     
     }

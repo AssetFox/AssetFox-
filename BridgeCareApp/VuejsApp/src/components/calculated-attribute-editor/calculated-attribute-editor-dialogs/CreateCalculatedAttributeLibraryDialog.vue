@@ -55,16 +55,12 @@ import {
     rules,
 } from '@/shared/utils/input-validation-rules';
 import { clone } from 'ramda';
-import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
+import { getNewGuid } from '@/shared/utils/uuid-utils';
 import { CreateCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/create-calculated-attribute-library-dialog-data';
 import {
-    CalculatedAttribute,
     CalculatedAttributeLibrary,
-    CriterionAndEquationSet,
     emptyCalculatedAttributeLibrary,
-    Timing,
 } from '@/shared/models/iAM/calculated-attribute';
-import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component
 export default class CreateCalculatedAttributeLibraryDialog extends Vue {

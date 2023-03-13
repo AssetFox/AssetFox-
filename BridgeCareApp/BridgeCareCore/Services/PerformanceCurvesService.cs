@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
 using OfficeOpenXml;
-using MoreLinq;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
-using BridgeCareCore.Models;
-using System.Data;
 
 namespace BridgeCareCore.Services
 {
@@ -209,8 +204,7 @@ namespace BridgeCareCore.Services
         {
             var performanceCurveRepo = _unitOfWork.PerformanceCurveRepo;
             var PerformanceCurves = performanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
-            var simulationName = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
-                    .Select(_ => new SimulationEntity { Name = _.Name }).AsNoTracking().Single().Name;
+            var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
             var fileName = $"{simulationName.Trim().Replace(" ", "_")}_performance_curves.xlsx";
             
             return CreateExportFile(PerformanceCurves, fileName);

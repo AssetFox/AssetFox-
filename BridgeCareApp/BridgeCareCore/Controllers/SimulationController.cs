@@ -192,10 +192,8 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(dto.Id, UserId);
-                    UnitOfWork.SimulationRepo.UpdateSimulation(dto);
-                    UnitOfWork.Commit();
+                    UnitOfWork.SimulationRepo.UpdateSimulationAndPossiblyUsers(dto);
                     return UnitOfWork.SimulationRepo.GetSimulation(dto.Id);
                 });
 
@@ -203,13 +201,11 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::UpdateSimulation {simulationName} - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::UpdateSimulation {simulationName} - {e.Message}");
                 throw;
             }

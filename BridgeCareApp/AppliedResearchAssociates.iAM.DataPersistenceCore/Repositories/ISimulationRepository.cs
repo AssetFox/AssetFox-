@@ -28,7 +28,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         SimulationCloningResultDTO CloneSimulation(Guid simulationId, Guid networkId, string simulationName);
 
-        void UpdateSimulation(SimulationDTO dto);
+        /// <summary>Updates the simulation. If the dto has a nonempty
+        /// list of users, also updates the users. BUT if the
+        /// dto's list of users is empty, the users are unaffected.</summary> 
+        void UpdateSimulationAndPossiblyUsers(SimulationDTO dto);
 
         void DeleteSimulation(Guid simulationId);
 

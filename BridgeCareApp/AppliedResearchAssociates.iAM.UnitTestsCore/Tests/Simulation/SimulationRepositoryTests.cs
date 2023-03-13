@@ -542,7 +542,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 };
 
             // Act
-            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulation(updatedSimulation);
+            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulationAndPossiblyUsers(updatedSimulation);
             var dto = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(updatedSimulation.Id);
 
             // Assert

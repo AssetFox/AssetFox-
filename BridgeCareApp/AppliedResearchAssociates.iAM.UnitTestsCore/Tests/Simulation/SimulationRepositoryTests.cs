@@ -29,6 +29,7 @@ using Microsoft.AspNetCore.Http;
 using Moq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
+using Microsoft.Data.SqlClient;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -559,6 +560,57 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 simulationUsers.Single(_ => _.UserId != ownerId).UserId);
         }
 
+        [Fact]
+        public async Task UpdateSimulation_InvalidUserInDto_ThrowsWithoutUpdating()
+        {
+            // Arrange
+            Setup();
+            var testUser1 = await AddTestUser();
+            var testUser2 = await AddTestUser();
+            TestHelper.UnitOfWork.Context.SaveChanges();
+            var simulationId = Guid.NewGuid();
+            var ownerId = testUser1.Id;
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, owner: ownerId);
+            var updateDto = SimulationDtos.Dto(simulationId, owner: testUser2.Id);
+
+            updateDto.Name = "Updated Name";
+            var invalidUserId = Guid.NewGuid();
+            updateDto.Users = new List<SimulationUserDTO>
+                {
+                    new SimulationUserDTO
+                    {
+                        UserId = testUser1.Id,
+                        Username = "conflicting userId",
+                        CanModify = true,
+                        IsOwner = true
+                    },
+                    new SimulationUserDTO
+                    {
+                        UserId = testUser1.Id,
+                        Username = "other conflicting userId",
+                        CanModify = true,
+                        IsOwner = true
+                    }
+                };
+
+            // Act
+            var exception = Assert.Throws<SqlException>(() => TestHelper.UnitOfWork.SimulationRepo.UpdateSimulation(updateDto));
+
+            // Assert
+            var dto = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(updateDto.Id);
+            Assert.NotEqual(updateDto.Name, dto.Name);
+            var simulationEntity = TestHelper.UnitOfWork.Context.Simulation
+                .Include(_ => _.SimulationUserJoins)
+                .ThenInclude(_ => _.User)
+                .Single(_ => _.Id == dto.Id);
+
+            Assert.Equal(dto.Name, simulationEntity.Name);
+
+            var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
+            Assert.True(simulationUsers.Count == 2);
+            Assert.Equal(testUser2.Id,
+                simulationUsers.Single(_ => _.UserId != ownerId).UserId);
+        }
         [Fact]
         public void SimulationInDb_Clone_Clones()
         {

@@ -15,6 +15,7 @@ using BridgeCareCore.Models;
 using System.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.WorkQueue;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {

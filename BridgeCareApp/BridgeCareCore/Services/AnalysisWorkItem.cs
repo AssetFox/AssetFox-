@@ -36,9 +36,9 @@ namespace BridgeCareCore.Services
             using var scope = serviceProvider.CreateScope();
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            if (!string.IsNullOrEmpty(userInfo.Name))
+            if (!string.IsNullOrEmpty(UserInfo.Name))
             {
-                if (!_unitOfWork.UserRepo.UserExists(userInfo.Name))
+                if (!_unitOfWork.UserRepo.UserExists(UserInfo.Name))
                 {
                     _unitOfWork.AddUser(UserInfo.Name, UserInfo.HasAdminAccess);
                 }

@@ -14,6 +14,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using System.Runtime.InteropServices;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
 {
@@ -265,7 +268,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public async Task ShouldGetScenarioTreatmentData()
+        public void ShouldGetScenarioTreatmentData()
         {
             // Arrange
             Setup();
@@ -413,5 +416,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
                     _.Id == _testTreatmentConsequence.Id));
         }
 
+        [Fact]
+        public void GetSelectableTreatmentByLibraryIdAndName_Does()
+        {
+            var networkId = Guid.NewGuid();
+            var treatmentLibraryId = Guid.NewGuid();
+            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatmentId = Guid.NewGuid();
+            var treatmentName = RandomStrings.WithPrefix("treatment");
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
+                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, treatmentName);
+
+            var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatmentByLibraryIdAndName(treatmentLibraryId, treatmentName);
+
+            treatment.BudgetIds = new List<Guid>();
+            ObjectAssertions.EquivalentExcluding(treatment, result, x => x.CriterionLibrary);
+
+        }
+
+        [Fact]
+        public void GetSelectableTreatmentByLibraryIdAndName_TreatmentInDbWithDifferentName_DoesNotFind()
+        {
+            var networkId = Guid.NewGuid();
+            var treatmentLibraryId = Guid.NewGuid();
+            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatmentId = Guid.NewGuid();
+            var treatmentName = RandomStrings.WithPrefix("treatment");
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
+                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, treatmentName);
+
+            var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatmentByLibraryIdAndName(treatmentLibraryId, "wrongName");
+
+            Assert.Null(result);
+        }
     }
 }

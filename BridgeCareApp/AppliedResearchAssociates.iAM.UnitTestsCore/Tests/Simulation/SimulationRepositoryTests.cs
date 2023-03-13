@@ -29,6 +29,7 @@ using Microsoft.AspNetCore.Http;
 using Moq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
+using Microsoft.Data.SqlClient;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -542,7 +543,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 };
 
             // Act
-            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulation(updatedSimulation);
+            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulationAndPossiblyUsers(updatedSimulation);
             var dto = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(updatedSimulation.Id);
 
             // Assert
@@ -559,6 +560,50 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 simulationUsers.Single(_ => _.UserId != ownerId).UserId);
         }
 
+        [Fact]
+        public async Task UpdateSimulation_InvalidUserInDto_ThrowsWithoutUpdating()
+        {
+            // Arrange
+            Setup();
+            var testUser1 = await AddTestUser();
+            var testUser2 = await AddTestUser();
+            TestHelper.UnitOfWork.Context.SaveChanges();
+            var simulationId = Guid.NewGuid();
+            var ownerId = testUser1.Id;
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, owner: ownerId);
+            var updateDto = SimulationDtos.Dto(simulationId, owner: testUser2.Id);
+
+            updateDto.Name = "Updated Name";
+            var invalidUserId = Guid.NewGuid();
+            updateDto.Users = new List<SimulationUserDTO>
+                {
+                    new SimulationUserDTO
+                    {
+                        UserId = testUser2.Id,
+                        Username = "conflicting userId",
+                        CanModify = true,
+                        IsOwner = true
+                    },
+                    new SimulationUserDTO
+                    {
+                        UserId = testUser2.Id,
+                        Username = "other conflicting userId",
+                        CanModify = true,
+                        IsOwner = true
+                    }
+                };
+            var dtoBefore = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(updateDto.Id);
+
+            // Act
+            var exception = Assert.Throws<SqlException>(() => TestHelper.UnitOfWork.SimulationRepo.UpdateSimulationAndPossiblyUsers(updateDto));
+
+            // Assert
+            TestHelper.UnitOfWork.
+                Context.ChangeTracker.Clear();
+            var dtoAfter = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(updateDto.Id);
+            ObjectAssertions.Equivalent(dtoBefore, dtoAfter);
+            Assert.NotEqual(updateDto.Name, dtoAfter.Name);
+        }
         [Fact]
         public void SimulationInDb_Clone_Clones()
         {

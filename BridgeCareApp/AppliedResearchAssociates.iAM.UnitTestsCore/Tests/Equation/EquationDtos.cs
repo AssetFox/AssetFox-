@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace BridgeCareCoreTests.Tests
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class EquationDtos
     {
@@ -16,6 +16,16 @@ namespace BridgeCareCoreTests.Tests
             {
                 Id = resolveId,
                 Expression = "[AGE] + 1"
+            };
+            return equation;
+        }
+
+        public static EquationDTO WithExpression(Guid id, string expression)
+        {
+            var equation = new EquationDTO
+            {
+                Id = id,
+                Expression = expression,
             };
             return equation;
         }

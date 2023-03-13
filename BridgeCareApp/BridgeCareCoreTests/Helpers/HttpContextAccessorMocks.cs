@@ -24,6 +24,13 @@ namespace BridgeCareCoreTests
             return mock.Object;
         }
 
+        public static Mock<IHttpContextAccessor> WithContext(HttpContext context)
+        {
+            var mock = DefaultMock();
+            mock.Setup(m => m.HttpContext).Returns(context);
+            return mock;
+        }
+
         public static Mock<IHttpContextAccessor> MockWithClaims(List<Claim> claims)
         {
             var mock = new Mock<IHttpContextAccessor>();

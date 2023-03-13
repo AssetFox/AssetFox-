@@ -47,5 +47,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         ScenarioSelectableTreatmentEntity GetDefaultTreatment(Guid simulationId);
         TreatmentDTO GetDefaultNoTreatment(Guid simulationId);
         TreatmentLibraryDTO GetTreatmentLibraryWithSingleTreatmentByTreatmentId(Guid treatmentId);
+        TreatmentDTO GetSelectableTreatmentByLibraryIdAndName(Guid treatmentLibraryId, string treatmentName);
     }
 }

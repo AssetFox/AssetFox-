@@ -257,5 +257,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
         }
+
+        public List<TreatmentCostDTO> GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName(Guid treatmentLibraryId, string treatmentName)
+        {
+            var treatmentCosts = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.TreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
+            .ThenInclude(_ => _.CriterionLibrary)
+                .FirstOrDefault(_ => _.Name == treatmentName && _.TreatmentLibraryId == treatmentLibraryId)?.TreatmentCosts
+                .Where(_ => _.TreatmentCostEquationJoin != null)
+                .Select(entity => entity.ToDto())
+                .ToList();
+            return treatmentCosts;
+
+        }
     }
 }

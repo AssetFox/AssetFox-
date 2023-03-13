@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace BridgeCareCoreTests.Tests
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class CriterionLibraryDtos
     {

@@ -32,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var equationInDb = TestHelper.UnitOfWork.Context.Equation
                 .SingleOrDefault(e => e.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == performanceCurveLibraryId);
             Assert.NotNull(equationInDb);
+            TestHelper.UnitOfWork.Context.ChangeTracker.Clear();
 
             // Act
             TestHelper.UnitOfWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(performanceCurveLibraryId);

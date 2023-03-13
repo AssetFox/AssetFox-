@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return returnValue;
         }
 
-        [Fact] // Seems to be some connection with other tests here. For example, WJ had a failure in an "unrelated" attribute import test that fried it.
+        [Fact] 
         public void DeleteSimulation_Does()
         {
             Setup();
@@ -792,6 +792,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotEqual(clonedSimulation.AnalysisMethod.Id, originalSimulation.AnalysisMethod.Id);
             Assert.Equal(clonedSimulation.AnalysisMethod.Benefit.AttributeId,
                 originalSimulation.AnalysisMethod.Benefit.AttributeId);
+        }
+
+        [Fact]
+        public void SimulationInDbWithChildren_Delete_DeletesAll()
+        {
+            var unitOfWork = TestHelper.UnitOfWork;
+            AttributeTestSetup.CreateAttributes(unitOfWork);
+            NetworkTestSetup.CreateNetwork(unitOfWork);
+
+            var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
+            var simulationId = simulation.Id;
+            var investmentPlan = simulation.InvestmentPlan;
+            var budgetName = RandomStrings.WithPrefix("Budget");
+            var budget = investmentPlan.AddBudget();
+            budget.Name = budgetName;
+            var budgets = investmentPlan.Budgets.ToList();
+            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
+
+            unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
+
         }
     }
 }

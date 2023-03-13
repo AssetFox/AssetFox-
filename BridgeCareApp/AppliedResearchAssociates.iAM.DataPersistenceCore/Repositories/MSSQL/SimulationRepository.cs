@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -1311,7 +1311,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     simulationEntity.Name = dto.Name;
                     simulationEntity.NoTreatmentBeforeCommittedProjects = dto.NoTreatmentBeforeCommittedProjects;
 
-                    u.Context.UpdateEntity(simulationEntity, dto.Id, _unitOfWork.UserEntity?.Id);
+                    u.Context.UpdateEntity(simulationEntity, dto.Id, u.UserEntity?.Id);
                 }
 
                 if (dto.Users.Any())

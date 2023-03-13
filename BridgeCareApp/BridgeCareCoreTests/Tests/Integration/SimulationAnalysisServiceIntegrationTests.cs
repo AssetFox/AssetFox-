@@ -15,6 +15,7 @@ using BridgeCareCore.Models;
 using System.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.WorkQueue;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {
@@ -53,9 +54,8 @@ namespace BridgeCareCoreTests.Tests.Integration
                 NetworkTestSetup.NetworkId, simulationId, userInfo);
 
             var result = service.CreateAndRunPermitted(NetworkTestSetup.NetworkId, simulationId, userInfo);
-
-            var resultUserInfo = result.UserInfo;
-            ObjectAssertions.Equivalent(userInfo, resultUserInfo);
+            var resultUser = result.UserId;
+            Assert.Equal(user.Username, resultUser);
         }
 
         [Fact]
@@ -174,8 +174,8 @@ namespace BridgeCareCoreTests.Tests.Integration
 
             var result = service.CreateAndRunPermitted(NetworkTestSetup.NetworkId, simulationId, user2Info);
 
-            var resultUserInfo = result.UserInfo;
-            ObjectAssertions.Equivalent(user2Info, resultUserInfo);
+            var resultUser = result.UserId;
+            Assert.Equal(user2Info.Name, resultUser);
         }
     }
 }

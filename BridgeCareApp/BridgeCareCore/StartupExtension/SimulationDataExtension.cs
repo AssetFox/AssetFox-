@@ -2,6 +2,7 @@
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.Treatment;

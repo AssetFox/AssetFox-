@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -212,11 +212,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
             var investmentPlan = simulation.InvestmentPlan;
             var budgetName = RandomStrings.WithPrefix("Budget");
-            var budget = investmentPlan.AddBudget();
-            budget.Name = budgetName;
-            var budgets = investmentPlan.Budgets.ToList();
-            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
+            var budgetId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.New(budgetId, budgetName);
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgetDtos, simulation.Id);
 
+            //testing and asserts
             var details = TestHelper.UnitOfWork.BudgetRepo.GetScenarioSimpleBudgetDetails(simulation.Id);
 
             var detail = details.Single();
@@ -229,18 +230,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
-            var investmentPlan = simulation.InvestmentPlan;
             var budgetName = RandomStrings.WithPrefix("Budget");
-            var budget = investmentPlan.AddBudget();
-            budget.Name = budgetName;
-            var budgets = investmentPlan.Budgets.ToList();
-            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
+            var budgetId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.New(budgetId, budgetName);
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgetDtos, simulation.Id);
 
             var actualBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
 
             var actualBudget = actualBudgets.Single();
             Assert.Equal(budgetName, actualBudget.Name);
-            Assert.Equal(budget.Id, actualBudget.Id);
+            Assert.Equal(budgetId, actualBudget.Id);
             Assert.Empty(actualBudget.BudgetAmounts);
             Assert.Equal(Guid.Empty, actualBudget.CriterionLibrary.Id);
         }

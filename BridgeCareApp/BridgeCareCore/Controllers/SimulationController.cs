@@ -358,9 +358,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.SimulationRepo.SetNoTreatmentBeforeCommitted(simulationId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
@@ -386,9 +384,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.SimulationRepo.RemoveNoTreatmentBeforeCommitted(simulationId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
@@ -414,9 +410,7 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var noTreatmentBeforeCommitted = UnitOfWork.SimulationRepo.GetNoTreatmentBeforeCommitted(simulationId);
-                    UnitOfWork.Commit();
                     return noTreatmentBeforeCommitted;
                 });
 

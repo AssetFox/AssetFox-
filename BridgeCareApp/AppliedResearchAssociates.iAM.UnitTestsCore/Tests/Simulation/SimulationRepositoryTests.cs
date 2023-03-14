@@ -30,6 +30,8 @@ using Moq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using Microsoft.Data.SqlClient;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -806,12 +808,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var investmentPlan = simulation.InvestmentPlan;
             var budgetName = RandomStrings.WithPrefix("Budget");
             var budget = investmentPlan.AddBudget();
+            var budgetId = budget.Id;
             budget.Name = budgetName;
             var budgets = investmentPlan.Budgets.ToList();
             ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
+            var budgetAmountId = Guid.NewGuid();
+            BudgetAmountTestSetup.SetupSingleAmountForBudget(unitOfWork, simulationId, budget.Name, budgetId, budgetAmountId);
+            var simulationBudgetsBefore = unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
 
             unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
 
+            var simulationBudgetsAfter = unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+
         }
+
     }
 }

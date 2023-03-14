@@ -310,7 +310,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            return _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery().Where(_ => _.SimulationId == simulationId)
+            return _unitOfWork.Context.ScenarioBudget
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)

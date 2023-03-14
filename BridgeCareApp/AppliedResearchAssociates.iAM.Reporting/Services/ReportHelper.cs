@@ -146,13 +146,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
         public List<AssetDetail> GetSectionsWithUnfundedTreatments(SimulationYearDetail simulationYearDetail)
         {
             var untreatedSections =
-                    simulationYearDetail.Assets.Where(
-                        section => section.TreatmentCause == TreatmentCause.NoSelection && section.TreatmentOptions.Count > 0
-                        &&
-                        ((!string.IsNullOrEmpty(CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) && int.Parse(CheckAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) == 1)
-                        ||
-                        CheckAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA") > 28500
-                        )).ToList();
+                    simulationYearDetail.Assets
+                        .Where(section => section.TreatmentCause == TreatmentCause.NoSelection && section.TreatmentOptions.Count > 0)
+                        .ToList();
             return untreatedSections;
         }
 

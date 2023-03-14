@@ -251,9 +251,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
+            var investmentPlanDto = TestHelper.UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulation.Id);
+            investmentPlanDto.NumberOfYearsInAnalysisPeriod = 1;
+            TestHelper.UnitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlanDto, simulation.Id);
+            TestHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             var investmentPlan = simulation.InvestmentPlan;
-            TestHelper.UnitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(investmentPlan, simulation.Id);
-            investmentPlan.NumberOfYearsInAnalysisPeriod = 1;
             var budgetName = RandomStrings.WithPrefix("Budget");
             var budget = investmentPlan.AddBudget();
             budget.YearlyAmounts[0].Value = 1234;

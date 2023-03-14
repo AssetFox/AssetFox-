@@ -797,30 +797,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void SimulationInDbWithChildren_Delete_DeletesAll()
+        public void SimulationInDbWithBudgetAndAmount_Delete_DeletesAll()
         {
             var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);
             NetworkTestSetup.CreateNetwork(unitOfWork);
-
             var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
             var simulationId = simulation.Id;
             var investmentPlan = simulation.InvestmentPlan;
+            var investmentPlanId = investmentPlan.Id;
             var budgetName = RandomStrings.WithPrefix("Budget");
             var budget = investmentPlan.AddBudget();
             var budgetId = budget.Id;
             budget.Name = budgetName;
             var budgets = investmentPlan.Budgets.ToList();
-            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
             var budgetAmountId = Guid.NewGuid();
+            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
             BudgetAmountTestSetup.SetupSingleAmountForBudget(unitOfWork, simulationId, budget.Name, budgetId, budgetAmountId);
             var simulationBudgetsBefore = unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            var budgetAmountEntityBefore = TestHelper.UnitOfWork.Context.ScenarioBudgetAmount.SingleOrDefault(ba => ba.Id == budgetAmountId);
+            var scenarioBudgetEntityBefore = TestHelper.UnitOfWork.Context.ScenarioBudget.SingleOrDefault(sb => sb.Id == budgetId);
+            Assert.NotNull(budgetAmountEntityBefore);
+            Assert.NotNull(scenarioBudgetEntityBefore);
 
             unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
 
-            var simulationBudgetsAfter = unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
-
+            unitOfWork.Context.ChangeTracker.Clear();
+            var budgetAmountEntityAfter = TestHelper.UnitOfWork.Context.ScenarioBudgetAmount.SingleOrDefault(ba => ba.Id == budgetAmountId);
+            var scenarioBudgetEntityAfter = TestHelper.UnitOfWork.Context.ScenarioBudget.SingleOrDefault(sb => sb.Id == budgetId);
+            var investmentPlanEntityAfter = TestHelper.UnitOfWork.Context.InvestmentPlan.SingleOrDefault(ip => ip.Id == investmentPlanId);
+            Assert.Null(budgetAmountEntityAfter);
+            Assert.Null(scenarioBudgetEntityAfter);
+            Assert.Null(investmentPlanEntityAfter);
         }
-
     }
 }

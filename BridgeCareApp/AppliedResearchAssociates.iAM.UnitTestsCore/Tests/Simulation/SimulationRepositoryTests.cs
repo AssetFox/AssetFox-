@@ -807,13 +807,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var investmentPlan = simulation.InvestmentPlan;
             var investmentPlanId = investmentPlan.Id;
             var budgetName = RandomStrings.WithPrefix("Budget");
-            var budget = investmentPlan.AddBudget();
-            var budgetId = budget.Id;
-            budget.Name = budgetName;
-            var budgets = investmentPlan.Budgets.ToList();
+
+            var budgetId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.New(budgetId, budgetName);
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            budgetDto.CriterionLibrary = criterionLibrary;
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgetDtos, simulation.Id);
             var budgetAmountId = Guid.NewGuid();
-            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
-            BudgetAmountTestSetup.SetupSingleAmountForBudget(unitOfWork, simulationId, budget.Name, budgetId, budgetAmountId);
+            BudgetAmountTestSetup.SetupSingleAmountForBudget(unitOfWork, simulationId, budgetName, budgetId, budgetAmountId);
             var simulationBudgetsBefore = unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
             var budgetAmountEntityBefore = TestHelper.UnitOfWork.Context.ScenarioBudgetAmount.SingleOrDefault(ba => ba.Id == budgetAmountId);
             var scenarioBudgetEntityBefore = TestHelper.UnitOfWork.Context.ScenarioBudget.SingleOrDefault(sb => sb.Id == budgetId);

@@ -396,5 +396,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var user = users.FirstOrDefault();
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
+
+        public void UpsertTargetConditionGoalLibraryAndGoals(TargetConditionGoalLibraryDTO dto)
+        {
+            _unitOfWork.AsTransaction(u =>
+            {
+                u.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
+                u.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
+            });
+        }
     }
 }

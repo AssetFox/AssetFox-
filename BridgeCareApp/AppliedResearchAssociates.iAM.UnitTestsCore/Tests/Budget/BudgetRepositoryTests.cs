@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void CreateScenarioBudgets_SuccessfulWithValidInput()
+        public void UpsertOrDeleteScenarioBudgets_SuccessfulWithValidInput()
         {
             //setup
             var unitOfWork = TestHelper.UnitOfWork;
@@ -58,13 +58,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             NetworkTestSetup.CreateNetwork(unitOfWork);
             var simulationObject = SimulationTestSetup.DomainSimulation(unitOfWork);
             var investmentPlan = simulationObject.InvestmentPlan;
-            var budgetObject = investmentPlan.AddBudget();
             var budgetName = "Test Budget";
-            budgetObject.Name = budgetName;
-            var budgets = investmentPlan.Budgets.ToList();
+            var budgetId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.New(budgetId, budgetName);
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
 
             //testing and asserts
-            unitOfWork.BudgetRepo.CreateScenarioBudgets(budgets, simulationObject.Id);
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(unitOfWork, budgetDtos, simulationObject.Id);
 
             var budgetEntities = unitOfWork.Context.ScenarioBudget
                                     .Where(w => w.SimulationId == simulationObject.Id)

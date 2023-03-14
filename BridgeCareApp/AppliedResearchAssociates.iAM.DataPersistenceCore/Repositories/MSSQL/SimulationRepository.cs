@@ -1329,30 +1329,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 return;
             }
-
-            _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
-                _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-            _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
-                _.ScenarioSelectableTreatment.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-            var count = _unitOfWork.Context.CommittedProject.Where(_ =>
-                _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).Count();
-
-            var committedEntities = _unitOfWork.Context.CommittedProject.Where(_ =>
-                _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).ToList();
-
-            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
-                _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-            var index = 0;
-            while (index < committedEntities.Count)
+            _unitOfWork.AsTransaction(u =>
             {
-                _unitOfWork.Context.Entry(committedEntities[index]).Reload();
-                index++;
-            }
+                u.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
+                    _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
-            _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
+                u.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                    _.ScenarioSelectableTreatment.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
+
+                var count = u.Context.CommittedProject.Where(_ =>
+                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).Count();
+
+                var committedEntities = u.Context.CommittedProject.Where(_ =>
+                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).ToList();
+
+                u.Context.DeleteAll<CommittedProjectEntity>(_ =>
+                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
+
+                var index = 0;
+                while (index < committedEntities.Count)
+                {
+                    u.Context.Entry(committedEntities[index]).Reload();
+                    index++;
+                }
+
+                u.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
+            });
         }
 
         public void DeleteSimulationsByNetworkId(Guid networkId)

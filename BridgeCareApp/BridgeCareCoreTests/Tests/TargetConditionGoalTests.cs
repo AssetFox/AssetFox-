@@ -68,7 +68,7 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertTargetConditionGoalLibraryAndGoals));
+            var libraryCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser));
             ObjectAssertions.Equivalent(libraryDto, libraryCall.Arguments[0]);
         }
 
@@ -117,7 +117,7 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertTargetConditionGoalLibraryAndGoals));
+            var libraryCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser));
             var upsertedLibrary = libraryCall.Arguments[0] as TargetConditionGoalLibraryDTO;
             Assert.Equal("Updated Description", upsertedLibrary.Description);
             var upsertedGoals = upsertedLibrary.TargetConditionGoals;

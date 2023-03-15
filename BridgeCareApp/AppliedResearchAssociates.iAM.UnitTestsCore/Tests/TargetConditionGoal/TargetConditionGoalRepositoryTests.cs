@@ -155,19 +155,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void UpsertTargetConditionGoalLibraryAndGoals_LibraryNotInDb_Adds()
+        public async Task UpsertTargetConditionGoalLibraryAndGoals_LibraryNotInDb_Adds()
         {
             Setup();
             var libraryId = Guid.NewGuid();
             var libraryName = RandomStrings.WithPrefix("Library");
             var library = TargetConditionGoalLibraryDtos.Dto(libraryId);
             var goalId = Guid.NewGuid();
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var goalName = RandomStrings.WithPrefix("Goal");
             var attributeName = TestAttributeNames.DeckDurationN;
             var goal = TargetConditionGoalDtos.Dto(attributeName, goalId, goalName);
             library.TargetConditionGoals = new List<TargetConditionGoalDTO> { goal };
 
-            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibraryAndGoals(library);
+            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser(library, true, user.Id);
 
             var librariesAfter = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalLibrariesWithTargetConditionGoals();
             var libraryAfter = librariesAfter.Single(l => l.Id == libraryId);
@@ -188,7 +189,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             library.TargetConditionGoals = new List<TargetConditionGoalDTO> { goal };
             library.Description = "Updated library description";
 
-            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibraryAndGoals(library);
+            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser(library, false, Guid.NewGuid());
 
             var librariesAfter = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalLibrariesWithTargetConditionGoals();
             var libraryAfter = librariesAfter.Single(l => l.Id == libraryId);

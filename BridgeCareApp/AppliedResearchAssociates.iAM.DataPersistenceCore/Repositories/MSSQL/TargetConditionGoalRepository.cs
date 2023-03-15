@@ -14,6 +14,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -397,12 +398,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
 
-        public void UpsertTargetConditionGoalLibraryAndGoals(TargetConditionGoalLibraryDTO dto)
+        public void UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser(TargetConditionGoalLibraryDTO dto, bool isNewLibrary, Guid ownerIdForNewLibrary)
         {
             _unitOfWork.AsTransaction(u =>
             {
                 u.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
                 u.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
+                if (isNewLibrary)
+                {
+
+                    var users = LibraryUserDtolists.OwnerAccess(ownerIdForNewLibrary);
+                    u.TargetConditionGoalRepo.UpsertOrDeleteUsers(dto.Id, users);
+                }
             });
         }
     }

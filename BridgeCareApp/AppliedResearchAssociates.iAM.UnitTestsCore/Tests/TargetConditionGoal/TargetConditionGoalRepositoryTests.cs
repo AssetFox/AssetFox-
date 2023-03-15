@@ -175,6 +175,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public void UpsertTargetConditionGoalLibraryAndGoals_LibraryInDb_Updates()
+        {
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var libraryName = RandomStrings.WithPrefix("Library");
+            var library = TargetConditionGoalLibraryDtos.Dto(libraryId);
+            var goalId = Guid.NewGuid();
+            var goalName = RandomStrings.WithPrefix("Goal");
+            var attributeName = TestAttributeNames.DeckDurationN;
+            var goal = TargetConditionGoalDtos.Dto(attributeName, goalId, goalName);
+            library.TargetConditionGoals = new List<TargetConditionGoalDTO> { goal };
+            library.Description = "Updated library description";
+
+            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibraryAndGoals(library);
+
+            var librariesAfter = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalLibrariesWithTargetConditionGoals();
+            var libraryAfter = librariesAfter.Single(l => l.Id == libraryId);
+            ObjectAssertions.EquivalentExcluding(library, libraryAfter, x => x.TargetConditionGoals[0].CriterionLibrary, x => x.Owner);
+        }
+
+        [Fact]
         public void DeleteTargetConditionGoalLibrary_DeletesGoalsAndData()
         {
             Setup();

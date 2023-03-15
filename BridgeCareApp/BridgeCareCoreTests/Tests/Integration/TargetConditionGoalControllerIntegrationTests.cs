@@ -64,7 +64,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public async Task UpsertScenarioTargetConditionGoals_IdkWhat()
+        public async Task UpsertScenarioTargetConditionGoals_Does()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);

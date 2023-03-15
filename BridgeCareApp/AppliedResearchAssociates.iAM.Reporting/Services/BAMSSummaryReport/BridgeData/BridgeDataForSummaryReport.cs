@@ -674,7 +674,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "County\r\n(5A05)",
                 "Owner Code\r\n(5A21)",
                 "Submitting Agency\r\n(6A06)",
-                "Maintenance Responsibility",
+                "Maintenance Responsibility\r\n(5A20)",
                 "Planning Partner\r\n(5A13)",
 
                 //--------------------- Structure ---------------------

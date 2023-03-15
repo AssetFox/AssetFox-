@@ -68,7 +68,7 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertTargetConditionGoalLibrary));
+            var libraryCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertTargetConditionGoalLibraryAndGoals));
             ObjectAssertions.Equivalent(libraryDto, libraryCall.Arguments[0]);
         }
 
@@ -99,15 +99,12 @@ namespace BridgeCareCoreTests.Tests
             var libraryDto = TargetConditionGoalLibraryDtos.Dto(libraryId);
             var goalDto = TargetConditionGoalDtos.Dto("attribute");
             repo.Setup(r => r.GetTargetConditionGoalsByLibraryId(libraryId)).ReturnsList(goalDto);
-
             libraryDto.Description = "Updated Description";
             goalDto.Name = "Updated Name";
-
             var sync = new PagingSyncModel<TargetConditionGoalDTO>()
             {
                 UpdateRows = new List<TargetConditionGoalDTO>() { goalDto }
             };
-
             var libraryRequest = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>()
             {
                 IsNewLibrary = false,
@@ -120,14 +117,12 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertTargetConditionGoalLibrary));
-            var goalsCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertOrDeleteTargetConditionGoals));
+            var libraryCall = repo.SingleInvocationWithName(nameof(ITargetConditionGoalRepository.UpsertTargetConditionGoalLibraryAndGoals));
             var upsertedLibrary = libraryCall.Arguments[0] as TargetConditionGoalLibraryDTO;
             Assert.Equal("Updated Description", upsertedLibrary.Description);
-            var upsertedGoals = goalsCall.Arguments[0] as List<TargetConditionGoalDTO>;
+            var upsertedGoals = upsertedLibrary.TargetConditionGoals;
             var upsertedGoal = upsertedGoals.Single();
             Assert.Equal("Updated Name", upsertedGoal.Name);
-            Assert.Equal(libraryId, goalsCall.Arguments[1]);
         }
 
         [Fact]

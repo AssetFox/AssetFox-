@@ -21,8 +21,8 @@ namespace BridgeCareCore.Services
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var workItem = await _sequentialWorkQueue.Dequeue(stoppingToken);
-                workItem?.DoWork(_serviceProvider, stoppingToken);
+                var workStarter = await _sequentialWorkQueue.Dequeue(stoppingToken);
+                workStarter?.StartWork(_serviceProvider);
             }
         }
     }

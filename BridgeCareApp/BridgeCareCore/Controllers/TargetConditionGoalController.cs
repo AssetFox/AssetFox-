@@ -16,8 +16,6 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BridgeCareCore.Controllers
 {

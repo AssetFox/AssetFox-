@@ -337,7 +337,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void ShouldModifyScenarioTreatmentData()
+        public void UpsertOrDeleteSelectableTreatments_ValidInput_Succeeds()
         {
             // Arrange
             Setup();
@@ -395,6 +395,77 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
             Assert.Equal(dto[0].Name, modifiedDto[0].Name);
             Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
             Assert.Contains(scenarioBudget.Id, modifiedDto[0].BudgetIds);
+        }
+
+        [Fact]
+        public void UpsertOrDeleteSelectableTreatments_TwoConsequencesCollide_DbUnchanged()
+        {
+            // Arrange
+            Setup();
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            CreateScenarioTestData(simulation.Id);
+
+            var scenarioBudget = new ScenarioBudgetEntity
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                SimulationId = simulation.Id
+            };
+            TestHelper.UnitOfWork.Context.AddEntity(scenarioBudget);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+
+            var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo
+                .GetScenarioSelectableTreatments(simulation.Id);
+
+            dto[0].Description = "Updated Description";
+            dto[0].Name = "Updated Name";
+            dto[0].CriterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dto[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dto[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            dto[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dto[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            dto[0].BudgetIds.Add(scenarioBudget.Id);
+            var consequenceToCollideWith = dto[0].Consequences[0];
+            var collidingConsequence = new TreatmentConsequenceDTO
+            {
+                Id = consequenceToCollideWith.Id,
+                Equation = new EquationDTO
+                {
+                    Id = Guid.NewGuid(),
+                    Expression = consequenceToCollideWith.Equation.Expression,
+                }
+            };
+            dto[0].Consequences.Add(collidingConsequence);
+            var treatmentsBefore = TestHelper.UnitOfWork.SelectableTreatmentRepo
+                .GetScenarioSelectableTreatments(simulation.Id);
+
+            // Act
+            var exception = Assert.ThrowsAny<Exception>(() => TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dto, simulation.Id));
+
+            // Assert
+            var treatmentsAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo
+                .GetScenarioSelectableTreatments(simulation.Id);
+            ObjectAssertions.Equivalent(treatmentsBefore, treatmentsAfter);
         }
 
         [Fact]

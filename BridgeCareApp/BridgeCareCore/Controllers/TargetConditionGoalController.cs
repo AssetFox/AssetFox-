@@ -165,8 +165,7 @@ namespace BridgeCareCore.Controllers
                         _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                         dto.TargetConditionGoals = items;
                     }
-                    UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
-                    UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
+                    UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibraryAndGoals(dto);
                     if (upsertRequest.IsNewLibrary)
                     {
                         var users = LibraryUserDtolists.OwnerAccess(UserId);

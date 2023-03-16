@@ -14,7 +14,7 @@
                     >
                     </v-select>
                 </v-flex>
-                <v-flex xs6>                       
+                <v-flex xs7>                       
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
                     <v-select
                         :items='treatmentSelectItems'
@@ -26,7 +26,7 @@
                     >
                     </v-select>
                 </v-flex>
-                <v-flex xs6>
+                <v-flex xs7>
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 20px !important">
                         <div class="ghd-control-label" style="padding-top: 12px !important">
                         Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |    

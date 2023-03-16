@@ -184,7 +184,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void ShouldGetSimpleTreatmentsByLibraryId()
+        public void GetSimpleTreatmentsByLibraryId_EntitiesInDatabase_Gets()
         {
             // Arrange
             Setup();
@@ -200,7 +200,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
 
 
         [Fact]
-        public void ShouldGetSimpleTreatmentsByScenarioId()
+        public void GetSimpleTreatmentsBySimulationId_EntitiesInDb_Gets()
         {
             // Arrange
             Setup();
@@ -213,13 +213,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
             Assert.Single(dtos);
 
             Assert.Equal(_testScenarioTreatment.Id, dtos[0].Id);
-
         }
 
-
-
         [Fact]
-        public void ShouldReturnOkResultOnLibraryGet()
+        public void GetAllTreatmentLibrariesNoChildren_AtLeastOneLibraryInDb_Gets()
         {
             Setup();
             // Act
@@ -229,7 +226,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnScenarioGet()
+        public void GetScenarioSelectableTreatments_SimulationInDb_DoesNotThrow()
         {
             Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
@@ -283,7 +280,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnLibraryPost()
+        public void UpsertOrDeleteLibrary_ThenTreatments_DoesNotThrow()
         {
             // Arrange
             Setup();
@@ -302,7 +299,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
 
 
         [Fact]
-        public void ShouldReturnOkResultOnScenarioPost()
+        public void UpsertOrDeleteScenarioTreatments_DoesNotThrow()
         {
             // Arrange
             Setup();
@@ -314,7 +311,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnLibraryDelete()
+        public void DeleteTreatmentLibrary_NoSuchLibraryInDb_DoesNotThrow()
         {
             // we pass if this does not throw.
             TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(Guid.NewGuid());
@@ -322,7 +319,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
 
 
         [Fact]
-        public void ShouldGetLibraryTreatmentData()
+        public void GetAllTreatmentLibrariesNoChildren_EntitiesInDatabase_Deletes()
         {
             //Arrange
             Setup();
@@ -335,7 +332,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void ShouldGetScenarioTreatmentData()
+        public void GetScenarioSelectableTreatments_EntitiesInDatabase_Gets()
         {
             // Arrange
             Setup();
@@ -358,9 +355,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void ShouldModifyLibraryTreatmentData()
+        public void UpsertTreatmentLibrary_ThenTreatments_LibraryAndTreatmentsInDb_Updates()
         {
-            // Arrange
+            // WJWJWJ could be a good test to modify for the new repo method?
             Setup();
             CreateLibraryTestData();
 
@@ -536,7 +533,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void ShouldDeleteLibraryData()
+        public void DeleteTreatmentLibrary_EntitiesInDb_Deletes()
         {
             // Arrange
             Setup();

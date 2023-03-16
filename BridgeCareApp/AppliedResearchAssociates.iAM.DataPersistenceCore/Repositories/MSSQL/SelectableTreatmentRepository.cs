@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
 using static AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums.TreatmentEnum;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -629,34 +630,37 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entityId = scenarioSelectableTreatment.Id;
 
-            _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
-                _.ScenarioSelectableTreatment.SimulationId == simulationId && _.ScenarioSelectableTreatment.Id == entityId);
+            _unitOfWork.AsTransaction(u =>
+            {
+                u.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                    _.ScenarioSelectableTreatment.SimulationId == simulationId && _.ScenarioSelectableTreatment.Id == entityId);
 
-            _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
-                _.SimulationId == simulationId && _.Id == entityId);
+                u.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
+                    _.SimulationId == simulationId && _.Id == entityId);
 
-            _unitOfWork.Context.DeleteAll<EquationEntity>(_ => (_.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId
-                    && _.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.Id == entityId)
-                ||
-                (_.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
-                    .ScenarioSelectableTreatment.SimulationId == simulationId
-                    && _.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
-                    .ScenarioSelectableTreatment.Id == entityId));
+                u.Context.DeleteAll<EquationEntity>(_ => (_.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId
+                        && _.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.Id == entityId)
+                    ||
+                    (_.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
+                        .ScenarioSelectableTreatment.SimulationId == simulationId
+                        && _.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
+                        .ScenarioSelectableTreatment.Id == entityId));
 
-            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioSelectableTreatmentEntity>(_ =>
-                _.ScenarioSelectableTreatment.SimulationId == simulationId && _.ScenarioSelectableTreatment.Id == entityId);
+                u.Context.DeleteAll<CriterionLibraryScenarioSelectableTreatmentEntity>(_ =>
+                    _.ScenarioSelectableTreatment.SimulationId == simulationId && _.ScenarioSelectableTreatment.Id == entityId);
 
-            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentCostEntity>(_ =>
-                _.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId
-                && _.ScenarioTreatmentCost.ScenarioSelectableTreatment.Id == entityId);
+                u.Context.DeleteAll<CriterionLibraryScenarioTreatmentCostEntity>(_ =>
+                    _.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId
+                    && _.ScenarioTreatmentCost.ScenarioSelectableTreatment.Id == entityId);
 
-            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(_ =>
-                _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.SimulationId == simulationId
-                && _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.Id == entityId);
+                u.Context.DeleteAll<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(_ =>
+                    _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.SimulationId == simulationId
+                    && _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.Id == entityId);
 
-            // Update last modified date
-            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
-            _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+                // Update last modified date
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                u.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+            });
         }
 
         public List<SimpleTreatmentDTO> GetSimpleTreatmentsBySimulationId(Guid simulationId)
@@ -803,5 +807,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var dto = entity.ToDtoNullSafe();
             return dto;
         }
+
+        public void UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(TreatmentLibraryDTO dto, bool isNewLibrary, Guid userId)
+        {
+            _unitOfWork.AsTransaction(u =>
+            {
+                u.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
+                u.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
+                if (isNewLibrary)
+                {
+                    var users = LibraryUserDtolists.OwnerAccess(userId);
+                    u.TreatmentLibraryUserRepo.UpsertOrDeleteUsers(dto.Id, users);
+                }
+
+            });
+        };
     }
 }

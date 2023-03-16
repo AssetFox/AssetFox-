@@ -13,6 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class UserCriteriaRepository : IUserCriteriaRepository
     {
+        public const string TheUserWasNotFound = "The specified user was not found.";
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public UserCriteriaRepository(UnitOfDataPersistenceWork unitOfWork) =>
@@ -106,7 +107,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.User.Any(_ => _.Id == dto.UserId))
             {
-                throw new RowNotInTableException("The specified user was not found.");
+                throw new RowNotInTableException(TheUserWasNotFound);
             }
 
             _unitOfWork.Context.Upsert(dto.ToEntity(), _ => _.UserId == dto.UserId, _unitOfWork.UserEntity?.Id);

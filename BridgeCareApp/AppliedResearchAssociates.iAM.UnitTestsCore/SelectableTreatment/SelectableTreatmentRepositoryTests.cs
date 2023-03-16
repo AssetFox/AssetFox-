@@ -355,7 +355,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void UpsertTreatmentLibrary_ThenTreatments_LibraryAndTreatmentsInDb_Updates()
+        public void UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers_LibraryAndTreatmentsInDb_Updates()
         {
             // WJWJWJ could be a good test to modify for the new repo method?
             Setup();
@@ -391,9 +391,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
             treatments[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
 
             // Act
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dtoLibrary);
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dtoLibrary.Treatments, dtoLibrary.Id);
-
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(dtoLibrary, false, Guid.Empty);
             // Assert
             var modifiedDto =
                 TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().Single(lib => lib.Id == dtoLibrary.Id);
@@ -401,7 +399,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
         }
 
         [Fact]
-        public void UpsertOrDeleteSelectableTreatments_ValidInput_Succeeds()
+        public void UpsertOrDeleteScenarioSelectableTreatment_ValidInput_Succeeds()
         {
             // Arrange
             Setup();
@@ -409,7 +407,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
-
             var scenarioBudget = new ScenarioBudgetEntity
             {
                 Id = Guid.NewGuid(),

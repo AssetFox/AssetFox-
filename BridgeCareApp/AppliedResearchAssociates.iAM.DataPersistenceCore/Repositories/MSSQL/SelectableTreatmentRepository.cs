@@ -819,8 +819,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var users = LibraryUserDtolists.OwnerAccess(userId);
                     u.TreatmentLibraryUserRepo.UpsertOrDeleteUsers(dto.Id, users);
                 }
-
             });
-        };
+        }
     }
 }

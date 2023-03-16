@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             unfundedTreatmentTimeWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             AddDynamicDataCells(unfundedTreatmentTimeWorksheet, simulationOutput, currentCell);
-            unfundedTreatmentTimeWorksheet.Calculate();  // calculation is set to manual, so force calculation of the total now
+            //unfundedTreatmentTimeWorksheet.Calculate();  // calculation is set to manual, so force calculation of the total now
 
             unfundedTreatmentTimeWorksheet.Cells.AutoFitColumns();
             _unfundedTreatmentCommon.PerformPostAutofitAdjustments(unfundedTreatmentTimeWorksheet);

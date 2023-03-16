@@ -388,12 +388,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
-                _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
-                _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
-                    .TreatmentLibraryId == libraryId);
+            _unitOfWork.AsTransaction(u =>
+            {
+                u.Context.DeleteAll<EquationEntity>(_ =>
+                    _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
+                    _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
+                        .TreatmentLibraryId == libraryId);
 
-            _unitOfWork.Context.DeleteEntity<TreatmentLibraryEntity>(_ => _.Id == libraryId);
+                u.Context.DeleteEntity<TreatmentLibraryEntity>(_ => _.Id == libraryId);
+            });
         }
 
         public List<TreatmentDTO> GetScenarioSelectableTreatments(Guid simulationId)

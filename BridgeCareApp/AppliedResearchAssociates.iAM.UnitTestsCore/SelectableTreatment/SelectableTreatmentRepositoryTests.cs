@@ -17,6 +17,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using System.Runtime.InteropServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
 {
@@ -114,6 +115,72 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
 
             TestHelper.UnitOfWork.Context.SaveChanges();
             return budget;
+        }
+
+        [Fact]
+        public void TreatmentInDbWithCostEquation_DeleteLibrary_EquationIsDeleted()
+        {
+            var libraryId = Guid.NewGuid();
+            var treatmentId = Guid.NewGuid();
+            var library = TreatmentLibraryDtos.Empty(libraryId);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(treatmentId);
+            var costId = Guid.NewGuid();
+            var costLibraryId = Guid.NewGuid();
+            var insertCostEquationId = Guid.NewGuid();
+            var cost = TreatmentCostDtos.WithEquationAndCriterionLibrary(costId, insertCostEquationId, costLibraryId, "equation", "mergedCriteriaExpression");
+            treatment.Costs.Add(cost);
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(library);
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(treatments, libraryId);
+            var costInDb = TestHelper.UnitOfWork.Context.TreatmentCost
+                .Include(tc => tc.TreatmentCostEquationJoin)
+                .SingleOrDefault(x => x.Id == costId);
+            Assert.NotNull(costInDb);
+            var equationIdInDb = costInDb.TreatmentCostEquationJoin.EquationId;
+            var equationInDb = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationIdInDb);
+            Assert.NotNull(equationInDb);
+
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
+
+            var equationInDbAfter = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationIdInDb);
+            Assert.Null(equationInDbAfter);
+            var costInDbAfter = TestHelper.UnitOfWork.Context.TreatmentCost
+                .SingleOrDefault(x => x.Id == costId);
+            Assert.Null(costInDbAfter);
+        }
+
+        [Fact]
+        public void TreatmentInDbWithConsequenceEquation_DeleteLibrary_EquationIsDeleted()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var libraryId = Guid.NewGuid();
+            var treatmentId = Guid.NewGuid();
+            var attributeName = TestAttributeNames.CulvDurationN;
+            var library = TreatmentLibraryDtos.Empty(libraryId);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(treatmentId);
+            var consequenceId = Guid.NewGuid();
+            var consequenceLibraryId = Guid.NewGuid();
+            var insertConsequenceEquationId = Guid.NewGuid();
+            var consequence = TreatmentConsequenceDtos.WithEquationAndCriterionLibrary(consequenceId, attributeName, insertConsequenceEquationId, consequenceLibraryId);
+            treatment.Consequences.Add(consequence);
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(library);
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(treatments, libraryId);
+            var consequenceInDb = TestHelper.UnitOfWork.Context.TreatmentConsequence
+                .Include(tc => tc.ConditionalTreatmentConsequenceEquationJoin)
+                .SingleOrDefault(x => x.Id == consequenceId);
+            Assert.NotNull(consequenceInDb);
+            var equationIdInDb = consequenceInDb.ConditionalTreatmentConsequenceEquationJoin.EquationId;
+            var equationInDb = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationIdInDb);
+            Assert.NotNull(equationInDb);
+
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
+
+            var equationInDbAfter = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationIdInDb);
+            Assert.Null(equationInDbAfter);
+            var costInDbAfter = TestHelper.UnitOfWork.Context.TreatmentCost
+                .SingleOrDefault(x => x.Id == consequenceId);
+            Assert.Null(costInDbAfter);
         }
 
         [Fact]
@@ -478,12 +545,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
             // Act
             TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(_testTreatmentLibrary.Id);
 
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == _testTreatmentLibrary.Id));
-            Assert.True(!TestHelper.UnitOfWork.Context.SelectableTreatment.Any(_ => _.Id == _testTreatment.Id));
-            Assert.True(!TestHelper.UnitOfWork.Context.TreatmentCost.Any(_ => _.Id == _testTreatmentCost.Id));
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.TreatmentConsequence.Any(_ =>
+            Assert.False(
+                TestHelper.UnitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == _testTreatmentLibrary.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.SelectableTreatment.Any(_ => _.Id == _testTreatment.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.TreatmentCost.Any(_ => _.Id == _testTreatmentCost.Id));
+            Assert.False(
+                TestHelper.UnitOfWork.Context.TreatmentConsequence.Any(_ =>
                     _.Id == _testTreatmentConsequence.Id));
         }
 

@@ -19,6 +19,14 @@ using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DTOs.Static;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Utils.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.SqlServer.Dac.Model;
+using static BridgeCareCore.Security.SecurityConstants;
 
 namespace BridgeCareCore.Controllers
 {
@@ -27,8 +35,13 @@ namespace BridgeCareCore.Controllers
     public class NetworkController : BridgeCareCoreBaseController
     {
         public const string NetworkError = "Network Error";
+
+        private readonly IWorkQueService _workQueueService;
         public NetworkController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
+            IHttpContextAccessor httpContextAccessor, IWorkQueService workQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
+            _workQueueService = workQueService ?? throw new ArgumentNullException(nameof(workQueService));
+        }
 
         [HttpGet]
         [Route("GetAllNetworks")]
@@ -139,6 +152,48 @@ namespace BridgeCareCore.Controllers
                     }
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, $"Completed network deletion");
                 });
+            }
+        }
+
+        [HttpPost]
+        [Route("DeleteNetwork/{networkId}")]
+        [Authorize(Policy = Policy.RunSimulation)]
+        public async Task<IActionResult> RunSimulation(Guid networkId)
+        {
+            try
+            {
+                DeleteNetworkWorkitem workItem = new DeleteNetworkWorkitem(networkId, UserInfo.Name);
+                var analysisHandle = _workQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, analysisHandle.MostRecentStatusMessage);
+                }
+
+                //await analysisHandle.WorkCompletion;
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::DeleteNetwork - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
+                if (e is not SimulationException)
+                {
+                    var logDto = SimulationLogDtos.GenericException(simulationId, e);
+                    UnitOfWork.SimulationLogRepo.CreateLog(logDto);
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::DeleteNetwork {networkName} - {e.Message}");
+                }
+                else
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::DeleteNetwork {networkName} - {e.Message}");
+                }
+                throw;
             }
         }
 

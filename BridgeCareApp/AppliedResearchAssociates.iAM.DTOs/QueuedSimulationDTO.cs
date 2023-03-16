@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
-    public class QueuedSimulationDTO
+    public class QueuedWorkDTO
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

@@ -19,7 +19,7 @@ namespace BridgeCareCore.Utils
     {
         private readonly IUnitOfWork UnitOfWork;
         private readonly IHttpContextAccessor ContextAccessor;
-        private readonly ISimulationQueueService _simulationQueueService;
+        private readonly IWorkQueueService _simulationQueueService;
 
         public const string LibraryModifyUnauthorizedMessage = "You are not authorized to modify this library's data.";
         public const string LibraryDeleteUnauthorizedMessage = "You are not authorized to delete this library.";
@@ -33,7 +33,7 @@ namespace BridgeCareCore.Utils
         public const string AddingOwnersIsNotAllowedMessage = "Adding owners to a library is not allowed.";
         public const string RemovingOwnersIsNotAllowedMessage = "Removing owners of a library is not allowed.";
 
-        public ClaimHelper(IUnitOfWork unitOfWork, ISimulationQueueService simulationQueueService, IHttpContextAccessor contextAccessor)
+        public ClaimHelper(IUnitOfWork unitOfWork, IWorkQueueService simulationQueueService, IHttpContextAccessor contextAccessor)
         {
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
@@ -213,20 +213,6 @@ namespace BridgeCareCore.Utils
         {
             return !HasAdminAccess();
         }
-
-        private QueuedSimulationDTO GetQueuedSimulation(Guid simulationId)
-        {
-            QueuedSimulationDTO simulation;
-            try
-            {
-                simulation = _simulationQueueService.GetQueuedSimulation(simulationId);
-            }
-            catch
-            {
-                throw new RowNotInTableException($"No simulation analysis found in queue having id {simulationId}");
-            }
-            return simulation;
-        }
 
         private SimulationDTO GetSimulationWithUsers(Guid simulationId)
         {

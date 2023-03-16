@@ -28,11 +28,11 @@ namespace BridgeCareCore.Controllers
 
         private readonly ISimulationAnalysis _simulationAnalysis;
         private readonly ISimulationPagingService _simulationService;
-        private readonly ISimulationQueueService _simulationQueueService;
+        private readonly IWorkQueueService _simulationQueueService;
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
+        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, IWorkQueueService simulationQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
@@ -118,11 +118,11 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("GetSimulationQueuePage")]
         [Authorize]
-        public async Task<IActionResult> GetSimulationQueuePage([FromBody] PagingRequestModel<QueuedSimulationDTO> request)
+        public async Task<IActionResult> GetSimulationQueuePage([FromBody] PagingRequestModel<QueuedWorkDTO> request)
         {
             try
             {                
-                var result = await Task.Factory.StartNew(() => _simulationQueueService.GetSimulationQueuePage(request));
+                var result = await Task.Factory.StartNew(() => _simulationQueueService.GetWorkQueuePage(request));
                 return Ok(result);
             }
             catch (Exception e)

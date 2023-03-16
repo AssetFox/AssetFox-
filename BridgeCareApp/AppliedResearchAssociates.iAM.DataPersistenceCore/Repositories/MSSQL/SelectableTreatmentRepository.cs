@@ -491,35 +491,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
             _unitOfWork.AsTransaction(u =>
             {
-                _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                u.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
                     _.ScenarioSelectableTreatment.SimulationId == simulationId);
 
-                _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
+                u.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
                     _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
-                _unitOfWork.Context.UpdateAll(scenarioSelectableTreatmentEntities
+                u.Context.UpdateAll(scenarioSelectableTreatmentEntities
                     .Where(_ => existingEntityIds.Contains(_.Id))
                     .ToList());
-                _unitOfWork.Context.AddAll(scenarioSelectableTreatmentEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                u.Context.AddAll(scenarioSelectableTreatmentEntities.Where(_ => !existingEntityIds.Contains(_.Id))
                     .ToList());
 
-                _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
+                u.Context.DeleteAll<EquationEntity>(_ =>
                     _.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId ==
                     simulationId ||
                     _.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
                         .ScenarioSelectableTreatment
                         .SimulationId == simulationId);
 
-                _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                u.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
                     _.ScenarioSelectableTreatment.SimulationId == simulationId);
 
-                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioSelectableTreatmentEntity>(_ =>
+                u.Context.DeleteAll<CriterionLibraryScenarioSelectableTreatmentEntity>(_ =>
                     _.ScenarioSelectableTreatment.SimulationId == simulationId);
 
-                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentCostEntity>(_ =>
+                u.Context.DeleteAll<CriterionLibraryScenarioTreatmentCostEntity>(_ =>
                     _.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId);
 
-                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(_ =>
+                u.Context.DeleteAll<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(_ =>
                     _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.SimulationId == simulationId);
 
                 if (scenarioSelectableTreatments.Any(_ => _.Costs.Any()))
@@ -527,14 +527,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var costsPerTreatmentId =
                         scenarioSelectableTreatments.Where(_ => _.Costs.Any()).ToList()
                             .ToDictionary(_ => _.Id, _ => _.Costs);
-                    _unitOfWork.TreatmentCostRepo.UpsertOrDeleteScenarioTreatmentCosts(costsPerTreatmentId, simulationId);
+                    u.TreatmentCostRepo.UpsertOrDeleteScenarioTreatmentCosts(costsPerTreatmentId, simulationId);
                 }
 
                 if (scenarioSelectableTreatments.Any(_ => _.Consequences.Any()))
                 {
                     var consequencesPerTreatmentId = scenarioSelectableTreatments.Where(_ => _.Consequences.Any()).ToList()
                         .ToDictionary(_ => _.Id, _ => _.Consequences);
-                    _unitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteScenarioTreatmentConsequences(
+                    u.TreatmentConsequenceRepo.UpsertOrDeleteScenarioTreatmentConsequences(
                         consequencesPerTreatmentId, simulationId);
                 }
 
@@ -549,7 +549,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                     ScenarioBudgetId = budgetId
                                 })).ToList();
 
-                    _unitOfWork.Context.AddAll(treatmentBudgetJoinsToAdd, _unitOfWork.UserEntity?.Id);
+                    u.Context.AddAll(treatmentBudgetJoinsToAdd, _unitOfWork.UserEntity?.Id);
                 }
 
                 if (scenarioSelectableTreatments.Any(_ =>
@@ -578,13 +578,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             return criterionLibraryEntity;
                         }).ToList();
 
-                    _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
-                    _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
+                    u.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                    u.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
                 }
 
                 // Update last modified date
-                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
-                _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+                var simulationEntity = u.Context.Simulation.Single(_ => _.Id == simulationId);
+                u.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
             });
         }
 
@@ -597,23 +597,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var selectableTreatmentEntity = treatment.ToLibraryEntity(libraryId);
             var entityId = selectableTreatmentEntity.Id;
+            _unitOfWork.AsTransaction(u =>
+            {
 
-            _unitOfWork.Context.DeleteAll<SelectableTreatmentEntity>(_ =>
-                _.TreatmentLibraryId == libraryId && entityId == _.Id);
+                u.Context.DeleteAll<SelectableTreatmentEntity>(_ =>
+                    _.TreatmentLibraryId == libraryId && entityId == _.Id);
 
-            _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
-                (_.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
-                    _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
-                    .TreatmentLibraryId == libraryId) && _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment.Id == treatment.Id);
+                u.Context.DeleteAll<EquationEntity>(_ =>
+                    (_.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
+                        _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
+                        .TreatmentLibraryId == libraryId) && _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment.Id == treatment.Id);
 
-            _unitOfWork.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
-                _.SelectableTreatment.TreatmentLibraryId == libraryId && _.SelectableTreatment.Id == treatment.Id);
+                u.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
+                    _.SelectableTreatment.TreatmentLibraryId == libraryId && _.SelectableTreatment.Id == treatment.Id);
 
-            _unitOfWork.Context.DeleteAll<CriterionLibraryTreatmentCostEntity>(_ =>
-                _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId && _.TreatmentCost.SelectableTreatment.Id == treatment.Id);
+                u.Context.DeleteAll<CriterionLibraryTreatmentCostEntity>(_ =>
+                    _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId && _.TreatmentCost.SelectableTreatment.Id == treatment.Id);
 
-            _unitOfWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
-                _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId && _.ConditionalTreatmentConsequence.SelectableTreatment.Id == treatment.Id);
+                _unitOfWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
+                    _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId && _.ConditionalTreatmentConsequence.SelectableTreatment.Id == treatment.Id);
+            });
         }
 
         public void DeleteScenarioSelectableTreatment(TreatmentDTO scenarioSelectableTreatment,

@@ -2,6 +2,8 @@
 
 public interface IQueuedWorkHandle
 {
+    string MostRecentStatusMessage { get; }
+
     DateTime QueueEntryTimestamp { get; }
 
     int QueueIndex { get; }
@@ -16,7 +18,7 @@ public interface IQueuedWorkHandle
 
     DateTime? WorkStartTimestamp { get; }
 
-    void RemoveFromQueue(bool setCanceled = false);
+    void RemoveFromQueue(bool setCanceled);
 
     CancellationTokenSource? WorkCancellationTokenSource { get; }
 }

@@ -12,7 +12,7 @@ public class SequentialWorkQueue
 {
     public IReadOnlyList<IQueuedWorkHandle> Snapshot => IncompleteElements.Values.ToList();
 
-    public async Task<IWorkItem?> Dequeue(CancellationToken cancellationToken)
+    public async Task<IWorkStarter?> Dequeue(CancellationToken cancellationToken)
     {
         var workItem = await ElementChannel.Reader.ReadAsync(cancellationToken);
         while (workItem != null && workItem.WorkCompletion.IsCanceled)
@@ -22,7 +22,7 @@ public class SequentialWorkQueue
         return workItem;
     }
 
-    public Task Enqueue(IWorkItem workItem, out IQueuedWorkHandle workHandle)
+    public Task Enqueue(IWorkSpecification workItem, out IQueuedWorkHandle workHandle)
     {
         lock (ElementChannel)
         {
@@ -64,17 +64,19 @@ public class SequentialWorkQueue
 
     private readonly ConcurrentDictionary<string, QueueElement> IncompleteElements = new();
 
-    private class QueueElement : IWorkItem, IQueuedWorkHandle
+    internal class QueueElement : IQueuedWorkHandle, IWorkStarter
     {
-        public QueueElement(IWorkItem workItem, SequentialWorkQueue workQueue)
+        public QueueElement(IWorkSpecification workSpec, SequentialWorkQueue workQueue)
         {
-            WorkItem = workItem ?? throw new ArgumentNullException(nameof(workItem));
+            WorkSpec = workSpec ?? throw new ArgumentNullException(nameof(workSpec));
             WorkQueue = workQueue ?? throw new ArgumentNullException(nameof(workQueue));
 
             QueueEntryTimestamp = WorkQueue.EntryTimestampPerId[WorkId];
 
             _ = WorkQueue.IncompleteElements.TryAdd(WorkId, this);
         }
+
+        public string MostRecentStatusMessage { get; private set; } = "";
 
         public DateTime QueueEntryTimestamp { get; }
 
@@ -89,17 +91,17 @@ public class SequentialWorkQueue
             }
         }
 
-        public string UserId => WorkItem.UserId;
+        public string UserId => WorkSpec.UserId;
 
         public Task WorkCompletion => WorkCompletionSource.Task;
 
-        public string WorkId => WorkItem.WorkId;
+        public string WorkId => WorkSpec.WorkId;
 
         public DateTime? WorkStartTimestamp { get; private set; }
 
         public CancellationTokenSource? WorkCancellationTokenSource { get; private set; }
 
-        public void DoWork(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        public void StartWork(IServiceProvider serviceProvider)
         {
             if (WorkQueue.EntryTimestampPerId.ContainsKey(WorkId))
             {
@@ -108,7 +110,10 @@ public class SequentialWorkQueue
 
                 try
                 {
-                    WorkItem.DoWork(serviceProvider, WorkCancellationTokenSource.Token);
+                    WorkSpec.DoWork(
+                        serviceProvider,
+                        message => MostRecentStatusMessage = message,
+                        WorkCancellationTokenSource.Token);
                 }
                 catch (Exception e)
                 {
@@ -131,7 +136,7 @@ public class SequentialWorkQueue
                     var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                     var message = new SimulationAnalysisDetailDTO()
                     {
-                        SimulationId = Guid.Parse(WorkItem.WorkId),
+                        SimulationId = Guid.Parse(WorkSpec.WorkId),
                         Status = $"Run Failed. {WorkCompletion.Exception?.InnerException?.Message ?? "Unknown status."}",
                         LastRun = DateTime.Now
                     };
@@ -139,7 +144,7 @@ public class SequentialWorkQueue
                     _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(message);
                 }
 
-                RemoveFromQueue();
+                RemoveFromQueue(false);
             }
             else
             {
@@ -147,7 +152,7 @@ public class SequentialWorkQueue
             }
         }
 
-        public void RemoveFromQueue(bool setCanceled = false)
+        public void RemoveFromQueue(bool setCanceled)
         {
             _ = WorkQueue.IncompleteElements.TryRemove(WorkId, out _);
             _ = WorkQueue.EntryTimestampPerId.TryRemove(WorkId, out _);
@@ -159,7 +164,7 @@ public class SequentialWorkQueue
 
         private readonly TaskCompletionSource WorkCompletionSource = new();
 
-        private readonly IWorkItem WorkItem;
+        private readonly IWorkSpecification WorkSpec;
 
         private readonly SequentialWorkQueue WorkQueue;
     }

@@ -62,18 +62,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Username = userInfo.Sub,
                     HasInventoryAccess = userInfo.HasAdminAccess
                 };
-                _unitOfWork.Context.AddEntity(newUserEntity, newUserEntity.Id);
-
-                // if the newly logged in user is an admin
-                switch (newUserEntity.HasInventoryAccess)
+                UserCriteriaFilterEntity userCriteriaFilterEntity = null;
+                _unitOfWork.AsTransaction(u =>
                 {
-                case true:
-                    var newCriteriaFilter = newUserEntity.GenerateDefaultCriteriaForAdmin();
-                    _unitOfWork.Context.AddEntity(newCriteriaFilter, newUserEntity.Id);
-                    return newCriteriaFilter.ToDto();
-                    break;
-                // user does not have admin access, so don't enter the data in userCriteria_Filter table and return an empty object
-                case false:
+                    _unitOfWork.Context.AddEntity(newUserEntity, newUserEntity.Id);
+
+                    // if the newly logged in user is an admin
+                    if (newUserEntity.HasInventoryAccess)
+                    {
+                        userCriteriaFilterEntity = newUserEntity.GenerateDefaultCriteriaForAdmin();
+                        _unitOfWork.Context.AddEntity(userCriteriaFilterEntity, newUserEntity.Id);
+                    }
+                });
+                if (userCriteriaFilterEntity!= null) { 
+                    return userCriteriaFilterEntity.ToDto();
+                }
+                else
+                {
                     return new UserCriteriaDTO { UserName = userInfo.Sub };
                 }
             }
@@ -86,7 +91,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 if (!userEntity.HasInventoryAccess)
                 {
-                    return new UserCriteriaDTO {UserName = userInfo.Sub, HasAccess = userEntity.HasInventoryAccess};
+                    return new UserCriteriaDTO { UserName = userInfo.Sub, HasAccess = userEntity.HasInventoryAccess };
                 }
 
                 var newCriteriaFilter = userEntity.GenerateDefaultCriteriaForAdmin();
@@ -108,7 +113,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var userEntity = new UserEntity
             {
-                Id = dto.UserId, Username = dto.UserName, HasInventoryAccess = dto.HasAccess
+                Id = dto.UserId,
+                Username = dto.UserName,
+                HasInventoryAccess = dto.HasAccess
             };
             _unitOfWork.Context.UpdateEntity(userEntity, dto.UserId, _unitOfWork.UserEntity?.Id);
         }

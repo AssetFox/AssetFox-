@@ -30,9 +30,7 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var userCriteria = UnitOfWork.UserCriteriaRepo.GetOwnUserCriteria(UserInfo.ToDto());
-                    UnitOfWork.Commit();
                     return userCriteria;
                 });
 
@@ -40,7 +38,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::GetUserCriteria - {e.Message}");
                 throw;
             }

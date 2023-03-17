@@ -25,18 +25,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 return;
             }
+            _unitOfWork.AsTransaction(u =>
+            {
+                var userCriteriaFilterEntity =
+                    u.Context.UserCriteria.AsNoTracking()
+                        .Include(_ => _.User)
+                        .Single(_ => _.UserCriteriaId == userCriteriaId);
 
-            var userCriteriaFilterEntity =
-                _unitOfWork.Context.UserCriteria.AsNoTracking()
-                    .Include(_ => _.User)
-                    .Single(_ => _.UserCriteriaId == userCriteriaId);
+                userCriteriaFilterEntity.User.HasInventoryAccess = false;
 
-            userCriteriaFilterEntity.User.HasInventoryAccess = false;
+                u.Context.UpdateEntity(userCriteriaFilterEntity.User, userCriteriaFilterEntity.User.Id,
+                    u.UserEntity?.Id);
 
-            _unitOfWork.Context.UpdateEntity(userCriteriaFilterEntity.User, userCriteriaFilterEntity.User.Id,
-                _unitOfWork.UserEntity?.Id);
-
-            _unitOfWork.Context.DeleteEntity<UserCriteriaFilterEntity>(_ => _.UserCriteriaId == userCriteriaId);
+                u.Context.DeleteEntity<UserCriteriaFilterEntity>(_ => _.UserCriteriaId == userCriteriaId);
+            });
         }
 
         public List<UserCriteriaDTO> GetAllUserCriteria()

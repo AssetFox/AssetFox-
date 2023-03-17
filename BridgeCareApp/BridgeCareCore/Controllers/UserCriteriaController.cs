@@ -91,16 +91,13 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.UserCriteriaRepo.RevokeUserAccess(userCriteriaId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::RevokeUserAccess - {e.Message}");
                 throw;
             }
@@ -115,16 +112,13 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.UserCriteriaRepo.DeleteUser(userId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::DeleteUser - {e.Message}");
                 throw;
             }

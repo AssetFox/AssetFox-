@@ -102,7 +102,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             TestHelper.UnitOfWork.Context.AddEntity(_testScenarioBudgetPriority);
 
-
             _testBudgetPercentagePair = new BudgetPercentagePairEntity
             {
                 Id = Guid.NewGuid(),
@@ -115,19 +114,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
 
         [Fact]
-        public void ShouldReturnOkResultOnLibraryGet()
+        public void GetBudgetPriortyLibrariesNoChildren_DoesNotThrow()
         {
-            // Arrange
             Setup();
 
             // Act
             var result = TestHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriortyLibrariesNoChildren();
-
-            // Assert
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnScenarioGet()
+        public void GetScenarioBudgetPriorities_SimulationExists_DoesNotThrow()
         {
             // Arrange
             Setup();
@@ -135,12 +131,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             // Act
             var result = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulation.Id);
-
-            // Assert
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnLibraryPost()
+        public void UpsertBudgetPriorityLibrary_DoesNotThrow()
         {
             // Arrange
             Setup();
@@ -153,36 +147,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             // Act
             TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
-
-            // Assert
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnScenarioPost()
-        {
-            // Arrange
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var dtos = new List<BudgetPriorityDTO>();
-
-            // Act
-            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(dtos, simulation.Id);
-
-            // Assert
-        }
-
-        [Fact]
-        public void ShouldReturnOkResultOnDelete()
+        public void DeleteBudgetPriorityLibrary_DoesNotThrow()
         {
             Setup();
             // Act
             TestHelper.UnitOfWork.BudgetPriorityRepo.DeleteBudgetPriorityLibrary(Guid.Empty);
-
-            // Assert
         }
 
         [Fact]
-        public void ShouldGetLibraryNoData()
+        public void GetBudgetPriorityLibraries_LibraryInDb_Gets()
         {
             // Arrange
             Setup();
@@ -193,11 +169,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             // Assert
             Assert.Contains(dtos, b => b.Name == BudgetPriorityLibraryEntityName);
-            var budgetPriorityLibraryDTO = dtos.FirstOrDefault(b => b.Name == BudgetPriorityLibraryEntityName && b.Id == _testBudgetPriorityLibrary.Id);
+            var budgetPriorityLibraryDTO = dtos.Single(b => b.Name == BudgetPriorityLibraryEntityName && b.Id == _testBudgetPriorityLibrary.Id);
         }
 
         [Fact]
-        public void ShouldGetScenarioData()
+        public void GetScenarioBudgetPriorities_EntitiesInDb_Gets()
         {
             // Arrange
             Setup();
@@ -223,7 +199,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void ShouldModifyLibraryData()
+        public void UpsertLibraryAndPriorities_EntitiesInDb_Updates()
         {
             // Arrange
             Setup();
@@ -231,14 +207,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             // Arrange
             _testBudgetPriorityLibrary.BudgetPriorities = new List<BudgetPriorityEntity> { _testBudgetPriority };
-
             var dto = _testBudgetPriorityLibrary.ToDto();
             dto.Description = "Updated Description";
             var updatedPriority = dto.BudgetPriorities[0];
             updatedPriority.PriorityLevel = 2;
             updatedPriority.Year = DateTime.Now.Year + 1;
             updatedPriority.CriterionLibrary = new CriterionLibraryDTO();
-
             var updateRows = new List<BudgetPriorityDTO>() { updatedPriority };
 
             // Act
@@ -248,7 +222,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // Assert
             var modifiedDto = TestHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries().Single(l => l.Id == dto.Id);
             Assert.Equal(dto.Description, modifiedDto.Description);
-
             Assert.Equal(dto.BudgetPriorities[0].PriorityLevel, modifiedDto.BudgetPriorities[0].PriorityLevel);
             Assert.Equal(dto.BudgetPriorities[0].Year, modifiedDto.BudgetPriorities[0].Year);
             Assert.Equal(dto.BudgetPriorities[0].CriterionLibrary.Id,
@@ -256,7 +229,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void ShouldModifyScenarioData()
+        public void UpsertOrDeleteScenarioBudgetPriorities_PriorityInDb_Updates()
         {
             // Arrange
             Setup();
@@ -284,10 +257,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void ShouldDeleteLibraryData()
+        public void DeleteBudgetPriorityLibrary_EntitiesInDb_Deletes()
         {
             Setup();
             CreateLibraryTestData();
+            Assert.True(TestHelper.UnitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == _testBudgetPriorityLibrary.Id));
+            Assert.True(TestHelper.UnitOfWork.Context.BudgetPriority.Any(_ => _.Id == _testBudgetPriority.Id));
+            Assert.True(TestHelper.UnitOfWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
+                    _.BudgetPriorityId == _testBudgetPriority.Id));
 
             // Act
             TestHelper.UnitOfWork.BudgetPriorityRepo.DeleteBudgetPriorityLibrary(_testBudgetPriorityLibrary.Id);

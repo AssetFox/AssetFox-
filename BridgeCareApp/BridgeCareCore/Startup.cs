@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Security;
 using BridgeCareCore.Services.Aggregation;
 using BridgeCareCore.StartupExtension;
+using BridgeCareCore.GraphQL;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -81,6 +82,8 @@ namespace BridgeCareCore
                 sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
                 );
 
+            services.AddGraphQLServer().AddQueryType<Query>();
+
             SetupReporting(services);
             var reportLookup = new Dictionary<string, Type>();
 
@@ -130,6 +133,7 @@ namespace BridgeCareCore
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<BridgeCareHub>("/bridgecarehub");
+                endpoints.MapGraphQL();
             });
         }
 

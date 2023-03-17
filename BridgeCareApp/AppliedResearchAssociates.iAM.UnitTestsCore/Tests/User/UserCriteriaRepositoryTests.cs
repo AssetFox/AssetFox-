@@ -89,5 +89,43 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User
 
             var filter = TestHelper.UnitOfWork.Context.UserCriteria.Single(uc => uc.UserId == userId);
         }
+
+        [Fact]
+        public void RevokeUserAccess_UserCriteriaDoNotExist_DoesNothing()
+        {
+            var nonexistentCriteriaId = Guid.NewGuid();
+
+            TestHelper.UnitOfWork.UserCriteriaRepo
+                .RevokeUserAccess(nonexistentCriteriaId);
+        }
+
+        [Fact]
+        public async Task RevokeUserAccess_UserCriteriaExist_Deletes()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, true);
+            var userId = user.Id;
+            var dto = new UserCriteriaDTO
+            {
+                UserId = userId,
+                HasAccess = true,
+            };
+            TestHelper.UnitOfWork.UserCriteriaRepo
+                .UpsertUserCriteria(dto);
+            var userCriteriaEntityBefore = TestHelper.UnitOfWork.Context
+                .UserCriteria.SingleOrDefault(uc => uc.UserId == userId);
+            Assert.NotNull(userCriteriaEntityBefore);
+            var userBefore = TestHelper.UnitOfWork.Context.User
+                .Single(u => u.Id == user.Id);
+            Assert.True(userBefore.HasInventoryAccess);
+
+            TestHelper.UnitOfWork.UserCriteriaRepo.RevokeUserAccess(userCriteriaEntityBefore.UserCriteriaId);
+
+            var userCriteriaEntityAfter = TestHelper.UnitOfWork.Context
+            .UserCriteria.SingleOrDefault(uc => uc.UserId == userId);
+            Assert.Null(userCriteriaEntityAfter);
+            var userAfter = TestHelper.UnitOfWork.Context.User
+                .Single(u => u.Id == user.Id);
+            Assert.False(userAfter.HasInventoryAccess);
+        }
     }
 }

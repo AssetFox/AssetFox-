@@ -69,16 +69,13 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.UserCriteriaRepo.UpsertUserCriteria(userCriteria);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 var username = userCriteria?.UserName ?? "null";
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::UpsertUserCriteria for {username} - {e.Message}");
                 throw;

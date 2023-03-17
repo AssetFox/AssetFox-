@@ -110,15 +110,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException(TheUserWasNotFound);
             }
 
-            _unitOfWork.Context.Upsert(dto.ToEntity(), _ => _.UserId == dto.UserId, _unitOfWork.UserEntity?.Id);
-
-            var userEntity = new UserEntity
+            _unitOfWork.AsTransaction(u =>
             {
-                Id = dto.UserId,
-                Username = dto.UserName,
-                HasInventoryAccess = dto.HasAccess
-            };
-            _unitOfWork.Context.UpdateEntity(userEntity, dto.UserId, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.Upsert(dto.ToEntity(), _ => _.UserId == dto.UserId, _unitOfWork.UserEntity?.Id);
+
+                var userEntity = new UserEntity
+                {
+                    Id = dto.UserId,
+                    Username = dto.UserName,
+                    HasInventoryAccess = dto.HasAccess
+                };
+                _unitOfWork.Context.UpdateEntity(userEntity, dto.UserId, _unitOfWork.UserEntity?.Id);
+            });
         }
 
         public void DeleteUser(Guid userId)

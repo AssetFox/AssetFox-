@@ -35,6 +35,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         [Fact]
         public async Task CreateNewLibrary_Does()
         {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var controller = CreateController();
             var libraryId = Guid.NewGuid();
             var libraryName = RandomStrings.WithPrefix("Library");

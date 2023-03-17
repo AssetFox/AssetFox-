@@ -78,7 +78,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::DeleteAnnouncement - {e.Message}");
                 throw new Exception(e.Message);
             }

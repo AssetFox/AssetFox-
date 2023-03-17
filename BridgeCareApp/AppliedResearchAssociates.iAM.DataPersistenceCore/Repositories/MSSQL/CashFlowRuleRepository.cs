@@ -116,6 +116,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.SaveChanges();
         }
 
+        public void UpsertCashFlowRuleLibraryAndRules(CashFlowRuleLibraryDTO dto)
+        {
+            _unitOfWork.AsTransaction(u =>
+            {
+                u.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);
+                u.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
+            });
+        }
+
         public void UpsertOrDeleteCashFlowRules(List<CashFlowRuleDTO> cashFlowRules, Guid libraryId)
         {
             if (!_unitOfWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == libraryId))

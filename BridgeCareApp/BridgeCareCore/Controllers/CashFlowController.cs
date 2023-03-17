@@ -153,7 +153,6 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var items = _cashFlowService.GetSyncedLibraryDataset(upsertRequest);                  
                     var dto = upsertRequest.Library;
                     if (dto != null)
@@ -161,22 +160,18 @@ namespace BridgeCareCore.Controllers
                         _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                         dto.CashFlowRules = items;
                     }
-                    UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);
-                    UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
-                    UnitOfWork.Commit();
+                    UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibraryAndRules(dto);
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::UpsertCashFlowRuleLibrary - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::UpsertCashFlowRuleLibrary - {e.Message}");
                 throw;
             }

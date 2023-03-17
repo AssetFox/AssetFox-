@@ -8,11 +8,13 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -168,18 +170,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void ShouldModifyScenarioRemainingLifeLimitData()
+        public void UpsertOrDeleteScenarioRemainingLifeLimits_Does()
         {
             // Arrange
             Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var limitEntity = SetupForScenarioGet(simulation.Id);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-
             var dto = limitEntity.ToDto();
             dto.Value = 2.0;
-            dto.CriterionLibrary =
-                criterionLibrary;
+            dto.CriterionLibrary = criterionLibrary;
             var dtos = new List<RemainingLifeLimitDTO> { dto };
 
             // Act
@@ -188,10 +188,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // Assert
             var modifiedDto = TestHelper.UnitOfWork.RemainingLifeLimitRepo
                 .GetScenarioRemainingLifeLimits(simulation.Id).Single(rll => rll.Id == dto.Id);
-
             Assert.Equal(2.0, modifiedDto.Value);
         }
 
+        [Fact]
+        public void UpsertOrDeleteScenarioRemainingLifeLimits_TwoAddsCollide_NoChangeToDb()
+        {
+            // Arrange
+            Setup();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var limitEntity = SetupForScenarioGet(simulation.Id);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
+            var updateDto = limitEntity.ToDto();
+            var attribute = TestAttributeNames.DeckDurationN;
+            updateDto.Value = 2.0;
+            updateDto.CriterionLibrary = criterionLibrary;
+            var collidingAddId = Guid.NewGuid();
+            var addDto1 = RemainingLifeLimitDtos.Dto(attribute, collidingAddId);
+            var addDto2 = RemainingLifeLimitDtos.Dto(attribute, collidingAddId);
+            var dtos = new List<RemainingLifeLimitDTO> { updateDto, addDto1, addDto2 };
+            var limitsBefore = TestHelper.UnitOfWork.RemainingLifeLimitRepo
+                .GetScenarioRemainingLifeLimits(simulation.Id);
+
+            // Act
+            Assert.Throws<SqlException>(() => TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(dtos, simulation.Id));
+
+            // Assert
+            var limitsAfter = TestHelper.UnitOfWork.RemainingLifeLimitRepo
+                .GetScenarioRemainingLifeLimits(simulation.Id);
+            ObjectAssertions.Equivalent(limitsBefore, limitsAfter);
+        }
 
         [Fact]
         public void GetScenarioRemainingLifeLimits_ScenarioInDbWithRemainingLifeLimit_Gets()

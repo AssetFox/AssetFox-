@@ -232,70 +232,73 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
-                .Single(_ => _.Id == simulationId);
-
-            var cashFlowRuleEntities = cashFlowRules
-                .Select(_ => _.ToScenarioEntity(simulationId))
-                .ToList();
-
-            var entityIds = cashFlowRuleEntities.Select(_ => _.Id).ToList();
-
-            var existingEntityIds = _unitOfWork.Context.ScenarioCashFlowRule.AsNoTracking()
-                .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
-                .Select(_ => _.Id).ToList();
-
-            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioCashFlowRuleEntity>(_ =>
-                _.ScenarioCashFlowRule.SimulationId == simulationId);
-
-            _unitOfWork.Context.DeleteAll<ScenarioCashFlowRuleEntity>(_ =>
-                _.SimulationId == simulationId && !entityIds.Contains(_.Id));
-
-            _unitOfWork.Context.UpdateAll(cashFlowRuleEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(),
-                _unitOfWork.UserEntity?.Id);
-
-            _unitOfWork.Context.AddAll(cashFlowRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(),
-                _unitOfWork.UserEntity?.Id);
-
-            if (cashFlowRules.Any(_ => _.CashFlowDistributionRules.Any()))
+            _unitOfWork.AsTransaction(u =>
             {
-                var distributionRulesPerCashFlowRuleId = cashFlowRules.Where(_ => _.CashFlowDistributionRules.Any())
-                    .ToDictionary(_ => _.Id, _ => _.CashFlowDistributionRules);
-                _unitOfWork.CashFlowDistributionRuleRepo.UpsertOrDeleteScenarioCashFlowDistributionRules(
-                    distributionRulesPerCashFlowRuleId, simulationId);
-            }
+                var simulationEntity = u.Context.Simulation.AsNoTracking()
+                    .Single(_ => _.Id == simulationId);
 
-            if (cashFlowRules.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                                       !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
-            {
-                var criterionJoins = new List<CriterionLibraryScenarioCashFlowRuleEntity>();
+                var cashFlowRuleEntities = cashFlowRules
+                    .Select(_ => _.ToScenarioEntity(simulationId))
+                    .ToList();
 
-                var criteria = cashFlowRules
-                    .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
-                    .Select(cashFlowRule =>
-                    {
-                        var criterion = new CriterionLibraryEntity
+                var entityIds = cashFlowRuleEntities.Select(_ => _.Id).ToList();
+
+                var existingEntityIds = u.Context.ScenarioCashFlowRule.AsNoTracking()
+                    .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
+                    .Select(_ => _.Id).ToList();
+
+                u.Context.DeleteAll<CriterionLibraryScenarioCashFlowRuleEntity>(_ =>
+                    _.ScenarioCashFlowRule.SimulationId == simulationId);
+
+                u.Context.DeleteAll<ScenarioCashFlowRuleEntity>(_ =>
+                    _.SimulationId == simulationId && !entityIds.Contains(_.Id));
+
+                u.Context.UpdateAll(cashFlowRuleEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(),
+                    u.UserEntity?.Id);
+
+                u.Context.AddAll(cashFlowRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(),
+                    u.UserEntity?.Id);
+
+                if (cashFlowRules.Any(_ => _.CashFlowDistributionRules.Any()))
+                {
+                    var distributionRulesPerCashFlowRuleId = cashFlowRules.Where(_ => _.CashFlowDistributionRules.Any())
+                        .ToDictionary(_ => _.Id, _ => _.CashFlowDistributionRules);
+                    u.CashFlowDistributionRuleRepo.UpsertOrDeleteScenarioCashFlowDistributionRules(
+                        distributionRulesPerCashFlowRuleId, simulationId);
+                }
+
+                if (cashFlowRules.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                                           !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+                {
+                    var criterionJoins = new List<CriterionLibraryScenarioCashFlowRuleEntity>();
+
+                    var criteria = cashFlowRules
+                        .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                                    !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
+                        .Select(cashFlowRule =>
                         {
-                            Id = Guid.NewGuid(),
-                            MergedCriteriaExpression = cashFlowRule.CriterionLibrary.MergedCriteriaExpression,
-                            Name = $"{cashFlowRule.Name} Criterion",
-                            IsSingleUse = true
-                        };
-                        criterionJoins.Add(new CriterionLibraryScenarioCashFlowRuleEntity
-                        {
-                            CriterionLibraryId = criterion.Id,
-                            ScenarioCashFlowRuleId = cashFlowRule.Id
-                        });
-                        return criterion;
-                    }).ToList();
+                            var criterion = new CriterionLibraryEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                MergedCriteriaExpression = cashFlowRule.CriterionLibrary.MergedCriteriaExpression,
+                                Name = $"{cashFlowRule.Name} Criterion",
+                                IsSingleUse = true
+                            };
+                            criterionJoins.Add(new CriterionLibraryScenarioCashFlowRuleEntity
+                            {
+                                CriterionLibraryId = criterion.Id,
+                                ScenarioCashFlowRuleId = cashFlowRule.Id
+                            });
+                            return criterion;
+                        }).ToList();
 
-                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
-                _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
-            }
+                    u.Context.AddAll(criteria, u.UserEntity?.Id);
+                    u.Context.AddAll(criterionJoins, u.UserEntity?.Id);
+                }
 
-            // Update last modified date
-            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+                // Update last modified date
+                u.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+            });
         }
 
         public List<CashFlowRuleLibraryDTO> GetCashFlowRuleLibrariesNoChildrenAccessibleToUser(Guid userId)

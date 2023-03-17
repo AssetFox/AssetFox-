@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private List<string> _errorList;
         private string _reportTypeName;
 
-        public HelloWorldReport(UnitOfDataPersistenceWork repository, string name, ReportIndexDTO results)
+        public HelloWorldReport(IUnitOfWork repository, string name, ReportIndexDTO results)
         {
             _id = Guid.NewGuid();
             _errorList = new List<string>();

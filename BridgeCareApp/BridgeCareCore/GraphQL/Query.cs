@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs;
 using HotChocolate;
+using HotChocolate.Data;
 
 namespace BridgeCareCore.GraphQL
 {
@@ -15,6 +15,8 @@ namespace BridgeCareCore.GraphQL
         //        Type = "Information"
         //    };
 
+        [UseFiltering]
+        [UseSorting]
         public List<SimulationDTO> GetSimulations([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork) =>
             _unitOfWork.SimulationRepo.GetAllScenario();
     }

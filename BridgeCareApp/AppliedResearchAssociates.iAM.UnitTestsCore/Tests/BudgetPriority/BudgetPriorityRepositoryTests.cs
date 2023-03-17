@@ -158,6 +158,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public void UpsertOrDeleteScenarioBudgetPriorities_TwoPrioritiesCollide_NothingChanges()
+        {
+            var unitOfWork = TestHelper.UnitOfWork;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationEntity = SimulationTestSetup.EntityInDb(unitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var goodPriorityId = Guid.NewGuid();
+            var goodPriority = BudgetPriorityDtos.New(goodPriorityId);
+            var goodPriorities = new List<BudgetPriorityDTO> { goodPriority };
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(goodPriorities, simulationId);
+            var collidingPriorityId = Guid.NewGuid();
+            var collidingPriority1 = BudgetPriorityDtos.New(collidingPriorityId);
+            var collidingPriority2 = BudgetPriorityDtos.New(collidingPriorityId);
+            var budgetId = Guid.NewGuid();
+            var budgetName = RandomStrings.WithPrefix("Budget");
+            goodPriority.PriorityLevel = 123;
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            criterionLibrary.Name = null;
+            collidingPriority1.CriterionLibrary = criterionLibrary;
+            var budgetPriorities = new List<BudgetPriorityDTO> { goodPriority, collidingPriority1, collidingPriority2 };
+            var prioritiesBefore = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId);
+
+            var exception = Assert.Throws<SqlException>(() =>
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(budgetPriorities, simulationId));
+
+            var prioritiesAfter = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId);
+            ObjectAssertions.Equivalent(prioritiesBefore, prioritiesAfter);
+        }
+
+        [Fact]
         public void GetBudgetPriorityLibraries_LibraryInDb_Gets()
         {
             // Arrange

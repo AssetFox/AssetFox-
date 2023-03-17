@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
@@ -586,67 +587,75 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause); //Project Pick
                     }
 
+                    var recommendedTreatment = section.AppliedTreatment; // Recommended Treatment
+                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis
+
+                    //get budget usages
                     var appliedTreatment = section.AppliedTreatment ?? "";
                     var treatmentConsiderations = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == appliedTreatment);
-
-                    BudgetUsageDetail budgetUsage = null;
+                    var budgetUsages = new List<BudgetUsageDetail>();
                     foreach (var item in treatmentConsiderations)
                     {
-                        budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCovered);
+                        var budgetUsagesFiltered = item.BudgetUsages.Where(_ => _.Status == BudgetUsageStatus.CostCovered).ToList();
+                        if (budgetUsagesFiltered?.Any() == true) { budgetUsages.AddRange(budgetUsagesFiltered); }
                     }
 
-                    var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName; // Budget
-                    var recommendedTreatment = section.AppliedTreatment; // Recommended Treatment
-                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis 
-
-                    //check for multi year budget
-                    if (allowFundingFromMultipleBudgets == true && cost > 0 && (string.IsNullOrEmpty(budgetName) && string.IsNullOrWhiteSpace(budgetName)))
-                    {
-                        //budgets used
-                        var multiYearBudgetAndCostList = new List<BudgetUsageDetail>();
-                        foreach (var treatment in section.TreatmentConsiderations)
+                    //check budget usages
+                    var budgetName = "";
+                    if (budgetUsages?.Any() == true && cost > 0)
+                    {                        
+                        if (budgetUsages.Count == 1) //single budget
                         {
-                            var budgetUsages = treatment.BudgetUsages.Where(w => w.CoveredCost > 0).ToList();
-                            if (budgetUsages?.Any() == true) { multiYearBudgetAndCostList.AddRange(budgetUsages); }
+                            budgetName = budgetUsages.First().BudgetName ?? ""; // Budget
+                            if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName)) {
+                                budgetName = BAMSConstants.Unspecified_Budget;
+                            }
                         }
-
-                        if (multiYearBudgetAndCostList?.Any() == true)
+                        else //multiple budgets
                         {
-                            foreach (var budgetAndCost in multiYearBudgetAndCostList)
+                            //check for multi year budget
+                            if (allowFundingFromMultipleBudgets == true)
                             {
-                                var multiYearBudgetName = budgetAndCost?.BudgetName ?? "UnSpecified";
-                                var multiYearBudgetCost = budgetAndCost?.CoveredCost ?? 0;
-
-                                var budgetAmountAbbrName = "";
-                                if (multiYearBudgetCost > 0)
+                                foreach (var budgetUsage in budgetUsages)
                                 {
-                                    //check budget and add abbreviation
-                                    budgetAmountAbbrName = multiYearBudgetCost.ToString();
-                                    if (multiYearBudgetCost > 1000000)
-                                    {
-                                        budgetAmountAbbrName = "$" + Math.Floor(multiYearBudgetCost / 1000000).ToString() + "M";
-                                    }
-                                    else if (cost > 1000)
-                                    {
-                                        budgetAmountAbbrName = "$" + Math.Floor(multiYearBudgetCost / 1000).ToString() + "K";
+                                    var multiYearBudgetCost = budgetUsage.CoveredCost;
+                                    var multiYearBudgetName = budgetUsage.BudgetName ?? ""; // Budget;
+                                    if (string.IsNullOrEmpty(multiYearBudgetName) || string.IsNullOrWhiteSpace(multiYearBudgetName)) {
+                                        multiYearBudgetName = BAMSConstants.Unspecified_Budget;
                                     }
 
-                                    //set budget header name
-                                    if (!string.IsNullOrEmpty(budgetAmountAbbrName) && !string.IsNullOrWhiteSpace(budgetAmountAbbrName))
+                                    var budgetAmountAbbrName = "";
+                                    if (multiYearBudgetCost > 0)
                                     {
-                                        multiYearBudgetName += " (" + budgetAmountAbbrName + ")";
-                                    }
+                                        //check budget and add abbreviation
+                                        budgetAmountAbbrName = multiYearBudgetCost.ToString();
+                                        if (multiYearBudgetCost > 1000000)
+                                        {
+                                            budgetAmountAbbrName = "$" + Math.Floor(multiYearBudgetCost / 1000000).ToString() + "M";
+                                        }
+                                        else if (cost > 1000)
+                                        {
+                                            budgetAmountAbbrName = "$" + Math.Floor(multiYearBudgetCost / 1000).ToString() + "K";
+                                        }
 
-                                    if(string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName)) {
-                                        budgetName = multiYearBudgetName;
-                                    }
-                                    else
-                                    {
-                                        budgetName += ", " + multiYearBudgetName;
+                                        //set budget header name
+                                        if (!string.IsNullOrEmpty(budgetAmountAbbrName) && !string.IsNullOrWhiteSpace(budgetAmountAbbrName))
+                                        {
+                                            multiYearBudgetName += " (" + budgetAmountAbbrName + ")";
+                                        }
+
+                                        if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName))
+                                        {
+                                            budgetName = multiYearBudgetName;
+                                        }
+                                        else
+                                        {
+                                            budgetName += ", " + multiYearBudgetName;
+                                        }
                                     }
                                 }
                             }
-                        }                                                                      
+                        }
                     }
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget

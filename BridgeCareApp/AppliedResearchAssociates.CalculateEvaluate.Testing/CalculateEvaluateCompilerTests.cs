@@ -15,6 +15,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
         {
             Assert.True(b);
         }
+
         [Fact]
         public void BadLex() => Assert.Throws<CalculateEvaluateLexingException>(() => ParameterlessCalculation("2 # 2", 4));
 

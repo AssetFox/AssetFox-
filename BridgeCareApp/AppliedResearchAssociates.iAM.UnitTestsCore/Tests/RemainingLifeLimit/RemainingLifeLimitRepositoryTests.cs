@@ -94,15 +94,89 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void UpsertRemainingLifeLimitLibrary_Does()
+        public async Task UpsertRemainingLifeLimitLibrary_Does()
         {
             Setup();
-            var dto = RemainingLifeLimitLibraryDtos.Empty();
+            var libraryId = Guid.NewGuid();
+            var dto = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            var dtoClone = RemainingLifeLimitLibraryDtos.Empty(libraryId);
             // Act
             TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(dto);
 
             // Assert
-            var dtoAfter = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(dto.Id);
+            var dtoAfter = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
+                .Single(library => library.Id == dto.Id);
+            ObjectAssertions.EquivalentExcluding(dtoClone, dtoAfter, x => x.Owner);
+        }
+
+        [Fact]
+        public void UpsertRemainingLifeLimitLibraryAndLimits_LibraryNotInDb_Adds()
+        {
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var dto = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            var dtoClone = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            var limitId = Guid.NewGuid();
+            var limit = RemainingLifeLimitDtos.Dto(TestAttributeNames.CulvDurationN, limitId, 1);
+            var limitClone = RemainingLifeLimitDtos.Dto(TestAttributeNames.CulvDurationN, limitId, 1);
+            limitClone.CriterionLibrary = new CriterionLibraryDTO();
+            dto.RemainingLifeLimits.Add(limit);
+            dtoClone.RemainingLifeLimits.Add(limitClone);
+            // Act
+            TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibraryAndLimits(dto);
+
+            // Assert
+            var dtoAfter = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
+                .Single(library => library.Id == dto.Id);
+            ObjectAssertions.EquivalentExcluding (dtoClone, dtoAfter, x => x.Owner);
+        }
+
+        [Fact]
+        public void UpsertRemainingLifeLimitLibraryAndLimits_LibraryInDb_Modifies()
+        {
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var oldLibrary = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            oldLibrary.Description = "old description";
+            TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(oldLibrary);
+            var dto = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            var dtoClone = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            var limitId = Guid.NewGuid();
+            var limit = RemainingLifeLimitDtos.Dto(TestAttributeNames.CulvDurationN, limitId, 1);
+            var limitClone = RemainingLifeLimitDtos.Dto(TestAttributeNames.CulvDurationN, limitId, 1);
+            limitClone.CriterionLibrary = new CriterionLibraryDTO();
+            dto.RemainingLifeLimits.Add(limit);
+            dtoClone.RemainingLifeLimits.Add(limitClone);
+            // Act
+            TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibraryAndLimits(dto);
+
+            // Assert
+            var dtoAfter = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
+                .Single(library => library.Id == dto.Id);
+            ObjectAssertions.EquivalentExcluding(dtoClone, dtoAfter, x => x.Owner);
+        }
+
+        [Fact]
+        public void UpsertRemainingLifeLimitLibraryAndLimits_TwoLimitsCollide_NoChanges()
+        {
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var oldLibrary = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            oldLibrary.Description = "old description";
+            TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(oldLibrary);
+            var dto = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            var limitId = Guid.NewGuid();
+            var limit1 = RemainingLifeLimitDtos.Dto(TestAttributeNames.CulvDurationN, limitId, 1);
+            var limit2 = RemainingLifeLimitDtos.Dto(TestAttributeNames.CulvDurationN, limitId, 1);
+            dto.RemainingLifeLimits.Add(limit1);
+            dto.RemainingLifeLimits.Add(limit2);
+            // Act
+            Assert.Throws<SqlException>(() => TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibraryAndLimits(dto));
+
+            // Assert
+            var dtoAfter = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
+                .Single(library => library.Id == dto.Id);
+            ObjectAssertions.EquivalentExcluding(oldLibrary, dtoAfter, x => x.Owner);
         }
 
         [Fact]

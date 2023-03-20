@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentTime
 {
-    public class UnfundedTreatmentTime : IUnfundedTreatmentTime
+    public class UnfundedTreatmentTime
     {
-        private IUnfundedTreatmentCommon _unfundedTreatmentCommon;
+        private UnfundedTreatmentCommon _unfundedTreatmentCommon;
         private ReportHelper _reportHelper;
 
         public UnfundedTreatmentTime()
         {
-            _unfundedTreatmentCommon = new UnfundedTreatmentCommon.UnfundedTreatmentCommon();
+            _unfundedTreatmentCommon = new UnfundedTreatmentCommon();
             _reportHelper = new ReportHelper();
         }
 

@@ -5,7 +5,6 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.StaticContent;
@@ -14,7 +13,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
-    public class BridgeWorkSummaryByBudget : IBridgeWorkSummaryByBudget
+    public class BridgeWorkSummaryByBudget
     {
         private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
         private CulvertCost _culvertCost;

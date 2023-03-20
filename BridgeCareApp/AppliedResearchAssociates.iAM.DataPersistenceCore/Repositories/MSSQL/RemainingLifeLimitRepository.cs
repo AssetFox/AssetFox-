@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using Humanizer;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -397,6 +398,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 // Update last modified date
                 var simulationEntity = u.Context.Simulation.Single(_ => _.Id == simulationId);
                 u.Context.Upsert(simulationEntity, simulationId, u.UserEntity?.Id);
+            });
+        }
+
+        public void UpsertRemainingLifeLimitLibraryAndLimits(RemainingLifeLimitLibraryDTO library)
+        {
+            _unitOfWork.AsTransaction(u =>
+            {
+                u.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(library);
+                u.RemainingLifeLimitRepo.UpsertOrDeleteRemainingLifeLimits(library.RemainingLifeLimits, library.Id);
             });
         }
     }

@@ -26,14 +26,14 @@ namespace BridgeCareCore.Controllers
         public const string RemainingLifeLimitError = "Remaining Life Limit Error";
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IClaimHelper _claimHelper;
-        private readonly IRemainingLifeLimitPagingService _remainingLIfeLimitService;
+        private readonly IRemainingLifeLimitPagingService _remainingLifeLimitService;
 
         public RemainingLifeLimitController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
             IRemainingLifeLimitPagingService remainingLifeService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
-            _remainingLIfeLimitService = remainingLifeService ?? throw new ArgumentNullException(nameof(remainingLifeService));
+            _remainingLifeLimitService = remainingLifeService ?? throw new ArgumentNullException(nameof(remainingLifeService));
         }
 
 
@@ -48,7 +48,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
-                    result = _remainingLIfeLimitService.GetScenarioPage(simulationId, pageRequest);
+                    result = _remainingLifeLimitService.GetScenarioPage(simulationId, pageRequest);
                 });
 
                 return Ok(result);
@@ -77,7 +77,7 @@ namespace BridgeCareCore.Controllers
                 var result = new PagingPageModel<RemainingLifeLimitDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = _remainingLIfeLimitService.GetLibraryPage(libraryId, pageRequest);
+                    result = _remainingLifeLimitService.GetLibraryPage(libraryId, pageRequest);
                 });
 
                 return Ok(result);
@@ -154,17 +154,14 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
-                    var items = _remainingLIfeLimitService.GetSyncedLibraryDataset(upsertRequest);                   
+                    var items = _remainingLifeLimitService.GetSyncedLibraryDataset(upsertRequest);                   
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
                         _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                         dto.RemainingLifeLimits = items;
                     }
-                    UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(dto);
-                    UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteRemainingLifeLimits(dto.RemainingLifeLimits, dto.Id);
-                    UnitOfWork.Commit();
+                    UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibraryAndLimits(dto);
                 });
 
                 return Ok();
@@ -191,7 +188,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    var dtos = _remainingLIfeLimitService.GetSyncedScenarioDataSet(simulationId, pagingSync);
+                    var dtos = _remainingLifeLimitService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(dtos, simulationId);
                 });

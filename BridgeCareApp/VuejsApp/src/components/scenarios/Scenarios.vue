@@ -497,7 +497,7 @@ import {
     TabItems,
     ScenarioUser,
     emptySimulation,
-    QueuedSimulation,
+    QueuedWork,
 } from '@/shared/models/iAM/scenario';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
@@ -568,11 +568,11 @@ import ScenarioService from '@/services/scenario.service';
 export default class Scenarios extends Vue {
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
-    @State(state => state.scenarioModule.simulationQueue) stateSimulationQueue: QueuedSimulation[];
+    @State(state => state.scenarioModule.simulationQueue) stateSimulationQueue: QueuedWork[];
 
     @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
     @State(state => state.scenarioModule.currentUserScenarioPage) stateUserScenariosPage: Scenario[];
-    @State(state => state.scenarioModule.currentSimulationQueuePage) stateSimulationQueuePage: QueuedSimulation[];
+    @State(state => state.scenarioModule.currentSimulationQueuePage) stateSimulationQueuePage: QueuedWork[];
 
     @State(state => state.scenarioModule.totalSharedScenarios) stateTotalSharedScenarios: number;
     @State(state => state.scenarioModule.totalUserScenarios) stateTotalUserScenarios: number;
@@ -815,8 +815,8 @@ export default class Scenarios extends Vue {
     sharedScenariosPagination:  Pagination = clone(emptyPagination);    
     totalSharedScenarios: number = 0;
 
-    simulationQueue: QueuedSimulation[] = [];
-    currentSimulationQueuePage: QueuedSimulation[] = [];
+    simulationQueue: QueuedWork[] = [];
+    currentSimulationQueuePage: QueuedWork[] = [];
     simulationQueuePagination: Pagination = clone(emptyPagination);
     totalQueuedSimulations: number = 0;
 
@@ -843,7 +843,7 @@ export default class Scenarios extends Vue {
     confirmCancelAlertData: AlertData = clone(emptyAlertData);
     showCreateScenarioDialog: boolean = false;
     selectedScenario: Scenario = clone(emptyScenario);
-    selectedSimulation: QueuedSimulation = clone(emptySimulation);
+    selectedSimulation: QueuedWork = clone(emptySimulation);
     networkDataAssignmentStatus: string = '';
     rules: InputValidationRules = rules;
     showMigrateLegacySimulationDialog: boolean = false;
@@ -980,7 +980,7 @@ export default class Scenarios extends Vue {
             return;
         const { sortBy, descending, page, rowsPerPage } = this.simulationQueuePagination;
 
-        const simulationQueueRequest: PagingRequest<QueuedSimulation>= {
+        const simulationQueueRequest: PagingRequest<QueuedWork>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
@@ -1126,7 +1126,7 @@ export default class Scenarios extends Vue {
             isDescending: false,
             search: ''
         };
-        const simulationQueueRequest: PagingRequest<QueuedSimulation> = {
+        const simulationQueueRequest: PagingRequest<QueuedWork> = {
             page: 1,
             rowsPerPage: 5,
             syncModel: {
@@ -1370,7 +1370,7 @@ export default class Scenarios extends Vue {
     }
 
 
-    onShowConfirmCancelAlert(simulation: QueuedSimulation) {
+    onShowConfirmCancelAlert(simulation: QueuedWork) {
         this.selectedSimulation = clone(simulation);
 
         this.confirmCancelAlertData = {
@@ -1428,9 +1428,9 @@ export default class Scenarios extends Vue {
     }
 
     getScenarioAnalysisDetailUpdate(data: any) {
-        this.updateSimulationAnalysisDetailAction({
-            simulationAnalysisDetail: data.simulationAnalysisDetail,
-        });
+        // this.updateSimulationAnalysisDetailAction({
+        //     simulationAnalysisDetail: data.simulationAnalysisDetail,
+        // });
         (async () => { 
             if ((data.simulationAnalysisDetail.status == "Queued to run.") ||
                 (data.simulationAnalysisDetail.status == "Getting simulation analysis network") ||
@@ -1592,7 +1592,7 @@ export default class Scenarios extends Vue {
 
     OnSimulationQueueActionTaken(
         action: string,
-        simulation: QueuedSimulation,
+        simulation: QueuedWork,
     ) {
         switch (action) {
             case this.availableSimulationActions.cancel:

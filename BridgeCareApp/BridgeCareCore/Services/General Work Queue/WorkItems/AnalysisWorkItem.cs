@@ -19,7 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
 {
-    public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserInfo) : IWorkSpecification
+    public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserInfo, string scenarioName) : IWorkSpecification
     {
         public string WorkId => SimulationId.ToString();
 
@@ -30,6 +30,8 @@ namespace BridgeCareCore.Services
         public string WorkDescription => "Run Simulation";
 
         public WorkType WorkType => WorkType.SimulationAnalyis;
+
+        public string WorkName => scenarioName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {

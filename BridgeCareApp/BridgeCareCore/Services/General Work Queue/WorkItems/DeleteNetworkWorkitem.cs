@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Common;
 
@@ -14,6 +14,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.WorkQueue;
 
@@ -23,7 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
 {
-    public record DeleteNetworkWorkitem(Guid NetworkId, string userId) : IWorkSpecification
+    public record DeleteNetworkWorkitem(Guid NetworkId, string userId, string networkName) : IWorkSpecification
 
     {
         public string WorkId => NetworkId.ToString();
@@ -36,13 +37,20 @@ namespace BridgeCareCore.Services
 
         public WorkType WorkType => WorkType.DeleteNetwork;
 
+        public string WorkName => networkName;
+
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
             using var scope = serviceProvider.CreateScope();
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            updateStatusOnHandle.Invoke("Network Deleting");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastSimulationAnalysisDetail, "");
+            Task.Delay(60000).Wait();
             updateStatusOnHandle.Invoke("Deleting Network");
             _unitOfWork.NetworkRepo.DeleteNetwork(NetworkId);
+            Task.Delay(60000).Wait();
             updateStatusOnHandle.Invoke("Network Deleted");
         }
     }

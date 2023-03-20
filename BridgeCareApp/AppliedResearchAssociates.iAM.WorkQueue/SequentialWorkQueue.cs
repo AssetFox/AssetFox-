@@ -101,6 +101,8 @@ public class SequentialWorkQueue
 
         public string WorkId => WorkSpec.WorkId;
 
+        public string WorkName => WorkSpec.WorkName;
+
         public DateTime? WorkStartTimestamp { get; private set; }
 
         public CancellationTokenSource? WorkCancellationTokenSource { get; private set; }

@@ -14,6 +14,8 @@ public interface IQueuedWorkHandle
 
     WorkType WorkType { get; }
 
+    public string WorkName { get; }
+
     Task WorkCompletion { get; }
 
     bool WorkHasStarted => WorkStartTimestamp.HasValue;

@@ -157,12 +157,17 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("DeleteNetwork/{networkId}")]
-        [Authorize(Policy = Policy.RunSimulation)]
+        [ClaimAuthorize("NetworkDeleteAccess")]
         public async Task<IActionResult> DeleteNetwork(Guid networkId)
         {
             try
             {
-                DeleteNetworkWorkitem workItem = new DeleteNetworkWorkitem(networkId, UserInfo.Name);
+                var networkName = "";
+                await Task.Factory.StartNew(() =>
+                {
+                    networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
+                });
+                DeleteNetworkWorkitem workItem = new DeleteNetworkWorkitem(networkId, UserInfo.Name, networkName);
                 var analysisHandle = _workQueueService.CreateAndRun(workItem);
                 // Before sending a "queued" message that may overwrite early messages from the run,
                 // allow a brief moment for an empty queue to start running the submission.
@@ -189,7 +194,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("CancelNetworkDeletion/{networkId}")]
-        [Authorize]
+        [ClaimAuthorize("NetworkViewAccess")]
         public async Task<IActionResult> CancelNetworkDeletion(Guid networkId)
         {
             try

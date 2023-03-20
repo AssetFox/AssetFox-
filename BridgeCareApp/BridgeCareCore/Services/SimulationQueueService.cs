@@ -70,7 +70,6 @@ namespace BridgeCareCore.Services
         private List<QueuedWorkDTO> GetQueuedWork(IReadOnlyList<IQueuedWorkHandle> workQueue)
         {
             var simulationAnalysisIds = workQueue.Where(_ => _.WorkType == WorkType.SimulationAnalyis).Select(_ => Guid.Parse(_.WorkId)).ToList();
-            var networkDeleteIds = workQueue.Where(_ => _.WorkType == WorkType.SimulationAnalyis).Select(_ => Guid.Parse(_.WorkId)).ToList();
 
             var queuedWork = new List<QueuedWorkDTO>();
 
@@ -78,7 +77,7 @@ namespace BridgeCareCore.Services
                 .Select(_ => _.ToQueuedWorkDTO(workQueue))
                 .ToList();
 
-            queuedWork = queuedWork.Concat(_unitOfWork.NetworkRepo.GetNetworksByIdsNoChildren(networkDeleteIds).Select(_ => _.ToQueuedWorkDTO(workQueue))).ToList();
+            queuedWork = queuedWork.Concat(workQueue.Where(_ => _.WorkType == WorkType.DeleteNetwork).Select(_ => _.ToQueuedWorkDTO())).ToList();
 
             return queuedWork;
         }
@@ -133,7 +132,7 @@ namespace BridgeCareCore.Services
             QueuedWorkDTO queuedSimulationDTO = new QueuedWorkDTO()
             {
                 Id = simulationDTO.Id,
-                Name = simulationDTO.Name,
+                Name = queuedWorkHandle.WorkName,
                 PreviousRunTime = simulationDTO.RunTime,
 
                 Status = queuedWorkHandle. MostRecentStatusMessage,
@@ -158,20 +157,12 @@ namespace BridgeCareCore.Services
             return queuedSimulationDTO;
         }
 
-        public static QueuedWorkDTO ToQueuedWorkDTO(this NetworkDTO networkDto, IReadOnlyList<IQueuedWorkHandle> simulationQueue)
+        public static QueuedWorkDTO ToQueuedWorkDTO(this IQueuedWorkHandle queuedWorkHandle)
         {
-            var queuedWorkHandle = simulationQueue.SingleOrDefault(_ => new Guid(_.WorkId) == networkDto.Id);
-
-            if (queuedWorkHandle == null)
-            {
-                throw new RowNotInTableException("No queued simulation was found for the given id.");
-            }
-
             QueuedWorkDTO queuedSimulationDTO = new QueuedWorkDTO()
             {
-                Id = networkDto.Id,
-                Name = networkDto.Name,
-
+                Id = Guid.Parse(queuedWorkHandle.WorkId),
+                Name = queuedWorkHandle.WorkName,
                 Status = queuedWorkHandle.MostRecentStatusMessage,                
                 QueueEntryTimestamp = queuedWorkHandle.QueueEntryTimestamp,
                 WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp,

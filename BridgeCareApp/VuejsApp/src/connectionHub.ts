@@ -66,11 +66,11 @@ export default {
 
         connection.on(
             Hub.BroadcastType.BroadcastSimulationAnalysisDetail,
-            (simulationAnalysisDetail: SimulationAnalysisDetail) => {
+            (status: string) => {
                 statusHub.$emit(
                     Hub.BroadcastEventType
                         .BroadcastSimulationAnalysisDetailEvent,
-                    { simulationAnalysisDetail },
+                    status,
                 );
             },
         );

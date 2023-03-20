@@ -21,6 +21,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddSingleton<SequentialWorkQueue>();
             services.AddHostedService<SequentialWorkBackgroundService>();
             services.AddScoped<ISimulationAnalysis, SimulationAnalysisService>();
+            services.AddScoped<IWorkQueService, WorkQueService>();
             services.AddScoped<AttributeService>();
             services.AddScoped<IExcelRawDataImportService, ExcelRawDataImportService>();
             services.AddScoped<IExpressionValidationService, ExpressionValidationService>();

@@ -67,6 +67,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
         }
 
+        public List<NetworkDTO> GetNetworksByIdsNoChildren(List<Guid> ids)
+        {
+            return _unitOfWork.Context.Network.Where(_ => ids.Contains(_.Id)).Select(_ => _.ToDto(null, _unitOfWork.EncryptionKey)).ToList();
+        }
+
         public NetworkEntity GetMainNetwork()
         {
             var mainNetworkId = new Guid(_unitOfWork.Config["InventoryData:PrimaryNetwork"]);

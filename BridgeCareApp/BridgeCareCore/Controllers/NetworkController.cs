@@ -119,46 +119,46 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("DeleteNetwork/{networkId}")]
-        [ClaimAuthorize("NetworkDeleteAccess")]
-        public async Task<IActionResult> DeleteNetwork(Guid networkId)
-        {
-            try
-            {
-                return Ok();
-            }
-            finally
-            {
-                Response.OnCompleted(async () =>
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastInfo, $"Started network deletion");
-                    try
-                    {
-                        await Task.Factory.StartNew(() =>
-                        {
-                            UnitOfWork.NetworkRepo.DeleteNetwork(networkId);
-                        });
-                    }
-                    catch (UnauthorizedAccessException e)
-                    {
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error deleting network::{e.Message}");
-                        throw;
-                    }
-                    catch (Exception e)
-                    {
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error deleting network::{e.Message}");
-                        throw;
-                    }
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, $"Completed network deletion");
-                });
-            }
-        }
+        //[HttpPost]
+        //[Route("DeleteNetwork/{networkId}")]
+        //[ClaimAuthorize("NetworkDeleteAccess")]
+        //public async Task<IActionResult> DeleteNetwork(Guid networkId)
+        //{
+        //    try
+        //    {
+        //        return Ok();
+        //    }
+        //    finally
+        //    {
+        //        Response.OnCompleted(async () =>
+        //        {
+        //            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastInfo, $"Started network deletion");
+        //            try
+        //            {
+        //                await Task.Factory.StartNew(() =>
+        //                {
+        //                    UnitOfWork.NetworkRepo.DeleteNetwork(networkId);
+        //                });
+        //            }
+        //            catch (UnauthorizedAccessException e)
+        //            {
+        //                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error deleting network::{e.Message}");
+        //                throw;
+        //            }
+        //            catch (Exception e)
+        //            {
+        //                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error deleting network::{e.Message}");
+        //                throw;
+        //            }
+        //            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, $"Completed network deletion");
+        //        });
+        //    }
+        //}
 
         [HttpPost]
         [Route("DeleteNetwork/{networkId}")]
         [Authorize(Policy = Policy.RunSimulation)]
-        public async Task<IActionResult> RunSimulation(Guid networkId)
+        public async Task<IActionResult> DeleteNetwork(Guid networkId)
         {
             try
             {
@@ -182,17 +182,44 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
-                if (e is not SimulationException)
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::DeleteNetwork - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpDelete]
+        [Route("CancelNetworkDeletion/{networkId}")]
+        [Authorize]
+        public async Task<IActionResult> CancelNetworkDeletion(Guid networkId)
+        {
+            try
+            {
+                var hasBeenRemovedFromQueue = _workQueueService.Cancel(networkId);
+                await Task.Delay(125);
+
+                if (hasBeenRemovedFromQueue)
                 {
-                    var logDto = SimulationLogDtos.GenericException(simulationId, e);
-                    UnitOfWork.SimulationLogRepo.CreateLog(logDto);
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::DeleteNetwork {networkName} - {e.Message}");
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                    {
+                        SimulationId = networkId,
+                        Status = "Canceled"
+                    });
                 }
                 else
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::DeleteNetwork {networkName} - {e.Message}");
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                    {
+                        SimulationId = networkId,
+                        Status = "Canceling network deletion..."
+                    });
+
                 }
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling network deltion for {networkName}::{e.Message}");
                 throw;
             }
         }

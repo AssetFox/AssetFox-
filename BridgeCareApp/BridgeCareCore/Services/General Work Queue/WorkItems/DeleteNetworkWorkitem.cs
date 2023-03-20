@@ -23,15 +23,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
 {
-    public record DeleteNetworkWorkitem(Guid NetworkId, string UserId) : IWorkSpecification
+    public record DeleteNetworkWorkitem(Guid NetworkId, string userId) : IWorkSpecification
 
     {
         public string WorkId => NetworkId.ToString();
 
-
         public DateTime StartTime { get; set; }
 
-        public string UserId => UserId;
+        public string UserId => userId;
+
+        public string WorkDescription => "Delete Network";
+
+        public WorkType WorkType => WorkType.DeleteNetwork;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {

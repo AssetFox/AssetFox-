@@ -19,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<Network> GetAllNetworks();
 
         NetworkEntity GetMainNetwork();
+        List<NetworkDTO> GetNetworksByIdsNoChildren(List<Guid> ids);
 
         Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true);
 

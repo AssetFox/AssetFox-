@@ -27,6 +27,10 @@ namespace BridgeCareCore.Services
 
         public string UserId => UserInfo.Name;
 
+        public string WorkDescription => "Run Simulation";
+
+        public WorkType WorkType => WorkType.SimulationAnalyis;
+
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
             // [REVIEW] This implementation is old, with most of its code written elsewhere when the
@@ -65,6 +69,7 @@ namespace BridgeCareCore.Services
             var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status, StartTime);
 
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
@@ -269,6 +274,7 @@ namespace BridgeCareCore.Services
                     simulationAnalysisDetail.RunTime = interval.Value.ToString(@"hh\:mm\:ss");
                 }
                 _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+                updateStatusOnHandle.Invoke(simulationAnalysisDetail.Status);
             }
         }
 

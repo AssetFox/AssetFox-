@@ -93,6 +93,10 @@ public class SequentialWorkQueue
 
         public string UserId => WorkSpec.UserId;
 
+        public string WorkDescription => WorkSpec.WorkDescription;
+
+        public WorkType WorkType => WorkSpec.WorkType;
+
         public Task WorkCompletion => WorkCompletionSource.Task;
 
         public string WorkId => WorkSpec.WorkId;

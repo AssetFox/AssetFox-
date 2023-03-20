@@ -13,5 +13,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string CurrentRunTime { get; set; }
         public string PreviousRunTime { get; set; }
         public int QueuePosition { get; set; }
+        public string WorkDescription { get; set; }
     }
 }

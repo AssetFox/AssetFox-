@@ -49,6 +49,10 @@ namespace BridgeCareCoreTests.Tests
 
             public string UserId => "";
 
+            public WorkType WorkType => throw new NotImplementedException();
+
+            public string WorkDescription => "";
+
             public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatus, CancellationToken cancellationToken)
             {
                 WorkTarget.Add(Id);

@@ -4,11 +4,15 @@ public interface IQueuedWorkHandle
 {
     string MostRecentStatusMessage { get; }
 
+    string WorkDescription { get; }
+
     DateTime QueueEntryTimestamp { get; }
 
     int QueueIndex { get; }
 
     string UserId { get; }
+
+    WorkType WorkType { get; }
 
     Task WorkCompletion { get; }
 

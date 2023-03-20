@@ -94,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public async Task UpsertRemainingLifeLimitLibrary_Does()
+        public void UpsertRemainingLifeLimitLibrary_Does()
         {
             Setup();
             var libraryId = Guid.NewGuid();

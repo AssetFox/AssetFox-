@@ -120,12 +120,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO library)
         {
-            _unitOfDataPersistenceWork.AsTransaction(u =>
+            _unitOfDataPersistenceWork.AsTransaction(() =>
             {
                 // Does the library have a provided ID?
                 AssignIdWhenNull(library);
 
-                var existingLibrary = u.Context.CalculatedAttributeLibrary
+                var existingLibrary = _unitOfDataPersistenceWork.Context.CalculatedAttributeLibrary
                     .Include(_ => _.CalculatedAttributes)
                     .ThenInclude(_ => _.Equations)
                     .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
@@ -140,20 +140,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .Select(_ => _.CriterionLibraryId);
 
                     // Delete the criteria
-                    u.Context.DeleteAll<CriterionLibraryEntity>(_ => criteriaIds.Contains(_.Id));
+                    _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryEntity>(_ => criteriaIds.Contains(_.Id));
                 }
 
                 // Update the library
-                u.Context.Upsert(library.ToLibraryEntity(), library.Id, u.UserEntity?.Id);
+                _unitOfDataPersistenceWork.Context.Upsert(library.ToLibraryEntity(), library.Id, _unitOfDataPersistenceWork.UserEntity?.Id);
 
                 // Delete the entities attached to the library that are no longer there
                 var entityIds = library.CalculatedAttributes.Select(_ => _.Id).ToList();
                 // This SHOULD cascade all deletes except for equations and criteria
-                u.Context.DeleteAll<CalculatedAttributeEntity>(_ => _.CalculatedAttributeLibraryId == library.Id && !entityIds.Contains(_.Id));
+                _unitOfDataPersistenceWork.Context.DeleteAll<CalculatedAttributeEntity>(_ => _.CalculatedAttributeLibraryId == library.Id && !entityIds.Contains(_.Id));
                 // Deleteing all equations and criteria are fine as they will be deleted as part of the upsert anyways.
-                u.Context.DeleteAll<EquationEntity>(_ =>
+                _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ =>
                     _.CalculatedAttributePairJoin.CalculatedAttributePair.CalculatedAttribute.CalculatedAttributeLibraryId == library.Id);
-                u.Context.DeleteAll<CriterionLibraryCalculatedAttributePairEntity>(_ =>
+                _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryCalculatedAttributePairEntity>(_ =>
                     _.CalculatedAttributePair.CalculatedAttribute.CalculatedAttributeLibraryId == library.Id);
 
 
@@ -331,9 +331,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             // This will throw an error if no simulation is found.  That is the desired action here.
             // Let the API worry about the existence of the simulation
-            _unitOfDataPersistenceWork.AsTransaction(u =>
+            _unitOfDataPersistenceWork.AsTransaction(() =>
             {
-                u.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributes(calculatedAttributes, scenarioId);
+                _unitOfDataPersistenceWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributes(calculatedAttributes, scenarioId);
             });
         }
 

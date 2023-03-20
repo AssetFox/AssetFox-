@@ -165,7 +165,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpdateBudgetLibraryAndUpsertOrDeleteBudgets(BudgetLibraryDTO dto)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 UpsertBudgetLibrary(dto);
                 UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
@@ -176,7 +176,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void CreateNewBudgetLibrary(BudgetLibraryDTO dto, Guid userId)
         {
             var users = LibraryUserDtolists.OwnerAccess(userId);
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 UpsertBudgetLibrary(dto);
                 UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
@@ -390,10 +390,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteScenarioBudgetsWithInvestmentPlan(List<BudgetDTO> budgets, InvestmentPlanDTO investmentPlan, Guid simulationId)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 UpsertOrDeleteScenarioBudgets(budgets, simulationId);
-                u.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
+                _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
             });
         }
 

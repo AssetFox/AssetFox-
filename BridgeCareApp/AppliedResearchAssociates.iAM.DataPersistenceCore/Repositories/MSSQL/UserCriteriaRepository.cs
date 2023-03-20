@@ -25,19 +25,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 return;
             }
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 var userCriteriaFilterEntity =
-                    u.Context.UserCriteria.AsNoTracking()
+                    _unitOfWork.Context.UserCriteria.AsNoTracking()
                         .Include(_ => _.User)
                         .Single(_ => _.UserCriteriaId == userCriteriaId);
 
                 userCriteriaFilterEntity.User.HasInventoryAccess = false;
 
-                u.Context.UpdateEntity(userCriteriaFilterEntity.User, userCriteriaFilterEntity.User.Id,
-                    u.UserEntity?.Id);
+                _unitOfWork.Context.UpdateEntity(userCriteriaFilterEntity.User, userCriteriaFilterEntity.User.Id,
+                    _unitOfWork.UserEntity?.Id);
 
-                u.Context.DeleteEntity<UserCriteriaFilterEntity>(_ => _.UserCriteriaId == userCriteriaId);
+                _unitOfWork.Context.DeleteEntity<UserCriteriaFilterEntity>(_ => _.UserCriteriaId == userCriteriaId);
             });
         }
 
@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     HasInventoryAccess = userInfo.HasAdminAccess
                 };
                 UserCriteriaFilterEntity userCriteriaFilterEntity = null;
-                _unitOfWork.AsTransaction(u =>
+                _unitOfWork.AsTransaction(() =>
                 {
                     _unitOfWork.Context.AddEntity(newUserEntity, newUserEntity.Id);
 
@@ -112,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException(TheUserWasNotFound);
             }
 
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 _unitOfWork.Context.Upsert(dto.ToEntity(), _ => _.UserId == dto.UserId, _unitOfWork.UserEntity?.Id);
 

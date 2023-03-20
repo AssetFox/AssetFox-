@@ -27,8 +27,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertAttributesAtomically(List<Attribute> attributes)
         {
-            _unitOfWork.AsTransaction(u =>
-              u.AttributeRepo.UpsertAttributes(attributes));
+            _unitOfWork.AsTransaction(() =>
+              _unitOfWork.AttributeRepo.UpsertAttributes(attributes));
         }
 
         public void UpsertAttributes(List<Attribute> attributes)

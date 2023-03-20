@@ -595,8 +595,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             List<PerformanceCurveDTO> scenarioPerformanceCurves,
             Guid simulationId)
         {
-            _unitOfWork.AsTransaction(u =>
-            u.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(scenarioPerformanceCurves, simulationId));
+            _unitOfWork.AsTransaction(() =>
+            _unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(scenarioPerformanceCurves, simulationId));
         }
 
         public List<PerformanceCurveDTO> GetPerformanceCurvesForLibrary(Guid performanceCurveLibraryId)
@@ -723,14 +723,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeletePerformanceCurveLibraryAndCurves(PerformanceCurveLibraryDTO library, bool isNewLibrary, Guid ownerIdForNewLibrary)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
-                u.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(library);
-                u.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(library.PerformanceCurves, library.Id);
+                _unitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(library);
+                _unitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(library.PerformanceCurves, library.Id);
                 if (isNewLibrary)
                 {
                     var users = LibraryUserDtolists.OwnerAccess(ownerIdForNewLibrary);
-                    u.PerformanceCurveRepo.UpsertOrDeleteUsers(library.Id, users);
+                    _unitOfWork.PerformanceCurveRepo.UpsertOrDeleteUsers(library.Id, users);
                 };
             });
         }

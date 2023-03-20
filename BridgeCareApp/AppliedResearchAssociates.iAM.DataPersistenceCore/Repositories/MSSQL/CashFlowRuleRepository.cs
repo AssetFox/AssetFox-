@@ -118,10 +118,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertCashFlowRuleLibraryAndRules(CashFlowRuleLibraryDTO dto)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
-                u.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);
-                u.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
+                UpsertCashFlowRuleLibrary(dto);
+                UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
             });
         }
 
@@ -241,9 +241,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
-                var simulationEntity = u.Context.Simulation.AsNoTracking()
+                var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
                     .Single(_ => _.Id == simulationId);
 
                 var cashFlowRuleEntities = cashFlowRules
@@ -252,27 +252,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 var entityIds = cashFlowRuleEntities.Select(_ => _.Id).ToList();
 
-                var existingEntityIds = u.Context.ScenarioCashFlowRule.AsNoTracking()
+                var existingEntityIds = _unitOfWork.Context.ScenarioCashFlowRule.AsNoTracking()
                     .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
                     .Select(_ => _.Id).ToList();
 
-                u.Context.DeleteAll<CriterionLibraryScenarioCashFlowRuleEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioCashFlowRuleEntity>(_ =>
                     _.ScenarioCashFlowRule.SimulationId == simulationId);
 
-                u.Context.DeleteAll<ScenarioCashFlowRuleEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<ScenarioCashFlowRuleEntity>(_ =>
                     _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
-                u.Context.UpdateAll(cashFlowRuleEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(),
-                    u.UserEntity?.Id);
+                _unitOfWork.Context.UpdateAll(cashFlowRuleEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(),
+                    _unitOfWork.UserEntity?.Id);
 
-                u.Context.AddAll(cashFlowRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(),
-                    u.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(cashFlowRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(),
+                    _unitOfWork.UserEntity?.Id);
 
                 if (cashFlowRules.Any(_ => _.CashFlowDistributionRules.Any()))
                 {
                     var distributionRulesPerCashFlowRuleId = cashFlowRules.Where(_ => _.CashFlowDistributionRules.Any())
                         .ToDictionary(_ => _.Id, _ => _.CashFlowDistributionRules);
-                    u.CashFlowDistributionRuleRepo.UpsertOrDeleteScenarioCashFlowDistributionRules(
+                    _unitOfWork.CashFlowDistributionRuleRepo.UpsertOrDeleteScenarioCashFlowDistributionRules(
                         distributionRulesPerCashFlowRuleId, simulationId);
                 }
 
@@ -301,12 +301,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             return criterion;
                         }).ToList();
 
-                    u.Context.AddAll(criteria, u.UserEntity?.Id);
-                    u.Context.AddAll(criterionJoins, u.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
                 }
 
                 // Update last modified date
-                u.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+                _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
             });
         }
 

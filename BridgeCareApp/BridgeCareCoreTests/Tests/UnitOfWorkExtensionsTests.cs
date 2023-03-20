@@ -15,9 +15,9 @@ namespace BridgeCareCoreTests.Tests
         public void NestedAsTransaction_Throws()
         {
             var exception = Assert.Throws<InvalidOperationException>(() =>
-                TestHelper.UnitOfWork.AsTransaction(u =>
+                TestHelper.UnitOfWork.AsTransaction(() =>
                 {
-                    u.AsTransaction(uu => { });
+                    TestHelper.UnitOfWork.AsTransaction(() => { });
                 }));
 
             Assert.Equal(UnitOfDataPersistenceWorkExtensions.CannotStartTransactionWhileAnotherTransactionIsInProgress, exception.Message);

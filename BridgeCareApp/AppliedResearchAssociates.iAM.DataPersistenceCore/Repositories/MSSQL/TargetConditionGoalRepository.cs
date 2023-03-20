@@ -261,9 +261,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new InvalidOperationException("All target conditions must have an attribute.");
             }
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
-                var attributeEntities = u.Context.Attribute.ToList();
+                var attributeEntities = _unitOfWork.Context.Attribute.ToList();
                 var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
 
                 if (!scenarioTargetConditionGoal.All(_ => attributeNames.Contains(_.Attribute)))
@@ -284,20 +284,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .ToList();
                 var entityIds = scenarioTargetConditionGoal.Select(_ => _.Id).ToList();
 
-                var existingEntityIds = u.Context.ScenarioTargetConditionGoals
+                var existingEntityIds = _unitOfWork.Context.ScenarioTargetConditionGoals
                     .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
                     .Select(_ => _.Id).ToList();
 
-                u.Context.DeleteAll<ScenarioTargetConditionGoalEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<ScenarioTargetConditionGoalEntity>(_ =>
                     _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
-                u.Context.UpdateAll(scenarioTargetConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
-                    .ToList(), u.UserEntity?.Id);
+                _unitOfWork.Context.UpdateAll(scenarioTargetConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
+                    .ToList(), _unitOfWork.UserEntity?.Id);
 
-                u.Context.AddAll(scenarioTargetConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
-                    .ToList(), u.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(scenarioTargetConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                    .ToList(), _unitOfWork.UserEntity?.Id);
 
-                u.Context.DeleteAll<CriterionLibraryScenarioTargetConditionGoalEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTargetConditionGoalEntity>(_ =>
                     _.ScenarioTargetConditionGoal.SimulationId == simulationId);
 
                 if (scenarioTargetConditionGoal.Any(_ =>
@@ -327,12 +327,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             });
                         });
 
-                    u.Context.AddAll(criterionLibraryEntities, u.UserEntity?.Id);
-                    u.Context.AddAll(criterionLibraryJoinEntities, u.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
                 }
                 // Update last modified date
-                var simulationEntity = u.Context.Simulation.Single(_ => _.Id == simulationId);
-                u.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
             });
         }
 
@@ -403,15 +403,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser(TargetConditionGoalLibraryDTO dto, bool isNewLibrary, Guid ownerIdForNewLibrary)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
-                u.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
-                u.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
+                _unitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
+                _unitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
                 if (isNewLibrary)
                 {
 
                     var users = LibraryUserDtolists.OwnerAccess(ownerIdForNewLibrary);
-                    u.TargetConditionGoalRepo.UpsertOrDeleteUsers(dto.Id, users);
+                    _unitOfWork.TargetConditionGoalRepo.UpsertOrDeleteUsers(dto.Id, users);
                 }
             });
         }

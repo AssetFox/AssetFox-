@@ -183,7 +183,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertDeficientConditionGoalLibraryAndGoals(DeficientConditionGoalLibraryDTO dto)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 UpsertDeficientConditionGoalLibrary(dto);
                 UpsertOrDeleteDeficientConditionGoals(dto.DeficientConditionGoals, dto.Id);
@@ -331,9 +331,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteScenarioDeficientConditionGoals(List<DeficientConditionGoalDTO> scenarioDeficientConditionGoal, Guid simulationId)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
-                if (!u.Context.Simulation.Any(_ => _.Id == simulationId))
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
                     throw new RowNotInTableException($"No simulation found for the given scenario.");
                 }
@@ -341,7 +341,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     throw new InvalidOperationException("All deficient conditions must have an attribute.");
                 }
-                var attributeEntities = u.Context.Attribute.ToList();
+                var attributeEntities = _unitOfWork.Context.Attribute.ToList();
                 var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
 
                 if (!scenarioDeficientConditionGoal.All(_ => attributeNames.Contains(_.Attribute)))
@@ -362,20 +362,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .ToList();
                 var entityIds = scenarioDeficientConditionGoal.Select(_ => _.Id).ToList();
 
-                var existingEntityIds = u.Context.ScenarioDeficientConditionGoal
+                var existingEntityIds = _unitOfWork.Context.ScenarioDeficientConditionGoal
                     .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
                     .Select(_ => _.Id).ToList();
 
-                u.Context.DeleteAll<ScenarioDeficientConditionGoalEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<ScenarioDeficientConditionGoalEntity>(_ =>
                     _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
-                u.Context.UpdateAll(scenarioDeficientConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
-                    .ToList(), u.UserEntity?.Id);
+                _unitOfWork.Context.UpdateAll(scenarioDeficientConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
+                    .ToList(), _unitOfWork.UserEntity?.Id);
 
-                u.Context.AddAll(scenarioDeficientConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
-                    .ToList(), u.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(scenarioDeficientConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                    .ToList(), _unitOfWork.UserEntity?.Id);
 
-                u.Context.DeleteAll<CriterionLibraryScenarioDeficientConditionGoalEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioDeficientConditionGoalEntity>(_ =>
                     _.ScenarioDeficientConditionGoal.SimulationId == simulationId);
 
                 if (scenarioDeficientConditionGoal.Any(_ =>
@@ -405,12 +405,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             });
                         });
 
-                    u.Context.AddAll(criterionLibraryEntities, u.UserEntity?.Id);
-                    u.Context.AddAll(criterionLibraryJoinEntities, u.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
                 }
                 // Update last modified date
-                var simulationEntity = u.Context.Simulation.Single(_ => _.Id == simulationId);
-                u.Context.Upsert(simulationEntity, simulationId, u.UserEntity?.Id);
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
             });
         }
     }

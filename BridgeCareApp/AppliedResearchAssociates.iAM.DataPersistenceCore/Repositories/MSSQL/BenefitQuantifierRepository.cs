@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertBenefitQuantifierAtomically(BenefitQuantifierDTO dto)
         {
-            _unitOfWork.AsTransaction(u => u.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto));
+            _unitOfWork.AsTransaction(() => _unitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto));
         }
 
         public void UpsertBenefitQuantifier(BenefitQuantifierDTO dto)

@@ -196,10 +196,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
 
-                var simulationEntity = u.Context.Simulation.AsNoTracking()
+                var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
                     .Single(_ => _.Id == simulationId);
 
                 var budgetPriorityEntities = budgetPriorities
@@ -208,26 +208,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 var entityIds = budgetPriorityEntities.Select(_ => _.Id).ToList();
 
-                var existingEntityIds = u.Context.ScenarioBudgetPriority.AsNoTracking()
+                var existingEntityIds = _unitOfWork.Context.ScenarioBudgetPriority.AsNoTracking()
                     .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
                     .Select(_ => _.Id).ToList();
 
-                u.Context.DeleteAll<BudgetPercentagePairEntity>(_ => _.ScenarioBudgetPriority.SimulationId == simulationId);
+                _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ => _.ScenarioBudgetPriority.SimulationId == simulationId);
 
-                u.Context.DeleteAll<ScenarioBudgetPriorityEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<ScenarioBudgetPriorityEntity>(_ =>
                     _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
-                u.Context.UpdateAll(budgetPriorityEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(), u.UserEntity?.Id);
+                _unitOfWork.Context.UpdateAll(budgetPriorityEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
 
-                u.Context.AddAll(budgetPriorityEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), u.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(budgetPriorityEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
 
-                u.Context.DeleteAll<CriterionLibraryScenarioBudgetPriorityEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioBudgetPriorityEntity>(_ =>
                     _.ScenarioBudgetPriority.SimulationId == simulationId);
 
                 if (budgetPriorities.Any(_ => _.BudgetPercentagePairs.Any()))
                 {
-                    u.Context.AddAll(budgetPriorities.Where(_ => _.BudgetPercentagePairs.Any())
-                        .SelectMany(_ => _.BudgetPercentagePairs.Select(pair => pair.ToEntity(_.Id))).ToList(), u.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(budgetPriorities.Where(_ => _.BudgetPercentagePairs.Any())
+                        .SelectMany(_ => _.BudgetPercentagePairs.Select(pair => pair.ToEntity(_.Id))).ToList(), _unitOfWork.UserEntity?.Id);
                 }
 
                 if (budgetPriorities.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
@@ -255,12 +255,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             return criterion;
                         }).ToList();
 
-                    u.Context.AddAll(criteria, u.UserEntity?.Id);
-                    u.Context.AddAll(criterionJoins, u.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
                 }
 
                 // Update last modified date
-                u.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+                _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
             });
         }
 
@@ -346,14 +346,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteBudgetPriorityLibraryAndPriorities(BudgetPriorityLibraryDTO dto, bool isNewLibrary, Guid ownerIdForNewLibrary)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
-                u.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
-                u.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
+                _unitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
+                _unitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
                 if (isNewLibrary)
                 {
                     var users = LibraryUserDtolists.OwnerAccess(ownerIdForNewLibrary);
-                    u.BudgetPriorityRepo.UpsertOrDeleteUsers(dto.Id, users);
+                    _unitOfWork.BudgetPriorityRepo.UpsertOrDeleteUsers(dto.Id, users);
                 }
             });
         }

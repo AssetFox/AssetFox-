@@ -351,18 +351,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
-                u.Context.DeleteAll<ScenarioRemainingLifeLimitEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<ScenarioRemainingLifeLimitEntity>(_ =>
                 _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
-                u.Context.UpdateAll(scenariRemainingLifeLimitEntities.Where(_ => existingEntityIds.Contains(_.Id))
+                _unitOfWork.Context.UpdateAll(scenariRemainingLifeLimitEntities.Where(_ => existingEntityIds.Contains(_.Id))
                     .ToList());
 
-                u.Context.AddAll(scenariRemainingLifeLimitEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                _unitOfWork.Context.AddAll(scenariRemainingLifeLimitEntities.Where(_ => !existingEntityIds.Contains(_.Id))
                     .ToList());
 
-                u.Context.DeleteAll<CriterionLibraryScenarioRemainingLifeLimitEntity>(_ =>
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioRemainingLifeLimitEntity>(_ =>
                     _.ScenarioRemainingLifeLimit.SimulationId == simulationId);
 
                 if (scenarioRemainingLifeLimit.Any(_ =>
@@ -392,21 +392,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             });
                         });
 
-                    u.Context.AddAll(criterionLibraryEntities, u.UserEntity?.Id);
-                    u.Context.AddAll(criterionLibraryJoinEntities, u.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
                 }
                 // Update last modified date
-                var simulationEntity = u.Context.Simulation.Single(_ => _.Id == simulationId);
-                u.Context.Upsert(simulationEntity, simulationId, u.UserEntity?.Id);
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
             });
         }
 
         public void UpsertRemainingLifeLimitLibraryAndLimits(RemainingLifeLimitLibraryDTO library)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
-                u.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(library);
-                u.RemainingLifeLimitRepo.UpsertOrDeleteRemainingLifeLimits(library.RemainingLifeLimits, library.Id);
+                _unitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(library);
+                _unitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteRemainingLifeLimits(library.RemainingLifeLimits, library.Id);
             });
         }
     }

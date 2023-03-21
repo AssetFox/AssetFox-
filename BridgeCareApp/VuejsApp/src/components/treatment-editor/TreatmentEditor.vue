@@ -4,8 +4,9 @@
             <v-layout>
                 <v-flex xs3>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
+                    <!-- https://stackoverflow.com/questions/65908052/get-the-item-text-from-a-v-select -->
                     <v-select
-                        :items='librarySelectItems'
+                        :items='librarySelectItems' return-object
                         append-icon=$vuetify.icons.ghd-down
                         class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                         label='Select a Treatment Library'
@@ -528,6 +529,14 @@ export default class TreatmentEditor extends Vue {
                 this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
             })
         this.librarySelectItemValueAllowedChanged = true;
+
+        this.checkHasUnsavedChanges();
+        console.log(this.hasUnsavedChanges);
+        if (this.hasUnsavedChanges) {
+            this.$root.$emit("changeLibrary", this.librarySelectItemValue.text + " (Modified)");
+        } else {
+            this.$root.$emit("changeLibrary", this.librarySelectItemValue.text);
+        }
     }
     onSelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue

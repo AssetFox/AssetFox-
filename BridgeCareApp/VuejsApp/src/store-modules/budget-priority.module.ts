@@ -25,7 +25,6 @@ const state = {
         emptyBudgetPriorityLibrary,
     ) as BudgetPriorityLibrary,
     scenarioBudgetPriorities: [] as BudgetPriority[],
-    scenarioBudgetPriorityLibrary: [] as BudgetPriorityLibrary[],
     hasPermittedAccess: false,
     libraryUsers: [] as LibraryUser[],
     isSharedLibrary: false
@@ -37,12 +36,6 @@ const mutations = {
         libraries: BudgetPriorityLibrary[],
     ) {
         state.budgetPriorityLibraries = clone(libraries);
-    },
-    scenarioBudgetPriorityLibraryMutator(
-        start: any,
-        libraries: BudgetPriorityLibrary[],
-    ) {
-        state.scenarioBudgetPriorityLibrary = clone(libraries);
     },
     selectedBudgetPriorityLibraryMutator(state: any, libraryId: string) {
         if (any(propEq('id', libraryId), state.budgetPriorityLibraries)) {
@@ -166,16 +159,6 @@ const actions = {
                 hasValue(response, 'status') && http2XX.test(response.status.toString())
             ) {
                 commit('budgetPriorityLibraryUserMutator', response.data);                
-            }
-        });
-    },
-    async getScenarioBudgetPriorityLibrary({ commit }: any, scenarioId: string) {
-        await BudgetPriorityService.getScenarioBudgetPriorityLibrary(scenarioId)
-        .then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') && http2XX.test(response.status.toString())
-            ) {
-                commit('scenarioBudgetPriorityLibraryMutator', response.data);                
             }
         });
     },

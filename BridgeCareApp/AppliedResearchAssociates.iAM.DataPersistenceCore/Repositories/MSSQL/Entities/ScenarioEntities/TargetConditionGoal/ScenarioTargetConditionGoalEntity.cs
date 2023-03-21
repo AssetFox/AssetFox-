@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public int? Year { get; set; }
 
+        public Guid LibraryId { get; set; }
+
         public virtual SimulationEntity Simulation { get; set;}
 
         public virtual CriterionLibraryScenarioTargetConditionGoalEntity CriterionLibraryScenarioTargetConditionGoalJoin { get; set; }

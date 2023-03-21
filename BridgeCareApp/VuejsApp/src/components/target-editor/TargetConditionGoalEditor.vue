@@ -38,6 +38,7 @@
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
+                    <div>Parent library {{parentLibraryName}}</div>
                     <v-layout align-end style="padding-top: 18px !important;">
                         <v-spacer></v-spacer>
                         <v-btn outline
@@ -521,6 +522,8 @@ export default class TargetConditionGoalEditor extends Vue {
     hasCreatedLibrary: boolean = false;
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
+    parentLibraryId: string = "";
+    parentLibraryName: string = "";
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -629,6 +632,13 @@ export default class TargetConditionGoalEditor extends Vue {
 
     @Watch('currentPage')
     onCurrentPageChanged() {
+
+        // Get parent name from library id
+        this.librarySelectItems.forEach(library => {
+            if (library.value === this.parentLibraryId) {
+                this.parentLibraryName = library.text;
+            }
+        });
     }
     
     @Watch('isSharedLibrary')
@@ -973,6 +983,17 @@ export default class TargetConditionGoalEditor extends Vue {
         }
     };
 
+    setParentLibraryName(libraryId: string) {
+        let foundLibrary: TargetConditionGoalLibrary = emptyTargetConditionGoalLibrary;
+        this.stateTargetConditionGoalLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
+
     initializePages(){
         const request: PagingRequest<TargetConditionGoal>= {
             page: 1,
@@ -995,6 +1016,8 @@ export default class TargetConditionGoalEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+
+                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
                 }
             });
     }

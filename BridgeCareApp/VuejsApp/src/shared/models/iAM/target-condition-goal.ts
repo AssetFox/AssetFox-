@@ -8,6 +8,7 @@ export interface TargetConditionGoal {
     attribute: string;
     target: number;
     year: number | null;
+    libraryId: string;
     criterionLibrary: CriterionLibrary;
 }
 
@@ -27,6 +28,7 @@ export const emptyTargetConditionGoal: TargetConditionGoal = {
     attribute: '',
     target: 1,
     year: null,
+    libraryId: getBlankGuid(),
     criterionLibrary: clone(emptyCriterionLibrary)
 };
 

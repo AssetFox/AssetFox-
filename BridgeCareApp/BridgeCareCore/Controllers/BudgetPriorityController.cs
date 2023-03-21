@@ -180,25 +180,6 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("GetScenarioBudgetPriorityLibrary/{scenarioId}")]
-        [Authorize(Policy = Policy.ViewBudgetPriorityFromLibrary)]
-        public async Task<IActionResult> GetScenarioBudgetPriorityLibrary(Guid scenarioId)
-        {
-            try
-            {
-                var result = new List<BudgetPriorityLibraryDTO>();
-                await Task.Factory.StartNew(() =>
-                {
-                    result = UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetLibrary(scenarioId);
-                });
-                return Ok(result);
-            } catch (UnauthorizedAccessException)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetScenarioBudgetPriorityLibrary - {HubService.errorList["Unauthorized"]}");
-                throw;
-            }
-        }
-        [HttpGet]
         [Route("GetScenarioBudgetPriorities/{simulationId}")]
         [Authorize(Policy = Policy.ViewBudgetPriorityFromScenario)]
         public async Task<IActionResult> GetScenarioBudgetPriorities(Guid simulationId)

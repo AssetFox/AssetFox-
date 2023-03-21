@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 
@@ -17,13 +16,13 @@ using Org.BouncyCastle.Utilities.Encoders;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData
 {
-    public class BridgeDataForSummaryReport : IBridgeDataForSummaryReport
+    public class BridgeDataForSummaryReport
     {
         private List<int> _spacerColumnNumbers;
-        private IHighlightWorkDoneCells _highlightWorkDoneCells;
+        private HighlightWorkDoneCells _highlightWorkDoneCells;
         private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> _valueForMinC;
         private readonly List<int> _simulationYears = new List<int>();
-        private ISummaryReportHelper _summaryReportHelper;
+        private SummaryReportHelper _summaryReportHelper;
         private ReportHelper _reportHelper;
 
         // This is also used in Bridge Work Summary TAB

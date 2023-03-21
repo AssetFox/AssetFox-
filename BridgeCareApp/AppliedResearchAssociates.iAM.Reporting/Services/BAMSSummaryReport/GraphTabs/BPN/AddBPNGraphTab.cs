@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using OfficeOpenXml;
-
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs.BPN
 {
-    public class AddBPNGraphTab : IAddBPNGraphTab
+    public class AddBPNGraphTab
     {
         private CombinedPostedAndClosed _combinedPostedAndClosed;
         private CashNeededByBPN _cashNeededByBPN;

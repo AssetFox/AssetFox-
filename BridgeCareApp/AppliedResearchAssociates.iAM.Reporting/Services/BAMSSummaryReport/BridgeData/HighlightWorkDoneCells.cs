@@ -1,14 +1,11 @@
 ﻿using System.Drawing;
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
-
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData
 {
-    public class HighlightWorkDoneCells : IHighlightWorkDoneCells
+    public class HighlightWorkDoneCells
     {
         public void CheckConditions(int parallelBridge, string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
             TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)

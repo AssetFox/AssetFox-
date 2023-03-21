@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         public string Name => "BAMSPBExportReport";
 
-        public IReport Create(UnitOfDataPersistenceWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
         {
             var report = new BAMSPBExportReport(uow, Name, results, hubService);
             return report;

@@ -59,18 +59,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             Assert.Equal(bmsIdDatum.AssetId, checkGuid);
         }
 
-        [Fact (Skip ="Fails. The underlying apis have changed. Need to figure out if their behavior is appropriate or not.")]
+        [Fact]
         public void ReturnsSegmentDataWithBRKey()
         {
             Setup();
             var repo = new MaintainableAssetDataRepository(_testRepo);
 
             // Act
-            var testSegment = repo.GetAssetAttributes("BRKEY_", "2");
+            var testSegment = repo.GetAssetAttributes("BRKEY_", "13401256");
 
             // Assert
             var brKeyAsset = testSegment.Single(_ => _.Name == "BRKEY_");
-            Assert.Equal("101256", brKeyAsset.TextValue);
+            Assert.Equal("13401256", brKeyAsset.TextValue);
             var lengthAsset = testSegment.First(_ => _.Name == "Length");
             var nameAsset = testSegment.First(_ => _.Name == "Name");
             Assert.Equal("15.4", lengthAsset.TextValue);

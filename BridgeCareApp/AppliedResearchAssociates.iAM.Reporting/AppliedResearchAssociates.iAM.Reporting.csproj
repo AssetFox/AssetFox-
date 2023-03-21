@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Models\BAMSPBExportReport\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 

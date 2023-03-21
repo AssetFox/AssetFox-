@@ -9,7 +9,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSPBExportReport;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Treatments;
 using BridgeCareCore.Services;
 using OfficeOpenXml;
 
@@ -22,12 +26,18 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private Guid _networkId;        
         private readonly ReportHelper _reportHelper;
 
+        private readonly ITreatmentForPBExportReport _treatmentForPBExportReportReport;
+
         public BAMSPBExportReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
             _reportHelper = new ReportHelper();
+
+            //create summary report objects
+            _treatmentForPBExportReportReport = new TreatmentForPBExportReport();
+            if (_treatmentForPBExportReportReport == null) { throw new ArgumentNullException(nameof(_treatmentForPBExportReportReport)); }
 
             // Check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -141,10 +151,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
-            var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
 
             // Sort data if needed..
-            
+
 
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
@@ -156,8 +166,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("BAMSPBExportReportData.xlsx"));
 
-            // Tabs..
-
+            // BAMS Treatment TAB
+            reportDetailDto.Status = $"Creating BAMS Treatment TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PBExportReportTabNames.Treatments);
+            _treatmentForPBExportReportReport.Fill(treatmentsWorksheet, reportOutputData);
 
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";

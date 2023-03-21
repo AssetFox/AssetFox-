@@ -191,7 +191,7 @@ namespace BridgeCareCore.Controllers
             var dtoList = new List<CalculatedAttributeDTO>() { dto };
             try
             {
-                calculatedAttributesRepo.UpsertScenarioCalculatedAttributesAtomically(dtoList, simulationId);
+                calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dtoList, simulationId);
             }
             catch (Exception e)
             {
@@ -214,7 +214,7 @@ namespace BridgeCareCore.Controllers
                 {
                     var dto = _calulatedAttributeService.GetSyncedScenarioDataSet(simulationId, syncModel);
                     
-                    calculatedAttributesRepo.UpsertScenarioCalculatedAttributesAtomically(dto, simulationId);
+                    calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);
                 });
                 return Ok();
             }

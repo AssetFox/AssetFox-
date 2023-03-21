@@ -50,7 +50,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifierAtomically(dto);
+                    UnitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto);
                 });
 
                 return Ok();

@@ -38,12 +38,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.NetworkId == networkId).ToDto();
         }
 
-        public void UpsertBenefitQuantifierAtomically(BenefitQuantifierDTO dto)
+        public void UpsertBenefitQuantifier(BenefitQuantifierDTO dto)
         {
-            _unitOfWork.AsTransaction(() => _unitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto));
+            _unitOfWork.AsTransaction(() => _unitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifierNonAtomic(dto));
         }
 
-        public void UpsertBenefitQuantifier(BenefitQuantifierDTO dto)
+        public void UpsertBenefitQuantifierNonAtomic(BenefitQuantifierDTO dto)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == dto.NetworkId))
             {

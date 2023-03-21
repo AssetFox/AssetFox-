@@ -261,7 +261,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
 
-        public void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId)
+        public void UpsertScenarioCalculatedAttributesNonAtomic(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId)
         {
             _unitOfDataPersistenceWork.SimulationRepo.GetSimulation(scenarioId);
 
@@ -327,13 +327,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             AddAllWithUser(criteriaPairJoins);
         }
 
-        public void UpsertScenarioCalculatedAttributesAtomically(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId)
+        public void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId)
         {
             // This will throw an error if no simulation is found.  That is the desired action here.
             // Let the API worry about the existence of the simulation
             _unitOfDataPersistenceWork.AsTransaction(() =>
             {
-                _unitOfDataPersistenceWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributes(calculatedAttributes, scenarioId);
+                _unitOfDataPersistenceWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributesNonAtomic(calculatedAttributes, scenarioId);
             });
         }
 

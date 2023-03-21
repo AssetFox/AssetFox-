@@ -398,7 +398,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertOrDeleteScenarioPerformanceCurves(
+        public void UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(
             List<PerformanceCurveDTO> scenarioPerformanceCurves,
             Guid simulationId)
         {
@@ -589,12 +589,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
         }
 
-        public void UpsertOrDeleteScenarioPerformanceCurvesAtomically(
+        public void UpsertOrDeleteScenarioPerformanceCurves(
             List<PerformanceCurveDTO> scenarioPerformanceCurves,
             Guid simulationId)
         {
             _unitOfWork.AsTransaction(() =>
-            _unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(scenarioPerformanceCurves, simulationId));
+            _unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(scenarioPerformanceCurves, simulationId));
         }
 
         public List<PerformanceCurveDTO> GetPerformanceCurvesForLibrary(Guid performanceCurveLibraryId)

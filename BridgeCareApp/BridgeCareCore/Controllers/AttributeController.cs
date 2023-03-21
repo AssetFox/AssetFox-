@@ -115,7 +115,7 @@ namespace BridgeCareCore.Controllers
                 var convertedAttributes = attributeDTOs.Select(AttributeService.ConvertAllAttribute).ToList();
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.AttributeRepo.UpsertAttributesAtomically(convertedAttributes);
+                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributes);
                 });
 
                 return Ok();
@@ -148,7 +148,7 @@ namespace BridgeCareCore.Controllers
                 var convertedAttributeDto = AttributeService.ConvertAllAttribute(attributeDto);
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.AttributeRepo.UpsertAttributesAtomically(convertedAttributeDto);
+                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto);
                 });
 
                 return Ok();

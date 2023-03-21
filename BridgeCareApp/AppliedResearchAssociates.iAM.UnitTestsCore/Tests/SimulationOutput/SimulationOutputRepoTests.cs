@@ -105,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var oldSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(context.SimulationId);
             oldSimulation.Name = RandomStrings.WithPrefix("Modified simulation");
             var updateStartDate = DateTime.Now;
-            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulation(oldSimulation);
+            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulationAndPossiblyUsers(oldSimulation);
             var updateEndDate = DateTime.Now;
             var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaRelation(context.SimulationId);
             var lastModifiedDate = loadedOutput.LastModifiedDate;

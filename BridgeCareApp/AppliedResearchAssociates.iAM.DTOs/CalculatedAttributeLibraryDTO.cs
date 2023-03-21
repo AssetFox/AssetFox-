@@ -7,6 +7,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
     {
         public bool IsDefault { get; set; } = false;
 
-        public ICollection<CalculatedAttributeDTO> CalculatedAttributes { get; set; } = new List<CalculatedAttributeDTO>();
+        public List<CalculatedAttributeDTO> CalculatedAttributes { get; set; } = new List<CalculatedAttributeDTO>();
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using MoreLinq;
@@ -136,7 +137,7 @@ namespace BridgeCareCore.Services
 
                 QueueEntryTimestamp = queuedWorkHandle.QueueEntryTimestamp,
                 WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp,
-                QueueingUser = queuedWorkHandle.UserInfo.Name,
+                QueueingUser = queuedWorkHandle.UserId,
                 QueuePosition = queuedWorkHandle.QueueIndex,
             };
 

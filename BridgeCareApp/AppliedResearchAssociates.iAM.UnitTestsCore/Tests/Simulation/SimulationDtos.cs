@@ -17,6 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 var newUser = new SimulationUserDTO
                 {
                     IsOwner = true,
+                    CanModify = true,
                     UserId = owner.Value,
                 };
                 users.Add(newUser);

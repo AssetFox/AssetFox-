@@ -1,10 +1,11 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using Xunit;
 
 namespace AppliedResearchAssociates.Testing
 {
     public class CycleDetectionTests
     {
-        [Test]
+        [Fact]
         public void ClrsFigure22_4()
         {
             // https://stackoverflow.com/a/53995651/402749
@@ -33,9 +34,12 @@ namespace AppliedResearchAssociates.Testing
             var vertices = new[] { u, w };
             var cycles = CycleDetection.FindAllCycles(vertices, vertex => vertex.Adjacencies);
 
-            Assert.That(cycles, Is.Not.Empty);
-            Assert.That(cycles, Does.Contain(new[] { v, y, x }).Using(SequenceEqualityComparer.Default));
-            Assert.That(cycles, Does.Contain(new[] { z }).Using(SequenceEqualityComparer.Default));
+            var child1 = new List<Vertex> { v, y, x };
+            var child2 = new List<Vertex> { z };
+
+            Assert.NotEmpty(cycles);
+            Assert.Contains(cycles, x => SequenceEqualityComparer.Default.Equals(x, child1));
+            Assert.Contains(cycles, x => SequenceEqualityComparer.Default.Equals(x, child2));
         }
 
         private sealed class Vertex

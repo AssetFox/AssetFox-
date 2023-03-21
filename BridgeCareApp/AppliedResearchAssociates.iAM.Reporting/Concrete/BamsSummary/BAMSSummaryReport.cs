@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class BAMSSummaryReport : IReport
     {
         protected readonly IHubService _hubService;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
         private readonly IFundedTreatmentList _fundedTreatmentList;
         private readonly IUnfundedTreatmentFinalList _unfundedTreatmentFinalList;
@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public string Status { get; private set; }
 
 
-        public BAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
+        public BAMSSummaryReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             //store passed parameter   
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

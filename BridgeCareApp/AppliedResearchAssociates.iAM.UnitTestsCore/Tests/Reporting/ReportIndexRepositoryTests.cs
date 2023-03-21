@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
 {
@@ -41,11 +42,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         public void AddSuccessfullyInsertsNewReport()
         {
             // Arrange
-            var newReport = new ReportIndexEntity()
+            var newReport = new ReportIndexDTO
             {
                 Id = new Guid("5ef4090a-77d6-4ed9-9fe1-6a938e043137"),
-                SimulationID = new Guid("0951aaad-eddd-462d-ab8d-99ed3829019f"),
-                ReportTypeName = "Test Report File",
+                SimulationId = new Guid("0951aaad-eddd-462d-ab8d-99ed3829019f"),
+                Type = "Test Report File",
                 Result = "C:\\fakepath\\report.xlsx",
                 ExpirationDate = DateTime.Now.AddDays(2)
             };
@@ -63,11 +64,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         public void AddSuccessfullyReplacesExistingReport()
         {
             // Arrange
-            var newReport = new ReportIndexEntity()
+            var newReport = new ReportIndexDTO()
             {
                 Id = new Guid("7a406cd1-6857-4288-9d93-9cc7ebd38fdf"),
-                SimulationID = new Guid("be82f095-c108-4ab7-af7e-cb7ecd18ede2"),
-                ReportTypeName = "Test Report File",
+                SimulationId = new Guid("be82f095-c108-4ab7-af7e-cb7ecd18ede2"),
+                Type = "Test Report File",
                 Result = "C:\\fakepath\\report.xlsx",
                 ExpirationDate = DateTime.Now.AddDays(2)
             };
@@ -86,11 +87,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         public void AddHandlesMissingId()
         {
             // Arrange
-            var newReport = new ReportIndexEntity()
+            var newReport = new ReportIndexDTO()
             {
                 Id = Guid.Empty,
-                SimulationID = null,
-                ReportTypeName = "Test Report File",
+                SimulationId = null,
+                Type = "Test Report File",
                 Result = "C:\\fakepath\\report.xlsx",
                 ExpirationDate = DateTime.Now.AddDays(2)
             };
@@ -104,11 +105,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         public void AddHandlesMissingreportType()
         {
             // Arrange
-            var newReport = new ReportIndexEntity()
+            var newReport = new ReportIndexDTO()
             {
                 Id = new Guid("5ef4090a-77d6-4ed9-9fe1-6a938e043137"),
-                SimulationID = new Guid("0951aaad-eddd-462d-ab8d-99ed3829019f"),
-                ReportTypeName = "",
+                SimulationId = new Guid("0951aaad-eddd-462d-ab8d-99ed3829019f"),
+                Type = "",
                 Result = "C:\\fakepath\\report.xlsx",
                 ExpirationDate = DateTime.Now.AddDays(2)
             };

@@ -25,5 +25,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             return ToDTO(entity);
         }
+
+        public static ReportIndexEntity ToEntity(this ReportIndexDTO dto)
+        {
+            var entity = new ReportIndexEntity
+            {
+                Id = dto.Id,
+                SimulationID = dto.SimulationId,
+                ExpirationDate = dto.ExpirationDate,
+                Result = dto.Result,
+                ReportTypeName = dto.Type,
+            };
+            return entity;
+        }
     }
 }

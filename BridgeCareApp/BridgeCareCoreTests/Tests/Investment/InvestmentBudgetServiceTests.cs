@@ -19,7 +19,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class DatabaseBasedInvestmentBudgetServiceTests
+    public class InvestmentBudgetServiceTests
     {
         private InvestmentBudgetsService CreateService(Mock<IUnitOfWork> unitOfWork)
         {
@@ -78,7 +78,7 @@ namespace BridgeCareCoreTests.Tests
             return excelPackage;
         }
 
-        [Fact] // done
+        [Fact]
         public void ImportLibraryInvestmentBudgetsFile_Does()
         {
             // Arrange

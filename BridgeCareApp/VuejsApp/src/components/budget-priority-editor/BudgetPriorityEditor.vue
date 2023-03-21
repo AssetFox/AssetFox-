@@ -32,7 +32,7 @@
                     </v-layout>                               
                 </v-flex>
                 <v-flex xs4>
-                    parent library: {{parentLibraryName}} <div v-if="parentModifiedFlag">(modified)</div>
+                    parent library: {{parentLibraryName}} <span v-if="parentModifiedFlag">(modified)</span>
                 </v-flex>                               
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout row align-end class="left-buttons-padding">
@@ -443,14 +443,6 @@ export default class BudgetPriorityEditor extends Vue {
                 this.parentLibraryName = library.text;
             }
         });
-
-
-        this.stateBudgetPriorityLibraries.forEach(stateLibrary => {
-            if (stateLibrary.id == this.parentLibraryId) {
-                // look for equivalence
-            }
-        });
-
     }
 
     @Watch('selectedBudgetPriorityGridRows')
@@ -767,12 +759,11 @@ export default class BudgetPriorityEditor extends Vue {
             addedRows: this.addedRows           
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.clearChanges();
                 this.librarySelectItemValue = null;
                 this.addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
                 this.currentPage = sortByProperty("priorityLevel", this.currentPage);
-
-                this.parentModifiedFlag = true;
             }           
         });
     }
@@ -987,6 +978,16 @@ export default class BudgetPriorityEditor extends Vue {
             });
         }
     }
+    setParentLibraryName(libraryId: string) {
+        let foundLibrary: BudgetPriorityLibrary = emptyBudgetPriorityLibrary;
+        this.stateBudgetPriorityLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
 
     initializePages(){
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
@@ -1012,7 +1013,7 @@ export default class BudgetPriorityEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                 }
-                this.parentLibraryId = (this.currentPage.length > 0) ? this.currentPage[0].libraryId : "";
+                this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
             });
     }
 }

@@ -27,6 +27,7 @@ const state = {
     treatmentLibraries: [] as TreatmentLibrary[],
     selectedTreatmentLibrary: clone(emptyTreatmentLibrary) as TreatmentLibrary,
     scenarioSelectableTreatments: [] as Treatment[],
+    scenarioTreatmentLibrary: emptyTreatmentLibrary as TreatmentLibrary,
     simpleScenarioSelectableTreatments: [] as SimpleTreatment[],
     simpleSelectableTreatments: [] as SimpleTreatment[],
     hasPermittedAccess: false,
@@ -89,6 +90,12 @@ const mutations = {
         selectableTreatments: SimpleTreatment[],
     ) {
         state.simpleSelectableTreatments = clone(selectableTreatments);
+    },
+    scenarioTreatmentLibraryMutator(
+        state: any,
+        treatmentLibrary: Treatment
+    ) {
+        state.scenarioTreatmentLibrary = clone(treatmentLibrary);
     },
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
@@ -180,6 +187,18 @@ const actions = {
                     );
                 }
             },
+        );
+    },
+    async getTreatmentLibraryBySimulationId({ commit }: any, simulationId: string) {
+        await TreatmentService.getTreatmentLibraryBySimulationId(simulationId).then(
+            (response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit(
+                        'scenarioTreatmentLibraryMutator',
+                        response.data as TreatmentLibrary
+                    );
+                }
+            }
         );
     },
     async upsertScenarioSelectableTreatments(

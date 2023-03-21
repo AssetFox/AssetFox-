@@ -43,6 +43,9 @@
                         </div>  
                     </v-layout>
                 </v-flex>
+                <v-flex xs2>
+                    <v-subheader class="">Parent Library: {{this.selectedTreatmentLibrary.name}}</v-subheader>
+                </v-flex>
                 <v-flex style="padding-right: 5px">
                     <v-btn
                         @click='onShowConfirmDeleteTreatmentAlert'
@@ -381,6 +384,8 @@ export default class TreatmentEditor extends Vue {
     stateScenarioSelectableTreatments: Treatment[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
+    @State(state => state.scenarioTreatmentLibrary)
+    stateScenarioTreatmentLibrary: TreatmentLibrary;
     @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.treatmentModule.hasPermittedAccess) hasPermittedAccess: boolean;
@@ -397,6 +402,7 @@ export default class TreatmentEditor extends Vue {
     @Action('deleteTreatmentLibrary') deleteTreatmentLibraryAction: any;
     @Action('getSimpleScenarioSelectableTreatments') getSimpleScenarioSelectableTreatmentsAction: any;
     @Action('getSimpleSelectableTreatments') getSimpleSelectableTreatmentsAction: any;
+    @Action('getTreatmentLibraryBySimulationId') getTreatmentLibraryBySimulationIdAction: any;
     @Action('getScenarioSimpleBudgetDetails')
     getScenarioSimpleBudgetDetailsAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
@@ -485,7 +491,7 @@ export default class TreatmentEditor extends Vue {
 
                 vm.hasScenario = true;
                 vm.getSimpleScenarioSelectableTreatmentsAction(vm.selectedScenarioId);
-
+                vm.getTreatmentLibraryBySimulationIdAction(vm.selectedScenarioId);
                 vm.treatmentTabs = [...vm.treatmentTabs, 'Budgets'];
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId, }).then(()=> {
                     vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
@@ -555,10 +561,16 @@ export default class TreatmentEditor extends Vue {
         this.selectedTreatmentLibrary = clone(
             this.stateSelectedTreatmentLibrary,
         );
+        console.log("stateSimpleLibraryTreatments: " + this.stateTreatmentLibrary);
     }
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
         this.isShared = this.isSharedLibrary;
+    }
+
+    @Watch('stateScenarioTreatmentLibrary')
+    OnStateScenarioTreatmentLibraryChanged() {
+        console.log("library: " + this.stateScenarioTreatmentLibrary);
     }
 
     @Watch('selectedTreatmentLibrary')
@@ -599,9 +611,10 @@ export default class TreatmentEditor extends Vue {
     @Watch('treatmentSelectItemValue')
     onTreatmentSelectItemValueChanged() {
         if(!isNil(this.treatmentSelectItemValue)){
-            var mapEntry = this.updatedRowsMap.get(this.treatmentSelectItemValue)
-            var addedRow = this.addedRows.find(_ => _.id == this.treatmentSelectItemValue)
-            var treatment = this.treatmentCache.find(_ => _.id === this.treatmentSelectItemValue)
+            console.log("treatment selectItemValue: " + this.treatmentSelectItemValue);
+            var mapEntry = this.updatedRowsMap.get(this.treatmentSelectItemValue);
+            var addedRow = this.addedRows.find(_ => _.id == this.treatmentSelectItemValue);
+            var treatment = this.treatmentCache.find(_ => _.id === this.treatmentSelectItemValue);
             if(!isNil(mapEntry)){
                 this.selectedTreatment = clone(mapEntry[1]);
             }
@@ -1112,6 +1125,11 @@ export default class TreatmentEditor extends Vue {
             next();
         }
     };
+    CheckLibraryModified() {
+        // check if the current scenario library is equal to the library object
+        if (this.selectedTreatment.name === this.selectedTreatmentLibrary.name) return true;
+        
+    }
 }
 </script>
 

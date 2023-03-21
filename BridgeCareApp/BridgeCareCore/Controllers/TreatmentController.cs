@@ -102,7 +102,36 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-
+        [HttpGet]
+        [Route("GetTreatmentLibraryFromSimulationId/{simulationId}")]
+        [Authorize(Policy = Policy.ViewTreatmentFromScenario)]
+        public async Task<IActionResult> GetTreatmentLibraryFromSimulationId(Guid simulationId)
+        {
+            try
+            {
+                var result = new TreatmentLibraryDTO();
+                await Task.Factory.StartNew(() =>
+                {
+                    var selectableTreatment = UnitOfWork.SelectableTreatmentRepo.GetDefaultTreatment(simulationId);
+                    
+                    var library = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == selectableTreatment.Id);
+                    //var library = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraryWithSingleTreatmentByTreatmentId(selectableTreatment.Id);
+                    
+                    result = library;
+                });
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetSelectedTreatmentById - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError} ::GetSelectedTreatmentById - {e.Message}");
+                throw;
+            }
+        }
         [HttpGet]
         [Route("GetSelectedTreatmentById/{id}")]
         [Authorize(Policy = Policy.ViewTreatmentFromScenario)]

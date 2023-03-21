@@ -24,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertOrDeleteScenarioBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid simulationId);
 
+        List<BudgetPriorityLibraryDTO> GetScenarioBudgetLibrary(Guid scenarioId);
         List<BudgetPriorityLibraryDTO> GetBudgetPriorityLibrariesNoChildrenAccessibleToUser(Guid userId);
         LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
         void UpsertOrDeleteUsers(Guid budgetPriorityLibraryId, IList<LibraryUserDTO> libraryUsers);

@@ -257,6 +257,7 @@ const ObjectID = require('bson-objectid');
 export default class BudgetPriorityEditor extends Vue {
     @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
     @State(state => state.budgetPriorityModule.budgetPriorityLibraries) stateBudgetPriorityLibraries: BudgetPriorityLibrary[];
+    @State(state => state.scenarioBudgetPriorityLibrary) stateScenarioBudgetPriorityLibrary: BudgetPriorityLibrary[];
     @State(state => state.budgetPriorityModule.selectedBudgetPriorityLibrary) stateSelectedBudgetPriorityLibrary: BudgetPriorityLibrary;
     @State(state => state.budgetPriorityModule.scenarioBudgetPriorities) stateScenarioBudgetPriorities: BudgetPriority[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
@@ -267,6 +268,7 @@ export default class BudgetPriorityEditor extends Vue {
     @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getBudgetPriorityLibraries') getBudgetPriorityLibrariesAction: any;
+    @Action('getScenarioBudgetPriorityLibrary') getScenarioBudgetPriorityLibrary: any;
     @Action('selectBudgetPriorityLibrary') selectBudgetPriorityLibraryAction: any;
     @Action('upsertBudgetPriorityLibrary') upsertBudgetPriorityLibraryAction: any;
     @Action('deleteBudgetPriorityLibrary') deleteBudgetPriorityLibraryAction: any;
@@ -328,6 +330,7 @@ export default class BudgetPriorityEditor extends Vue {
     checkBoxChanged: boolean = false;
     hasLibraryEditPermission: boolean = false;
     hasCreatedLibrary: boolean = false;
+    parentLibrary: BudgetPriorityLibrary;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -344,14 +347,13 @@ export default class BudgetPriorityEditor extends Vue {
                     });
                     vm.$router.push('/Scenarios/');
                 }
-
                 vm.hasScenario = true;
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId }).then(() => {
                     vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
                         vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
                         vm.initializePages();
                     });                                        
-                });                
+                });             
             }
         });
     }
@@ -366,6 +368,30 @@ export default class BudgetPriorityEditor extends Vue {
             text: library.name,
             value: library.id,
         }));
+
+        // console.log("budget priority library: " + this.currentPage[0].id);
+        // vm.getScenarioBudgetPriorityLibrary(vm.selectedScenarioId);
+
+        // if (!isNullOrUndefined(this.stateBudgetPriorityLibraries)) {
+        //     // go through budget priority libraries and find match with current scenario
+        //     this.stateBudgetPriorityLibraries.forEach(budgetPriorityLibrary => {
+        //         console.log("library name: " + budgetPriorityLibrary.name);
+        //         console.log("applied ids: " + budgetPriorityLibrary.appliedScenarioIds.length);
+        //         console.log("bps: " + budgetPriorityLibrary.budgetPriorities.length);
+        //         budgetPriorityLibrary.budgetPriorities.forEach(bp => {
+        //             console.log("selected sceario id: " + this.selectedScenarioId);
+        //             if (bp.id === this.selectedScenarioId) {
+        //                 this.parentLibrary = budgetPriorityLibrary;
+        //                 console.log("library name: " + this.parentLibrary.name);
+        //             }
+        //         });
+        //     });
+        // }
+
+    }
+    @Watch('stateScenarioBudgetPriorityLibrary')
+    onStateScenarioBudgetPriorityLibraryChanged() {
+        console.log("state scenario BudgetPriorityLibrary: " + this.stateScenarioBudgetPriorityLibrary.length);
     }
     //this is so that a user is asked wether or not to continue when switching libraries after they have made changes
     //but only when in libraries
@@ -991,6 +1017,10 @@ export default class BudgetPriorityEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                 }
+                console.log("init current page: " + this.currentPage.length);
+                console.log("first one: " + this.currentPage[0].id);
+                console.log("second one: " + this.currentPage[1].id);
+                console.log("third one: " + this.currentPage[2].id);
             });
     }
 }

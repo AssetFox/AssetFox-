@@ -47,6 +47,12 @@ export default class BudgetPriorityService {
         );
     }
 
+    static getScenarioBudgetPriorityLibrary(scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.BudgetPriority}/GetScenarioBudgetPriorityLibrary/${scenarioId}`,
+        );
+    }
+
     static upsertScenarioBudgetPriorities(
         data: PaginSync<BudgetPriority>, scenarioId: string
     ): AxiosPromise {

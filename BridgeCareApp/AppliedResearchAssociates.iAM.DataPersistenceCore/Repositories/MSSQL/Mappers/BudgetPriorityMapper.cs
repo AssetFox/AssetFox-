@@ -26,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = dto.Id,
                 SimulationId = simulationId,
+                LibraryId = dto.libraryId,
                 PriorityLevel = dto.PriorityLevel,
                 Year = dto.Year
             };
@@ -60,6 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 PriorityLevel = entity.PriorityLevel,
                 Year = entity.Year,
+                libraryId= entity.LibraryId,
                 BudgetPercentagePairs = entity.BudgetPercentagePairs.Any()
                     ? entity.BudgetPercentagePairs.Select(_ => _.ToDto()).ToList()
                     : new List<BudgetPercentagePairDTO>(),

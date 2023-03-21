@@ -188,7 +188,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
         }
-
+        public List<BudgetPriorityLibraryDTO> GetScenarioBudgetLibrary(Guid budgetPriorityId)
+        {
+            return _unitOfWork.Context.BudgetPriority
+                .AsNoTracking()
+                .Include(u => u.BudgetPriorityLibrary)
+                .Where(u => u.Id == budgetPriorityId)
+                .Select(u => u.BudgetPriorityLibrary.ToDto())
+                .ToList();
+        }
         public void UpsertOrDeleteScenarioBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

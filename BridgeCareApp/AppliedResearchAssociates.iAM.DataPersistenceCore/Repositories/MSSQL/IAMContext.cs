@@ -574,6 +574,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.PriorityLevel).IsRequired();
 
+                entity.Property(e => e.LibraryId).IsRequired();
+
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.BudgetPriorities)
                     .HasForeignKey(d => d.SimulationId)

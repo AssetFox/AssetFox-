@@ -130,7 +130,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SUBM_AGENCY"); //Submitting Agency
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CUSTODIAN"); // Maintenance Responsibility
+
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_NAME"); // Planning Partner
+
+
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LOCATION"); // Location / Structure Name
+
 
                 //--------------------- Structure ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LENGTH"); //Structure Length
@@ -733,7 +739,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "County\r\n(5A05)",
                 "Owner Code\r\n(5A21)",
                 "Submitting Agency\r\n(6A06)",
+                "Maintenance Responsibility\r\n(5A20)",
                 "Planning Partner\r\n(5A13)",
+
+
+                "Location / Structure Name\r\n(5A02)",
+
 
                 //--------------------- Structure ---------------------
                 "Structure Length\r\n(5B18)",
@@ -808,7 +819,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         break;
 
                     case "OWNERSHIP":
-                        totalNumOfColumns = 5; cellBGColor = ColorTranslator.FromHtml("#C6E0B4");
+                        totalNumOfColumns = 7; cellBGColor = ColorTranslator.FromHtml("#C6E0B4");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
                         break;
 

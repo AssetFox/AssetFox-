@@ -121,6 +121,74 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public async Task GetSimulations_CallShouldGetAllScenariosInRepo_RepoOnlyhasSharedScenarios()
+        {
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulation = SimulationDtos.Dto();
+            var simulations = new List<SimulationDTO> { simulation };
+            var emptySimulations = new List<SimulationDTO>();
+            repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(simulations);
+            repo.Setup(r => r.GetUserScenarios()).Returns(emptySimulations);
+
+            // Act
+            var result = await controller.GetSimulations();
+
+            // Assert
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as List<SimulationDTO>;
+            ObjectAssertions.Equivalent(simulations, castValue);
+        }
+
+        [Fact]
+        public async Task GetSimulations_CallShouldGetAllScenariosInRepo_RepoHasSharedAndUserScenarios()
+        {
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulation1 = SimulationDtos.Dto();
+            var simulation2 = SimulationDtos.Dto();
+            var simulations1 = new List<SimulationDTO> { simulation1 };
+            var simulations2 = new List<SimulationDTO> { simulation2 };
+            var expected = simulations1.Concat(simulations2).ToList();
+            repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(simulations1);
+            repo.Setup(r => r.GetUserScenarios()).Returns(simulations2);
+
+            // Act
+            var result = await controller.GetSimulations();
+
+            // Assert
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as List<SimulationDTO>;
+            ObjectAssertions.Equivalent(expected, castValue);
+        }
+
+        [Fact]
+        public async Task GetSimulations_CallShouldGetAllScenariosInRepo_RepoOnlyhasUserScenarios()
+        {
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulation = SimulationDtos.Dto();
+            var simulations = new List<SimulationDTO> { simulation };
+            var emptySimulations = new List<SimulationDTO>();
+            repo.Setup(r => r.GetSharedScenarios(true, true)).Returns(emptySimulations);
+            repo.Setup(r => r.GetUserScenarios()).Returns(simulations);
+
+            // Act
+            var result = await controller.GetSimulations();
+
+            // Assert
+            var value = ActionResultAssertions.OkObject(result);
+            var castValue = value as List<SimulationDTO>;
+            ObjectAssertions.Equivalent(simulations, castValue);
+        }
+
+        [Fact]
         public async Task CreateSimulation_CallsCreateOnRepo()
         {
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
@@ -172,7 +240,7 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var value = ActionResultAssertions.OkObject(result);
             ObjectAssertions.Equivalent(simulationDTO3, value);
-            var repoCall = repo.SingleInvocationWithName(nameof(ISimulationRepository.UpdateSimulation));
+            var repoCall = repo.SingleInvocationWithName(nameof(ISimulationRepository.UpdateSimulationAndPossiblyUsers));
             ObjectAssertions.Equivalent(simulationDTO3, repoCall.Arguments[0]);
         }
 

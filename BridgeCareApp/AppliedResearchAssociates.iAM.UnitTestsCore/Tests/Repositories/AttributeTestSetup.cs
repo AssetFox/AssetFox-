@@ -1,21 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data.Mappers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
@@ -49,8 +47,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 
         private static bool AttributesHaveBeenCreated = false;
         private static readonly object AttributeLock = new object();
+        private static SQLDataSourceDTO CacheDataSourceForAttributes { get; set; }
 
-        public static void CreateAttributes(IUnitOfWork unitOfWork)
+        public static SQLDataSourceDTO CreateAttributes(IUnitOfWork unitOfWork)
         {
             if (!AttributesHaveBeenCreated)
             {
@@ -74,6 +73,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                         {
                             dataSourceToApply = (SQLDataSourceDTO)unitOfWork.DataSourceRepo.GetDataSources().First(_ => _.Type == "SQL");
                         }
+                        CacheDataSourceForAttributes = dataSourceToApply;
                         var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
                         foreach (var attribute in attributesToInsert)
                         {
@@ -84,7 +84,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                     }
                 }
             }
+            return CacheDataSourceForAttributes;
         }
 
+        public static AttributeDTO CreateSingleTextAttribute(
+            IUnitOfWork unitOfWork,
+            Guid? id = null,
+            string name = null)
+        {
+            var resolveId = id ?? Guid.NewGuid();
+            var resolveName = name ?? RandomStrings.WithPrefix("attribute");
+            var dataSource = DataSourceDtos.TestConfigurationSql();
+            unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
+            var attribute = AttributeDtos.Text(resolveName, resolveId);
+            attribute.DataSource = dataSource;
+            var attributes = new List<AttributeDTO> { attribute };
+            unitOfWork.AttributeRepo.UpsertAttributes(attributes);
+            return attribute;
+        }
+        public static AttributeDTO CreateSingleNumericAttribute(
+            IUnitOfWork unitOfWork,
+            Guid? id = null,
+            string name = null)
+        {
+            var resolveId = id ?? Guid.NewGuid();
+            var resolveName = name ?? RandomStrings.WithPrefix("attribute");
+            var dataSource = DataSourceDtos.TestConfigurationSql();
+            unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
+            var attribute = AttributeDtos.Numeric(resolveName, resolveId);
+            attribute.DataSource = dataSource;
+            var attributes = new List<AttributeDTO> { attribute };
+            unitOfWork.AttributeRepo.UpsertAttributes(attributes);
+            return attribute;
+        }
     }
 }

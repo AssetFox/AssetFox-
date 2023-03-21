@@ -579,7 +579,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             {
                 if (context.YearIsWithinShadowForAnyTreatment(year))
                 {
-                    var rejections = ActiveTreatments.Select(treatment => new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForAnyTreatment));
+                    var rejections = ActiveTreatments.Select(treatment => new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForAnyTreatment, getBenefitImprovement(context, treatment)));
                     context.Detail.TreatmentRejections.AddRange(rejections);
                     return;
                 }
@@ -591,7 +591,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     var isRejected = context.YearIsWithinShadowForSameTreatment(year, treatment);
                     if (isRejected)
                     {
-                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForSameTreatment));
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForSameTreatment, getBenefitImprovement(context, treatment)));
                     }
 
                     return isRejected;
@@ -602,7 +602,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     var isFeasible = treatment.IsFeasible(context);
                     if (!isFeasible)
                     {
-                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.NotFeasible));
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.NotFeasible, getBenefitImprovement(context, treatment)));
                     }
 
                     return !isFeasible;
@@ -621,7 +621,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     var isSuperseded = supersededTreatments.Contains(treatment);
                     if (isSuperseded)
                     {
-                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.Superseded));
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.Superseded, getBenefitImprovement(context, treatment)));
                     }
 
                     return isSuperseded;
@@ -634,18 +634,27 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     {
                         if (convertedCost < Simulation.InvestmentPlan.MinimumProjectCostLimit)
                         {
-                            context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit));
+                            context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit, getBenefitImprovement(context, treatment)));
                             return true;
                         }
 
                         return false;
                     }
 
-                    context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
+                    context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost, getBenefitImprovement(context, treatment)));
                     var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Asset, treatment, cost, context.SimulationRunner.Simulation.Id);
                     Send(messageBuilder);
                     return true;
                 });
+
+                static double getBenefitImprovement(AssetContext context, Treatment treatment)
+                {
+                    var copyOfContext = new AssetContext(context);
+                    var benefitBeforeTreatment = copyOfContext.GetBenefit(false);
+                    copyOfContext.ApplyTreatmentConsequences(treatment);
+                    var benefitAfterTreatment = copyOfContext.GetBenefit(false);
+                    return benefitAfterTreatment - benefitBeforeTreatment;
+                }
 
                 if (feasibleTreatments.Count > 0)
                 {
@@ -812,16 +821,16 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             {
                 assetContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
                 var budgetUsageDetail = treatmentConsideration.BudgetUsages.Single(budgetUsage => budgetUsage.Status != BudgetUsageStatus.NotUsable);
-                budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInFull;
+                budgetUsageDetail.Status = BudgetUsageStatus.CostCovered;
                 budgetUsageDetail.CoveredCost = (decimal)treatmentCost; // Cost is assumed to already include all appropriate adjustments, e.g. for inflation.
                 return CostCoverage.Full;
             }
 
-            var applicableBudgets = Zip.Strict(BudgetContexts, treatmentConsideration.BudgetUsages).Where(budgetIsApplicable).ToArray();
+            var applicableBudgets = BudgetContexts.Zip(treatmentConsideration.BudgetUsages, BudgetInfo.Create).Where(budgetIsApplicable).ToArray();
 
-            bool budgetIsApplicable((BudgetContext, BudgetUsageDetail) _)
+            bool budgetIsApplicable(BudgetInfo info)
             {
-                var (budgetContext, budgetUsageDetail) = _;
+                var (budgetContext, budgetUsageDetail) = info;
 
                 if (budgetUsageDetail.Status == BudgetUsageStatus.NotUsable)
                 {
@@ -891,8 +900,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                         var futureCostAllocators = new List<Action>();
                         var considerationPerYear = costPerYear.Select(_ => new TreatmentConsiderationDetail(treatmentConsideration)).ToList();
 
-                        var workingBudgetContexts = applicableBudgets.Select(_ => new BudgetContext(_.Item1)).ToArray();
-                        var applicableBudgetNames = applicableBudgets.Select(_ => _.Item2.BudgetName).ToHashSet();
+                        var workingBudgetContexts = applicableBudgets.Select(_ => new BudgetContext(_.Context)).ToArray();
+                        var applicableBudgetNames = applicableBudgets.Select(_ => _.UsageDetail.BudgetName).ToHashSet();
 
                         var originalBudgetContextPerWorkingBudgetContext = new Dictionary<BudgetContext, BudgetContext>();
                         foreach (var ((original, _), working) in Zip.Strict(applicableBudgets, workingBudgetContexts))
@@ -900,7 +909,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                             originalBudgetContextPerWorkingBudgetContext[working] = original;
                         }
 
-                        BudgetContext firstYearBudget = null;
+                        Dictionary<BudgetContext, decimal> firstYearFractionPerBudget = null;
 
                         foreach (var (futureYearConsideration, futureYearCost, futureYear) in Zip.Short(considerationPerYear, costPerYear, Static.Count(year)))
                         {
@@ -910,12 +919,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                             }
 
                             var workingBudgetDetails = futureYearConsideration.BudgetUsages.Where(detail => applicableBudgetNames.Contains(detail.BudgetName));
-                            var workingBudgets = Zip.Strict(workingBudgetContexts, workingBudgetDetails).ToList();
-
-                            if (firstYearBudget is not null)
-                            {
-                                _ = workingBudgets.RemoveAll(pair => pair.Item1 != firstYearBudget);
-                            }
+                            var workingBudgets = workingBudgetContexts.Zip(workingBudgetDetails, BudgetInfo.Create).ToList();
 
                             var remainingYearCost = futureYearCost;
 
@@ -928,16 +932,28 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                                 futureCostAllocators.Add(() => originalBudgetContext.AllocateCost(cost, futureYear));
                             }
 
-                            tryToAllocateCost(workingBudgets, ref remainingYearCost, addFutureCostAllocator);
+                            tryToAllocateCost(
+                                workingBudgets,
+                                ref remainingYearCost,
+                                addFutureCostAllocator,
+                                firstYearFractionPerBudget,
+                                out var costCoverageFractionsWereSatisfied);
 
-                            if (futureYear == year && Simulation.AnalysisMethod.ShouldRestrictCashFlowToFirstYearBudget)
+                            if (firstYearFractionPerBudget is not null && !costCoverageFractionsWereSatisfied)
                             {
-                                firstYearBudget = workingBudgets.SingleOrDefault(pair => pair.Item2.Status == BudgetUsageStatus.CostCoveredInFull).Item1;
+                                return ReasonAgainstCashFlow.FirstYearFundingPatternFailedInFutureYear;
                             }
 
                             if (remainingYearCost > 0)
                             {
                                 return ReasonAgainstCashFlow.FundingIsNotAvailable;
+                            }
+
+                            if (futureYear == year && Simulation.AnalysisMethod.ShouldRestrictCashFlowToFirstYearBudgets)
+                            {
+                                firstYearFractionPerBudget = workingBudgets
+                                    .Where(info => info.UsageDetail.Status == BudgetUsageStatus.CostCovered)
+                                    .ToDictionary(info => info.Context, info => info.UsageDetail.CoveredCost / futureYearCost);
                             }
                         }
 
@@ -983,7 +999,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 costAllocators.Add(() => budgetContext.AllocateCost(cost));
             }
 
-            tryToAllocateCost(applicableBudgets, ref remainingCost, addCostAllocator);
+            tryToAllocateCost(
+                applicableBudgets,
+                ref remainingCost,
+                addCostAllocator,
+                null,
+                out _);
 
             if (remainingCost > 0)
             {
@@ -997,9 +1018,20 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             return CostCoverage.Full;
 
-            void tryToAllocateCost(IEnumerable<(BudgetContext, BudgetUsageDetail)> budgets, ref decimal cost, Action<decimal, BudgetContext> costAllocationAction)
-            // "cost" is a variable that is being *indirectly* updated by "costAllocationAction".
+            void tryToAllocateCost(
+                IEnumerable<BudgetInfo> budgets,
+                ref decimal cost,
+                Action<decimal, BudgetContext> costAllocationAction,
+                IReadOnlyDictionary<BudgetContext, decimal> costCoverageFractionPerBudget,
+                out bool costCoverageFractionsWereSatisfied)
             {
+                // Assumed (or irrelevant, if no fractions are provided)
+                costCoverageFractionsWereSatisfied = true;
+
+                // "cost" is a variable that is being *indirectly* updated by "costAllocationAction".
+
+                var originalCost = cost;
+
                 foreach (var (budgetContext, budgetUsageDetail) in budgets)
                 {
                     if (cost <= 0)
@@ -1009,23 +1041,43 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                     var availableAmount = getAvailableAmount(budgetContext);
 
-                    if (SpendingLimit == SpendingLimit.NoLimit || cost <= availableAmount)
+                    if (costCoverageFractionPerBudget is null)
                     {
-                        budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInFull;
-                        budgetUsageDetail.CoveredCost = cost;
-                        costAllocationAction(cost, budgetContext);
-                        break;
+                        if (SpendingLimit == SpendingLimit.NoLimit || cost <= availableAmount)
+                        {
+                            coverCost(cost);
+                            break;
+                        }
+
+                        if (Simulation.AnalysisMethod.AllowFundingFromMultipleBudgets && availableAmount > 0)
+                        {
+                            coverCost(availableAmount);
+                        }
+                    }
+                    else if (costCoverageFractionPerBudget.TryGetValue(budgetContext, out var coverageFraction))
+                    {
+                        var fractionedCost = originalCost * coverageFraction;
+
+                        if (fractionedCost <= availableAmount)
+                        {
+                            coverCost(fractionedCost);
+                            continue;
+                        }
+                        else
+                        {
+                            // Any unsatisfied coverage fraction means the whole cost allocation has failed.
+                            costCoverageFractionsWereSatisfied = false;
+                            return;
+                        }
                     }
 
-                    if (Simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets && availableAmount > 0)
+                    budgetUsageDetail.Status = BudgetUsageStatus.CostNotCovered;
+
+                    void coverCost(decimal costToCover)
                     {
-                        budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInPart;
-                        budgetUsageDetail.CoveredCost = availableAmount;
-                        costAllocationAction(availableAmount, budgetContext);
-                    }
-                    else
-                    {
-                        budgetUsageDetail.Status = BudgetUsageStatus.CostNotCovered;
+                        budgetUsageDetail.Status = BudgetUsageStatus.CostCovered;
+                        budgetUsageDetail.CoveredCost = costToCover;
+                        costAllocationAction(costToCover, budgetContext);
                     }
                 }
 
@@ -1040,6 +1092,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             TargetConditionActuals = GetTargetConditionActuals(year);
             DeficientConditionActuals = GetDeficientConditionActuals();
+        }
+
+        private sealed record BudgetInfo(BudgetContext Context, BudgetUsageDetail UsageDetail)
+        {
+            public static BudgetInfo Create(BudgetContext context, BudgetUsageDetail usageDetail) => new(context, usageDetail);
         }
     }
 }

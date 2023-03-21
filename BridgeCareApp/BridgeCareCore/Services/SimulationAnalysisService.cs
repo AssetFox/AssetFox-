@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 
@@ -13,6 +12,8 @@ namespace BridgeCareCore.Services
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly SequentialWorkQueue _sequentialWorkQueue;
+        public const string NoSimulationFoundForGivenScenario = $"No simulation found for given scenario.";
+        public const string YouAreNotAuthorizedToModifyThisSimulation = "You are not authorized to modify this simulation.";
 
         public SimulationAnalysisService(UnitOfDataPersistenceWork unitOfWork, SequentialWorkQueue sequentialWorkQueue)
         {
@@ -22,15 +23,11 @@ namespace BridgeCareCore.Services
 
         public IQueuedWorkHandle CreateAndRunPermitted(Guid networkId, Guid simulationId, UserInfo userInfo)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
-            }
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
 
-            if (!_unitOfWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.CurrentUser.Id && __.CanModify)))
+            if (!simulation.Users.Any(u => u.UserId == _unitOfWork.CurrentUser.Id && u.CanModify))
             {
-                throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
+                throw new UnauthorizedAccessException(YouAreNotAuthorizedToModifyThisSimulation);
             }
 
             return CreateAndRun(networkId, simulationId, userInfo);

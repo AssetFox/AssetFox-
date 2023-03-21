@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -154,6 +155,11 @@ namespace BridgeCareCore.Controllers
                     }
                     UnitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto);
                     UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
+                    if (upsertRequest.IsNewLibrary)
+                    {
+                        var users = LibraryUserDtolists.OwnerAccess(UserId);
+                        UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteUsers(dto.Id, users);
+                    }
                     UnitOfWork.Commit();
                 });
 
@@ -229,6 +235,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
+                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DeletePerformanceCurveLibrary - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
@@ -448,6 +455,91 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetPerformanceCurveLibraryUsers/{libraryId}")]
+        [Authorize(Policy=Policy.ViewPerformanceCurveFromLibrary)]
+        public async Task<IActionResult> GetPerformanceCurveLibraryUsers(Guid libraryId)
+        {
+            try
+            {
+                List<LibraryUserDTO> users = new List<LibraryUserDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    var accessModel = UnitOfWork.PerformanceCurveRepo.GetLibraryAccess(libraryId, UserId);
+                    _claimHelper.CheckGetLibraryUsersValidity(accessModel, UserId);
+                    users = UnitOfWork.PerformanceCurveRepo.GetLibraryUsers(libraryId);
+                });
+                return Ok(users);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetPerformanceCurveLibraryUsers - {HubService.errorList["Unauthorized"]}");
+                return Ok();
+            }
+            catch (Exception)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetPerformanceCurveLibraryUsers - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+        [HttpPost]
+        [Route("UpsertOrDeletePerformanceCurveLibraryUsers/{libraryId}")]
+        [Authorize(Policy=Policy.ModifyOrDeletePerformanceCurveFromLibrary)]
+        public async Task<IActionResult> UpsertOrDeletePerformanceCurveLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var libraryUsers = UnitOfWork.PerformanceCurveRepo.GetLibraryUsers(libraryId);
+                    _claimHelper.CheckAccessModifyValidity(libraryUsers, proposedUsers, UserId);
+                    UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteUsers(libraryId, proposedUsers);
+                });
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertOrDeletePerformanceCurveLibraryUsers - {HubService.errorList["Unauthorized"]}");
+                return Ok();
+            }
+            catch (InvalidOperationException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertOrDeletePerformanceCurveLibraryUsers - {HubService.errorList["InvalidOperationException"]}");
+                return BadRequest();
+            }
+            catch (Exception)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertOrDeletePerformanceCurveLibraryUsers - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+        [HttpGet]
+        [Route("GetIsSharedLibrary/{performanceCurveLibraryId}")]
+        [Authorize(Policy = Policy.ViewPerformanceCurveFromLibrary)]
+        public async Task<IActionResult> GetIsSharedLibrary(Guid performanceCurveLibraryId)
+        {
+            bool result = false;
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var users = UnitOfWork.PerformanceCurveRepo.GetLibraryUsers(performanceCurveLibraryId);
+                    if (users.Count<=0)
+                    {
+                        result = false;
+                    } else
+                    {
+                        result = true;
+                    }
+                });
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetIsSharedLibrary - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
         [HttpGet]
         [Route("GetHasPermittedAccess")]
         [Authorize]

@@ -1,6 +1,6 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Models;
-using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Interfaces
 {

@@ -43,27 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
             TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId);
-            var results = new List<IAggregatedResult>();
-            foreach (var asset in maintainableAssets)
-            {
-                var resultId = Guid.NewGuid();
-                var resultData = new List<(IamAttribute, (int, double))>();
-
-                foreach (var attribute in resultAttributes)
-                {
-                    var resultDatum = (
-                        attribute, (2022, 1.23));
-                    resultData.Add(resultDatum);
-                }
-                var result = new AggregatedResult<double>(
-                    resultId,
-                    asset,
-                    resultData
-                    );
-
-                results.Add(result);
-            }
-            TestHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
+            AggregatedResultTestSetup.AddNumericAggregatedResultsToDb(TestHelper.UnitOfWork, maintainableAssets, resultAttributes);
 
             var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
@@ -84,6 +64,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Assert.Equal(aggregatedResultPerAssetCount, historicalAttributeList.Count);
             }
         }
+
 
         [Fact]
         public void GetSimulationAnalysisNetwork_NetworkInDb300Assets_Does()

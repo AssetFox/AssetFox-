@@ -30,6 +30,7 @@ const state = {
     scenarioCalculatedAttributes: [] as CalculatedAttribute[],
     selectedLibraryCalculatedAttributes: [] as CalculatedAttribute[],
     calculatedAttributes: [] as Attribute[],
+    isSharedLibrary: false,
 };
 
 const mutations = {
@@ -84,6 +85,9 @@ const mutations = {
     calculatedAttributesMutator(state: any, calculatedAtt: Attribute[]) {
         state.calculatedAttributes = clone(calculatedAtt);
     },
+    IsSharedLibraryMutator(state: any, status: boolean) {
+        state.isSharedLibrary = status;
+    }
 };
 
 const actions = {
@@ -162,6 +166,17 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Deleted calculated attribute library',
                 });
+            }
+        });
+    },
+    async getIsSharedCalculatedAttributeLibrary({ dispatch, commit }: any, payload: any) {
+        await CalculatedAttributeService.getIsSharedCalculatedAttributeLibrary(payload.id).then(
+            (response: AxiosResponse) => {
+                if (
+                hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                commit('IsSharedLibraryMutator', response.data as boolean);
             }
         });
     },

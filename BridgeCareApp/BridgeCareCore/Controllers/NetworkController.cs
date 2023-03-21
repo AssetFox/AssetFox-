@@ -1,25 +1,24 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.Data.Mappers;
+using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Controllers.BaseController;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using BridgeCareCore.Controllers.BaseController;
+using BridgeCareCore.Models;
+using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
-using BridgeCareCore.Models;
+using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using BridgeCareCore.Utils;
-using BridgeCareCore.Security;
-using AppliedResearchAssociates.iAM.Data.Mappers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
-using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace BridgeCareCore.Controllers
 {
@@ -153,29 +152,23 @@ namespace BridgeCareCore.Controllers
             {
                 var attributesForOriginalNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
                 var networks = await UnitOfWork.NetworkRepo.Networks();
-
+                var originalNetwork = networks.First(_ => _.Id == networkId);
                 var compatibleNetworks = new List<NetworkDTO>();
-
+                compatibleNetworks.Add(originalNetwork);
                 foreach (var network in networks)
                 {
-                    //TODO: Investigate case where networks have separate key attributes. Disable until handled in 3.1
-                    /*
+                    if(network.Id == networkId)
+                        continue;
+                    if (network.KeyAttribute != originalNetwork.KeyAttribute)
+                        continue;
                     var attributesForNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(network.Id);
 
                     if (attributesForOriginalNetwork.TrueForAll(_ => attributesForNetwork.Any(__ => _ == __))) {
                         compatibleNetworks.Add(network);
                     }
-                    */
-
-                    //Placeholder until above enabled
-                    if (network.Id == networkId)
-                    {
-                        compatibleNetworks.Add(network);
-                    }
+                    
                 }
                 
-
-
                 return Ok(compatibleNetworks);
 
             }

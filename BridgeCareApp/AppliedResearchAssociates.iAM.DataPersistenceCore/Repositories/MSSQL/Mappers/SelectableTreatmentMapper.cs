@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using MoreLinq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -156,6 +157,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? entity.Treatments.Select(_ => _.ToDto()).OrderBy(t => t.Name).ToList()
                     : new List<TreatmentDTO>()
             };
+
+        public static TreatmentDTO ToDtoNullSafe(this SelectableTreatmentEntity entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+            return entity.ToDto();
+        }
 
         public static TreatmentDTO ToDto(this ScenarioSelectableTreatmentEntity entity) =>
             new TreatmentDTO

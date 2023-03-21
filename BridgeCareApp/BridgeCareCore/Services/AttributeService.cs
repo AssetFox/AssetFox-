@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using AppliedResearchAssociates;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Models;
@@ -14,48 +12,40 @@ namespace BridgeCareCore.Services
 {
     public class AttributeService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
+        public const string ValuesForAttribute = "Values for attribute";
+        public const string IsANumberUseTextInput = "is a number; use text input";
 
-        public AttributeService(UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfWork =
-            unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public AttributeService(IUnitOfWork unitOfWork) => _unitOfWork =
+            unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
         {
-            if (!_unitOfWork.Context.AggregatedResult.Any(_ => attributeNames.Contains(_.Attribute.Name)))
+            var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributeNames);
+            if (!aggregatedResults.Any())
             {
                 return new List<AttributeSelectValuesResult>();
             }
-            return _unitOfWork.Context.AggregatedResult
-                .Where(_ => attributeNames.Contains(_.Attribute.Name))
-                .Select(aggregatedResult => new AggregatedResultEntity
-                {
-                    Attribute = new AttributeEntity
-                    {
-                        Name = aggregatedResult.Attribute.Name, DataType = aggregatedResult.Attribute.DataType
-                    },
-                    NumericValue = aggregatedResult.NumericValue,
-                    TextValue = aggregatedResult.TextValue,
-                    Discriminator = aggregatedResult.Discriminator
-                }).AsEnumerable()
+            return aggregatedResults
                 .GroupBy(_ => _.Attribute.Name, _ => _)
                 .ToDictionary(_ => _.Key, _ => _.ToList())
                 .Select(keyValuePair =>
                 {
                     var values = new List<string>();
                     var dtypes = new List<string>();
-                    if (keyValuePair.Value.All(aggregatedResultEntity =>
-                        aggregatedResultEntity.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
+                    if (keyValuePair.Value.All(aggregatedResult =>
+                        aggregatedResult.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
                     {
                         values = keyValuePair.Value.Where(_ => _.NumericValue.HasValue)
                             .DistinctBy(_ => _.NumericValue).Select(_ => _.NumericValue!.Value.ToString()).ToList();
-                        dtypes = keyValuePair.Value.Where(_ => _.Attribute.DataType == "NUMBER").DistinctBy(_ => _.Attribute.DataType).Select(_ => _.Attribute.DataType!).ToList();
+                        dtypes = keyValuePair.Value.Where(_ => _.Attribute.Type == "NUMBER").DistinctBy(_ => _.Attribute.Type).Select(_ => _.Attribute.Type!).ToList();
                     }
-                    if (keyValuePair.Value.All(aggregatedResultEntity =>
-                        aggregatedResultEntity.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
+                    if (keyValuePair.Value.All(aggregatedResult =>
+                        aggregatedResult.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
                     {
                         values = keyValuePair.Value.Where(_ => _.TextValue != null)
                             .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue).ToList();
-                        dtypes = keyValuePair.Value.Where(_ => _.Attribute.DataType == "NUMBER").DistinctBy(_ => _.Attribute.DataType).Select(_ => _.Attribute.DataType).ToList();
+                        dtypes = keyValuePair.Value.Where(_ => _.Attribute.Type == "NUMBER").DistinctBy(_ => _.Attribute.Type).Select(_ => _.Attribute.Type).ToList();
                     }
                     return new AttributeSelectValuesResult
                     {
@@ -68,7 +58,7 @@ namespace BridgeCareCore.Services
                             ? $"No values found for attribute {keyValuePair.Key}; use text input"
  //                           : values.Count > 100
                             : dtypes.Count > 0
-                                ? $"Values for attribute {keyValuePair.Key} is a number; use text input"
+                                ? $"{ValuesForAttribute} {keyValuePair.Key} {IsANumberUseTextInput}"
                                 : "Success",
                         ResultType = !values.Any() ? "warning" : "success"
                     };

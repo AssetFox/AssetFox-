@@ -5,10 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
-using BridgeCareCore.Services.Paging.Generics;
-using Microsoft.EntityFrameworkCore;
 using MoreLinq;
-using Newtonsoft.Json;
 
 namespace BridgeCareCore.Services
 {

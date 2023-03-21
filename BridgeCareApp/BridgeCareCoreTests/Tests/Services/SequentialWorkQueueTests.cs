@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using Moq;
@@ -31,8 +32,8 @@ namespace BridgeCareCoreTests.Tests
             {
                 while (!cts.IsCancellationRequested)
                 {
-                    var workItem = queue.Dequeue(cts.Token).Result;
-                    workItem.DoWork(null);
+                    var workStarter = queue.Dequeue(cts.Token).Result;
+                    workStarter.StartWork(null);
                 }
             }
             catch (AggregateException e) when (e.InnerException is OperationCanceledException)
@@ -42,13 +43,13 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(Enumerable.Range(1, 5), taskEffects);
         }
 
-        private record TestWorkItem(int Id, int MsDelay, List<int> WorkTarget) : IWorkItem
+        private record TestWorkItem(int Id, int MsDelay, List<int> WorkTarget) : IWorkSpecification
         {
             public string WorkId { get; } = Id.ToString();
 
-            public UserInfo UserInfo => new();
+            public string UserId => "";
 
-            public void DoWork(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+            public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatus, CancellationToken cancellationToken)
             {
                 WorkTarget.Add(Id);
                 Task.Delay(MsDelay).Wait();

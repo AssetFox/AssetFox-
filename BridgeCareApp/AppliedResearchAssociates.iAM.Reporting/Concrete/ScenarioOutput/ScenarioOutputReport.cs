@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class ScenarioOutputReport : IReport
     {
-        private UnitOfDataPersistenceWork _unitofwork;
+        private IUnitOfWork _unitofwork;
 
         public Guid ID { get; set; }
         public Guid? SimulationID { get; set; }
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public ScenarioOutputReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results)
+        public ScenarioOutputReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results)
         {
             _unitofwork = unitOfWork;
             ReportTypeName = name;

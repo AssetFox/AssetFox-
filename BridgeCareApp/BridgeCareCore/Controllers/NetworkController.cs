@@ -119,42 +119,6 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        //[HttpPost]
-        //[Route("DeleteNetwork/{networkId}")]
-        //[ClaimAuthorize("NetworkDeleteAccess")]
-        //public async Task<IActionResult> DeleteNetwork(Guid networkId)
-        //{
-        //    try
-        //    {
-        //        return Ok();
-        //    }
-        //    finally
-        //    {
-        //        Response.OnCompleted(async () =>
-        //        {
-        //            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastInfo, $"Started network deletion");
-        //            try
-        //            {
-        //                await Task.Factory.StartNew(() =>
-        //                {
-        //                    UnitOfWork.NetworkRepo.DeleteNetwork(networkId);
-        //                });
-        //            }
-        //            catch (UnauthorizedAccessException e)
-        //            {
-        //                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error deleting network::{e.Message}");
-        //                throw;
-        //            }
-        //            catch (Exception e)
-        //            {
-        //                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error deleting network::{e.Message}");
-        //                throw;
-        //            }
-        //            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, $"Completed network deletion");
-        //        });
-        //    }
-        //}
-
         [HttpPost]
         [Route("DeleteNetwork/{networkId}")]
         [ClaimAuthorize("NetworkDeleteAccess")]
@@ -194,7 +158,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("CancelNetworkDeletion/{networkId}")]
-        [ClaimAuthorize("NetworkViewAccess")]
+        [Authorize]
         public async Task<IActionResult> CancelNetworkDeletion(Guid networkId)
         {
             try
@@ -204,19 +168,11 @@ namespace BridgeCareCore.Controllers
 
                 if (hasBeenRemovedFromQueue)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
-                    {
-                        SimulationId = networkId,
-                        Status = "Canceled"
-                    });
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, "Canceled");
                 }
                 else
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
-                    {
-                        SimulationId = networkId,
-                        Status = "Canceling network deletion..."
-                    });
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, "Canceling network deletion...");
 
                 }
                 return Ok();

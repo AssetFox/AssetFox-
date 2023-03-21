@@ -21,8 +21,8 @@ export default class ScenarioService {
         return coreAxiosInstance.post(`${API.Scenario}/GetCurrentUserOrSharedScenario/${simulationId}`);
     }
 
-    static getSimulationQueuePage(data:PagingRequest<QueuedWork>): AxiosPromise {
-        return coreAxiosInstance.post(`${API.Scenario}/GetSimulationQueuePage/`, data);
+    static getWorkQueuePage(data:PagingRequest<QueuedWork>): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetWorkQueuePage/`, data);
     }    
 
     static createScenario(data: Scenario, networkId: string): AxiosPromise {

@@ -13,7 +13,7 @@ const state = {
     queuedSimulations: [] as QueuedWork[],
     currentSharedScenariosPage: [] as Scenario[],
     currentUserScenarioPage: [] as Scenario[],
-    currentSimulationQueuePage: [] as QueuedWork[],
+    currentWorkQueuePage: [] as QueuedWork[],
     totalSharedScenarios: 0 as number,
     totalUserScenarios: 0 as number,
     totalQueuedSimulations: 0 as number,
@@ -36,8 +36,8 @@ const mutations = {
     UserUserOrSharedScenarioMutator(state: any, scenario: Scenario){
         state.currentUserOrSharedScenario = clone(scenario);        
     },
-    SimulationQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedWork>){
-        state.currentSimulationQueuePage = clone(queuedSimulations.items);
+    WorkQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedWork>){
+        state.currentWorkQueuePage = clone(queuedSimulations.items);
         state.totalQueuedSimulations = queuedSimulations.totalItems;
     },
     selectedScenarioMutator(state: any, id: string) {
@@ -77,14 +77,14 @@ const mutations = {
                 state.currentUserScenarioPage
             );         
         }
-        if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage)) {
-            const updatedSimulation: QueuedWork = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage) as QueuedWork;
+        if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentWorkQueuePage)) {
+            const updatedSimulation: QueuedWork = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentWorkQueuePage) as QueuedWork;
             updatedSimulation.status = simulationAnalysisDetail.status;
 
-            state.currentSimulationQueuePage = update(
-                findIndex(propEq('id', updatedSimulation.id), state.currentSimulationQueuePage),
+            state.currentWorkQueuePage = update(
+                findIndex(propEq('id', updatedSimulation.id), state.currentWorkQueuePage),
                 updatedSimulation,
-                state.currentSimulationQueuePage
+                state.currentWorkQueuePage
             );         
         }        
     },
@@ -138,11 +138,11 @@ const actions = {
                 }
             });
     },
-    async getSimulationQueuePage({commit}: any, payload: PagingRequest<QueuedWork>) {
-        await ScenarioService.getSimulationQueuePage(payload)
+    async getWorkQueuePage({commit}: any, payload: PagingRequest<QueuedWork>) {
+        await ScenarioService.getWorkQueuePage(payload)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    commit('SimulationQueuePageMutator', response.data as PagingPage<QueuedWork>);
+                    commit('workQueuePageMutator', response.data as PagingPage<QueuedWork>);
                 }
             });
     },    

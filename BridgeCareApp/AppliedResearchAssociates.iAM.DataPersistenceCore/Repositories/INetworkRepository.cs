@@ -5,6 +5,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
+using System.Threading;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -25,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void DeleteNetworkData();
 
-        void DeleteNetwork(Guid networkId);
+        void DeleteNetwork(Guid networkId, Action<string> updateAction = null, CancellationToken? cancellationToken = null, IHubService hubService = null);
 
         void UpsertNetworkRollupDetail(Guid networkId, string status);
 

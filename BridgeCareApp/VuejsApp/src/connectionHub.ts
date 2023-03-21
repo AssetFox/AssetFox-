@@ -64,19 +64,19 @@ export default {
             },
         );
 
-        // connection.on(
-        //     Hub.BroadcastType.BroadcastSimulationAnalysisDetail,
-        //     (status: string) => {
-        //         statusHub.$emit(
-        //             Hub.BroadcastEventType
-        //                 .BroadcastSimulationAnalysisDetailEvent,
-        //             status,
-        //         );
-        //     },
-        // );
+        connection.on(
+            Hub.BroadcastType.BroadcastSimulationAnalysisDetail,
+            (simulationAnalysisDetail: SimulationAnalysisDetail) => {
+                statusHub.$emit(
+                    Hub.BroadcastEventType
+                        .BroadcastSimulationAnalysisDetailEvent,
+                    {simulationAnalysisDetail},
+                );
+            },
+        );
 
-        connection.on(Hub.BroadcastType.BroadcastSimulationAnalysisDetail, status => {
-            statusHub.$emit(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, {
+        connection.on(Hub.BroadcastType.BroadcastWorkQueueStatusUpdate, status => {
+            statusHub.$emit(Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent, {
                 status,
             });
         });
@@ -151,6 +151,7 @@ export const Hub = {
         BroadcastSimulationAnalysisDetail: 'BroadcastSimulationAnalysisDetail',
         BroadcastDataMigration: 'BroadcastDataMigration',
         BroadcastNetworkRollupDetail: 'BroadcastNetworkRollupDetail',
+        BroadcastWorkQueueStatusUpdate: 'BroadcastWorkQueueStatusUpdate'
     },
     BroadcastEventType: {
         BroadcastErrorEvent: 'BroadcastErrorEvent',
@@ -166,5 +167,6 @@ export const Hub = {
             'BroadcastSimulationAnalysisDetailEvent',
         BroadcastDataMigrationEvent: 'BroadcastDataMigrationEvent',
         BroadcastNetworkRollupDetailEvent: 'BroadcastNetworkRollupDetailEvent',
+        BroadcastWorkQueueStatusUpdateEvent: 'BroadcastWorkQueueStatusUpdateEvent'
     },
 };

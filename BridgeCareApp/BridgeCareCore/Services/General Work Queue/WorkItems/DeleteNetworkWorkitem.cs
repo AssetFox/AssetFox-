@@ -45,13 +45,7 @@ namespace BridgeCareCore.Services
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-            updateStatusOnHandle.Invoke("Network Deleting");
-            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastSimulationAnalysisDetail, "");
-            Task.Delay(60000).Wait();
-            updateStatusOnHandle.Invoke("Deleting Network");
-            _unitOfWork.NetworkRepo.DeleteNetwork(NetworkId);
-            Task.Delay(60000).Wait();
-            updateStatusOnHandle.Invoke("Network Deleted");
+            _unitOfWork.NetworkRepo.DeleteNetwork(NetworkId, updateStatusOnHandle, cancellationToken, _hubService);
         }
     }
 }

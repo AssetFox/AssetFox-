@@ -277,7 +277,12 @@ namespace BridgeCareCore.Controllers
             try
             {
                 _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                var analysisHandle = _simulationAnalysis.CreateAndRun(networkId, simulationId, UserInfo);
+                var scenarioName = "";
+                await Task.Factory.StartNew(() =>
+                {
+                    scenarioName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
+                });
+                var analysisHandle = _simulationAnalysis.CreateAndRun(networkId, simulationId, UserInfo, scenarioName);
                 // Before sending a "queued" message that may overwrite early messages from the run,
                 // allow a brief moment for an empty queue to start running the submission.
                 await Task.Delay(500);

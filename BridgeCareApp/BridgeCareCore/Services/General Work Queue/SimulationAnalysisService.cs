@@ -21,7 +21,7 @@ namespace BridgeCareCore.Services
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
         }
 
-        public IQueuedWorkHandle CreateAndRunPermitted(Guid networkId, Guid simulationId, UserInfo userInfo)
+        public IQueuedWorkHandle CreateAndRunPermitted(Guid networkId, Guid simulationId, UserInfo userInfo, string scenarioName)
         {
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
 
@@ -30,12 +30,12 @@ namespace BridgeCareCore.Services
                 throw new UnauthorizedAccessException(YouAreNotAuthorizedToModifyThisSimulation);
             }
 
-            return CreateAndRun(networkId, simulationId, userInfo);
+            return CreateAndRun(networkId, simulationId, userInfo,  scenarioName);
         }
 
-        public IQueuedWorkHandle CreateAndRun(Guid networkId, Guid simulationId, UserInfo userInfo)
+        public IQueuedWorkHandle CreateAndRun(Guid networkId, Guid simulationId, UserInfo userInfo, string scenarioName)
         {
-            AnalysisWorkItem workItem = new(networkId, simulationId, userInfo);
+            AnalysisWorkItem workItem = new(networkId, simulationId, userInfo, scenarioName);
             _sequentialWorkQueue.Enqueue(workItem, out var workHandle).Wait();
             return workHandle;
         }

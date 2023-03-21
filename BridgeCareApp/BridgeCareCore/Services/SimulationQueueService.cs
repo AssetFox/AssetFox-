@@ -129,30 +129,9 @@ namespace BridgeCareCore.Services
                 throw new RowNotInTableException("No queued simulation was found for the given id.");
             }
 
-            QueuedWorkDTO queuedSimulationDTO = new QueuedWorkDTO()
-            {
-                Id = simulationDTO.Id,
-                Name = queuedWorkHandle.WorkName,
-                PreviousRunTime = simulationDTO.RunTime,
+            QueuedWorkDTO queuedSimulationDTO = ToQueuedWorkDTO(queuedWorkHandle);
 
-                Status = queuedWorkHandle. MostRecentStatusMessage,
-                QueueEntryTimestamp = queuedWorkHandle.QueueEntryTimestamp,
-                WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp,
-                QueueingUser = queuedWorkHandle.UserId,
-                QueuePosition = queuedWorkHandle.QueueIndex,
-                WorkDescription = queuedWorkHandle.WorkDescription
-            };
-
-            if (queuedWorkHandle.WorkHasStarted)
-            {
-                queuedSimulationDTO.CurrentRunTime = DateTime.Now.Subtract(queuedSimulationDTO.WorkStartedTimestamp.Value).ToString(@"hh\:mm\:ss", null);
-            }
-            else
-            {
-                queuedSimulationDTO.WorkStartedTimestamp = null;
-                queuedSimulationDTO.CurrentRunTime = null;
-                queuedSimulationDTO.Status = $"Queued to run.";
-            }
+            queuedSimulationDTO.PreviousRunTime = simulationDTO.RunTime;
 
             return queuedSimulationDTO;
         }
@@ -162,14 +141,20 @@ namespace BridgeCareCore.Services
             QueuedWorkDTO queuedSimulationDTO = new QueuedWorkDTO()
             {
                 Id = Guid.Parse(queuedWorkHandle.WorkId),
-                Name = queuedWorkHandle.WorkName,
-                Status = queuedWorkHandle.MostRecentStatusMessage,                
+                Name = queuedWorkHandle.WorkName,             
                 QueueEntryTimestamp = queuedWorkHandle.QueueEntryTimestamp,
                 WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp,
                 QueueingUser = queuedWorkHandle.UserId,
                 QueuePosition = queuedWorkHandle.QueueIndex,
                 WorkDescription = queuedWorkHandle.WorkDescription
             };
+
+            if (queuedWorkHandle.WorkCancellationTokenSource != null)
+            {
+                queuedSimulationDTO.Status = queuedWorkHandle.WorkCancellationTokenSource.IsCancellationRequested ? "Cancelling" : queuedWorkHandle.MostRecentStatusMessage;
+            }
+            else
+                queuedSimulationDTO.Status = queuedWorkHandle.MostRecentStatusMessage;
 
             if (queuedWorkHandle.WorkHasStarted)
             {
@@ -184,5 +169,7 @@ namespace BridgeCareCore.Services
 
             return queuedSimulationDTO;
         }
+
+
     }
 }

@@ -6,9 +6,9 @@ namespace BridgeCareCore.Interfaces
 {
     public interface ISimulationAnalysis
     {
-        IQueuedWorkHandle CreateAndRunPermitted(Guid networkId, Guid simulationId, UserInfo userInfo);
+        IQueuedWorkHandle CreateAndRunPermitted(Guid networkId, Guid simulationId, UserInfo userInfo, string scenarioName);
 
-        IQueuedWorkHandle CreateAndRun(Guid networkId, Guid simulationId, UserInfo userInfo);
+        IQueuedWorkHandle CreateAndRun(Guid networkId, Guid simulationId, UserInfo userInfo, string scenarioName);
 
         bool Cancel(Guid simulationId);
     }

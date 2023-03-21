@@ -64,16 +64,22 @@ export default {
             },
         );
 
-        connection.on(
-            Hub.BroadcastType.BroadcastSimulationAnalysisDetail,
-            (status: string) => {
-                statusHub.$emit(
-                    Hub.BroadcastEventType
-                        .BroadcastSimulationAnalysisDetailEvent,
-                    status,
-                );
-            },
-        );
+        // connection.on(
+        //     Hub.BroadcastType.BroadcastSimulationAnalysisDetail,
+        //     (status: string) => {
+        //         statusHub.$emit(
+        //             Hub.BroadcastEventType
+        //                 .BroadcastSimulationAnalysisDetailEvent,
+        //             status,
+        //         );
+        //     },
+        // );
+
+        connection.on(Hub.BroadcastType.BroadcastSimulationAnalysisDetail, status => {
+            statusHub.$emit(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, {
+                status,
+            });
+        });
 
         connection.on(Hub.BroadcastType.BroadcastError, error => {
             statusHub.$emit(Hub.BroadcastEventType.BroadcastErrorEvent, {

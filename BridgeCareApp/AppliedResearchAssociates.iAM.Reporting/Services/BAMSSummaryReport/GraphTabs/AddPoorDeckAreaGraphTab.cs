@@ -1,9 +1,8 @@
-﻿using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
-using OfficeOpenXml;
+﻿using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs
 {
-    public class AddPoorDeckAreaGraphTab : IAddPoorDeckAreaGraphTab
+    public class AddPoorDeckAreaGraphTab
     {
         private PoorBridgeDeckArea _poorBridgeDeckArea;
 

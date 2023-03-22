@@ -5,7 +5,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
-using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
 namespace BridgeCareCore.Services

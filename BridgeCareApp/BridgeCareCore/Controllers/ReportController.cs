@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -250,19 +249,19 @@ namespace BridgeCareCore.Controllers
         {
             var functionRetrunValue = "";
 
-            //configure report index entity
-            var reportIndexEntity = new ReportIndexEntity()
+            //configure report index dto
+            var reportIndexDto = new ReportIndexDTO()
             {
                 Id = reportObject.ID,
-                SimulationID = reportObject.SimulationID,
-                ReportTypeName = reportObject.ReportTypeName,
+                SimulationId = reportObject.SimulationID,
+                Type = reportObject.ReportTypeName,
                 Result = reportObject.Results,
                 ExpirationDate = DateTime.Now.AddDays(30),
             };
 
             ////create report index repository
-            var isSuccess = this.UnitOfWork.ReportIndexRepository.Add(reportIndexEntity);
-            if (isSuccess == true) { functionRetrunValue = reportIndexEntity.Id.ToString(); }
+            var isSuccess = this.UnitOfWork.ReportIndexRepository.Add(reportIndexDto);
+            if (isSuccess == true) { functionRetrunValue = reportIndexDto.Id.ToString(); }
 
             //return value
             return functionRetrunValue;

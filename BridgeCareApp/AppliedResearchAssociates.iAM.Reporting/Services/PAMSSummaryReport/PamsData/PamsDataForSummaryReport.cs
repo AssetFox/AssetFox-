@@ -4,20 +4,17 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
-
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData
 {
-    public class PamsDataForSummaryReport: IPamsDataForSummaryReport
+    public class PamsDataForSummaryReport
     {
         private List<int> _spacerColumnNumbers;
         private readonly List<int> _simulationYears = new List<int>();
-        private ISummaryReportHelper _summaryReportHelper;
+        private SummaryReportHelper _summaryReportHelper;
 
         // This is also used in Bridge Work Summary TAB
         private readonly List<double> _previousYearInitialMinC = new List<double>();

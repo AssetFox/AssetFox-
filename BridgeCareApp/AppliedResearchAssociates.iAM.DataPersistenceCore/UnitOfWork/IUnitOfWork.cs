@@ -16,8 +16,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public string EncryptionKey { get; }
 
-        IAMContext Context { get; } // This needs to go ASAP
-
         void BeginTransaction(); // This needs to go ASAP
 
         IAggregatedResultRepository AggregatedResultRepo { get; }

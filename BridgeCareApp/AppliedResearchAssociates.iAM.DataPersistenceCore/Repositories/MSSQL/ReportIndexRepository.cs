@@ -18,7 +18,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
-        public bool Add(ReportIndexEntity report)
+        public bool Add(ReportIndexDTO dto)
+        {
+            var entity = dto.ToEntity();
+            var returnValue = Add(entity);
+            return returnValue;
+        }
+
+        private bool Add(ReportIndexEntity report)
         {
             // Ensure required fields are present
             if (report.Id == Guid.Empty || string.IsNullOrEmpty(report.ReportTypeName))

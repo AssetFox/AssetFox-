@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public ICollection<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibraries() =>
-            _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary
+            _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary.AsNoTracking()
                 .Include(_ => _.CalculatedAttributes)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CalculatedAttributes)
@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibrariesNoChildren()
         {
-            return _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary
+            return _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary.AsNoTracking()
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -53,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("The specified scenario was not found");
             }
 
-            return _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute
+            return _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute.AsNoTracking()
                 .Include(_ => _.Attribute)
                 .Where(_ => _.SimulationId == scenarioId)
                 .Select(_ => _.ToDto())
@@ -67,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("The specified calculated attribute library was not found");
             }
 
-            return _unitOfDataPersistanceWork.Context.CalculatedAttribute
+            return _unitOfDataPersistanceWork.Context.CalculatedAttribute.AsNoTracking()
                 .Include(_ => _.Attribute)
                 .Where(_ => _.CalculatedAttributeLibraryId == libraryid)
                 .Select(_ => _.ToDto())
@@ -104,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public CalculatedAttributeLibraryDTO GetCalculatedAttributeLibraryByID(Guid id)
         {
-            return _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary
+            return _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary.AsNoTracking()
             .Include(_ => _.CalculatedAttributes)
             .ThenInclude(_ => _.Attribute)
             .Include(_ => _.CalculatedAttributes)
@@ -246,7 +246,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             
 
         public ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId) =>
-            _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute
+            _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.Attribute)
                 .Include(_ => _.Equations)

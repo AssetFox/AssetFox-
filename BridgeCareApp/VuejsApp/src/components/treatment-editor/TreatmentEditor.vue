@@ -14,7 +14,7 @@
                     >
                     </v-select>
                 </v-flex>
-                <v-flex>                       
+                <v-flex xs6>                       
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
                     <v-select
                         :items='treatmentSelectItems'
@@ -26,18 +26,8 @@
                     >
                     </v-select>
                 </v-flex>
-                <v-flex style="padding-top:30px;">
-                    <v-btn
-                        @click='onShowConfirmDeleteTreatmentAlert'
-                        depressed
-                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'                        
-                        v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
-                    >
-                        Delete Treatment
-                    </v-btn>
-                </v-flex>
-                <v-flex xs4>
-                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 11px !important">
+                <v-flex xs6>
+                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 20px !important">
                         <div class="ghd-control-label" style="padding-top: 12px !important">
                         Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |    
                         <v-badge v-show="isShared">
@@ -53,7 +43,17 @@
                         </div>  
                     </v-layout>
                 </v-flex>
-                <v-flex xs2>
+                <v-flex style="padding-right: 5px">
+                    <v-btn
+                        @click='onShowConfirmDeleteTreatmentAlert'
+                        depressed
+                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
+                        v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
+                    >
+                        Delete Treatment
+                    </v-btn>
+                </v-flex>
+                <v-flex style="padding-left: 5px">
                     <v-btn
                         @click='onShowCreateTreatmentLibraryDialog(false)'
                         depressed

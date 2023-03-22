@@ -48,6 +48,7 @@ namespace BridgeCareCoreTests.Tests
 
             var libraryId = Guid.NewGuid();
             var dto = RemainingLifeLimitLibraryDtos.Empty(libraryId);
+            var dtoClone = RemainingLifeLimitLibraryDtos.Empty(libraryId);
             var request = new LibraryUpsertPagingRequestModel<RemainingLifeLimitLibraryDTO, RemainingLifeLimitDTO>();
             request.IsNewLibrary = true;
             request.Library = dto;
@@ -57,12 +58,8 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var repoLibraryCall = repo.SingleInvocationWithName(nameof(IRemainingLifeLimitRepository.UpsertRemainingLifeLimitLibrary));
-            var repoLimitCall = repo.SingleInvocationWithName(nameof(IRemainingLifeLimitRepository.UpsertOrDeleteRemainingLifeLimits));
-            ObjectAssertions.Equivalent(request.Library, repoLibraryCall.Arguments[0]);
-            Assert.Equal(libraryId, repoLimitCall.Arguments[1]);
-            var castArgumentZero = repoLimitCall.Arguments[0] as List<RemainingLifeLimitDTO>;
-            Assert.Empty(castArgumentZero);
+            var repoLibraryCall = repo.SingleInvocationWithName(nameof(IRemainingLifeLimitRepository.UpsertRemainingLifeLimitLibraryAndLimits));
+            ObjectAssertions.Equivalent(dtoClone, repoLibraryCall.Arguments[0]);
         }
 
         [Fact]
@@ -137,10 +134,9 @@ namespace BridgeCareCoreTests.Tests
             await controller.UpsertRemainingLifeLimitLibrary(libraryRequest);
 
             // Assert
-            var libraryCall = repo.SingleInvocationWithName(nameof(IRemainingLifeLimitRepository.UpsertRemainingLifeLimitLibrary));
-            var limitCall = repo.SingleInvocationWithName(nameof(IRemainingLifeLimitRepository.UpsertOrDeleteRemainingLifeLimits));
+            var libraryCall = repo.SingleInvocationWithName(nameof(IRemainingLifeLimitRepository.UpsertRemainingLifeLimitLibraryAndLimits));
             var modifiedDto = libraryCall.Arguments[0] as RemainingLifeLimitLibraryDTO;
-            var modifiedLimits = limitCall.Arguments[0] as List<RemainingLifeLimitDTO>;
+            var modifiedLimits = modifiedDto.RemainingLifeLimits;
 
             Assert.Equal("Updated Description", modifiedDto.Description);
             Assert.Equal("attribute", modifiedLimits[0].Attribute);

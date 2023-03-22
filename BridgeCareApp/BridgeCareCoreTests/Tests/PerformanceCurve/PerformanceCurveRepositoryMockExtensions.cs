@@ -34,7 +34,7 @@ namespace BridgeCareCoreTests.Tests
             string exceptionMessage)
         {
             var exception = new Exception(exceptionMessage);
-            mock.Setup(m => m.UpsertOrDeleteScenarioPerformanceCurves(
+            mock.Setup(m => m.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(
                 It.IsAny<List<PerformanceCurveDTO>>(),
                 It.IsAny<Guid>()))
                 .Throws(exception);

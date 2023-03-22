@@ -14,6 +14,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using Microsoft.Data.SqlClient;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore
@@ -86,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
         }
 
         [Fact]
-        public void UpsertScenarioCashFlowRules_SimulationInDb_Does()
+        public void UpsertOrDeleteScenarioCashFlowRules_SimulationInDb_Does()
         {
             // Arrange
             Setup();
@@ -186,17 +187,44 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
         }
 
         [Fact]
+        public void UpsertOrDeleteScenarioCashFlowRules_TwoAddsCollide_NothingChanges()
+        {
+            // Arrange
+            Setup();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var scenarioRule = CreateScenarioTestData(simulation.Id);
+            var scenarioDto = scenarioRule.ToDto();
+            scenarioDto.Name = "Updated Name";
+            scenarioDto.CriterionLibrary.MergedCriteriaExpression = "Updated Expression";
+            scenarioDto.CashFlowDistributionRules[0].DurationInYears = 2;
+            var collidingId = Guid.NewGuid();
+            var collidingDto1 = CashFlowRuleDtos.Rule(collidingId);
+            var collidingDto2 = CashFlowRuleDtos.Rule(collidingId);
+            var dtosToUpsert = new List<CashFlowRuleDTO> { scenarioDto, collidingDto1, collidingDto2 };
+            var dtosBefore = TestHelper.UnitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulation.Id);
+
+            // Act
+            var exception = Assert.Throws<SqlException>(() => TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(dtosToUpsert, simulation.Id));
+
+            // Assert
+            var dtosAfter = TestHelper.UnitOfWork.CashFlowRuleRepo
+                .GetScenarioCashFlowRules(simulation.Id);
+            ObjectAssertions.Equivalent(dtosBefore, dtosAfter);
+        }
+
+        [Fact]
         public void UpsertOrDeleteScenarioCashFlowRules_RuleInDb_Modifies()
         {
             // Arrange
             Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var scenarioRule = CreateScenarioTestData(simulation.Id);
+            var scenarioDto = scenarioRule.ToDto();
+            scenarioDto.Name = "Updated Name";
+            scenarioDto.CriterionLibrary.MergedCriteriaExpression = "Updated Expression";
+            scenarioDto.CashFlowDistributionRules[0].DurationInYears = 2;
 
-            var dtos = new List<CashFlowRuleDTO> { scenarioRule.ToDto() };
-            dtos[0].Name = "Updated Name";
-            dtos[0].CriterionLibrary.MergedCriteriaExpression = "Updated Expression";
-            dtos[0].CashFlowDistributionRules[0].DurationInYears = 2;
+            var dtos = new List<CashFlowRuleDTO> { scenarioDto };
 
             // Act
             TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(dtos, simulation.Id);
@@ -205,11 +233,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var modifiedDtos = TestHelper.UnitOfWork.CashFlowRuleRepo
                 .GetScenarioCashFlowRules(simulation.Id);
             Assert.Single(modifiedDtos);
-
             Assert.Equal(dtos[0].Name, modifiedDtos[0].Name);
             Assert.Equal(dtos[0].CriterionLibrary.MergedCriteriaExpression,
                 modifiedDtos[0].CriterionLibrary.MergedCriteriaExpression);
-
             Assert.Equal(dtos[0].CashFlowDistributionRules[0].DurationInYears,
                 modifiedDtos[0].CashFlowDistributionRules[0].DurationInYears);
         }

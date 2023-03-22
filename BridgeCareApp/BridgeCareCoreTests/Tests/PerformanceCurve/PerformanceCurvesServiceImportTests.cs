@@ -98,7 +98,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var performanceCurvesService = CreatePerformanceCurvesService(unitOfWork);
             var args = new List<List<PerformanceCurveDTO>>();
-            performanceCurveRepo.Setup(r => r.UpsertOrDeleteScenarioPerformanceCurves(Capture.In(args), It.IsAny<Guid>()));
+            performanceCurveRepo.Setup(r => r.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(Capture.In(args), It.IsAny<Guid>()));
             performanceCurveRepo.Setup(r => r.GetScenarioPerformanceCurves(It.IsAny<Guid>()))
                 .Returns(() => args.Last());
                 //.Returns<List<PerformanceCurveDTO>>(x => args.Last());
@@ -116,7 +116,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal("ScenarioPerformance_Eq1", performanceCurve.Name);
             Assert.Equal("AGE", performanceCurve.Attribute);
             Assert.Equal("[AGE]", performanceCurve.Equation.Expression);
-            performanceCurveRepo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeleteScenarioPerformanceCurves));
+            performanceCurveRepo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic));
             performanceCurveRepo.SingleInvocationWithName(nameof(IPerformanceCurveRepository.GetScenarioPerformanceCurves));
         }
 
@@ -162,7 +162,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var performanceCurvesService = CreatePerformanceCurvesService(unitOfWork, mockExpressionValidationService);
             var args = new List<List<PerformanceCurveDTO>>();
-            performanceCurveRepo.Setup(r => r.UpsertOrDeleteScenarioPerformanceCurves(Capture.In(args), It.IsAny<Guid>()));
+            performanceCurveRepo.Setup(r => r.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(Capture.In(args), It.IsAny<Guid>()));
             performanceCurveRepo.Setup(r => r.GetScenarioPerformanceCurves(It.IsAny<Guid>()))
                 .Returns(() => args.Last());
             //.Returns<List<PerformanceCurveDTO>>(x => args.Last());

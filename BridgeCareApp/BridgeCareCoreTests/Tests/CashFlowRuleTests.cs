@@ -1,6 +1,7 @@
 ﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -137,6 +138,12 @@ namespace BridgeCareCoreTests.Tests
                 Name = "",
                 CashFlowRules = new List<CashFlowRuleDTO>()
             };
+            var dtoClone = new CashFlowRuleLibraryDTO
+            {
+                Id = dto.Id,
+                Name = "",
+                CashFlowRules = new List<CashFlowRuleDTO>(),
+            };
             var libraryRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>()
             {
                 IsNewLibrary = true,
@@ -148,11 +155,9 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
-            var libraryInvocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.UpsertCashFlowRuleLibrary));
-            var ruleInvocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.UpsertOrDeleteCashFlowRules));
-            Assert.Equal(dto, libraryInvocation.Arguments[0]);
-            Assert.Equal(dto.CashFlowRules, ruleInvocation.Arguments[0]);
-            Assert.Equal(dto.Id, ruleInvocation.Arguments[1]);
+            var libraryInvocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.UpsertCashFlowRuleLibraryAndRules));
+            var inputDto = libraryInvocation.Arguments[0] as CashFlowRuleLibraryDTO;
+            ObjectAssertions.Equivalent(dtoClone, inputDto);
         }
 
         [Fact]
@@ -174,7 +179,6 @@ namespace BridgeCareCoreTests.Tests
             ActionResultAssertions.Ok(result);
             var invocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.UpsertOrDeleteScenarioCashFlowRules));
             Assert.Equal(simulationId, invocation.Arguments[1]);
-            
         }
 
         [Fact]
@@ -215,15 +219,16 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task UpsertCashFlowRuleLibrary_CallsUpsertBothLibraryAndRulesOnRepo()
+        public async Task UpsertCashFlowRuleLibrary_CallsUpsertLibraryAndRulesOnRepo()
         {
             // Arrange
             var unitOfWork = UnitOfWorkMocks.New();
             var repo = CashFlowRuleRepositoryMocks.DefaultMock(unitOfWork);
             var userRepo = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var controller = CreateController(unitOfWork);
-            var dto = CashFlowRuleLibraryDtos.WithSingleRule();
-            var libraryId = dto.Id;
+            var ruleId = Guid.NewGuid();
+            var libraryId = Guid.NewGuid();
+            var dto = CashFlowRuleLibraryDtos.WithSingleRule(libraryId);
             var otherRule = CashFlowRuleDtos.Rule();
             var otherRules = new List<CashFlowRuleDTO> { otherRule };
             repo.Setup(r => r.GetCashFlowRulesByLibraryId(libraryId)).Returns(otherRules);
@@ -243,11 +248,8 @@ namespace BridgeCareCoreTests.Tests
             await controller.UpsertCashFlowRuleLibrary(libraryRequest);
 
             // Assert
-            var libraryInvocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.UpsertCashFlowRuleLibrary));
-            var ruleInvocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.UpsertOrDeleteCashFlowRules));
+            var libraryInvocation = repo.SingleInvocationWithName(nameof(ICashFlowRuleRepository.UpsertCashFlowRuleLibraryAndRules));
             Assert.Equal(dto, libraryInvocation.Arguments[0]);
-            Assert.Equal(otherRules, ruleInvocation.Arguments[0]);
-            Assert.Equal(libraryId, ruleInvocation.Arguments[1]);
         }
     }
 }

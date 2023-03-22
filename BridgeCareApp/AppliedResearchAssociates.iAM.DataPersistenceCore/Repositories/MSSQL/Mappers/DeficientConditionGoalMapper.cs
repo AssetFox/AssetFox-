@@ -89,6 +89,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Name = entity.Name,
                 Attribute = entity.Attribute.Name,
+                LibraryId = entity.LibraryId,
                 AllowedDeficientPercentage = entity.AllowedDeficientPercentage,
                 DeficientLimit = entity.DeficientLimit,
                 CriterionLibrary = entity.CriterionLibraryScenarioDeficientConditionGoalJoin != null

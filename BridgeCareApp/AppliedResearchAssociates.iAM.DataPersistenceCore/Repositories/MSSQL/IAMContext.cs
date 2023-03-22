@@ -1273,6 +1273,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.DeficientLimit).IsRequired();
 
+                entity.Property(e => e.LibraryId).IsRequired();
+
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.ScenarioDeficientConditionGoals)

@@ -13,6 +13,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public double DeficientLimit { get; set; }
 
+        public Guid LibraryId { get; set; }
+
         public virtual SimulationEntity Simulation { get; set; }
 
         public virtual CriterionLibraryScenarioDeficientConditionGoalEntity CriterionLibraryScenarioDeficientConditionGoalJoin { get; set; }

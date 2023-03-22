@@ -645,6 +645,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Name).IsRequired();
 
+                entity.Property(e => e.LibraryId).IsRequired();
+
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.CashFlowRules)
                     .HasForeignKey(d => d.SimulationId)

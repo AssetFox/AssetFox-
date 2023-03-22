@@ -20,13 +20,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static ScenarioCashFlowRuleEntity ToScenarioEntity(this CashFlowRuleDTO dto, Guid simulationId) =>
-            new ScenarioCashFlowRuleEntity { Id = dto.Id, Name = dto.Name, SimulationId = simulationId };
+            new ScenarioCashFlowRuleEntity { Id = dto.Id, Name = dto.Name, LibraryId = dto.LibraryId, SimulationId = simulationId };
 
         public static CashFlowRuleDTO ToDto(this ScenarioCashFlowRuleEntity entity) =>
             new CashFlowRuleDTO
             {
                 Id = entity.Id,
                 Name = entity.Name,
+                LibraryId = entity.LibraryId,
                 CashFlowDistributionRules = entity.ScenarioCashFlowDistributionRules.Any()
                     ? entity.ScenarioCashFlowDistributionRules.OrderBy(_ => _.DurationInYears)
                         .Select(_ => _.ToDto()).ToList()

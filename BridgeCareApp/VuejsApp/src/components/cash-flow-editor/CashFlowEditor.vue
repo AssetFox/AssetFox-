@@ -460,6 +460,8 @@ export default class CashFlowEditor extends Vue {
     showAddCashFlowRuleDialog: boolean = false;
     importLibraryDisabled: boolean = true;
     scenarioHasCreatedNew: boolean = false;
+    parentLibraryName: string = "";
+    parentLibraryId: string = "";
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -516,7 +518,6 @@ export default class CashFlowEditor extends Vue {
     }
     onLibrarySelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue;
-        
         if(!this.hasScenario || isNil(this.librarySelectItemValue))
         {    
             this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
@@ -542,6 +543,7 @@ export default class CashFlowEditor extends Vue {
         this.selectedCashFlowRuleLibrary = clone(
             this.stateSelectedCashRuleFlowLibrary,
         );
+        console.log("stat cash flow library: " + this.stateSelectedCashRuleFlowLibrary.id);
     }
 
     @Watch('selectedCashFlowRuleLibrary')
@@ -629,6 +631,16 @@ export default class CashFlowEditor extends Vue {
             });     
     }
 
+    @Watch('currentPage')
+    onCurrentPageChanged() {
+        // Get parent name from library id
+        this.librarySelectItems.forEach(library => {
+            if (library.value === this.parentLibraryId) {
+                this.parentLibraryName = library.text;
+            }
+        });
+        this.$root.$emit("changeLibrary", this.parentLibraryName==="" ? "None" : this.parentLibraryName );
+    }
     @Watch('deletionIds')
     onDeletionIdsChanged(){
         this.checkHasUnsavedChanges();
@@ -841,6 +853,7 @@ export default class CashFlowEditor extends Vue {
             addedRows: this.addedRows           
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.clearChanges();
                 this.librarySelectItemValue = null;
                 this.resetPage();
@@ -1043,6 +1056,17 @@ export default class CashFlowEditor extends Vue {
         }
     };
 
+    setParentLibraryName(libraryId: string) {
+        let foundLibrary: CashFlowRuleLibrary = emptyCashFlowRuleLibrary;
+        this.stateCashFlowRuleLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
+
     initializePages(){
         const request: PagingRequest<CashFlowRule>= {
             page: 1,
@@ -1065,6 +1089,7 @@ export default class CashFlowEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
                 }
             });
     }

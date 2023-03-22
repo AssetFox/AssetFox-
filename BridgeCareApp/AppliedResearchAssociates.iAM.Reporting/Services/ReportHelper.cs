@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
             return FunctionalClassDescriptions.ContainsKey(functionalClassAbbreviation) ? FunctionalClassDescriptions[functionalClassAbbreviation] : FunctionalClassDescriptions["NN"];
         }
 
-        public bool BridgeFundingBOF(AssetDetail section)
+        public bool BridgeFundingBOF(AssetSummaryDetail section)
         {
             var functionalClass = "";
             if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                 functionalClass is "08" or "09" or "18" or "19";
         }
 
-        public bool BridgeFundingNHPP(AssetDetail section)
+        public bool BridgeFundingNHPP(AssetSummaryDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                 (fedAid is "0" && functionalClass is "99");
         }
 
-        public bool BridgeFundingSTP(AssetDetail section)
+        public bool BridgeFundingSTP(AssetSummaryDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -84,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
             return fedAid is "1" or "2";
         }
 
-        public bool BridgeFundingBRIP(AssetDetail section)
+        public bool BridgeFundingBRIP(AssetSummaryDetail section)
         {
             var functionalClass = "";
             if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
@@ -98,14 +98,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                 functionalClass is "01" or "02";
         }
 
-        public bool BridgeFundingState(AssetDetail section)
+        public bool BridgeFundingState(AssetSummaryDetail section)
         {
             var internetReport = section.ValuePerTextAttribute["INTERNET_REPORT"];
 
             return internetReport is "State" or "Local";
         }
 
-        public bool BridgeFundingNotApplicable(AssetDetail section)
+        public bool BridgeFundingNotApplicable(AssetSummaryDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);

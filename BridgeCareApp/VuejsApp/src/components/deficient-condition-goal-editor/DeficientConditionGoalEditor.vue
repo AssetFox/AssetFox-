@@ -493,8 +493,10 @@ export default class DeficientConditionGoalEditor extends Vue {
     trueLibrarySelectItemValue: string | null = ''
     librarySelectItemValueAllowedChanged: boolean = true;
     librarySelectItemValue: string | null = null;
+    parentLibraryId: string = "";
+    parentLibraryName: string = "";
 
-    beforeRouteEnter(to: any, from: any, next: any) {
+    parentLibraryNameuteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getDeficientConditionGoalLibrariesAction().then(() => {
@@ -609,7 +611,12 @@ export default class DeficientConditionGoalEditor extends Vue {
 
     @Watch('currentPage')
     onCurrentPageChanged() {
-
+        this.librarySelectItems.forEach(library => {
+            if (library.value === this.parentLibraryId) {
+                this.parentLibraryName = library.text;
+            }
+        });
+        this.$root.$emit("changeLibrary", this.parentLibraryName==="" ? "None" : this.parentLibraryName );
     }
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
@@ -1002,7 +1009,16 @@ export default class DeficientConditionGoalEditor extends Vue {
                 }
     }
 
-
+    setParentLibraryName(libraryId: string) {
+        let foundLibrary: DeficientConditionGoalLibrary = emptyDeficientConditionGoalLibrary;
+        this.stateDeficientConditionGoalLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
     initializePages(){
         const request: PagingRequest<DeficientConditionGoal>= {
             page: 1,
@@ -1025,6 +1041,7 @@ export default class DeficientConditionGoalEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
                 }
             });
     }

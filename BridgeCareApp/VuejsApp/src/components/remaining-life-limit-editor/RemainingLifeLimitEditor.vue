@@ -406,6 +406,8 @@ export default class RemainingLifeLimitEditor extends Vue {
     hasScenario: boolean = false;
     currentUrl: string = window.location.href;
     hasCreatedLibrary: boolean = false;
+    parentLibraryName: string = "";
+    parentLibraryId: string = "";
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -492,6 +494,13 @@ export default class RemainingLifeLimitEditor extends Vue {
     }
     @Watch('currentPage')
     onGridDataChanged() {
+           // Get parent name from library id
+        this.selectListItems.forEach(library => {
+            if (library.value === this.parentLibraryId) {
+                this.parentLibraryName = library.text;
+            }
+        });
+        this.$root.$emit("changeLibrary", this.parentLibraryName==="" ? "None" : this.parentLibraryName );
     }
     
     @Watch('isSharedLibrary')
@@ -730,6 +739,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             addedRows: this.addedRows           
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.clearChanges();
                 this.librarySelectItemValue = null;
                 this.resetPage();
@@ -902,6 +912,17 @@ export default class RemainingLifeLimitEditor extends Vue {
                 }
     }
 
+    setParentLibraryName(libraryId: string) {
+        let foundLibrary: RemainingLifeLimitLibrary = emptyRemainingLifeLimitLibrary;
+        this.stateRemainingLifeLimitLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
+
     initializePages(){
         const request: PagingRequest<RemainingLifeLimit>= {
             page: 1,
@@ -924,6 +945,7 @@ export default class RemainingLifeLimitEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
                 }
             });
     }

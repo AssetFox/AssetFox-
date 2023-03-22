@@ -48,6 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = dto.Id,
                 Name = dto.Name,
+                LibraryId = dto.LibraryId,
                 SimulationId = simulationId,
                 AttributeId = attributeId,
                 AllowedDeficientPercentage = dto.AllowedDeficientPercentage,

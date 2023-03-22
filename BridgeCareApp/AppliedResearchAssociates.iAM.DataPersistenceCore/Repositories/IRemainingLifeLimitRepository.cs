@@ -29,5 +29,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertOrDeleteUsers(Guid remainingLifeLimitLibraryId, IList<LibraryUserDTO> libraryUsers);
 
         List<LibraryUserDTO> GetLibraryUsers(Guid remainingLifeLimitLibraryId);
+        void AddLibraryIdToScenarioRemainingLifeLimit(List<RemainingLifeLimitDTO> remainintLifeLimitDTOs, Guid? libraryId);
     }
 }

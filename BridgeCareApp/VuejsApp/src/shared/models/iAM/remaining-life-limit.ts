@@ -6,6 +6,7 @@ export interface RemainingLifeLimit {
     id: string;
     attribute: string;
     value: number;
+    libraryId: string;
     criterionLibrary: CriterionLibrary;
 }
 
@@ -13,6 +14,7 @@ export const emptyRemainingLifeLimit: RemainingLifeLimit = {
     id: getBlankGuid(),
     attribute: '',
     value: 0,
+    libraryId: getBlankGuid(),
     criterionLibrary: clone(emptyCriterionLibrary)
 };
 

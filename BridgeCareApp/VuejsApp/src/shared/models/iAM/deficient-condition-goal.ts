@@ -7,6 +7,7 @@ export interface DeficientConditionGoal {
     name: string;
     attribute: string;
     deficientLimit: number;
+    libraryId: string;
     allowedDeficientPercentage: number;
     criterionLibrary: CriterionLibrary;
 }
@@ -25,6 +26,7 @@ export const emptyDeficientConditionGoal: DeficientConditionGoal = {
     name: '',
     attribute: '',
     deficientLimit: 0,
+    libraryId: getBlankGuid(),
     allowedDeficientPercentage: 0,
     criterionLibrary: clone(emptyCriterionLibrary)
 };

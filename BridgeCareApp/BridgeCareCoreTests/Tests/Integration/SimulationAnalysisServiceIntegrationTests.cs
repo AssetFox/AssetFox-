@@ -51,9 +51,9 @@ namespace BridgeCareCoreTests.Tests.Integration
                 Email = "Foo@bar.Com",
             };
             var expectedWorkItem = new AnalysisWorkItem(
-                NetworkTestSetup.NetworkId, simulationId, userInfo);
+                NetworkTestSetup.NetworkId, simulationId, userInfo, simulationName);
 
-            var result = service.CreateAndRunPermitted(NetworkTestSetup.NetworkId, simulationId, userInfo);
+            var result = service.CreateAndRunPermitted(NetworkTestSetup.NetworkId, simulationId, userInfo, simulationName);
             var resultUser = result.UserId;
             Assert.Equal(user.Username, resultUser);
         }
@@ -75,7 +75,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.SetUser(user.Username);
             var exception = Assert.Throws<RowNotInTableException>(() =>
                service.CreateAndRunPermitted(NetworkTestSetup.NetworkId,
-               simulationId, userInfo));
+               simulationId, userInfo, ""));
             Assert.Equal(SimulationRepository.NoSimulationWasFoundForTheGivenScenario, exception.Message);
         }
 
@@ -104,7 +104,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.SetUser(user2.Username);
             var exception = Assert.Throws<UnauthorizedAccessException>(() =>
                service.CreateAndRunPermitted(NetworkTestSetup.NetworkId,
-               simulationId, user2Info));
+               simulationId, user2Info, simulationName));
             Assert.Equal(SimulationAnalysisService.YouAreNotAuthorizedToModifyThisSimulation, exception.Message);
         }
 
@@ -139,7 +139,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.Context.SaveChanges();
             var exception = Assert.Throws<UnauthorizedAccessException>(() =>
                service.CreateAndRunPermitted(NetworkTestSetup.NetworkId,
-               simulationId, user2Info));
+               simulationId, user2Info, simulationName));
             Assert.Equal(SimulationAnalysisService.YouAreNotAuthorizedToModifyThisSimulation, exception.Message);
         }
 
@@ -172,7 +172,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.Context.Add(simulationUser2);
             TestHelper.UnitOfWork.Context.SaveChanges();
 
-            var result = service.CreateAndRunPermitted(NetworkTestSetup.NetworkId, simulationId, user2Info);
+            var result = service.CreateAndRunPermitted(NetworkTestSetup.NetworkId, simulationId, user2Info, simulationName);
 
             var resultUser = result.UserId;
             Assert.Equal(user2Info.Name, resultUser);

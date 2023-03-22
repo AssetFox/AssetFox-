@@ -13,6 +13,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         private BridgesUnfundedTreatments _bridgesUnfundedTreatments;
         private ReportHelper _reportHelper;
 
+        public static HashSet<string> GetRequiredAttributes() => new()
+        {
+            $"{BAMSAuditReportConstants.DeckSeeded}",
+            $"{BAMSAuditReportConstants.SupSeeded}",
+            $"{BAMSAuditReportConstants.SubSeeded}",
+            $"{BAMSAuditReportConstants.CulvSeeded}",
+            $"{BAMSAuditReportConstants.DeckDurationN}",
+            $"{BAMSAuditReportConstants.SupDurationN}",
+            $"{BAMSAuditReportConstants.SubDurationN}",
+            $"{BAMSAuditReportConstants.CulvDurationN}"
+        };
+
         public DataTab()
         {            
             _reportHelper = new ReportHelper();
@@ -37,19 +49,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
             bridgesWorksheet.Cells.AutoFitColumns();
             _bridgesUnfundedTreatments.PerformPostAutofitAdjustments(bridgesWorksheet);
-        }
-
-        public static HashSet<string> GetRequiredAttributes() => new()
-        {
-            $"{BAMSAuditReportConstants.DeckSeeded}",
-            $"{BAMSAuditReportConstants.SupSeeded}",
-            $"{BAMSAuditReportConstants.SubSeeded}",
-            $"{BAMSAuditReportConstants.CulvSeeded}",
-            $"{BAMSAuditReportConstants.DeckDurationN}",
-            $"{BAMSAuditReportConstants.SupDurationN}",
-            $"{BAMSAuditReportConstants.SubDurationN}",
-            $"{BAMSAuditReportConstants.CulvDurationN}"
-        };
+        }        
 
         private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
         {               

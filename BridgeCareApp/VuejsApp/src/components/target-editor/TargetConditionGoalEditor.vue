@@ -758,7 +758,7 @@ export default class TargetConditionGoalEditor extends Vue {
 
     onAddTargetConditionGoal(newTargetConditionGoal: TargetConditionGoal) {
         this.showCreateTargetConditionGoalDialog = false;
-
+        newTargetConditionGoal.libraryId = this.selectedTargetConditionGoalLibrary.id;
         if (!isNil(newTargetConditionGoal)) {
             this.addedRows.push(newTargetConditionGoal);
             this.onPaginationChanged()
@@ -1016,7 +1016,9 @@ export default class TargetConditionGoalEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
-
+                    console.log("current page: " + this.currentPage.length);
+                    console.log("current page item: " + this.currentPage[0].name);
+                    console.log("current page libraryId: " + this.currentPage[0].libraryId);
                     this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
                 }
             });

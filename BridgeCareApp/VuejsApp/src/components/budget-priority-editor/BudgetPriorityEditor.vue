@@ -31,9 +31,6 @@
                         </v-btn>
                     </v-layout>                               
                 </v-flex>
-                <v-flex xs4>
-                    parent library: {{parentLibraryName}} <span v-if="parentModifiedFlag">(modified)</span>
-                </v-flex>                               
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout row align-end class="left-buttons-padding">
                         <v-spacer></v-spacer>
@@ -443,6 +440,7 @@ export default class BudgetPriorityEditor extends Vue {
                 this.parentLibraryName = library.text;
             }
         });
+        this.$root.$emit("changeLibrary", this.parentLibraryName);
     }
 
     @Watch('selectedBudgetPriorityGridRows')

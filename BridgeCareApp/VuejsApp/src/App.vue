@@ -210,7 +210,9 @@
                     }}</span>
 
                     <!-- <span style="float:right;" class="ghd-control-label ghd-md-gray" v-if='hasSelectedLibrary && !hasScenario' bleh="console.log('changeLibrary: ');">Owner:</span> -->
-                    <span style="float:right;" class="ghd-control-label ghd-md-gray" >Library: {{ librarySelected }}</span>
+                    <div class="ara-blue-pantone-281 scenario-status" v-if="hasSelectedScenario">
+                        <span style="float:right; padding-right: 20px;" class="font-weight-light" >Library: {{ librarySelected }}</span>
+                    </div>
             </div>
             <v-container fluid v-bind="container">
                 <router-view></router-view>

@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using OfficeOpenXml;
-
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs.NHSConditionCharts;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs.BPN;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs
 {
-    public class AddGraphsInTabs : IAddGraphsInTabs
+    public class AddGraphsInTabs
     {
         private ConditionPercentageChart _conditionPercentageChart;
         private GraphData _graphData;
 
-        private IAddBPNGraphTab _addBPNGraphTab;
-        private IAddPoorCountGraphTab _addPoorCountGraphTab;
-        private IAddPoorDeckAreaGraphTab _addPoorDeckAreaGraphTab;
+        private AddBPNGraphTab _addBPNGraphTab;
+        private AddPoorCountGraphTab _addPoorCountGraphTab;
+        private AddPoorDeckAreaGraphTab _addPoorDeckAreaGraphTab;
 
         public AddGraphsInTabs()
         {

@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.CountySummary;
@@ -33,14 +32,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly IUnitOfWork _unitOfWork;
 
         private readonly SummaryReportParameters _summaryReportParameters;
-        private readonly IPamsDataForSummaryReport _pamsDataForSummaryReport;
-        private readonly IPavementWorkSummary _pavementWorkSummary;
-        private readonly IPavementWorkSummaryByBudget _pavementWorkSummaryByBudget;
+        private readonly PamsDataForSummaryReport _pamsDataForSummaryReport;
+        private readonly PavementWorkSummary _pavementWorkSummary;
+        private readonly PavementWorkSummaryByBudget _pavementWorkSummaryByBudget;
         private readonly UnfundedPavementProjects _unfundedPavementProjects;
 
-        private readonly ICountySummary _countySummary;
+        private readonly CountySummary _countySummary;
 
-        private readonly IAddGraphsInTabs _addGraphsInTabs;
+        private readonly AddGraphsInTabs _addGraphsInTabs;
         private readonly SummaryReportGlossary _summaryReportGlossary;
 
         private Guid _networkId;

@@ -4,15 +4,13 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis;
 using OfficeOpenXml;
-
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
-    public class BridgeWorkSummary : IBridgeWorkSummary
+    public class BridgeWorkSummary
     {
         private CostBudgetsWorkSummary _costBudgetsWorkSummary;
         private BridgesCulvertsWorkSummary _bridgesCulvertsWorkSummary;

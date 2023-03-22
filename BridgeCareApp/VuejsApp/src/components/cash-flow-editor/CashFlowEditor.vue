@@ -543,7 +543,6 @@ export default class CashFlowEditor extends Vue {
         this.selectedCashFlowRuleLibrary = clone(
             this.stateSelectedCashRuleFlowLibrary,
         );
-        console.log("stat cash flow library: " + this.stateSelectedCashRuleFlowLibrary.id);
     }
 
     @Watch('selectedCashFlowRuleLibrary')

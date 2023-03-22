@@ -38,7 +38,6 @@
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
-                    <div>Parent library {{parentLibraryName}}</div>
                     <v-layout align-end style="padding-top: 18px !important;">
                         <v-spacer></v-spacer>
                         <v-btn outline
@@ -338,6 +337,7 @@ import {
     find,
     isNil,
     propEq,
+    isEmpty,
 } from 'ramda';
 import {
     ShareTargetConditionGoalLibraryDialogData,
@@ -639,6 +639,8 @@ export default class TargetConditionGoalEditor extends Vue {
                 this.parentLibraryName = library.text;
             }
         });
+        this.$root.$emit("changeLibrary", this.parentLibraryName==="" ? "None" : this.parentLibraryName );
+
     }
     
     @Watch('isSharedLibrary')
@@ -1016,9 +1018,6 @@ export default class TargetConditionGoalEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
-                    console.log("current page: " + this.currentPage.length);
-                    console.log("current page item: " + this.currentPage[0].name);
-                    console.log("current page libraryId: " + this.currentPage[0].libraryId);
                     this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
                 }
             });

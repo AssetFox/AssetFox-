@@ -100,6 +100,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : "",
                 Target = entity.Target,
                 Year = entity.Year,
+                LibraryId = entity.LibraryId,
                 CriterionLibrary = entity.CriterionLibraryScenarioTargetConditionGoalJoin != null
                     ? entity.CriterionLibraryScenarioTargetConditionGoalJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO()

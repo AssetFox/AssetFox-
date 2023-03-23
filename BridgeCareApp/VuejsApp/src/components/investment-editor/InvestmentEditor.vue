@@ -1380,6 +1380,18 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
         }
     };
 
+    setParentLibraryName(libraryId: string) {
+        let foundLibrary: BudgetLibrary = emptyBudgetLibrary;
+        this.stateBudgetLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
+
+
     initializePages(){
         const request: InvestmentPagingRequestModel= {
             page: 1,

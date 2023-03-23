@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public Guid LibraryId { get; set; }
 
+        public Boolean IsModified { get; set; }
+
         public List<BudgetAmountDTO> BudgetAmounts { get; set; }
 
         public CriterionLibraryDTO CriterionLibrary { get; set; }

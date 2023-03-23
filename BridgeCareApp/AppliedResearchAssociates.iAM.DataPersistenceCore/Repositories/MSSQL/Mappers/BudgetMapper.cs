@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new ScenarioBudgetEntity { Id = domain.Id, SimulationId = simulationId, Name = domain.Name };
 
         public static ScenarioBudgetEntity ToScenarioEntity(this BudgetDTO dto, Guid simulationId) =>
-            new ScenarioBudgetEntity { Id = dto.Id, SimulationId = simulationId, LibraryId = dto.LibraryId, Name = dto.Name, BudgetOrder = dto.BudgetOrder };
+            new ScenarioBudgetEntity { Id = dto.Id, SimulationId = simulationId, LibraryId = dto.LibraryId, IsModified = dto.IsModified, Name = dto.Name, BudgetOrder = dto.BudgetOrder };
 
         public static ScenarioBudgetEntity ToScenarioEntityWithBudgetAmount(this BudgetDTO dto, Guid simulationId) =>
             new ScenarioBudgetEntity
@@ -37,6 +37,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Name = entity.Name,
                 LibraryId = entity.LibraryId,
+                IsModified = entity.IsModified,
                 BudgetOrder = entity.BudgetOrder,
                 BudgetAmounts = entity.ScenarioBudgetAmounts.Any()
                     ? entity.ScenarioBudgetAmounts.Select(_ => _.ToDto(entity.Name)).ToList()

@@ -3,9 +3,9 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Concrete.PAMSPBExport
+namespace AppliedResearchAssociates.iAM.Reporting
 {
-    internal class PAMSPBExportReportFactory : IReportFactory
+    public class PAMSPBExportReportFactory : IReportFactory
     {
         public string Name => "PAMSPBExportReport";
 

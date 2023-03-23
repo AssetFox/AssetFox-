@@ -11,7 +11,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services;
 using BridgeCareCore.Services;
 using OfficeOpenXml;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Concrete.PAMSPBExport
+namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class PAMSPBExportReport : IReport
     {

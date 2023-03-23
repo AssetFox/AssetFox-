@@ -12,6 +12,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public Guid LibraryId { get; set; }
 
+        public bool IsModified { get; set; }
+
         public ICollection<CalculatedAttributeEquationCriteriaPairDTO> Equations { get; set; } = new List<CalculatedAttributeEquationCriteriaPairDTO>();
     }
 }

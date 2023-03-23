@@ -16,9 +16,11 @@ namespace BridgeCareCore.Models
             UpdatedBudgetAmounts = new Dictionary<string, List<BudgetAmountDTO>>();
             AddedBudgetAmounts = new Dictionary<string, List<BudgetAmountDTO>>();
             FirstYearAnalysisBudgetShift = 0;
+            IsModified = false;
         }
         public InvestmentPlanDTO Investment { get; set; }
         public Guid? LibraryId { get; set; }
+        public bool IsModified { get; set; }
         public List<Guid> BudgetsForDeletion { get; set; }
         public List<BudgetDTO> UpdatedBudgets { get; set; }
         public List<BudgetDTO> AddedBudgets { get; set; }

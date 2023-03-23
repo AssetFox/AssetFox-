@@ -620,7 +620,6 @@ export default class TreatmentEditor extends Vue {
     @Watch('treatmentSelectItemValue')
     onTreatmentSelectItemValueChanged() {
         if(!isNil(this.treatmentSelectItemValue)){
-            console.log("treatment selectItemValue: " + this.treatmentSelectItemValue);
             var mapEntry = this.updatedRowsMap.get(this.treatmentSelectItemValue);
             var addedRow = this.addedRows.find(_ => _.id == this.treatmentSelectItemValue);
             var treatment = this.treatmentCache.find(_ => _.id === this.treatmentSelectItemValue);

@@ -8,9 +8,11 @@
                               append-icon=$vuetify.icons.ghd-down
                               outline
                               v-model='librarySelectItemValue'
-                              class="ghd-select ghd-text-field ghd-text-field-border">
+                              class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
                     </v-select>
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent">Parent Library: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified"> (Modified)</span></div>
                 </v-flex>
+
                 <!-- these are only in library -->
                 <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
@@ -307,6 +309,7 @@ import { LibraryUser } from '@/shared/models/iAM/user';
 import {
     mapToIndexSignature
 } from '../../shared/utils/conversion-utils';
+import { isNullOrUndefined } from 'util';
 
 @Component({
     components: {
@@ -402,6 +405,9 @@ export default class InvestmentEditor extends Vue {
     hasLibraryEditPermission: boolean = false;
     showReminder: boolean = false;
     range: number = 1;
+    parentLibraryName: string = "";
+    parentLibraryId: string = "";
+    scenarioLibraryIsModified: boolean = false;
 
     get addYearLabel() {
         return 'Add Year (' + this.getNextYear() + ')';
@@ -596,7 +602,14 @@ export default class InvestmentEditor extends Vue {
         this.setGridHeaders();
         this.setGridData();
         
-        this.checkHasUnsavedChanges()
+        this.checkHasUnsavedChanges();
+
+        // Get parent name from library id
+        this.librarySelectItems.forEach(library => {
+            if (library.value === this.parentLibraryId) {
+                this.parentLibraryName = library.text;
+            }
+        });
     }
 
     @Watch('investmentPlan')
@@ -1125,6 +1138,9 @@ export default class InvestmentEditor extends Vue {
     onUpsertInvestment() {
         const investmentPlan: InvestmentPlan = clone(this.investmentPlan);
 
+        if (this.selectedBudgetLibrary.id === this.uuidNIL) {this.scenarioLibraryIsModified = true;}
+        else { this.scenarioLibraryIsModified = false; }
+
         const sync: InvestmentPagingSyncModel = {
             libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
             updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
@@ -1140,15 +1156,17 @@ export default class InvestmentEditor extends Vue {
             },
             addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
             firstYearAnalysisBudgetShift: this.firstYearOfAnalysisPeriodShift,
+            isModified: this.scenarioLibraryIsModified,
         }
         InvestmentService.upsertInvestment(sync ,this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.firstYearOfAnalysisPeriodShift = 0;
                 this.investmentPlanMutator(this.investmentPlan)                
                 this.clearChanges();               
                 this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified investment"});
-                this.librarySelectItemValue = null
+                this.librarySelectItemValue = null;
             }           
         });
     }
@@ -1165,6 +1183,7 @@ export default class InvestmentEditor extends Vue {
             Investment: null,
             addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
             firstYearAnalysisBudgetShift: 0,
+            isModified: false
         }
 
         const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
@@ -1406,6 +1425,7 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
                 Investment: null,
                 addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
                 firstYearAnalysisBudgetShift: 0,
+                isModified: false
             },           
             sortColumn: 'year',
             isDescending: false,
@@ -1430,6 +1450,8 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
                     if(data.firstYear === 0)
                         this.originalFirstYear = moment().year()
                 }
+                this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
+                this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
                 this.initializing = false;
             });
         }            
@@ -1467,7 +1489,10 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
         width: 100%;
     }
 
-
+    .budget-parent {
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
 
     .invest-owner-padding {
         padding-top: 7px;

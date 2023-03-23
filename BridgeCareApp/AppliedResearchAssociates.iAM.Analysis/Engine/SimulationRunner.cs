@@ -1052,6 +1052,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                         if (Simulation.AnalysisMethod.AllowFundingFromMultipleBudgets && availableAmount > 0)
                         {
                             coverCost(availableAmount);
+                            continue;
                         }
                     }
                     else if (costCoverageFractionPerBudget.TryGetValue(budgetContext, out var coverageFraction))

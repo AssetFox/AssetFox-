@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid LibraryId { get; set; }
 
+        public bool IsModified { get; set; }
 
         public virtual CriterionLibraryScenarioPerformanceCurveEntity CriterionLibraryScenarioPerformanceCurveJoin { get; set; }
 

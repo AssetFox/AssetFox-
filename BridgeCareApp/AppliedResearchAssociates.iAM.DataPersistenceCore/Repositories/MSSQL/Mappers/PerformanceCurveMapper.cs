@@ -36,6 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = dto.Id,
                 LibraryId = dto.LibraryId,
+                IsModified = dto.IsModified,
                 SimulationId = simulationId,
                 AttributeId = attributeId,
                 Name = dto.Name,
@@ -92,6 +93,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Name = entity.Name,
                 LibraryId = entity.LibraryId,
+                IsModified = entity.IsModified,
                 Attribute = entity.Attribute.Name,
                 CriterionLibrary = entity.CriterionLibraryScenarioPerformanceCurveJoin != null
                     ? entity.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary.ToDto()

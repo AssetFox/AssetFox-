@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
             var currentCell = AddDataHeadersCells(worksheet, dataHeaders);
 
             //add data to cells
-            FillTreatmentData(worksheet, reportOutputData, currentCell);
+            FillDynamicDataForHeaders(worksheet, reportOutputData, currentCell);
         }
 
         #region Private Methods
@@ -94,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
             return currentCell;
         }
 
-        private void FillTreatmentData(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
+        private void FillDynamicDataForHeaders(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
         {
             var rowNo = currentCell.Row;
             var columnNo = currentCell.Column;

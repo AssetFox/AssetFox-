@@ -9,6 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual SimulationEntity Simulation { get; set; }
 
+        public Guid LibraryId { get; set; }
+
+
         public virtual CriterionLibraryScenarioPerformanceCurveEntity CriterionLibraryScenarioPerformanceCurveJoin { get; set; }
 
         public virtual ScenarioPerformanceCurveEquationEntity ScenarioPerformanceCurveEquationJoin { get; set; }

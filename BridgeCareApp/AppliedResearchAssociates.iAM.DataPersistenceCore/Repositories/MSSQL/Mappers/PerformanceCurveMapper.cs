@@ -35,6 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new ScenarioPerformanceCurveEntity
             {
                 Id = dto.Id,
+                LibraryId = dto.LibraryId,
                 SimulationId = simulationId,
                 AttributeId = attributeId,
                 Name = dto.Name,
@@ -90,6 +91,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = entity.Id,
                 Name = entity.Name,
+                LibraryId = entity.LibraryId,
                 Attribute = entity.Attribute.Name,
                 CriterionLibrary = entity.CriterionLibraryScenarioPerformanceCurveJoin != null
                     ? entity.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary.ToDto()

@@ -1,4 +1,5 @@
-﻿using AppliedResearchAssociates.iAM.DTOs.Abstract;
+﻿using System;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
@@ -7,6 +8,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string Attribute { get; set; }
 
         public string Name { get; set; }
+
+        public Guid LibraryId { get; set; }
 
         public bool Shift { get; set; }
 

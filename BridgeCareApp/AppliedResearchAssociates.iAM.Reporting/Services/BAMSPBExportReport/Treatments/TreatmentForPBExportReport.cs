@@ -4,9 +4,8 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSPBExportReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-
+using MathNet.Numerics.Financial;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
@@ -16,7 +15,7 @@ using Org.BouncyCastle.Utilities.Encoders;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Treatments
 {
-    public class TreatmentForPBExportReport : ITreatmentForPBExportReport
+    public class TreatmentForPBExportReport
     {
         private ReportHelper _reportHelper;
 
@@ -31,7 +30,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
             worksheet.DefaultColWidth = 13;
 
             // Add data to excel.
-            //var sectionHeaders = GetStaticSectionHeaders();
             var dataHeaders = GetStaticDataHeaders();
 
             //add header
@@ -42,19 +40,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
         }
 
         #region Private Methods
-
-        private List<string> GetStaticSectionHeaders()
-        {
-            return new List<string>
-            {
-                "Asset ID",
-                "Ownership",
-                "Structure",
-                "Network",
-                "Asset Attributes",
-                "Funding",
-            };
-        }
 
         private List<string> GetStaticDataHeaders()
         {
@@ -77,6 +62,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                 "PreferredYear",
                 "Appliedtreatment",
                 "TreatmentFundingIgnoresSpendingLimit",
+                "TreatmentStatus",
                 "TreatmentStatusTreatmentCause",
                 "Cost",
                 "Benefit",
@@ -92,8 +78,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
         private CurrentCell AddDataHeadersCells(ExcelWorksheet worksheet, List<string> dataHeaders)
         {
             //section header
-            int dataHeaderRow = 1; var totalNumOfColumns = 0; var cellBGColor = ColorTranslator.FromHtml("#FFFFFF"); //White
-            var startColumn = 0; var endColumn = 0;
+            int dataHeaderRow = 1; 
 
             //data header
             for (int column = 0; column < dataHeaders.Count; column++)
@@ -111,134 +96,86 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
 
         private void FillTreatmentData(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
         {
-            //var rowNo = currentCell.Row;
-            //var columnNo = currentCell.Column;
-            //foreach (var sectionSummary in reportOutputData.InitialAssetSummaries)
-            //{
-            //    rowNo++; columnNo = 1;
+            var rowNo = currentCell.Row;
+            var columnNo = currentCell.Column;
+            foreach (var sectionSummary in reportOutputData.InitialAssetSummaries)
+            {
+                rowNo++; columnNo = 1;
 
-            //    //--------------------- Asset ID ---------------------
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "INTERNET_REPORT"); //Internet Report 
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "AssetType"); //Asset Type 
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MaintainableAssetid"); //Maintainable Asset Id
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "AssetName"); //AssetName
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BRIDGE_TYPE"); //Bridge (B/C)
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "District"); //District
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BMSID"); //Bridge ID
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "Cnty"); //Cnty
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "BRKEY_"); //BRKey
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "Route"); //Route
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    //--------------------- Ownership ---------------------
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT"); //District
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "OddityDirection"); //Oddity Direction
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY"); //County
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "BRKEY_"); //BRKey
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    var ownerName = ""; var ownerCode = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "OWNER_CODE"); //Owner Code
-            //    if (!string.IsNullOrEmpty(ownerCode) && !string.IsNullOrWhiteSpace(ownerCode)) { ownerName = MappingContent.OwnerCodeForReport(ownerCode); }
-            //    worksheet.Cells[rowNo, columnNo++].Value = ownerName;
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BRIDGE_ID"); //Bridge ID
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SUBM_AGENCY"); //Submitting Agency
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FromSection"); //From Section
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_NAME"); // Planning Partner
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "ToSection"); //To Section
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    //--------------------- Structure ---------------------
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LENGTH"); //Structure Length
-            //    ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "Offset"); //Offset
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DECK_AREA"); //Deck Area
-            //    ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "OWNER_CODE"); //Owner Code
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LARGE_BRIDGE"); //Large Bridge
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "INTERSTATE"); //Interstate
 
-            //    var spanType = ""; var spanTypeName = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SPANTYPE"); //Span Type
-            //    if (!string.IsNullOrEmpty(spanTypeName) && !string.IsNullOrWhiteSpace(spanTypeName))
-            //    {
-            //        spanType = spanTypeName == SpanType.M.ToSpanTypeName() ? MappingContent.SpanTypeMap[SpanType.M] : MappingContent.SpanTypeMap[SpanType.S];
-            //    }
-            //    worksheet.Cells[rowNo, columnNo++].Value = spanType;
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "PreferredYear"); //Preferred Year
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY_ID"); //Bridge Family
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "Appliedtreatment"); //Applied treatment
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "TreatmentFundingIgnoresSpendingLimit"); //Treatment Funding Ignores Spending Limit
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "STRUCTURE_TYPE"); //Structure Type
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "TreatmentStatus\r\n"); //Treatment Status
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FRACT_CRIT"); //Fractural Critical
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "TreatmentStatusTreatmentCause"); //Treatment Status Treatment Cause
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PARALLEL") > 0 ? "Y" : "N"; //Parallel Structure
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "Cost"); //Cost
+                ExcelHelper.SetCurrencyFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelFormatStrings.CurrencyWithoutCents);
 
-            //    //--------------------- Network ---------------------
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.FullFunctionalClassDescription(_reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FUNC_CLASS")); //Functional Class
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "Benefit"); //Benefit
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(_reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "NHS_IND"), out var numericValue) && numericValue > 0 ? "Y" : "N"; //NHS
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "PriorityLevel"); //Priority Level
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "NBISLEN"); //NBIS Len
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "RISK_SCORE"); //Risk Score
+                ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BUS_PLAN_NETWORK"); //BPN
-            //    ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "RemainingLife"); //Remaining Life
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SimulationOutputId"); //Simulation Output Id
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SimulationId"); //Simulation Id
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY"); //County
 
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "INTERSTATE"); //Interstate
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-            //    //--------------------- Asset Attibutes ---------------------
-            //    worksheet.Cells[rowNo, columnNo++].Value = MappingContent.GetDeckSurfaceType(_reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DECKSURF_TYPE")); //Deck Surface Type
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WS_SEEDED"); // Wearing Surface Cond
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "PAINT_COND"); //Paint Cond
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "PAINT_EXTENT"); //Paint Ext
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = (int)_reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YEAR_BUILT"); //Year Built
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AGE"); //Age
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "ADTTOTAL"); //ADT
-            //    ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISK_SCORE"); //Risk Score
-            //    ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DET_LENGTH"); //Detour Length
-            //    ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "POST_STATUS") == 0 ? "OPEN" : "POSTED"; //Posting Status
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SUFF_RATING"); //Suff Rating
-            //    ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
-
-            //    //--------------------- Funding ---------------------
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "HBRR_ELIG"); //HBRR Elig
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "P3") > 0 ? "Y" : "N"; //P3
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-            //    worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEDAID"); //Federal Aid
-
-            //    _previousYearInitialMinC.Add(_reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "MINCOND"));
-
-
-            //    if (rowNo % 2 == 0)
-            //    {
-            //        ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray);
-            //    }
-            //}
-            //currentCell.Row = rowNo;
-            //currentCell.Column = columnNo;
+                if (rowNo % 2 == 0)
+                {
+                    ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray);
+                }
+            }
+            currentCell.Row = rowNo;
+            currentCell.Column = columnNo;
         }
 
         #endregion Private Methods

@@ -9,8 +9,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSPBExportReport;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Treatments;
@@ -26,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private Guid _networkId;        
         private readonly ReportHelper _reportHelper;
 
-        private readonly ITreatmentForPBExportReport _treatmentForPBExportReportReport;
+        private readonly TreatmentForPBExportReport _treatmentForPBExportReportReport;
 
         public BAMSPBExportReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {

@@ -27,6 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = dto.Id,
                 SimulationId = simulationId,
                 LibraryId = dto.libraryId,
+                IsModified = dto.IsModified,
                 PriorityLevel = dto.PriorityLevel,
                 Year = dto.Year
             };
@@ -62,6 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 PriorityLevel = entity.PriorityLevel,
                 Year = entity.Year,
                 libraryId= entity.LibraryId,
+                IsModified = entity.IsModified,
                 BudgetPercentagePairs = entity.BudgetPercentagePairs.Any()
                     ? entity.BudgetPercentagePairs.Select(_ => _.ToDto()).ToList()
                     : new List<BudgetPercentagePairDTO>(),

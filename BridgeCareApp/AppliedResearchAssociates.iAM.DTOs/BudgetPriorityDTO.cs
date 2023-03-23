@@ -12,6 +12,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public Guid libraryId { get; set; }
 
+        public bool IsModified { get; set; }
+
         public List<BudgetPercentagePairDTO> BudgetPercentagePairs { get; set; }
 
         public CriterionLibraryDTO CriterionLibrary { get; set; }

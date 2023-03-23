@@ -4,16 +4,12 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis;
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using System.Reflection.PortableExecutable;
 using OfficeOpenXml.Style;
 using System.Drawing;
-
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
-
 using CurrentCell = AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport.CurrentCell;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
@@ -36,9 +32,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
         public decimal DistrictSum { get; set; }
     }
 
-    public class CountySummary : ICountySummary
+    public class CountySummary
     {
-        private ISummaryReportHelper _summaryReportHelper;
+        private SummaryReportHelper _summaryReportHelper;
         private IList<DistrictCounty> _uniqueDistrictCountyList = null;
         private IList<DistrictCountyCost> _districtCountyCostList = null;
 

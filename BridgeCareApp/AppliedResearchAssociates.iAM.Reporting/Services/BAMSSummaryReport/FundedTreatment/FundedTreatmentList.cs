@@ -4,21 +4,21 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using MoreLinq;
 using OfficeOpenXml;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment
 {
-    public class FundedTreatmentList : IFundedTreatmentList
+    public class FundedTreatmentList
     {
-        private ITreatmentCommon _treatmentCommon;
+        private TreatmentCommon _treatmentCommon;
         private ReportHelper _reportHelper;
 
         public FundedTreatmentList()
         {
-            _treatmentCommon = new TreatmentCommon.TreatmentCommon();
+            _treatmentCommon = new TreatmentCommon();
             _reportHelper = new ReportHelper();
         }
 

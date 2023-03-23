@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 var resultAttribute = AttributeTestSetup.Numeric();
                 resultAttributes.Add(resultAttribute);
             }
-            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
+            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributesNonAtomic(resultAttributes);
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId);
             AggregatedResultTestSetup.AddNumericAggregatedResultsToDb(TestHelper.UnitOfWork, maintainableAssets, resultAttributes);
 

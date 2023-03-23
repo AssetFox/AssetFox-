@@ -34,25 +34,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TargetConditionGoal
                 CriterionLibrary = criterionLibraryObject
             };
         }
-        public static TargetConditionGoalLibraryDTO CreateTargetConditionGoalLibraryDto(string name)
+        public static TargetConditionGoalLibraryDTO CreateTargetConditionGoalLibraryDto(string name, Guid id)
         {
-            //setup
             var targetConditionGoalList = new List<TargetConditionGoalDTO>();
             targetConditionGoalList.Add(CreateTargetConditionGoalDto("Target Condition Goal 1"));
 
-            //create budget library
             return new TargetConditionGoalLibraryDTO()
             {
-                Id = Guid.NewGuid(),
+                Id = id,
                 Name = name,
                 TargetConditionGoals = targetConditionGoalList?.ToList(),
             };
         }
 
-        public static TargetConditionGoalLibraryDTO ModelForEntityInDb(IUnitOfWork unitOfWork, string targetConditionGoalLibraryName = null)
+        public static TargetConditionGoalLibraryDTO ModelForEntityInDb(IUnitOfWork unitOfWork, string targetConditionGoalLibraryName = null, Guid? libraryId = null)
         {
             var resolveTargetConditionGoalLibraryName = targetConditionGoalLibraryName ?? RandomStrings.WithPrefix("TargetConditionGoalLibrary");
-            var dto = CreateTargetConditionGoalLibraryDto(resolveTargetConditionGoalLibraryName);
+            var resolveId = libraryId ?? Guid.NewGuid();
+            var dto = CreateTargetConditionGoalLibraryDto(resolveTargetConditionGoalLibraryName, resolveId);
             unitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
             return dto;
         }

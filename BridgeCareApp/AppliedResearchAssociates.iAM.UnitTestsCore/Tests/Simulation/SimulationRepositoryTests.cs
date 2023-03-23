@@ -30,6 +30,8 @@ using Moq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using Microsoft.Data.SqlClient;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -54,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return returnValue;
         }
 
-        [Fact] // Seems to be some connection with other tests here. For example, WJ had a failure in an "unrelated" attribute import test that fried it.
+        [Fact] 
         public void DeleteSimulation_Does()
         {
             Setup();
@@ -792,6 +794,69 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotEqual(clonedSimulation.AnalysisMethod.Id, originalSimulation.AnalysisMethod.Id);
             Assert.Equal(clonedSimulation.AnalysisMethod.Benefit.AttributeId,
                 originalSimulation.AnalysisMethod.Benefit.AttributeId);
+        }
+
+        [Fact (Skip ="Fails for reasons WJ does not understand.")]
+        public void SimulationInDbWithBudgetAndAmount_Delete_DeletesAll()
+        {
+            var unitOfWork = TestHelper.UnitOfWork;
+            AttributeTestSetup.CreateAttributes(unitOfWork);
+            NetworkTestSetup.CreateNetwork(unitOfWork);
+            var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
+            var simulationId = simulation.Id;
+            var investmentPlan = simulation.InvestmentPlan;
+            var investmentPlanId = investmentPlan.Id;
+            var budgetName = RandomStrings.WithPrefix("Budget");
+
+            var budgetId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.New(budgetId, budgetName);
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            budgetDto.CriterionLibrary = criterionLibrary;
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgetDtos, simulation.Id);
+            var budgetAmountId = Guid.NewGuid();
+            BudgetAmountTestSetup.SetupSingleAmountForBudget(unitOfWork, simulationId, budgetName, budgetId, budgetAmountId);
+            var budgetPercentagePairId = Guid.NewGuid();
+            var budgetPriorityId = Guid.NewGuid();
+            var percentagePair =
+                new BudgetPercentagePairDTO
+                {
+                    BudgetId = budgetId,
+                    BudgetName = budgetName,
+                    Id = budgetPercentagePairId,
+                    Percentage = 100,
+                };
+            var budgetPriority = new BudgetPriorityDTO
+            {
+                Id = budgetPriorityId,
+                BudgetPercentagePairs = new List<BudgetPercentagePairDTO>
+                {
+                    percentagePair,
+                },
+                CriterionLibrary = CriterionLibraryDtos.Dto(),
+            };
+            var budgetPriorities = new List<BudgetPriorityDTO> { budgetPriority };
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(budgetPriorities, simulationId); // If we delete this line, the test passes. But why can't we have budget priorities?
+
+            var simulationBudgetsBefore = unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            var budgetAmountEntityBefore = TestHelper.UnitOfWork.Context.ScenarioBudgetAmount.SingleOrDefault(ba => ba.Id == budgetAmountId);
+            var scenarioBudgetEntityBefore = TestHelper.UnitOfWork.Context.ScenarioBudget.SingleOrDefault(sb => sb.Id == budgetId);
+            var budgetPriorityEntityBefore = TestHelper.UnitOfWork.Context.ScenarioBudgetPriority
+                .SingleOrDefault(bp => bp.Id == budgetPriorityId);
+            Assert.NotNull(budgetAmountEntityBefore);
+            Assert.NotNull(scenarioBudgetEntityBefore);
+            Assert.NotNull(budgetPriorityEntityBefore);
+            unitOfWork.Context.SaveChanges();
+
+            unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
+
+            unitOfWork.Context.ChangeTracker.Clear();
+            var budgetAmountEntityAfter = TestHelper.UnitOfWork.Context.ScenarioBudgetAmount.SingleOrDefault(ba => ba.Id == budgetAmountId);
+            var scenarioBudgetEntityAfter = TestHelper.UnitOfWork.Context.ScenarioBudget.SingleOrDefault(sb => sb.Id == budgetId);
+            var investmentPlanEntityAfter = TestHelper.UnitOfWork.Context.InvestmentPlan.SingleOrDefault(ip => ip.Id == investmentPlanId);
+            Assert.Null(budgetAmountEntityAfter);
+            Assert.Null(scenarioBudgetEntityAfter);
+            Assert.Null(investmentPlanEntityAfter);
         }
     }
 }

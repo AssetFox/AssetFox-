@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
-
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
 {
-    public class SummaryReportHelper : ISummaryReportHelper
+    public class SummaryReportHelper
     {
         public T checkAndGetValue<T>(IDictionary itemsArray, string itemName)
         {

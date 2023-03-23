@@ -39,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
-            repo.UpsertAttributes(attributes);
+            repo.UpsertAttributesNonAtomic(attributes);
             var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             Assert.Equal(1, attributeAfter.Minimum);
@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Text();
             var attributes = new List<DataAttribute> { attribute };
-            repo.UpsertAttributes(attributes);
+            repo.UpsertAttributesNonAtomic(attributes);
             var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             Assert.Null(attributeAfter.Minimum);
@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
-            repo.UpsertAttributes(attributes);
+            repo.UpsertAttributesNonAtomic(attributes);
             var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
             var updateAttribute = new NumericAttribute(
@@ -79,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 "updatedCommand", Data.ConnectionType.MSSQL, "connectionString",
                 !attribute.IsCalculated, !attribute.IsAscending, Guid.Empty);
             var updateAttributes = new List<DataAttribute> { updateAttribute };
-            repo.UpsertAttributes(updateAttributes);
+            repo.UpsertAttributesNonAtomic(updateAttributes);
             var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             ObjectAssertions.Equivalent(attributeBefore, attributeAfter);
@@ -92,12 +92,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
-            repo.UpsertAttributes(attributes);
+            repo.UpsertAttributesNonAtomic(attributes);
             var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
             var updateAttribute = AttributeTestSetup.Numeric(attribute.Id, "updated name should fail");
             var updateAttributes = new List<DataAttribute> { updateAttribute };
-            var exception = Assert.Throws<InvalidAttributeUpsertException>(() => repo.UpsertAttributes(updateAttributes));
+            var exception = Assert.Throws<InvalidAttributeUpsertException>(() => repo.UpsertAttributesNonAtomic(updateAttributes));
             Assert.Contains(AttributeUpdateValidityChecker.NameChangeNotAllowed, exception.Message);
             var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
@@ -111,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
-            repo.UpsertAttributes(attributes);
+            repo.UpsertAttributesNonAtomic(attributes);
             var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
             var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "Last", "update command", Data.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending, Guid.Empty);

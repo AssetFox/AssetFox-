@@ -10,6 +10,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid SimulationId { get; set; }
 
+        public Guid LibraryId { get; set; }
+
         public virtual SimulationEntity Simulation { get; set; }
 
         public ICollection<ScenarioCalculatedAttributeEquationCriteriaPairEntity> Equations { get; set; }

@@ -49,6 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new CalculatedAttributeDTO()
             {
                 Id = entity.Id,
+                LibraryId = entity.LibraryId,
                 Attribute = entity.Attribute.Name,
                 CalculationTiming = entity.CalculationTiming,
                 Equations = entity.Equations.Any()
@@ -106,6 +107,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new ScenarioCalculatedAttributeEntity()
             {
                 Id = dto.Id,
+                LibraryId = dto.LibraryId,
                 AttributeId = attributeId,
                 CalculationTiming = dto.CalculationTiming,
                 SimulationId = simulationId

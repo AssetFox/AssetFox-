@@ -1446,6 +1446,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
+                entity.Property(e => e.LibraryId).IsRequired();
+
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.CalculatedAttributes)
                     .HasForeignKey(d => d.SimulationId)

@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid LibraryId { get; set; }
 
-        public Boolean IsModified { get; set; }
+        public bool IsModified { get; set; }
 
         public virtual SimulationEntity Simulation { get; set; }
 

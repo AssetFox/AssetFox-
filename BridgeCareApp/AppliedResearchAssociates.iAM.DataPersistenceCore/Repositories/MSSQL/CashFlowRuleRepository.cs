@@ -342,6 +342,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 dto.LibraryId = (Guid)libraryId;
             }
         }
+        public void AddModifiedToScenarioCashFlowRule(List<CashFlowRuleDTO> cashFlowRuleDTOs, bool IsModified)
+        {
+            foreach (var dto in cashFlowRuleDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
 
         private List<LibraryUserDTO> GetAccessForUser(Guid cashFlowRuleLibraryId, Guid userId)
         {

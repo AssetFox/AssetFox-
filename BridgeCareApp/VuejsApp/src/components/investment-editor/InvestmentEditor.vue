@@ -10,7 +10,7 @@
                               v-model='librarySelectItemValue'
                               class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Parent Library: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>
+                    <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario">Parent Library: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>
                 </v-flex>
 
                 <!-- these are only in library -->
@@ -36,7 +36,7 @@
                 </v-flex>
             </v-layout>
             <!-- only for scenario -->
-            <v-layout row style="margin-top:-40px;">
+            <v-layout row style="margin-top:-20px;">
                 <!-- text boxes for scenario only -->
                 <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-subheader"><span>First Year of Analysis Period</span></v-subheader>
@@ -1489,11 +1489,6 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
     .budget-year-amount-input {
         border: 1px solid;
         width: 100%;
-    }
-
-    .budget-parent {
-        padding-bottom: 10px;
-        margin-bottom: 10px;
     }
 
     .invest-owner-padding {

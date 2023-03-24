@@ -13,7 +13,7 @@
                             v-model="librarySelectItemValue"
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>     
-                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Parent Library: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>                  
+                        <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario">Parent Library: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>                  
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -31,11 +31,6 @@
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
-                        <!-- <v-switch
-                            class='sharing header-text-content'
-                            label="Default Calculation"
-                            v-model="isDefaultBool"
-                            /> -->
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -1582,7 +1577,6 @@ export default class CalculatedAttributeEditor extends Vue {
 .sharing .v-input__slot{
     top: 5px !important;
 }
-
 .sharing .v-label{
     margin-bottom: 0;
     position: relative;

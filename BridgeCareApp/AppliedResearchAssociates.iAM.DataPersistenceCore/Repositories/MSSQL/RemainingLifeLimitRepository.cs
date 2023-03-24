@@ -170,11 +170,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
             return dtos;
         }
-        public void AddLibraryIdToScenarioRemainingLifeLimit(List<RemainingLifeLimitDTO> remainintLifeLimitDTOs, Guid? libraryId)
+        public void AddLibraryIdToScenarioRemainingLifeLimit(List<RemainingLifeLimitDTO> remainingLifeLimitDTOs, Guid? libraryId)
         {
-            foreach(var dto in remainintLifeLimitDTOs)
+            if (libraryId == null) return;
+            foreach (var dto in remainingLifeLimitDTOs)
             {
                 dto.LibraryId = (Guid)libraryId;
+            }
+        }
+        public void AddModifiedToScenarioRemainingLifeLimit(List<RemainingLifeLimitDTO> remainingLifeLimitDTOs, bool IsModified)
+        {
+            foreach (var dto in remainingLifeLimitDTOs)
+            {
+                dto.IsModified = IsModified;
             }
         }
         public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)

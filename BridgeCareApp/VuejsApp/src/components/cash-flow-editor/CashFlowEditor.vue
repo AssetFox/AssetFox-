@@ -11,7 +11,7 @@
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
-                    
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Parent Library: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">    
                     <div v-if="hasScenario" style="padding-top: 18px !important">
@@ -462,6 +462,7 @@ export default class CashFlowEditor extends Vue {
     scenarioHasCreatedNew: boolean = false;
     parentLibraryName: string = "";
     parentLibraryId: string = "";
+    scenarioLibraryIsModified: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -601,6 +602,7 @@ export default class CashFlowEditor extends Vue {
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
                 addedRows: this.addedRows,
+                isModified: this.scenarioLibraryIsModified
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
@@ -638,7 +640,6 @@ export default class CashFlowEditor extends Vue {
                 this.parentLibraryName = library.text;
             }
         });
-        this.$root.$emit("changeLibrary", this.parentLibraryName==="" ? "None" : this.parentLibraryName );
     }
     @Watch('deletionIds')
     onDeletionIdsChanged(){
@@ -688,6 +689,7 @@ export default class CashFlowEditor extends Vue {
                     rowsForDeletion: cashFlowRuleLibrary.cashFlowRules === [] ? [] : this.deletionIds,
                     updateRows: cashFlowRuleLibrary.cashFlowRules === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: cashFlowRuleLibrary.cashFlowRules === [] ? [] : this.addedRows,
+                    isModified: false
                  },
                  scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
@@ -845,11 +847,15 @@ export default class CashFlowEditor extends Vue {
     }
 
     onUpsertScenarioCashFlowRules() {
+        if (this.selectedCashFlowRuleLibrary.id === this.uuidNIL) {this.scenarioLibraryIsModified = true;}
+        else { this.scenarioLibraryIsModified = false; }
+
         CashFlowService.upsertScenarioCashFlowRules({
             libraryId: this.selectedCashFlowRuleLibrary.id === this.uuidNIL ? null : this.selectedCashFlowRuleLibrary.id,
             rowsForDeletion: this.deletionIds,
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows           
+            addedRows: this.addedRows,
+            isModified: this.scenarioLibraryIsModified
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
@@ -875,7 +881,8 @@ export default class CashFlowEditor extends Vue {
                 libraryId: this.selectedCashFlowRuleLibrary.id === this.uuidNIL ? null : this.selectedCashFlowRuleLibrary.id,
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                addedRows: this.addedRows
+                addedRows: this.addedRows,
+                isModified: false
                 },
                 scenarioId: null
         }
@@ -1075,6 +1082,7 @@ export default class CashFlowEditor extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false
             },           
             sortColumn: '',
             isDescending: false,
@@ -1089,6 +1097,7 @@ export default class CashFlowEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                     this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
+                    this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
                 }
             });
     }

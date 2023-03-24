@@ -49,6 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = dto.Id,
                 Name = dto.Name,
                 LibraryId = dto.LibraryId,
+                IsModified = dto.IsModified,
                 SimulationId = simulationId,
                 AttributeId = attributeId,
                 AllowedDeficientPercentage = dto.AllowedDeficientPercentage,
@@ -91,6 +92,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = entity.Name,
                 Attribute = entity.Attribute.Name,
                 LibraryId = entity.LibraryId,
+                IsModified = entity.IsModified,
                 AllowedDeficientPercentage = entity.AllowedDeficientPercentage,
                 DeficientLimit = entity.DeficientLimit,
                 CriterionLibrary = entity.CriterionLibraryScenarioDeficientConditionGoalJoin != null

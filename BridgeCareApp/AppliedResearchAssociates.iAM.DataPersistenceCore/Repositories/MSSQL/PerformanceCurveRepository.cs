@@ -714,6 +714,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
             return dtos;
         }
-
+        public void AddLibraryIdToScenarioPerformanceCurve(List<PerformanceCurveDTO> performanceCurveDTOs, Guid? libraryId)
+        {
+            if (libraryId == null) return;
+            foreach (var dto in performanceCurveDTOs)
+            {
+                dto.LibraryId = (Guid)libraryId;
+            }
+        }
+        public void AddModifiedToScenarioPerformanceCurve(List<PerformanceCurveDTO> performanceCurveDTOs, bool IsModified)
+        {
+            foreach (var dto in performanceCurveDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
     }
 }

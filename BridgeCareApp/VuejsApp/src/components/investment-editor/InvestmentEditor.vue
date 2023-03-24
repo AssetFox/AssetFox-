@@ -482,6 +482,7 @@ export default class InvestmentEditor extends Vue {
                 } : this.investmentPlan,
                 addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
                 firstYearAnalysisBudgetShift: this.firstYearOfAnalysisPeriodShift,
+                isModified: this.scenarioLibraryIsModified
             },           
             sortColumn: sortBy === '' ? 'year' : sortBy,
             isDescending: descending != null ? descending : false,
@@ -855,6 +856,7 @@ export default class InvestmentEditor extends Vue {
                 updatedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.updatedBudgetAmounts),
                 addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.addedBudgetAmounts),
                 firstYearAnalysisBudgetShift: 0,
+                isModified: false
             },
             scenarioId: this.hasScenario ? this.selectedScenarioId : null
         }

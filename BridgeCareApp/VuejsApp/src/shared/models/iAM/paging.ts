@@ -32,6 +32,7 @@ export interface PagingPage<T>{
 
 export interface PaginSync<T>{
     libraryId: string | null;
+    isModified: boolean;
     rowsForDeletion: string[];
     updateRows: T[];
     addedRows: T[];

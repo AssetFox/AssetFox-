@@ -1770,6 +1770,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.ShadowForSameTreatment).IsRequired();
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
+                entity.Property(e => e.IsModified).IsRequired();
+                entity.Property(e => e.LibraryId).IsRequired();
+
                 entity.Property(e => e.Category)
                 .HasDefaultValue(TreatmentCategory.Preservation)
                 .HasConversion(

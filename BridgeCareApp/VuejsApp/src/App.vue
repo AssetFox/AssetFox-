@@ -210,7 +210,7 @@
                     }}</span>
 
                     <!-- <span style="float:right;" class="ghd-control-label ghd-md-gray" v-if='hasSelectedLibrary && !hasScenario' bleh="console.log('changeLibrary: ');">Owner:</span> -->
-                    <span style="float:right;" class="ghd-control-label ghd-md-gray" >Library: {{ librarySelected }}</span>
+
             </div>
             <v-container fluid v-bind="container">
                 <router-view></router-view>
@@ -345,7 +345,6 @@ export default class AppComponent extends Vue {
     agencyLogo: string = '';
     productLogo: string = '';
 
-    librarySelected: string = 'None Selected';
 
     get container() {
         const container: any = {};
@@ -532,10 +531,7 @@ export default class AppComponent extends Vue {
             this.productLogo = this.$config.productLogo
 
         //https://javascript.plainenglish.io/communication-between-components-in-vue-js-d79124917cd0
-        this.$root.$on("changeLibrary", (msg) => {
-            //https://stackoverflow.com/questions/51225681/how-to-bind-the-input-data-enter-with-span-text
-            this.librarySelected = msg;
-        });
+        //https://stackoverflow.com/questions/51225681/how-to-bind-the-input-data-enter-with-span-text
     }
 
     beforeDestroy() {

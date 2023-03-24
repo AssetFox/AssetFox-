@@ -47,6 +47,8 @@ export interface Treatment {
     addTreatment: boolean;
     category: TreatmentCategory;
     assetType: AssetType;
+    isModified: boolean;
+    libraryId: string;
 }
 
 export interface SimpleTreatment {
@@ -110,6 +112,8 @@ export const emptyTreatment: Treatment = {
     addTreatment: false,
     category: TreatmentCategory.preservation,
     assetType: AssetType.bridge,
+    isModified: false,
+    libraryId: ''
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {

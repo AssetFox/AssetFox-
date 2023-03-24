@@ -382,6 +382,8 @@ namespace BridgeCareCore.Controllers
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     var dtos = _treatmentPagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);
+                    UnitOfWork.SelectableTreatmentRepo.AddLibraryIdToScenarioSelectableTreatments(dtos, pagingSync.LibraryId);
+                    UnitOfWork.SelectableTreatmentRepo.AddModifiedToScenarioSelectableTreatments(dtos, pagingSync.IsModified);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
                 });
 

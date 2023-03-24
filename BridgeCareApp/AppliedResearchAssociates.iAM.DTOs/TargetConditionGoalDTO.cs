@@ -15,6 +15,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public Guid LibraryId { get; set; }
 
+        public bool IsModified { get; set; }
+
         public CriterionLibraryDTO CriterionLibrary { get; set; }
     }
 }

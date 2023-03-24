@@ -46,8 +46,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = dto.Id,
                 SimulationId = simulationId,
                 AttributeId = attributeId,
+                LibraryId = dto.LibraryId,
+                IsModified = dto.IsModified,
                 Value = dto.Value,
-                LibraryId = dto.LibraryId
             };
 
         public static RemainingLifeLimitLibraryEntity ToEntity(this RemainingLifeLimitLibraryDTO dto) =>
@@ -90,6 +91,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? entity.Attribute.Name
                     : "",
                 LibraryId = entity.LibraryId,
+                IsModified = entity.IsModified,
                 CriterionLibrary = entity.CriterionLibraryScenarioRemainingLifeLimitJoin != null
                     ? entity.CriterionLibraryScenarioRemainingLifeLimitJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO()

@@ -1690,6 +1690,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.LibraryId).IsRequired();
 
+                entity.Property(e => e.IsModified).IsRequired();
+
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.Simulation)

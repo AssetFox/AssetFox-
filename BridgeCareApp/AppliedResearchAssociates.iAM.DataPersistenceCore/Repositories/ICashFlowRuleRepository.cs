@@ -34,5 +34,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void AddLibraryIdToScenarioCashFlowRule(List<CashFlowRuleDTO> cashFlowRuleDTOs, Guid? libraryId);
 
         void AddModifiedToScenarioCashFlowRule(List<CashFlowRuleDTO> cashFlowRuleDTOs, bool IsModified);
+        void UpsertCashFlowRuleLibraryAndRules(CashFlowRuleLibraryDTO dto);
     }
 }

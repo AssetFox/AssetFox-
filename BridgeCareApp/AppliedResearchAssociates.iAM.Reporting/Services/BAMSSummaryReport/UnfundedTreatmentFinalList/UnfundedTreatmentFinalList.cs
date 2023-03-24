@@ -1,25 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentFinalList
 {
-    public class UnfundedTreatmentFinalList : IUnfundedTreatmentFinalList
+    public class UnfundedTreatmentFinalList
     {
-        private IUnfundedTreatmentCommon _unfundedTreatmentCommon;
+        private UnfundedTreatmentCommon _unfundedTreatmentCommon;
         private ReportHelper _reportHelper;
 
         public UnfundedTreatmentFinalList()
         {
-            _unfundedTreatmentCommon = new UnfundedTreatmentCommon.UnfundedTreatmentCommon();
+            _unfundedTreatmentCommon = new UnfundedTreatmentCommon();
             _reportHelper = new ReportHelper();
         }
 
@@ -47,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             unfundedTreatmentTimeWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             AddDynamicDataCells(unfundedTreatmentTimeWorksheet, simulationOutput, currentCell);
-            unfundedTreatmentTimeWorksheet.Calculate();  // calculation is set to manual, so force calculation of the total now
+            //unfundedTreatmentTimeWorksheet.Calculate();  // calculation is set to manual, so force calculation of the total now
 
             unfundedTreatmentTimeWorksheet.Cells.AutoFitColumns();
             _unfundedTreatmentCommon.PerformPostAutofitAdjustments(unfundedTreatmentTimeWorksheet);

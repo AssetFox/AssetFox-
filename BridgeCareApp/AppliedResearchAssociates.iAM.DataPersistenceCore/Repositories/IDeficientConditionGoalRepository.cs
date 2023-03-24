@@ -35,5 +35,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void AddLibraryIdToScenarioDeficientConditionGoal(List<DeficientConditionGoalDTO> deficientConditionGoalDTOs, Guid? libraryId);
 
         void AddModifiedToScenarioDeficientConditionGoal(List<DeficientConditionGoalDTO> deficientConditionGoalDTOs, bool IsModified);
+        void UpsertDeficientConditionGoalLibraryAndGoals(DeficientConditionGoalLibraryDTO dto);
     }
 }

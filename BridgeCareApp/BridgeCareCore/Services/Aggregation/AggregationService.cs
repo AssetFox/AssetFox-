@@ -121,9 +121,9 @@ namespace BridgeCareCore.Services.Aggregation
                     var directory = Directory.GetCurrentDirectory();
                     var path = Path.Combine(directory, "Logs");
                     // Set up the log
-                    StringBuilder stringBuilder = new StringBuilder();
+                    var stringBuilder = new StringBuilder();
                     stringBuilder.AppendLine("Datum Name, Location Id, Datum Id");
-                    StreamWriter streamWriter = new StreamWriter(path + "\\UnmatchedDatum.txt");
+                    var streamWriter = new StreamWriter(path + "\\UnmatchedDatum.txt");
                     
                     state.Status = "Aggregating";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);

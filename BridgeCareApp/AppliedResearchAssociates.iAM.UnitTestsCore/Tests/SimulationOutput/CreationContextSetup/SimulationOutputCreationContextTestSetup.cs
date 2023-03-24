@@ -77,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 var textAttribute = AttributeTestSetup.Text(textAttributeId, textAttributeName);
                 attributes.Add(textAttribute);
             }
-            unitOfWork.AttributeRepo.UpsertAttributes(attributes);
+            unitOfWork.AttributeRepo.UpsertAttributesNonAtomic(attributes);
             var years = Enumerable.Range(2022, numberOfYears).ToList();
             var context = new SimulationOutputSetupContext
             {

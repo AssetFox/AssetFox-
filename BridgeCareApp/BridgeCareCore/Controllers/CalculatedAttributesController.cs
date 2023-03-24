@@ -148,7 +148,6 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var attributes = new List<CalculatedAttributeDTO>();
                     if (upsertRequest.ScenarioId != null)
                         attributes = _calulatedAttributeService.GetSyncedScenarioDataSet(upsertRequest.ScenarioId.Value, upsertRequest.SyncModel);
@@ -172,14 +171,12 @@ namespace BridgeCareCore.Controllers
                     var dto = upsertRequest.Library;
                     dto.CalculatedAttributes = attributes;
                     calculatedAttributesRepo.UpsertCalculatedAttributeLibrary(dto);
-                    UnitOfWork.Commit();
                 });
                 return Ok();
 
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertCalculatedAttributeLibrary - {e.Message}");
                 throw;
             }
@@ -220,14 +217,13 @@ namespace BridgeCareCore.Controllers
 
                     calculatedAttributesRepo.AddLibraryIdToScenarioCalculatedAttributes(dto, syncModel.LibraryId);
                     calculatedAttributesRepo.AddModifiedToScenarioCalculatedAttributes(dto, syncModel.IsModified);
+                    
                     calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);
-                    UnitOfWork.Commit();
                 });
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertScenarioAttributes for {simulationName} - {e.Message}");
                 throw;

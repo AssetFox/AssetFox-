@@ -14,6 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<BudgetPriorityLibraryDTO> GetBudgetPriortyLibrariesNoChildren();
 
         void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto);
+        void UpsertOrDeleteBudgetPriorityLibraryAndPriorities(BudgetPriorityLibraryDTO dto, bool isNewLibrary, Guid ownerIdForNewLibrary);
 
         void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId);
 

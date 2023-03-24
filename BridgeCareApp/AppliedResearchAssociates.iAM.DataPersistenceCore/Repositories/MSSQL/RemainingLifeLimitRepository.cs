@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
@@ -364,51 +364,63 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
-            _unitOfWork.Context.DeleteAll<ScenarioRemainingLifeLimitEntity>(_ =>
+            _unitOfWork.AsTransaction(() =>
+            {
+                _unitOfWork.Context.DeleteAll<ScenarioRemainingLifeLimitEntity>(_ =>
                 _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
-            _unitOfWork.Context.UpdateAll(scenariRemainingLifeLimitEntities.Where(_ => existingEntityIds.Contains(_.Id))
-                .ToList());
+                _unitOfWork.Context.UpdateAll(scenariRemainingLifeLimitEntities.Where(_ => existingEntityIds.Contains(_.Id))
+                    .ToList());
 
-            _unitOfWork.Context.AddAll(scenariRemainingLifeLimitEntities.Where(_ => !existingEntityIds.Contains(_.Id))
-                .ToList());
+                _unitOfWork.Context.AddAll(scenariRemainingLifeLimitEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                    .ToList());
 
-            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioRemainingLifeLimitEntity>(_ =>
-                _.ScenarioRemainingLifeLimit.SimulationId == simulationId);
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioRemainingLifeLimitEntity>(_ =>
+                    _.ScenarioRemainingLifeLimit.SimulationId == simulationId);
 
-            if (scenarioRemainingLifeLimit.Any(_ =>
-                _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
-            {
-                var criterionLibraryEntities = new List<CriterionLibraryEntity>();
-                var criterionLibraryJoinEntities = new List<CriterionLibraryScenarioRemainingLifeLimitEntity>();
+                if (scenarioRemainingLifeLimit.Any(_ =>
+                    _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                    !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+                {
+                    var criterionLibraryEntities = new List<CriterionLibraryEntity>();
+                    var criterionLibraryJoinEntities = new List<CriterionLibraryScenarioRemainingLifeLimitEntity>();
 
-                scenarioRemainingLifeLimit.Where(curve =>
-                        curve.CriterionLibrary?.Id != null && curve.CriterionLibrary?.Id != Guid.Empty &&
-                        !string.IsNullOrEmpty(curve.CriterionLibrary.MergedCriteriaExpression))
-                    .ForEach(goal =>
-                    {
-                        var criterionLibraryEntity = new CriterionLibraryEntity
+                    scenarioRemainingLifeLimit.Where(curve =>
+                            curve.CriterionLibrary?.Id != null && curve.CriterionLibrary?.Id != Guid.Empty &&
+                            !string.IsNullOrEmpty(curve.CriterionLibrary.MergedCriteriaExpression))
+                        .ForEach(goal =>
                         {
-                            Id = Guid.NewGuid(),
-                            MergedCriteriaExpression = goal.CriterionLibrary.MergedCriteriaExpression,
-                            Name = $"Remaining life limit {goal.Attribute} Criterion",
-                            IsSingleUse = true
-                        };
-                        criterionLibraryEntities.Add(criterionLibraryEntity);
-                        criterionLibraryJoinEntities.Add(new CriterionLibraryScenarioRemainingLifeLimitEntity
-                        {
-                            CriterionLibraryId = criterionLibraryEntity.Id,
-                            ScenarioRemainingLifeLimitId = goal.Id
+                            var criterionLibraryEntity = new CriterionLibraryEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                MergedCriteriaExpression = goal.CriterionLibrary.MergedCriteriaExpression,
+                                Name = $"Remaining life limit {goal.Attribute} Criterion",
+                                IsSingleUse = true
+                            };
+                            criterionLibraryEntities.Add(criterionLibraryEntity);
+                            criterionLibraryJoinEntities.Add(new CriterionLibraryScenarioRemainingLifeLimitEntity
+                            {
+                                CriterionLibraryId = criterionLibraryEntity.Id,
+                                ScenarioRemainingLifeLimitId = goal.Id
+                            });
                         });
-                    });
 
-                _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
-                _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
-            }
-            // Update last modified date
-            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
-            _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
+                }
+                // Update last modified date
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+            });
+        }
+
+        public void UpsertRemainingLifeLimitLibraryAndLimits(RemainingLifeLimitLibraryDTO library)
+        {
+            _unitOfWork.AsTransaction(() =>
+            {
+                _unitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(library);
+                _unitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteRemainingLifeLimits(library.RemainingLifeLimits, library.Id);
+            });
         }
     }
 }

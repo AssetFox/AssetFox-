@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeRepository
     {
-        void UpsertAttributes(List<Attribute> attributes);
+        void UpsertAttributesNonAtomic(List<Attribute> attributes);
 
         void JoinAttributesWithEquationsAndCriteria(Explorer explorer);
 
@@ -44,5 +44,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         string GetAttributeName(Guid attributeId);
         List<AttributeDTO> GetAllAttributesAbbreviated();
+        void UpsertAttributes(List<Attribute> attributes);
     }
 }

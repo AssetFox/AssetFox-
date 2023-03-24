@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent;
@@ -16,7 +15,7 @@ using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummaryByBudget
 {
-    public class PavementWorkSummaryByBudget : IPavementWorkSummaryByBudget
+    public class PavementWorkSummaryByBudget
     {
         private PavementWorkSummaryComputationHelper _pavementWorkSummaryComputationHelper;
 

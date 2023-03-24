@@ -92,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.Calculate
         {
             var calcAttr = TestCalculatedAttributeDto(calcAttrId, attributeName);
             var calcAttrs = new List<CalculatedAttributeDTO> { calcAttr };
-            unitOfWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributes(calcAttrs, scenarioId);
+            unitOfWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributesNonAtomic(calcAttrs, scenarioId);
             var calcAttrsFromDb = unitOfWork.CalculatedAttributeRepo.GetScenarioCalculatedAttributes(scenarioId);
             var calcAttrToReturn = calcAttrsFromDb.Single(c => c.Id == calcAttrId);
             return calcAttrToReturn;

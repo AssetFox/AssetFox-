@@ -20,9 +20,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule
             };
             return library;
         }
-        public static CashFlowRuleLibraryDTO WithSingleRule()
+        public static CashFlowRuleLibraryDTO WithSingleRule(Guid? libraryId = null)
         {
-            var library = Empty();
+            var library = Empty(libraryId);
             var rule = CashFlowRuleDtos.Rule();
             library.CashFlowRules.Add(rule);
             return library;

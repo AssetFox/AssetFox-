@@ -60,7 +60,7 @@ namespace BridgeCareCore.Controllers
                 var metadataDataSourceId = metadataDataSource.Id;
                 var metadataAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes(metadataDataSourceId);
                 var dbAttributes = UnitOfWork.AttributeRepo.GetAttributes();
-                UnitOfWork.AttributeRepo.UpsertAttributes(metadataAttributes);
+                UnitOfWork.AttributeRepo.UpsertAttributesNonAtomic(metadataAttributes);
                 var dbAttributesAfter = UnitOfWork.AttributeRepo.GetAttributes();
                 var dbAttributeIdsAfter = dbAttributesAfter.Select(a => a.Id).ToList();
                 var metadataAttributeIds = metadataAttributes.Select(a => a.Id).ToList();

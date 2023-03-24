@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var configurableAttributes = AttributeDtoDomainMapper.ToDomainList(attributeDtos, _unitOfWork.EncryptionKey);
 
             // insert/update configurable attributes
-            _unitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
+            _unitOfWork.AttributeRepo.UpsertAttributesNonAtomic(configurableAttributes);
 
             // get the attribute ids off of the assigned data on the maintainable assets that have
             // not been modified yet

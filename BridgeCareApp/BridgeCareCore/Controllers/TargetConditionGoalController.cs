@@ -16,8 +16,6 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BridgeCareCore.Controllers
 {
@@ -157,7 +155,6 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var items = _targetConditionGoalService.GetSyncedLibraryDataset(upsertRequest);                 
                     var dto = upsertRequest.Library;
                     if (dto != null)
@@ -165,27 +162,18 @@ namespace BridgeCareCore.Controllers
                         _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                         dto.TargetConditionGoals = items;
                     }
-                    UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
-                    UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
-                    if (upsertRequest.IsNewLibrary)
-                    {
-                        var users = LibraryUserDtolists.OwnerAccess(UserId);
-                        UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteUsers(dto.Id, users);
-                    }
-                    UnitOfWork.Commit();
+                    UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser(dto, upsertRequest.IsNewLibrary, UserId);
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::UpsertTargetConditionGoalLibrary - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::UpsertTargetConditionGoalLibrary - {e.Message}");
                 throw;
             }
@@ -200,13 +188,11 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var dtos = _targetConditionGoalService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.TargetConditionGoalRepo.AddLibraryIdToScenarioTargetConditionGoal(dtos, pagingSync.LibraryId);
                     UnitOfWork.TargetConditionGoalRepo.AddModifiedToScenarioTargetConditionGoal(dtos, pagingSync.IsModified);
                     UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(dtos, simulationId);
-                    UnitOfWork.Commit();
                 });
 
 
@@ -214,14 +200,12 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::UpsertScenarioTargetConditionGoals for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::UpsertScenarioTargetConditionGoals for {simulationName} - {e.Message}");
                 throw;
@@ -237,7 +221,6 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         var dto = GetAllTargetConditionGoalLibrariesWithTargetConditionGoals().FirstOrDefault(_ => _.Id == libraryId);
@@ -245,7 +228,6 @@ namespace BridgeCareCore.Controllers
                         _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                     }
                     UnitOfWork.TargetConditionGoalRepo.DeleteTargetConditionGoalLibrary(libraryId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
@@ -257,7 +239,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::DeleteTargetConditionGoalLibrary - {e.Message}");
                 throw;
             }

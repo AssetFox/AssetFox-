@@ -166,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpdateBudgetLibraryAndUpsertOrDeleteBudgets(BudgetLibraryDTO dto)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 UpsertBudgetLibrary(dto);
                 UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
@@ -177,7 +177,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void CreateNewBudgetLibrary(BudgetLibraryDTO dto, Guid userId)
         {
             var users = LibraryUserDtolists.OwnerAccess(userId);
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 UpsertBudgetLibrary(dto);
                 UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
@@ -325,7 +325,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            return _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery().Where(_ => _.SimulationId == simulationId)
+            return _unitOfWork.Context.ScenarioBudget
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
@@ -402,10 +405,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteScenarioBudgetsWithInvestmentPlan(List<BudgetDTO> budgets, InvestmentPlanDTO investmentPlan, Guid simulationId)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 UpsertOrDeleteScenarioBudgets(budgets, simulationId);
-                u.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
+                _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
             });
         }
 

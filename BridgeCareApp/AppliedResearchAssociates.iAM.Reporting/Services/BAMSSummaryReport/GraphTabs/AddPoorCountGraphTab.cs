@@ -1,9 +1,8 @@
-﻿using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
-using OfficeOpenXml;
+﻿using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs
 {
-    public class AddPoorCountGraphTab: IAddPoorCountGraphTab
+    public class AddPoorCountGraphTab
     {
         private PoorBridgeCount _poorBridgeCount;
 

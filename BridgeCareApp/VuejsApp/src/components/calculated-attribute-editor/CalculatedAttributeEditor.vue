@@ -13,7 +13,7 @@
                             v-model="librarySelectItemValue"
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>     
-                        <div class="ghd-md-gray ghd-control-subheader budget-parent">Parent Library: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified"> (Modified)</span></div>                  
+                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Parent Library: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>                  
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">

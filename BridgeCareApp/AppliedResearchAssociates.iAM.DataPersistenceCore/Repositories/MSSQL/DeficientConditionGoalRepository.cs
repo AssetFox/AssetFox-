@@ -400,5 +400,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
             _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
         }
+
+        public void AddLibraryIdToScenarioDeficientConditionGoal(List<DeficientConditionGoalDTO> deficientConditionGoalDTOs, Guid? libraryId)
+        {
+            if (libraryId == null) return;
+            foreach (var dto in deficientConditionGoalDTOs)
+            {
+                dto.LibraryId = (Guid)libraryId;
+            }
+        }
+
+        public void AddModifiedToScenarioDeficientConditionGoal(List<DeficientConditionGoalDTO> deficientConditionGoalDTOs, bool IsModified)
+        {
+            foreach (var dto in deficientConditionGoalDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
+
     }
 }

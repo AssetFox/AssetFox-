@@ -30,7 +30,6 @@ namespace BridgeCareCore.Services
                 rows.ForEach(_ =>
                 {
                     _.Id = Guid.NewGuid();
-                    _.libraryId= request.LibraryId.Value;
                     if (_.CriterionLibrary != null)
                     {
                         _.CriterionLibrary.Id = Guid.NewGuid();

@@ -337,5 +337,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var user = users.FirstOrDefault();
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
+        public void AddLibraryIdToScenarioBudgetPriority(List<BudgetPriorityDTO> budgetPriorityDTOs, Guid? libraryId)
+        {
+            if (libraryId == null) return;
+            foreach (var dto in budgetPriorityDTOs)
+            {
+                dto.libraryId = (Guid)libraryId;
+            }
+        }
+        public void AddModifiedToScenarioBudgetPriority(List<BudgetPriorityDTO> budgetPriorityDTOs, bool IsModified)
+        {
+            foreach (var dto in budgetPriorityDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
     }
 }

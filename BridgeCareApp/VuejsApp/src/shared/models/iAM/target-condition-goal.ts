@@ -9,6 +9,7 @@ export interface TargetConditionGoal {
     target: number;
     year: number | null;
     libraryId: string;
+    isModified: boolean;
     criterionLibrary: CriterionLibrary;
 }
 
@@ -28,6 +29,7 @@ export const emptyTargetConditionGoal: TargetConditionGoal = {
     attribute: '',
     target: 1,
     year: null,
+    isModified: false,
     libraryId: getBlankGuid(),
     criterionLibrary: clone(emptyCriterionLibrary)
 };

@@ -12,7 +12,8 @@
                             outline
                             v-model="librarySelectItemValue"
                             class="ghd-select ghd-text-field ghd-text-field-border">
-                        </v-select>                       
+                        </v-select>     
+                        <div class="ghd-md-gray ghd-control-subheader budget-parent">Parent Library: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified"> (Modified)</span></div>                  
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -460,6 +461,10 @@ export default class CalculatedAttributeEditor extends Vue {
     selectedAttribute: CalculatedAttribute = clone(emptyCalculatedAttribute)
     hasCreatedLibrary: boolean = false;
 
+    parentLibraryName: string = "";
+    parentLibraryId: string = "";
+    scenarioLibraryIsModified: boolean = false;
+
     calculatedAttributeGridHeaders: DataTableHeader[] = [
         {
             text: 'Equation',
@@ -539,7 +544,8 @@ export default class CalculatedAttributeEditor extends Vue {
                 updatedPairs: mapToIndexSignature( this.updatedPairs),
                 addedPairs: mapToIndexSignature(this.addedPairs),
                 addedCalculatedAttributes: this.addedCalcAttr,
-                defaultEquations: mapToIndexSignature(this.defaultEquations)
+                defaultEquations: mapToIndexSignature(this.defaultEquations),
+                isModified: this.scenarioLibraryIsModified
             },           
             sortColumn: sortBy === '' ? 'year' : sortBy,
             isDescending: descending != null ? descending : false,
@@ -599,6 +605,15 @@ export default class CalculatedAttributeEditor extends Vue {
     onStateCalculatedAttributesChanged() {
         this.setAttributeSelectItems();
     }
+    @Watch('currentPage')
+    onCurrentPageChanged() {
+        // Get parent name from library id
+        this.librarySelectItems.forEach(library => {
+            if (library.value === this.parentLibraryId) {
+                this.parentLibraryName = library.text;
+            }
+        });
+    }
     setAttributeSelectItems() {
         if (hasValue(this.stateCalculatedAttributes)) {
             this.attributeSelectItems = this.stateCalculatedAttributes.map(
@@ -613,6 +628,8 @@ export default class CalculatedAttributeEditor extends Vue {
                     id: getNewGuid(),
                     attribute: _.text,
                     name: _.text,
+                    libraryId: getNewGuid(),
+                    isModified: false,
                     calculationTiming: Timing.OnDemand,
                     equations: [] as CriterionAndEquationSet[],
                 };
@@ -698,6 +715,8 @@ export default class CalculatedAttributeEditor extends Vue {
                 // Add a new object for it. Because we cannot loop over a object, which is null
                 var newAttributeObject: CalculatedAttribute = {
                     id: getNewGuid(),
+                    libraryId: getNewGuid(),
+                    isModified: false,
                     attribute: this.attributeSelectItemValue,
                     name: this.attributeSelectItemValue,
                     calculationTiming: Timing.OnDemand,
@@ -858,6 +877,10 @@ export default class CalculatedAttributeEditor extends Vue {
     }
 
     onUpsertScenarioCalculatedAttribute() {
+
+        if (this.selectedCalculatedAttributeLibrary.id === this.uuidNIL) {this.scenarioLibraryIsModified = true;}
+        else { this.scenarioLibraryIsModified = false; }
+
         const syncModel: CalculatedAttributePagingSyncModel = {
                 libraryId: this.selectedCalculatedAttributeLibrary.id === this.uuidNIL ? null : this.selectedCalculatedAttributeLibrary.id,
                 updatedCalculatedAttributes: Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
@@ -865,10 +888,12 @@ export default class CalculatedAttributeEditor extends Vue {
                 updatedPairs: mapToIndexSignature( this.updatedPairs),
                 addedPairs: mapToIndexSignature(this.addedPairs) ,
                 addedCalculatedAttributes: this.addedCalcAttr,
-                defaultEquations: mapToIndexSignature(this.defaultEquations)
+                defaultEquations: mapToIndexSignature(this.defaultEquations),
+                isModified: this.scenarioLibraryIsModified
         }
         CalculatedAttributeService.upsertScenarioCalculatedAttribute(syncModel, this.selectedScenarioId).then(((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.getScenarioCalculatedAttributeAction(this.selectedScenarioId);
                 this.clearChanges()
                 this.resetPage();
@@ -886,7 +911,8 @@ export default class CalculatedAttributeEditor extends Vue {
                 updatedPairs: mapToIndexSignature( this.updatedPairs),
                 addedPairs: mapToIndexSignature(this.addedPairs),
                 addedCalculatedAttributes: this.addedCalcAttr,
-                defaultEquations: mapToIndexSignature(this.defaultEquations)
+                defaultEquations: mapToIndexSignature(this.defaultEquations),
+                isModified: false
         }
         const request: CalculatedAttributeLibraryUpsertPagingRequestModel = {
             syncModel: syncModel,
@@ -944,7 +970,8 @@ export default class CalculatedAttributeEditor extends Vue {
                 updatedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature( this.updatedPairs),
                 addedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(this.addedPairs),
                 addedCalculatedAttributes: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? [] : this.addedCalcAttr,
-                defaultEquations: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(this.defaultEquations)
+                defaultEquations: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(this.defaultEquations),
+                isModified: false
             }
             const request: CalculatedAttributeLibraryUpsertPagingRequestModel = {
                 syncModel: syncModel,
@@ -1477,6 +1504,17 @@ export default class CalculatedAttributeEditor extends Vue {
                 }
     }
 
+    setParentLibraryName(libraryId: string) {
+        let foundLibrary: CalculatedAttributeLibrary = emptyCalculatedAttributeLibrary;
+        this.stateCalculatedAttributeLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
+
     initializePages(){
         const request: CalculatedAttributePagingRequestModel= {
             page: 1,
@@ -1488,7 +1526,8 @@ export default class CalculatedAttributeEditor extends Vue {
                 updatedPairs: mapToIndexSignature( this.updatedPairs),
                 addedPairs: mapToIndexSignature(this.addedPairs),
                 addedCalculatedAttributes: this.addedCalcAttr,
-                defaultEquations: mapToIndexSignature(this.defaultEquations) 
+                defaultEquations: mapToIndexSignature(this.defaultEquations),
+                isModified: false
             },           
             sortColumn: '',
             isDescending: false,
@@ -1508,6 +1547,9 @@ export default class CalculatedAttributeEditor extends Vue {
                     this.defaultEquationCache = clone(this.defaultEquation);
                     this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.currentPage)
                     this.setTimingsMultiSelect(this.currentPage.calculationTiming);
+
+                    this.setParentLibraryName(data.libraryId);
+                    this.scenarioLibraryIsModified = data.isModified;
                 }
                 this.initializing = false;
             });

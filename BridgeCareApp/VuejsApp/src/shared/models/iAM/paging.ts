@@ -78,6 +78,7 @@ export interface CalculatedAttributePagingRequestModel extends BasePagingRequest
 
 export interface CalculatedAttributePagingSyncModel{
     libraryId: string | null;
+    isModified: boolean;
     updatedCalculatedAttributes: CalculatedAttribute[];
     addedCalculatedAttributes: CalculatedAttribute[];
     addedPairs: { [key: string]: CriterionAndEquationSet[]; }
@@ -88,5 +89,7 @@ export interface CalculatedAttributePagingSyncModel{
 
 export interface calculcatedAttributePagingPageModel extends PagingPage<CriterionAndEquationSet>{
     calculationTiming: Timing;
-    defaultEquation: CriterionAndEquationSet
+    defaultEquation: CriterionAndEquationSet;
+    libraryId: string;
+    isModified: boolean;
 }

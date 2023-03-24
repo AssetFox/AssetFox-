@@ -456,7 +456,7 @@ export default class CalculatedAttributeEditor extends Vue {
     selectedAttribute: CalculatedAttribute = clone(emptyCalculatedAttribute)
     hasCreatedLibrary: boolean = false;
 
-    parentLibraryName: string = "";
+    parentLibraryName: string = "None";
     parentLibraryId: string = "";
     scenarioLibraryIsModified: boolean = false;
 

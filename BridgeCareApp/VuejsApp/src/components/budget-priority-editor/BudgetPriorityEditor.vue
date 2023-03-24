@@ -329,7 +329,7 @@ export default class BudgetPriorityEditor extends Vue {
     checkBoxChanged: boolean = false;
     hasLibraryEditPermission: boolean = false;
     hasCreatedLibrary: boolean = false;
-    parentLibraryName: string = "";
+    parentLibraryName: string = "None";
     parentLibraryId: string = "";
     parentModifiedFlag: boolean = false;
     scenarioLibraryIsModified: boolean = false;
@@ -1021,7 +1021,7 @@ export default class BudgetPriorityEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                 }
-                this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
+                this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
                 this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
             });
     }

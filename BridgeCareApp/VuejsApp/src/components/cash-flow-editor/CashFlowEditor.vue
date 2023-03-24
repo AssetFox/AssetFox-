@@ -460,7 +460,7 @@ export default class CashFlowEditor extends Vue {
     showAddCashFlowRuleDialog: boolean = false;
     importLibraryDisabled: boolean = true;
     scenarioHasCreatedNew: boolean = false;
-    parentLibraryName: string = "";
+    parentLibraryName: string = "None";
     parentLibraryId: string = "";
     scenarioLibraryIsModified: boolean = false;
 
@@ -1096,7 +1096,7 @@ export default class CashFlowEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
-                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
+                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
                     this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
                 }
             });

@@ -524,7 +524,7 @@ export default class TargetConditionGoalEditor extends Vue {
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
     parentLibraryId: string = "";
-    parentLibraryName: string = "";
+    parentLibraryName: string = "None";
     scenarioLibraryIsModified: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
@@ -1028,7 +1028,7 @@ export default class TargetConditionGoalEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
-                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
+                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
                     this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
                 }
             });

@@ -405,7 +405,7 @@ export default class InvestmentEditor extends Vue {
     hasLibraryEditPermission: boolean = false;
     showReminder: boolean = false;
     range: number = 1;
-    parentLibraryName: string = "";
+    parentLibraryName: string = "None";
     parentLibraryId: string = "";
     scenarioLibraryIsModified: boolean = false;
 
@@ -1452,7 +1452,7 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
                     if(data.firstYear === 0)
                         this.originalFirstYear = moment().year()
                 }
-                this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "");
+                this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
                 this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
                 this.initializing = false;
             });

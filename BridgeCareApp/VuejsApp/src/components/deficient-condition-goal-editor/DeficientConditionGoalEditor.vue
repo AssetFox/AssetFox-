@@ -498,7 +498,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     parentLibraryName: string = "None";
     scenarioLibraryIsModified: boolean = false;
 
-    parentLibraryNameuteEnter(to: any, from: any, next: any) {
+    beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getDeficientConditionGoalLibrariesAction().then(() => {

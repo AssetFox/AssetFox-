@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Services;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport;
 using BridgeCareCore.Services;
 using OfficeOpenXml;
 
@@ -19,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly IUnitOfWork _unitOfWork;
         private Guid _networkId;
         private readonly ReportHelper _reportHelper;
+        private readonly TreatmentTab _treatmentTab;
 
         public PAMSPBExportReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
@@ -26,6 +28,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
             _reportHelper = new ReportHelper();
+            _treatmentTab = new TreatmentTab();
 
             // Check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -154,7 +157,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("PAMSPBExportReportData.xlsx"));
 
-            // Tabs..
+            // Teatments Tab
+            reportDetailDto.Status = $"Creating Data TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.TreatmentTab);
+            //ValidateSections(simulationOutput, reportDetailDto, simulationId);
+            _treatmentTab.Fill(treatmentsWorksheet, simulationOutput);
+
+            // Other tab(s)..
 
 
             // Check and generate folder

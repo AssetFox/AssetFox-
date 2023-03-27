@@ -2,7 +2,7 @@
 {
     public sealed class PerformanceCurve
     {
-        public string AttributeID { get; set; }
+        public string AttributeName { get; set; }
 
         public string CriterionExpression { get; set; }
 

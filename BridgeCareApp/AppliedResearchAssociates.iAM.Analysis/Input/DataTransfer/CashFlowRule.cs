@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
         public List<CashFlowDistributionRule> DistributionRules { get; set; }
 
-        public string ID { get; set; }
+        public string Name { get; set; }
     }
 }

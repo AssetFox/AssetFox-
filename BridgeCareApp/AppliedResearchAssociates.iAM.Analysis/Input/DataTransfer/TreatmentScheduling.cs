@@ -4,6 +4,6 @@
     {
         public int OffsetToFutureYear { get; set; }
 
-        public string TreatmentID { get; set; }
+        public string TreatmentName { get; set; }
     }
 }

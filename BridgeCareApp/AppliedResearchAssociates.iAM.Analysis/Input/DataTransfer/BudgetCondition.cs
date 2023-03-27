@@ -2,7 +2,7 @@
 {
     public sealed class BudgetCondition
     {
-        public string BudgetID { get; set; }
+        public string BudgetName { get; set; }
 
         public string ConditionExpression { get; set; }
     }

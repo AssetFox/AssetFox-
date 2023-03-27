@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 {
     public sealed class Asset
     {
-        public string ID { get; set; }
+        public string Name { get; set; }
 
         public List<AttributeValueHistory<double>> NumberAttributeHistories { get; set; }
 

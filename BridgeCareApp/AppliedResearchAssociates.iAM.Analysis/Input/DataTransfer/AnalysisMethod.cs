@@ -7,11 +7,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
     {
         public bool AllowFundingFromMultipleBudgets { get; set; }
 
-        public string BenefitAttributeID { get; set; }
+        public string BenefitAttributeName { get; set; }
 
         public double BenefitLimit { get; set; }
 
-        public string BenefitWeightAttributeID { get; set; }
+        public string BenefitWeightAttributeName { get; set; }
 
         public List<BudgetPriority> BudgetPriorities { get; set; }
 

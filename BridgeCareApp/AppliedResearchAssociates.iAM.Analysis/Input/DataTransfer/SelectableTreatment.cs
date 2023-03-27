@@ -10,10 +10,10 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
         public List<string> FeasibilityCriterionExpressions { get; set; }
 
+        public List<string> NamesOfUsableBudgets { get; set; }
+
         public List<TreatmentScheduling> Schedulings { get; set; }
 
         public List<TreatmentSupersession> Supersessions { get; set; }
-
-        public List<string> UsableBudgetIDs { get; set; }
     }
 }

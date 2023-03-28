@@ -27,7 +27,7 @@ const state = {
     treatmentLibraries: [] as TreatmentLibrary[],
     selectedTreatmentLibrary: clone(emptyTreatmentLibrary) as TreatmentLibrary,
     scenarioSelectableTreatments: [] as Treatment[],
-    scenarioTreatmentLibrary: emptyTreatmentLibrary as TreatmentLibrary,
+    scenarioTreatmentLibrary: clone(emptyTreatmentLibrary) as TreatmentLibrary,
     simpleScenarioSelectableTreatments: [] as SimpleTreatment[],
     simpleSelectableTreatments: [] as SimpleTreatment[],
     hasPermittedAccess: false,

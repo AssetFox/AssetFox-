@@ -69,6 +69,7 @@ export interface TreatmentLibrary {
     treatments: Treatment[];
     owner?: string;
     isShared: boolean;
+    isModified: boolean;
     users: TreatmentLibraryUser[];
 }
 
@@ -122,6 +123,7 @@ export const emptyTreatmentLibrary: TreatmentLibrary = {
     description: '',
     treatments: [],
     isShared: false,
+    isModified: false,
     users: []
 };
 

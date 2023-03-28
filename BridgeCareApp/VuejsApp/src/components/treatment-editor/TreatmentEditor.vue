@@ -365,6 +365,8 @@ import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { LibraryUpsertPagingRequest } from '@/shared/models/iAM/paging';
 import { http2XX } from '@/shared/utils/http-utils';
+import { watch } from 'fs';
+import { isNullOrUndefined } from 'util';
 
 @Component({
     components: {
@@ -385,15 +387,11 @@ export default class TreatmentEditor extends Vue {
     stateTreatmentLibraries: TreatmentLibrary[];
     @State(state => state.treatmentModule.selectedTreatmentLibrary)
     stateSelectedTreatmentLibrary: TreatmentLibrary;
-
-    //@State(state => state.treatmentModule.selectedTreatmentLibrary)
-    stateSelectTreatmentLibr: TreatmentLibrary;
-
     @State(state => state.treatmentModule.scenarioSelectableTreatments)
     stateScenarioSelectableTreatments: Treatment[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-    @State(state => state.scenarioTreatmentLibrary)
+    @State(state => state.treatmentModule.scenarioTreatmentLibrary)
     stateScenarioTreatmentLibrary: TreatmentLibrary;
     @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
@@ -485,7 +483,6 @@ export default class TreatmentEditor extends Vue {
 
     shareTreatmentLibraryDialogData: ShareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
 
-    librarySelected: string = 'None Selected';
     parentLibraryId: string = '';
     parentLibraryName: string = 'None';
     scenarioLibraryIsModified: boolean = false;
@@ -502,20 +499,18 @@ export default class TreatmentEditor extends Vue {
                     });
                     vm.$router.push('/Scenarios/');
                 }
-
                 vm.hasScenario = true;
                 vm.getSimpleScenarioSelectableTreatmentsAction(vm.selectedScenarioId);
                 vm.getTreatmentLibraryBySimulationIdAction(vm.selectedScenarioId);
                 vm.treatmentTabs = [...vm.treatmentTabs, 'Budgets'];
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId, }).then(()=> {
                     vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });   
                     });
                 });
             }
         });
     }
-
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }  
@@ -534,6 +529,12 @@ export default class TreatmentEditor extends Vue {
                 value: library.id,
             })
         );
+    }
+    
+    @Watch('stateScenarioTreatmentLibrary')
+    onStateScenarioTreatmentLibraryChanged() {
+        this.setParentLibraryName(this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.id : "None");
+        this.scenarioLibraryIsModified = this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.isModified : false;
     }
 
     @Watch('librarySelectItemValue')
@@ -580,7 +581,6 @@ export default class TreatmentEditor extends Vue {
 
     @Watch('stateSelectedTreatmentLibrary')
     onStateSelectedTreatmentLibraryChanged() {
-        this.stateSelectTreatmentLibr = this.selectedTreatmentLibrary;
         this.selectedTreatmentLibrary = clone(
             this.stateSelectedTreatmentLibrary
         );
@@ -588,10 +588,6 @@ export default class TreatmentEditor extends Vue {
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
         this.isShared = this.isSharedLibrary;
-    }
-
-    @Watch('stateScenarioTreatmentLibrary')
-    OnStateScenarioTreatmentLibraryChanged() {
     }
 
     @Watch('selectedTreatmentLibrary')
@@ -668,15 +664,6 @@ export default class TreatmentEditor extends Vue {
         else
             this.selectedTreatment = clone(emptyTreatment);
        
-        // TreatmentService.getScenarioSelectedTreatmentById(this.treatmentSelectItemValue).then((response: AxiosResponse) => {
-        //     if(hasValue(response, 'data')) {
-        //         var data = response.data as Treatment;
-        //         this.selectedTreatment = data;
-
-        //     }
-        // });
-
-
         if (!this.keepActiveTab) {
             this.activeTab = 0;
         }
@@ -1128,9 +1115,7 @@ export default class TreatmentEditor extends Vue {
             this.addedRows[index] = updatedRow;
             return;
         }
-
         let mapEntry = this.updatedRowsMap.get(rowId)
-
         if(isNil(mapEntry)){
             const row = this.treatmentCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
@@ -1176,11 +1161,6 @@ export default class TreatmentEditor extends Vue {
             next();
         }
     };
-    CheckLibraryModified() {
-        // check if the current scenario library is equal to the library object
-        if (this.selectedTreatment.name === this.selectedTreatmentLibrary.name) return true;
-        
-    }
 }
 </script>
 

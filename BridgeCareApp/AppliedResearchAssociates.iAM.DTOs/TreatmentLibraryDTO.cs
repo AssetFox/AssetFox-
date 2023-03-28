@@ -6,5 +6,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
     public class TreatmentLibraryDTO : BaseLibraryDTO
     {
         public List<TreatmentDTO> Treatments { get; set; }
+
+        public bool IsModified { get; set; }
     }
 }

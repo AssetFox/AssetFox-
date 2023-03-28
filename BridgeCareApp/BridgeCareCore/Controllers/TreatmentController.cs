@@ -113,10 +113,8 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     var selectableTreatment = UnitOfWork.SelectableTreatmentRepo.GetDefaultTreatment(simulationId);
-                    
-                    var library = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == selectableTreatment.Id);
-                    //var library = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraryWithSingleTreatmentByTreatmentId(selectableTreatment.Id);
-                    
+                    var library = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == selectableTreatment.LibraryId);
+                    library.IsModified = selectableTreatment.IsModified;
                     result = library;
                 });
                 return Ok(result);

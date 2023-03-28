@@ -168,11 +168,11 @@ namespace BridgeCareCore.Controllers
 
                 if (hasBeenRemovedFromQueue)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, "Canceled");
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceled" });
                 }
                 else
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, "Canceling network deletion...");
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceling network deletion..." });
 
                 }
                 return Ok();

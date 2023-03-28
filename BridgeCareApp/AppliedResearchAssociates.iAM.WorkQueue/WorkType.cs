@@ -9,6 +9,7 @@ namespace AppliedResearchAssociates.iAM.WorkQueue
     public enum WorkType
     {
         SimulationAnalyis,
-        DeleteNetwork
+        DeleteNetwork,
+        NetworkAggregation
     }
 }

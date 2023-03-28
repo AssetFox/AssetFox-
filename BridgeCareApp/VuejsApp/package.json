@@ -8,13 +8,13 @@
     "author": {
         "name": "Applied Research Associates"
     },
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build-prod": "vue-cli-service build",
-    "stage": "vue-cli-service build --mode staging",
-    "lint": "wotan 'src/**'",
-    "lint-fix": "wotan --fix 'src/**'"
-  },
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "build-prod": "vue-cli-service build",
+        "stage": "vue-cli-service build --mode staging",
+        "lint": "wotan 'src/**'",
+        "lint-fix": "wotan --fix 'src/**'"
+    },
     "dependencies": {
         "@microsoft/signalr": "^3.1.22",
         "@progress/kendo-charts-vue-wrapper": "2020.1.115",

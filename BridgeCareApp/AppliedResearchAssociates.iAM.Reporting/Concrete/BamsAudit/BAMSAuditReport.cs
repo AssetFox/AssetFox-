@@ -19,13 +19,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class BAMSAuditReport : IReport
     {
         protected readonly IHubService _hubService;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private Guid _networkId;       
         private readonly DataTab _dataTab;
         private readonly DecisionTab _decisionTab;
         private readonly ReportHelper _reportHelper;
 
-        public BAMSAuditReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
+        public BAMSAuditReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
@@ -110,7 +110,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportPath = string.Empty;
             try
             {
-                reportPath = GenerateAuditReport(_networkId, _simulationId);
+                reportPath = GenerateBAMSAuditReport(_networkId, _simulationId);
             }
             catch (Exception e)
             {
@@ -134,7 +134,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private string GenerateAuditReport(Guid networkId, Guid simulationId)
+        private string GenerateBAMSAuditReport(Guid networkId, Guid simulationId)
         {
             var reportPath = string.Empty;
             var reportDetailDto = new SimulationReportDetailDTO
@@ -171,14 +171,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
 
             // Report
-            using var excelPackage = new ExcelPackage(new FileInfo("AuditReportData.xlsx"));
+            using var excelPackage = new ExcelPackage(new FileInfo("BAMSAuditReportData.xlsx"));
             
             // Bridge Data TAB
             reportDetailDto.Status = $"Creating Data TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            var bridgesWorksheet = excelPackage.Workbook.Worksheets.Add(AuditReportConstants.BridgesTab);
-            var dataTabRequiredAttributes = _dataTab.GetRequiredAttributes();
+            var bridgesWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.BridgesTab);
+            var dataTabRequiredAttributes = DataTab.GetRequiredAttributes();
             ValidateSections(simulationOutput, reportDetailDto, simulationId, dataTabRequiredAttributes);
             _dataTab.Fill(bridgesWorksheet, simulationOutput);
 
@@ -186,7 +186,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             reportDetailDto.Status = $"Creating Decision TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            var decisionsWorksheet = excelPackage.Workbook.Worksheets.Add(AuditReportConstants.DecisionsTab);
+            var decisionsWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.DecisionsTab);
             var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
             ValidateSections(simulationOutput, reportDetailDto, simulationId, new HashSet<string>(performanceCurvesAttributes.Except(dataTabRequiredAttributes)));
             _decisionTab.Fill(decisionsWorksheet, simulationOutput, simulation, performanceCurvesAttributes);
@@ -197,7 +197,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
-            reportPath = Path.Combine(folderPathForSimulation, "AuditReport.xlsx");
+            reportPath = Path.Combine(folderPathForSimulation, "BAMSAuditReport.xlsx");
 
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(reportPath, bin);                       

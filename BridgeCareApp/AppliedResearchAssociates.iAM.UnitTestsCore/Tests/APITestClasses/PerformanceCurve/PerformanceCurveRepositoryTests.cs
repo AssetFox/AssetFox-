@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
     {
 
         [Fact]
-        public void Delete_PerformanceCurveLibraryExists_Deletes()
+        public void Delete_PerformanceCurveLibraryExistsWithCurveAndEquation_DeletesAll()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var performanceCurveLibraryId = Guid.NewGuid();
@@ -29,10 +29,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
 
             var performanceCurveLibraryDTO = dtos.Single(dto => dto.Id == performanceCurveLibraryId);
             curveDto.CriterionLibrary = criterionLibrary;
+            var equationInDb = TestHelper.UnitOfWork.Context.Equation
+                .SingleOrDefault(e => e.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == performanceCurveLibraryId);
+            Assert.NotNull(equationInDb);
+            TestHelper.UnitOfWork.Context.ChangeTracker.Clear();
 
             // Act
             TestHelper.UnitOfWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(performanceCurveLibraryId);
-
 
             Assert.False(TestHelper.UnitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == performanceCurveLibraryId));
             Assert.False(TestHelper.UnitOfWork.Context.PerformanceCurve.Any(_ => _.Id == performanceCurveId));
@@ -42,7 +45,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             Assert.False(
                 TestHelper.UnitOfWork.Context.PerformanceCurveEquation.Any(_ =>
                     _.PerformanceCurveId == performanceCurveId));
+            var equationInDbAfter = TestHelper.UnitOfWork.Context.Equation
+                .SingleOrDefault(e => e.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == performanceCurveLibraryId);
+            Assert.Null(equationInDbAfter);
         }
+
         private void Setup()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -64,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var UpdateRows = new List<PerformanceCurveDTO> { performanceCurveDto };
 
             // Act
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(UpdateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(UpdateRows, simulation.Id);
 
             // Assert
             var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -85,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var updateRows = new List<PerformanceCurveDTO> { performanceCurve };
 
             // Act
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             // Assert
             var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -110,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var updateRows = new List<PerformanceCurveDTO> { performanceCurveDto };
 
             // Act
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             // Assert
             var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -135,7 +142,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var performanceCurveDto = scenarioCurves[0];
             var updateRows = new List<PerformanceCurveDTO> { performanceCurveDto };
             // Act
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             // Assert
             var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -161,7 +168,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var updateRows = new List<PerformanceCurveDTO> { performanceCurveDto };
 
             // Act
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             // Assert
             var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -189,7 +196,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var updateRows = new List<PerformanceCurveDTO>();
 
             // Act
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             // Assert
             var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -216,7 +223,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var updateRows = new List<PerformanceCurveDTO> { performanceCurveDto };
 
             // Act
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             // Assert
             var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -237,7 +244,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var updateRows = new List<PerformanceCurveDTO>();
 
             // Act
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             // Assert
             var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -260,7 +267,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             };
             var updateRows = new List<PerformanceCurveDTO> { performanceCurveDto };
 
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             Assert.Single(scenarioCurvesAfter);
@@ -288,7 +295,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             };
             var updateRows = new List<PerformanceCurveDTO> { performanceCurveDto };
 
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation.Id);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
@@ -321,7 +328,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             };
             var updateRows = new List<PerformanceCurveDTO> { performanceCurveDto };
 
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
@@ -356,7 +363,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
 
             var updateRows = new List<PerformanceCurveDTO> { performanceCurveDto };
 
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(updateRows, simulation.Id);
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(updateRows, simulation.Id);
 
             var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation.Id);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
@@ -389,7 +396,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var performanceCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
 
             var exception = Assert.ThrowsAny<Exception>(() =>
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurves, simulation.Id));
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(performanceCurves, simulation.Id));
 
             var message = exception.Message;
             Assert.Contains(ErrorMessageConstants.NoAttributeFoundHavingName, message);

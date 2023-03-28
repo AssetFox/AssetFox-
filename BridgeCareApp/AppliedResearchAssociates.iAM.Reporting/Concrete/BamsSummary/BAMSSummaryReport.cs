@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Parameters;
@@ -25,7 +24,6 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Services;
 
 namespace AppliedResearchAssociates.iAM.Reporting
@@ -33,16 +31,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class BAMSSummaryReport : IReport
     {
         protected readonly IHubService _hubService;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
-        private readonly IFundedTreatmentList _fundedTreatmentList;
-        private readonly IUnfundedTreatmentFinalList _unfundedTreatmentFinalList;
-        private readonly IUnfundedTreatmentTime _unfundedTreatmentTime;
-        private readonly IBridgeWorkSummary _bridgeWorkSummary;
-        private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly BridgeDataForSummaryReport _bridgeDataForSummaryReport;
+        private readonly FundedTreatmentList _fundedTreatmentList;
+        private readonly UnfundedTreatmentFinalList _unfundedTreatmentFinalList;
+        private readonly UnfundedTreatmentTime _unfundedTreatmentTime;
+        private readonly BridgeWorkSummary _bridgeWorkSummary;
+        private readonly BridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
         private readonly SummaryReportGlossary _summaryReportGlossary;
         private readonly SummaryReportParameters _summaryReportParameters;
-        private readonly IAddGraphsInTabs _addGraphsInTabs;
+        private readonly AddGraphsInTabs _addGraphsInTabs;
         private readonly ReportHelper _reportHelper;
 
         private Guid _networkId;
@@ -66,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public string Status { get; private set; }
 
 
-        public BAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
+        public BAMSSummaryReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             //store passed parameter   
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

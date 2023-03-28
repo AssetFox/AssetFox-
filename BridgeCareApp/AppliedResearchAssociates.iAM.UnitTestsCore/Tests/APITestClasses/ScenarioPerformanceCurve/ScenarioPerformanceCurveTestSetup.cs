@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Equation = equationDto,
             };
             var performanceCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
-            unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurves, simulationId);
+            unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(performanceCurves, simulationId);
             unitOfWork.Context.SaveChanges();
             var scenarioPerformanceCurves = unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var returnDto = scenarioPerformanceCurves.Single(curve => curve.Id == curveId);

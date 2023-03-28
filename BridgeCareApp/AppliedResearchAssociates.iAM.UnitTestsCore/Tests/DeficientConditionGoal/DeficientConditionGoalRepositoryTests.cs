@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
@@ -13,6 +14,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using Microsoft.Data.SqlClient;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
@@ -317,6 +319,40 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public void UpsertOrDeleteScenarioDeficientConditionGoals_SomethingThrows_NoChange()
+        {
+            Setup();
+            var simulationId = Guid.NewGuid();
+            var goalId = Guid.NewGuid();
+            SetupScenarioGoalsForGet(simulationId, goalId);
+            var goalId2 = Guid.NewGuid();
+            var goal2 = TestScenarioDeficientConditionGoal(goalId2);
+            goal2.SimulationId = simulationId;
+            var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
+            goal2.AttributeId = attribute.Id;
+            TestHelper.UnitOfWork.Context.Add(goal2);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
+            var localScenarioDeficientGoals = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
+            var goalIndexToDelete = localScenarioDeficientGoals.FindIndex(g => g.Id == goalId2);
+            localScenarioDeficientGoals.RemoveAt(goalIndexToDelete);
+            var goalToUpdate = localScenarioDeficientGoals.First();
+            var updatedGoalId = goalToUpdate.Id;
+            goalToUpdate.Name = "Updated";
+            goalToUpdate.CriterionLibrary = criterionLibrary;
+            goalToUpdate.DeficientLimit = double.NaN;
+            var goalsBefore = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
+
+            // Act
+            var exception = Assert.Throws<SqlException>(() => TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(localScenarioDeficientGoals, simulationId));
+
+            // Assert
+            var goalsAfter = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
+            ObjectAssertions.Equivalent(goalsBefore, goalsAfter);
+            Assert.Equal(2, goalsAfter.Count);
+        }
+
+        [Fact]
         public void GetGoalsForScenario_GoalInDb_GetsTheGoal()
         {
             Setup();
@@ -325,7 +361,6 @@ namespace BridgeCareCoreTests.Tests
             var goalId = Guid.NewGuid();
             var simulationId = Guid.NewGuid();
             SetupScenarioGoalsForGet(simulationId, goalId);
-
             // Act
             var dtos = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
 
@@ -406,6 +441,27 @@ namespace BridgeCareCoreTests.Tests
             var user2After = libraryUsersAfter.Single(u => u.UserId == user2.Id);
             Assert.Equal(LibraryAccessLevel.Modify, user1After.AccessLevel);
             Assert.Equal(LibraryAccessLevel.Read, user2After.AccessLevel);
+        }
+
+        [Fact]
+        public void UpsertDeficientConditionGoalLibraryAndGoals_SecondPartFails_NothingHappens()
+        {
+            var library = DeficientConditionGoalLibraryTestSetup.ModelForEntityInDb(
+                TestHelper.UnitOfWork);
+            var goalId = Guid.NewGuid();
+            var criterionLibraryId = Guid.NewGuid();
+            var attributeName = "nonexistentAttribute";
+            var goal = DeficientConditionGoalDtos.Dto(goalId, attributeName,  criterionLibraryId);
+            library.DeficientConditionGoals.Add(goal);
+            library.Description = "Updated description";
+
+            var exception = Assert.Throws<RowNotInTableException>(() => TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibraryAndGoals(
+                library));
+
+            var libraryAfter = TestHelper.UnitOfWork.DeficientConditionGoalRepo
+                .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()
+                .Single(lib => lib.Id == library.Id);
+            Assert.Null(libraryAfter.Description);
         }
     }
 }

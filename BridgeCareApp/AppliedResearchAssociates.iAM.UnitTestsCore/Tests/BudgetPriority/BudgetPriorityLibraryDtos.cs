@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace BridgeCareCoreTests.Tests.BudgetPriority
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    internal class BudgetPriorityLibraryDtos
+    public static class BudgetPriorityLibraryDtos
     {
 
         public const string BudgetPriorityLibraryName = "BudgetPriorityLibrary";

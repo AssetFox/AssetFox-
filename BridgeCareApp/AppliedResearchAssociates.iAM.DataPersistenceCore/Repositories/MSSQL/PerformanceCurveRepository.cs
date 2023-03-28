@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -358,10 +358,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 return;
             }
-
-            _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
-                _.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == libraryId);
-
             _unitOfWork.Context.DeleteEntity<PerformanceCurveLibraryEntity>(_ => _.Id == libraryId);
         }
 
@@ -402,7 +398,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertOrDeleteScenarioPerformanceCurves(
+        public void UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(
             List<PerformanceCurveDTO> scenarioPerformanceCurves,
             Guid simulationId)
         {
@@ -593,6 +589,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
         }
 
+        public void UpsertOrDeleteScenarioPerformanceCurves(
+            List<PerformanceCurveDTO> scenarioPerformanceCurves,
+            Guid simulationId)
+        {
+            _unitOfWork.AsTransaction(() =>
+            _unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(scenarioPerformanceCurves, simulationId));
+        }
+
         public List<PerformanceCurveDTO> GetPerformanceCurvesForLibrary(Guid performanceCurveLibraryId)
         {
             if (!_unitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == performanceCurveLibraryId))
@@ -715,5 +719,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return dtos;
         }
 
+        public void UpsertOrDeletePerformanceCurveLibraryAndCurves(PerformanceCurveLibraryDTO library, bool isNewLibrary, Guid ownerIdForNewLibrary)
+        {
+            _unitOfWork.AsTransaction(() =>
+            {
+                _unitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(library);
+                _unitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(library.PerformanceCurves, library.Id);
+                if (isNewLibrary)
+                {
+                    var users = LibraryUserDtolists.OwnerAccess(ownerIdForNewLibrary);
+                    _unitOfWork.PerformanceCurveRepo.UpsertOrDeleteUsers(library.Id, users);
+                };
+            });
+        }
     }
 }

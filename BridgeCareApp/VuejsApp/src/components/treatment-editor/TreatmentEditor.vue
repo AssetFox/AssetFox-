@@ -582,7 +582,7 @@ export default class TreatmentEditor extends Vue {
     onStateSelectedTreatmentLibraryChanged() {
         this.stateSelectTreatmentLibr = this.selectedTreatmentLibrary;
         this.selectedTreatmentLibrary = clone(
-            this.stateSelectTreatmentLibr
+            this.stateSelectedTreatmentLibrary
         );
     }
     @Watch('isSharedLibrary')
@@ -635,6 +635,7 @@ export default class TreatmentEditor extends Vue {
             var mapEntry = this.updatedRowsMap.get(this.treatmentSelectItemValue);
             var addedRow = this.addedRows.find(_ => _.id == this.treatmentSelectItemValue);
             var treatment = this.treatmentCache.find(_ => _.id === this.treatmentSelectItemValue);
+
             if(!isNil(mapEntry)){
                 this.selectedTreatment = clone(mapEntry[1]);
             }

@@ -276,76 +276,215 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
                 var result = Convert(source.Network).AddSimulation();
 
                 result.Name = source.Name;
-
-                // fill in analysis method, perf curves, etc
-                Convert(source.AnalysisMethod, result.AnalysisMethod);
-                Convert(source.InvestmentPlan, result.InvestmentPlan);
-                //perf curves
-                //treatments
-
                 //top-level props
 
-                //CPs
+                Convert(source.AnalysisMethod, result.AnalysisMethod);
+                Convert(source.InvestmentPlan, result.InvestmentPlan); //todo
 
-                foreach (var sourceItem in source.CommittedProjects)
+                foreach (var item in source.PerformanceCurves)
                 {
-                    result.CommittedProjects.Add(Convert(sourceItem));
+                    //todo
                 }
+
+                foreach (var item in source.SelectableTreatments)
+                {
+                    //todo
+                }
+
+                foreach (var item in source.CommittedProjects)
+                {
+                    result.CommittedProjects.Add(Convert(item));
+                }
+
+                TreatmentByName[source.NameOfPassiveTreatment].DesignateAsPassiveForSimulation();
 
                 return result;
             }
 
             private Dictionary<string, AnalysisMaintainableAsset> AssetByName;
+            private Dictionary<string, Analysis.Attribute> AttributeByName;
+            private Dictionary<string, Analysis.Budget> BudgetByName;
             private Dictionary<string, Analysis.NumberAttribute> NumberAttributeByName;
+            private Dictionary<string, INumericAttribute> NumericAttributeByName;
             private Dictionary<string, Analysis.TextAttribute> TextAttributeByName;
+            private Dictionary<string, Analysis.SelectableTreatment> TreatmentByName;
+
+            private static void Convert(BudgetPriority source, Analysis.AnalysisMethod target)
+            {
+                var result = target.AddBudgetPriority();
+
+                result.Criterion.Expression = source.CriterionExpression;
+                result.PriorityLevel = source.PriorityLevel;
+                result.Year = source.Year;
+            }
+
+            private static void Convert(TextAttribute source, Explorer target)
+            {
+                var result = target.AddTextAttribute(source.Name);
+
+                result.DefaultValue = source.DefaultValue;
+            }
+
+            private static void Convert(NumberAttribute source, Explorer target)
+            {
+                var result = target.AddNumberAttribute(source.Name);
+
+                result.DefaultValue = source.DefaultValue;
+                result.IsDecreasingWithDeterioration = source.IsDecreasingWithDeterioration;
+                result.Maximum = source.MaximumValue;
+                result.Minimum = source.MinimumValue;
+            }
+
+            private static void Convert(CalculatedField source, Explorer target)
+            {
+                var result = target.AddCalculatedField(source.Name);
+
+                result.IsDecreasingWithDeterioration = source.IsDecreasingWithDeterioration;
+                result.Timing = source.Timing;
+
+                foreach (var item in source.ValueDefinitions)
+                {
+                    Convert(item, result);
+                }
+            }
+
+            private static void Convert(CriterionEquationPair source, Analysis.CalculatedField target)
+            {
+                var result = target.AddValueSource();
+
+                result.Criterion.Expression = source.CriterionExpression;
+                result.Equation.Expression = source.EquationExpression;
+            }
+
+            private static void Convert<TValue, TAttribute>(AttributeValueHistory<TValue> source, AnalysisMaintainableAsset target, Dictionary<string, TAttribute> attributeByName) where TAttribute : Analysis.Attribute<TValue>
+            {
+                var history = target.GetHistory(attributeByName[source.AttributeName]);
+
+                foreach (var datum in source.History)
+                {
+                    history[datum.Year] = datum.Value;
+                }
+            }
 
             private void Convert(InvestmentPlan source, Analysis.InvestmentPlan target)
             {
                 //todo
+                //setup BudgetByName
             }
 
-            private Analysis.CommittedProject Convert(CommittedProject source) => new(AssetByName[source.AssetName], source.Year)
+            private Analysis.CommittedProject Convert(CommittedProject source)
             {
-                // need budget objects first
+                var result = new Analysis.CommittedProject(AssetByName[source.AssetName], source.Year)
+                {
+                    Budget = BudgetByName[source.NameOfUsableBudget],
+                    Cost = source.Cost,
+                    treatmentCategory = source.Category,
+                };
+
+                foreach (var item in source.Consequences)
+                {
+                    result.Consequences.Add(Convert(item));
+                }
+
+                return result;
+            }
+
+            private Analysis.TreatmentConsequence Convert(TreatmentConsequence source) => new()
+            {
+                Attribute = AttributeByName[source.AttributeName],
+                Change = { Expression = source.ChangeExpression },
             };
 
             private void Convert(AnalysisMethod source, Analysis.AnalysisMethod target)
             {
                 target.AllowFundingFromMultipleBudgets = source.AllowFundingFromMultipleBudgets;
+                target.Benefit.Attribute = NumericAttributeByName[source.BenefitAttributeName];
+                target.Benefit.Limit = source.BenefitLimit;
+                target.Filter.Expression = source.FilterExpression;
+                target.OptimizationStrategy = source.OptimizationStrategy;
+                target.ShouldApplyMultipleFeasibleCosts = source.ShouldApplyMultipleFeasibleCosts;
+                target.ShouldDeteriorateDuringCashFlow = source.ShouldDeteriorateDuringCashFlow;
+                target.ShouldRestrictCashFlowToFirstYearBudgets = source.ShouldRestrictCashFlowToFirstYearBudgets;
+                target.SpendingStrategy = source.SpendingStrategy;
+                target.Weighting = NumericAttributeByName[source.BenefitWeightAttributeName];
+
+                foreach (var item in source.BudgetPriorities)
+                {
+                    Convert(item, target);
+                }
+
+                foreach (var item in source.DeficientConditionGoals)
+                {
+                    Convert(item, target);
+                }
+
+                foreach (var item in source.RemainingLifeLimits)
+                {
+                    Convert(item, target);
+                }
+
+                foreach (var item in source.TargetConditionGoals)
+                {
+                    Convert(item, target);
+                }
+            }
+
+            private void Convert(TargetConditionGoal source, Analysis.AnalysisMethod target)
+            {
+                var result = target.AddTargetConditionGoal();
+
+                result.Attribute = NumericAttributeByName[source.AttributeName];
+                result.Criterion.Expression = source.CriterionExpression;
+                result.Name = source.Name;
+                result.Target = source.Target;
+                result.Year = source.Year;
+            }
+
+            private void Convert(RemainingLifeLimit source, Analysis.AnalysisMethod target)
+            {
+                var result = target.AddRemainingLifeLimit();
+
+                result.Attribute = NumericAttributeByName[source.AttributeName];
+                result.Criterion.Expression = source.CriterionExpression;
+                result.Value = source.Value;
+            }
+
+            private void Convert(DeficientConditionGoal source, Analysis.AnalysisMethod target)
+            {
+                var result = target.AddDeficientConditionGoal();
+
+                result.AllowedDeficientPercentage = source.AllowedDeficientPercentage;
+                result.Attribute = NumericAttributeByName[source.AttributeName];
+                result.Criterion.Expression = source.CriterionExpression;
+                result.DeficientLimit = source.DeficientLimit;
+                result.Name = source.Name;
             }
 
             private Explorer Convert(AttributeSystem source)
             {
                 var result = new Explorer(source.AgeAttributeName);
 
-                foreach (var sourceAttribute in source.CalculatedFields)
+                foreach (var item in source.CalculatedFields)
                 {
-                    Convert(sourceAttribute, result);
+                    Convert(item, result);
                 }
 
-                foreach (var sourceAttribute in source.NumberAttributes)
+                foreach (var item in source.NumberAttributes)
                 {
-                    _ = result.AddNumberAttribute(sourceAttribute.Name);
-                    //todo
+                    Convert(item, result);
                 }
 
-                foreach (var sourceAttribute in source.TextAttributes)
+                foreach (var item in source.TextAttributes)
                 {
-                    _ = result.AddTextAttribute(sourceAttribute.Name);
-                    //todo
+                    Convert(item, result);
                 }
 
+                AttributeByName = result.AllAttributes.ToDictionary(_ => _.Name);
+                NumericAttributeByName = result.NumericAttributes.ToDictionary(_ => _.Name);
                 NumberAttributeByName = result.NumberAttributes.ToDictionary(_ => _.Name);
                 TextAttributeByName = result.TextAttributes.ToDictionary(_ => _.Name);
 
                 return result;
-            }
-
-            private void Convert(CalculatedField source, Explorer target)
-            {
-                var result = target.AddCalculatedField(source.Name);
-                result.IsDecreasingWithDeterioration = source.IsDecreasingWithDeterioration;
-                //todo
             }
 
             private Analysis.Network Convert(Network source)
@@ -354,9 +493,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
                 result.Name = source.Name;
 
-                foreach (var sourceAsset in source.Assets)
+                foreach (var item in source.Assets)
                 {
-                    Convert(sourceAsset, result.AddAsset());
+                    Convert(item, result);
                 }
 
                 AssetByName = result.Assets.ToDictionary(_ => _.AssetName);
@@ -364,29 +503,21 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
                 return result;
             }
 
-            private void Convert(Asset source, AnalysisMaintainableAsset target)
+            private void Convert(Asset source, Analysis.Network target)
             {
-                target.AssetName = source.Name;
-                target.SpatialWeighting.Expression = source.SpatialWeightExpression;
+                var result = target.AddAsset();
 
-                foreach (var sourceHistory in source.NumberAttributeHistories)
+                result.AssetName = source.Name;
+                result.SpatialWeighting.Expression = source.SpatialWeightExpression;
+
+                foreach (var item in source.NumberAttributeHistories)
                 {
-                    var history = target.GetHistory(NumberAttributeByName[sourceHistory.AttributeName]);
-
-                    foreach (var datum in sourceHistory.History)
-                    {
-                        history[datum.Year] = datum.Value;
-                    }
+                    Convert(item, result, NumberAttributeByName);
                 }
 
-                foreach (var sourceHistory in source.TextAttributeHistories)
+                foreach (var item in source.TextAttributeHistories)
                 {
-                    var history = target.GetHistory(TextAttributeByName[sourceHistory.AttributeName]);
-
-                    foreach (var datum in sourceHistory.History)
-                    {
-                        history[datum.Year] = datum.Value;
-                    }
+                    Convert(item, result, TextAttributeByName);
                 }
             }
         }

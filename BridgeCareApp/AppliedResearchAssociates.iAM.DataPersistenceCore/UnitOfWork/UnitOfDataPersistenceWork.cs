@@ -161,9 +161,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDbContextTransaction DbContextTransaction { get; private set; }
 
-        /// <summary>
-        /// <inheritdoc cref="IUnitOfWork.BeginTransaction"/>
-        /// </summary>
+        /// <summary><inheritdoc cref="IUnitOfWork.BeginTransaction"/></summary>
         public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
 
         public void SetUser(string username)
@@ -191,6 +189,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
             }
         }
 
+        /// <summary><inheritdoc cref="IUnitOfWork.Commit"/></summary>
         public void Commit()
         {
             if (DbContextTransaction != null)
@@ -201,6 +200,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
             }
         }
 
+        /// <summary><inheritdoc cref="IUnitOfWork.Rollback"/></summary>
         public void Rollback()
         {
             if (DbContextTransaction != null)

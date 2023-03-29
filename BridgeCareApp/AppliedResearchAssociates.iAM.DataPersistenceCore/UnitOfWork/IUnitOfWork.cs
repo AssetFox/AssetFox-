@@ -16,7 +16,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public string EncryptionKey { get; }
 
-        void BeginTransaction(); // This needs to go ASAP
+        /// <summary>In general, this should be called from the repo level,
+        /// not from BridgeCareCore. We are keeping around the call in
+        /// AggregationService as an exception to that. Also, as a general
+        /// matter, using the AsTransaction extension method is probably a better way
+        /// to do this. The advantage of AsTransaction() is that it will ensure
+        /// that BeginTransaction, Commit, and Rollback are kept in sync as they
+        /// are required to be.</summary> 
+        void BeginTransaction();
 
         IAggregatedResultRepository AggregatedResultRepo { get; }
 
@@ -107,8 +114,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         void AddUser(string username, bool hasAdminClaim);
 
+        /// <summary>
+        /// See comment on <see cref="BeginTransaction()"/>
+        /// </summary>
         void Commit();
 
+        /// <summary>
+        /// See comment on <see cref="BeginTransaction()"/>
+        /// </summary>
         void Rollback();
     }
 }

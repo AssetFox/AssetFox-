@@ -157,15 +157,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public UserDTO CurrentUser => UserEntity?.ToDto();
 
-        // TODO: Refactor to an persistence independent object
         public UserEntity UserEntity { get; private set; }
 
         public IDbContextTransaction DbContextTransaction { get; private set; }
 
+        /// <summary>
+        /// <inheritdoc cref="IUnitOfWork.BeginTransaction"/>
+        /// </summary>
         public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
-
-        public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
-        // End Refactor
 
         public void SetUser(string username)
         {

@@ -276,10 +276,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
                 var result = Convert(source.Network).AddSimulation();
 
                 result.Name = source.Name;
-                //top-level props
+                result.NumberOfYearsOfTreatmentOutlook = source.NumberOfYearsOfTreatmentOutlook;
+                result.ShouldPreapplyPassiveTreatment = source.ShouldPreapplyPassiveTreatment;
 
                 Convert(source.AnalysisMethod, result.AnalysisMethod);
-                Convert(source.InvestmentPlan, result.InvestmentPlan); //todo
+                Convert(source.InvestmentPlan, result.InvestmentPlan);
 
                 foreach (var item in source.PerformanceCurves)
                 {
@@ -368,8 +369,67 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
             private void Convert(InvestmentPlan source, Analysis.InvestmentPlan target)
             {
-                //todo
-                //setup BudgetByName
+                target.FirstYearOfAnalysisPeriod = source.FirstYearOfAnalysisPeriod;
+                target.InflationRatePercentage = source.InflationRatePercentage;
+                target.MinimumProjectCostLimit = source.MinimumProjectCostLimit;
+                target.NumberOfYearsInAnalysisPeriod = source.NumberOfYearsInAnalysisPeriod;
+                target.ShouldAccumulateUnusedBudgetAmounts = source.ShouldAccumulateUnusedBudgetAmounts;
+
+                foreach (var item in source.Budgets)
+                {
+                    Convert(item, target);
+                }
+
+                BudgetByName = target.Budgets.ToDictionary(_ => _.Name);
+
+                foreach (var item in source.BudgetConditions)
+                {
+                    Convert(item, target);
+                }
+
+                foreach (var item in source.CashFlowRules)
+                {
+                    Convert(item, target);
+                }
+            }
+
+            private static void Convert(CashFlowRule source, Analysis.InvestmentPlan target)
+            {
+                var result = target.AddCashFlowRule();
+
+                result.Criterion.Expression = source.CriterionExpression;
+                result.Name = source.Name;
+
+                foreach (var item in source.DistributionRules)
+                {
+                    result.DistributionRules.Add(Convert(item));
+                }
+            }
+
+            private static Analysis.CashFlowDistributionRule Convert(CashFlowDistributionRule source) => new()
+            {
+                CostCeiling = source.CostCeiling,
+                Expression = string.Join('/', source.YearlyPercentages),
+            };
+
+            private void Convert(BudgetCondition source, Analysis.InvestmentPlan target)
+            {
+                var result = target.AddBudgetCondition();
+
+                result.Budget = BudgetByName[source.BudgetName];
+                result.Criterion.Expression = source.ConditionExpression;
+            }
+
+            private static void Convert(Budget source, Analysis.InvestmentPlan target)
+            {
+                var result = target.AddBudget();
+
+                result.Name = source.Name;
+
+                foreach (var (resultAmount, sourceAmount) in result.YearlyAmounts.Zip(source.YearlyAmounts))
+                {
+                    resultAmount.Value = sourceAmount;
+                }
             }
 
             private Analysis.CommittedProject Convert(CommittedProject source)

@@ -67,6 +67,34 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.EquivalentExcluding(budgetDto, budgetAfter, x => x.CriterionLibrary);
         }
 
+        [Fact]
+        public void UpsertOrDeleteScenarioBudgets_SimulationInDbWithBudgetPriority_BudgetInList_InsertsWithPercentagePair()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulationId = simulation.Id;
+            var budgetPriority = BudgetPriorityDtos.New();
+            var budgetPriorities = new List<BudgetPriorityDTO> { budgetPriority };
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(budgetPriorities, simulationId);
+            var budgetDto = BudgetDtos.New();
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+
+            // Act
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(budgetDtos, simulation.Id);
+
+            var budgetsAfter = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            var budgetAfter = budgetsAfter.Single();
+            ObjectAssertions.EquivalentExcluding(budgetDto, budgetAfter, x => x.CriterionLibrary);
+            var budgetPrioritiesAfter = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId);
+            var budgetPriorityAfter = budgetPrioritiesAfter.Single();
+            var percentagePairs = budgetPriorityAfter.BudgetPercentagePairs;
+            var percentagePair = percentagePairs.Single();
+            Assert.Equal(100, percentagePair.Percentage);
+            Assert.Equal(budgetAfter.Name, percentagePair.BudgetName);
+            Assert.Equal(budgetAfter.Id, percentagePair.BudgetId);
+        }
 
         [Fact]
         public void UpsertBudgetLibrary_NullDto_Throws()

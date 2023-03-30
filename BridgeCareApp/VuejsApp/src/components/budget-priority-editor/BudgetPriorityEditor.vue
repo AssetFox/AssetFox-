@@ -509,26 +509,8 @@ export default class BudgetPriorityEditor extends Vue {
         return isEqual(sortNonObjectLists(simpleBudgetDetails), sortNonObjectLists(clone(this.stateScenarioSimpleBudgetDetails)));
     }
 
-    syncBudgetPercentagePairsWithBudgets() {// this might cause problems
-        const budgetPriorities: BudgetPriority[] = clone(this.currentPage);
-
-        if (hasValue(this.stateScenarioSimpleBudgetDetails)) {
-            var ids = this.stateScenarioSimpleBudgetDetails.map(_ => _.id);
-            budgetPriorities.forEach((budgetPriority: BudgetPriority) => {
-                if (!this.hasBudgetPercentagePairsThatMatchBudgets(budgetPriority)) {
-                    budgetPriority.budgetPercentagePairs = budgetPriority.budgetPercentagePairs.filter(_ => ids.includes(_.budgetId))
-                    var newPairs = this.stateScenarioSimpleBudgetDetails.filter(_ => !budgetPriority.budgetPercentagePairs.some(__ => __.budgetId == _.id)).map((simpleBudgetDetail: SimpleBudgetDetail) => ({
-                        id: getNewGuid(),
-                        budgetId: simpleBudgetDetail.id,
-                        budgetName: simpleBudgetDetail.name,
-                        percentage: 100,
-                    })) as BudgetPercentagePair[];
-                    budgetPriority.budgetPercentagePairs = budgetPriority.budgetPercentagePairs.concat(newPairs)
-                    this.onUpdateRow(budgetPriority.id, budgetPriority);
-                }
-            });
-            this.onPaginationChanged();
-        }
+    syncBudgetPercentagePairsWithBudgets() {
+        throw "We are trying to prevent this from ever happening."
     }
 
     createNewBudgetPercentagePairsFromBudgets() {

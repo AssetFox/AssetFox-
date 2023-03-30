@@ -1,16 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class ScenarioOutputReport : IReport
     {
-        private IUnitOfWork _unitofwork;
+        private IUnitOfWork _unitOfWork;
+        private readonly IHubService _hubService;
 
         public Guid ID { get; set; }
         public Guid? SimulationID { get; set; }
@@ -27,9 +34,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public ScenarioOutputReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results)
+        public ScenarioOutputReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
-            _unitofwork = unitOfWork;
+            _unitOfWork = unitOfWork;
+            _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
             ID = Guid.NewGuid();
             Errors = new List<string>();
@@ -38,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = false;
         }
 
-        public async Task Run(string parameters)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
         {
             // TODO:  Don't regenerate the report if it has already been generated AND the date on the file was after the LastRun date of the
             // scenario.
@@ -51,10 +59,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 return;
             }
             SimulationID = simulationGuid;
+            Status = "Generating report";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationGuid, Status = Status });
 
             // Check for simulation existence
             string reportFileName;
-            var simulationName = _unitofwork.SimulationRepo.GetSimulationName(simulationGuid);
+            var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(simulationGuid);
             if (simulationName == null)
             {
                 IndicateError();
@@ -71,11 +83,17 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 reportFileName = $"Reports\\{SimulationID}.json";
             }
 
+           
             // Pull the simulation object
+            Status = "Getting simulation output";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationGuid, Status = Status });
             Analysis.Engine.SimulationOutput simulationOutput;
             try
             {
-                simulationOutput = _unitofwork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationGuid);
+                checkCancelled(cancellationToken);
+                simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationGuid);
             }
             catch (Exception e)
             {
@@ -86,8 +104,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Save the output to a file
+            Status = "Saving output";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationGuid, Status = Status });
             try
             {
+                checkCancelled(cancellationToken);
                 using var reportFileWriter = File.CreateText(reportFileName);
                 JsonSerializer serializer = new();
                 serializer.Serialize(reportFileWriter, simulationOutput);
@@ -104,6 +127,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Results = reportFileName;  // This is not set until here to ensure the file was created correctly
             IsComplete = true;
             Status = "File generated.";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationGuid, Status = Status });
             return;
         }
 
@@ -111,6 +137,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             Status = "Simulation output report completed with errors";
             IsComplete = true;
+        }
+
+        private void checkCancelled(CancellationToken? cancellationToken)
+        {
+            if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+            {
+                throw new Exception("Report was cancelled");
+            }
         }
     }
 }

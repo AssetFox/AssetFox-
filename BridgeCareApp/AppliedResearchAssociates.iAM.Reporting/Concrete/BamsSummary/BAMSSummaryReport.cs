@@ -25,6 +25,7 @@ using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.Reporting.Services;
+using System.Threading;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -106,7 +107,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = false;
         }
 
-        public async Task Run(string parameters)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
         {
             //check for the parameters string
             if(string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters)) {
@@ -126,6 +127,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var simulationName = "";
             try
             {
+                checkCancelled(cancellationToken);
                 var simulationObject = _unitOfWork.SimulationRepo.GetSimulation(_simulationId);
                 simulationName = simulationObject.Name;
                 _networkId = simulationObject.NetworkId;
@@ -150,7 +152,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var summaryReportPath = "";
             try
             {
-                summaryReportPath = GenerateSummaryReport(_networkId, _simulationId);
+                checkCancelled(cancellationToken);
+                summaryReportPath = GenerateSummaryReport(_networkId, _simulationId, cancellationToken, updateStatusOnHandle);
             }
             catch (Exception e)
             {
@@ -174,13 +177,17 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private string GenerateSummaryReport(Guid networkId, Guid simulationId)
+        private string GenerateSummaryReport(Guid networkId, Guid simulationId, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
         {
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
 
+            checkCancelled(cancellationToken);
             reportDetailDto.Status = $"Generating...";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
 
             var functionReturnValue = "";
 
@@ -200,9 +207,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
 
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
-
+            reportDetailDto.Status = $"Checking initial sections";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate,
+                new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             foreach (var item in requiredSections)
             {
+                checkCancelled(cancellationToken);
                 if (!initialSectionValues.ContainsKey(item))
                 {
                     reportDetailDto.Status = $"{item} was not found in initial section";
@@ -214,14 +226,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             var sectionValueAttribute = reportOutputData.Years[0].Assets[0].ValuePerNumericAttribute;
-
+            reportDetailDto.Status = $"Checking sections";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate,
+                new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             foreach (var item in requiredSections)
             {
+                checkCancelled(cancellationToken);
                 if (!sectionValueAttribute.ContainsKey(item))
                 {
                     reportDetailDto.Status = $"{item} was not found in sections";
                     UpdateSimulationAnalysisDetail(reportDetailDto);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
                     Errors.Add(reportDetailDto.Status);
                     throw new KeyNotFoundException($"{item} was not found in sections");
                 }
@@ -231,16 +249,28 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );
 
+            reportDetailDto.Status = $"Sorting yearly section data";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate,
+                new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             foreach (var yearlySectionData in reportOutputData.Years)
             {
+                checkCancelled(cancellationToken);
                 yearlySectionData.Assets.Sort(
                     (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );
             }
 
             var simulationYears = new List<int>();
+            reportDetailDto.Status = $"Adding simulation years";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate,
+                new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             foreach (var item in reportOutputData.Years)
             {
+                checkCancelled(cancellationToken);
                 simulationYears.Add(item.Year);
             }
 
@@ -259,8 +289,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
+            reportDetailDto.Status = $"Adding yearly budget amounts";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate,
+                new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             foreach (var budget in simulation.InvestmentPlan.Budgets)
             {
+                checkCancelled(cancellationToken);
                 if (!yearlyBudgetAmount.ContainsKey(budget.Name))
                 {
                     yearlyBudgetAmount.Add(budget.Name, budget);
@@ -276,8 +312,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var treatmentList = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             if (treatmentList?.Any() == true)
             {
+                reportDetailDto.Status = $"Checking treatment list";
+                if (updateStatusOnHandle != null)
+                    updateStatusOnHandle.Invoke(reportDetailDto.Status);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate,
+                    new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
                 foreach (var treatmentObject in treatmentList)
                 {
+                    checkCancelled(cancellationToken);
                     if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
                     {
                         treatmentCategoryLookup.Add(treatmentObject.Name, treatmentObject.Category.ToString());
@@ -288,8 +330,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Pull best guess on committed project treatment categories here
             var committedProjectList = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
             var treatmentsToAdd = committedProjectList.Select(_ => _.Treatment).Where(_ => !treatmentCategoryLookup.ContainsKey(_));
+            reportDetailDto.Status = $"Adding committed project treatments ";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate,
+                new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             foreach (var newTreatment in treatmentsToAdd)
             {
+                checkCancelled(cancellationToken);
                 var bestTreatmentEntry = committedProjectList.Where(_ => _.Treatment == newTreatment)
                     .GroupBy(_ => _.Category)
                     .Select(_ => new { Category = _.Key, Count = _.Count() })
@@ -307,67 +355,103 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Create Simluation parameters TAB
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
 
+            checkCancelled(cancellationToken);
             // Bridge Data TAB
             reportDetailDto.Status = $"Creating Bridge Data TAB";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);            
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             var bridgeDataWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
             var workSummaryModel = _bridgeDataForSummaryReport.Fill(bridgeDataWorksheet, reportOutputData, treatmentCategoryLookup);
-                        
+
+            checkCancelled(cancellationToken);
             // Fill Simulation parameters TAB
             reportDetailDto.Status = $"Creating Parameters TAB";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation, reportOutputData);
 
+            checkCancelled(cancellationToken);
             // Funded Treatment List TAB
             reportDetailDto.Status = $"Creating Funded Treatment List TAB";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             var fundedTreatmentWorksheet = excelPackage.Workbook.Worksheets.Add("Funded Treatment List");
             _fundedTreatmentList.Fill(fundedTreatmentWorksheet, reportOutputData);
 
             // unfunded tab will be uncommented and redone in a future release
 
+            checkCancelled(cancellationToken);
             //// Unfunded Treatment - Final List TAB
             reportDetailDto.Status = $"Creating Unfunded Treatment - Final List TAB";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             var unfundedTreatmentFinalListWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Final List");
             _unfundedTreatmentFinalList.Fill(unfundedTreatmentFinalListWorksheet, reportOutputData);
 
+            checkCancelled(cancellationToken);
             //// Unfunded Treatment - Time TAB
             reportDetailDto.Status = $"Creating Unfunded Treatment - Time TAB";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             var unfundedTreatmentTimeWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Time");
             _unfundedTreatmentTime.Fill(unfundedTreatmentTimeWorksheet, reportOutputData);
 
+            checkCancelled(cancellationToken);
             reportDetailDto.Status = $"Creating Bridge Work Summary TAB";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             // Bridge work summary TAB
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
                                                         simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
+            checkCancelled(cancellationToken);
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
 
+            checkCancelled(cancellationToken);
             reportDetailDto.Status = $"Creating District County Totals TAB";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             // District County Totals TAB
             var districtCountyTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
             ExcelWorksheetAdder.AddWorksheet(excelPackage.Workbook, districtCountyTotalsModel);
 
+            checkCancelled(cancellationToken);
             reportDetailDto.Status = $"Creating Graph TABs";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
 
             _addGraphsInTabs.Add(excelPackage, bridgeDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
@@ -380,6 +464,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Directory.CreateDirectory(folderPathForSimulation);
             var filePath = Path.Combine(folderPathForSimulation, "SummaryReport.xlsx");
 
+            checkCancelled(cancellationToken);
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);
 
@@ -387,8 +472,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
             functionReturnValue = filePath;
 
             reportDetailDto.Status = $"Report generation completed";
+            if (updateStatusOnHandle != null)
+                updateStatusOnHandle.Invoke(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
 
             //return value
             return functionReturnValue;
@@ -408,6 +496,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             Status = "Summary output report completed with errors";
             IsComplete = true;
+        }
+
+        private void checkCancelled(CancellationToken? cancellationToken)
+        {
+            if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+            {
+                throw new Exception("Report was cancelled");
+            }
         }
     }
 }

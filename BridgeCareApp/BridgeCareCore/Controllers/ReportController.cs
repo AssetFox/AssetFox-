@@ -13,7 +13,10 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Controllers.BaseController;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,12 +29,15 @@ namespace BridgeCareCore.Controllers
     {
         private readonly IReportGenerator _generator;
         private readonly ILog _log;
+        private readonly IWorkQueService _workQueueService;
+        public const string ReportError = "Report Error";
 
         public ReportController(IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, ILog logger) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, ILog logger, IWorkQueService workQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _generator = generator ?? throw new ArgumentNullException(nameof(generator));
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
+            _workQueueService = workQueService ?? throw new ArgumentNullException(nameof(workQueService));
         }
 
         #region "API functions"
@@ -74,57 +80,131 @@ namespace BridgeCareCore.Controllers
             return validResult;
         }
 
+        //[HttpPost]
+        //[Route("GetFile/{reportName}")]
+        //[Authorize]
+        //public async Task<IActionResult> GetFile(string reportName)
+        //{
+        //    var parameters = await GetParameters();
+        //    var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(parameters);
+        //    HubService.SendRealTimeMessage(UnitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, "", parameters);
+
+        //    try
+        //    {
+        //        return Ok();
+        //    }
+        //    finally
+        //    {
+        //        Response.OnCompleted(async () =>
+        //        {
+        //            var report = await GenerateReport(reportName, ReportType.File, parameters);
+
+        //            if (report == null)
+        //            {
+        //                SendRealTimeMessage($"Failed to generate report object for '{reportName}' on simulation '{simulationName}'");
+        //            }
+
+        //            // Handle a completed run with errors
+        //            if (report.Errors.Any())
+        //            {
+        //                SendRealTimeMessage($"Failed to generate '{reportName}' on simulation '{simulationName}'");
+
+        //                _log.Information($"Failed to generate '{reportName}'");
+
+        //                foreach (string message in report.Errors)
+        //                {
+        //                    _log.Information($"Message: {message}");
+        //                }
+        //            }
+
+        //            // Handle an incomplete run without errors
+        //            if (!report.IsComplete)
+        //            {
+        //                SendRealTimeMessage($"{reportName} on simulation '{simulationName}' ran but never completed");
+        //            }
+
+        //            //create report index repository
+        //            var reportIndexID = createReportIndexRepository(report);
+
+        //            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
+        //            {
+        //                SendRealTimeMessage($"Failed to create report repository index on {reportName}");
+        //            }
+        //        });
+        //    }
+        //}
+
         [HttpPost]
         [Route("GetFile/{reportName}")]
         [Authorize]
         public async Task<IActionResult> GetFile(string reportName)
         {
-            var parameters = await GetParameters();
-            var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(parameters);
-            HubService.SendRealTimeMessage(UnitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, "", parameters);
-
             try
             {
+                var parameters = await GetParameters();
+                var scenarioName = "";
+                var scenarioId = new Guid();
+                if (Guid.TryParse(parameters, out scenarioId))
+                {
+                    await Task.Factory.StartNew(() =>
+                    {
+                        scenarioName = UnitOfWork.SimulationRepo.GetSimulationName(scenarioId);
+                    });
+                }
+                else
+                    scenarioId = Guid.NewGuid();
+
+                ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName);
+                var analysisHandle = _workQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, analysisHandle.MostRecentStatusMessage);
+                }
+
+                //await analysisHandle.WorkCompletion;
                 return Ok();
             }
-            finally
+            catch (UnauthorizedAccessException)
             {
-                Response.OnCompleted(async () =>
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpDelete]
+        [Route("Cancel/{networkId}")]
+        [Authorize]
+        public async Task<IActionResult> CancelNetworkDeletion(Guid networkId)
+        {
+            try
+            {
+                var hasBeenRemovedFromQueue = _workQueueService.Cancel(networkId);
+                await Task.Delay(125);
+
+                if (hasBeenRemovedFromQueue)
                 {
-                    var report = await GenerateReport(reportName, ReportType.File, parameters);
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceled" });
+                }
+                else
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceling network deletion..." });
 
-                    if (report == null)
-                    {
-                        SendRealTimeMessage($"Failed to generate report object for '{reportName}' on simulation '{simulationName}'");
-                    }
-
-                    // Handle a completed run with errors
-                    if (report.Errors.Any())
-                    {
-                        SendRealTimeMessage($"Failed to generate '{reportName}' on simulation '{simulationName}'");
-
-                        _log.Information($"Failed to generate '{reportName}'");
-
-                        foreach (string message in report.Errors)
-                        {
-                            _log.Information($"Message: {message}");
-                        }
-                    }
-
-                    // Handle an incomplete run without errors
-                    if (!report.IsComplete)
-                    {
-                        SendRealTimeMessage($"{reportName} on simulation '{simulationName}' ran but never completed");
-                    }
-
-                    //create report index repository
-                    var reportIndexID = createReportIndexRepository(report);
-
-                    if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
-                    {
-                        SendRealTimeMessage($"Failed to create report repository index on {reportName}");
-                    }
-                });
+                }
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling network deltion for {networkName}::{e.Message}");
+                throw;
             }
         }
 

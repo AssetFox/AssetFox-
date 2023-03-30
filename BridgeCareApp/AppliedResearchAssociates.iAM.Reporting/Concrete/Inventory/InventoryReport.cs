@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DTOs;
+using System.Threading;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -58,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _networkId = _unitofwork.NetworkRepo.GetMainNetwork().Id;
         }
 
-        public async Task Run(string parameters)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
         {
             segmentIds = Parse(parameters);
             if (segmentIds.BRKey == -1 && string.IsNullOrEmpty(segmentIds.BMSID)) return; // report failed due to bad parameters

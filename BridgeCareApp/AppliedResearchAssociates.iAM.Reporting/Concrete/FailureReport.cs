@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AppliedResearchAssociates.iAM.Reporting
@@ -36,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status => String.Empty;
 
-        public async Task Run(string parameters)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
         {
             _isComplete = false;
             string errorMessage = parameters;

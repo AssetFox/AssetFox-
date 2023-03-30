@@ -45,7 +45,8 @@ namespace BridgeCareCore.Services
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-            _unitOfWork.NetworkRepo.DeleteNetwork(NetworkId, updateStatusOnHandle, cancellationToken, _hubService);
+            var _queueLogger = new GeneralWorkQueLogger(_hubService, UserId, updateStatusOnHandle);
+            _unitOfWork.NetworkRepo.DeleteNetwork(NetworkId, cancellationToken, _queueLogger);
         }
     }
 }

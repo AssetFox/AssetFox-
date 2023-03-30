@@ -16,6 +16,7 @@ using System.Threading;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Hubs.Services;
 using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Common.Logging;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -168,10 +169,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.SaveChanges();
         }
 
-        public void DeleteNetwork(Guid networkId, Action<string> updateAction = null, CancellationToken? cancellationToken = null, IHubService hubService = null)
+        public void DeleteNetwork(Guid networkId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             try
             {
+                queueLog ??= new DoNotWorkQueueLog();
                 _unitOfWork.BeginTransaction();
                                    
                 if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
@@ -179,11 +181,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                if (updateAction != null)
-                {
-                    updateAction.Invoke("Deleting Benefit Quantifier");
-                    hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, "Deleting Benefit Quantifier");
-                }
+                queueLog.UpdateWorkQueueStatus(networkId, "Deleting Benefit Quantifier");
 
                 _unitOfWork.BenefitQuantifierRepo.DeleteBenefitQuantifier(networkId);
                                    
@@ -192,11 +190,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                if (updateAction != null)
-                {
-                    updateAction.Invoke("Deleting Simulations");
-                    hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, "Deleting Simulations");
-                }
+                queueLog.UpdateWorkQueueStatus(networkId, "Deleting Simulations");
 
                 _unitOfWork.SimulationRepo.DeleteSimulationsByNetworkId(networkId);
                                 
@@ -205,11 +199,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                if (updateAction != null)
-                {
-                    updateAction.Invoke("Deleting Maintainable Assets");
-                    hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, "Deleting Maintainable Assets");
-                }
+                queueLog.UpdateWorkQueueStatus(networkId, "Deleting Maintainable Assets");
 
                 _unitOfWork.Context.DeleteEntity<NetworkEntity>(_ => _.Id == networkId);
 

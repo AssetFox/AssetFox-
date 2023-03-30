@@ -8,7 +8,7 @@ using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
-    public class GeneralWorkQueService : IWorkQueService
+    public class GeneralWorkQueService : IGeneralWorkQueueService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly SequentialWorkQueue _sequentialWorkQueue;

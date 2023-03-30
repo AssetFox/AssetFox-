@@ -36,9 +36,9 @@ namespace BridgeCareCore.Controllers
     {
         public const string NetworkError = "Network Error";
 
-        private readonly IWorkQueService _workQueueService;
+        private readonly IGeneralWorkQueueService _workQueueService;
         public NetworkController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, IWorkQueService workQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, IGeneralWorkQueueService workQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _workQueueService = workQueService ?? throw new ArgumentNullException(nameof(workQueService));
         }

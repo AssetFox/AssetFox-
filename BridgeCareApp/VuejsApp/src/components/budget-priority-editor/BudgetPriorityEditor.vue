@@ -509,7 +509,7 @@ export default class BudgetPriorityEditor extends Vue {
         return isEqual(sortNonObjectLists(simpleBudgetDetails), sortNonObjectLists(clone(this.stateScenarioSimpleBudgetDetails)));
     }
 
-    syncBudgetPercentagePairsWithBudgets() {// this might cause problems
+    syncBudgetPercentagePairsWithBudgets() {
         const budgetPriorities: BudgetPriority[] = clone(this.currentPage);
 
         if (hasValue(this.stateScenarioSimpleBudgetDetails)) {

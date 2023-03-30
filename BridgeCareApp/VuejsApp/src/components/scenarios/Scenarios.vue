@@ -534,6 +534,7 @@ import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { FileInfo } from '@/shared/models/iAM/file-info';
+import { queuedWorkStatusUpdate } from '@/shared/models/iAM/queuedWorkStatusUpdate';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
 import FileDownload from 'js-file-download';
 import ImportExportCommittedProjectsDialog from './scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
@@ -612,6 +613,7 @@ export default class Scenarios extends Vue {
     @Action('selectScenario') selectScenarioAction: any;
     @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
     @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
+    @Action('updateQueuedWorkStatus') updateQueuedWorkStatusAction: any;
 
     networks: Network[] = [];
     scenarioGridHeaders: DataTableHeader[] = [
@@ -859,6 +861,7 @@ export default class Scenarios extends Vue {
     showImportExportCommittedProjectsDialog: boolean = false;
     alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
     selectedScenarioId: string = "";
+    currentWorkQueuePage: QueuedWork[] = [];
 
     aggragateDialogData: any = { showDialog: false };
 
@@ -1461,10 +1464,19 @@ export default class Scenarios extends Vue {
     }
 
     getWorkQueueUpdate(data: any) {
-        (async () => { 
+        var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
+        var queueItem = this.stateWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
+        if(!isNil(queueItem)){
+            this.updateQueuedWorkStatusAction({
+                workQueueStatusUpdate: updatedQueueItem
+            })
+        }
+        else{
+            (async () => { 
             await this.delay(1000);
                 this.doWorkQueuePagination();
-        })();                            
+            })();
+        }                                  
     }
 
     getReportStatus(data: any) {

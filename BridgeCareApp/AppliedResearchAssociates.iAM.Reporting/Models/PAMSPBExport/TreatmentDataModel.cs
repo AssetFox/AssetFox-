@@ -7,8 +7,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
     {
         public Guid SimulationId { get; set; }
 
-        public Guid SimulationOutputId { get; set; }
-
         public Guid NetworkId { get; set; }
 
         public Guid MaintainableAssetId { get; set; }
@@ -17,13 +15,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public string Cnty { get; set; }
 
-        public string SR { get; set; }
+        public string Route { get; set; }
 
         public string AssetName { get; set; }
 
-        public string FromSection { get; set; }
+        public string FromSection { get; set; } // TODO: source?
 
-        public string ToSection { get; set; }
+        public string ToSection { get; set; } // TODO: source?
 
         public int Year { get; set; }
 
@@ -39,16 +37,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public int PriorityLevel { get; set; }
 
-        public int TreatmentFundingIgnoresSpendingLimit { get; set; } // TODO from bool
+        public int TreatmentFundingIgnoresSpendingLimit { get; set; }
 
-        public int TreatmentStatus { get; set; } // From enum TreatmentStatus
+        public int TreatmentStatus { get; set; }
 
         public int TreatmentCause { get; set; }
 
-        public string Budget { get; set; } // TODO: source??
+        public string Budget { get; set; } // TODO: source?
 
-        public string Category { get; set; } // TODO source?? If TreatmentCategory, what to consider
+        public string Category { get; set; } // TODO source? If TreatmentCategory, what to consider
 
-        public List<string> Consequences { get; set; } // Treatment attributes i.e. ones getting affected from treatment
+        public List<double> Consequences { get; set; } = new List<double>();// Treatment attributes i.e. ones getting affected from treatment
     }
 }

@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
@@ -19,14 +21,92 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             _reportHelper = new ReportHelper();
         }
 
-        public void Fill(ExcelWorksheet treatmentsWorksheet, SimulationOutput simulationOutput)
+        public void Fill(ExcelWorksheet treatmentsWorksheet, SimulationOutput simulationOutput, Guid simulationId, Guid networkId)
         {
             var currentCell = AddHeadersCells(treatmentsWorksheet);
 
-            // TODO for data
-            // Years => Assets based on condi.n i.e. TreatmentCause except Undefined, NoSelection
+            FillDynamicDataInWorkSheet(simulationOutput, treatmentsWorksheet, currentCell, simulationId, networkId);            
 
+            treatmentsWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
+            treatmentsWorksheet.Cells.AutoFitColumns();
         }
+
+        private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, ExcelWorksheet treatmentsWorksheet, CurrentCell currentCell, Guid simulationId, Guid networkId)
+        {
+            // TODO for data
+            // Loop on InitialAssetSummaries then Years => Assets(for resp InitialAssetSummary in loop at a time)
+            // based on condi.n i.e. TreatmentCause except Undefined, NoSelection
+            foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
+            {                
+                var assetId = initialAssetSummary.AssetId;
+                var years = simulationOutput.Years.OrderBy(yr => yr.Year);
+
+                foreach (var year in years)
+                {
+                    var section = year.Assets.FirstOrDefault(_ => _.AssetId == assetId);
+                    if (section.TreatmentCause == TreatmentCause.NoSelection || section.TreatmentCause == TreatmentCause.Undefined)
+                    {
+                        continue;
+                    }
+
+                    // Generate data model                    
+                    var treatmentDataModel = GenerateTreatmentDataModel(assetId, year, section, simulationId, networkId);
+
+                    // Fill in excel
+                    currentCell = FillDataInWorksheet(treatmentsWorksheet, treatmentDataModel, currentCell);
+                }
+                ExcelHelper.ApplyBorder(treatmentsWorksheet.Cells[1, 1, currentCell.Row, currentCell.Column]);
+            }
+        }
+
+        private CurrentCell FillDataInWorksheet(ExcelWorksheet treatmentsWorksheet, object treatmentDataModel, CurrentCell currentCell)
+        {
+
+
+
+            return currentCell;
+        }
+
+        private TreatmentDataModel GenerateTreatmentDataModel(Guid assetId, SimulationYearDetail year, AssetDetail section, Guid simulationId, Guid networkId)
+        {
+            TreatmentDataModel treatmentDataModel = new TreatmentDataModel
+            {
+                SimulationId = simulationId,
+                NetworkId = networkId,
+                MaintainableAssetId = assetId,
+                AssetName = section.AssetName,
+                Year = year.Year,
+                Appliedtreatment = section.AppliedTreatment,
+            };
+
+            treatmentDataModel.District = CheckGetTextValue(section.ValuePerTextAttribute, "DISTRICT");
+            treatmentDataModel.Cnty = CheckGetTextValue(section.ValuePerTextAttribute, "CNTY");
+            treatmentDataModel.Route = CheckGetTextValue(section.ValuePerTextAttribute, "SR");
+            treatmentDataModel.RiskScore = CheckGetNumericValue(section.ValuePerNumericAttribute, "RISKSCORE");
+
+            // TODO cost, benefit, remaining life, priority level,
+
+
+
+            treatmentDataModel.TreatmentFundingIgnoresSpendingLimit = section.TreatmentFundingIgnoresSpendingLimit ? 1 : 0;
+            treatmentDataModel.TreatmentCause = (int)section.TreatmentCause;
+            treatmentDataModel.TreatmentStatus = (int)section.TreatmentStatus;
+
+            // Consequences
+            var consequences = new List<double>();
+            foreach (var consequenceColumn in consequencesColumns)
+            {
+                consequences.Add(CheckGetNumericValue(section.ValuePerNumericAttribute, consequenceColumn));
+            }
+            treatmentDataModel.Consequences = consequences;
+
+            return treatmentDataModel;
+        }
+
+        private double CheckGetNumericValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);
+
+        private string CheckGetTextValue(Dictionary<string, string> valuePerTextAttribute, string attribute) =>
+          _reportHelper.CheckAndGetValue<string>(valuePerTextAttribute, attribute);
 
         private CurrentCell AddHeadersCells(ExcelWorksheet worksheet)
         {

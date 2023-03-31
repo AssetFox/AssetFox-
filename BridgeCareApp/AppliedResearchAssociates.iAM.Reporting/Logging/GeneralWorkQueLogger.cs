@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Logging
         {
             var queueStatusUpdate = new QueuedWorkStatusUpdateModel() { Id = workId, Status = statusMessage };
             _updateAction.Invoke(statusMessage);
-            _hubService.SendRealTimeMessage(_username, HubConstant.BroadcastSimulationAnalysisDetail, queueStatusUpdate);
+            _hubService.SendRealTimeMessage(_username, HubConstant.BroadcastWorkQueueStatusUpdate, queueStatusUpdate);
         }
     }
 }

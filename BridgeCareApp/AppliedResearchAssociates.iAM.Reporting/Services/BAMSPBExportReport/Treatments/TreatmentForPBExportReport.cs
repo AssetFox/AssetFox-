@@ -146,6 +146,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             var bmsID = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "BMSID"); //BMSID
 
                             //get budget usages
+                            var cost = Math.Round(assetDetailObject.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis
                             var appliedTreatment = assetDetailObject.AppliedTreatment ?? "";
                             var treatmentConsiderations = assetDetailObject.TreatmentConsiderations.FindAll(_ => _.TreatmentName == appliedTreatment);
                             var budgetUsages = new List<BudgetUsageDetail>();
@@ -169,7 +170,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                                 else //multiple budgets
                                 {
                                     //check for multi year budget
-                                    if (allowFundingFromMultipleBudgets == true)
+                                    if (simulationObject.allowFundingFromMultipleBudgets == true)
                                     {
                                         foreach (var budgetUsage in budgetUsages)
                                         {
@@ -213,15 +214,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                                     }
                                 }
                             }
-
-                            worksheet.Cells[row, ++column].Value = budgetName; // Budget
-                            worksheet.Cells[row, ++column].Value = recommendedTreatment; // Recommended Treatment
-                            var columnForAppliedTreatment = column;
-
-
-
-
-
 
                             worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.AssetId.ToString(); //Asset Id
                             worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.AssetName.ToString(); //Asset

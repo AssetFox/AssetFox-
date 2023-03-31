@@ -9,12 +9,14 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 using MathNet.Numerics.Financial;
+using Microsoft.Extensions.Hosting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using OfficeOpenXml.Style;
 using Org.BouncyCastle.Utilities.Encoders;
+using static System.Collections.Specialized.BitVector32;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Treatments
 {
@@ -142,6 +144,84 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             rowNo++; columnNo = 1;
 
                             var bmsID = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "BMSID"); //BMSID
+
+                            //get budget usages
+                            var appliedTreatment = assetDetailObject.AppliedTreatment ?? "";
+                            var treatmentConsiderations = assetDetailObject.TreatmentConsiderations.FindAll(_ => _.TreatmentName == appliedTreatment);
+                            var budgetUsages = new List<BudgetUsageDetail>();
+                            foreach (var item in treatmentConsiderations) {
+                                var budgetUsagesFiltered = item.BudgetUsages.Where(_ => _.Status == BudgetUsageStatus.CostCovered).ToList();
+                                if (budgetUsagesFiltered?.Any() == true) { budgetUsages.AddRange(budgetUsagesFiltered); }
+                            }
+
+                            //check budget usages
+                            var budgetName = "";
+                            if (budgetUsages?.Any() == true && cost > 0)
+                            {
+                                if (budgetUsages.Count == 1) //single budget
+                                {
+                                    budgetName = budgetUsages.First().BudgetName ?? ""; // Budget
+                                    if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName))
+                                    {
+                                        budgetName = BAMSConstants.Unspecified_Budget;
+                                    }
+                                }
+                                else //multiple budgets
+                                {
+                                    //check for multi year budget
+                                    if (allowFundingFromMultipleBudgets == true)
+                                    {
+                                        foreach (var budgetUsage in budgetUsages)
+                                        {
+                                            var multiYearBudgetCost = budgetUsage.CoveredCost;
+                                            var multiYearBudgetName = budgetUsage.BudgetName ?? ""; // Budget;
+                                            if (string.IsNullOrEmpty(multiYearBudgetName) || string.IsNullOrWhiteSpace(multiYearBudgetName))
+                                            {
+                                                multiYearBudgetName = BAMSConstants.Unspecified_Budget;
+                                            }
+
+                                            var budgetAmountAbbrName = "";
+                                            if (multiYearBudgetCost > 0)
+                                            {
+                                                //check budget and add abbreviation
+                                                budgetAmountAbbrName = multiYearBudgetCost.ToString();
+                                                if (multiYearBudgetCost > 1000000)
+                                                {
+                                                    budgetAmountAbbrName = "$" + Math.Floor(multiYearBudgetCost / 1000000).ToString() + "M";
+                                                }
+                                                else if (cost > 1000)
+                                                {
+                                                    budgetAmountAbbrName = "$" + Math.Floor(multiYearBudgetCost / 1000).ToString() + "K";
+                                                }
+
+                                                //set budget header name
+                                                if (!string.IsNullOrEmpty(budgetAmountAbbrName) && !string.IsNullOrWhiteSpace(budgetAmountAbbrName))
+                                                {
+                                                    multiYearBudgetName += " (" + budgetAmountAbbrName + ")";
+                                                }
+
+                                                if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName))
+                                                {
+                                                    budgetName = multiYearBudgetName;
+                                                }
+                                                else
+                                                {
+                                                    budgetName += ", " + multiYearBudgetName;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            worksheet.Cells[row, ++column].Value = budgetName; // Budget
+                            worksheet.Cells[row, ++column].Value = recommendedTreatment; // Recommended Treatment
+                            var columnForAppliedTreatment = column;
+
+
+
+
+
 
                             worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.AssetId.ToString(); //Asset Id
                             worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.AssetName.ToString(); //Asset

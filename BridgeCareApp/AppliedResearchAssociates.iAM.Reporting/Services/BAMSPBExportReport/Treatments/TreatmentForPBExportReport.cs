@@ -170,7 +170,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                                 else //multiple budgets
                                 {
                                     //check for multi year budget
-                                    if (simulationObject.allowFundingFromMultipleBudgets == true)
+                                    var allowFundingFromMultipleBudgets = simulationObject?.AnalysisMethod?.AllowFundingFromMultipleBudgets ?? false;
+                                    if (allowFundingFromMultipleBudgets == true)
                                     {
                                         foreach (var budgetUsage in budgetUsages)
                                         {
@@ -242,12 +243,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "INTERSTATE"); //Interstate
 
-                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.AppliedTreatment; //Treatment
+                            worksheet.Cells[rowNo, columnNo++].Value = appliedTreatment; //Treatment
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "Benefit"); //Benefit
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "Cost"); //Cost
+                            worksheet.Cells[rowNo, columnNo++].Value = cost; //Cost
                             ExcelHelper.SetCurrencyFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelFormatStrings.CurrencyWithoutCents);
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "RISK_SCORE"); //Risk
@@ -287,7 +288,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "YEARSAME"); //YEARSAME
 
-                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "BUDGET"); //BUDGET
+                            worksheet.Cells[rowNo, columnNo++].Value = budgetName; //BUDGET
 
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "AGE"); //AGE

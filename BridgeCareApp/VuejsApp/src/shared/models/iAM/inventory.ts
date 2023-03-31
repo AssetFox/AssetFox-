@@ -2,7 +2,10 @@ export interface InventoryItem {
     bmsId: string;
     brKey: number;
 }
-
+export interface MappedInventoryItem {
+    keyProperty1: string;
+    keyProperty2: number;
+}
 export interface LabelValue {
     label: string;
     value: any;

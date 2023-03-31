@@ -16,6 +16,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using IamAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -40,35 +41,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 var resultAttribute = AttributeTestSetup.Numeric();
                 resultAttributes.Add(resultAttribute);
             }
-            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
+            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributesNonAtomic(resultAttributes);
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId);
-            var results = new List<IAggregatedResult>();
-            foreach (var asset in maintainableAssets)
-            {
-                var resultId = Guid.NewGuid();
-                var resultData = new List<(IamAttribute, (int, double))>();
-
-                foreach (var attribute in resultAttributes)
-                {
-                    var resultDatum = (
-                        attribute, (2022, 1.23));
-                    resultData.Add(resultDatum);
-                }
-                var result = new AggregatedResult<double>(
-                    resultId,
-                    asset,
-                    resultData
-                    );
-
-                results.Add(result);
-            }
-            TestHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
+            AggregatedResultTestSetup.AddNumericAggregatedResultsToDb(TestHelper.UnitOfWork, maintainableAssets, resultAttributes);
 
             var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(TestHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
-            var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
+            var districtAttribute = AttributeDtoDomainMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
             var explorer = TestHelper.UnitOfWork.AttributeRepo.GetExplorer();
 
@@ -83,6 +64,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Assert.Equal(aggregatedResultPerAssetCount, historicalAttributeList.Count);
             }
         }
+
 
         [Fact]
         public void GetSimulationAnalysisNetwork_NetworkInDb300Assets_Does()

@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 
@@ -15,11 +12,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
 {
     public class SummaryReportParameters
     {
-        private ISummaryReportHelper _summaryReportHelper;
-
         public SummaryReportParameters()
         {
-            _summaryReportHelper = new SummaryReportHelper();
         }
 
         internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel, Simulation simulation)

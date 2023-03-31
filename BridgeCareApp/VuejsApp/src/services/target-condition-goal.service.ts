@@ -4,6 +4,7 @@ import {
     TargetConditionGoal,
     TargetConditionGoalLibrary,
 } from '@/shared/models/iAM/target-condition-goal';
+import { LibraryUser } from '@/shared/models/iAM/user';
 import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class TargetConditionGoalService {
@@ -53,6 +54,21 @@ export default class TargetConditionGoalService {
         return coreAxiosInstance.post(
             `${API.TargetConditionGoal}/UpsertScenarioTargetConditionGoals/${scenarioId}`,
             data,
+        );
+    }
+    static getTargetConditionGoalLibraryUsers(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.TargetConditionGoal}/GetTargetConditionGoalLibraryUsers/${libraryId}`);
+    }
+
+    static upsertOrDeleteTargetConditionGoalLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.TargetConditionGoal}/UpsertOrDeleteTargetConditionGoalLibraryUsers/${libraryId}`
+            , proposedUsers
+        );
+    }
+    static getIsSharedLibrary(targetConditionGoalLibraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.TargetConditionGoal}/GetIsSharedLibrary/${targetConditionGoalLibraryId}`
         );
     }
 

@@ -150,6 +150,9 @@
                 <v-btn @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Aggregate
                 </v-btn>
+                <v-btn @click='onDeleteClick' :disabled='isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                    Delete
+                </v-btn>
                 <v-btn @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
                     v-show="isNewNetwork"
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'>
@@ -182,15 +185,13 @@ import {
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
 import { Attribute, emptyAttribute } from '@/shared/models/iAM/attribute';
-import { Datasource, emptyDatasource, RawDataColumns } from '@/shared/models/iAM/data-source';
-import { clone, filter, findIndex, isNil, propEq, update, any, find } from 'ramda';
+import { Datasource } from '@/shared/models/iAM/data-source';
+import { clone, isNil, propEq, any } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
-import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 import  AddNetworkDialog from '@/components/networks/networks-dialogs/AddNetworkDialog.vue';
 import { AddNetworkDialogData, emptyAddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
-import { NetworkRequestType } from 'msal/lib-commonjs/utils/Constants';
 import { Hub } from '@/connectionHub';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 
@@ -213,6 +214,7 @@ export default class Networks extends Vue {
     @Action('getAttributes') getAttributes: any;
     @Action('selectNetwork') selectNetworkAction: any;
     @Action('createNetwork') createNetworkAction: any;
+    @Action('deleteNetwork') deleteNetworkAction: any;
     @Action('aggregateNetworkData') aggregateNetworkAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
@@ -297,7 +299,10 @@ export default class Networks extends Vue {
     @Watch('selectNetworkItemValue')
     onSelectNetworkItemValueChanged() {
         this.selectNetworkAction(this.selectNetworkItemValue);
-        this.hasSelectedNetwork = true;
+        if(this.selectNetworkItemValue != getBlankGuid() || this.isNewNetwork)
+            this.hasSelectedNetwork = true;
+        else
+            this.hasSelectedNetwork = false;
     }
     @Watch('selectedAttributeRows')
     onSelectedAttributeRowsChanged()
@@ -344,10 +349,11 @@ export default class Networks extends Vue {
             text: network.name,
             value: network.id
         });
-
+        
+        this.isNewNetwork = true;
         this.selectNetworkItemValue = network.id;
         this.selectedNetwork = clone(network);
-        this.isNewNetwork = true;
+        this.hasSelectedNetwork = true;
     }
     onDiscardChanges() {
         this.selectedNetwork = clone(this.stateSelectedNetwork);
@@ -381,6 +387,14 @@ export default class Networks extends Vue {
         });
 
         this.hasStartedAggregation = true;
+    }
+
+    onDeleteClick(){
+        this.deleteNetworkAction(this.selectedNetwork.id).then(() => {
+            this.hasSelectedNetwork = false;
+            this.selectNetworkItemValue = "";
+            this.selectedNetwork = clone(emptyNetwork)
+        })       
     }
     disableCrudButtonsCreate() {
 

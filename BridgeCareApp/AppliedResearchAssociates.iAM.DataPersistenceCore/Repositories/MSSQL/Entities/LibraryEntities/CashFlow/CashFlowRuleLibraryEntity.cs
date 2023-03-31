@@ -8,8 +8,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public CashFlowRuleLibraryEntity()
         {
             CashFlowRules = new HashSet<CashFlowRuleEntity>();
+            Users = new HashSet<CashFlowRuleLibraryUserEntity>();
         }
 
         public virtual ICollection<CashFlowRuleEntity> CashFlowRules { get; set; }
+        public virtual ICollection<CashFlowRuleLibraryUserEntity> Users { get; set; }
     }
 }

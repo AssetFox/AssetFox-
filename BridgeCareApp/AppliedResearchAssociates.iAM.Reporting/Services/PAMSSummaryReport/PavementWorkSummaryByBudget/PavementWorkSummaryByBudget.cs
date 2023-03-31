@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent;
@@ -16,7 +15,7 @@ using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummaryByBudget
 {
-    public class PavementWorkSummaryByBudget : IPavementWorkSummaryByBudget
+    public class PavementWorkSummaryByBudget
     {
         private PavementWorkSummaryComputationHelper _pavementWorkSummaryComputationHelper;
 
@@ -112,21 +111,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 // Finally, advance for next budget label
                 currentCell.Row++;
             }
-        }
-
-        private Dictionary<int, double> CalculateTotalBudgetPerYear(List<int> simulationYears, List<YearsData> costForCommittedBudgets)
-        {
-            // Fill up the total costs
-            var totalBudgetPerYear = new Dictionary<int, double>();
-            //var totalSpent = new List<(int year, double amount)>();
-            foreach (var year in simulationYears)
-            {
-                var yearlyBudget = costForCommittedBudgets.FindAll(_ => _.Year == year);
-                var committedAmountSum = yearlyBudget.Sum(s => s.Amount);
-                totalBudgetPerYear.Add(year, committedAmountSum);
-                //totalSpent.Add((year, committedAmountSum));
-            }
-            return totalBudgetPerYear;
         }
 
         private static void SetupBudgetModelsAndCommittedTreatments(SimulationOutput reportOutputData, IReadOnlyCollection<SelectableTreatment> selectableTreatments, List<WorkSummaryByBudgetModel> workSummaryByBudgetModels, HashSet<string> committedTreatments)

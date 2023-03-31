@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
@@ -16,9 +16,8 @@ using BridgeCareCore.Utils.Interfaces;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace BridgeCareCore.Controllers
 {
@@ -33,7 +32,7 @@ namespace BridgeCareCore.Controllers
 
         private IBudgetPriortyPagingService _budgetPriortyService;
 
-        public BudgetPriorityController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+        public BudgetPriorityController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
             IBudgetPriortyPagingService budgetPriortyService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
@@ -111,30 +110,25 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var items = _budgetPriortyService.GetSyncedLibraryDataset(upsertRequest);
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                         dto.BudgetPriorities = items;
                     }
-                    UnitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
-                    UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
-                    UnitOfWork.Commit();
+                    UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorityLibraryAndPriorities(dto, upsertRequest.IsNewLibrary, UserId);
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::UpsertBudgetPriorityLibrary - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::UpsertBudgetPriorityLibrary - {e.Message}");
                 throw;
             }
@@ -149,15 +143,13 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         var dto = GetAllBudgetPriorityLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
                     }
                     UnitOfWork.BudgetPriorityRepo.DeleteBudgetPriorityLibrary(libraryId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
@@ -169,7 +161,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::DeleteBudgetPriorityLibrary - {e.Message}");
                 throw;
             }
@@ -212,34 +203,110 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var dtos = _budgetPriortyService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(dtos, simulationId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::UpsertScenarioBudgetPriorities - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::UpsertScenarioBudgetPriorities - {e.Message}");
                 throw;
             }
         }
+        [HttpGet]
+        [Route("GetBudgetPriorityLibraryUsers/{libraryId}")]
+        [Authorize(Policy = Policy.ViewBudgetPriorityFromLibrary)]
+        public async Task<IActionResult> GetBudgetPriorityLibraryUsers(Guid libraryId)
+        {
+            try
+            {
+                List<LibraryUserDTO> users = new List<LibraryUserDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    var accessModel = UnitOfWork.BudgetPriorityRepo.GetLibraryAccess(libraryId, UserId);
+                    _claimHelper.CheckGetLibraryUsersValidity(accessModel, UserId);
+                    users = UnitOfWork.BudgetPriorityRepo.GetLibraryUsers(libraryId);
+                });
+                return Ok(users);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetBudgetPriorityLibraryUsers - {HubService.errorList["Unauthorized"]}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetBudgetPriorityLibraryUsers - {e.Message}");
+                throw;
+            }
+        }
 
+        [HttpPost]
+        [Route("UpsertOrDeleteBudgetPriorityLibraryUsers/{libraryId}")]
+        [Authorize(Policy = Policy.ModifyBudgetPriorityFromLibrary)]
+        public async Task<IActionResult> UpsertOrDeleteBudgetPriorityLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var libraryUsers = UnitOfWork.BudgetPriorityRepo.GetLibraryUsers(libraryId);
+                    _claimHelper.CheckAccessModifyValidity(libraryUsers, proposedUsers, UserId);
+                    UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteUsers(libraryId, proposedUsers);
+                });
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::UpsertOrDeleteBudgetPriorityLibraryUsers - {e.Message}");
+                throw;
+            }
+        }
+        [HttpGet]
+        [Route("GetIsSharedLibrary/{budgetPriorityLibraryId}")]
+        [Authorize(Policy = Policy.ViewBudgetPriorityFromLibrary)]
+        public async Task<IActionResult> GetIsSharedLibrary(Guid budgetPriorityLibraryId)
+        {
+            try
+            {
+                bool result = false;
+                await Task.Factory.StartNew(() =>
+                {
+                    var users = UnitOfWork.BudgetPriorityRepo.GetLibraryUsers(budgetPriorityLibraryId);
+                    var nonOwnerUsers = users.Any(x => x.AccessLevel != AppliedResearchAssociates.iAM.DTOs.Enums.LibraryAccessLevel.Owner);
+                    if (nonOwnerUsers)
+                    {
+                        result = true;
+                    }
+                    else
+                    {
+                        result = false;
+                    }
+                });
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetIsSharedLibrary - {e.Message}");
+                throw;
+            }
+        }
         [HttpGet]
         [Route("GetHasPermittedAccess")]
         [Authorize(Policy = Policy.ModifyBudgetPriorityFromLibrary)]
         public async Task<IActionResult> GetHasPermittedAccess()
         {
+            await Task.Factory.StartNew(() =>
+            {
+            });
             return Ok(true);
         }
 

@@ -1,10 +1,18 @@
+//#define dump_analysis_input
+//#define dump_analysis_output
+
+#if dump_analysis_input || dump_analysis_output
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
+#endif
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
 
@@ -19,7 +27,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
 #if !DEBUG
-        private static int maxThreadsForSimulation = GetMaxThreadsForSimulation();
+        private static readonly int MaxThreadsForSimulation = GetMaxThreadsForSimulation();
+
+        private static int GetMaxThreadsForSimulation()
+        {
+            int processorCount = Environment.ProcessorCount;
+            return processorCount >= 8 ? processorCount - 2 : processorCount - 1;
+        }
 #endif
 
         public Simulation Simulation { get;  }
@@ -62,9 +76,24 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
         }
 
-
-        public void Run(bool withValidation = true, CancellationToken cancellationToken = default(CancellationToken))
+        public void Run(bool withValidation = true, CancellationToken cancellationToken = default)
         {
+#if dump_analysis_input
+            var inputDumpPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                $"{DateTime.Now:yyyy-MM-dd HH-mm-ss-fff} analysis input dump.json");
+
+            var inputData = Scenario.Convert(Simulation);
+            var inputJson = JsonSerializer.Serialize(inputData, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Converters = { new JsonStringEnumConverter() },
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            });
+
+            File.WriteAllText(inputDumpPath, inputJson);
+#endif
+
             // During the execution of this method and its dependencies, the "SimulationException"
             // type is used for errors that are caused by invalid user input. Other types like
             // "InvalidOperationException" are used for errors that are caused by internal or
@@ -126,7 +155,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             AssetContexts = Simulation.Network.Assets
 #if !DEBUG
                 .AsParallel()
-                .WithDegreeOfParallelism(maxThreadsForSimulation)
+                .WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif
                 .Select(asset => new AssetContext(asset, this))
                 .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))
@@ -143,7 +172,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var logMessage = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
                 Send(logMessage);
             }
-
             InParallel(AssetContexts, context =>
             {
                 context.RollForward();
@@ -152,35 +180,16 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;
 
-            switch (Simulation.AnalysisMethod.SpendingStrategy)
+            ConditionGoalsEvaluator = Simulation.AnalysisMethod.SpendingStrategy switch
             {
-            case SpendingStrategy.NoSpending:
-                ConditionGoalsEvaluator = () => false;
-                break;
-
-            case SpendingStrategy.UnlimitedSpending:
-                ConditionGoalsEvaluator = () => false;
-                break;
-
-            case SpendingStrategy.UntilTargetAndDeficientConditionGoalsMet:
-                ConditionGoalsEvaluator = () => GoalsAreMet(TargetConditionActuals) && GoalsAreMet(DeficientConditionActuals);
-                break;
-
-            case SpendingStrategy.UntilTargetConditionGoalsMet:
-                ConditionGoalsEvaluator = () => GoalsAreMet(TargetConditionActuals);
-                break;
-
-            case SpendingStrategy.UntilDeficientConditionGoalsMet:
-                ConditionGoalsEvaluator = () => GoalsAreMet(DeficientConditionActuals);
-                break;
-
-            case SpendingStrategy.AsBudgetPermits:
-                ConditionGoalsEvaluator = () => false;
-                break;
-
-            default:
-                throw new InvalidOperationException(MessageStrings.InvalidSpendingStrategy);
-            }
+                SpendingStrategy.NoSpending => () => false,
+                SpendingStrategy.UnlimitedSpending => () => false,
+                SpendingStrategy.UntilTargetAndDeficientConditionGoalsMet => () => GoalsAreMet(TargetConditionActuals) && GoalsAreMet(DeficientConditionActuals),
+                SpendingStrategy.UntilTargetConditionGoalsMet => () => GoalsAreMet(TargetConditionActuals),
+                SpendingStrategy.UntilDeficientConditionGoalsMet => () => GoalsAreMet(DeficientConditionActuals),
+                SpendingStrategy.AsBudgetPermits => () => false,
+                _ => throw new InvalidOperationException(MessageStrings.InvalidSpendingStrategy),
+            };
 
             ObjectiveFunction = Simulation.AnalysisMethod.ObjectiveFunction;
 
@@ -189,18 +198,52 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             SimulationOutput output = new();
             output.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
             output.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
+
+            output.AssetTreatmentCategories = new();
+            foreach (var assetContext in AssetContexts)
+            {
+                var committedProject = Simulation.CommittedProjects.FirstOrDefault(c => c.Asset.Id == assetContext.Asset.Id);
+                if (committedProject != null)
+                {
+                    var assetTreatmentCategoryDetail = new AssetTreatmentCategoryDetail(committedProject.Asset.Id, committedProject.Asset.AssetName, committedProject.treatmentCategory);
+                    output.AssetTreatmentCategories.Add(assetTreatmentCategoryDetail);
+                }
+            }
+
             Simulation.ResultsOnDisk.Initialize(output);
             output = null;
 
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
-                if (CheckCanceled(cancellationToken)) return;
+                if (CheckCanceled(cancellationToken))
+                {
+                    return;
+                }
+
                 var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod * 100;
                 ReportProgress(ProgressStatus.Running, percentComplete, year);
 
-                var unhandledContexts = ApplyRequiredEvents(year); if (CheckCanceled(cancellationToken)) return;
-                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year); if (CheckCanceled(cancellationToken)) return;
-                ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year); if (CheckCanceled(cancellationToken)) return;
+                var unhandledContexts = ApplyRequiredEvents(year);
+
+                if (CheckCanceled(cancellationToken))
+                {
+                    return;
+                }
+
+                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
+
+                if (CheckCanceled(cancellationToken))
+                {
+                    return;
+                }
+
+                ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
+
+                if (CheckCanceled(cancellationToken))
+                {
+                    return;
+                }
+
                 treatmentOptions = null;
 
                 InParallel(AssetContexts, context =>
@@ -208,7 +251,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     context.ApplyTreatmentMetadataIfPending(year);
                     context.UnfixCalculatedFieldValues();
                 });
-                if (CheckCanceled(cancellationToken)) return;
+
+                if (CheckCanceled(cancellationToken))
+                {
+                    return;
+                }
 
                 Snapshot(year);
             }
@@ -222,7 +269,21 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
 
+#if dump_analysis_output
+            var outputDumpPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                $"{DateTime.Now:yyyy-MM-dd HH-mm-ss-fff} analysis output dump.json");
 
+            var outputData = Simulation.Results;
+            var outputJson = JsonSerializer.Serialize(outputData, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Converters = { new JsonStringEnumConverter() },
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            });
+
+            File.WriteAllText(outputDumpPath, outputJson);
+#endif
 
             bool CheckCanceled(CancellationToken cancellationToken)
             {
@@ -312,7 +373,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 action(item);
             }
 #else
-            _ = System.Threading.Tasks.Parallel.ForEach(items, new ParallelOptions { MaxDegreeOfParallelism = maxThreadsForSimulation }, action);
+            _ = System.Threading.Tasks.Parallel.ForEach(items, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = MaxThreadsForSimulation }, action);
 #endif
         }
 
@@ -465,7 +526,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                     foreach (var option in treatmentOptions)
                     {
-                        if (workingContextPerBaselineContext.TryGetValue(option.Context, out var workingContext) && priority.Criterion.EvaluateOrDefault(workingContext))
+                        var optionContextIsPending = workingContextPerBaselineContext.TryGetValue(option.Context, out var workingContext);
+                        if (optionContextIsPending && priority.Criterion.EvaluateOrDefault(workingContext))
                         {
                             var costCoverage = TryToPayForTreatment(
                                 workingContext,
@@ -517,7 +579,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             {
                 if (context.YearIsWithinShadowForAnyTreatment(year))
                 {
-                    var rejections = ActiveTreatments.Select(treatment => new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForAnyTreatment));
+                    var rejections = ActiveTreatments.Select(treatment => new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForAnyTreatment, getBenefitImprovement(context, treatment)));
                     context.Detail.TreatmentRejections.AddRange(rejections);
                     return;
                 }
@@ -529,7 +591,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     var isRejected = context.YearIsWithinShadowForSameTreatment(year, treatment);
                     if (isRejected)
                     {
-                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForSameTreatment));
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForSameTreatment, getBenefitImprovement(context, treatment)));
                     }
 
                     return isRejected;
@@ -540,7 +602,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     var isFeasible = treatment.IsFeasible(context);
                     if (!isFeasible)
                     {
-                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.NotFeasible));
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.NotFeasible, getBenefitImprovement(context, treatment)));
                     }
 
                     return !isFeasible;
@@ -559,7 +621,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     var isSuperseded = supersededTreatments.Contains(treatment);
                     if (isSuperseded)
                     {
-                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.Superseded));
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.Superseded, getBenefitImprovement(context, treatment)));
                     }
 
                     return isSuperseded;
@@ -572,18 +634,27 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     {
                         if (convertedCost < Simulation.InvestmentPlan.MinimumProjectCostLimit)
                         {
-                            context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit));
+                            context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit, getBenefitImprovement(context, treatment)));
                             return true;
                         }
 
                         return false;
                     }
 
-                    context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
+                    context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost, getBenefitImprovement(context, treatment)));
                     var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Asset, treatment, cost, context.SimulationRunner.Simulation.Id);
                     Send(messageBuilder);
                     return true;
                 });
+
+                static double getBenefitImprovement(AssetContext context, Treatment treatment)
+                {
+                    var copyOfContext = new AssetContext(context);
+                    var benefitBeforeTreatment = copyOfContext.GetBenefit(false);
+                    copyOfContext.ApplyTreatmentConsequences(treatment);
+                    var benefitAfterTreatment = copyOfContext.GetBenefit(false);
+                    return benefitAfterTreatment - benefitBeforeTreatment;
+                }
 
                 if (feasibleTreatments.Count > 0)
                 {
@@ -629,8 +700,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             {
                 var goalContexts = AssetContexts
 #if !DEBUG
-                    .AsParallel().
-                    WithDegreeOfParallelism(maxThreadsForSimulation)
+                    .AsParallel()
+                    .WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
@@ -659,8 +730,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                 var goalContexts = AssetContexts
 #if !DEBUG
-                    .AsParallel().
-                    WithDegreeOfParallelism(maxThreadsForSimulation)
+                    .AsParallel()
+                    .WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
@@ -738,6 +809,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             var treatmentConsideration = new TreatmentConsiderationDetail(treatment.Name);
 
+            treatmentConsideration.BudgetsAtDecisionTime.AddRange(
+                BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.CurrentAmount)));
+
             treatmentConsideration.BudgetUsages.AddRange(BudgetContexts.Select(budgetContext => new BudgetUsageDetail(budgetContext.Budget.Name)
             {
                 Status = treatment.CanUseBudget(budgetContext.Budget) ? BudgetUsageStatus.NotNeeded : BudgetUsageStatus.NotUsable
@@ -747,16 +821,16 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             {
                 assetContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
                 var budgetUsageDetail = treatmentConsideration.BudgetUsages.Single(budgetUsage => budgetUsage.Status != BudgetUsageStatus.NotUsable);
-                budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInFull;
+                budgetUsageDetail.Status = BudgetUsageStatus.CostCovered;
                 budgetUsageDetail.CoveredCost = (decimal)treatmentCost; // Cost is assumed to already include all appropriate adjustments, e.g. for inflation.
                 return CostCoverage.Full;
             }
 
-            var applicableBudgets = Zip.Strict(BudgetContexts, treatmentConsideration.BudgetUsages).Where(budgetIsApplicable).ToArray();
+            var applicableBudgets = BudgetContexts.Zip(treatmentConsideration.BudgetUsages, BudgetInfo.Create).Where(budgetIsApplicable).ToArray();
 
-            bool budgetIsApplicable((BudgetContext, BudgetUsageDetail) _)
+            bool budgetIsApplicable(BudgetInfo info)
             {
-                var (budgetContext, budgetUsageDetail) = _;
+                var (budgetContext, budgetUsageDetail) = info;
 
                 if (budgetUsageDetail.Status == BudgetUsageStatus.NotUsable)
                 {
@@ -764,7 +838,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 }
 
                 var budgetConditions = ConditionsPerBudget[budgetContext.Budget];
-                var budgetConditionIsMet = treatment is CommittedProject || budgetConditions.Count() == 0 || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(assetContext));
+                var budgetConditionIsMet = treatment is CommittedProject || !budgetConditions.Any() || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(assetContext));
                 if (!budgetConditionIsMet)
                 {
                     budgetUsageDetail.Status = BudgetUsageStatus.ConditionNotMet;
@@ -826,8 +900,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                         var futureCostAllocators = new List<Action>();
                         var considerationPerYear = costPerYear.Select(_ => new TreatmentConsiderationDetail(treatmentConsideration)).ToList();
 
-                        var workingBudgetContexts = applicableBudgets.Select(_ => new BudgetContext(_.Item1)).ToArray();
-                        var applicableBudgetNames = applicableBudgets.Select(_ => _.Item2.BudgetName).ToHashSet();
+                        var workingBudgetContexts = applicableBudgets.Select(_ => new BudgetContext(_.Context)).ToArray();
+                        var applicableBudgetNames = applicableBudgets.Select(_ => _.UsageDetail.BudgetName).ToHashSet();
 
                         var originalBudgetContextPerWorkingBudgetContext = new Dictionary<BudgetContext, BudgetContext>();
                         foreach (var ((original, _), working) in Zip.Strict(applicableBudgets, workingBudgetContexts))
@@ -835,7 +909,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                             originalBudgetContextPerWorkingBudgetContext[working] = original;
                         }
 
-                        BudgetContext firstYearBudget = null;
+                        Dictionary<BudgetContext, decimal> firstYearFractionPerBudget = null;
 
                         foreach (var (futureYearConsideration, futureYearCost, futureYear) in Zip.Short(considerationPerYear, costPerYear, Static.Count(year)))
                         {
@@ -845,12 +919,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                             }
 
                             var workingBudgetDetails = futureYearConsideration.BudgetUsages.Where(detail => applicableBudgetNames.Contains(detail.BudgetName));
-                            var workingBudgets = Zip.Strict(workingBudgetContexts, workingBudgetDetails).ToList();
-
-                            if (firstYearBudget is object)
-                            {
-                                _ = workingBudgets.RemoveAll(pair => pair.Item1 != firstYearBudget);
-                            }
+                            var workingBudgets = workingBudgetContexts.Zip(workingBudgetDetails, BudgetInfo.Create).ToList();
 
                             var remainingYearCost = futureYearCost;
 
@@ -863,16 +932,28 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                                 futureCostAllocators.Add(() => originalBudgetContext.AllocateCost(cost, futureYear));
                             }
 
-                            tryToAllocateCost(workingBudgets, ref remainingYearCost, addFutureCostAllocator);
+                            tryToAllocateCost(
+                                workingBudgets,
+                                ref remainingYearCost,
+                                addFutureCostAllocator,
+                                firstYearFractionPerBudget,
+                                out var costCoverageFractionsWereSatisfied);
 
-                            if (futureYear == year && Simulation.AnalysisMethod.ShouldRestrictCashFlowToFirstYearBudget)
+                            if (firstYearFractionPerBudget is not null && !costCoverageFractionsWereSatisfied)
                             {
-                                firstYearBudget = workingBudgets.SingleOrDefault(pair => pair.Item2.Status == BudgetUsageStatus.CostCoveredInFull).Item1;
+                                return ReasonAgainstCashFlow.FirstYearFundingPatternFailedInFutureYear;
                             }
 
                             if (remainingYearCost > 0)
                             {
                                 return ReasonAgainstCashFlow.FundingIsNotAvailable;
+                            }
+
+                            if (futureYear == year && Simulation.AnalysisMethod.ShouldRestrictCashFlowToFirstYearBudgets)
+                            {
+                                firstYearFractionPerBudget = workingBudgets
+                                    .Where(info => info.UsageDetail.Status == BudgetUsageStatus.CostCovered)
+                                    .ToDictionary(info => info.Context, info => info.UsageDetail.CoveredCost / futureYearCost);
                             }
                         }
 
@@ -899,7 +980,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     }
                 }
 
-                if (scheduleCashFlowEvents is object)
+                if (scheduleCashFlowEvents is not null)
                 {
                     scheduleCashFlowEvents();
                     return CostCoverage.CashFlow;
@@ -918,7 +999,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 costAllocators.Add(() => budgetContext.AllocateCost(cost));
             }
 
-            tryToAllocateCost(applicableBudgets, ref remainingCost, addCostAllocator);
+            tryToAllocateCost(
+                applicableBudgets,
+                ref remainingCost,
+                addCostAllocator,
+                null,
+                out _);
 
             if (remainingCost > 0)
             {
@@ -932,9 +1018,20 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             return CostCoverage.Full;
 
-            void tryToAllocateCost(IEnumerable<(BudgetContext, BudgetUsageDetail)> budgets, ref decimal cost, Action<decimal, BudgetContext> costAllocationAction)
-            // "cost" is a variable that is being *indirectly* updated by "costAllocationAction".
+            void tryToAllocateCost(
+                IEnumerable<BudgetInfo> budgets,
+                ref decimal cost,
+                Action<decimal, BudgetContext> costAllocationAction,
+                IReadOnlyDictionary<BudgetContext, decimal> costCoverageFractionPerBudget,
+                out bool costCoverageFractionsWereSatisfied)
             {
+                // Assumed (or irrelevant, if no fractions are provided)
+                costCoverageFractionsWereSatisfied = true;
+
+                // "cost" is a variable that is being *indirectly* updated by "costAllocationAction".
+
+                var originalCost = cost;
+
                 foreach (var (budgetContext, budgetUsageDetail) in budgets)
                 {
                     if (cost <= 0)
@@ -944,23 +1041,43 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                     var availableAmount = getAvailableAmount(budgetContext);
 
-                    if (SpendingLimit == SpendingLimit.NoLimit || cost <= availableAmount)
+                    if (costCoverageFractionPerBudget is null)
                     {
-                        budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInFull;
-                        budgetUsageDetail.CoveredCost = cost;
-                        costAllocationAction(cost, budgetContext);
-                        break;
+                        if (SpendingLimit == SpendingLimit.NoLimit || cost <= availableAmount)
+                        {
+                            coverCost(cost);
+                            break;
+                        }
+
+                        if (Simulation.AnalysisMethod.AllowFundingFromMultipleBudgets && availableAmount > 0)
+                        {
+                            coverCost(availableAmount);
+                        }
+                    }
+                    else if (costCoverageFractionPerBudget.TryGetValue(budgetContext, out var coverageFraction))
+                    {
+                        var fractionedCost = originalCost * coverageFraction;
+
+                        if (fractionedCost <= availableAmount)
+                        {
+                            coverCost(fractionedCost);
+                            continue;
+                        }
+                        else
+                        {
+                            // Any unsatisfied coverage fraction means the whole cost allocation has failed.
+                            costCoverageFractionsWereSatisfied = false;
+                            return;
+                        }
                     }
 
-                    if (Simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets && availableAmount > 0)
+                    budgetUsageDetail.Status = BudgetUsageStatus.CostNotCovered;
+
+                    void coverCost(decimal costToCover)
                     {
-                        budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInPart;
-                        budgetUsageDetail.CoveredCost = availableAmount;
-                        costAllocationAction(availableAmount, budgetContext);
-                    }
-                    else
-                    {
-                        budgetUsageDetail.Status = BudgetUsageStatus.CostNotCovered;
+                        budgetUsageDetail.Status = BudgetUsageStatus.CostCovered;
+                        budgetUsageDetail.CoveredCost = costToCover;
+                        costAllocationAction(costToCover, budgetContext);
                     }
                 }
 
@@ -977,16 +1094,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             DeficientConditionActuals = GetDeficientConditionActuals();
         }
 
-        private static int GetMaxThreadsForSimulation()
+        private sealed record BudgetInfo(BudgetContext Context, BudgetUsageDetail UsageDetail)
         {
-            int processorCount = Environment.ProcessorCount;
-
-            if(processorCount >= 8)
-            {
-                return processorCount - 2;
-            }
-
-            return processorCount - 1;
+            public static BudgetInfo Create(BudgetContext context, BudgetUsageDetail usageDetail) => new(context, usageDetail);
         }
     }
 }

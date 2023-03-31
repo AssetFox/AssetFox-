@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -117,12 +118,76 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
         }
+        public List<DeficientConditionGoalLibraryDTO> GetDeficientConditionGoalLibrariesNoChildrenAccessibleToUser(Guid userId)
+        {
+            return _unitOfWork.Context.DeficientConditionGoalLibraryUser
+                .AsNoTracking()
+                .Include(u => u.DeficientConditionGoalLibrary)
+                .Where(u => u.UserId == userId)
+                .Select(u => u.DeficientConditionGoalLibrary.ToDto())
+                .ToList();
+        }
+        public void UpsertOrDeleteUsers(Guid deficientConditionGoalLibraryId, IList<LibraryUserDTO> libraryUsers)
+        {
+            var existingEntities = _unitOfWork.Context.DeficientConditionGoalLibraryUser.Where(u => u.LibraryId == deficientConditionGoalLibraryId).ToList();
+            var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
+            var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
+            var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
+            var userIdsToUpdate = existingUserIds.Intersect(desiredUserIDs).ToList();
+            var userIdsToAdd = desiredUserIDs.Except(existingUserIds).ToList();
+            var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToDeficientConditionGoalLibraryUserEntity(u, deficientConditionGoalLibraryId)).ToList();
+            var dtosToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToMaybeUpdate = existingEntities.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToUpdate = new List<DeficientConditionGoalLibraryUserEntity>();
+            foreach (var dto in dtosToUpdate)
+            {
+                var entityToUpdate = entitiesToMaybeUpdate.FirstOrDefault(e => e.UserId == dto.UserId);
+                if (entityToUpdate != null && entityToUpdate.AccessLevel != (int)dto.AccessLevel)
+                {
+                    entityToUpdate.AccessLevel = (int)dto.AccessLevel;
+                    entitiesToUpdate.Add(entityToUpdate);
+                }
+            }
+            _unitOfWork.Context.AddRange(entitiesToAdd);
+            _unitOfWork.Context.UpdateRange(entitiesToUpdate);
+            var entitiesToDelete = existingEntities.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
+            _unitOfWork.Context.RemoveRange(entitiesToDelete);
+            _unitOfWork.Context.SaveChanges();
+        }
+        private List<LibraryUserDTO> GetAccessForUser(Guid deficientConditionGoalLibraryId, Guid userId)
+        {
+            var dtos = _unitOfWork.Context.DeficientConditionGoalLibraryUser
+                .Where(u => u.LibraryId == deficientConditionGoalLibraryId && u.UserId == userId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
+
+        public List<LibraryUserDTO> GetLibraryUsers(Guid deficientConditionGoalLibraryId)
+        {
+            var dtos = _unitOfWork.Context.DeficientConditionGoalLibraryUser
+                .Include(u => u.User)
+                .Where(u => u.LibraryId == deficientConditionGoalLibraryId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
 
         public void UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto)
         {
             var deficientConditionGoalLibraryEntity = dto.ToEntity();
 
             _unitOfWork.Context.Upsert(deficientConditionGoalLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
+        }
+
+
+        public void UpsertDeficientConditionGoalLibraryAndGoals(DeficientConditionGoalLibraryDTO dto)
+        {
+            _unitOfWork.AsTransaction(() =>
+            {
+                UpsertDeficientConditionGoalLibrary(dto);
+                UpsertOrDeleteDeficientConditionGoals(dto.DeficientConditionGoals, dto.Id);
+            });
         }
 
         public void UpsertOrDeleteDeficientConditionGoals(List<DeficientConditionGoalDTO> deficientConditionGoals,
@@ -252,86 +317,101 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return res;
         }
 
+        public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
+        {
+            var exists = _unitOfWork.Context.DeficientConditionGoalLibrary.Any(bl => bl.Id == libraryId);
+            if (!exists)
+            {
+                return LibraryAccessModels.LibraryDoesNotExist();
+            }
+            var users = GetAccessForUser(libraryId, userId);
+            var user = users.FirstOrDefault();
+            return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
+        }
+
         public void UpsertOrDeleteScenarioDeficientConditionGoals(List<DeficientConditionGoalDTO> scenarioDeficientConditionGoal, Guid simulationId)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            _unitOfWork.AsTransaction(() =>
             {
-                throw new RowNotInTableException($"No simulation found for the given scenario.");
-            }
-            if (scenarioDeficientConditionGoal.Any(_ => string.IsNullOrEmpty(_.Attribute)))
-            {
-                throw new InvalidOperationException("All deficient conditions must have an attribute.");
-            }
-            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
-            var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
-
-            if (!scenarioDeficientConditionGoal.All(_ => attributeNames.Contains(_.Attribute)))
-            {
-                var missingAttributes = scenarioDeficientConditionGoal.Select(_ => _.Attribute)
-                    .Except(attributeNames).ToList();
-                if (missingAttributes.Count == 1)
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
-                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
+                    throw new RowNotInTableException($"No simulation found for the given scenario.");
                 }
+                if (scenarioDeficientConditionGoal.Any(_ => string.IsNullOrEmpty(_.Attribute)))
+                {
+                    throw new InvalidOperationException("All deficient conditions must have an attribute.");
+                }
+                var attributeEntities = _unitOfWork.Context.Attribute.ToList();
+                var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
 
-                throw new RowNotInTableException(
-                    $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
-            }
-            var scenarioDeficientConditionGoalEntities = scenarioDeficientConditionGoal
-                .Select(_ =>
-                    _.ToScenarioEntity(simulationId, attributeEntities.Single(__ => __.Name == _.Attribute).Id))
-                .ToList();
-            var entityIds = scenarioDeficientConditionGoal.Select(_ => _.Id).ToList();
-
-            var existingEntityIds = _unitOfWork.Context.ScenarioDeficientConditionGoal
-                .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
-                .Select(_ => _.Id).ToList();
-
-            _unitOfWork.Context.DeleteAll<ScenarioDeficientConditionGoalEntity>(_ =>
-                _.SimulationId == simulationId && !entityIds.Contains(_.Id));
-
-            _unitOfWork.Context.UpdateAll(scenarioDeficientConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
-                .ToList(), _unitOfWork.UserEntity?.Id);
-
-            _unitOfWork.Context.AddAll(scenarioDeficientConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
-                .ToList(), _unitOfWork.UserEntity?.Id);
-
-            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioDeficientConditionGoalEntity>(_ =>
-                _.ScenarioDeficientConditionGoal.SimulationId == simulationId);
-
-            if (scenarioDeficientConditionGoal.Any(_ =>
-                _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
-            {
-                var criterionLibraryEntities = new List<CriterionLibraryEntity>();
-                var criterionLibraryJoinEntities = new List<CriterionLibraryScenarioDeficientConditionGoalEntity>();
-
-                scenarioDeficientConditionGoal.Where(curve =>
-                        curve.CriterionLibrary?.Id != null && curve.CriterionLibrary?.Id != Guid.Empty &&
-                        !string.IsNullOrEmpty(curve.CriterionLibrary.MergedCriteriaExpression))
-                    .ForEach(goal =>
+                if (!scenarioDeficientConditionGoal.All(_ => attributeNames.Contains(_.Attribute)))
+                {
+                    var missingAttributes = scenarioDeficientConditionGoal.Select(_ => _.Attribute)
+                        .Except(attributeNames).ToList();
+                    if (missingAttributes.Count == 1)
                     {
-                        var criterionLibraryEntity = new CriterionLibraryEntity
-                        {
-                            Id = Guid.NewGuid(),
-                            MergedCriteriaExpression = goal.CriterionLibrary.MergedCriteriaExpression,
-                            Name = $"{goal.Name} {goal.Attribute} Criterion",
-                            IsSingleUse = true
-                        };
-                        criterionLibraryEntities.Add(criterionLibraryEntity);
-                        criterionLibraryJoinEntities.Add(new CriterionLibraryScenarioDeficientConditionGoalEntity
-                        {
-                            CriterionLibraryId = criterionLibraryEntity.Id,
-                            ScenarioDeficientConditionGoalId = goal.Id
-                        });
-                    });
+                        throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
+                    }
 
-                _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
-                _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
-            }
-            // Update last modified date
-            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
-            _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+                    throw new RowNotInTableException(
+                        $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
+                }
+                var scenarioDeficientConditionGoalEntities = scenarioDeficientConditionGoal
+                    .Select(_ =>
+                        _.ToScenarioEntity(simulationId, attributeEntities.Single(__ => __.Name == _.Attribute).Id))
+                    .ToList();
+                var entityIds = scenarioDeficientConditionGoal.Select(_ => _.Id).ToList();
+
+                var existingEntityIds = _unitOfWork.Context.ScenarioDeficientConditionGoal
+                    .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
+                    .Select(_ => _.Id).ToList();
+
+                _unitOfWork.Context.DeleteAll<ScenarioDeficientConditionGoalEntity>(_ =>
+                    _.SimulationId == simulationId && !entityIds.Contains(_.Id));
+
+                _unitOfWork.Context.UpdateAll(scenarioDeficientConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
+                    .ToList(), _unitOfWork.UserEntity?.Id);
+
+                _unitOfWork.Context.AddAll(scenarioDeficientConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                    .ToList(), _unitOfWork.UserEntity?.Id);
+
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioDeficientConditionGoalEntity>(_ =>
+                    _.ScenarioDeficientConditionGoal.SimulationId == simulationId);
+
+                if (scenarioDeficientConditionGoal.Any(_ =>
+                    _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                    !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+                {
+                    var criterionLibraryEntities = new List<CriterionLibraryEntity>();
+                    var criterionLibraryJoinEntities = new List<CriterionLibraryScenarioDeficientConditionGoalEntity>();
+
+                    scenarioDeficientConditionGoal.Where(curve =>
+                            curve.CriterionLibrary?.Id != null && curve.CriterionLibrary?.Id != Guid.Empty &&
+                            !string.IsNullOrEmpty(curve.CriterionLibrary.MergedCriteriaExpression))
+                        .ForEach(goal =>
+                        {
+                            var criterionLibraryEntity = new CriterionLibraryEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                MergedCriteriaExpression = goal.CriterionLibrary.MergedCriteriaExpression,
+                                Name = $"{goal.Name} {goal.Attribute} Criterion",
+                                IsSingleUse = true
+                            };
+                            criterionLibraryEntities.Add(criterionLibraryEntity);
+                            criterionLibraryJoinEntities.Add(new CriterionLibraryScenarioDeficientConditionGoalEntity
+                            {
+                                CriterionLibraryId = criterionLibraryEntity.Id,
+                                ScenarioDeficientConditionGoalId = goal.Id
+                            });
+                        });
+
+                    _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
+                }
+                // Update last modified date
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+            });
         }
     }
 }

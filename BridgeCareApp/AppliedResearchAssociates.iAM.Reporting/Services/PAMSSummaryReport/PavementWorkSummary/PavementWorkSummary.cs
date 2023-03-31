@@ -4,14 +4,12 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis;
 using OfficeOpenXml;
-
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
-    public class PavementWorkSummary : IPavementWorkSummary
+    public class PavementWorkSummary
     {
         private CostBudgetsWorkSummary _costBudgetsWorkSummary;
         private TreatmentsWorkSummary _treatmentsWorkSummary;
@@ -67,15 +65,5 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             return chartRowsModel;
         }
-
-        #region Private methods
-
-
-
-
-
-
-
-        #endregion Private methods
     }
 }

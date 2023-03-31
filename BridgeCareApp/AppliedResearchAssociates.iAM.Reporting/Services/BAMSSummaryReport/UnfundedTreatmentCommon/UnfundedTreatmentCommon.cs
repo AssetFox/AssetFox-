@@ -1,26 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentCommon
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {
-    public class UnfundedTreatmentCommon : IUnfundedTreatmentCommon
+    public class UnfundedTreatmentCommon
     {
-        private ISummaryReportHelper _summaryReportHelper;
-        private ITreatmentCommon _treatmentCommon;
+        private SummaryReportHelper _summaryReportHelper;
+        private TreatmentCommon _treatmentCommon;
+        private ReportHelper _reportHelper;
 
         public UnfundedTreatmentCommon()
         {
             _summaryReportHelper = new SummaryReportHelper();
-            _treatmentCommon = new TreatmentCommon.TreatmentCommon();
+            _treatmentCommon = new TreatmentCommon();
+            _reportHelper = new ReportHelper();
         }
 
         public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment)
@@ -46,18 +43,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = Year;
 
-            var familyId = int.Parse(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "FAMILY_ID"));
+            var familyId = int.Parse(_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FAMILY_ID"));
             if (familyId < 11)
             {
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_SEEDED");
+                worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_SEEDED");
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUP_SEEDED");
+                worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUP_SEEDED");
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
+                worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
@@ -65,13 +62,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
-                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_DURATION_N");
+                worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_DURATION_N");
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
-                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUP_DURATION_N");
+                worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUP_DURATION_N");
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
-                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_DURATION_N");
+                worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_DURATION_N");
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
@@ -176,26 +173,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
             currentCell = new CurrentCell { Row = headerRow + 2, Column = worksheet.Dimension.Columns + 1 };
             return currentCell;
-        }
-
-        public List<AssetDetail> GetSectionsWithUnfundedTreatments(SimulationYearDetail simulationYearDetail)
-        {
-            var untreatedSections =
-                    simulationYearDetail.Assets.Where(
-                        section => section.TreatmentCause == TreatmentCause.NoSelection && section.TreatmentOptions.Count > 0
-                        &&
-                        ((!string.IsNullOrEmpty(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) && int.Parse(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) == 1)
-                        ||
-                        _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA") > 28500
-                        )).ToList();
-            return untreatedSections;
-        }
-
-        public List<AssetDetail> GetSectionsWithFundedTreatments(SimulationYearDetail simulationYearDetail)
-        {
-            var treatedSections = simulationYearDetail.Assets.Where(section => section.TreatmentCause is not TreatmentCause.NoSelection);
-            return treatedSections.ToList();
-        }
+        }        
 
         private const string BRIDGE_FUNDING = "Bridge Funding";
         private const string INTERSTATE = "Interstate";

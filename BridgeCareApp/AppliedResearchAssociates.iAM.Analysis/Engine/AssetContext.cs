@@ -67,9 +67,18 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             ApplyTreatmentMetadata(year);
         }
 
+        public void ApplyTreatmentConsequences(Treatment treatment)
+        {
+            var consequenceActions = treatment.GetConsequenceActions(this);
+            foreach (var consequenceAction in consequenceActions)
+            {
+                consequenceAction();
+            }
+        }
+
         public void ApplyTreatmentMetadataIfPending(int year)
         {
-            if (AppliedTreatmentWithPendingMetadata is object)
+            if (AppliedTreatmentWithPendingMetadata is not null)
             {
                 ApplyTreatmentMetadata(year);
             }
@@ -85,12 +94,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PreDeterioration));
 
-        public double GetBenefit()
+        public double GetBenefit() => GetBenefit(true);
+
+        public double GetBenefit(bool withWeighting)
         {
             var rawBenefit = GetNumber(AnalysisMethod.Benefit.Attribute.Name);
             var benefit = AnalysisMethod.Benefit.GetValueRelativeToLimit(rawBenefit);
 
-            if (AnalysisMethod.Weighting != null)
+            if (withWeighting && AnalysisMethod.Weighting != null)
             {
                 var weight = GetNumber(AnalysisMethod.Weighting.Name);
                 benefit *= weight;
@@ -248,7 +259,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private readonly IDictionary<string, int> FirstUnshadowedYearForSameTreatment = new Dictionary<string, int>();
 
-        private readonly Stack<string> GetNumber_ActiveKeysOfCurrentInvocation = new Stack<string>();
+        private readonly Stack<string> GetNumber_ActiveKeysOfCurrentInvocation = new();
+
+        private readonly Dictionary<Attribute, double> MostRecentAdjustmentFactorsForPerformanceCurves = new();
 
         private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(KeyComparer);
 
@@ -272,12 +285,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private void ApplyTreatmentButNotMetadata(Treatment treatment)
         {
-            var consequenceActions = treatment.GetConsequenceActions(this);
-            foreach (var consequenceAction in consequenceActions)
-            {
-                consequenceAction();
-            }
-
+            ApplyTreatmentConsequences(treatment);
             AppliedTreatmentWithPendingMetadata = treatment;
         }
 
@@ -308,9 +316,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             Detail.AppliedTreatment = treatment.Name;
             Detail.TreatmentStatus = TreatmentStatus.Applied;
+
+            foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
+            {
+                MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
+            }
         }
 
-        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve);
+        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve, MostRecentAdjustmentFactorsForPerformanceCurves);
 
         private double CalculateValueOnCurve(PerformanceCurve curve, Action<double> handle)
         {

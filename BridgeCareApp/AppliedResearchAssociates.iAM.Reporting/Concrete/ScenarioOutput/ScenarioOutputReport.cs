@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
 using System.IO;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class ScenarioOutputReport : IReport
     {
-        private UnitOfDataPersistenceWork _unitofwork;
+        private IUnitOfWork _unitofwork;
 
         public Guid ID { get; set; }
         public Guid? SimulationID { get; set; }
@@ -30,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public ScenarioOutputReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results)
+        public ScenarioOutputReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results)
         {
             _unitofwork = unitOfWork;
             ReportTypeName = name;
@@ -47,7 +44,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // scenario.
 
             // Determine the Guid for the simulation
-            if (!Guid.TryParse(parameters, out Guid simulationGuid)) {
+            if (!Guid.TryParse(parameters, out Guid simulationGuid))
+            {
                 Errors.Add("Simulation ID could not be parsed to a Guid");
                 IndicateError();
                 return;
@@ -79,21 +77,22 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 simulationOutput = _unitofwork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationGuid);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 IndicateError();
                 Errors.Add("Failed to pull simulation output.  Has the simulation been run?");
                 Errors.Add(e.Message);
                 return;
             }
-            var outputJson = JsonConvert.SerializeObject(simulationOutput);
 
             // Save the output to a file
             try
             {
-                File.WriteAllText(reportFileName, outputJson);
+                using var reportFileWriter = File.CreateText(reportFileName);
+                JsonSerializer serializer = new();
+                serializer.Serialize(reportFileWriter, simulationOutput);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 IndicateError();
                 Errors.Add("Failed to write file to server");

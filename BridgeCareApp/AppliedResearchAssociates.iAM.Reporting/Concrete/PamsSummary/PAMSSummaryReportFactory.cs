@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         public string Name => "PAMSSummaryReport";
 
-        public IReport Create(UnitOfDataPersistenceWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
         {
             var report = new PAMSSummaryReport(uow, Name, results, hubService);
             return report;

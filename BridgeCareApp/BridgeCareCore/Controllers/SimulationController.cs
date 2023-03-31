@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -15,7 +15,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;using MoreLinq;
+using System.Linq;
 
 namespace BridgeCareCore.Controllers
 {
@@ -31,7 +32,7 @@ namespace BridgeCareCore.Controllers
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
@@ -100,8 +101,11 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                // copied comment for // TODO:  Replace with query to find all shared simulations
-                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetAllScenario());
+                var result = await Task.Factory.StartNew(() => {
+                    var scenariosToReturn = UnitOfWork.SimulationRepo.GetSharedScenarios(UserInfo.HasAdminAccess, UserInfo.HasSimulationAccess);
+                    scenariosToReturn = scenariosToReturn.Concat(UnitOfWork.SimulationRepo.GetUserScenarios()).ToList();
+                    return scenariosToReturn;
+                });
                 return Ok(result);
             }
             catch (Exception e)
@@ -137,9 +141,7 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.SimulationRepo.CreateSimulation(networkId, dto);
-                    UnitOfWork.Commit();
                     return UnitOfWork.SimulationRepo.GetSimulation(dto.Id);
                 });
                 
@@ -147,7 +149,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::CreateSimulation {dto.Name} - {e.Message}");
                 throw;
             }
@@ -155,17 +156,16 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CloneScenario/")]
-        [Authorize]
+        [Authorize(Policy = Policy.CloneSimulation)]
         public async Task<IActionResult> CloneSimulation([FromBody] CloneSimulationDTO dto)
         {
             try
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
-                    // Copied comment TODO (the user should only be able to clone scenarios that they have access to)
+
+                    _claimHelper.CheckUserSimulationModifyAuthorization(dto.scenarioId, UserId);
                     var cloneResult = UnitOfWork.SimulationRepo.CloneSimulation(dto.scenarioId, dto.networkId, dto.scenarioName);
-                    UnitOfWork.Commit();
                     return cloneResult;
                 });
 
@@ -177,7 +177,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::CloneSimulation - {e.Message}");
                 throw;
             }
@@ -193,10 +192,8 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(dto.Id, UserId);
-                    UnitOfWork.SimulationRepo.UpdateSimulation(dto);
-                    UnitOfWork.Commit();
+                    UnitOfWork.SimulationRepo.UpdateSimulationAndPossiblyUsers(dto);
                     return UnitOfWork.SimulationRepo.GetSimulation(dto.Id);
                 });
 
@@ -204,13 +201,11 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::UpdateSimulation {simulationName} - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::UpdateSimulation {simulationName} - {e.Message}");
                 throw;
             }
@@ -227,14 +222,12 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation {simulationName} - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation {simulationName} - {e.Message}");
                 throw;
@@ -254,15 +247,12 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.SimulationRepo.DeleteSimulation(simulationId);
-                    UnitOfWork.Commit();
                 });
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation {simulationName} - {e.Message}");
             }
@@ -368,9 +358,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.SimulationRepo.SetNoTreatmentBeforeCommitted(simulationId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
@@ -396,9 +384,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.SimulationRepo.RemoveNoTreatmentBeforeCommitted(simulationId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
@@ -424,9 +410,7 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var noTreatmentBeforeCommitted = UnitOfWork.SimulationRepo.GetNoTreatmentBeforeCommitted(simulationId);
-                    UnitOfWork.Commit();
                     return noTreatmentBeforeCommitted;
                 });
 

@@ -203,5 +203,44 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
                 IsCalculated = false,
                 IsAscending = false
             };
+
+        public static AttributeDTO Text(
+            string name,
+            Guid id)
+        {
+            var dto = new AttributeDTO
+            {
+                AggregationRuleType = "PREDOMINANT",
+                Id = id,
+                IsAscending = true,
+                Command = "",
+                Name = name,
+                Type = AttributeTypeNames.String,
+                DefaultValue = "default attribute value",
+                IsCalculated = false,
+            };
+            return dto;
+        }
+
+
+        public static AttributeDTO Numeric(
+            string name,
+            Guid id)
+        {
+            var dto = new AttributeDTO
+            {
+                AggregationRuleType = "AVERAGE",
+                Id = id,
+                IsAscending = true,
+                Command = "",
+                Name = name,
+                Type = AttributeTypeNames.Number,
+                DefaultValue = "0",
+                Minimum = 0,
+                Maximum = 100,
+                IsCalculated = false,
+            };
+            return dto;
+        }
     }
 }

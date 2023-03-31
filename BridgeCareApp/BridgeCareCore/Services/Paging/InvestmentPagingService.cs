@@ -3,7 +3,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Models;
 using System.Collections.Generic;
 using System;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Interfaces;
 using System.Linq;
@@ -12,10 +11,23 @@ namespace BridgeCareCore.Services.Paging
 {
     public class InvestmentPagingService : IInvestmentPagingService
     {
-        private static UnitOfDataPersistenceWork _unitOfWork;
+        private static IUnitOfWork _unitOfWork;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
 
-        public InvestmentPagingService(UnitOfDataPersistenceWork unitOfWork,
+        private static void FixNullAmounts(BudgetDTO budget)
+        {
+            if (budget.BudgetAmounts == null)
+            {
+                budget.BudgetAmounts = new List<BudgetAmountDTO>();
+            }
+        }
+
+        private static void FixNullAmounts(List<BudgetDTO> budgets)
+        {
+            budgets.ForEach(b => FixNullAmounts(b));
+        }
+
+        public InvestmentPagingService(IUnitOfWork unitOfWork,
             IInvestmentDefaultDataService investmentDefaultDataService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -30,7 +42,7 @@ namespace BridgeCareCore.Services.Paging
             var lastYear = 0;
 
             var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
-
+            FixNullAmounts(budgets);
 
             budgets = SyncedDataset(budgets, request.SyncModel);
 
@@ -95,6 +107,7 @@ namespace BridgeCareCore.Services.Paging
                 _unitOfWork.BudgetRepo.GetBudgetLibrary(request.SyncModel.LibraryId.Value).Budgets;
 
             budgets = SyncedDataset(budgets, request.SyncModel);
+            FixNullAmounts(budgets);
 
             if (request.sortColumn.Trim() != "")
                 budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
@@ -142,6 +155,7 @@ namespace BridgeCareCore.Services.Paging
                     _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
                     _unitOfWork.BudgetRepo.GetBudgetLibrary(request.LibraryId.Value).Budgets;
             budgets = SyncedDataset(budgets, request);
+            FixNullAmounts(budgets);
 
             if (request.LibraryId != null)
             {
@@ -170,6 +184,7 @@ namespace BridgeCareCore.Services.Paging
 
         private List<BudgetDTO> OrderByColumn(List<BudgetDTO> budgets, string sortColumn, bool isDescending)
         {
+            FixNullAmounts(budgets);
             sortColumn = sortColumn?.ToLower().Trim();
             switch (sortColumn)
             {
@@ -206,6 +221,7 @@ namespace BridgeCareCore.Services.Paging
         private List<BudgetDTO> SyncedDataset(List<BudgetDTO> budgets, InvestmentPagingSyncModel syncModel)
         {
             budgets = budgets.Concat(syncModel.AddedBudgets).Where(_ => !syncModel.BudgetsForDeletion.Contains(_.Id)).ToList();
+            FixNullAmounts(budgets);
             for (var i = 0; i < budgets.Count; i++)
             {
                 var budget = budgets[i];

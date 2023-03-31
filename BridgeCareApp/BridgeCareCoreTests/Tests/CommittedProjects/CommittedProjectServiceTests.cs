@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using Moq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -27,12 +27,12 @@ namespace BridgeCareCoreTests.Tests
             _excelData = excelData.ExcelData;
 
             var mockedTestUOW = new Mock<IUnitOfWork>();
-            _mockedContext = new Mock<IAMContext>();
-
+            var mockInvestmentPlanRepo = new Mock<IInvestmentPlanRepository>();
+            mockedTestUOW.Setup(u => u.InvestmentPlanRepo).Returns(mockInvestmentPlanRepo.Object);
+            mockInvestmentPlanRepo.Setup(i => i.GetInvestmentPlan(TestDataForCommittedProjects.SimulationId)).Returns(TestDataForCommittedProjects.TestInvestmentPlan);
             var mockAssetDataRepository = new Mock<IAssetData>();
             mockAssetDataRepository.Setup(_ => _.KeyProperties).Returns(TestDataForCommittedProjects.KeyProperties);
             mockedTestUOW.Setup(_ => _.AssetDataRepository).Returns(mockAssetDataRepository.Object);
-
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
             _mockCommittedProjectRepo.Setup(_ => _.GetCommittedProjectsForExport(It.IsAny<Guid>()))
                 .Returns<Guid>(_ => TestDataForCommittedProjects.ValidCommittedProjects
@@ -42,7 +42,7 @@ namespace BridgeCareCoreTests.Tests
             mockedTestUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
             _mockedSimulationRepo = new Mock<ISimulationRepository>();
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Simulation, TestDataForCommittedProjects.Simulations.AsQueryable());
+            _mockedSimulationRepo.Setup(s => s.GetSimulation(TestDataForCommittedProjects.SimulationId)).Returns(TestDataForCommittedProjects.TestSimulationDTO);
             _mockedSimulationRepo.Setup(_ => _.GetSimulationName(It.Is<Guid>(_ => _ != _badScenario))).Returns("Test");
             _mockedSimulationRepo.Setup(_ => _.GetSimulationName(It.Is<Guid>(_ => _ == _badScenario))).Returns<string>(null);
             mockedTestUOW.Setup(_ => _.SimulationRepo).Returns(_mockedSimulationRepo.Object);
@@ -61,7 +61,6 @@ namespace BridgeCareCoreTests.Tests
             mockedTestUOW.Setup(_ => _.BudgetRepo).Returns(mockBudgetRepository.Object);
 
             //_testUOW = new UnitOfDataPersistenceWork(new Mock<IConfiguration>().Object, _mockedContext.Object);
-            mockedTestUOW.Setup(_ => _.Context).Returns(_mockedContext.Object);
             _testUOW = mockedTestUOW.Object;
         }
 
@@ -133,7 +132,8 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             List<SectionCommittedProjectDTO> testInput = new List<SectionCommittedProjectDTO>();
             _mockCommittedProjectRepo.Setup(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()))
-                .Callback<List<SectionCommittedProjectDTO>>(_ => {
+                .Callback<List<SectionCommittedProjectDTO>>(_ =>
+                {
                     testInput = _;
                 });
             var service = new CommittedProjectService(_testUOW);
@@ -156,7 +156,8 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             List<SectionCommittedProjectDTO> testInput = new List<SectionCommittedProjectDTO>();
             _mockCommittedProjectRepo.Setup(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()))
-                .Callback<List<SectionCommittedProjectDTO>>(_ => {
+                .Callback<List<SectionCommittedProjectDTO>>(_ =>
+                {
                     testInput = _;
                 });
             var service = new CommittedProjectService(_testUOW);

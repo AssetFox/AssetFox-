@@ -1,11 +1,10 @@
 import { BenefitQuantifier, emptyNetwork, Network } from '@/shared/models/iAM/network';
 import NetworkService from '../services/network.service';
-import { any, append, clone, find, findIndex, propEq, update } from 'ramda';
+import { any, append, clone, find, findIndex, propEq, reject, update } from 'ramda';
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import prepend from 'ramda/es/prepend';
 import { http2XX } from '@/shared/utils/http-utils';
-import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import AggregationService from '@/services/aggregation.service';
 
 const state = {
@@ -102,6 +101,25 @@ const actions = {
                     });
                     //commit('selectedNetworkMutator', response.data);
                     dispatch('addSuccessNotification', { message: message });
+                }
+            },
+        );
+    },
+    async deleteNetwork({dispatch, commit, state}: any, networkId: any) {
+        return await NetworkService.deleteNetwork(networkId)
+            .then((response: AxiosResponse) => {
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                )  {
+                    dispatch('addSuccessNotification', {
+                        message: 'Deleted network',
+                    });
+                    const networks: Network[] = reject(
+                        propEq('id', networkId),
+                        state.networks,
+                    );
+                    commit('networksMutatorClone', networks)
                 }
             },
         );

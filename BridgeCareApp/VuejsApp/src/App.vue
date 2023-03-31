@@ -3,9 +3,9 @@
         <v-content>
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
-                    <img :src="require('@/assets/images/PennDOTLogo.svg')" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
+                    <img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" /> 
                     <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
-                    <img :src="require('@/assets/images/BridgeCareLogo.svg')" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
+                    <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
                     <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
                 </v-toolbar-title>
                 <v-toolbar-items>
@@ -249,7 +249,6 @@ import {
     setAuthHeader,
     setContentTypeCharset,
 } from '@/shared/utils/http-utils';
-//import ReportsService from './services/reports.service';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { clone } from 'ramda';
@@ -340,6 +339,8 @@ export default class AppComponent extends Vue {
     hasUnreadNewsItem: boolean = false;
     currentURL: any = '';
     unauthorizedError: string = '';
+    agencyLogo: string = '';
+    productLogo: string = '';
 
     get container() {
         const container: any = {};
@@ -514,6 +515,16 @@ export default class AppComponent extends Vue {
         );
         
         this.currentURL = this.$router.currentRoute.name;
+
+        if(this.$config.agencyLogo.trim() === "")
+            this.agencyLogo = require(`@/assets/images/PennDOTLogo.svg`)
+        else
+            this.agencyLogo = this.$config.agencyLogo
+
+        if(this.$config.productLogo.trim() === "")
+            this.productLogo = require(`@/assets/images/BridgeCareLogo.svg`)
+        else
+            this.productLogo = this.$config.productLogo
     }
 
     beforeDestroy() {
@@ -603,17 +614,15 @@ export default class AppComponent extends Vue {
      */
     onLogout() {
         this.logOutAction().then(() => {
-            clearRefreshIntervalID();
-            if (
-                window.location.host.toLowerCase().indexOf('penndot.gov') === -1
-            ) {
+            clearRefreshIntervalID(); 
+            if (window.location.host.toLowerCase().indexOf('penndot.gov') === -1) {
                 /*
                  * In order to log out properly, the browser must visit the /iAM page of a penndot deployment, as iam-deploy.com cannot
                  * modify browser cookies for penndot.gov. So, the current host is sent as part of the query to the penndot site
                  * to allow the landing page to redirect the browser to the original host.
                  */
                 window.location.href =
-                    'http://bamssyst.penndot.gov/iAM?host=' +
+                    'http://www.bamssyst.penndot.gov/iAM?host=' +
                     encodeURI(window.location.host);
             } else {
                 this.onNavigate('/iAM/');

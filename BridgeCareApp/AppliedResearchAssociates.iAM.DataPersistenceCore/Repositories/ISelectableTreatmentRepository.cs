@@ -37,12 +37,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<TreatmentLibraryDTO> GetAllTreatmentLibrariesNoChildren();
 
+        List<TreatmentLibraryDTO> GetTreatmentLibrariesNoChildrenAccessibleToUser(Guid userId);
+
         List<SimpleTreatmentDTO> GetSimpleTreatmentsBySimulationId(Guid simulationId);
         List<SimpleTreatmentDTO> GetSimpleTreatmentsByLibraryId(Guid simulationId);
-        TreatmentDTO GetScenarioSelectableTreatmentById(Guid id);
+        TreatmentDTOWithSimulationId GetScenarioSelectableTreatmentById(Guid id);
         TreatmentDTO GetSelectableTreatmentById(Guid id);
 
         ScenarioSelectableTreatmentEntity GetDefaultTreatment(Guid simulationId);
         TreatmentDTO GetDefaultNoTreatment(Guid simulationId);
+        TreatmentLibraryDTO GetTreatmentLibraryWithSingleTreatmentByTreatmentId(Guid treatmentId);
+        TreatmentDTO GetSelectableTreatmentByLibraryIdAndName(Guid treatmentLibraryId, string treatmentName);
+        void UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(TreatmentLibraryDTO dto, bool isNewLibrary, Guid userId);
     }
 }

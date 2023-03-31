@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public static class AttributeRepositoryExtensions
     {
@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var dataAttributes = new List<DataAttribute>();
             foreach (var dto in dtos)
             {
-                var mappedDto = AttributeMapper.ToDomain(dto, repository.GetEncryptionKey());
+                var mappedDto = AttributeDtoDomainMapper.ToDomain(dto, repository.GetEncryptionKey());
                 var valid = AttributeValidityChecker.IsValid(mappedDto);
                 if (!valid)
                 {
@@ -39,6 +39,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public static void UpsertAttributes(this IAttributeRepository repo, params DataAttribute[] attributes)
-            => repo.UpsertAttributes(attributes.ToList());
+            => repo.UpsertAttributesNonAtomic(attributes.ToList());
     }
 }

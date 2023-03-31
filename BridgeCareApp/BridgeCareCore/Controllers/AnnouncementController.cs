@@ -17,7 +17,7 @@ namespace BridgeCareCore.Controllers
     public class AnnouncementController : BridgeCareCoreBaseController
     {
         public const string AnnouncementError = "Announcement Error";
-        public AnnouncementController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public AnnouncementController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
         }
@@ -49,9 +49,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.AnnouncementRepo.UpsertAnnouncement(dto);
-                    UnitOfWork.Commit();
                 });
 
 
@@ -59,7 +57,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::UpsertAnnouncement - {e.Message}");
                 throw new Exception(e.Message);
             }
@@ -74,16 +71,13 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.AnnouncementRepo.DeleteAnnouncement(announcementId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::DeleteAnnouncement - {e.Message}");
                 throw new Exception(e.Message);
             }

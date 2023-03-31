@@ -1,4 +1,4 @@
-import {clone, any, propEq, update, findIndex, append} from 'ramda';
+import {clone, any, propEq, update, findIndex, append, reject} from 'ramda';
 import {AxiosResponse} from 'axios';
 import {
     Datasource, 
@@ -90,6 +90,29 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Modified data sources',
                 });
+            }
+        });
+    },
+    async deleteDataSource(
+        {dispatch, commit, state  }: any,
+        payload: string,
+    ) {
+        await DataSourceService.DeleteDataSource(
+            payload
+        ).then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+
+                dispatch('addSuccessNotification', {
+                    message: 'Deleted data sources',
+                });
+                const dataSources: Datasource[] = reject(
+                    propEq('id', payload),
+                    state.dataSources,
+                );
+                commit('dataSourceMutator', dataSources)
             }
         });
     },

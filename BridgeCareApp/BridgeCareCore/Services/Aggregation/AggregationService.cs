@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.Data.Helpers;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs;
-using BridgeCareCore.Models;
 using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
 
 namespace BridgeCareCore.Services.Aggregation
@@ -30,7 +30,9 @@ namespace BridgeCareCore.Services.Aggregation
         {
             state.NetworkId = networkId;
             var isError = false;
+            var isUnmatchedDatum = false;
             state.ErrorMessage = "";
+
             await Task.Run(() =>
             {
                 try
@@ -45,7 +47,7 @@ namespace BridgeCareCore.Services.Aggregation
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);  // DbUpdateException here -- "The wait operation timed out."
 
                     // Get/create configurable attributes
-                    var configurationAttributes = AttributeMapper.ToDomainList(attributes, _unitOfWork.EncryptionKey);
+                    var configurationAttributes = AttributeDtoDomainMapper.ToDomainList(attributes, _unitOfWork.EncryptionKey);
 
                     var checkForDuplicateIDs = configurationAttributes.Select(_ => _.Id).ToList();
 
@@ -116,6 +118,13 @@ namespace BridgeCareCore.Services.Aggregation
                     var totalAssets = (double)maintainableAssets.Count;
                     var i = 0.0;
 
+                    var directory = Directory.GetCurrentDirectory();
+                    var path = Path.Combine(directory, "Logs");
+                    // Set up the log
+                    var stringBuilder = new StringBuilder();
+                    stringBuilder.AppendLine("Datum Name, Location Id, Datum Id");
+                    var streamWriter = new StreamWriter(path + "\\UnmatchedDatum.txt");
+                    
                     state.Status = "Aggregating";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                     // loop over maintainable assets and remove assigned data that has an attribute id
@@ -130,7 +139,17 @@ namespace BridgeCareCore.Services.Aggregation
                         i++;
                         maintainableAsset.AssignedData.RemoveAll(_ =>
                             attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
-                        maintainableAsset.AssignAttributeData(attributeData);
+                        List<DatumLog> unmatchedDatum = maintainableAsset.AssignAttributeData(attributeData);
+                        if (unmatchedDatum.Count > 0)
+                        {
+                            isUnmatchedDatum = true;
+                            foreach(var datum in unmatchedDatum)
+                            {
+                                stringBuilder.AppendLine(datum.ToString());
+                            }
+                            streamWriter.WriteLine(stringBuilder);
+                            stringBuilder.Clear();
+                        }
 
                         //maintainableAsset.AssignSpatialWeighting(benefitQuantifierEquation.Equation.Expression);
                         try
@@ -167,6 +186,8 @@ namespace BridgeCareCore.Services.Aggregation
                     }
                     state.Status = "Saving";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+
+                    streamWriter.Close();
 
                     try
                     {
@@ -230,6 +251,10 @@ namespace BridgeCareCore.Services.Aggregation
                 }
 
             });
+            if (isUnmatchedDatum)
+            {
+                WriteError(writer, "Unmatched Datum locations found::See unmatchedDatum.txt log file for more details.");
+            }
             return !isError;
         }
 

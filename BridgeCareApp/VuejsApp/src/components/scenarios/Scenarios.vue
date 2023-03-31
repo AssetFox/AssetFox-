@@ -9,19 +9,12 @@
                         :key="item.name"
                         class="tab-theme"
                     >
-                        <!-- <img class="icon-selected-tab" style="padding-right:10px" v-bind:src="item.icon"/> -->
                         <GhdQueueSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Simulation queue'"/> 
                         <GhdShareSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Shared with me'"/>  
                         <GhdStarSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'My scenarios'"/>  
                         {{ item.name }} ( {{ item.count }} )
                     </v-tab>
                     <v-spacer></v-spacer>
-                    <!--<v-btn v-if="isAdmin"
-                        class="green darken-2 white--text"
-                        @click="onShowAggregatePopup"
-                    >
-                        Aggregate Data
-                    </v-btn>-->
                     <v-flex xs1></v-flex>
                 </v-tabs>
                 <v-tabs-items v-model="tab">
@@ -432,11 +425,6 @@
                 </v-tabs-items>
             </v-card>
         </v-flex>
-
-        <!--    <CreateNetworkDialog :showDialog="showCreateNetworkDialog" @submit="onCreateNetworkDialogSubmit"/>-->
-
-        <!--    <ConfirmRollupAlert :dialogData="confirmRollupAlertData" @submit="onConfirmRollupAlertSubmit"/>-->
-
         <ConfirmAnalysisRunAlert
             :dialogData="confirmAnalysisRunAlertData"
             @submit="onConfirmAnalysisRunAlertSubmit"
@@ -525,7 +513,7 @@ import { CloneScenarioDialogData, emptyCloneScenarioDialogData } from '@/shared/
 import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
 import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
 import { Network } from '@/shared/models/iAM/network';
-import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
+import { any, clone, isNil } from 'ramda';
 import { getUserName } from '@/shared/utils/get-user-info';
 import {
     InputValidationRules,
@@ -552,7 +540,7 @@ import GhdStarSvg from '@/shared/icons/GhdStarSvg.vue';
 import GhdShareSvg from '@/shared/icons/GhdShareSvg.vue';
 import GhdQueueSvg from '@/shared/icons/GhdQueueSvg.vue';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
-import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
+import { PagingRequest } from '@/shared/models/iAM/paging';
 import ScenarioService from '@/services/scenario.service';
 
 @Component({
@@ -621,9 +609,6 @@ export default class Scenarios extends Vue {
     updateSimulationReportDetailAction: any;
     @Action('updateNetworkRollupDetail') updateNetworkRollupDetailAction: any;
     @Action('selectScenario') selectScenarioAction: any;
-
-    //@Action('rollupNetwork') rollupNetworkAction: any;
-    //@Action('createNetwork') createNetworkAction: any;
     @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
     @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
 
@@ -1017,11 +1002,6 @@ export default class Scenarios extends Vue {
             this.initializeScenarioPages();
         } 
         
-
-        // this.$statusHub.$on(
-        //     Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-        //     this.getDataAggregationStatus,
-        // );
         this.$statusHub.$on(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             this.getDataMigrationStatus,
@@ -1195,33 +1175,6 @@ export default class Scenarios extends Vue {
             any(scenarioUserCanModify, scenarioUsers)
         );
     }
-
-    /*onShowConfirmRollupAlert() {
-      this.confirmRollupAlertData = {
-        showDialog: true,
-        heading: 'Warning',
-        choice: true,
-        message: 'The rollup can take around 5 minutes to finish. Continue?'
-      }
-    }
-
-    onConfirmRollupAlertSubmit(submit: boolean) {
-      this.confirmRollupAlertData = clone(emptyAlertData);
-
-      if (submit) {
-        this.rollupNetworkAction({
-          networkId: this.networks[0].id,
-        });
-      }
-    }*/
-
-    /*onCreateNetworkDialogSubmit(network: Network) {
-      this.showCreateNetworkDialog = false;
-
-      if (!isNil(network)) {
-        this.createNetworkAction({network: network});
-      }
-    }*/
 
     // TODO: update to send no payload when API is modified to migrate ALL simulations
     onStartDataMigration() {
@@ -1450,7 +1403,6 @@ export default class Scenarios extends Vue {
                 simulationId: this.selectedSimulation.id,
             }).then(() => {
                 this.selectedSimulation = clone(emptySimulation);
-                //this.onSimulationQueuePagination();
             });
         }
     }
@@ -1632,8 +1584,6 @@ export default class Scenarios extends Vue {
                 if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
                     this.onNavigateToCommittedProjectView(scenario);
                 }
-                // this.selectedScenarioId = scenario.id;
-                // this.showImportExportCommittedProjectsDialog = true;
                 break;
             case this.availableActions.convert:
                 this.onShowConfirmConvertJsonToRelationalAlert(scenario);

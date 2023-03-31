@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeRepository
     {
-        void UpsertAttributes(List<Attribute> attributes);
+        void UpsertAttributesNonAtomic(List<Attribute> attributes);
 
         void JoinAttributesWithEquationsAndCriteria(Explorer explorer);
 
@@ -33,10 +33,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         /// inefficient. To perform the case-insensitive comparison, it pulls everything into memory.</summary>
         AttributeDTO GetSingleByName(string attributeName);
 
+        /// <summary>Case insensitive search. If no attribute with the a given name is found,
+        /// simply does not return an attribute for that name. Also, this method is necessarily somewhat
+        /// inefficient. To perform the case-insensitive comparison, it pulls everything into memory.</summary>
+        List<AttributeDTO> GetAttributesWithNames(List<string> attributeNames);
+
         void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete);
 
         string GetEncryptionKey();
 
         string GetAttributeName(Guid attributeId);
+        List<AttributeDTO> GetAllAttributesAbbreviated();
+        void UpsertAttributes(List<Attribute> attributes);
     }
 }

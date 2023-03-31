@@ -24,7 +24,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AttributeRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
+
         public void UpsertAttributes(List<Attribute> attributes)
+        {
+            _unitOfWork.AsTransaction(() =>
+              _unitOfWork.AttributeRepo.UpsertAttributesNonAtomic(attributes));
+        }
+
+        public void UpsertAttributesNonAtomic(List<Attribute> attributes)
         {
             var upsertAttributeEntities = attributes.Select(_ => _.ToEntity(_unitOfWork.DataSourceRepo, _unitOfWork.EncryptionKey)).ToList();
             var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
@@ -200,10 +207,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssets = _unitOfWork.Context.MaintainableAsset
+            var maintainableAssets = _unitOfWork.Context.MaintainableAsset.AsNoTracking()
                 .Where(_ => _.NetworkId == networkId);
 
-            var attributes = _unitOfWork.Context.AggregatedResult
+            var attributes = _unitOfWork.Context.AggregatedResult.AsNoTracking()
                 .Where(_ => maintainableAssets.Any(__ => __.Id == _.MaintainableAssetId))
                 .Select(_ => _.AttributeId)
                 .Distinct()
@@ -269,6 +276,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var entity = _unitOfWork.Context.Attribute.AsEnumerable().FirstOrDefault(
                 a => a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase)); // See https://stackoverflow.com/questions/841226/case-insensitive-string-compare-in-linq-to-sql for why we make the .AsEnumerable() call here.
             return AttributeMapper.ToDtoNullPropagating(entity, GetEncryptionKey());
+        }
+
+        public List<AttributeDTO> GetAttributesWithNames(List<string> attributeNames)
+        {
+            var entities = _unitOfWork.Context.Attribute.AsNoTracking().AsEnumerable();
+            var dtos = new List<AttributeDTO>();
+            foreach (var entity in entities)
+            {
+                foreach (var name in attributeNames)
+                {
+                    if (name.Equals(entity.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var dto = AttributeMapper.ToAbbreviatedDto(entity);
+                        dtos.Add(dto);
+                        continue;
+                    }
+                }
+            }
+            return dtos;
+        }
+
+        public List<AttributeDTO> GetAllAttributesAbbreviated()
+        {
+            var dtos = _unitOfWork.Context.Attribute.AsEnumerable()
+                .Select(a => AttributeMapper.ToAbbreviatedDto(a))
+                .ToList();
+            return dtos;
         }
 
         public void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete)

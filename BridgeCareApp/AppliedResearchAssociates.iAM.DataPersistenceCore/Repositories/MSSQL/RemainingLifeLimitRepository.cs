@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
@@ -114,11 +114,82 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
+        public List<RemainingLifeLimitLibraryDTO> GetRemainingLifeLimitLibrariesNoChildrenAccessibleToUser(Guid userId)
+        {
+            return _unitOfWork.Context.RemainingLifeLimitLibraryUser
+                .AsNoTracking()
+                .Include(u => u.RemainingLifeLimitLibrary)
+                .Where(u => u.UserId == userId)
+                .Select(u => u.RemainingLifeLimitLibrary.ToDto())
+                .ToList();
+        }
+
+        public void UpsertOrDeleteUsers(Guid remainingLifeLimitLibraryId, IList<LibraryUserDTO> libraryUsers)
+        {
+            var existingEntities = _unitOfWork.Context.RemainingLifeLimitLibraryUser.Where(u => u.LibraryId == remainingLifeLimitLibraryId).ToList();
+            var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
+            var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
+            var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
+            var userIdsToUpdate = existingUserIds.Intersect(desiredUserIDs).ToList();
+            var userIdsToAdd = desiredUserIDs.Except(existingUserIds).ToList();
+            var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToRemainingLifeLimitLibraryUserEntity(u, remainingLifeLimitLibraryId)).ToList();
+            var dtosToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToMaybeUpdate = existingEntities.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToUpdate = new List<RemainingLifeLimitLibraryUserEntity>();
+            foreach (var dto in dtosToUpdate)
+            {
+                var entityToUpdate = entitiesToMaybeUpdate.FirstOrDefault(e => e.UserId == dto.UserId);
+                if (entityToUpdate != null && entityToUpdate.AccessLevel != (int)dto.AccessLevel)
+                {
+                    entityToUpdate.AccessLevel = (int)dto.AccessLevel;
+                    entitiesToUpdate.Add(entityToUpdate);
+                }
+            }
+            _unitOfWork.Context.AddRange(entitiesToAdd);
+            _unitOfWork.Context.UpdateRange(entitiesToUpdate);
+            var entitiesToDelete = existingEntities.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
+            _unitOfWork.Context.RemoveRange(entitiesToDelete);
+            _unitOfWork.Context.SaveChanges();
+        }
+
+        private List<LibraryUserDTO> GetAccessForUser(Guid remainingLifeLimitLibraryId, Guid userId)
+        {
+            var dtos = _unitOfWork.Context.RemainingLifeLimitLibraryUser
+                .Where(u => u.LibraryId == remainingLifeLimitLibraryId && u.UserId == userId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
+
+        public List<LibraryUserDTO> GetLibraryUsers(Guid remainingLifeLimitLibraryId)
+        {
+            var dtos = _unitOfWork.Context.RemainingLifeLimitLibraryUser
+                .Include(u => u.User)
+                .Where(u => u.LibraryId == remainingLifeLimitLibraryId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
+
+        public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
+        {
+            var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);
+            if (!exists)
+            {
+                return LibraryAccessModels.LibraryDoesNotExist();
+            }
+            var users = GetAccessForUser(libraryId, userId);
+            var user = users.FirstOrDefault();
+            return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
+        }
+
         public void UpsertRemainingLifeLimitLibrary(RemainingLifeLimitLibraryDTO dto)
         {
+            var libraryExists = _unitOfWork.Context.RemainingLifeLimitLibrary.Any(rm => rm.Id == dto.Id);
             var remainingLifeLimitLibraryEntity = dto.ToEntity();
 
             _unitOfWork.Context.Upsert(remainingLifeLimitLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void UpsertOrDeleteRemainingLifeLimits(List<RemainingLifeLimitDTO> remainingLifeLimits,
@@ -279,51 +350,63 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
-            _unitOfWork.Context.DeleteAll<ScenarioRemainingLifeLimitEntity>(_ =>
+            _unitOfWork.AsTransaction(() =>
+            {
+                _unitOfWork.Context.DeleteAll<ScenarioRemainingLifeLimitEntity>(_ =>
                 _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
-            _unitOfWork.Context.UpdateAll(scenariRemainingLifeLimitEntities.Where(_ => existingEntityIds.Contains(_.Id))
-                .ToList());
+                _unitOfWork.Context.UpdateAll(scenariRemainingLifeLimitEntities.Where(_ => existingEntityIds.Contains(_.Id))
+                    .ToList());
 
-            _unitOfWork.Context.AddAll(scenariRemainingLifeLimitEntities.Where(_ => !existingEntityIds.Contains(_.Id))
-                .ToList());
+                _unitOfWork.Context.AddAll(scenariRemainingLifeLimitEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                    .ToList());
 
-            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioRemainingLifeLimitEntity>(_ =>
-                _.ScenarioRemainingLifeLimit.SimulationId == simulationId);
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioRemainingLifeLimitEntity>(_ =>
+                    _.ScenarioRemainingLifeLimit.SimulationId == simulationId);
 
-            if (scenarioRemainingLifeLimit.Any(_ =>
-                _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
-            {
-                var criterionLibraryEntities = new List<CriterionLibraryEntity>();
-                var criterionLibraryJoinEntities = new List<CriterionLibraryScenarioRemainingLifeLimitEntity>();
+                if (scenarioRemainingLifeLimit.Any(_ =>
+                    _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                    !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+                {
+                    var criterionLibraryEntities = new List<CriterionLibraryEntity>();
+                    var criterionLibraryJoinEntities = new List<CriterionLibraryScenarioRemainingLifeLimitEntity>();
 
-                scenarioRemainingLifeLimit.Where(curve =>
-                        curve.CriterionLibrary?.Id != null && curve.CriterionLibrary?.Id != Guid.Empty &&
-                        !string.IsNullOrEmpty(curve.CriterionLibrary.MergedCriteriaExpression))
-                    .ForEach(goal =>
-                    {
-                        var criterionLibraryEntity = new CriterionLibraryEntity
+                    scenarioRemainingLifeLimit.Where(curve =>
+                            curve.CriterionLibrary?.Id != null && curve.CriterionLibrary?.Id != Guid.Empty &&
+                            !string.IsNullOrEmpty(curve.CriterionLibrary.MergedCriteriaExpression))
+                        .ForEach(goal =>
                         {
-                            Id = Guid.NewGuid(),
-                            MergedCriteriaExpression = goal.CriterionLibrary.MergedCriteriaExpression,
-                            Name = $"Remaining life limit {goal.Attribute} Criterion",
-                            IsSingleUse = true
-                        };
-                        criterionLibraryEntities.Add(criterionLibraryEntity);
-                        criterionLibraryJoinEntities.Add(new CriterionLibraryScenarioRemainingLifeLimitEntity
-                        {
-                            CriterionLibraryId = criterionLibraryEntity.Id,
-                            ScenarioRemainingLifeLimitId = goal.Id
+                            var criterionLibraryEntity = new CriterionLibraryEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                MergedCriteriaExpression = goal.CriterionLibrary.MergedCriteriaExpression,
+                                Name = $"Remaining life limit {goal.Attribute} Criterion",
+                                IsSingleUse = true
+                            };
+                            criterionLibraryEntities.Add(criterionLibraryEntity);
+                            criterionLibraryJoinEntities.Add(new CriterionLibraryScenarioRemainingLifeLimitEntity
+                            {
+                                CriterionLibraryId = criterionLibraryEntity.Id,
+                                ScenarioRemainingLifeLimitId = goal.Id
+                            });
                         });
-                    });
 
-                _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
-                _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
-            }
-            // Update last modified date
-            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
-            _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
+                }
+                // Update last modified date
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+            });
+        }
+
+        public void UpsertRemainingLifeLimitLibraryAndLimits(RemainingLifeLimitLibraryDTO library)
+        {
+            _unitOfWork.AsTransaction(() =>
+            {
+                _unitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(library);
+                _unitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteRemainingLifeLimits(library.RemainingLifeLimits, library.Id);
+            });
         }
     }
 }

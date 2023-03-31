@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.CellData;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using OfficeOpenXml;
@@ -18,10 +17,10 @@ namespace BridgeCareCore.Services
         private const int MaximumRows = 100000;
         private const int MaximumColumns = 1000;
 
-        private UnitOfDataPersistenceWork _unitOfWork;
+        private IUnitOfWork _unitOfWork;
 
         public ExcelRawDataImportService(
-            UnitOfDataPersistenceWork unitOfWork
+            IUnitOfWork unitOfWork
             )
         {
             _unitOfWork = unitOfWork;
@@ -97,7 +96,7 @@ namespace BridgeCareCore.Services
             }
             var workseet = ExcelRawDataSpreadsheets.WithColumns(columns);
             var newId = Guid.NewGuid();
-            var dto = ExcelDatabaseWorksheetMapper.ToDTO(workseet, dataSourceId, newId);
+            var dto = ExcelRawDataSpreadsheetSerializationMapper.ToDTO(workseet, dataSourceId, newId);
             var returnId = _unitOfWork.ExcelWorksheetRepository.AddExcelRawData(dto);
             return new ExcelRawDataImportResultDTO
             {

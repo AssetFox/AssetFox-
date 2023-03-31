@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Parameters;
@@ -25,23 +24,24 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.Reporting.Services;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class BAMSSummaryReport : IReport
     {
         protected readonly IHubService _hubService;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
-        private readonly IFundedTreatmentList _fundedTreatmentList;
-        private readonly IUnfundedTreatmentFinalList _unfundedTreatmentFinalList;
-        private readonly IUnfundedTreatmentTime _unfundedTreatmentTime;
-        private readonly IBridgeWorkSummary _bridgeWorkSummary;
-        private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly BridgeDataForSummaryReport _bridgeDataForSummaryReport;
+        private readonly FundedTreatmentList _fundedTreatmentList;
+        private readonly UnfundedTreatmentFinalList _unfundedTreatmentFinalList;
+        private readonly UnfundedTreatmentTime _unfundedTreatmentTime;
+        private readonly BridgeWorkSummary _bridgeWorkSummary;
+        private readonly BridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
         private readonly SummaryReportGlossary _summaryReportGlossary;
         private readonly SummaryReportParameters _summaryReportParameters;
-        private readonly IAddGraphsInTabs _addGraphsInTabs;
-        private readonly ISummaryReportHelper _summaryReportHelper;
+        private readonly AddGraphsInTabs _addGraphsInTabs;
+        private readonly ReportHelper _reportHelper;
 
         private Guid _networkId;
 
@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public string Status { get; private set; }
 
 
-        public BAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
+        public BAMSSummaryReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             //store passed parameter   
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -92,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _summaryReportGlossary = new SummaryReportGlossary();
             _summaryReportParameters = new SummaryReportParameters();                        
             _addGraphsInTabs = new AddGraphsInTabs();
-            _summaryReportHelper = new SummaryReportHelper();
+            _reportHelper = new ReportHelper();
 
             //check for existing report id
             var reportId = results?.Id; if(reportId == null) { reportId = Guid.NewGuid(); }
@@ -228,13 +228,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             reportOutputData.InitialAssetSummaries.Sort(
-                    (a, b) => _summaryReportHelper.checkAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_summaryReportHelper.checkAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
+                    (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );
 
             foreach (var yearlySectionData in reportOutputData.Years)
             {
                 yearlySectionData.Assets.Sort(
-                    (a, b) => _summaryReportHelper.checkAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_summaryReportHelper.checkAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
+                    (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );
             }
 
@@ -394,31 +394,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return functionReturnValue;
         }
 
-        private byte[] FetchFromFileLocation(Guid networkId, Guid simulationId)
-        {
-            var folderPathForSimulation = $"Reports\\{simulationId}";
-            var relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
-            var filePath = Path.Combine(relativeFolderPath, "SummaryReport.xlsx");
-            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
-
-            if (File.Exists(filePath))
-            {
-                reportDetailDto.Status = $"Gathering summary report data";
-                UpdateSimulationAnalysisDetail(reportDetailDto);
-                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-                Errors.Add(reportDetailDto.Status);
-
-                byte[] summaryReportData = File.ReadAllBytes(filePath);
-                return summaryReportData;
-            }
-
-            reportDetailDto.Status = $"Summary report is not available in the path {filePath}";
-            UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            Errors.Add(reportDetailDto.Status);
-
-            throw new FileNotFoundException($"Summary report is not available in the path {filePath}", "SummaryReport.xlsx");
-        }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 

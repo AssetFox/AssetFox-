@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
 using OfficeOpenXml;
-using MoreLinq;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
-using BridgeCareCore.Models;
-using System.Data;
 
 namespace BridgeCareCore.Services
 {
@@ -104,7 +99,7 @@ namespace BridgeCareCore.Services
                 //performanceCurvesToImport.AddRange(existingPerformanceCurves);
                 #endregion
 
-                performanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurvesToImport, simulationId);
+                performanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(performanceCurvesToImport, simulationId);
             }
             catch (Exception ex)
             {
@@ -114,10 +109,11 @@ namespace BridgeCareCore.Services
             UpdateWarningForMissingAttributes(performanceCurvesWithMissingAttributes, warningSb);
             UpdateWarningForInvalidCriteria(performanceCurvesWithInvalidCriteria, warningSb);
             UpdateWarningForInvalidEquation(performanceCurvesWithInvalidEquation, warningSb);
+            var scenarioCurves = performanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
 
             return new ScenarioPerformanceCurvesImportResultDTO
             {
-                PerformanceCurves = performanceCurveRepo.GetScenarioPerformanceCurves(simulationId),
+                PerformanceCurves = scenarioCurves,
                 WarningMessage = !string.IsNullOrEmpty(warningSb.ToString())
                     ? warningSb.ToString()
                     : null
@@ -208,8 +204,7 @@ namespace BridgeCareCore.Services
         {
             var performanceCurveRepo = _unitOfWork.PerformanceCurveRepo;
             var PerformanceCurves = performanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
-            var simulationName = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
-                    .Select(_ => new SimulationEntity { Name = _.Name }).AsNoTracking().Single().Name;
+            var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
             var fileName = $"{simulationName.Trim().Replace(" ", "_")}_performance_curves.xlsx";
             
             return CreateExportFile(PerformanceCurves, fileName);
@@ -258,8 +253,6 @@ namespace BridgeCareCore.Services
                 FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
                 MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             };
-        }
-
-        
+        }      
     }
 }

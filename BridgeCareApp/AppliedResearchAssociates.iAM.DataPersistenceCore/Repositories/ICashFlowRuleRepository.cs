@@ -24,5 +24,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<CashFlowRuleDTO> GetCashFlowRulesByLibraryId(Guid libraryId);
 
         void UpsertOrDeleteScenarioCashFlowRules(List<CashFlowRuleDTO> cashFlowRules, Guid simulationId);
+
+        List<CashFlowRuleLibraryDTO> GetCashFlowRuleLibrariesNoChildrenAccessibleToUser(Guid userId);
+        LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
+
+        void UpsertOrDeleteUsers(Guid cashFlowRuleLibraryId, IList<LibraryUserDTO> libraryUsers);
+        List<LibraryUserDTO> GetLibraryUsers(Guid cashFlowRuleLibraryId);
+        void UpsertCashFlowRuleLibraryAndRules(CashFlowRuleLibraryDTO dto);
     }
 }

@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         /// If a criterionLibrary or an equation is passed in, it is expected to NOT yet
         /// be in the db. This setup will add it, but with a different id.
         /// </summary>
-        public static PerformanceCurveDTO DtoForEntityInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid curveId, CriterionLibraryDTO criterionLibraryDto = null, string equation = null)
+        public static PerformanceCurveDTO DtoForEntityInDb(UnitOfDataPersistenceWork unitOfWork, Guid simulationId, Guid curveId, CriterionLibraryDTO criterionLibraryDto = null, string equation = null)
         {
             var equationDto = equation == null ? null : EquationTestSetup.Dto(equation);
             var performanceCurveDto = new PerformanceCurveDTO
@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Equation = equationDto,
             };
             var performanceCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
-            unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurves, simulationId);
+            unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(performanceCurves, simulationId);
             unitOfWork.Context.SaveChanges();
             var scenarioPerformanceCurves = unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var returnDto = scenarioPerformanceCurves.Single(curve => curve.Id == curveId);

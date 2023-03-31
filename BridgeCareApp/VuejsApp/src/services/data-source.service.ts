@@ -1,7 +1,6 @@
 import {AxiosPromise} from 'axios';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
-import { Datasource, ExcelDataSource, SqlDataSource} from '@/shared/models/iAM/data-source';
-import { TestStringData } from '@/shared/models/iAM/test-string';
+import {ExcelDataSource, SqlDataSource, TestConnection} from '@/shared/models/iAM/data-source';
 
 
 export default class DataSourceService {
@@ -25,6 +24,13 @@ export default class DataSourceService {
         return coreAxiosInstance.post(
             `${API.DataSource}/UpsertExcelDataSource/`,
             data
+        );
+    }
+    static DeleteDataSource(
+        id: string,
+    ): AxiosPromise {
+        return coreAxiosInstance.delete(
+            `${API.DataSource}/DeleteDataSource/${id}`
         );
     }
     static getExcelSpreadsheetColumnHeaders(

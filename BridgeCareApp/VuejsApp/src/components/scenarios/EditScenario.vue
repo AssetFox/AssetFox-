@@ -16,7 +16,6 @@
                         <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
                             <v-list-tile-action>
                                 <v-list-tile-icon>
-                                    <!-- <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon> -->
                                     <TreatmentSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
                                     <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
                                     <RemainingLifeLimitSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Remaining Life Limit'"/>  
@@ -45,9 +44,6 @@
                         outlined>
                         Run Scenario
                     </v-btn>
-                    <!-- <v-btn class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border" @click="showImportExportCommittedProjectsDialog = true" depressed block>
-                        Committed Projects
-                    </v-btn> -->
                 </div>
             </v-card>
             <v-flex xs12 class="ghd-content">

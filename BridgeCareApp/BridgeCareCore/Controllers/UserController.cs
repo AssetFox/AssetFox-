@@ -56,23 +56,6 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("GetUserById/{userName}")]
-        [Authorize]
-        public async Task<IActionResult> GetUserById(Guid id)
-        {
-            try
-            {
-                var result = await UnitOfWork.UserRepo.GetUserById(id);
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::GetUserById - {e.Message}");
-                throw;
-            }
-        }
-
         [HttpPost]
         [Route("UpdateLastNewsAccessDate")]
         [Authorize]
@@ -82,9 +65,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.UserRepo.UpdateLastNewsAccessDate(dto.Id, dto.LastNewsAccessDate);
-                    UnitOfWork.Commit();
                 });
                 return Ok();
             }

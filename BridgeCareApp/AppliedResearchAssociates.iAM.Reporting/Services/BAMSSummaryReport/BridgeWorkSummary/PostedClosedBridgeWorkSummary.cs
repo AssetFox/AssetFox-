@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.StaticContent;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -18,13 +15,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
     {
         private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
         private BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
-        private WorkSummaryModel _workSummaryModel;
 
         public PostedClosedBridgeWorkSummary(WorkSummaryModel workSummaryModel)
         {
             _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon(); 
             _bridgeWorkSummaryComputationHelper = new BridgeWorkSummaryComputationHelper();
-            _workSummaryModel = workSummaryModel;
         }
 
         internal ChartRowsModel FillPostedBridgesCountByBPN(ExcelWorksheet worksheet, CurrentCell currentCell,
@@ -308,7 +303,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             //fill BPN annualized amount
             for (var i = 0; i < reportOutputData.Years.Count; i++)
             {
-                //worksheet.Cells[row + bpnRowCount, startColumn + i + 2].Value = _workSummaryModel.AnnualizedAmount;
                 worksheet.Cells[row + bpnRowCount, startColumn + i + 2].Value = bpnAnnualizedAmount;
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column]);

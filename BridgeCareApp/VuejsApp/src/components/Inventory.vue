@@ -62,7 +62,7 @@
         @State(state => state.inventoryModule.lastFiveBrKeySearches) stateLastFiveBrKeySearches: number[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
 
-        @Action('getPennDOTInventory') getInventoryAction: any;
+        @Action('getInventory') getInventoryAction: any;
         @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
         @Action('getInventoryItemDetailByBMSId') getInventoryItemDetailByBMSIdAction: any;
         @Action('getInventoryItemDetailByBRKey') getInventoryItemDetailByBRKeyAction: any;
@@ -101,9 +101,6 @@
         @Watch('inventoryItems')
         onInventoryItemsChanged() {
             this.setupSelectLists();
-            /*if (this.inventoryItems.length > 0) {
-                this.setInventorySelectLists();
-            }*/
         }
 
         /**
@@ -115,10 +112,6 @@
                 this.lastFiveBmsIdSearches = this.setLastFiveSearchesForInventorySelectList(this.stateLastFiveBmsIdSearches);
                 this.setupSelectLists();
             }
-
-            /*if (this.stateLastFiveBmsIdSearches.length > 0) {
-                this.setInventorySelectLists();
-            }*/
         }
 
         /**
@@ -130,10 +123,6 @@
                 this.lastFiveBrKeySearches = this.setLastFiveSearchesForInventorySelectList(this.stateLastFiveBrKeySearches);
                 this.setupSelectLists();
             }
-
-            /*if (this.stateLastFiveBrKeySearches.length > 0) {
-                this.setInventorySelectLists();
-            }*/
 
         }
 
@@ -177,7 +166,11 @@
          */
         mounted() {
             //this.$forceUpdate();
-            this.getInventoryAction({network: {}});
+            var inventoryDetail = {
+                key1: "BMSID",
+                key2: "BRKEY_"
+            };
+            this.getInventoryAction(inventoryDetail);
         }
 
         created() {
@@ -321,13 +314,6 @@
          * BMS id has been selected
          */
         onSelectInventoryItemByBMSId(bmsId: string) {
-            // this.getInventoryItemDetailByBMSIdAction({bmsId: bmsId})
-            //     .then(() => setTimeout(() => {
-            //         this.selectedBmsId = bmsId;
-            //         const inventoryItem: InventoryItem = find(propEq('bmsId', bmsId), this.inventoryItems) as InventoryItem;
-            //         this.selectedBrKey = inventoryItem.brKey;
-            //         this.appendBmsIdSearchStringAction({bmsId: bmsId});
-            //     }));
             var data : InventoryItem = {
                 bmsId: bmsId,
                 brKey: -1
@@ -342,14 +328,6 @@
          * BR key has been selected
          */
         onSelectInventoryItemsByBRKey(brKey: number) {
-            // this.getInventoryItemDetailByBRKeyAction({brKey: brKey})
-            //     .then(() => setTimeout(() => {
-            //         this.selectedBrKey = brKey;
-            //         const inventoryItem: InventoryItem = find(propEq('brKey', brKey), this.inventoryItems) as InventoryItem;
-            //         this.selectedBmsId = inventoryItem.bmsId;
-            //         this.appendBrKeySearchNumberAction({brKey: brKey});
-            //     }));
-
             var data : InventoryItem = {
                 bmsId: '',
                 brKey: brKey

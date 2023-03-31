@@ -4,11 +4,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     public sealed class TreatmentRejectionDetail
     {
-        public TreatmentRejectionDetail(string treatmentName, TreatmentRejectionReason treatmentRejectionReason)
+        public TreatmentRejectionDetail(string treatmentName, TreatmentRejectionReason treatmentRejectionReason, double potentialConditionChange)
         {
             TreatmentName = treatmentName ?? throw new ArgumentNullException(nameof(treatmentName));
             TreatmentRejectionReason = treatmentRejectionReason;
+            PotentialConditionChange = potentialConditionChange;
         }
+
+        public double PotentialConditionChange { get; }
 
         public string TreatmentName { get; }
 
@@ -18,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             TreatmentName = original.TreatmentName;
             TreatmentRejectionReason = original.TreatmentRejectionReason;
+            PotentialConditionChange = original.PotentialConditionChange;
         }
     }
 }

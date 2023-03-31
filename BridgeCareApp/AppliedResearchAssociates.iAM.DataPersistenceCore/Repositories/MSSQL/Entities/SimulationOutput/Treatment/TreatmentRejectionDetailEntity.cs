@@ -16,6 +16,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual AssetDetailEntity AssetDetail { get; set; }
 
+        public double PotentialConditionChange { get; set; }
+
         public string TreatmentName { get; set; }
 
         public int TreatmentRejectionReason { get; set; }

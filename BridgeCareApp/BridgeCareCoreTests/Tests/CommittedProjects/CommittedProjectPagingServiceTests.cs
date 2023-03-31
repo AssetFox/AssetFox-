@@ -1,83 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Data;
-using System.IO;
-using System.Threading.Tasks;
-using Xunit;
-using Moq;
-using OfficeOpenXml;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using BridgeCareCore.Services;
-using BridgeCareCore.Interfaces;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using BridgeCareCore.Controllers;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
-using BridgeCareCore.Logging;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using BridgeCareCore.Services;
+using BridgeCareCoreTests.Helpers;
+using Moq;
+using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
     public class CommittedProjectPagingServiceTests
     {
-        private IUnitOfWork _testUOW;
-        private Mock<IAMContext> _mockedContext;
-        private Mock<ISimulationRepository> _mockedSimulationRepo;
-        private Mock<ICommittedProjectRepository> _mockCommittedProjectRepo;
-
-        public CommittedProjectPagingServiceTests()
+        private CommittedProjectPagingService CreatePagingService(Mock<IUnitOfWork> unitOfWork)
         {
-            var mockedTestUOW = new Mock<IUnitOfWork>();
-            _mockedContext = new Mock<IAMContext>();
-
-            var mockAssetDataRepository = new Mock<IAssetData>();
-            mockAssetDataRepository.Setup(_ => _.KeyProperties).Returns(TestDataForCommittedProjects.KeyProperties);
-            mockedTestUOW.Setup(_ => _.AssetDataRepository).Returns(mockAssetDataRepository.Object);
-
-            _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
-            _mockCommittedProjectRepo.Setup(_ => _.GetCommittedProjectsForExport(It.IsAny<Guid>()))
-                .Returns<Guid>(_ => TestDataForCommittedProjects.ValidCommittedProjects
-                    .Where(q => q.SimulationId == _)
-                    .Select(p => (BaseCommittedProjectDTO)p)
-                    .ToList());
-            _mockCommittedProjectRepo.Setup(_ => _.GetSectionCommittedProjectDTOs(It.IsAny<Guid>())).Returns(TestDataForCommittedProjects.ValidCommittedProjects);
-            mockedTestUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
-
-            _mockedSimulationRepo = new Mock<ISimulationRepository>();
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Simulation, TestDataForCommittedProjects.Simulations.AsQueryable());
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioBudget, TestDataForCommittedProjects.ScenarioBudgetEntities.AsQueryable());
-            mockedTestUOW.Setup(_ => _.SimulationRepo).Returns(_mockedSimulationRepo.Object);
-
-            var mockAttributeRepository = new Mock<IAttributeRepository>();
-            mockAttributeRepository.Setup(_ => _.GetAttributes()).Returns(TestDataForCommittedProjects.Attributes);
-            mockedTestUOW.Setup(_ => _.AttributeRepo).Returns(mockAttributeRepository.Object);
-
-            var mockMaintainableAssetRepository = new Mock<IMaintainableAssetRepository>();
-            mockMaintainableAssetRepository.Setup(_ => _.GetAllInNetworkWithLocations(It.IsAny<Guid>()))
-                .Returns(TestDataForCommittedProjects.MaintainableAssets);
-            mockedTestUOW.Setup(_ => _.MaintainableAssetRepo).Returns(mockMaintainableAssetRepository.Object);
-
-            var mockBudgetRepository = new Mock<IBudgetRepository>();
-            mockBudgetRepository.Setup(_ => _.GetScenarioBudgets(It.IsAny<Guid>())).Returns(TestDataForCommittedProjects.ScenarioBudgets);
-            mockedTestUOW.Setup(_ => _.BudgetRepo).Returns(mockBudgetRepository.Object);
-
-            //_testUOW = new UnitOfDataPersistenceWork(new Mock<IConfiguration>().Object, _mockedContext.Object);
-            mockedTestUOW.Setup(_ => _.Context).Returns(_mockedContext.Object);
-            _testUOW = mockedTestUOW.Object;
+            return new CommittedProjectPagingService(unitOfWork.Object);
         }
 
         [Fact]
-        public void GetCommittedProjectPageSizeOneSuccess()
+        public void GetCommittedProjectPage_PageSizeOne_ReturnsOneItem()
         {
-            var service = new CommittedProjectPagingService(_testUOW);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var sectionCommittedProjectId1 = Guid.NewGuid();
+            var sectionCommittedProjectId2 = Guid.NewGuid();
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2);
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2 };
+            var service = CreatePagingService(unitOfWork);
 
             var request = new PagingRequestModel<SectionCommittedProjectDTO>()
             {
@@ -89,19 +38,43 @@ namespace BridgeCareCoreTests.Tests
                 sortColumn = ""
             };
 
-            var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
+            var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);
 
-            Assert.Equal(3, page.TotalItems);
-            Assert.Equal(page.Items.Count ,request.RowsPerPage);
-            Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.FirstOrDefault(_ => _.Id == page.Items[0].Id) != null);
+            Assert.Equal(2, page.TotalItems);
+            Assert.Equal(page.Items.Count, request.RowsPerPage);
+            sectionCommittedProjects.Single(_ => _.Id == page.Items[0].Id);
         }
 
         [Fact]
-        public void GetCommittedProjectPageSizetwoSortColumnTreatmentIsDescendingFalse()
+        public void GetCommittedProjectPageSizeTwoSortColumnTreatmentIsDescendingFalse()
         {
-            var service = new CommittedProjectPagingService(_testUOW);
-
-
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var service = CreatePagingService(unitOfWork);
+            var sectionCommittedProjectId1 = Guid.NewGuid();
+            var sectionCommittedProjectId2 = Guid.NewGuid();
+            var sectionCommittedProjectId3 = Guid.NewGuid();
+            var scenarioBudgetId1 = Guid.NewGuid();
+            var scenarioBudgetId2 = Guid.NewGuid();
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1);
+            sectionCommittedProject1.Treatment = "Treatmentz";
+            sectionCommittedProject2.Treatment = "Treatmentx";
+            sectionCommittedProject3.Treatment = "Treatmenty";
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2, sectionCommittedProject3 };
+            var returnDictionary = new Dictionary<Guid, string>
+            {
+                {
+                    scenarioBudgetId1, "Interstate"
+                },
+                {
+                    scenarioBudgetId2, "Local"
+                }
+            };
+            budgetRepo.Setup(br => br.GetScenarioBudgetDictionary(It.Is<List<Guid>>(
+                list => list.Contains(scenarioBudgetId1) && list.Contains(scenarioBudgetId2)
+                        && list.Count == 2))).Returns(returnDictionary);
             var request = new PagingRequestModel<SectionCommittedProjectDTO>()
             {
                 Page = 1,
@@ -112,19 +85,122 @@ namespace BridgeCareCoreTests.Tests
                 sortColumn = "treatment"
             };
 
-            var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
-            var sorted = TestDataForCommittedProjects.ValidCommittedProjects.OrderBy(_ => _.Treatment).ToList();
+
+            var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);
             Assert.Equal(3, page.TotalItems);
             Assert.Equal(page.Items.Count, request.RowsPerPage);
-            Assert.True(page.Items[0].Id == sorted[0].Id);
-            Assert.True(page.Items[1].Id == sorted[1].Id);
+            Assert.Equal(sectionCommittedProjectId2, page.Items[0].Id);
+            Assert.Equal(sectionCommittedProjectId3, page.Items[1].Id);
+        }
+
+        [Fact]
+        public void GetCommittedProjectPageSizeTwoSortColumnTreatment_Nulls_DoesNotThrow()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var service = CreatePagingService(unitOfWork);
+            var sectionCommittedProjectId1 = Guid.NewGuid();
+            var sectionCommittedProjectId2 = Guid.NewGuid();
+            var sectionCommittedProjectId3 = Guid.NewGuid();
+            var scenarioBudgetId1 = Guid.NewGuid();
+            var scenarioBudgetId2 = Guid.NewGuid();
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1);
+            sectionCommittedProject1.Treatment = null;
+            sectionCommittedProject2.Treatment = "";
+            sectionCommittedProject3.Treatment = "Treatmenty";
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2, sectionCommittedProject3 };
+            var returnDictionary = new Dictionary<Guid, string>
+            {
+                {
+                    scenarioBudgetId1, "Interstate"
+                },
+                {
+                    scenarioBudgetId2, "Local"
+                }
+            };
+            budgetRepo.Setup(br => br.GetScenarioBudgetDictionary(It.Is<List<Guid>>(
+                list => list.Contains(scenarioBudgetId1) && list.Contains(scenarioBudgetId2)
+                        && list.Count == 2))).Returns(returnDictionary);
+            var request = new PagingRequestModel<SectionCommittedProjectDTO>()
+            {
+                Page = 1,
+                RowsPerPage = 2,
+                isDescending = false,
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>(),
+                search = "",
+                sortColumn = "treatment"
+            };
+
+            var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);
+            Assert.Equal(3, page.TotalItems);
+            Assert.Equal(page.Items.Count, request.RowsPerPage);
+        }
+
+        [Fact]
+        public void GetCommittedProjectPageSizeTwoSearch_Nulls_DoesNotThrow()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var service = CreatePagingService(unitOfWork);
+            var sectionCommittedProjectId1 = Guid.NewGuid();
+            var sectionCommittedProjectId2 = Guid.NewGuid();
+            var sectionCommittedProjectId3 = Guid.NewGuid();
+            var scenarioBudgetId1 = Guid.NewGuid();
+            var scenarioBudgetId2 = Guid.NewGuid();
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1);
+            sectionCommittedProject1.Treatment = null;
+            sectionCommittedProject2.Consequences = null;
+            sectionCommittedProject3.LocationKeys = null;
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2, sectionCommittedProject3 };
+            var returnDictionary = new Dictionary<Guid, string>
+            {
+                {
+                    scenarioBudgetId1, "Interstate"
+                },
+                {
+                    scenarioBudgetId2, "Local"
+                }
+            };
+            budgetRepo.Setup(br => br.GetScenarioBudgetDictionary(It.Is<List<Guid>>(
+                list => list.Contains(scenarioBudgetId1) && list.Contains(scenarioBudgetId2)
+                        && list.Count == 2))).Returns(returnDictionary);
+            var request = new PagingRequestModel<SectionCommittedProjectDTO>()
+            {
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>(),
+                search = "won't find",
+            };
+
+            var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);
+            Assert.Equal(3, page.TotalItems);
+            Assert.Empty(page.Items);
         }
 
         [Fact]
         public void GetCommittedProjectPageSizetwoSearchItemsCountOne()
         {
-            var service = new CommittedProjectPagingService(_testUOW);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var sectionCommittedProjectId1 = Guid.NewGuid();
+            var sectionCommittedProjectId2 = Guid.NewGuid();
+            var sectionCommittedProjectId3 = Guid.NewGuid();
+            var scenarioTreatmentId1 = Guid.NewGuid();
+            var scenarioTreatmentId2 = Guid.NewGuid();
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioTreatmentId1);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioTreatmentId2);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioTreatmentId1);
+            sectionCommittedProject1.Treatment = "Simple";
+            sectionCommittedProject2.Treatment = "Complicated";
+            sectionCommittedProject3.Treatment = "Simple";
+            sectionCommittedProject1.LocationKeys["BRKEY_"] = "1";
+            sectionCommittedProject2.LocationKeys["BRKEY_"] = "2";
+            sectionCommittedProject3.LocationKeys["BRKEY_"] = "1";
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2, sectionCommittedProject3 };
 
+            var service = CreatePagingService(unitOfWork);
 
             var request = new PagingRequestModel<SectionCommittedProjectDTO>()
             {
@@ -135,8 +211,19 @@ namespace BridgeCareCoreTests.Tests
                 search = "Simple",
                 sortColumn = ""
             };
+            var dictionary = new Dictionary<Guid, string>
+            {
+                {
+                    scenarioTreatmentId1, "Simple"
+                },
+                {
+                    scenarioTreatmentId2, "Complicated"
+                }
+            };
+            budgetRepo.Setup(b => b.GetScenarioBudgetDictionary(It.Is<List<Guid>>(list => list.Count == 2)))
+                .Returns(dictionary);
 
-            var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
+            var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);
 
             Assert.Equal(3, page.TotalItems);
             Assert.Equal(2, page.Items.Count);
@@ -144,9 +231,13 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public void GetCommittedProjectPageSizeThreeAddRow()
+        public void GetCommittedProjectPage_AddRow_TwoProjectsExist_ReturnsThree() 
         {
-            var service = new CommittedProjectPagingService(_testUOW);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var service = CreatePagingService(unitOfWork);
+            var dto1 = SectionCommittedProjectDtos.Dto();
+            var dto2 = SectionCommittedProjectDtos.Dto();
+            var dtos = new List<SectionCommittedProjectDTO> { dto1, dto2 };
 
             var addrow = new SectionCommittedProjectDTO()
             {
@@ -156,7 +247,7 @@ namespace BridgeCareCoreTests.Tests
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 1,
                 Cost = 10000,
-                SimulationId = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,
+                SimulationId = TestDataForCommittedProjects.SimulationId,
                 LocationKeys = new Dictionary<string, string>()
                 {
                     { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
@@ -187,25 +278,43 @@ namespace BridgeCareCoreTests.Tests
                 isDescending = false,
                 SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>()
                 {
-                    AddedRows = new List<SectionCommittedProjectDTO> { addrow}
+                    AddedRows = new List<SectionCommittedProjectDTO> { addrow }
                 },
                 search = "",
                 sortColumn = ""
             };
 
-            var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
+            var page = service.GetCommittedProjectPage(dtos, request);
 
-            Assert.Equal(4, page.TotalItems);
-            Assert.Equal(page.Items.Count, request.RowsPerPage);
+            Assert.Equal(3, page.TotalItems);
+            Assert.Equal(3, page.Items.Count);
             Assert.True(page.Items.SingleOrDefault(_ => _.Id == addrow.Id) != null);
         }
 
         [Fact]
         public void GetCommittedProjectPageSizetwoUpdateRow()
         {
-            var service = new CommittedProjectPagingService(_testUOW);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var service = CreatePagingService(unitOfWork);
+            var sectionCommittedProjectId1 = Guid.NewGuid();
+            var sectionCommittedProjectId2 = Guid.NewGuid();
+            var sectionCommittedProjectId3 = Guid.NewGuid();
+            var scenarioTreatmentId1 = Guid.NewGuid();
+            var scenarioTreatmentId2 = Guid.NewGuid();
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioTreatmentId1);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioTreatmentId2);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioTreatmentId1);
+            var updateRow = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioTreatmentId1);
+            updateRow.Treatment = "updated treatment";
+            sectionCommittedProject1.Treatment = "Simple";
+            sectionCommittedProject2.Treatment = "Z Complicated";
+            sectionCommittedProject3.Treatment = "Simple";
+            sectionCommittedProject1.LocationKeys["BRKEY_"] = "1";
+            sectionCommittedProject2.LocationKeys["BRKEY_"] = "2";
+            sectionCommittedProject3.LocationKeys["BRKEY_"] = "1";
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2, sectionCommittedProject3 };
 
-            var updateRow = TestDataForCommittedProjects.ValidCommittedProjects[0];
             var newTreament = "updated treatment";
             updateRow.Treatment = newTreament;
 
@@ -219,100 +328,83 @@ namespace BridgeCareCoreTests.Tests
                     UpdateRows = new List<SectionCommittedProjectDTO> { updateRow }
                 },
                 search = "",
-                sortColumn = ""
+                sortColumn = "treatment"
             };
 
-            var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
+            var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);
 
             Assert.Equal(3, page.TotalItems);
-            Assert.True(page.Items.Count == request.RowsPerPage);
-            Assert.True(page.Items.FirstOrDefault(_ => updateRow.Id == _.Id).Treatment == newTreament);
+            Assert.Equal(request.RowsPerPage, page.Items.Count);
+            var updatedItem = page.Items.Single(_ => _.Id == sectionCommittedProjectId1);
+            Assert.Equal(newTreament, updatedItem.Treatment);
         }
 
         [Fact]
-        public void GetSyncedDataNoChanges()
+        public void GetSyncedDataset_NoChanges_GrabsFromRepo()
         {
-            var service = new CommittedProjectPagingService(_testUOW);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var service = CreatePagingService(unitOfWork);
+            var dto = SectionCommittedProjectDtos.Dto();
+            var dtos = new List<SectionCommittedProjectDTO> { dto };
+            var simulationId = Guid.NewGuid();
+            var committedProjectRepo = CommittedProjectRepositoryMocks.New(unitOfWork);
+            committedProjectRepo.Setup(c => c.GetSectionCommittedProjectDTOs(simulationId)).Returns(dtos);
 
-
-            var dataSet = service.GetSyncedDataset(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id, new PagingSyncModel<SectionCommittedProjectDTO>());
-            var dataIds = dataSet.Select(_ => _.Id).ToList();
-
-            Assert.True(dataSet.Count == TestDataForCommittedProjects.ValidCommittedProjects.Count);
-            Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.Where(_ => dataIds.Contains(_.Id)).Count() ==
-                TestDataForCommittedProjects.ValidCommittedProjects.Count);
+            var dataSet = service.GetSyncedDataset(simulationId, new PagingSyncModel<SectionCommittedProjectDTO>());
+            var actual = dataSet.Single();
+            Assert.Equal(dto, actual);
         }
 
         [Fact]
-        public void GetSyncedDataUpdateRow()
+        public void GetSyncedDataset_UpdateRowInRequest_Updates()
         {
-            var service = new CommittedProjectPagingService(_testUOW);
 
-            var updateRow = TestDataForCommittedProjects.ValidCommittedProjects[0];
+            var unitOfWork = UnitOfWorkMocks.New();
+            var service = CreatePagingService(unitOfWork);
+            var sectionCommittedProjectId = Guid.NewGuid();
+            var scenarioBudgetId = Guid.NewGuid();
+            var dto = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId, scenarioBudgetId);
+            var dtos = new List<SectionCommittedProjectDTO> { dto };
+            var simulationId = Guid.NewGuid();
+            var committedProjectRepo = CommittedProjectRepositoryMocks.New(unitOfWork);
+            committedProjectRepo.Setup(c => c.GetSectionCommittedProjectDTOs(simulationId)).Returns(dtos);
+            var updateDto = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId, scenarioBudgetId);
+            updateDto.Treatment = "Update me";
+            updateDto.Cost = 1000000;
+            var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
+            {
+                UpdateRows = new List<SectionCommittedProjectDTO> { updateDto }
+            };
+            var dataSet = service.GetSyncedDataset(simulationId, sync);
+            var actual = dataSet.Single();
+            ObjectAssertions.Equivalent(updateDto, actual);
+        }
 
-            updateRow.Treatment = "updated treatment";
+        [Fact]
+        public void GetSyncedData_AddRowInRequest_Adds()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var service = CreatePagingService(unitOfWork);
+            var sectionCommittedProjectId = Guid.NewGuid();
+            var scenarioBudgetId = Guid.NewGuid();
+            var dto = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId, scenarioBudgetId);
+            var dtos = new List<SectionCommittedProjectDTO> { dto };
+            var simulationId = Guid.NewGuid();
+            var committedProjectRepo = CommittedProjectRepositoryMocks.New(unitOfWork);
+            committedProjectRepo.Setup(c => c.GetSectionCommittedProjectDTOs(simulationId)).Returns(dtos);
+            var addDto = SectionCommittedProjectDtos.Dto();
 
             var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
             {
-                UpdateRows = new List<SectionCommittedProjectDTO> { updateRow }
-            };
-            var dataSet = service.GetSyncedDataset(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,sync);
-            var dataIds = dataSet.Select(_ => _.Id).ToList();
-
-            Assert.True(dataSet.Count == TestDataForCommittedProjects.ValidCommittedProjects.Count);
-            Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.Where(_ => dataIds.Contains(_.Id)).Count() ==
-                TestDataForCommittedProjects.ValidCommittedProjects.Count);
-            Assert.True(dataSet.FirstOrDefault(_ => _.Id == updateRow.Id).Treatment == updateRow.Treatment);
-        }
-
-        [Fact]
-        public void GetSyncedDataAddRow()
-        {
-            var service = new CommittedProjectPagingService(_testUOW);
-
-            var addrow = new SectionCommittedProjectDTO()
-            {
-                Id = Guid.NewGuid(),
-                Year = 2022,
-                Treatment = "Something",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 1,
-                Cost = 10000,
-                SimulationId = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,
-                LocationKeys = new Dictionary<string, string>()
-                {
-                    { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
-                    { "BRKEY_", "1" },
-                    { "BMSID", "12345678" }
-                },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "+3"
-                    },
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_DURATION_N",
-                        ChangeValue = "1"
-                    }
-                }
+                AddedRows = new List<SectionCommittedProjectDTO> { addDto }
             };
 
-            var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
-            {
-                AddedRows = new List<SectionCommittedProjectDTO> { addrow }
-            };
-            var dataSet = service.GetSyncedDataset(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id, sync);
-            var dataIds = dataSet.Select(_ => _.Id).ToList();
-
-            Assert.True(dataSet.Count == TestDataForCommittedProjects.ValidCommittedProjects.Count + 1);
-            Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.Where(_ => dataIds.Contains(_.Id)).Count() ==
-                TestDataForCommittedProjects.ValidCommittedProjects.Count);
-            Assert.True(dataSet.FirstOrDefault(_ => _.Id == addrow.Id) != null);
+            var dataSet = service.GetSyncedDataset(simulationId, sync);
+            Assert.Equal(2, dataSet.Count);
+            var unchanged = dataSet.Single(x => x.Id == sectionCommittedProjectId);
+            var added = dataSet.Single(x => x.Id == addDto.Id);
+            ObjectAssertions.Equivalent(dto, unchanged);
+            ObjectAssertions.Equivalent(addDto, added);
         }
     }
 }

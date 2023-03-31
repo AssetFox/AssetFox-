@@ -14,12 +14,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var detail = new BudgetUsageDetail(budgetName)
             {
                 CoveredCost = 12.34m,
-                Status = BudgetUsageStatus.CostCoveredInFull,
+                Status = BudgetUsageStatus.CostCovered,
             };
             return detail;
         }
-
-        public static BudgetUsageDetail Detail(SimulationOutputSetupContext context)
-            => Detail(context.BudgetName);
     }
 }

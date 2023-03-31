@@ -2,27 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Data;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Controllers.BaseController;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using BridgeCareCore.Logging;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using BridgeCareCore.Controllers.BaseController;
+using BridgeCareCore.Models;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using BridgeCareCore.Services.Aggregation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using BridgeCareCore.Models;
-using BridgeCareCore.Services;
-using AppliedResearchAssociates.iAM.Common;
 
 namespace BridgeCareCore.Controllers
 {
@@ -64,7 +60,7 @@ namespace BridgeCareCore.Controllers
                 var metadataDataSourceId = metadataDataSource.Id;
                 var metadataAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes(metadataDataSourceId);
                 var dbAttributes = UnitOfWork.AttributeRepo.GetAttributes();
-                UnitOfWork.AttributeRepo.UpsertAttributes(metadataAttributes);
+                UnitOfWork.AttributeRepo.UpsertAttributesNonAtomic(metadataAttributes);
                 var dbAttributesAfter = UnitOfWork.AttributeRepo.GetAttributes();
                 var dbAttributeIdsAfter = dbAttributesAfter.Select(a => a.Id).ToList();
                 var metadataAttributeIds = metadataAttributes.Select(a => a.Id).ToList();

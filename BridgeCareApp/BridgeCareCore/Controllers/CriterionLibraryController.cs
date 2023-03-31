@@ -17,7 +17,7 @@ namespace BridgeCareCore.Controllers
     public class CriterionLibraryController : BridgeCareCoreBaseController
     {
         public const string CriterionLibraryError = "Criterion Library Error";
-        public CriterionLibraryController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+        public CriterionLibraryController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
         [HttpGet]
@@ -53,19 +53,16 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var entityId = Guid.Empty;
+                var criterionLibraryId = Guid.Empty;
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
-                    entityId = UnitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto);
-                    UnitOfWork.Commit();
+                    criterionLibraryId = UnitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto);
                 });
 
-                return Ok(entityId);
+                return Ok(criterionLibraryId);
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CriterionLibraryError}::UpsertCriterionLibrary {dto.MergedCriteriaExpression} - {e.Message}");
                 throw;
             }
@@ -80,9 +77,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.CriterionLibraryRepo.DeleteCriterionLibrary(libraryId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();

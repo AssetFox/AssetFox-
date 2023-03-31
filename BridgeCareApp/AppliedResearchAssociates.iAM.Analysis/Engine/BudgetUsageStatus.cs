@@ -1,22 +1,21 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine
+﻿using System;
+
+namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     public enum BudgetUsageStatus
     {
         /// <summary>
-        ///     Indicates a budget that paid the entire remaining cost of the treatment.
+        ///     Indicates the existence of incomplete logic in the analysis engine.
         /// </summary>
-        CostCoveredInFull,
+        Undefined,
 
         /// <summary>
-        ///     Indicates a budget that paid some of the remaining cost of the treatment. Only
-        ///     possible when <see cref="AnalysisMethod.ShouldUseExtraFundsAcrossBudgets"/> is true.
+        ///     Indicates a budget that paid at least some of the cost of the treatment.
         /// </summary>
-        CostCoveredInPart,
+        CostCovered,
 
         /// <summary>
-        ///     Indicates a budget that was insufficient to pay the remaining cost of the treatment.
-        ///     When <see cref="AnalysisMethod.ShouldUseExtraFundsAcrossBudgets"/> is true, this
-        ///     status further indicates that the budget had zero available funds.
+        ///     Indicates a budget that did not pay any cost of the treatment.
         /// </summary>
         CostNotCovered,
 

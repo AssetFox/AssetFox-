@@ -4,22 +4,22 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 using MoreLinq;
 using OfficeOpenXml;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment
 {
-    public class FundedTreatmentList : IFundedTreatmentList
+    public class FundedTreatmentList
     {
-        private ITreatmentCommon _treatmentCommon;
-        private ISummaryReportHelper _summaryReportHelper;
+        private TreatmentCommon _treatmentCommon;
+        private ReportHelper _reportHelper;
 
         public FundedTreatmentList()
         {
-            _treatmentCommon = new TreatmentCommon.TreatmentCommon();
-            _summaryReportHelper = new SummaryReportHelper();
+            _treatmentCommon = new TreatmentCommon();
+            _reportHelper = new ReportHelper();
         }
 
         public void Fill(ExcelWorksheet fundedTreatmentWorksheet, SimulationOutput simulationOutput)
@@ -148,8 +148,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             var budget = section.TreatmentConsiderations
                 .Where(c => c.TreatmentName == treatmentName)
-                .FirstOrDefault(c => c.BudgetUsages.Any(b => b.Status is BudgetUsageStatus.CostCoveredInFull or BudgetUsageStatus.CostCoveredInPart))
-                ?.BudgetUsages?.First(b => b.Status is BudgetUsageStatus.CostCoveredInFull or BudgetUsageStatus.CostCoveredInPart);
+                .FirstOrDefault(c => c.BudgetUsages.Any(b => b.Status is BudgetUsageStatus.CostCovered))
+                ?.BudgetUsages?.First(b => b.Status is BudgetUsageStatus.CostCovered);
 
             var budgetName = budget?.BudgetName ?? string.Empty;
 
@@ -211,22 +211,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             object empty = leaveEmpty ? "" : null;
 
-            var familyId = int.Parse(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "FAMILY_ID"));
+            var familyId = int.Parse(_reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FAMILY_ID"));
             if (familyId < 11)
             {
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                var deck = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_SEEDED");
+                var deck = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_SEEDED");
                 worksheet.Cells[row, columnNo++].Value = empty ?? deck;
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                var sup = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUP_SEEDED");
+                var sup = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUP_SEEDED");
                 worksheet.Cells[row, columnNo++].Value = empty ?? sup;
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                var sub = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
+                var sub = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
                 worksheet.Cells[row, columnNo++].Value = empty ?? sub;
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
@@ -287,11 +287,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                         && !(section.TreatmentCause is TreatmentCause.CommittedProject && section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment.ToLower()))
                     .ToList();
 
-                var facilityIds = treatedSections.Select(section => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_")));
+                var facilityIds = treatedSections.Select(section => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_")));
 
                 treatedSections.ForEach(asset =>
                 {
-                    var id = Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(asset.ValuePerNumericAttribute, "BRKEY_"));
+                    var id = Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(asset.ValuePerNumericAttribute, "BRKEY_"));
                     var treatmentOption = asset.TreatmentOptions.FirstOrDefault(o => o.TreatmentName == asset.AppliedTreatment);
                     var treatmentConsideration = asset.TreatmentConsiderations.FirstOrDefault(c => c.TreatmentName == asset.AppliedTreatment);
 

@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -79,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     AttributeId = attributeId,
                     Year = historyEnumerator.Current.Key,
                     TextValue = typeof(T) == typeof(string) ? historyEnumerator.Current.Value.ToString() : null,
-                    NumericValue = typeof(T) == typeof(double) ? Convert.ToDouble(historyEnumerator.Current.Value) : (double?) null,
+                    NumericValue = typeof(T) == typeof(double) ? Convert.ToDouble(historyEnumerator.Current.Value) : (double?)null,
                     Discriminator = typeof(T) == typeof(double)
                         ? DataPersistenceConstants.AggregatedResultNumericDiscriminator
                         : DataPersistenceConstants.AggregatedResultTextDiscriminator
@@ -103,6 +104,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
 
             return entities;
+        }
+
+        public static AggregatedResultDTO ToDto(this AggregatedResultEntity entity)
+        {
+            var attribute = AttributeMapper.ToAbbreviatedDto(entity.Attribute);
+            return new AggregatedResultDTO
+            {
+                MaintainableAssetId = entity.MaintainableAssetId,
+                TextValue = entity.TextValue,
+                NumericValue = entity.NumericValue,
+                Year = entity.Year,
+                Discriminator = entity.Discriminator,
+                Attribute = attribute,
+            };
         }
     }
 }

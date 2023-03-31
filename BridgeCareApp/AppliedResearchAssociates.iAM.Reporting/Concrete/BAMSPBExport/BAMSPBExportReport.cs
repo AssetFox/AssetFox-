@@ -169,7 +169,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PBExportReportTabNames.Treatments);
-            _treatmentForPBExportReportReport.Fill(treatmentsWorksheet, reportOutputData);
+            _treatmentForPBExportReportReport.Fill(treatmentsWorksheet, simulation, reportOutputData);
 
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";

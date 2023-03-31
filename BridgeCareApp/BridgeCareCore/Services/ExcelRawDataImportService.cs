@@ -47,18 +47,40 @@ namespace BridgeCareCore.Services
             var cells = worksheet.Cells;
             var end = worksheet.Dimension.End;
 
-            // Check Excel file dimensions
-            // This addresses the case where Excel thinks it has far more rows or columns than it actually has
-            // TODO:  Implement file trimmer?
-            if (end.Column > MaximumColumns || end.Row > MaximumRows)
+            int indexRow = 1;
+            int indexCol = 1;
+            bool isTrimmed = false;
+            if (end.Row > MaximumRows)
             {
-                return new ExcelRawDataImportResultDTO
-                {
-                    WarningMessage = $"Excel file size unexpected.  Number of columns are {end.Column} and number of rows are {end.Row}"
-                };
+                for (int j = 1; j <= end.Row; j++)
+                    if (!string.IsNullOrWhiteSpace(cells[j, 1].Text))
+                        indexRow = j;
             }
-
-            for (int i = 1; i <= end.Column; i++)
+            if (end.Column > MaximumColumns && indexRow == 1)
+            {
+                for (int i = 1; i <= end.Column; i++)
+                    if (!string.IsNullOrWhiteSpace(cells[1, i].Text) && !string.IsNullOrWhiteSpace(cells[end.Row, i].Text))
+                        indexCol = i;
+            }
+            else if (end.Column > MaximumColumns)
+            {
+                for (int i = 1; i <= end.Column; i++)
+                    if (!string.IsNullOrWhiteSpace(cells[1, i].Text) && !string.IsNullOrWhiteSpace(cells[indexRow, i].Text))
+                        indexCol = i;
+            }
+            int endRow = end.Row;
+            int endCol = end.Column;
+            if (indexRow != 1)
+            {
+                endRow = Math.Min(indexRow, end.Row);
+                isTrimmed = true;
+            }
+            if (indexCol != 1)
+            {
+                endCol = Math.Min(indexCol, end.Column);
+                isTrimmed = true;
+            }
+            for (int i = 1; i <= endCol; i++)
             {
                 var titleContent = cells[1, i].Value;
                 var shouldIncludeColumn = includeColumnsWithoutTitles || titleContent != null && !string.IsNullOrWhiteSpace(titleContent.ToString());
@@ -75,12 +97,12 @@ namespace BridgeCareCore.Services
                 };
             }
             var columns = new List<ExcelRawDataColumn>();
-            for (var columnIndex = 1; columnIndex <= end.Column; columnIndex++)
+            for (var columnIndex = 1; columnIndex <= endCol; columnIndex++)
             {
                 if (columnIndexesToInclude.Contains(columnIndex))
                 {
                     var columnCells = new List<IExcelCellDatum>();
-                    for (var rowIndex = 1; rowIndex <= end.Row; rowIndex++)
+                    for (var rowIndex = 1; rowIndex <= endRow; rowIndex++)
                     {
                         var cellValue = cells[rowIndex, columnIndex].Value;
                         var newCell = ExcelCellData.ForObject(cellValue);
@@ -98,10 +120,17 @@ namespace BridgeCareCore.Services
             var newId = Guid.NewGuid();
             var dto = ExcelRawDataSpreadsheetSerializationMapper.ToDTO(workseet, dataSourceId, newId);
             var returnId = _unitOfWork.ExcelWorksheetRepository.AddExcelRawData(dto);
-            return new ExcelRawDataImportResultDTO
-            {
-                RawDataId = returnId,
-            };
+            if (isTrimmed)
+                return new ExcelRawDataImportResultDTO
+                {
+                    RawDataId = returnId,
+                    WarningMessage = $"Excel file size unexpected.  Number of columns are {end.Column} and number of rows are {end.Row}"
+                };
+            else
+                return new ExcelRawDataImportResultDTO
+                {
+                    RawDataId = returnId,
+                };
         }
     }
 }

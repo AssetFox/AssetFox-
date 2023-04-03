@@ -50,18 +50,21 @@ namespace BridgeCareCore.Services
             int indexRow = 1;
             int indexCol = 1;
             bool isTrimmed = false;
+            // Checks if detected rows are above threshold.
             if (end.Row > MaximumRows)
             {
                 for (int j = 1; j <= end.Row; j++)
                     if (!string.IsNullOrWhiteSpace(cells[j, 1].Text))
                         indexRow = j;
             }
-            if (end.Column > MaximumColumns && indexRow == 1)
+            // Checks if *only* detected columns are above threshold.
+            if (end.Column > MaximumColumns && end.Row > MaximumRows)
             {
                 for (int i = 1; i <= end.Column; i++)
                     if (!string.IsNullOrWhiteSpace(cells[1, i].Text) && !string.IsNullOrWhiteSpace(cells[end.Row, i].Text))
                         indexCol = i;
             }
+            // Checks if *both* detected rows & columns are above threshold.
             else if (end.Column > MaximumColumns)
             {
                 for (int i = 1; i <= end.Column; i++)

@@ -34,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = dto.Name,
                 ShadowForAnyTreatment = dto.ShadowForAnyTreatment,
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
+                PerformanceFactor = dto.PerformanceFactor,
                 Description = dto.Description,
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
                 AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType
@@ -80,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             selectableTreatment.Description = entity.Description;
             selectableTreatment.Category = (TreatmentCategory)entity.Category;
             selectableTreatment.AssetCategory = (AssetCategory)entity.AssetType;
-
+            selectableTreatment.PerformanceFactor = entity.PerformanceFactor;
             if (entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
             {
                 var budgetIds = entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Select(_ => _.ScenarioBudget.Id).ToList();
@@ -191,6 +192,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         : new CriterionLibraryDTO(),
                 ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                 ShadowForSameTreatment = entity.ShadowForSameTreatment,
+                PerformanceFactor = entity.PerformanceFactor,
                 Category = (TreatmentDTOEnum.TreatmentCategory)entity.Category,
                 AssetType = (TreatmentDTOEnum.AssetType)entity.AssetType
             };

@@ -94,6 +94,26 @@
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
                     </v-flex>
+                    <v-flex xs3>
+                        <v-subheader class="ghd-control-label ghd-md-gray">Performance Factor</v-subheader>
+                        <v-text-field
+                            class='ghd-control-border ghd-control-text ghd-control-width-sm'
+                            :mask="'####'"
+                            rows="4"
+                            @input="
+                                onEditTreatmentDetails(
+                                    'performanceFactor',
+                                    selectedTreatmentDetails.performanceFactor,
+                                )
+                            "
+                            label="Performance Factor"
+                            outline
+                            v-model="
+                                selectedTreatmentDetails.performanceFactor
+                            "
+                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        />
+                    </v-flex>
                 </v-layout>                
                 <v-flex class="criteria-flex">
                     <v-menu

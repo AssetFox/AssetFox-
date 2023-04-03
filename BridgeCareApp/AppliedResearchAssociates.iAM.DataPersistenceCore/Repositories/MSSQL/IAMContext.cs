@@ -1740,6 +1740,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.ShadowForAnyTreatment).IsRequired();
                 entity.Property(e => e.ShadowForSameTreatment).IsRequired();
+                entity.Property(e => e.PerformanceFactor).IsRequired();
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Category)

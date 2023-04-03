@@ -47,6 +47,7 @@ export interface Treatment {
     addTreatment: boolean;
     category: TreatmentCategory;
     assetType: AssetType;
+    performanceFactor: number;
 }
 
 export interface SimpleTreatment {
@@ -77,6 +78,7 @@ export interface TreatmentDetails {
     criterionLibrary: CriterionLibrary;
     category: TreatmentCategory;
     assetType: AssetType;
+    performanceFactor: number;
 }
 
 export interface BudgetGridRow {
@@ -110,6 +112,7 @@ export const emptyTreatment: Treatment = {
     addTreatment: false,
     category: TreatmentCategory.preservation,
     assetType: AssetType.bridge,
+    performanceFactor: 1
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {
@@ -135,6 +138,7 @@ export const emptyTreatmentDetails: TreatmentDetails = {
     criterionLibrary: clone(emptyCriterionLibrary),
     category: TreatmentCategory.preservation,
     assetType: AssetType.bridge,
+    performanceFactor: 1
 };
 
 export const assetTypeMap: Map<string, AssetType> = new Map([

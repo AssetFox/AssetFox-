@@ -649,6 +649,7 @@ export default class TreatmentEditor extends Vue {
             criterionLibrary: this.selectedTreatment.criterionLibrary,
             category: this.selectedTreatment.category,
             assetType: this.selectedTreatment.assetType,
+            performanceFactor: this.selectedTreatment.performanceFactor
         };
 
         this.isNoTreatmentSelected = this.selectedTreatment.name == 'No Treatment';

@@ -6,7 +6,7 @@ namespace BridgeCareCore.Interfaces
 {
     public interface IWorkQueService
     {
-        IQueuedWorkHandle CreateAndRun(IWorkSpecification workItem);
+        IQueuedWorkHandle<WorkQueueMetadata> CreateAndRun(IWorkSpecification<WorkQueueMetadata> workItem);
 
         bool Cancel(Guid simulationId);
     }

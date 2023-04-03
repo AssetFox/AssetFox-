@@ -24,7 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
 {
-    public record DeleteNetworkWorkitem(Guid NetworkId, string userId, string networkName) : IWorkSpecification
+    public record DeleteNetworkWorkitem(Guid NetworkId, string userId, string networkName) : IWorkSpecification<WorkQueueMetadata>
 
     {
         public string WorkId => NetworkId.ToString();
@@ -35,7 +35,8 @@ namespace BridgeCareCore.Services
 
         public string WorkDescription => "Delete Network";
 
-        public WorkType WorkType => WorkType.DeleteNetwork;
+        public WorkQueueMetadata Metadata =>
+            new WorkQueueMetadata() { WorkType = WorkType.DeleteNetwork, DomainType = DomainType.Network};
 
         public string WorkName => networkName;
 

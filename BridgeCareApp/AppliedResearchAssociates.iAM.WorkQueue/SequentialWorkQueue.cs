@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Channels;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -8,9 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AppliedResearchAssociates.iAM.WorkQueue;
 
-public class SequentialWorkQueue
+public class SequentialWorkQueue<T>
 {
-    public IReadOnlyList<IQueuedWorkHandle> Snapshot => IncompleteElements.Values.ToList();
+    public IReadOnlyList<IQueuedWorkHandle<T>> Snapshot => IncompleteElements.Values.ToList();
 
     public async Task<IWorkStarter?> Dequeue(CancellationToken cancellationToken)
     {
@@ -22,7 +23,7 @@ public class SequentialWorkQueue
         return workItem;
     }
 
-    public Task Enqueue(IWorkSpecification workItem, out IQueuedWorkHandle workHandle)
+    public Task Enqueue(IWorkSpecification<T> workItem, out IQueuedWorkHandle<T> workHandle)
     {
         lock (ElementChannel)
         {
@@ -39,7 +40,7 @@ public class SequentialWorkQueue
 
     public bool Cancel(Guid workId)
     {
-        IQueuedWorkHandle? queuedWorkHandle = IncompleteElements.Values.SingleOrDefault(_ => Guid.Parse(_.WorkId) == workId);
+        IQueuedWorkHandle<T>? queuedWorkHandle = IncompleteElements.Values.SingleOrDefault(_ => Guid.Parse(_.WorkId) == workId);
 
         if (queuedWorkHandle != null)
         {
@@ -64,9 +65,9 @@ public class SequentialWorkQueue
 
     private readonly ConcurrentDictionary<string, QueueElement> IncompleteElements = new();
 
-    internal class QueueElement : IQueuedWorkHandle, IWorkStarter
+    internal class QueueElement : IQueuedWorkHandle<T>, IWorkStarter
     {
-        public QueueElement(IWorkSpecification workSpec, SequentialWorkQueue workQueue)
+        public QueueElement(IWorkSpecification<T> workSpec, SequentialWorkQueue<T> workQueue)
         {
             WorkSpec = workSpec ?? throw new ArgumentNullException(nameof(workSpec));
             WorkQueue = workQueue ?? throw new ArgumentNullException(nameof(workQueue));
@@ -95,7 +96,7 @@ public class SequentialWorkQueue
 
         public string WorkDescription => WorkSpec.WorkDescription;
 
-        public WorkType WorkType => WorkSpec.WorkType;
+        public T MetaData => WorkSpec.Metadata;
 
         public Task WorkCompletion => WorkCompletionSource.Task;
 
@@ -170,8 +171,8 @@ public class SequentialWorkQueue
 
         private readonly TaskCompletionSource WorkCompletionSource = new();
 
-        private readonly IWorkSpecification WorkSpec;
+        private readonly IWorkSpecification<T> WorkSpec;
 
-        private readonly SequentialWorkQueue WorkQueue;
+        private readonly SequentialWorkQueue<T> WorkQueue;
     }
 }

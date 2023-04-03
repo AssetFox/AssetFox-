@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.Treatment;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +19,7 @@ namespace BridgeCareCore.StartupExtension
 
             services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
 
-            services.AddSingleton<SequentialWorkQueue>();
+            services.AddSingleton<SequentialWorkQueue<WorkQueueMetadata>>();
             services.AddHostedService<SequentialWorkBackgroundService>();
             services.AddScoped<ISimulationAnalysis, SimulationAnalysisService>();
             services.AddScoped<IWorkQueService, WorkQueService>();

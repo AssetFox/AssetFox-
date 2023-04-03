@@ -1,6 +1,6 @@
 ﻿namespace AppliedResearchAssociates.iAM.WorkQueue;
 
-public interface IQueuedWorkHandle
+public interface IQueuedWorkHandle<T>
 {
     string MostRecentStatusMessage { get; }
 
@@ -12,7 +12,7 @@ public interface IQueuedWorkHandle
 
     string UserId { get; }
 
-    WorkType WorkType { get; }
+    T MetaData { get; }
 
     public string WorkName { get; }
 

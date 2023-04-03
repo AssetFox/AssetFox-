@@ -11,15 +11,15 @@ namespace BridgeCareCore.Services
     public class WorkQueService : IWorkQueService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private readonly SequentialWorkQueue _sequentialWorkQueue;
+        private readonly SequentialWorkQueue<WorkQueueMetadata> _sequentialWorkQueue;
 
-        public WorkQueService(UnitOfDataPersistenceWork unitOfWork, SequentialWorkQueue sequentialWorkQueue)
+        public WorkQueService(UnitOfDataPersistenceWork unitOfWork, SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
         }
 
-        public IQueuedWorkHandle CreateAndRun(IWorkSpecification workItem)
+        public IQueuedWorkHandle<WorkQueueMetadata> CreateAndRun(IWorkSpecification<WorkQueueMetadata> workItem)
         {
             _sequentialWorkQueue.Enqueue(workItem, out var workHandle).Wait();
             return workHandle;

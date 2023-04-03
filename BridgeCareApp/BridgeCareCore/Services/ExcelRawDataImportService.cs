@@ -14,8 +14,6 @@ namespace BridgeCareCore.Services
 
         public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
         public const string DataSourceDoesNotExist = "No DataSource in the database with id";
-        private const int MaximumRows = 100000;
-        private const int MaximumColumns = 1000;
 
         private IUnitOfWork _unitOfWork;
 
@@ -47,41 +45,23 @@ namespace BridgeCareCore.Services
             var cells = worksheet.Cells;
             var end = worksheet.Dimension.End;
 
-            int indexRow = 1;
-            int indexCol = 1;
-            bool isTrimmed = false;
-            // Checks if detected rows are above threshold.
-            if (end.Row > MaximumRows)
+            int endRow = 1;
+            int endCol = 1;
+            for (int i = 1; i <= end.Row; i++)
             {
-                for (int j = 1; j <= end.Row; j++)
-                    if (!string.IsNullOrWhiteSpace(cells[j, 1].Text))
-                        indexRow = j;
+                //Check if the second column has text, in case the first column has gaps or ends early.
+                if (!string.IsNullOrWhiteSpace(cells[i, 1].Text) || !string.IsNullOrWhiteSpace(cells[i, 2].Text))
+                    endRow = i;
+                else
+                    break;
             }
-            // Checks if *only* detected columns are above threshold.
-            if (end.Column > MaximumColumns && end.Row <= MaximumRows)
+            for (int j = 1; j <= end.Column; j++)
             {
-                for (int i = 1; i <= end.Column; i++)
-                    if (!string.IsNullOrWhiteSpace(cells[1, i].Text) && !string.IsNullOrWhiteSpace(cells[end.Row, i].Text))
-                        indexCol = i;
-            }
-            // Checks if *both* detected rows & columns are above threshold.
-            else if (end.Column > MaximumColumns)
-            {
-                for (int i = 1; i <= end.Column; i++)
-                    if (!string.IsNullOrWhiteSpace(cells[1, i].Text) && !string.IsNullOrWhiteSpace(cells[indexRow, i].Text))
-                        indexCol = i;
-            }
-            int endRow = end.Row;
-            int endCol = end.Column;
-            if (indexRow != 1)
-            {
-                endRow = Math.Min(indexRow, end.Row);
-                isTrimmed = true;
-            }
-            if (indexCol != 1)
-            {
-                endCol = Math.Min(indexCol, end.Column);
-                isTrimmed = true;
+                //Check for each column title, as it should exist.
+                if (!string.IsNullOrWhiteSpace(cells[1, j].Text))
+                    endCol = j;
+                else
+                    break;
             }
             for (int i = 1; i <= endCol; i++)
             {
@@ -123,17 +103,10 @@ namespace BridgeCareCore.Services
             var newId = Guid.NewGuid();
             var dto = ExcelRawDataSpreadsheetSerializationMapper.ToDTO(workseet, dataSourceId, newId);
             var returnId = _unitOfWork.ExcelWorksheetRepository.AddExcelRawData(dto);
-            if (isTrimmed)
-                return new ExcelRawDataImportResultDTO
-                {
-                    RawDataId = returnId,
-                    WarningMessage = $"Excel file size unexpected.  Number of columns are {end.Column} and number of rows are {end.Row}"
-                };
-            else
-                return new ExcelRawDataImportResultDTO
-                {
-                    RawDataId = returnId,
-                };
+            return new ExcelRawDataImportResultDTO
+            {
+                RawDataId = returnId,
+            };
         }
     }
 }

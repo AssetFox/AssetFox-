@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,34 +25,6 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
             var specifiedData = AssignedData.Where(_ => _.Attribute.Id == attribute.Id);
             return new AggregatedResult<T>(Guid.NewGuid(), this, aggregationRule.Apply(specifiedData, attribute).ToList());
         }
-
-        // TODO: side effect => mutate (get area equation; calculate spatial weighting)
-        //public void AssignSpatialWeighting(string benefitQuantifierEquation)
-        //{
-        //    if (!AssignedData.Any() || !AssignedData.Any(_ => _ is AttributeDatum<double>))
-        //    {
-        //        return;
-        //    }
-
-        //    var numericAssignedData = AssignedData.Where(_ =>
-        //        _ is AttributeDatum<double> && benefitQuantifierEquation.Contains(_.Attribute.Name)).ToList();
-
-        //    var compiler = new CalculateEvaluateCompiler();
-        //    foreach (var numericDatum in numericAssignedData.Cast<AttributeDatum<double>>())
-        //    {
-        //        compiler.ParameterTypes[numericDatum.Attribute.Name] = CalculateEvaluateParameterType.Number;
-        //    }
-        //    var calculator = compiler.GetCalculator(benefitQuantifierEquation);
-
-        //    var scope = new CalculateEvaluateScope();
-        //    foreach (var numericDatum in numericAssignedData.Cast<AttributeDatum<double>>())
-        //    {
-        //        scope.SetNumber(numericDatum.Attribute.Name, numericDatum.Value);
-        //    }
-
-        //    var result = calculator.Delegate(scope);
-        //    //SpatialWeighting = new SpatialWeighting(result);
-        //}
 
         public List<DatumLog> AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
         {

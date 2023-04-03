@@ -19,6 +19,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public string AssetName { get; set; }
 
+        public string Direction { get; set; }
+
         public string FromSection { get; set; } // TODO: source?
 
         public string ToSection { get; set; } // TODO: source?
@@ -35,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public double? RemainingLife { get; set; }
 
-        public int PriorityLevel { get; set; }
+        public int? PriorityLevel { get; set; }
 
         public int TreatmentFundingIgnoresSpendingLimit { get; set; }
 
@@ -45,8 +47,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public string Budget { get; set; } // TODO: source?
 
-        public string Category { get; set; } // TODO source? If TreatmentCategory, what to consider
+        public string Category { get; set; } // TODO source TreatmentCategory?
 
-        public List<double> Consequences { get; set; } = new List<double>();// Treatment attributes i.e. ones getting affected from treatment
+        public List<double> Consequences { get; set; } = new List<double>(); // Treatment attributes i.e. ones getting affected from treatment
     }
 }

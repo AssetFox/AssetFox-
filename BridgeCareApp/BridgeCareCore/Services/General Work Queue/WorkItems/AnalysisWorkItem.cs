@@ -30,7 +30,7 @@ namespace BridgeCareCore.Services
         public string WorkDescription => "Run Simulation";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.SimulationAnalyis, DomainType = DomainType.Simulation };
+            new WorkQueueMetadata() { WorkType = WorkType.SimulationAnalysis, DomainType = DomainType.Simulation };
 
         public string WorkName => scenarioName;
 

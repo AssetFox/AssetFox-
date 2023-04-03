@@ -4,7 +4,6 @@
             <v-layout>
                 <v-flex xs3>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
-                    <!-- https://stackoverflow.com/questions/65908052/get-the-item-text-from-a-v-select -->
                     <v-select
                         :items='librarySelectItems'
                         append-icon=$vuetify.icons.ghd-down
@@ -69,10 +68,6 @@
 
 
         </v-flex>
-
-        <!--<div class="ara-blue-pantone-281 scenario-status" v-if="hasSelectedScenario">-->
-        <!--</div>-->
-
         <v-divider style="margin-top:-10px" v-show='hasSelectedLibrary || hasScenario'></v-divider>        
         <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top:-20px;margin-bottom:-15px;">                
                <v-btn

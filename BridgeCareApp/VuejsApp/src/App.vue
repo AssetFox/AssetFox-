@@ -208,8 +208,6 @@
                     <span v-if="selectedScenarioHasStatus">{{
                         selectedScenario.status
                     }}</span>
-
-                    <!-- <span style="float:right;" class="ghd-control-label ghd-md-gray" v-if='hasSelectedLibrary && !hasScenario' bleh="console.log('changeLibrary: ');">Owner:</span> -->
             </div>
             <v-container fluid v-bind="container">
                 <router-view></router-view>
@@ -343,7 +341,6 @@ export default class AppComponent extends Vue {
     unauthorizedError: string = '';
     agencyLogo: string = '';
     productLogo: string = '';
-
 
     get container() {
         const container: any = {};
@@ -528,9 +525,6 @@ export default class AppComponent extends Vue {
             this.productLogo = require(`@/assets/images/BridgeCareLogo.svg`)
         else
             this.productLogo = this.$config.productLogo
-
-        //https://javascript.plainenglish.io/communication-between-components-in-vue-js-d79124917cd0
-        //https://stackoverflow.com/questions/51225681/how-to-bind-the-input-data-enter-with-span-text
     }
 
     beforeDestroy() {

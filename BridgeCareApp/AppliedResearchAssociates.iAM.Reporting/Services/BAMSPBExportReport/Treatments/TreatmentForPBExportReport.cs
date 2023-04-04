@@ -80,7 +80,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                 "MaxYear",
                 "BRKEY",
                 "SimulationId",
-                "SimulationOutputId",
                 "NetworkId",
                 "ToDelete",
                 "OWNER_CODE",
@@ -188,7 +187,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                                 {
                                     //check for multi year budget
                                     var allowFundingFromMultipleBudgets = simulationObject?.AnalysisMethod?.AllowFundingFromMultipleBudgets ?? false;
-                                    if (allowFundingFromMultipleBudgets == true)
+                                    if (allowFundingFromMultipleBudgets == true || budgetUsages.Count > 1)
                                     {
                                         foreach (var budgetUsage in budgetUsages)
                                         {
@@ -234,7 +233,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             }
 
                             worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.AssetId.ToString(); //Asset Id
-                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.AssetName.ToString(); //Asset
+                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "BRKEY_"); //Asset
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "DISTRICT"); //District
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
@@ -300,8 +299,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                             worksheet.Cells[rowNo, columnNo++].Value = simulationObject.Id.ToString(); //SimulationId
-
-                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "SimulationOutputId"); //SimulationOutputId
 
                             worksheet.Cells[rowNo, columnNo++].Value = simulationObject?.Network?.Id.ToString(); //NetworkId
 

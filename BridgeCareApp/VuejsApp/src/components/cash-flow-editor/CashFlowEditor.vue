@@ -11,7 +11,7 @@
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Parent Library: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">    
                     <div v-if="hasScenario" style="padding-top: 18px !important">
@@ -460,9 +460,12 @@ export default class CashFlowEditor extends Vue {
     showAddCashFlowRuleDialog: boolean = false;
     importLibraryDisabled: boolean = true;
     scenarioHasCreatedNew: boolean = false;
+    loadedParentName: string = "";
+    loadedParentId: string = "";
     parentLibraryName: string = "None";
     parentLibraryId: string = "";
     scenarioLibraryIsModified: boolean = false;
+    libraryImported: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -516,6 +519,12 @@ export default class CashFlowEditor extends Vue {
                 this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
             })
         this.librarySelectItemValueAllowedChanged = true;
+        this.librarySelectItems.forEach(library => {
+            if (library.value === this.librarySelectItemValue) {
+                this.parentLibraryName = library.text;
+            }
+        });
+        //this.scenarioLibraryIsModified = false;
     }
     onLibrarySelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue;
@@ -535,8 +544,11 @@ export default class CashFlowEditor extends Vue {
     }
 
     importLibrary() {
+        this.setParentLibraryName(this.librarySelectItemValue ? this.librarySelectItemValue : "");
         this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
         this.importLibraryDisabled = true;
+        this.scenarioLibraryIsModified = false;
+        this.libraryImported = true;
     }
 
     @Watch('stateSelectedCashRuleFlowLibrary')
@@ -847,7 +859,7 @@ export default class CashFlowEditor extends Vue {
     }
 
     onUpsertScenarioCashFlowRules() {
-        if (this.selectedCashFlowRuleLibrary.id === this.uuidNIL) {this.scenarioLibraryIsModified = true;}
+        if (this.selectedCashFlowRuleLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.libraryImported === false) {this.scenarioLibraryIsModified = true;}
         else { this.scenarioLibraryIsModified = false; }
 
         CashFlowService.upsertScenarioCashFlowRules({
@@ -864,6 +876,7 @@ export default class CashFlowEditor extends Vue {
                 this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified scenario's cash flow rules"});
                 this.importLibraryDisabled = true;
+                this.libraryImported = false;
             }           
         });
     }
@@ -899,6 +912,9 @@ export default class CashFlowEditor extends Vue {
 
     onDiscardChanges() {
         this.librarySelectItemValue = null;
+        this.parentLibraryName = this.loadedParentName;
+        this.parentLibraryId = this.loadedParentId;
+
         setTimeout(() => {
             if (this.hasScenario) {
                 this.clearChanges();
@@ -1097,6 +1113,8 @@ export default class CashFlowEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                     this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
+                    this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
+                    this.loadedParentName = this.parentLibraryName; //store original
                     this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
                 }
             });

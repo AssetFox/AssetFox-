@@ -805,6 +805,7 @@ export default class PerformanceCurveEditor extends Vue {
         }
         this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
         this.newLibrarySelection = true;
+        this.scenarioLibraryIsModified = false;
         this.librarySelectItemValueAllowedChanged = true;
     }
     onSelectItemValueChanged() {

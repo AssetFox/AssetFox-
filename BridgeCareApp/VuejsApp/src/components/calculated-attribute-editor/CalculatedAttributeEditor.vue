@@ -669,6 +669,7 @@ export default class CalculatedAttributeEditor extends Vue {
             });
         }
         this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
+        this.setParentLibraryName(this.parentLibraryId);
         this.newLibrarySelection = true;
         this.librarySelectItemValueAllowedChanged = true;
     }

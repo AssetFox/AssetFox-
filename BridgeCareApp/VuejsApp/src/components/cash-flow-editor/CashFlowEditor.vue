@@ -524,7 +524,6 @@ export default class CashFlowEditor extends Vue {
                 this.parentLibraryName = library.text;
             }
         });
-        //this.scenarioLibraryIsModified = false;
     }
     onLibrarySelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue;

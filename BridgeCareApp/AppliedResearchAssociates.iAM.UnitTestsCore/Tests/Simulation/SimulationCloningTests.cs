@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
@@ -136,6 +137,33 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 bp => bp.Id, bp => bp.CriterionLibrary,
                 bp => bp.BudgetPercentagePairs[0].Id,
                 bp => bp.BudgetPercentagePairs[0].BudgetId);
+        }
+
+
+        [Fact]
+        public void SimulationInDbWithCashFlowRule_Clone_Clones()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var ruleId = Guid.NewGuid();
+            var cashFlowRule = CashFlowRuleDtos.Rule(ruleId);
+            var cashFlowRules = new List<CashFlowRuleDTO> { cashFlowRule };
+            TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(cashFlowRules, simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedCashFlowRules = TestHelper.UnitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(clonedSimulationId);
+            var clonedCashFlowRule = clonedCashFlowRules.Single();
+            Assert.Equal(cashFlowRule.Name, clonedCashFlowRule.Name);
+            var distributionRule = cashFlowRule.CashFlowDistributionRules.Single();
+            var clonedDistributionRule = clonedCashFlowRule.CashFlowDistributionRules.Single();
+            ObjectAssertions.EquivalentExcluding(distributionRule, clonedDistributionRule, x => x.Id);
         }
     }
 }

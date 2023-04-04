@@ -10,16 +10,10 @@ namespace BridgeCareCore.Services
 {
     public class GeneralWorkQueService : IGeneralWorkQueueService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly SequentialWorkQueue<WorkQueueMetadata> _sequentialWorkQueue;
 
-<<<<<<< HEAD:BridgeCareApp/BridgeCareCore/Services/General Work Queue/DeleteNetworkService.cs
-        public WorkQueService(UnitOfDataPersistenceWork unitOfWork, SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue)
-=======
-        public GeneralWorkQueService(UnitOfDataPersistenceWork unitOfWork, SequentialWorkQueue sequentialWorkQueue)
->>>>>>> 21292_deleteNetworkWorkQueue:BridgeCareApp/BridgeCareCore/Services/General Work Queue/GeneralWorkQueueService.cs
+        public GeneralWorkQueService(SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
         }
 

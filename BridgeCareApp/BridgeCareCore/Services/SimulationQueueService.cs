@@ -77,7 +77,7 @@ namespace BridgeCareCore.Services
                 .Select(_ => _.ToQueuedWorkDTO(workQueue))
                 .ToList();
 
-            queuedWork = queuedWork.Concat(workQueue.Where(_ => _.WorkType != WorkType.SimulationAnalyis).Select(_ => _.ToQueuedWorkDTO())).ToList();
+            queuedWork = queuedWork.Concat(workQueue.Where(_ => _.MetaData.WorkType != WorkType.SimulationAnalysis).Select(_ => _.ToQueuedWorkDTO())).ToList();
 
             return queuedWork;
         }

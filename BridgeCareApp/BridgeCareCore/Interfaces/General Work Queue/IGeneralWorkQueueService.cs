@@ -4,7 +4,7 @@ using System;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface IWorkQueService
+    public interface IGeneralWorkQueueService
     {
         IQueuedWorkHandle<WorkQueueMetadata> CreateAndRun(IWorkSpecification<WorkQueueMetadata> workItem);
 

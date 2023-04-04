@@ -36,9 +36,21 @@ const mutations = {
     UserUserOrSharedScenarioMutator(state: any, scenario: Scenario){
         state.currentUserOrSharedScenario = clone(scenario);        
     },
-    WorkQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedWork>){
+    workQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedWork>){
         state.currentWorkQueuePage = clone(queuedSimulations.items);
         state.totalQueuedSimulations = queuedSimulations.totalItems;
+    },
+    workQueStatusUpdateMutator(state: any, queuedWorkUpdated: QueuedWork) {
+        if (any(propEq('id', queuedWorkUpdated.id), state.currentWorkQueuePage)) {
+            const updatedQueuedWork: QueuedWork = find(propEq('id', queuedWorkUpdated.id), state.currentWorkQueuePage) as QueuedWork;
+            updatedQueuedWork.status = queuedWorkUpdated.status;
+
+            state.currentWorkQueuePage = update(
+                findIndex(propEq('id', updatedQueuedWork.id), state.currentWorkQueuePage),
+                updatedQueuedWork,
+                state.currentWorkQueuePage
+            );           
+        }
     },
     selectedScenarioMutator(state: any, id: string) {
         if (any(propEq('id', id), state.currentSharedScenariosPage)) {
@@ -118,6 +130,9 @@ const actions = {
     },
     updateSimulationAnalysisDetail({commit}: any, payload: any) {
         commit('simulationAnalysisDetailMutator', payload.simulationAnalysisDetail);
+    },
+    updateQueuedWorkStatus({commit}: any, payload: any) {
+        commit('workQueStatusUpdateMutator', payload.workQueueStatusUpdate);
     },
     updateSimulationReportDetail({commit}: any, payload: any) {
         commit('simulationReportDetailMutator', payload.simulationReportDetail);

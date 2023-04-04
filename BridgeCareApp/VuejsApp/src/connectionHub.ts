@@ -10,6 +10,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 
 import has = Reflect.has;
 import { getUserName } from '@/shared/utils/get-user-info';
+import { queuedWorkStatusUpdate } from './shared/models/iAM/queuedWorkStatusUpdate';
 
 export default {
     install(Vue: any) {
@@ -75,9 +76,9 @@ export default {
             },
         );
 
-        connection.on(Hub.BroadcastType.BroadcastWorkQueueStatusUpdate, status => {
+        connection.on(Hub.BroadcastType.BroadcastWorkQueueStatusUpdate, (queueItem: queuedWorkStatusUpdate) => {
             statusHub.$emit(Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent, {
-                status,
+                queueItem,
             });
         });
 

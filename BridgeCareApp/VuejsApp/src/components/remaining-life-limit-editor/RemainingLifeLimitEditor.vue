@@ -13,7 +13,7 @@
                           outline
                         >
                         </v-select>
-                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Parent Library: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
+                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -923,6 +923,10 @@ export default class RemainingLifeLimitEditor extends Vue {
     }
 
     setParentLibraryName(libraryId: string) {
+        if (libraryId === "") {
+            this.parentLibraryName = "None";
+            return;
+        }
         let foundLibrary: RemainingLifeLimitLibrary = emptyRemainingLifeLimitLibrary;
         this.stateRemainingLifeLimitLibraries.forEach(library => {
             if (library.id === libraryId ) {

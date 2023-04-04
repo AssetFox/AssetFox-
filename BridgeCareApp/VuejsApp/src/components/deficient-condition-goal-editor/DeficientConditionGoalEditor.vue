@@ -12,7 +12,7 @@
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Parent Library: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
                 </v-layout>
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
@@ -497,6 +497,9 @@ export default class DeficientConditionGoalEditor extends Vue {
     parentLibraryId: string = "";
     parentLibraryName: string = "None";
     scenarioLibraryIsModified: boolean = false;
+    loadedParentName: string = "";
+    loadedParentId: string = "";
+    libraryImported: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -547,12 +550,18 @@ export default class DeficientConditionGoalEditor extends Vue {
             this.onSelectItemValueChanged();
             this.unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged)
+        else if(this.librarySelectItemValueAllowedChanged) {
             this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
                 this.librarySelectItemValueAllowedChanged = false;
                 this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
-            })
+            });
+        }
         this.librarySelectItemValueAllowedChanged = true;
+        this.librarySelectItems.forEach(library => {
+            if (library.value === this.librarySelectItemValue) {
+                this.parentLibraryName = library.text;
+            }
+        });
     }
     onSelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue
@@ -669,10 +678,14 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     importLibrary() {
+        this.setParentLibraryName(this.librarySelectItemValue ? this.librarySelectItemValue : "");
         this.selectDeficientConditionGoalLibraryAction({
             libraryId: this.librarySelectItemValue,
         });
         this.importLibraryDisabled = true;
+        this.scenarioLibraryIsModified = false;
+        this.libraryImported = true;
+
     }
 
     getOwnerUserName(): string {
@@ -806,7 +819,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     onUpsertScenarioDeficientConditionGoals() {
-        if (this.selectedDeficientConditionGoalLibrary.id === this.uuidNIL) {this.scenarioLibraryIsModified = true;}
+        if (this.selectedDeficientConditionGoalLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.libraryImported === false) { this.scenarioLibraryIsModified = true; }
         else { this.scenarioLibraryIsModified = false; }
 
         DeficientConditionGoalService.upsertScenarioDeficientConditionGoals({
@@ -823,6 +836,7 @@ export default class DeficientConditionGoalEditor extends Vue {
                 this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified scenario's deficient condition goals"});
                 this.importLibraryDisabled = true;
+                this.libraryImported = false;
             }           
         });
     }
@@ -836,6 +850,8 @@ export default class DeficientConditionGoalEditor extends Vue {
                 this.importLibraryDisabled = true;
             }
         });
+        this.parentLibraryName = this.loadedParentName;
+        this.parentLibraryId = this.loadedParentId;
     }
 
     onRemoveSelectedDeficientConditionGoals() {
@@ -1019,6 +1035,11 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     setParentLibraryName(libraryId: string) {
+
+        if (libraryId === "") {
+            this.parentLibraryName = "None";
+            return;
+        }
         let foundLibrary: DeficientConditionGoalLibrary = emptyDeficientConditionGoalLibrary;
         this.stateDeficientConditionGoalLibraries.forEach(library => {
             if (library.id === libraryId ) {
@@ -1052,6 +1073,8 @@ export default class DeficientConditionGoalEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                     this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
+                    this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
+                    this.loadedParentName = this.parentLibraryName; //store original
                     this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
                 }
             });

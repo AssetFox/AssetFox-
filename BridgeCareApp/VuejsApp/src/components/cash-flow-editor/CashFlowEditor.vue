@@ -1078,6 +1078,10 @@ export default class CashFlowEditor extends Vue {
     };
 
     setParentLibraryName(libraryId: string) {
+        if (libraryId === "") {
+            this.parentLibraryName = "None";
+            return;
+        }
         let foundLibrary: CashFlowRuleLibrary = emptyCashFlowRuleLibrary;
         this.stateCashFlowRuleLibraries.forEach(library => {
             if (library.id === libraryId ) {

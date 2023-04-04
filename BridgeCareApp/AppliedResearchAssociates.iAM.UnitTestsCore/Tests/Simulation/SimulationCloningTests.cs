@@ -191,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void SimulationInDbWithPerformanceCurves_Clone_Clones()
+        public void SimulationInDbWithPerformanceCurve_Clone_Clones()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -200,8 +200,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationId = simulationEntity.Id;
             var performanceCurveId = Guid.NewGuid();
             var attributeName = TestAttributeNames.DeckDurationN;
+            var equationId = Guid.NewGuid();
             var performanceCurve = PerformanceCurveDtos.Dto(performanceCurveId, null, attributeName);
+            performanceCurve.Equation.Id = equationId;
             var performanceCurves = new List<PerformanceCurveDTO> { performanceCurve };
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            performanceCurve.CriterionLibrary = criterionLibrary;
             TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurves, simulationId);
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -212,7 +216,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var clonedPerformanceCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(clonedSimulationId);
             var clonedPerformanceCurve = clonedPerformanceCurves.Single();
             ObjectAssertions.EquivalentExcluding(performanceCurve, clonedPerformanceCurve,
-                x => x.Id, x => x.Equation.Id);
+                x => x.Id, x => x.Equation.Id, x => x.CriterionLibrary.Id, x => x.CriterionLibrary.Name,
+                x => x.CriterionLibrary.Owner);
         }
     }
 }

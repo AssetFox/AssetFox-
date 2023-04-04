@@ -27,7 +27,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
 
-            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
             Assert.Equal(networkId, clonedSimulation.NetworkId);
             Assert.Equal("Test Network", clonedSimulation.NetworkName);
@@ -50,6 +51,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
 
+            var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
             var clonedBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(cloningResult.Simulation.Id);
             var clonedBudget = clonedBudgets.Single();
@@ -164,6 +166,53 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var distributionRule = cashFlowRule.CashFlowDistributionRules.Single();
             var clonedDistributionRule = clonedCashFlowRule.CashFlowDistributionRules.Single();
             ObjectAssertions.EquivalentExcluding(distributionRule, clonedDistributionRule, x => x.Id);
+        }
+
+        [Fact]
+        public void SimulationInDbWithInvestmentPlan_Clone_Clones()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var investmentPlanId = Guid.NewGuid();
+            var investmentPlan = InvestmentPlanDtos.Dto(investmentPlanId);
+            TestHelper.UnitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedInvestmentPlan = TestHelper.UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(clonedSimulationId);
+            ObjectAssertions.EquivalentExcluding(investmentPlan, clonedInvestmentPlan,
+                i => i.Id);
+        }
+
+        [Fact]
+        public void SimulationInDbWithPerformanceCurves_Clone_Clones()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var performanceCurveId = Guid.NewGuid();
+            var attributeName = TestAttributeNames.DeckDurationN;
+            var performanceCurve = PerformanceCurveDtos.Dto(performanceCurveId, null, attributeName);
+            var performanceCurves = new List<PerformanceCurveDTO> { performanceCurve };
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurves, simulationId);
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedPerformanceCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(clonedSimulationId);
+            var clonedPerformanceCurve = clonedPerformanceCurves.Single();
+            ObjectAssertions.EquivalentExcluding(performanceCurve, clonedPerformanceCurve,
+                x => x.Id, x => x.Equation.Id);
         }
     }
 }

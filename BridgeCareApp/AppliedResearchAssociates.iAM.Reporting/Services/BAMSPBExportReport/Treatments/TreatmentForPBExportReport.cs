@@ -5,6 +5,8 @@ using System.Drawing.Text;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
@@ -25,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
         private ReportHelper _reportHelper;
 
         public TreatmentForPBExportReport()
-        {
+        {            
             _reportHelper = new ReportHelper();
         }
 

@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class InventoryReportFactory : IReportFactory
     {
         public string Name => "InventoryLookup";
-        public IReport Create(UnitOfDataPersistenceWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
         {
             return new InventoryReport(uow, Name, results);
         }

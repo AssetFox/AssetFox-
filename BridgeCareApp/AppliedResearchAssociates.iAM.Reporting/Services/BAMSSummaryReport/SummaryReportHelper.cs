@@ -1,13 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis.Engine;
-
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
+﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {
-    public class SummaryReportHelper : ISummaryReportHelper
+    public class SummaryReportHelper
     {
         public bool BridgeFundingBOF(AssetSummaryDetail section)
         {

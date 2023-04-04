@@ -39,6 +39,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         }
 
         public static void UpsertAttributes(this IAttributeRepository repo, params DataAttribute[] attributes)
-            => repo.UpsertAttributes(attributes.ToList());
+            => repo.UpsertAttributesNonAtomic(attributes.ToList());
     }
 }

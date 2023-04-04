@@ -99,7 +99,7 @@ namespace BridgeCareCore.Services
                 //performanceCurvesToImport.AddRange(existingPerformanceCurves);
                 #endregion
 
-                performanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurvesToImport, simulationId);
+                performanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(performanceCurvesToImport, simulationId);
             }
             catch (Exception ex)
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -145,57 +145,60 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateSimulation(Guid networkId, SimulationDTO dto)
         {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
+            _unitOfWork.AsTransaction(() =>
             {
-                throw new RowNotInTableException($"No network found having id {networkId}");
-            }
-
-            var defaultLibrary = _unitOfWork.Context.CalculatedAttributeLibrary.Where(_ => _.IsDefault == true)
-                .Include(_ => _.CalculatedAttributes)
-                .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.CalculatedAttributes)
-                .ThenInclude(_ => _.Equations)
-                .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.CalculatedAttributes)
-                .ThenInclude(_ => _.Equations)
-                .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
-                .ThenInclude(_ => _.Equation)
-                .Select(_ => _.ToDto())
-                .ToList();
-
-            if (defaultLibrary.Count == 0)
-            {
-                throw new RowNotInTableException($"No default library for Calculated Attributes has been found. Please contact admin");
-            }
-
-            var simulationEntity = dto.ToEntity(networkId);
-            // if there are multiple default libraries (This should not happen). Take the first one
-
-            _unitOfWork.Context.AddEntity(simulationEntity, _unitOfWork.UserEntity?.Id);
-            if (dto.Users.Any())
-            {
-                var usersToAdd = dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList();
-                _unitOfWork.Context.AddAll(usersToAdd,
-                    _unitOfWork.UserEntity?.Id);
-            }
-            ICalculatedAttributesRepository _calculatedAttributesRepo = _unitOfWork.CalculatedAttributeRepo;
-            // Assiging new Ids because this object will be assiged to a simulation
-            defaultLibrary[0].CalculatedAttributes.ForEach(_ =>
-            {
-                _.Id = Guid.NewGuid();
-                _.Equations.ForEach(e =>
+                if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
                 {
-                    e.Id = Guid.NewGuid();
-                    if (e.CriteriaLibrary != null)
+                    throw new RowNotInTableException($"No network found having id {networkId}");
+                }
+
+                var defaultLibrary = _unitOfWork.Context.CalculatedAttributeLibrary.Where(_ => _.IsDefault == true)
+                    .Include(_ => _.CalculatedAttributes)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.CalculatedAttributes)
+                    .ThenInclude(_ => _.Equations)
+                    .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.CalculatedAttributes)
+                    .ThenInclude(_ => _.Equations)
+                    .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Select(_ => _.ToDto())
+                    .ToList();
+
+                if (defaultLibrary.Count == 0)
+                {
+                    throw new RowNotInTableException($"No default library for Calculated Attributes has been found. Please contact admin");
+                }
+
+                var simulationEntity = dto.ToEntity(networkId);
+                // if there are multiple default libraries (This should not happen). Take the first one
+
+                _unitOfWork.Context.AddEntity(simulationEntity, _unitOfWork.UserEntity?.Id);
+                if (dto.Users.Any())
+                {
+                    var usersToAdd = dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList();
+                    _unitOfWork.Context.AddAll(usersToAdd,
+                        _unitOfWork.UserEntity?.Id);
+                }
+                ICalculatedAttributesRepository _calculatedAttributesRepo = _unitOfWork.CalculatedAttributeRepo;
+                // Assiging new Ids because this object will be assiged to a simulation
+                defaultLibrary[0].CalculatedAttributes.ForEach(_ =>
+                {
+                    _.Id = Guid.NewGuid();
+                    _.Equations.ForEach(e =>
                     {
-                        e.CriteriaLibrary.Id = Guid.NewGuid();
-                        e.CriteriaLibrary.IsSingleUse = true;
-                    }
-                    e.Equation.Id = Guid.NewGuid();
+                        e.Id = Guid.NewGuid();
+                        if (e.CriteriaLibrary != null)
+                        {
+                            e.CriteriaLibrary.Id = Guid.NewGuid();
+                            e.CriteriaLibrary.IsSingleUse = true;
+                        }
+                        e.Equation.Id = Guid.NewGuid();
+                    });
                 });
+                _calculatedAttributesRepo.UpsertScenarioCalculatedAttributesNonAtomic(defaultLibrary[0].CalculatedAttributes, simulationEntity.Id);
             });
-            _calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(defaultLibrary[0].CalculatedAttributes, simulationEntity.Id);
         }
 
         public SimulationDTO GetSimulation(Guid simulationId)
@@ -226,6 +229,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public SimulationCloningResultDTO CloneSimulation(Guid simulationId, Guid networkId, string simulationName)
+        {
+            SimulationCloningResultDTO result = null;
+            _unitOfWork.AsTransaction(() => result = CloneSimulationPrivate(simulationId, networkId, simulationName));
+            return result;
+        }
+
+        private SimulationCloningResultDTO CloneSimulationPrivate(Guid simulationId, Guid networkId, string simulationName)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
@@ -439,6 +449,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 percentagePair.ScenarioBudgetId = simulationToClone.Budgets
                                     .Single(_ => _.Name == percentagePair.ScenarioBudget.Name).Id;
                                 percentagePair.ScenarioBudget = null;
+                                percentagePair.ScenarioBudgetPriorityId = percentagePair.ScenarioBudgetPriority.Id;
                                 _unitOfWork.Context.ReInitializeAllEntityBaseProperties(percentagePair,
                                     _unitOfWork.UserEntity?.Id);
                             }
@@ -1288,27 +1299,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpdateSimulationAndPossiblyUsers(SimulationDTO dto)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
-                if (!u.Context.Simulation.Any(_ => _.Id == dto.Id))
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == dto.Id))
                 {
                     throw new RowNotInTableException("No simulation was found for the given scenario.");
                 }
 
-                var simulationEntity = u.Context.Simulation.Single(_ => _.Id == dto.Id);
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == dto.Id);
                 if (simulationEntity.Name != dto.Name || simulationEntity.NoTreatmentBeforeCommittedProjects != dto.NoTreatmentBeforeCommittedProjects)
                 {
                     simulationEntity.Name = dto.Name;
                     simulationEntity.NoTreatmentBeforeCommittedProjects = dto.NoTreatmentBeforeCommittedProjects;
 
-                    u.Context.UpdateEntity(simulationEntity, dto.Id, u.UserEntity?.Id);
+                    _unitOfWork.Context.UpdateEntity(simulationEntity, dto.Id, _unitOfWork.UserEntity?.Id);
                 }
 
                 if (dto.Users.Any())
                 {
-                    u.Context.DeleteAll<SimulationUserEntity>(_ => _.SimulationId == dto.Id);
-                    u.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(),
-                        u.UserEntity?.Id);
+                    _unitOfWork.Context.DeleteAll<SimulationUserEntity>(_ => _.SimulationId == dto.Id);
+                    _unitOfWork.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(),
+                        _unitOfWork.UserEntity?.Id);
                 }
             });
         }
@@ -1319,30 +1330,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 return;
             }
-
-            _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
-                _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-            _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
-                _.ScenarioSelectableTreatment.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-            var count = _unitOfWork.Context.CommittedProject.Where(_ =>
-                _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).Count();
-
-            var committedEntities = _unitOfWork.Context.CommittedProject.Where(_ =>
-                _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).ToList();
-
-            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
-                _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-            var index = 0;
-            while (index < committedEntities.Count)
+            _unitOfWork.AsTransaction(() =>
             {
-                _unitOfWork.Context.Entry(committedEntities[index]).Reload();
-                index++;
-            }
+                _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
+                    _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
-            _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
+                _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                    _.ScenarioSelectableTreatment.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
+
+                var count = _unitOfWork.Context.CommittedProject.Where(_ =>
+                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).Count();
+
+                var committedEntities = _unitOfWork.Context.CommittedProject.Where(_ =>
+                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).ToList();
+
+                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
+                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
+
+                var index = 0;
+                while (index < committedEntities.Count)
+                {
+                    _unitOfWork.Context.Entry(committedEntities[index]).Reload();
+                    index++;
+                }
+
+                _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
+            });
         }
 
         public void DeleteSimulationsByNetworkId(Guid networkId)

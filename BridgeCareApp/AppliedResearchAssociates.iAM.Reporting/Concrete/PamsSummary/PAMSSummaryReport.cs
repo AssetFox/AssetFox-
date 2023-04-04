@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.CountySummary;
@@ -30,17 +29,17 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class PAMSSummaryReport : IReport
     {
         private readonly IHubService _hubService;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         private readonly SummaryReportParameters _summaryReportParameters;
-        private readonly IPamsDataForSummaryReport _pamsDataForSummaryReport;
-        private readonly IPavementWorkSummary _pavementWorkSummary;
-        private readonly IPavementWorkSummaryByBudget _pavementWorkSummaryByBudget;
+        private readonly PamsDataForSummaryReport _pamsDataForSummaryReport;
+        private readonly PavementWorkSummary _pavementWorkSummary;
+        private readonly PavementWorkSummaryByBudget _pavementWorkSummaryByBudget;
         private readonly UnfundedPavementProjects _unfundedPavementProjects;
 
-        private readonly ICountySummary _countySummary;
+        private readonly CountySummary _countySummary;
 
-        private readonly IAddGraphsInTabs _addGraphsInTabs;
+        private readonly AddGraphsInTabs _addGraphsInTabs;
         private readonly SummaryReportGlossary _summaryReportGlossary;
 
         private Guid _networkId;
@@ -61,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public PAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
+        public PAMSSummaryReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             //store passed parameter   
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

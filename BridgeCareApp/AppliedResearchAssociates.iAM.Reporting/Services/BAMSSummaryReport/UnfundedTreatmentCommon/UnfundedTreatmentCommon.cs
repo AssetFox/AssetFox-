@@ -1,27 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentCommon
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {
-    public class UnfundedTreatmentCommon : IUnfundedTreatmentCommon
+    public class UnfundedTreatmentCommon
     {
-        private ISummaryReportHelper _summaryReportHelper;
-        private ITreatmentCommon _treatmentCommon;
+        private SummaryReportHelper _summaryReportHelper;
+        private TreatmentCommon _treatmentCommon;
         private ReportHelper _reportHelper;
 
         public UnfundedTreatmentCommon()
         {
             _summaryReportHelper = new SummaryReportHelper();
-            _treatmentCommon = new TreatmentCommon.TreatmentCommon();
+            _treatmentCommon = new TreatmentCommon();
             _reportHelper = new ReportHelper();
         }
 

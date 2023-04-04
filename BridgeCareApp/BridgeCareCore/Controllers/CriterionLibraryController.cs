@@ -56,16 +56,13 @@ namespace BridgeCareCore.Controllers
                 var criterionLibraryId = Guid.Empty;
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     criterionLibraryId = UnitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok(criterionLibraryId);
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CriterionLibraryError}::UpsertCriterionLibrary {dto.MergedCriteriaExpression} - {e.Message}");
                 throw;
             }
@@ -80,9 +77,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.CriterionLibraryRepo.DeleteCriterionLibrary(libraryId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();

@@ -149,16 +149,17 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
             var simulation = network.Simulations.First();
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentsNoChildren(simulation);
+            var networkMaintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(_networkId);
 
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("PAMSPBExportReportData.xlsx"));
 
             // Teatments Tab
-            reportDetailDto.Status = $"Creating Data TAB";
+            reportDetailDto.Status = $"Creating PAMS Treatments TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.TreatmentTab);
-            _treatmentTab.Fill(treatmentsWorksheet, simulationOutput, simulationId, simulation.Network.Id, simulation.Treatments);
+            _treatmentTab.Fill(treatmentsWorksheet, simulationOutput, simulationId, simulation.Network.Id, simulation.Treatments, networkMaintainableAssets);
 
             // Other tab(s) here..
 

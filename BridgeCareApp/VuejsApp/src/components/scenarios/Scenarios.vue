@@ -1254,7 +1254,6 @@ export default class Scenarios extends Vue {
     }
 
     onShowReportsDownloaderDialog(scenario: Scenario) {
-        console.log(scenario.networkId);
         this.reportsDownloaderDialogData = {
             showModal: true,
             scenarioId: scenario.id,

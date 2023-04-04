@@ -1035,7 +1035,6 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     setParentLibraryName(libraryId: string) {
-        console.log("libraryId: " + libraryId);
         if (libraryId === "None") {
             this.parentLibraryName = "None";
             return;

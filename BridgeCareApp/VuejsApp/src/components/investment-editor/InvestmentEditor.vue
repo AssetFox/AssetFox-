@@ -10,7 +10,7 @@
                               v-model='librarySelectItemValue'
                               class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario">Parent Library: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>
+                    <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario">Based on: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>
                 </v-flex>
 
                 <!-- these are only in library -->
@@ -408,6 +408,9 @@ export default class InvestmentEditor extends Vue {
     parentLibraryName: string = "None";
     parentLibraryId: string = "";
     scenarioLibraryIsModified: boolean = false;
+    loadedParentName: string = "";
+    loadedParentId: string = "";
+    newLibrarySelection: boolean = false;
 
     get addYearLabel() {
         return 'Add Year (' + this.getNextYear() + ')';
@@ -561,11 +564,14 @@ export default class InvestmentEditor extends Vue {
             this.onSelectItemValueChanged();
             this.unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged)
+        else if(this.librarySelectItemValueAllowedChanged){
             this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
                 this.librarySelectItemValueAllowedChanged = false;
                 this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
-            })
+            });
+        }
+        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
+        this.newLibrarySelection = true;
         this.librarySelectItemValueAllowedChanged = true;
     }
     onSelectItemValueChanged() {
@@ -1140,7 +1146,7 @@ export default class InvestmentEditor extends Vue {
     onUpsertInvestment() {
         const investmentPlan: InvestmentPlan = clone(this.investmentPlan);
 
-        if (this.selectedBudgetLibrary.id === this.uuidNIL) {this.scenarioLibraryIsModified = true;}
+        if (this.selectedBudgetLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
         else { this.scenarioLibraryIsModified = false; }
 
         const sync: InvestmentPagingSyncModel = {
@@ -1213,6 +1219,8 @@ export default class InvestmentEditor extends Vue {
                 this.resetPage();
             }
         });
+        this.parentLibraryName = this.loadedParentName;
+        this.parentLibraryId = this.loadedParentId;
     }
 
     formatAsCurrency(value: any) {
@@ -1402,6 +1410,10 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
     };
 
     setParentLibraryName(libraryId: string) {
+        if (libraryId === "None") {
+            this.parentLibraryName = "None";
+            return;
+        }
         let foundLibrary: BudgetLibrary = emptyBudgetLibrary;
         this.stateBudgetLibraries.forEach(library => {
             if (library.id === libraryId ) {
@@ -1453,6 +1465,8 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
                         this.originalFirstYear = moment().year()
                 }
                 this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
+                this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
+                this.loadedParentName = this.parentLibraryName; //store original
                 this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
                 this.initializing = false;
             });

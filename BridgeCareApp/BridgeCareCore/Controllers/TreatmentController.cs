@@ -114,7 +114,7 @@ namespace BridgeCareCore.Controllers
                 {
                     var selectableTreatment = UnitOfWork.SelectableTreatmentRepo.GetDefaultTreatment(simulationId);
                     var library = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == selectableTreatment.LibraryId);
-                    library.IsModified = selectableTreatment.IsModified;
+                    if (library != null) library.IsModified = selectableTreatment.IsModified;
                     result = library;
                 });
                 return Ok(result);

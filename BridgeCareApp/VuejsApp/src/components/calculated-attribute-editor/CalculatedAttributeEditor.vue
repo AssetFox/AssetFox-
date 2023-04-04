@@ -459,6 +459,9 @@ export default class CalculatedAttributeEditor extends Vue {
     parentLibraryName: string = "None";
     parentLibraryId: string = "";
     scenarioLibraryIsModified: boolean = false;
+    loadedParentName: string = "";
+    loadedParentId: string = "";
+    newLibrarySelection: boolean = false;
 
     calculatedAttributeGridHeaders: DataTableHeader[] = [
         {
@@ -659,11 +662,14 @@ export default class CalculatedAttributeEditor extends Vue {
             this.onLibrarySelectItemValueChanged();
             this.unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged)
+        else if(this.librarySelectItemValueAllowedChanged) {
             this.CheckUnsavedDialog(this.onLibrarySelectItemValueChanged, () => {
                 this.librarySelectItemValueAllowedChanged = false;
                 this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
-            })
+            });
+        }
+        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
+        this.newLibrarySelection = true;
         this.librarySelectItemValueAllowedChanged = true;
     }
     onLibrarySelectItemValueChanged() {
@@ -873,7 +879,7 @@ export default class CalculatedAttributeEditor extends Vue {
 
     onUpsertScenarioCalculatedAttribute() {
 
-        if (this.selectedCalculatedAttributeLibrary.id === this.uuidNIL) {this.scenarioLibraryIsModified = true;}
+        if (this.selectedCalculatedAttributeLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
         else { this.scenarioLibraryIsModified = false; }
 
         const syncModel: CalculatedAttributePagingSyncModel = {
@@ -1232,6 +1238,8 @@ export default class CalculatedAttributeEditor extends Vue {
                 this.resetPage();
             }
         });
+        this.parentLibraryName = this.loadedParentName;
+        this.parentLibraryId = this.loadedParentId;
     }
 
     resetGridData() {
@@ -1500,6 +1508,10 @@ export default class CalculatedAttributeEditor extends Vue {
     }
 
     setParentLibraryName(libraryId: string) {
+        if (libraryId === "None") {
+            this.parentLibraryName = "None";
+            return;
+        }
         let foundLibrary: CalculatedAttributeLibrary = emptyCalculatedAttributeLibrary;
         this.stateCalculatedAttributeLibraries.forEach(library => {
             if (library.id === libraryId ) {
@@ -1544,6 +1556,8 @@ export default class CalculatedAttributeEditor extends Vue {
                     this.setTimingsMultiSelect(this.currentPage.calculationTiming);
 
                     this.setParentLibraryName(data.libraryId);
+                    this.loadedParentId = data.libraryId;
+                    this.loadedParentName = this.parentLibraryName; //store original
                     this.scenarioLibraryIsModified = data.isModified;
                 }
                 this.initializing = false;

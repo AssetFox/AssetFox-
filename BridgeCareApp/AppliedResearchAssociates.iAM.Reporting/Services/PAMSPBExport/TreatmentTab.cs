@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Data.Networking;
@@ -16,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
     public class TreatmentTab
     {
         private ReportHelper _reportHelper;
-        private List<string> consequencesColumns;
+        private List<string> treatmentAttributes;
 
         public TreatmentTab()
         {
@@ -89,10 +87,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.Budget;
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.Category;
 
-            foreach(var consequence in treatmentDataModel.Consequences)
+            foreach(var treatmentAttributeValue in treatmentDataModel.TreatmentAttributeValues)
             {
                 SetDecimalFormat(treatmentsWorksheet.Cells[row, column]);
-                treatmentsWorksheet.Cells[row, column++].Value = consequence;
+                treatmentsWorksheet.Cells[row, column++].Value = treatmentAttributeValue;
             }
 
             return new CurrentCell { Row = ++row, Column = column - 1 }; ;
@@ -148,12 +146,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentDataModel.Category = treatments.FirstOrDefault(_ => _.Name == appliedTreatment)?.Category.ToString();
 
             // Consequences
-            var consequences = new List<double>();
-            foreach (var consequenceColumn in consequencesColumns)
+            var treatmentAttributeValues = new List<double>();
+            foreach (var treatmentAttribute in treatmentAttributes)
             {
-                consequences.Add(CheckGetNumericValue(section.ValuePerNumericAttribute, consequenceColumn));
+                treatmentAttributeValues.Add(CheckGetNumericValue(section.ValuePerNumericAttribute, treatmentAttribute));
             }
-            treatmentDataModel.Consequences = consequences;
+            treatmentDataModel.TreatmentAttributeValues = treatmentAttributeValues;
 
             return treatmentDataModel;
         }
@@ -192,16 +190,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             worksheet.Cells[headerRow, column++].Value = "Budget";
             worksheet.Cells[headerRow, column++].Value = "Category";
 
-            consequencesColumns = GetconsequencesHeaders();
-            foreach(var consequence in consequencesColumns)
+            var treatmentAttributes = GetTreatmentAttributes();
+            foreach(var treatmentAttribute in treatmentAttributes)
             {
-                worksheet.Cells[headerRow, column++].Value = consequence;
+                worksheet.Cells[headerRow, column++].Value = treatmentAttribute;
             }
 
             return new CurrentCell { Row = ++headerRow, Column = worksheet.Dimension.Columns + 1 };
         }
 
-        private static List<string> GetconsequencesHeaders() => new()
+        private static List<string> GetTreatmentAttributes() => new()
         {
             "BMISCCK1","BLRUTDP2","CLJCPRU3","BRAVLWT3","SURFACEID","LAST_STRUCTURAL_OVERLAY","BEDGDTR1","CBPATCCT","CLNGCRK3",
             "BRAVLWT2","CNSLABCT","BMISCCK3","CFLTJNT2","CTRNCRK3","CTRNJNT3","BTRNSFT3","BTRNSCT2","BPATCHSF","CTRNJNT1",

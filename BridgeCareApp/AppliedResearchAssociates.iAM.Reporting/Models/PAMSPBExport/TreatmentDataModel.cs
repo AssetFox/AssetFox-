@@ -49,6 +49,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public string Category { get; set; } 
 
-        public List<double> Consequences { get; set; } = new List<double>(); // Treatment attributes i.e. ones getting affected from treatment
+        public List<double> TreatmentAttributeValues { get; set; } = new List<double>(); // Treatment attributes i.e. ones getting affected from treatment
     }
 }

@@ -27,7 +27,10 @@ export default class TreatmentService {
             `${API.Treatment}/GetScenarioSelectedTreatments/${scenarioId}`,
         );
     }
-
+    static getTreatmentLibraryBySimulationId(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetTreatmentLibraryFromSimulationId/${simulationId}`);
+    }
     static getSimpleTreatmentsByLibraryId(libraryId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.Treatment}/GetSimpleTreatmentsByLibraryId/${libraryId}`,

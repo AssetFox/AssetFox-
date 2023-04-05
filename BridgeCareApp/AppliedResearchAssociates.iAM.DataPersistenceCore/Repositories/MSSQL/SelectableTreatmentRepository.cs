@@ -808,6 +808,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return dto;
         }
 
+        public void AddLibraryIdToScenarioSelectableTreatments(List<TreatmentDTO> treatmentDTOs, Guid? libraryId)
+        {
+            if (libraryId == null) return;
+            foreach (var dto in treatmentDTOs)
+            {
+                dto.LibraryId = (Guid)libraryId;
+            }
+        }
+
+        public void AddModifiedToScenarioSelectableTreatments(List<TreatmentDTO> treatmentDTOs, bool IsModified)
+        {
+            foreach (var dto in treatmentDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
+
         public void UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(TreatmentLibraryDTO dto, bool isNewLibrary, Guid userId)
         {
             _unitOfWork.AsTransaction(() =>

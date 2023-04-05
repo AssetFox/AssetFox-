@@ -59,5 +59,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpdateBudgetLibraryAndUpsertOrDeleteBudgets(BudgetLibraryDTO dto);
         void CreateNewBudgetLibrary(BudgetLibraryDTO dto, Guid userId);
         void UpsertOrDeleteScenarioBudgetsWithInvestmentPlan(List<BudgetDTO> budgets, InvestmentPlanDTO investmentPlan, Guid simulationId);
+        void AddLibraryIdToScenarioBudget(List<BudgetDTO> budgetDTOs, Guid? libraryId);
+        void AddModifiedToScenarioBudget(List<BudgetDTO> budgetDTOs, bool IsModified);
     }
 }

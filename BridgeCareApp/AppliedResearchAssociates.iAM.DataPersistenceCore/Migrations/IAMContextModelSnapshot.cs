@@ -1298,11 +1298,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsModified")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PriorityLevel")
                         .HasColumnType("int");
@@ -2071,6 +2077,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasKey("LibraryId", "UserId");
 
                     b.HasIndex("LibraryId");
+
+                    b.HasIndex("UserEntityId");
 
                     b.HasIndex("UserId");
 
@@ -3067,11 +3075,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsModified")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3129,11 +3143,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsModified")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PriorityLevel")
                         .HasColumnType("int");
@@ -3169,11 +3189,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsModified")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SimulationId")
                         .HasColumnType("uniqueidentifier");
@@ -3357,11 +3383,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsModified")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3428,11 +3460,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<double>("DeficientLimit")
                         .HasColumnType("float");
 
+                    b.Property<bool>("IsModified")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3495,11 +3533,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsModified")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3596,11 +3640,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsModified")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SimulationId")
                         .HasColumnType("uniqueidentifier");
@@ -3662,11 +3712,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsModified")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3904,11 +3960,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsModified")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -5434,6 +5496,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .HasForeignKey("LibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", null)
+                        .WithMany("PerformanceCurveLibraryUserJoins")
+                        .HasForeignKey("UserEntityId");
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
                         .WithMany("PerformanceCurveLibraryUsers")
@@ -7099,7 +7165,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("BudgetLibraryUsers");
 
                     b.Navigation("BudgetPriorityLibraryUsers");
-                    
+
                     b.Navigation("CalculatedAttributeLibraryUsers");
 
                     b.Navigation("CashFlowRuleLibraryUsers");

@@ -400,6 +400,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var user = users.FirstOrDefault();
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
+        public void AddLibraryIdToScenarioTargetConditionGoal(List<TargetConditionGoalDTO> targetConditionGoalDTOs, Guid? libraryId)
+        {
+            if (libraryId == null) return;
+            foreach (var dto in targetConditionGoalDTOs)
+            {
+                dto.LibraryId = (Guid)libraryId;
+            }
+        }
+
+        public void AddModifiedToScenarioTargetConditionGoal(List<TargetConditionGoalDTO> targetConditionGoalDTOs, bool IsModified)
+        {
+            foreach (var dto in targetConditionGoalDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
+
 
         public void UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser(TargetConditionGoalLibraryDTO dto, bool isNewLibrary, Guid ownerIdForNewLibrary)
         {

@@ -141,8 +141,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentDataModel.PriorityLevel = treatmentConsideration?.BudgetPriorityLevel;
 
             treatmentDataModel.TreatmentFundingIgnoresSpendingLimit = section.TreatmentFundingIgnoresSpendingLimit ? 1 : 0;
-            treatmentDataModel.TreatmentCause = (int)section.TreatmentCause;
-            treatmentDataModel.TreatmentStatus = (int)section.TreatmentStatus;            
+            treatmentDataModel.TreatmentCause = section.TreatmentCause.ToString();
+            treatmentDataModel.TreatmentStatus = section.TreatmentStatus.ToString();
             var budgetName = treatmentConsideration != null ? treatmentConsideration.BudgetUsages.OrderByDescending(_ => _.CoveredCost).FirstOrDefault()?.BudgetName : string.Empty;
             treatmentDataModel.Budget = budgetName;
             treatmentDataModel.Category = treatments.FirstOrDefault(_ => _.Name == appliedTreatment)?.Category.ToString();

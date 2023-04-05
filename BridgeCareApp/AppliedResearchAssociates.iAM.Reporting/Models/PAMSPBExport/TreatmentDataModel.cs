@@ -41,13 +41,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public int TreatmentFundingIgnoresSpendingLimit { get; set; }
 
-        public int TreatmentStatus { get; set; }
+        public string TreatmentStatus { get; set; }
 
-        public int TreatmentCause { get; set; }
+        public string TreatmentCause { get; set; }
 
-        public string Budget { get; set; } // TODO: source?
+        public string Budget { get; set; } 
 
-        public string Category { get; set; } // TODO source TreatmentCategory?
+        public string Category { get; set; } 
 
         public List<double> Consequences { get; set; } = new List<double>(); // Treatment attributes i.e. ones getting affected from treatment
     }

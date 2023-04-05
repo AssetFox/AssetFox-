@@ -428,14 +428,6 @@ export default class BudgetPriorityEditor extends Vue {
 
     @Watch('currentPage')
     onBudgetPrioritiesChanged() {
-        if(this.hasScenario){
-            const allBudgetPercentagePairsMatchBudgets: boolean = this.currentPage
-            .every((budgetPriority: BudgetPriority) => this.hasBudgetPercentagePairsThatMatchBudgets(budgetPriority));
-            if (!allBudgetPercentagePairsMatchBudgets) {
-                this.syncBudgetPercentagePairsWithBudgets();
-                return;
-            }
-        }
         this.setGridCriteriaColumnWidth();
         this.setGridHeaders();
         this.setGridData();
@@ -524,28 +516,6 @@ export default class BudgetPriorityEditor extends Vue {
             })) as SimpleBudgetDetail[];
 
         return isEqual(sortNonObjectLists(simpleBudgetDetails), sortNonObjectLists(clone(this.stateScenarioSimpleBudgetDetails)));
-    }
-
-    syncBudgetPercentagePairsWithBudgets() {// this might cause problems
-        const budgetPriorities: BudgetPriority[] = clone(this.currentPage);
-
-        if (hasValue(this.stateScenarioSimpleBudgetDetails)) {
-            var ids = this.stateScenarioSimpleBudgetDetails.map(_ => _.id);
-            budgetPriorities.forEach((budgetPriority: BudgetPriority) => {
-                if (!this.hasBudgetPercentagePairsThatMatchBudgets(budgetPriority)) {
-                    budgetPriority.budgetPercentagePairs = budgetPriority.budgetPercentagePairs.filter(_ => ids.includes(_.budgetId))
-                    var newPairs = this.stateScenarioSimpleBudgetDetails.filter(_ => !budgetPriority.budgetPercentagePairs.some(__ => __.budgetId == _.id)).map((simpleBudgetDetail: SimpleBudgetDetail) => ({
-                        id: getNewGuid(),
-                        budgetId: simpleBudgetDetail.id,
-                        budgetName: simpleBudgetDetail.name,
-                        percentage: 100,
-                    })) as BudgetPercentagePair[];
-                    budgetPriority.budgetPercentagePairs = budgetPriority.budgetPercentagePairs.concat(newPairs)
-                    this.onUpdateRow(budgetPriority.id, budgetPriority);
-                }
-            });
-            this.onPaginationChanged();
-        }
     }
 
     createNewBudgetPercentagePairsFromBudgets() {

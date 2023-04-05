@@ -81,7 +81,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                 "BRKEY",
                 "SimulationId",
                 "NetworkId",
-                "ToDelete",
                 "OWNER_CODE",
                 "CATEGORY",
                 "YEARANY",
@@ -301,10 +300,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             worksheet.Cells[rowNo, columnNo++].Value = simulationObject.Id.ToString(); //SimulationId
 
                             worksheet.Cells[rowNo, columnNo++].Value = simulationObject?.Network?.Id.ToString(); //NetworkId
-
-                            //TODO: Get value for the column after asking Dimitry
-                            worksheet.Cells[rowNo, columnNo++].Value = "0"; //ToDelete
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "OWNER_CODE"); //Owner Code
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);

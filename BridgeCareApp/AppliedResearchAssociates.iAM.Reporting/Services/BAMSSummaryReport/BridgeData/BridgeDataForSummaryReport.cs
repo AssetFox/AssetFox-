@@ -620,7 +620,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         else //multiple budgets
                         {
                             //check for multi year budget
-                            if (allowFundingFromMultipleBudgets == true)
+                            if (allowFundingFromMultipleBudgets == true || budgetUsages.Count > 1)
                             {
                                 foreach (var budgetUsage in budgetUsages)
                                 {

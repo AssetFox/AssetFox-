@@ -40,6 +40,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertBenefitQuantifier(BenefitQuantifierDTO dto)
         {
+            _unitOfWork.AsTransaction(() => _unitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifierNonAtomic(dto));
+        }
+
+        public void UpsertBenefitQuantifierNonAtomic(BenefitQuantifierDTO dto)
+        {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == dto.NetworkId))
             {
                 throw new RowNotInTableException("The specified network was not found.");
@@ -103,8 +108,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteBenefitQuantifier(Guid networkId)
         {
-            _unitOfWork.Context.DeleteEntity<EquationEntity>(_ => _.BenefitQuantifier.NetworkId == networkId);
-
             _unitOfWork.Context.DeleteEntity<BenefitQuantifierEntity>(_ => _.NetworkId == networkId);
         }
     }

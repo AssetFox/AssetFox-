@@ -1,6 +1,6 @@
 ﻿namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
-    public static class AuditReportConstants
+    public static class BAMSAuditReportConstants
     {
         public const string BridgesTab = "Bridges";
         public const string DecisionsTab = "Decisions";        

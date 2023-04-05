@@ -115,9 +115,7 @@ namespace BridgeCareCore.Controllers
                 var convertedAttributes = attributeDTOs.Select(AttributeService.ConvertAllAttribute).ToList();
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributes);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
@@ -136,7 +134,6 @@ namespace BridgeCareCore.Controllers
                 {
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {e.Message}");
                 }
-                UnitOfWork.Rollback();
                 throw;
             }
         }
@@ -151,16 +148,13 @@ namespace BridgeCareCore.Controllers
                 var convertedAttributeDto = AttributeService.ConvertAllAttribute(attributeDto);
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttribute {attributeDto.Name} - {e.Message}");
                 throw;
             }
@@ -189,7 +183,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CheckCommand - {e.Message}");
                 throw;
             }

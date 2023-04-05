@@ -1,26 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.TreatmentCommon
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {
-    public class TreatmentCommon : ITreatmentCommon
+    public class TreatmentCommon
     {
-        private ISummaryReportHelper _summaryReportHelper;
         private ReportHelper _reportHelper;
 
         public TreatmentCommon()
         {
-            _summaryReportHelper = new SummaryReportHelper();
             _reportHelper = new ReportHelper();
         }
 

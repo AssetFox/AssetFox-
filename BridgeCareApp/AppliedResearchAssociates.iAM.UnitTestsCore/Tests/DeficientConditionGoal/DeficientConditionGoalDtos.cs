@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
 
-        public static DeficientConditionGoalDTO Dto(Guid? id = null, Guid? criterionLibraryId = null, string attribute = "Attribute")
+        public static DeficientConditionGoalDTO Dto(Guid? id = null, string attribute = "Attribute", Guid? criterionLibraryId = null)
         {
             var resolveId = id ?? Guid.NewGuid();
             var resolveCriterionLibraryId = criterionLibraryId ?? Guid.NewGuid();

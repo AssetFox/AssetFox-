@@ -2,18 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
-
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
     public class BridgeWorkSummaryComputationHelper
     {
-        private ISummaryReportHelper _summaryReportHelper;
         private ReportHelper _reportHelper;
 
         public BridgeWorkSummaryComputationHelper()
         {
-            _summaryReportHelper = new SummaryReportHelper();
             _reportHelper = new ReportHelper();
         }
 

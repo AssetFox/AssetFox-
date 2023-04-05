@@ -17,6 +17,9 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;using MoreLinq;
 using System.Linq;
+using BridgeCareCore.Security;
+using BridgeCareCore.Services;
+using BridgeCareCore.Services.General_Work_Queue.WorkItems;
 
 namespace BridgeCareCore.Controllers
 {
@@ -29,16 +32,18 @@ namespace BridgeCareCore.Controllers
         private readonly ISimulationAnalysis _simulationAnalysis;
         private readonly ISimulationPagingService _simulationService;
         private readonly IWorkQueueService _workQueueService;
+        private readonly IGeneralWorkQueueService _generalWorkQueueService;
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, IWorkQueueService workQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper, IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+            _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
         }
 
         [HttpPost]
@@ -211,52 +216,43 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+
         [HttpDelete]
         [Route("DeleteScenario/{simulationId}")]
         [Authorize(Policy = Policy.DeleteSimulation)]
-        public async Task<IActionResult> DeleteSimulation(Guid simulationId)
+        public async Task<IActionResult> DeleteScenario(Guid simulationId)
         {
+            var simulationName = "";
             try
             {
+                
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                    simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
+                });
+                DeleteSimulationWorkitem workItem = new DeleteSimulationWorkitem(simulationId, UserInfo.Name, simulationName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, analysisHandle.MostRecentStatusMessage);
+                }
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                var simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation {simulationName} - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                var simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation {simulationName} - {e.Message}");
                 throw;
             }
-            finally
-            {
-                Response.OnCompleted(async () => {
-                    await DeleteSimulationOperation(simulationId);
-                });
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, $"{UnitOfWork.SimulationRepo.GetSimulationName(simulationId)} deleted");
-            }
-        }
-
-        public async Task<IActionResult> DeleteSimulationOperation(Guid simulationId)
-        {
-            try
-            {
-                await Task.Factory.StartNew(() =>
-                {
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    UnitOfWork.SimulationRepo.DeleteSimulation(simulationId);
-                });
-            }
-            catch (Exception e)
-            {
-                var simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation {simulationName} - {e.Message}");
-            }
-            return Ok();
         }
 
         [HttpPost]

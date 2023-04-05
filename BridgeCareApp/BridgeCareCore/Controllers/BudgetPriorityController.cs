@@ -205,6 +205,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dtos = _budgetPriortyService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                    UnitOfWork.BudgetPriorityRepo.AddLibraryIdToScenarioBudgetPriority(dtos, pagingSync.LibraryId);
+                    UnitOfWork.BudgetPriorityRepo.AddModifiedToScenarioBudgetPriority(dtos, pagingSync.IsModified);
                     UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(dtos, simulationId);
                 });
 

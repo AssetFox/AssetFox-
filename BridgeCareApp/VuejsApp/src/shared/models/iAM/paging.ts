@@ -32,6 +32,7 @@ export interface PagingPage<T>{
 
 export interface PaginSync<T>{
     libraryId: string | null;
+    isModified: boolean;
     rowsForDeletion: string[];
     updateRows: T[];
     addedRows: T[];
@@ -62,6 +63,7 @@ export interface InvestmentPagingSyncModel{
     updatedBudgetAmounts: { [key: string]: BudgetAmount[]; }
     addedBudgetAmounts: { [key: string]: BudgetAmount[]; }
     firstYearAnalysisBudgetShift: number;
+    isModified: boolean;
 }
 
 //CalculatedAttributes
@@ -76,6 +78,7 @@ export interface CalculatedAttributePagingRequestModel extends BasePagingRequest
 
 export interface CalculatedAttributePagingSyncModel{
     libraryId: string | null;
+    isModified: boolean;
     updatedCalculatedAttributes: CalculatedAttribute[];
     addedCalculatedAttributes: CalculatedAttribute[];
     addedPairs: { [key: string]: CriterionAndEquationSet[]; }
@@ -86,5 +89,7 @@ export interface CalculatedAttributePagingSyncModel{
 
 export interface calculcatedAttributePagingPageModel extends PagingPage<CriterionAndEquationSet>{
     calculationTiming: Timing;
-    defaultEquation: CriterionAndEquationSet
+    defaultEquation: CriterionAndEquationSet;
+    libraryId: string;
+    isModified: boolean;
 }

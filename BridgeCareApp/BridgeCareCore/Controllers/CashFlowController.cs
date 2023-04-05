@@ -189,6 +189,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dtos = _cashFlowService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                    UnitOfWork.CashFlowRuleRepo.AddLibraryIdToScenarioCashFlowRule(dtos, pagingSync.LibraryId);
+                    UnitOfWork.CashFlowRuleRepo.AddModifiedToScenarioCashFlowRule(dtos, pagingSync.IsModified);
                     UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(dtos, simulationId);
                 });
 

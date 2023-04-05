@@ -9,7 +9,8 @@
                                 append-icon=$vuetify.icons.ghd-down
                                 outline                           
                                 v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
-                            </v-select>                           
+                            </v-select>    
+                             <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>                       
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -30,7 +31,7 @@
                             Share Library
                         </v-btn>
                     </v-layout>                               
-                </v-flex>                               
+                </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout row align-end class="left-buttons-padding">
                         <v-spacer></v-spacer>
@@ -328,6 +329,13 @@ export default class BudgetPriorityEditor extends Vue {
     checkBoxChanged: boolean = false;
     hasLibraryEditPermission: boolean = false;
     hasCreatedLibrary: boolean = false;
+    parentLibraryName: string = "None";
+    parentLibraryId: string = "";
+    parentModifiedFlag: boolean = false;
+    scenarioLibraryIsModified: boolean = false;
+    loadedParentName: string = "";
+    loadedParentId: string = "";
+    newLibrarySelection: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -344,14 +352,13 @@ export default class BudgetPriorityEditor extends Vue {
                     });
                     vm.$router.push('/Scenarios/');
                 }
-
                 vm.hasScenario = true;
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId }).then(() => {
                     vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
                         vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
                         vm.initializePages();
                     });                                        
-                });                
+                });             
             }
         });
     }
@@ -375,11 +382,14 @@ export default class BudgetPriorityEditor extends Vue {
             this.onSelectItemValueChanged();
             this.unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged)
+        else if(this.librarySelectItemValueAllowedChanged) {
             this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
                 this.librarySelectItemValueAllowedChanged = false;
                 this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
-            })
+            });
+        }
+        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
+        this.newLibrarySelection = true;
         this.librarySelectItemValueAllowedChanged = true;
     }
     onSelectItemValueChanged() {
@@ -432,6 +442,12 @@ export default class BudgetPriorityEditor extends Vue {
         this.currentPage.forEach((item) => {
             this.currentPriorityList.push(item.priorityLevel);
         });
+        // Get parent name from library id
+        this.librarySelectItems.forEach(library => {
+            if (library.value === this.parentLibraryId) {
+                this.parentLibraryName = library.text;
+            }
+        });
     }
 
     @Watch('selectedBudgetPriorityGridRows')
@@ -457,6 +473,7 @@ export default class BudgetPriorityEditor extends Vue {
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
                 addedRows: this.addedRows,
+                isModified: this.scenarioLibraryIsModified
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
@@ -646,6 +663,7 @@ export default class BudgetPriorityEditor extends Vue {
                     rowsForDeletion: budgetPriorityLibrary.budgetPriorities === [] ? [] : this.deletionIds,
                     updateRows: budgetPriorityLibrary.budgetPriorities === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: budgetPriorityLibrary.budgetPriorities === [] ? [] : this.addedRows,
+                    isModified: false
                 },
                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
@@ -741,13 +759,19 @@ export default class BudgetPriorityEditor extends Vue {
     }
 
     onUpsertScenarioBudgetPriorities() {
+
+        if (this.selectedBudgetPriorityLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
+        else { this.scenarioLibraryIsModified = false; }
+
         BudgetPriorityService.upsertScenarioBudgetPriorities({
             libraryId: this.selectedBudgetPriorityLibrary.id === this.uuidNIL ? null : this.selectedBudgetPriorityLibrary.id,
             rowsForDeletion: this.deletionIds,
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows           
+            addedRows: this.addedRows,
+            isModified: this.scenarioLibraryIsModified
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.clearChanges();
                 this.librarySelectItemValue = null;
                 this.addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
@@ -770,7 +794,8 @@ export default class BudgetPriorityEditor extends Vue {
                     libraryId: this.selectedBudgetPriorityLibrary.id === this.uuidNIL ? null : this.selectedBudgetPriorityLibrary.id,
                     rowsForDeletion: this.deletionIds,
                     updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: this.addedRows
+                    addedRows: this.addedRows,
+                    isModified: false
                  }
                  , scenarioId: null
         }
@@ -793,6 +818,8 @@ export default class BudgetPriorityEditor extends Vue {
                 this.resetPage();
             }
         });
+        this.parentLibraryName = this.loadedParentName;
+        this.parentLibraryId = this.loadedParentId;
     }
 
     onRemoveBudgetPriorities() {
@@ -966,6 +993,20 @@ export default class BudgetPriorityEditor extends Vue {
             });
         }
     }
+    setParentLibraryName(libraryId: string) {
+        if (libraryId === "None") {
+            this.parentLibraryName = "None";
+            return;
+        }
+        let foundLibrary: BudgetPriorityLibrary = emptyBudgetPriorityLibrary;
+        this.stateBudgetPriorityLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
 
     initializePages(){
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
@@ -977,6 +1018,7 @@ export default class BudgetPriorityEditor extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false,
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
@@ -991,6 +1033,10 @@ export default class BudgetPriorityEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                 }
+                this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
+                this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
+                this.loadedParentName = this.parentLibraryName; //store original
+                this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
             });
     }
 }

@@ -15,5 +15,6 @@ namespace BridgeCareCore.Models
         public List<T> UpdateRows { get; set; }
         public List<T> AddedRows { get; set; }
         public Guid? LibraryId { get; set; }
+        public bool IsModified { get; set; }
     }
 }

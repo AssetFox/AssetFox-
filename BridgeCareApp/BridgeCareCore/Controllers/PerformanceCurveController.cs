@@ -178,6 +178,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dtos = _performanceCurvePagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);                   
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                    UnitOfWork.PerformanceCurveRepo.AddLibraryIdToScenarioPerformanceCurve(dtos, pagingSync.LibraryId);
+                    UnitOfWork.PerformanceCurveRepo.AddModifiedToScenarioPerformanceCurve(dtos, pagingSync.IsModified);
                     UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(dtos, simulationId);
                 });
 

@@ -190,6 +190,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dtos = _remainingLifeLimitService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                    UnitOfWork.RemainingLifeLimitRepo.AddLibraryIdToScenarioRemainingLifeLimit(dtos, pagingSync.LibraryId);
+                    UnitOfWork.RemainingLifeLimitRepo.AddModifiedToScenarioRemainingLifeLimit(dtos, pagingSync.IsModified);
                     UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(dtos, simulationId);
                 });
 

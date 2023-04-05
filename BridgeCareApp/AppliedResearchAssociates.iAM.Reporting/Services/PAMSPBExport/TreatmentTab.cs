@@ -190,7 +190,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             worksheet.Cells[headerRow, column++].Value = "Budget";
             worksheet.Cells[headerRow, column++].Value = "Category";
 
-            var treatmentAttributes = GetTreatmentAttributes();
+            treatmentAttributes = GetTreatmentAttributes();
             foreach(var treatmentAttribute in treatmentAttributes)
             {
                 worksheet.Cells[headerRow, column++].Value = treatmentAttribute;

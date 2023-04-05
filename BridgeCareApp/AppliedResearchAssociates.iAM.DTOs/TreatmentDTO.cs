@@ -21,6 +21,10 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public AssetType AssetType { get; set; }
 
+        public bool IsModified { get; set; }
+
+        public Guid LibraryId { get; set; }
+
         public CriterionLibraryDTO CriterionLibrary { get; set; }
 
         public List<TreatmentCostDTO> Costs { get; set; }

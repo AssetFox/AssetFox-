@@ -48,6 +48,8 @@ export interface Treatment {
     category: TreatmentCategory;
     assetType: AssetType;
     performanceFactor: number;
+    isModified: boolean;
+    libraryId: string;
 }
 
 export interface SimpleTreatment {
@@ -68,6 +70,7 @@ export interface TreatmentLibrary {
     treatments: Treatment[];
     owner?: string;
     isShared: boolean;
+    isModified: boolean;
     users: TreatmentLibraryUser[];
 }
 
@@ -112,7 +115,9 @@ export const emptyTreatment: Treatment = {
     addTreatment: false,
     category: TreatmentCategory.preservation,
     assetType: AssetType.bridge,
-    performanceFactor: 1
+    performanceFactor: 1,
+    isModified: false,
+    libraryId: ''
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {
@@ -121,6 +126,7 @@ export const emptyTreatmentLibrary: TreatmentLibrary = {
     description: '',
     treatments: [],
     isShared: false,
+    isModified: false,
     users: []
 };
 

@@ -13,6 +13,7 @@
                           outline
                         >
                         </v-select>
+                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -162,12 +163,6 @@
                 </template>
                 </v-data-table>
                 <v-layout justify-start align-center class="pa-2">
-                    <!-- <v-divider vertical class="mx-3"/>
-                    <v-btn flat right
-                      class="ghd-control-label ghd-blue"
-                      @click="onRemoveRemainingLifeLimit"
-                    > Delete Selected 
-                    </v-btn> -->
                 </v-layout>
                 <v-divider></v-divider>
                 <v-flex v-show="!hasScenario" xs12 class="px-0">
@@ -406,6 +401,12 @@ export default class RemainingLifeLimitEditor extends Vue {
     hasScenario: boolean = false;
     currentUrl: string = window.location.href;
     hasCreatedLibrary: boolean = false;
+    parentLibraryName: string = "None";
+    parentLibraryId: string = "";
+    scenarioLibraryIsModified: boolean = false;
+    loadedParentName: string = "";
+    loadedParentId: string = "";
+    newLibrarySelection: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -460,6 +461,9 @@ export default class RemainingLifeLimitEditor extends Vue {
                 this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
             })
         this.librarySelectItemValueAllowedChanged = true;
+        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
+        this.newLibrarySelection = true;
+
     }
     onLibrarySelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue
@@ -492,6 +496,12 @@ export default class RemainingLifeLimitEditor extends Vue {
     }
     @Watch('currentPage')
     onGridDataChanged() {
+           // Get parent name from library id
+        this.selectListItems.forEach(library => {
+            if (library.value === this.parentLibraryId) {
+                this.parentLibraryName = library.text;
+            }
+        });
     }
     
     @Watch('isSharedLibrary')
@@ -518,6 +528,7 @@ export default class RemainingLifeLimitEditor extends Vue {
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
                 addedRows: this.addedRows,
+                isModified: this.scenarioLibraryIsModified
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
@@ -625,6 +636,7 @@ export default class RemainingLifeLimitEditor extends Vue {
                     rowsForDeletion: library.remainingLifeLimits === [] ? [] : this.deletionIds,
                     updateRows: library.remainingLifeLimits === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.remainingLifeLimits === [] ? [] : this.addedRows,
+                    isModified: false
                  },
                  scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
@@ -707,7 +719,8 @@ export default class RemainingLifeLimitEditor extends Vue {
                 libraryId: this.selectedRemainingLifeLimitLibrary.id === this.uuidNIL ? null : this.selectedRemainingLifeLimitLibrary.id,
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                addedRows: this.addedRows
+                addedRows: this.addedRows,
+                isModified: false
                 },
                 scenarioId: null
         }
@@ -723,13 +736,18 @@ export default class RemainingLifeLimitEditor extends Vue {
     }
 
     onUpsertScenarioRemainingLifeLimits() {
+        if (this.selectedRemainingLifeLimitLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
+        else { this.scenarioLibraryIsModified = false; }
+
         RemainingLifeLimitService.upsertScenarioRemainingLifeLimits({
             libraryId: this.selectedRemainingLifeLimitLibrary.id === this.uuidNIL ? null : this.selectedRemainingLifeLimitLibrary.id,
             rowsForDeletion: this.deletionIds,
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows           
+            addedRows: this.addedRows,
+            isModified: this.scenarioLibraryIsModified
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.clearChanges();
                 this.librarySelectItemValue = null;
                 this.resetPage();
@@ -746,6 +764,8 @@ export default class RemainingLifeLimitEditor extends Vue {
                 this.resetPage();
             }
         });
+        this.parentLibraryName = this.loadedParentName;
+        this.parentLibraryId = this.loadedParentId;
     }
 
     onShowConfirmDeleteAlert() {
@@ -902,6 +922,21 @@ export default class RemainingLifeLimitEditor extends Vue {
                 }
     }
 
+    setParentLibraryName(libraryId: string) {
+        if (libraryId === "") {
+            this.parentLibraryName = "None";
+            return;
+        }
+        let foundLibrary: RemainingLifeLimitLibrary = emptyRemainingLifeLimitLibrary;
+        this.stateRemainingLifeLimitLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
+
     initializePages(){
         const request: PagingRequest<RemainingLifeLimit>= {
             page: 1,
@@ -911,6 +946,7 @@ export default class RemainingLifeLimitEditor extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false
             },           
             sortColumn: '',
             isDescending: false,
@@ -924,6 +960,10 @@ export default class RemainingLifeLimitEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
+                    this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
+                    this.loadedParentName = this.parentLibraryName; //store original
+                    this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
                 }
             });
     }

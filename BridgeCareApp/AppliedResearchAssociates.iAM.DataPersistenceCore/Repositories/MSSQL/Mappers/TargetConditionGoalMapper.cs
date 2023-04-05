@@ -52,6 +52,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = dto.Id,
                 Name = dto.Name,
+                LibraryId = dto.LibraryId,
+                IsModified = dto.IsModified,
                 SimulationId = simulationId,
                 AttributeId = attributeId,
                 Target = dto.Target,
@@ -99,6 +101,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : "",
                 Target = entity.Target,
                 Year = entity.Year,
+                LibraryId = entity.LibraryId,
+                IsModified = entity.IsModified,
                 CriterionLibrary = entity.CriterionLibraryScenarioTargetConditionGoalJoin != null
                     ? entity.CriterionLibraryScenarioTargetConditionGoalJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO()

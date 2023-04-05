@@ -486,6 +486,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Name).IsRequired();
 
+                entity.Property(e => e.LibraryId).IsRequired();
+
+                entity.Property(e => e.IsModified).IsRequired();
+
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.Budgets)
                     .HasForeignKey(d => d.SimulationId)
@@ -574,6 +578,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.PriorityLevel).IsRequired();
 
+                entity.Property(e => e.LibraryId).IsRequired();
+
+                entity.Property(e => e.IsModified).IsRequired();
+
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.BudgetPriorities)
                     .HasForeignKey(d => d.SimulationId)
@@ -642,6 +650,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.LibraryId).IsRequired();
+
+                entity.Property(e => e.IsModified).IsRequired();
 
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.CashFlowRules)
@@ -1271,6 +1283,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.DeficientLimit).IsRequired();
 
+                entity.Property(e => e.LibraryId).IsRequired();
+
+                entity.Property(e => e.IsModified).IsRequired();
+
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.ScenarioDeficientConditionGoals)
@@ -1417,6 +1433,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
+                entity.Property(e => e.LibraryId).IsRequired();
+
+                entity.Property(e => e.IsModified).IsRequired();
+
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.PerformanceCurves)
                     .HasForeignKey(d => d.SimulationId)
@@ -1437,6 +1457,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.CalculationTiming).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.LibraryId).IsRequired();
+
+                entity.Property(e => e.IsModified).IsRequired();
 
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.CalculatedAttributes)
@@ -1666,6 +1690,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Value).IsRequired();
 
+                entity.Property(e => e.LibraryId).IsRequired();
+
+                entity.Property(e => e.IsModified).IsRequired();
+
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.Simulation)
@@ -1742,6 +1770,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.ShadowForSameTreatment).IsRequired();
                 entity.Property(e => e.PerformanceFactor).IsRequired();
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.IsModified).IsRequired();
+                entity.Property(e => e.LibraryId).IsRequired();
 
                 entity.Property(e => e.Category)
                 .HasDefaultValue(TreatmentCategory.Preservation)
@@ -1854,6 +1885,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Target).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.LibraryId).IsRequired();
+
+                entity.Property(e => e.IsModified).IsRequired();
 
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.ScenarioTargetConditionalGoals)

@@ -13,6 +13,7 @@
                         v-model='librarySelectItemValue' 
                     >
                     </v-select>
+                    <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
                 </v-flex>
                 <v-flex xs6>                       
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
@@ -64,8 +65,10 @@
                     </v-btn>                                                          
                 </v-flex>
             </v-layout>
+
+
         </v-flex>
-        <v-divider style="margin-top:-20px" v-show='hasSelectedLibrary || hasScenario'></v-divider>        
+        <v-divider style="margin-top:-10px" v-show='hasSelectedLibrary || hasScenario'></v-divider>        
         <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top:-20px;margin-bottom:-15px;">                
                <v-btn
                     @click='showCreateTreatmentDialog = true'
@@ -357,6 +360,8 @@ import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { LibraryUpsertPagingRequest } from '@/shared/models/iAM/paging';
 import { http2XX } from '@/shared/utils/http-utils';
+import { watch } from 'fs';
+import { isNullOrUndefined } from 'util';
 
 @Component({
     components: {
@@ -381,6 +386,8 @@ export default class TreatmentEditor extends Vue {
     stateScenarioSelectableTreatments: Treatment[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
+    @State(state => state.treatmentModule.scenarioTreatmentLibrary)
+    stateScenarioTreatmentLibrary: TreatmentLibrary;
     @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.treatmentModule.hasPermittedAccess) hasPermittedAccess: boolean;
@@ -397,6 +404,7 @@ export default class TreatmentEditor extends Vue {
     @Action('deleteTreatmentLibrary') deleteTreatmentLibraryAction: any;
     @Action('getSimpleScenarioSelectableTreatments') getSimpleScenarioSelectableTreatmentsAction: any;
     @Action('getSimpleSelectableTreatments') getSimpleSelectableTreatmentsAction: any;
+    @Action('getTreatmentLibraryBySimulationId') getTreatmentLibraryBySimulationIdAction: any;
     @Action('getScenarioSimpleBudgetDetails')
     getScenarioSimpleBudgetDetailsAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
@@ -426,7 +434,7 @@ export default class TreatmentEditor extends Vue {
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
     treatmentSelectItems: SelectItem[] = [];
-    treatmentSelectItemValue: string | null = null;
+    treatmentSelectItemValue: string ="";
     selectedTreatment: Treatment = clone(emptyTreatment);
     selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     activeTab: number = 0;
@@ -464,15 +472,22 @@ export default class TreatmentEditor extends Vue {
     treatmentCache: Treatment[] = [];
 
     unsavedDialogAllowed: boolean = true;
-    trueLibrarySelectItemValue: string | null = ''
+    trueLibrarySelectItemValue: string = ''
     librarySelectItemValueAllowedChanged: boolean = true;
-    librarySelectItemValue: string | null = null;
+    librarySelectItemValue: string = "";
 
     shareTreatmentLibraryDialogData: ShareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
 
+    parentLibraryId: string = '';
+    parentLibraryName: string = 'None';
+    scenarioLibraryIsModified: boolean = false;
+    loadedParentName: string = "";
+    loadedParentId: string = "";
+    newLibrarySelection: boolean = false;
+
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
-            vm.librarySelectItemValue = null;
+            vm.librarySelectItemValue = "";
             vm.getTreatmentLibrariesAction();
             if (to.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
@@ -482,20 +497,18 @@ export default class TreatmentEditor extends Vue {
                     });
                     vm.$router.push('/Scenarios/');
                 }
-
                 vm.hasScenario = true;
                 vm.getSimpleScenarioSelectableTreatmentsAction(vm.selectedScenarioId);
-
+                vm.getTreatmentLibraryBySimulationIdAction(vm.selectedScenarioId);
                 vm.treatmentTabs = [...vm.treatmentTabs, 'Budgets'];
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId, }).then(()=> {
                     vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });   
                     });
                 });
             }
         });
     }
-
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }  
@@ -511,13 +524,22 @@ export default class TreatmentEditor extends Vue {
         this.librarySelectItems = this.stateTreatmentLibraries.map(
             (library: TreatmentLibrary) => ({
                 text: library.name,
-                value: library.id.toString(),
-            }),
+                value: library.id,
+            })
         );
+    }
+    
+    @Watch('stateScenarioTreatmentLibrary')
+    onStateScenarioTreatmentLibraryChanged() {
+        this.setParentLibraryName(this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.id : "None");
+        this.scenarioLibraryIsModified = this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.isModified : false;
+        this.loadedParentId = this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.id : "";
+        this.loadedParentName = this.parentLibraryName;
     }
 
     @Watch('librarySelectItemValue')
     onLibrarySelectItemValueChangedCheckUnsaved(){
+
         if(this.hasScenario){
             this.onSelectItemValueChanged();
             this.unsavedDialogAllowed = false;
@@ -528,13 +550,16 @@ export default class TreatmentEditor extends Vue {
                 this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
             })
         this.librarySelectItemValueAllowedChanged = true;
+        this.setParentLibraryName(this.librarySelectItemValue ? this.librarySelectItemValue : this.parentLibraryId);
+        this.scenarioLibraryIsModified = false;
+        this.newLibrarySelection = true;
     }
     onSelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue
+        this.trueLibrarySelectItemValue = this.librarySelectItemValue;
         this.selectTreatmentLibraryAction({
             libraryId: this.librarySelectItemValue,
         });
-
+    
         if(!isNil(this.librarySelectItemValue)){
             this.getSimpleSelectableTreatmentsAction(this.librarySelectItemValue);
         }           
@@ -553,7 +578,7 @@ export default class TreatmentEditor extends Vue {
     @Watch('stateSelectedTreatmentLibrary')
     onStateSelectedTreatmentLibraryChanged() {
         this.selectedTreatmentLibrary = clone(
-            this.stateSelectedTreatmentLibrary,
+            this.stateSelectedTreatmentLibrary
         );
     }
     @Watch('isSharedLibrary')
@@ -585,7 +610,7 @@ export default class TreatmentEditor extends Vue {
 
         this.checkHasUnsavedChanges()
 
-        this.treatmentSelectItemValue = null;
+        this.treatmentSelectItemValue = "";
     }
 
     @Watch('treatments')
@@ -599,9 +624,10 @@ export default class TreatmentEditor extends Vue {
     @Watch('treatmentSelectItemValue')
     onTreatmentSelectItemValueChanged() {
         if(!isNil(this.treatmentSelectItemValue)){
-            var mapEntry = this.updatedRowsMap.get(this.treatmentSelectItemValue)
-            var addedRow = this.addedRows.find(_ => _.id == this.treatmentSelectItemValue)
-            var treatment = this.treatmentCache.find(_ => _.id === this.treatmentSelectItemValue)
+            var mapEntry = this.updatedRowsMap.get(this.treatmentSelectItemValue);
+            var addedRow = this.addedRows.find(_ => _.id == this.treatmentSelectItemValue);
+            var treatment = this.treatmentCache.find(_ => _.id === this.treatmentSelectItemValue);
+
             if(!isNil(mapEntry)){
                 this.selectedTreatment = clone(mapEntry[1]);
             }
@@ -624,14 +650,14 @@ export default class TreatmentEditor extends Vue {
                     if(hasValue(response, 'data')) {
                         var data = response.data as Treatment;
                         this.selectedTreatment = data;
-                        if(isNil(this.treatmentCache.find(_ => _.id === data.id)))
-                            this.treatmentCache.push(data)
+                        if(isNil(this.treatmentCache.find(_ => _.id === data.id))){ this.treatmentCache.push(data); }
+                        this.scenarioLibraryIsModified = this.selectedTreatment ? this.selectedTreatment.isModified : false;
                     }
                 })
         }
         else
             this.selectedTreatment = clone(emptyTreatment);
-
+       
         if (!this.keepActiveTab) {
             this.activeTab = 0;
         }
@@ -778,6 +804,7 @@ export default class TreatmentEditor extends Vue {
                     rowsForDeletion: [],
                     updateRows: library.treatments === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.treatments === [] ? [] : this.addedRows,
+                    isModified: false
                  },
                  scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
@@ -798,21 +825,41 @@ export default class TreatmentEditor extends Vue {
         }
     }
 
+    setParentLibraryName(libraryId: string) {
+        if (libraryId === "None") {
+            this.parentLibraryName = "None";
+            return;
+        }
+        let foundLibrary: TreatmentLibrary = emptyTreatmentLibrary;
+        this.stateTreatmentLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
+
     onUpsertScenarioTreatments() {
+
+        if (this.selectedTreatmentLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
+        else { this.scenarioLibraryIsModified = false; }
+
         TreatmentService.upsertScenarioSelectedTreatments({
             libraryId: this.selectedTreatmentLibrary.id === this.uuidNIL ? null : this.selectedTreatmentLibrary.id,
             rowsForDeletion: [],
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows           
+            addedRows: this.addedRows,
+            isModified: this.scenarioLibraryIsModified
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges();
                 this.treatmentCache.push(this.selectedTreatment);
-                this.librarySelectItemValue = null;
+                this.librarySelectItemValue = "";
                 this.addSuccessNotificationAction({message: "Modified scenario's treatments"});
                 if(this.hasSelectedLibrary)
                     this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId).then(() =>{
-                        this.treatmentSelectItemValue = null;
+                        this.treatmentSelectItemValue = "";
                     })
                 this.checkHasUnsavedChanges();
             }           
@@ -827,7 +874,8 @@ export default class TreatmentEditor extends Vue {
                 libraryId: this.selectedTreatmentLibrary.id === this.uuidNIL ? null : this.selectedTreatmentLibrary.id,
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                addedRows: this.addedRows
+                addedRows: this.addedRows,
+                isModified: false
                 },
                 scenarioId: null
         }
@@ -943,19 +991,21 @@ export default class TreatmentEditor extends Vue {
     }
 
     onDiscardChanges() {
-        this.treatmentSelectItemValue = null;
-        this.librarySelectItemValue = null;
+        this.treatmentSelectItemValue = "";
+        this.librarySelectItemValue = "";
         setTimeout(() => {
             if (this.hasScenario) {       
                 this.clearChanges();        
                 this.simpleTreatments = clone(this.stateSimpleScenarioSelectableTreatments);
             }
         });
+        this.parentLibraryName = this.loadedParentName;
+        this.parentLibraryId = this.loadedParentId;
     }
 
     reset(){
-        this.treatmentSelectItemValue = null;
-        this.librarySelectItemValue = null;
+        this.treatmentSelectItemValue = "";
+        this.librarySelectItemValue = "";
         this.clearChanges();        
         this.simpleTreatments = clone(this.stateSimpleScenarioSelectableTreatments);
     }
@@ -973,7 +1023,7 @@ export default class TreatmentEditor extends Vue {
         this.confirmBeforeDeleteAlertData = clone(emptyAlertData);
 
         if (submit) {
-            this.librarySelectItemValue = null;
+            this.librarySelectItemValue = "";
             this.deleteTreatmentLibraryAction({ libraryId: this.selectedTreatmentLibrary.id, });            
         }
     }
@@ -1016,8 +1066,8 @@ export default class TreatmentEditor extends Vue {
                     ...data,
                     id: this.selectedScenarioId
                 }).then(() => {
-                    this.treatmentSelectItemValue = null;
-                    this.librarySelectItemValue = null;
+                    this.treatmentSelectItemValue = "";
+                    this.librarySelectItemValue = "";
                     this.clearChanges();        
                     this.simpleTreatments = clone(this.stateSimpleScenarioSelectableTreatments);                  
                 });
@@ -1026,8 +1076,8 @@ export default class TreatmentEditor extends Vue {
                     ...data,
                     id: this.selectedTreatmentLibrary.id
                 }).then(() => {
-                    this.treatmentSelectItemValue = null;
-                    this.librarySelectItemValue = null;
+                    this.treatmentSelectItemValue = "";
+                    this.librarySelectItemValue = "";
                     this.clearChanges();        
                     this.simpleTreatments = [];                  
                 });;
@@ -1065,9 +1115,7 @@ export default class TreatmentEditor extends Vue {
             this.addedRows[index] = updatedRow;
             return;
         }
-
         let mapEntry = this.updatedRowsMap.get(rowId)
-
         if(isNil(mapEntry)){
             const row = this.treatmentCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
@@ -1147,6 +1195,9 @@ export default class TreatmentEditor extends Vue {
     height: 470px;
     width: 400px;
     overflow-y: auto;
+}
+.treatment-parent {
+    padding-bottom: 20px;
 }
 
 .selected-treatment-item {

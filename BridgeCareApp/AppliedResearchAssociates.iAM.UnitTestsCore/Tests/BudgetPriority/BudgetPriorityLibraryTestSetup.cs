@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.BudgetPriority
 {
     public static class BudgetPriorityLibraryTestSetup
     {
-        private static BudgetPriorityDTO CreateBudgetPriorityDto(string budgetPriorityName)
+        private static BudgetPriorityDTO CreateBudgetPriorityDto()
         {
             return new BudgetPriorityDTO()
             {
@@ -23,8 +23,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.BudgetPriority
         public static BudgetPriorityLibraryDTO CreateBudgetPriorityLibraryDto(string name)
         {
             //setup
-            var budgetPriorityList = new List<BudgetPriorityDTO>();
-            budgetPriorityList.Add(CreateBudgetPriorityDto("Budget Priority 1"));
+            var dto = BudgetPriorityDtos.New(null, 1, 2023);
+            var budgetPriorityList = new List<BudgetPriorityDTO> { dto };
 
             //create budget priority library
             return new BudgetPriorityLibraryDTO()

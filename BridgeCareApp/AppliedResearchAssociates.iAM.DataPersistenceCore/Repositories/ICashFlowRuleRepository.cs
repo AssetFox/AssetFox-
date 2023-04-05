@@ -30,6 +30,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertOrDeleteUsers(Guid cashFlowRuleLibraryId, IList<LibraryUserDTO> libraryUsers);
         List<LibraryUserDTO> GetLibraryUsers(Guid cashFlowRuleLibraryId);
+
+        void AddLibraryIdToScenarioCashFlowRule(List<CashFlowRuleDTO> cashFlowRuleDTOs, Guid? libraryId);
+
+        void AddModifiedToScenarioCashFlowRule(List<CashFlowRuleDTO> cashFlowRuleDTOs, bool IsModified);
         void UpsertCashFlowRuleLibraryAndRules(CashFlowRuleLibraryDTO dto);
     }
 }

@@ -27,6 +27,8 @@
                                 </v-list-item>
                             </template>
                         </v-select>
+                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Based on: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>
+
                     </v-flex>
                     <v-flex xs2 v-show="hasScenario"></v-flex>
                     <v-flex xs5 v-show="hasSelectedLibrary || hasScenario">                     
@@ -86,15 +88,6 @@
                                 Share Library
                             </v-btn>
                             </div>
-                            <!-- <v-divider v-if='hasSelectedLibrary && !hasScenario' class="owner-shared-divider" style="margin-left:10px;" inset vertical>
-                            </v-divider>      -->                  
-                            <!-- <v-switch style="margin-left:10px;margin-top:4px;"
-                                class="sharing ghd-checkbox"
-                                label="Shared"
-                                v-if="hasSelectedLibrary && !hasScenario"
-                                v-model="selectedPerformanceCurveLibrary.isShared"
-                                @change="checkHasUnsavedChanges()"
-                            />                -->
                     </v-layout>
                 </v-flex>
                 <v-flex xs9 v-show="hasScenario">
@@ -683,6 +676,13 @@ export default class PerformanceCurveEditor extends Vue {
 
     sharePerformanceCurveLibraryDialogData: SharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
 
+    parentLibraryName: string = "None";
+    parentLibraryId: string = "";
+    scenarioLibraryIsModified: boolean = false;
+    loadedParentName: string = "";
+    loadedParentId: string = "";
+    newLibrarySelection: boolean = false;
+
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;           
@@ -735,6 +735,7 @@ export default class PerformanceCurveEditor extends Vue {
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
                 addedRows: this.addedRows,
+                isModified: this.scenarioLibraryIsModified
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
@@ -796,11 +797,15 @@ export default class PerformanceCurveEditor extends Vue {
             this.onSelectItemValueChanged();
             this.unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged)
+        else if(this.librarySelectItemValueAllowedChanged) {
             this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
                 this.librarySelectItemValueAllowedChanged = false;
                 this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
-            })
+            });
+        }
+        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
+        this.newLibrarySelection = true;
+        this.scenarioLibraryIsModified = false;
         this.librarySelectItemValueAllowedChanged = true;
     }
     onSelectItemValueChanged() {
@@ -854,6 +859,15 @@ export default class PerformanceCurveEditor extends Vue {
     @Watch('addedRows')
     onAddedRowsChanged(){
         this.checkHasUnsavedChanges();
+    }
+    @Watch('currentPage')
+    onCurrentPageChanged() {
+        // Get parent name from library id
+        this.librarySelectItems.forEach(library => {
+            if (library.value === this.parentLibraryId) {
+                this.parentLibraryName = library.text;
+            }
+        });
     }
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
@@ -919,6 +933,7 @@ export default class PerformanceCurveEditor extends Vue {
                     rowsForDeletion: performanceCurveLibrary.performanceCurves === [] ? [] : this.deletionIds,
                     updateRows: performanceCurveLibrary.performanceCurves === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: performanceCurveLibrary.performanceCurves === [] ? [] : this.addedRows,
+                    isModified: this.scenarioLibraryIsModified
                  },
                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
@@ -1048,13 +1063,19 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     onUpsertScenarioPerformanceCurves() {
+
+        if (this.selectedPerformanceCurveLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
+        else { this.scenarioLibraryIsModified = false; }
+
         PerformanceCurveService.UpsertScenarioPerformanceCurves({
             libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
             rowsForDeletion: this.deletionIds,
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows           
+            addedRows: this.addedRows,
+            isModified: this.scenarioLibraryIsModified
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.clearChanges()
                 this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified scenario's deterioration models"});
@@ -1071,7 +1092,8 @@ export default class PerformanceCurveEditor extends Vue {
                     libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
                     rowsForDeletion: this.deletionIds,
                     updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: this.addedRows
+                    addedRows: this.addedRows,
+                    isModified: this.scenarioLibraryIsModified
                  },
                  scenarioId: null
         }
@@ -1096,6 +1118,8 @@ export default class PerformanceCurveEditor extends Vue {
                 this.resetPage();
             }
         });
+        this.parentLibraryName = this.loadedParentName;
+        this.parentLibraryId = this.loadedParentId;
     }
 
     onShowConfirmDeleteAlert() {
@@ -1304,6 +1328,21 @@ export default class PerformanceCurveEditor extends Vue {
         }
     };
 
+    setParentLibraryName(libraryId: string) {
+         if (libraryId === "None") {
+            this.parentLibraryName = "None";
+            return;
+        }
+        let foundLibrary: PerformanceCurveLibrary = emptyPerformanceCurveLibrary;
+        this.statePerformanceCurveLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
+
     initializePages(){
         const request: PagingRequest<PerformanceCurve>= {
             page: 1,
@@ -1313,6 +1352,7 @@ export default class PerformanceCurveEditor extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false
             },           
             sortColumn: '',
             isDescending: false,
@@ -1326,6 +1366,11 @@ export default class PerformanceCurveEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
+                    this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
+                    this.loadedParentName = this.parentLibraryName; //store original
+                    this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
+
                 }
             });
     }

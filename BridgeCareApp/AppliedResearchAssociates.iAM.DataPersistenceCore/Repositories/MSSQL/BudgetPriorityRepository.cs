@@ -189,7 +189,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
         }
-
         public void UpsertOrDeleteScenarioBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -343,7 +342,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var user = users.FirstOrDefault();
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
-
+        public void AddLibraryIdToScenarioBudgetPriority(List<BudgetPriorityDTO> budgetPriorityDTOs, Guid? libraryId)
+        {
+            if (libraryId == null) return;
+            foreach (var dto in budgetPriorityDTOs)
+            {
+                dto.libraryId = (Guid)libraryId;
+            }
+        }
+        public void AddModifiedToScenarioBudgetPriority(List<BudgetPriorityDTO> budgetPriorityDTOs, bool IsModified)
+        {
+            foreach (var dto in budgetPriorityDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
         public void UpsertOrDeleteBudgetPriorityLibraryAndPriorities(BudgetPriorityLibraryDTO dto, bool isNewLibrary, Guid ownerIdForNewLibrary)
         {
             _unitOfWork.AsTransaction(() =>

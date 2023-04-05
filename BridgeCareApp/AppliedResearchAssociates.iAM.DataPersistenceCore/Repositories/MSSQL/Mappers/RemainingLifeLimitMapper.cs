@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.Attribute != null)
             {
-                limit.Attribute = simulation.Network.Explorer.NumberAttributes
+                limit.Attribute = simulation.Network.Explorer.NumericAttributes
                     .Single(_ => _.Name == entity.Attribute.Name);
             }
         }

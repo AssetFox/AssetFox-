@@ -80,6 +80,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.Benefit;
             SetDecimalFormat(treatmentsWorksheet.Cells[row, column]);
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.RiskScore;
+            SetDecimalFormat(treatmentsWorksheet.Cells[row, column]);
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.RemainingLife;
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.PriorityLevel;
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.TreatmentFundingIgnoresSpendingLimit;
@@ -134,7 +135,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == appliedTreatment);
             treatmentDataModel.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
             treatmentDataModel.Benefit = treatmentOption != null ? treatmentOption.Benefit : 0;
-            treatmentDataModel.RemainingLife = treatmentOption != null ? treatmentOption.RemainingLife : 0;
+            // TODO remove infinity condition once fix is available for such edge cases
+            treatmentDataModel.RemainingLife = treatmentOption != null && treatmentOption.RemainingLife?.ToString() != "-∞" ? treatmentOption.RemainingLife : 0;
             var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == appliedTreatment);
             treatmentDataModel.PriorityLevel = treatmentConsideration?.BudgetPriorityLevel;
 

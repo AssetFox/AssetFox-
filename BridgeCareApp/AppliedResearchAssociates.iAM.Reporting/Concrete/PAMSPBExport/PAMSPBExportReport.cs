@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private Guid _networkId;
         private readonly ReportHelper _reportHelper;
         private readonly TreatmentTab _treatmentTab;
+        private readonly MASTab _masTab;
 
         public PAMSPBExportReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
@@ -29,6 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             ReportTypeName = name;
             _reportHelper = new ReportHelper();
             _treatmentTab = new TreatmentTab();
+            _masTab = new MASTab();
 
             // Check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -161,8 +163,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.TreatmentTab);
             _treatmentTab.Fill(treatmentsWorksheet, simulationOutput, simulationId, simulation.Network.Id, simulation.Treatments, networkMaintainableAssets);
 
-            // Other tab(s) here..
-
+            // MAS Tab
+            reportDetailDto.Status = $"Creating PAMS MAS TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            var masWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.MASTab);
+            _masTab.Fill(masWorksheet, simulationOutput, simulationId, simulation.Network.Id, networkMaintainableAssets);
 
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";

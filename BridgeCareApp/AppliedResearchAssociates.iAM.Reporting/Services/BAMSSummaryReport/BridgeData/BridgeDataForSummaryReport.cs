@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Common;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 
@@ -634,7 +635,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                     if (multiYearBudgetCost > 0)
                                     {
                                         //check budget and add abbreviation
-                                        budgetAmountAbbrName = "$" + FormatNumber(multiYearBudgetCost, 1);
+                                        budgetAmountAbbrName = "$" + ReportCommon.FormatNumber(multiYearBudgetCost, 1);
 
                                         //set budget header name
                                         if (!string.IsNullOrEmpty(budgetAmountAbbrName) && !string.IsNullOrWhiteSpace(budgetAmountAbbrName))
@@ -1117,44 +1118,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             var functionalClass = _reportHelper.CheckAndGetValue<string>(valuePerTextAttribute, "FUNC_CLASS");
             if (!_parametersModel.FunctionalClass.Contains(functionalClass)) { _parametersModel.FunctionalClass.Add(functionalClass); }
-        }
-
-        public string FormatNumber(decimal numberToFormat, int decimalPlaces = 0)
-        {
-            // Get the default string representation of the numberToFormat.
-            var numberString = numberToFormat.ToString();
-
-            //check each suffix until found
-            foreach (NumberSuffix suffix in Enum.GetValues<NumberSuffix>())
-            {
-                // Assign the amount of digits to base 10.
-                var currentValue = Convert.ToDecimal(1 * Math.Pow(10, (int)suffix * 3));
-
-                // Get the suffix value.
-                var suffixValue = Enum.GetName(typeof(NumberSuffix), (int)suffix);
-
-                // If the suffix is the placeholder, set it to an empty string.
-                if ((int)suffix == 0) { suffixValue = string.Empty; }
-
-                // Set the return value to a rounded value with the suffix.
-                if (numberToFormat >= currentValue) {
-                    numberString = $"{Math.Round(numberToFormat / currentValue, decimalPlaces, MidpointRounding.ToZero)}{suffixValue}";
-                }
-                else { break; }
-            }
-
-            //return formatted string
-            return numberString;
-        }
-
-        private enum NumberSuffix
-        {
-            P, // Value is less than one thousand
-            K, // Thousand
-            M, // Million
-            B, // Billion
-            T, // Trillion
-            Q  // Quadrillion
         }
 
         private enum MinCValue

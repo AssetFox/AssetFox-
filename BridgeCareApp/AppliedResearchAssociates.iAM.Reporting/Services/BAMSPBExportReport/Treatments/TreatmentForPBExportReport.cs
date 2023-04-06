@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
             {
                 "SimulationId",
                 "NetworkId",
-                "AssetId",                
+                "MaintainableAssetId",                
                 "District",
                 "Cnty",
                 "Route",

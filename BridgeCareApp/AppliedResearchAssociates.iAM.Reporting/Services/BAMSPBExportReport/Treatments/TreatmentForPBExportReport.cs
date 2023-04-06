@@ -103,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                 "CULV_SEEDED",
                 "DECK_SEEDED",
                 "SUP_SEEDED",
-                "SUB_SEEDED",    
+                "SUB_SEEDED"  
             };
         }
 
@@ -294,8 +294,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             worksheet.Cells[rowNo, columnNo++].Value = budgetName; //BUDGET
 
                             worksheet.Cells[rowNo, columnNo++].Value = treatment?.Category.ToString() ?? ""; //CATEGORY
-
-
 
 
                             var offset = "";

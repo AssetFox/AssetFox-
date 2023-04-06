@@ -27,6 +27,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public int Year { get; set; }
 
+        public int MinYear { get; set; }
+
+        public int MaxYear { get; set; }
+
         public string Appliedtreatment { get; set; }
 
         public double Cost { get; set; }

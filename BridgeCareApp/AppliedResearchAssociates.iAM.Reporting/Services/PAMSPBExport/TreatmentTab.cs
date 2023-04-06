@@ -71,6 +71,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.FromSection;
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.ToSection;
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.Year;
+            treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.MinYear;
+            treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.MaxYear;
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.Appliedtreatment;
             SetDecimalFormat(treatmentsWorksheet.Cells[row, column]);
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.Cost;
@@ -105,8 +107,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             {
                 SimulationId = simulationId,
                 NetworkId = networkId,
-                MaintainableAssetId = assetId,                
+                MaintainableAssetId = assetId,
                 Year = year.Year,
+                MinYear = year.Year,
+                MaxYear = year.Year,
                 Appliedtreatment = appliedTreatment,
             };
 
@@ -178,6 +182,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             worksheet.Cells[headerRow, column++].Value = "FromSection";
             worksheet.Cells[headerRow, column++].Value = "ToSection";
             worksheet.Cells[headerRow, column++].Value = "Year";
+            worksheet.Cells[headerRow, column++].Value = "MinYear";
+            worksheet.Cells[headerRow, column++].Value = "MaxYear";
             worksheet.Cells[headerRow, column++].Value = "Appliedtreatment";
             worksheet.Cells[headerRow, column++].Value = "Cost";
             worksheet.Cells[headerRow, column++].Value = "Benefit";

@@ -60,32 +60,38 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
         {
             return new List<string>
             {
-                "AssetId",
-                "Asset",
+                "SimulationId",
+                "NetworkId",
+                "AssetId",                
                 "District",
                 "Cnty",
                 "Route",
+                "AssetName",
                 "Direction",
                 "Segment",
-                "Offset",
-                "Interstate",
-                "Treatment",
-                "Benefit",
-                "Cost",
-                "Risk",
-                "IsCommitted",
-                "PriorityOrder",
-                "PreferredYear",
+                "Year",
                 "MinYear",
                 "MaxYear",
-                "BRKEY",
-                "SimulationId",
-                "NetworkId",
-                "OWNER_CODE",
-                "CATEGORY",
+                "Treatment",
+                "Cost",
+                "Benefit",
+                "RiskScore",
+                "RemainingLife",
+                "PriorityLevel",
+                "TreatmentFundingIgnoresSpendingLimit",
+                "TreatmentStatus",
+                "TreatmentCause",
+                "Budget",
+                "Category",
+
+                "Offset",
+                "Interstate", 
+                "IsCommitted",
+                                
+                "BRKEY",                
+                "OWNER_CODE",                
                 "YEARANY",
-                "YEARSAME",
-                "BUDGET",
+                "YEARSAME",                
                 "AGE",
                 "LATX_CNT",
                 "WS_SEEDED",
@@ -96,11 +102,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                 "CULV_SEEDED",
                 "DECK_SEEDED",
                 "SUP_SEEDED",
-                "SUB_SEEDED",
-                "TreatmentFundingIgnoresSpendingLimit",
-                "TreatmentStatus",
-                "TreatmentCause",
-                "RemainingLife",
+                "SUB_SEEDED",    
             };
         }
 
@@ -231,9 +233,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                                 }
                             }
 
+                            worksheet.Cells[rowNo, columnNo++].Value = simulationObject.Id.ToString(); //SimulationId
+                            worksheet.Cells[rowNo, columnNo++].Value = simulationObject?.Network?.Id.ToString(); //NetworkId
                             worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.AssetId.ToString(); //Asset Id
-                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "BRKEY_"); //Asset
-
+                                                       
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "DISTRICT"); //District
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
@@ -247,6 +250,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "ROUTENUM"); //Route
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
+                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "BRKEY_"); //AssetName
+
                             //TODO: Get value for direction column
                             worksheet.Cells[rowNo, columnNo++].Value = "0"; //Direction
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
@@ -254,36 +259,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "SEGMENT"); //Segment
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-                            var offset = "";
-                            if (!string.IsNullOrEmpty(bmsID) && !string.IsNullOrWhiteSpace(bmsID)) {
-                                if(bmsID.Length > 4) { offset = bmsID.Substring(bmsID.Length - 4); }
-                            }
-                            worksheet.Cells[rowNo, columnNo++].Value = offset; //Offset
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "INTERSTATE"); //Interstate
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = appliedTreatment; //Treatment
-
-                            worksheet.Cells[rowNo, columnNo++].Value = treatmentOptionDetail?.Benefit ?? 0; //Benefit
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = cost; //Cost
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-                            ExcelHelper.SetCurrencyFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelFormatStrings.CurrencyWithoutCents);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "RISK_SCORE"); //Risk
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-                            ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.TreatmentCause == TreatmentCause.CommittedProject ? "1": "0"; //IsCommitted
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = treatmentConsiderationDetail?.BudgetPriorityLevel ?? 0; //PriorityOrder
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = yearObject.Year.ToString(); //Preferred Year
+                            worksheet.Cells[rowNo, columnNo++].Value = yearObject.Year.ToString(); //Year
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                             //TODO: Get value for the column
@@ -294,25 +270,70 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             worksheet.Cells[rowNo, columnNo++].Value = yearObject.Year.ToString(); //MaxYear
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "BRKEY_"); //BRKey
+                            worksheet.Cells[rowNo, columnNo++].Value = appliedTreatment; //Treatment
+
+                            worksheet.Cells[rowNo, columnNo++].Value = cost; //Cost
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                            ExcelHelper.SetCurrencyFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelFormatStrings.CurrencyWithoutCents);
+
+                            worksheet.Cells[rowNo, columnNo++].Value = treatmentOptionDetail?.Benefit ?? 0; //Benefit
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-                            worksheet.Cells[rowNo, columnNo++].Value = simulationObject.Id.ToString(); //SimulationId
-
-                            worksheet.Cells[rowNo, columnNo++].Value = simulationObject?.Network?.Id.ToString(); //NetworkId
-
-                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "OWNER_CODE"); //Owner Code
+                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "RISK_SCORE"); //Risk
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                            ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
+
+                            worksheet.Cells[rowNo, columnNo++].Value = treatmentOptionDetail?.RemainingLife ?? 0; //Remaining Life
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                            worksheet.Cells[rowNo, columnNo++].Value = treatmentConsiderationDetail?.BudgetPriorityLevel ?? 0; //PriorityLevel
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.TreatmentFundingIgnoresSpendingLimit == true ? 1 : 0; //TreatmentFundingIgnoresSpendingLimit
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.TreatmentStatus.ToString(); //TreatmentStatus
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.TreatmentCause.ToString(); //TreatmentCause
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                            worksheet.Cells[rowNo, columnNo++].Value = budgetName; //BUDGET
 
                             worksheet.Cells[rowNo, columnNo++].Value = treatment?.Category.ToString() ?? ""; //CATEGORY
+
+
+
+
+                            var offset = "";
+                            if (!string.IsNullOrEmpty(bmsID) && !string.IsNullOrWhiteSpace(bmsID)) {
+                                if(bmsID.Length > 4) { offset = bmsID.Substring(bmsID.Length - 4); }
+                            }
+                            worksheet.Cells[rowNo, columnNo++].Value = offset; //Offset
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "INTERSTATE"); //Interstate
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                            
+
+                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.TreatmentCause == TreatmentCause.CommittedProject ? "1": "0"; //IsCommitted
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                            
+                                                        
+
+                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "BRKEY_"); //BRKey
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);                            
+
+                            worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "OWNER_CODE"); //Owner Code
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);                                                       
 
                             worksheet.Cells[rowNo, columnNo++].Value = treatment?.ShadowForAnyTreatment ?? 0; //YEARANY
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                             worksheet.Cells[rowNo, columnNo++].Value = treatment?.ShadowForSameTreatment ?? 0; //YEARSAME
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = budgetName; //BUDGET
+                            
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "AGE"); //AGE
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
@@ -345,19 +366,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "SUB_SEEDED"); //SUB_SEEDED
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-
-                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.TreatmentFundingIgnoresSpendingLimit == true ? 1 : 0; //TreatmentFundingIgnoresSpendingLimit
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.TreatmentStatus.ToString(); //TreatmentStatus
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.TreatmentCause.ToString(); //TreatmentCause
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                            worksheet.Cells[rowNo, columnNo++].Value = treatmentOptionDetail?.RemainingLife ?? 0; //Remaining Life
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                             if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray); }

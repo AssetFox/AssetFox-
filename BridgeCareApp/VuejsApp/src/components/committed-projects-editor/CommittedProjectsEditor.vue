@@ -667,6 +667,7 @@ export default class CommittedProjectsEditor extends Vue  {
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
                 addedRows: this.addedRows,
+                isModified: false
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
@@ -750,7 +751,8 @@ export default class CommittedProjectsEditor extends Vue  {
                     libraryId: null,
                     rowsForDeletion: this.deletionIds,
                     updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: this.addedRows           
+                    addedRows: this.addedRows,
+                    isModified: false    
                 }
         if(!this.committedProjectsAreChanged())
         {
@@ -1232,6 +1234,7 @@ export default class CommittedProjectsEditor extends Vue  {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false
             },           
             sortColumn: '',
             isDescending: false,

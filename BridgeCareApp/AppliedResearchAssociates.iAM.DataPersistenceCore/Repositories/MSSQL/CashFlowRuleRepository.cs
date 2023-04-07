@@ -346,6 +346,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.RemoveRange(entitiesToDelete);
             _unitOfWork.Context.SaveChanges();
         }
+        public void AddLibraryIdToScenarioCashFlowRule(List<CashFlowRuleDTO> cashFlowRuleDTOs, Guid? libraryId)
+        {
+            if (libraryId == null) return;
+            foreach (var dto in cashFlowRuleDTOs)
+            {
+                dto.LibraryId = (Guid)libraryId;
+            }
+        }
+        public void AddModifiedToScenarioCashFlowRule(List<CashFlowRuleDTO> cashFlowRuleDTOs, bool IsModified)
+        {
+            foreach (var dto in cashFlowRuleDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
+
         private List<LibraryUserDTO> GetAccessForUser(Guid cashFlowRuleLibraryId, Guid userId)
         {
             var dtos = _unitOfWork.Context.CashFlowRuleLibraryUser

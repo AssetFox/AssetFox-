@@ -926,6 +926,7 @@ export default class Scenarios extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false,
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
@@ -948,6 +949,7 @@ export default class Scenarios extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false,
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
@@ -971,6 +973,7 @@ export default class Scenarios extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false,
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
@@ -1000,6 +1003,7 @@ export default class Scenarios extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false,
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
@@ -1141,6 +1145,7 @@ export default class Scenarios extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false,
             },           
             sortColumn: '',
             isDescending: false,
@@ -1154,6 +1159,7 @@ export default class Scenarios extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false
             },           
             sortColumn: '',
             isDescending: false,
@@ -1268,7 +1274,6 @@ export default class Scenarios extends Vue {
     }
 
     onShowReportsDownloaderDialog(scenario: Scenario) {
-        console.log(scenario.networkId);
         this.reportsDownloaderDialogData = {
             showModal: true,
             scenarioId: scenario.id,

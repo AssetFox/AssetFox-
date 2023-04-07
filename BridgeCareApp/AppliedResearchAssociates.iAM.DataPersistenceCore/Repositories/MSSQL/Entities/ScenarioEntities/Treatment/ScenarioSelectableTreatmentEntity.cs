@@ -23,6 +23,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public AssetCategory AssetType { get; set; }
 
+        public bool IsModified { get; set; }
+
+        public Guid LibraryId { get; set; }
+
         public virtual SimulationEntity Simulation { get; set; }
 
         public virtual CriterionLibraryScenarioSelectableTreatmentEntity CriterionLibraryScenarioSelectableTreatmentJoin { get; set; }

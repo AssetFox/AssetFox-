@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class BudgetPriorityDtos
     {
-        public static BudgetPriorityDTO New(Guid? id = null, int priorityLevel = 0)
+        public static BudgetPriorityDTO New(Guid? id = null, int priorityLevel = 0, int? year = null)
         {
             var resolveId = id ?? Guid.NewGuid();
             var dto = new BudgetPriorityDTO
@@ -17,6 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Id = resolveId,
                 BudgetPercentagePairs = new List<BudgetPercentagePairDTO>(),
                 PriorityLevel = priorityLevel,
+                Year = year,
             };
             return dto;
         }

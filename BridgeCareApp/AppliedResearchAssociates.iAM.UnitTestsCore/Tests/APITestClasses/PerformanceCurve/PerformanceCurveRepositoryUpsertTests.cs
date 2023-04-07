@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.Perfo
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
+            var performanceCurve = PerformanceCurveTestSetup.TestLibraryPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurves = performanceCurveLibraryDto.PerformanceCurves;
             performanceCurves.RemoveAt(0);
@@ -70,7 +70,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.Perfo
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurveDto = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
+            var performanceCurveDto = PerformanceCurveTestSetup.TestLibraryPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             performanceCurveDto.Shift = true;
             var performanceCurveDtos = new List<PerformanceCurveDTO> { performanceCurveDto };
             // Act
@@ -91,7 +91,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.Perfo
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
+            var performanceCurve = PerformanceCurveTestSetup.TestLibraryPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
             var equationId = performanceCurve.Equation.Id;
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDtos = performanceCurveLibraryDto.PerformanceCurves;
@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.Perfo
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
+            var performanceCurve = PerformanceCurveTestSetup.TestLibraryPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             var mergedExpression = RandomStrings.WithPrefix("MergedExpression");
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, "Performance Curve", mergedExpression);
             PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, "meow", mergedExpression);
@@ -141,7 +141,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.Perfo
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
+            var performanceCurve = PerformanceCurveTestSetup.TestLibraryPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
             // Act
@@ -161,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.Perfo
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
+            var performanceCurve = PerformanceCurveTestSetup.TestLibraryPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             var mergedExpression = RandomStrings.WithPrefix("MergedExpression");
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, "Performance Curve", mergedExpression);
             PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(
@@ -192,7 +192,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.Perfo
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
+            var performanceCurve = PerformanceCurveTestSetup.TestLibraryPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             var mergedExpression = RandomStrings.WithPrefix("MergedExpression");
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, "Performance Curve", mergedExpression);
             PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, "meow", mergedExpression);
@@ -218,7 +218,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.Perfo
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
+            var performanceCurve = PerformanceCurveTestSetup.TestLibraryPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurves = performanceCurveLibraryDto.PerformanceCurves;
             var performanceCurveDto = performanceCurves.Single();

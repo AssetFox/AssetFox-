@@ -449,6 +449,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 percentagePair.ScenarioBudgetId = simulationToClone.Budgets
                                     .Single(_ => _.Name == percentagePair.ScenarioBudget.Name).Id;
                                 percentagePair.ScenarioBudget = null;
+                                percentagePair.ScenarioBudgetPriorityId = percentagePair.ScenarioBudgetPriority.Id;
                                 _unitOfWork.Context.ReInitializeAllEntityBaseProperties(percentagePair,
                                     _unitOfWork.UserEntity?.Id);
                             }

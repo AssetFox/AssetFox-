@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         /// <summary>If an equation is passed in, it needs to have a nonempty id. BUT the id will
         /// be changed when it is inserted.</summary>
-        public static PerformanceCurveDTO TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId, string attributeName, string equation = null)
+        public static PerformanceCurveDTO TestLibraryPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId, string attributeName, string equation = null)
         {
             var curve = TestPerformanceCurveDto(libraryId, curveId, attributeName, "2");
             var curves = new List<PerformanceCurveDTO> { curve };

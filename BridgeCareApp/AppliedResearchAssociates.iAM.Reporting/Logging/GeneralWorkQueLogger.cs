@@ -13,13 +13,13 @@ using AppliedResearchAssociates.iAM.Common.Logging;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Logging
 {
-    public class GeneralWorkQueLogger : IWorkQueueLog
+    public class GeneralWorkQueueLogger : IWorkQueueLog
     {
         private readonly IHubService _hubService;
         private readonly string _username;
         private Action<string> _updateAction;
 
-        public GeneralWorkQueLogger(IHubService hubService, string userName, Action<string> updateAction)
+        public GeneralWorkQueueLogger(IHubService hubService, string userName, Action<string> updateAction)
         {
             _hubService = hubService;
             _username = userName;

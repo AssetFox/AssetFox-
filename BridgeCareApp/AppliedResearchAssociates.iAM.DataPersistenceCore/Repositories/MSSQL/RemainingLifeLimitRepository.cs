@@ -170,7 +170,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
             return dtos;
         }
-
+        public void AddLibraryIdToScenarioRemainingLifeLimit(List<RemainingLifeLimitDTO> remainingLifeLimitDTOs, Guid? libraryId)
+        {
+            if (libraryId == null) return;
+            foreach (var dto in remainingLifeLimitDTOs)
+            {
+                dto.LibraryId = (Guid)libraryId;
+            }
+        }
+        public void AddModifiedToScenarioRemainingLifeLimit(List<RemainingLifeLimitDTO> remainingLifeLimitDTOs, bool IsModified)
+        {
+            foreach (var dto in remainingLifeLimitDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
         public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
         {
             var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);

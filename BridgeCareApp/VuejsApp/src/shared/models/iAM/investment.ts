@@ -22,6 +22,8 @@ export interface Budget {
     id: string;
     budgetOrder: number;
     name: string;
+    libraryId: string;
+    isModified: boolean;
     budgetAmounts: BudgetAmount[];
     criterionLibrary: CriterionLibrary;
 }

@@ -1,6 +1,6 @@
 ﻿namespace AppliedResearchAssociates.iAM.WorkQueue;
 
-public interface IWorkSpecification
+public interface IWorkSpecification<T>
 {
     string UserId { get; }
 
@@ -10,7 +10,7 @@ public interface IWorkSpecification
 
     string WorkName { get; }
 
-    WorkType WorkType { get; } 
+    T Metadata { get; } 
 
     void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken);
 }

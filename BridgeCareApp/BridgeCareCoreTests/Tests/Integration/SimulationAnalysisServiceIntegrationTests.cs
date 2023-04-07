@@ -23,7 +23,7 @@ namespace BridgeCareCoreTests.Tests.Integration
     {
         private SimulationAnalysisService CreateService()
         {
-            var queue = new SequentialWorkQueue();
+            var queue = new SequentialWorkQueue<WorkQueueMetadata>();
             var service = new SimulationAnalysisService(
                 TestHelper.UnitOfWork,
                 queue);

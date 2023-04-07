@@ -69,7 +69,7 @@ namespace BridgeCareCore.Services
 
         private List<QueuedWorkDTO> GetQueuedWork(IReadOnlyList<IQueuedWorkHandle<WorkQueueMetadata>> workQueue)
         {
-            var simulationAnalysisIds = workQueue.Where(_ => _.MetaData.WorkType == WorkType.SimulationAnalysis).Select(_ => Guid.Parse(_.WorkId)).ToList();
+            var simulationAnalysisIds = workQueue.Where(_ => _.Metadata.WorkType == WorkType.SimulationAnalysis).Select(_ => Guid.Parse(_.WorkId)).ToList();
 
             var queuedWork = new List<QueuedWorkDTO>();
 
@@ -77,7 +77,7 @@ namespace BridgeCareCore.Services
                 .Select(_ => _.ToQueuedWorkDTO(workQueue))
                 .ToList();
 
-            queuedWork = queuedWork.Concat(workQueue.Where(_ => _.MetaData.WorkType != WorkType.SimulationAnalysis).Select(_ => _.ToQueuedWorkDTO())).ToList();
+            queuedWork = queuedWork.Concat(workQueue.Where(_ => _.Metadata.WorkType != WorkType.SimulationAnalysis).Select(_ => _.ToQueuedWorkDTO())).ToList();
 
             return queuedWork;
         }

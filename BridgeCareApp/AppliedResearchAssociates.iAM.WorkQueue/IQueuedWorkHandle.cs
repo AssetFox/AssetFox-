@@ -12,7 +12,7 @@ public interface IQueuedWorkHandle<T>
 
     string UserId { get; }
 
-    T MetaData { get; }
+    T Metadata { get; }
 
     public string WorkName { get; }
 

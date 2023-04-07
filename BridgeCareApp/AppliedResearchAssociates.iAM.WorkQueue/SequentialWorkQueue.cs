@@ -96,7 +96,7 @@ public class SequentialWorkQueue<T>
 
         public string WorkDescription => WorkSpec.WorkDescription;
 
-        public T MetaData => WorkSpec.Metadata;
+        public T Metadata => WorkSpec.Metadata;
 
         public Task WorkCompletion => WorkCompletionSource.Task;
 

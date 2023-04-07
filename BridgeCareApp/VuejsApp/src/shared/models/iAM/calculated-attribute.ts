@@ -22,6 +22,8 @@ export interface CalculatedAttribute {
     id: string;
     attribute: string;
     name: string;
+    libraryId: string;
+    isModified: boolean;
     calculationTiming: Timing;
     equations: CriterionAndEquationSet[];
 }
@@ -59,6 +61,8 @@ export const emptyCalculatedAttribute: CalculatedAttribute = {
     attribute: 'CONDITIONINDEX',
     name: 'CONDITIONINDEX',
     equations: [],
+    libraryId: getBlankGuid(),
+    isModified: false,
     calculationTiming: Timing.OnDemand,
 };
 

@@ -1,5 +1,5 @@
 import {AxiosPromise} from 'axios';
-import {CloneScenarioData, Scenario, QueuedSimulation} from '@/shared/models/iAM/scenario';
+import {CloneScenarioData, Scenario, QueuedWork} from '@/shared/models/iAM/scenario';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import { PagingRequest } from '@/shared/models/iAM/paging';
 import { BlobOptions } from 'buffer';
@@ -21,8 +21,8 @@ export default class ScenarioService {
         return coreAxiosInstance.post(`${API.Scenario}/GetCurrentUserOrSharedScenario/${simulationId}`);
     }
 
-    static getSimulationQueuePage(data:PagingRequest<QueuedSimulation>): AxiosPromise {
-        return coreAxiosInstance.post(`${API.Scenario}/GetSimulationQueuePage/`, data);
+    static getWorkQueuePage(data:PagingRequest<QueuedWork>): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetWorkQueuePage/`, data);
     }    
 
     static createScenario(data: Scenario, networkId: string): AxiosPromise {

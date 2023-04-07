@@ -28,16 +28,16 @@ namespace BridgeCareCore.Controllers
 
         private readonly ISimulationAnalysis _simulationAnalysis;
         private readonly ISimulationPagingService _simulationService;
-        private readonly ISimulationQueueService _simulationQueueService;
+        private readonly IWorkQueueService _workQueueService;
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
+        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, IWorkQueueService workQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
-            _simulationQueueService = simulationQueueService ?? throw new ArgumentNullException(nameof(simulationQueueService));
+            _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
         }
 
@@ -116,18 +116,18 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("GetSimulationQueuePage")]
+        [Route("GetWorkQueuePage")]
         [Authorize]
-        public async Task<IActionResult> GetSimulationQueuePage([FromBody] PagingRequestModel<QueuedSimulationDTO> request)
+        public async Task<IActionResult> GetWorkQueuePage([FromBody] PagingRequestModel<QueuedWorkDTO> request)
         {
             try
             {                
-                var result = await Task.Factory.StartNew(() => _simulationQueueService.GetSimulationQueuePage(request));
+                var result = await Task.Factory.StartNew(() => _workQueueService.GetWorkQueuePage(request));
                 return Ok(result);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetSimulationQueuePage - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetWorkQueuePage - {e.Message}");
                 throw;
             }
         }
@@ -267,17 +267,18 @@ namespace BridgeCareCore.Controllers
             try
             {
                 _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                var analysisHandle = _simulationAnalysis.CreateAndRun(networkId, simulationId, UserInfo);
+                var scenarioName = "";
+                await Task.Factory.StartNew(() =>
+                {
+                    scenarioName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
+                });
+                var analysisHandle = _simulationAnalysis.CreateAndRun(networkId, simulationId, UserInfo, scenarioName);
                 // Before sending a "queued" message that may overwrite early messages from the run,
                 // allow a brief moment for an empty queue to start running the submission.
                 await Task.Delay(500);
                 if (!analysisHandle.WorkHasStarted)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
-                    {
-                        SimulationId = simulationId,
-                        Status = "Queued to run."
-                    });
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, "Queued to run.");
                 }
 
                 //await analysisHandle.WorkCompletion;

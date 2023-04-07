@@ -7,10 +7,11 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
-    public record SimulationOutputConversionWorkitem(Guid scenarioId, string userId, string scenarioName) : IWorkSpecification
+    public record SimulationOutputConversionWorkitem(Guid scenarioId, string userId, string scenarioName) : IWorkSpecification<WorkQueueMetadata>
 
     {
         public string WorkId => scenarioId.ToString();
@@ -21,7 +22,7 @@ namespace BridgeCareCore.Services
 
         public string WorkDescription => "Convert scenario output to relational from json";
 
-        public WorkType WorkType => WorkType.DeleteNetwork;
+        public WorkQueueMetadata Metadata => new WorkQueueMetadata() { DomainType = DomainType.Simulation, WorkType = WorkType.SimulationOutputConversion};
 
         public string WorkName => scenarioName;
 
@@ -31,7 +32,7 @@ namespace BridgeCareCore.Services
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-            var _queueLogger = new GeneralWorkQueLogger(_hubService, userId, updateStatusOnHandle);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, userId, updateStatusOnHandle);
             _unitOfWork.SimulationOutputRepo.ConvertSimulationOutpuFromJsonTorelational(scenarioId, cancellationToken, _queueLogger);
         }
     }

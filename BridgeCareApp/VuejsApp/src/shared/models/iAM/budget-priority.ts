@@ -13,6 +13,8 @@ export interface BudgetPriority {
     id: string;
     priorityLevel: number;
     year: number | null;
+    libraryId: string;
+    isModified: boolean;
     budgetPercentagePairs: BudgetPercentagePair[];
     criterionLibrary: CriterionLibrary;
 }
@@ -37,6 +39,8 @@ export const emptyBudgetPriority: BudgetPriority = {
     id: getBlankGuid(),
     priorityLevel: 1,
     year: null,
+    isModified: false,
+    libraryId: getBlankGuid(),
     budgetPercentagePairs: [],
     criterionLibrary: clone(emptyCriterionLibrary)
 };

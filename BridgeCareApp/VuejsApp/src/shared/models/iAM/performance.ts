@@ -11,6 +11,8 @@ export interface PerformanceCurve {
     attribute: string;
     name: string;
     shift: boolean;
+    libraryId: string;
+    isModified: boolean;
     criterionLibrary: CriterionLibrary;
     equation: Equation;
 }
@@ -36,6 +38,8 @@ export const emptyPerformanceCurve: PerformanceCurve = {
     attribute: '',
     name: '',
     shift: false,
+    libraryId: getBlankGuid(),
+    isModified: false,
     equation: clone(emptyEquation),
     criterionLibrary: clone(emptyCriterionLibrary),
 };

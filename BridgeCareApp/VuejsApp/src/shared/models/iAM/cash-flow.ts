@@ -12,6 +12,8 @@ export interface CashFlowDistributionRule {
 export interface CashFlowRule {
     id: string;
     name: string;
+    libraryId: string;
+    isModified: boolean;
     criterionLibrary: CriterionLibrary;
     cashFlowDistributionRules: CashFlowDistributionRule[];
 }
@@ -40,6 +42,8 @@ export const emptyCashFlowRuleLibrary: CashFlowRuleLibrary = {
 export const emptyCashFlowRule: CashFlowRule = {
     id: getBlankGuid(),
     name: '',
+    isModified: false,
+    libraryId: getBlankGuid(),
     criterionLibrary: clone(emptyCriterionLibrary),
     cashFlowDistributionRules: []
 };

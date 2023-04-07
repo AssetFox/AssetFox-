@@ -39,7 +39,6 @@ namespace BridgeCareCore.Services
             else
                 calcAttribute = request.SyncModel.LibraryId == null ? _unitOfWork.CalculatedAttributeRepo.GetScenarioCalulatedAttributesByScenarioAndAttributeId(simulationId, request.AttributeId):
                 _unitOfWork.CalculatedAttributeRepo.GetLibraryCalulatedAttributesByLibraryAndAttributeId(request.SyncModel.LibraryId.Value, request.AttributeId);
-
             return HandlePaging(calcAttribute, request);
         }
 
@@ -208,7 +207,9 @@ namespace BridgeCareCore.Services
                     CalculationTiming = attribute.CalculationTiming,
                     Items = items,
                     TotalItems = attribute.Equations.Count,
-                    DefaultEquation = defaultEquation
+                    DefaultEquation = defaultEquation,
+                    LibraryId = attribute.LibraryId,
+                    IsModified = attribute.IsModified,
                 };
             }
 
@@ -216,6 +217,8 @@ namespace BridgeCareCore.Services
             {
                 CalculationTiming = attribute.CalculationTiming,
                 Items = items,
+                LibraryId =attribute.LibraryId,
+                IsModified = attribute.IsModified,
                 TotalItems = attribute.Equations.Count,
                 DefaultEquation = defaultEquation
             };

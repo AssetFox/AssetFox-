@@ -49,6 +49,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new CalculatedAttributeDTO()
             {
                 Id = entity.Id,
+                LibraryId = entity.LibraryId,
+                IsModified = entity.IsModified,
                 Attribute = entity.Attribute.Name,
                 CalculationTiming = entity.CalculationTiming,
                 Equations = entity.Equations.Any()
@@ -106,6 +108,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new ScenarioCalculatedAttributeEntity()
             {
                 Id = dto.Id,
+                LibraryId = dto.LibraryId,
+                IsModified = dto.IsModified,
                 AttributeId = attributeId,
                 CalculationTiming = dto.CalculationTiming,
                 SimulationId = simulationId

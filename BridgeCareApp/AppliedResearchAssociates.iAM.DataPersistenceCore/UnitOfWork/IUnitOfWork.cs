@@ -16,7 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public string EncryptionKey { get; }
 
-        void BeginTransaction(); // This needs to go ASAP
+        ///<summary>Start a new transaction for the database repository</summary>
+        ///<remarks>Only use this when the transaction MUST occur outside the data repository</remarks>
+        void BeginTransaction();
 
         IAggregatedResultRepository AggregatedResultRepo { get; }
 
@@ -107,8 +109,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         void AddUser(string username, bool hasAdminClaim);
 
+        ///<summary>Commit the transaction for the database repository</summary>
+        ///<remarks>Only use this when the transaction MUST occur outside the data repository</remarks>
         void Commit();
 
+        ///<summary>Roll back the transaction for the database repository</summary>
+        ///<remarks>Only use this when the transaction MUST occur outside the data repository</remarks>
         void Rollback();
     }
 }

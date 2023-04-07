@@ -11,6 +11,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public double Value { get; set; }
 
+        public Guid LibraryId { get; set; }
+
+        public bool IsModified { get; set; }
+
         public virtual SimulationEntity Simulation { get; set; }
 
         public virtual CriterionLibraryScenarioRemainingLifeLimitEntity CriterionLibraryScenarioRemainingLifeLimitJoin { get; set; }

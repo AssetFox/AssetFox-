@@ -21,15 +21,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public string Direction { get; set; }
 
-        public string FromSection { get; set; } // TODO: source?
+        public string FromSection { get; set; } 
 
-        public string ToSection { get; set; } // TODO: source?
+        public string ToSection { get; set; } 
 
         public int Year { get; set; }
 
         public int MinYear { get; set; }
 
         public int MaxYear { get; set; }
+
+        public string Interstate { get; set; }
 
         public string Appliedtreatment { get; set; }
 
@@ -53,6 +55,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public string Category { get; set; } 
 
-        public List<double> TreatmentAttributeValues { get; set; } = new List<double>(); // Treatment attributes i.e. ones getting affected from treatment
+        public List<double> TreatmentAttributeValues { get; set; } = new List<double>();
     }
 }

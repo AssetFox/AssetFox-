@@ -73,6 +73,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.Year;
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.MinYear;
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.MaxYear;
+            treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.Interstate;
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.Appliedtreatment;
             SetDecimalFormat(treatmentsWorksheet.Cells[row, column]);
             treatmentsWorksheet.Cells[row, column++].Value = treatmentDataModel.Cost;
@@ -132,7 +133,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentDataModel.Cnty = CheckGetTextValue(section.ValuePerTextAttribute, "CNTY");
             treatmentDataModel.Route = CheckGetTextValue(section.ValuePerTextAttribute, "SR");
             treatmentDataModel.Direction = CheckGetTextValue(section.ValuePerTextAttribute, "DIRECTION");
-            treatmentDataModel.RiskScore = CheckGetNumericValue(section.ValuePerNumericAttribute, "RISKSCORE");            
+            treatmentDataModel.RiskScore = CheckGetNumericValue(section.ValuePerNumericAttribute, "RISKSCORE");
+            treatmentDataModel.Interstate = CheckGetTextValue(section.ValuePerTextAttribute, "INTERSTATE");
 
             var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == appliedTreatment);
             treatmentDataModel.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
@@ -184,6 +186,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             worksheet.Cells[headerRow, column++].Value = "Year";
             worksheet.Cells[headerRow, column++].Value = "MinYear";
             worksheet.Cells[headerRow, column++].Value = "MaxYear";
+            worksheet.Cells[headerRow, column++].Value = "Interstate";
             worksheet.Cells[headerRow, column++].Value = "Treatment";
             worksheet.Cells[headerRow, column++].Value = "Cost";
             worksheet.Cells[headerRow, column++].Value = "Benefit";

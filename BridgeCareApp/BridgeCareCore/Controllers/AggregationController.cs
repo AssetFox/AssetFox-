@@ -32,17 +32,17 @@ namespace BridgeCareCore.Controllers
         public const bool UpdateAttributes = false;
         private readonly ILog _log;
         private readonly IAggregationService _aggregationService;
-        private readonly IWorkQueService _workQueueService;
+        private readonly IGeneralWorkQueueService _generalWorkQueueService;
 
 
         public AggregationController(ILog log, IAggregationService aggregationService,
             IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor httpContextAccessor, IWorkQueService workQueueService) :
+            IHubService hubService, IHttpContextAccessor httpContextAccessor, IGeneralWorkQueueService generalWorkQueueService) :
             base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _aggregationService = aggregationService ?? throw new ArgumentNullException(nameof(aggregationService));
-            _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
+            _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
         }
 
         private static bool FalseButCompilerDoesNotKnowThat => Guid.NewGuid() == Guid.Empty;
@@ -84,7 +84,7 @@ namespace BridgeCareCore.Controllers
                     networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
                 });
                 aggregationWorkitem workItem = new aggregationWorkitem(networkId, UserInfo.Name, networkName, specificAttributes);
-                var analysisHandle = _workQueueService.CreateAndRun(workItem);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
                 // Before sending a "queued" message that may overwrite early messages from the run,
                 // allow a brief moment for an empty queue to start running the submission.
                 await Task.Delay(500);
@@ -115,7 +115,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var hasBeenRemovedFromQueue = _workQueueService.Cancel(networkId);
+                var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(networkId);
                 await Task.Delay(125);
 
                 if (hasBeenRemovedFromQueue)

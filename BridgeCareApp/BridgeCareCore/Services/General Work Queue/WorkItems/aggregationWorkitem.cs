@@ -16,10 +16,11 @@ using System.Text;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace BridgeCareCore.Services
 {
-    public record aggregationWorkitem(Guid NetworkId, string userId, string networkName, List<AttributeDTO> attributes) : IWorkSpecification
+    public record aggregationWorkitem(Guid NetworkId, string userId, string networkName, List<AttributeDTO> attributes) : IWorkSpecification<WorkQueueMetadata>
 
     {
         public string WorkId => NetworkId.ToString();
@@ -30,9 +31,9 @@ namespace BridgeCareCore.Services
 
         public string WorkDescription => "Network Aggregation";
 
-        public WorkType WorkType => WorkType.DeleteNetwork;
-
         public string WorkName => networkName;
+
+        public WorkQueueMetadata Metadata => new WorkQueueMetadata() { DomainType = DomainType.Network, WorkType = WorkType.Aggregation };
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -44,9 +45,9 @@ namespace BridgeCareCore.Services
             var _log = scope.ServiceProvider.GetRequiredService<ILog>();
             var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
             var state = new AggregationState();
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
             var timer = KeepUserInformedOfState(state);
             var readTask = Task.Run(() => ReadMessages(channel.Reader));
-            
             
             try
             {
@@ -128,8 +129,7 @@ namespace BridgeCareCore.Services
                 var queueMessage = state.Status;
                 if (state.Percentage > 0)
                     queueMessage = queueMessage + $": {state.Percentage}%";
-                updateStatusOnHandle.Invoke(queueMessage);
-                _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = NetworkId, Status = queueMessage});
+                _queueLogger.UpdateWorkQueueStatus(NetworkId, queueMessage);
                 state.Count++;
             }
 

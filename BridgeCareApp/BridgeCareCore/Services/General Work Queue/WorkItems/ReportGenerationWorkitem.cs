@@ -14,10 +14,11 @@ using BridgeCareCore.Models;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace BridgeCareCore.Services
 {
-    public record ReportGenerationWorkitem(Guid scenarioId, string userId, string scenarioName,  string reportName) : IWorkSpecification
+    public record ReportGenerationWorkitem(Guid scenarioId, string userId, string scenarioName,  string reportName) : IWorkSpecification<WorkQueueMetadata>
 
     {
         public string WorkId => scenarioId.ToString();
@@ -28,9 +29,9 @@ namespace BridgeCareCore.Services
 
         public string WorkDescription => $"Generate {reportName} report";
 
-        public WorkType WorkType => WorkType.GenerateReport;
-
         public string WorkName => scenarioName;
+
+        public WorkQueueMetadata Metadata => new WorkQueueMetadata() {DomainType = DomainType.Simulation };
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -40,6 +41,7 @@ namespace BridgeCareCore.Services
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _log = scope.ServiceProvider.GetRequiredService<ILog>();
             var _generator = scope.ServiceProvider.GetRequiredService<IReportGenerator>();
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
             updateStatusOnHandle.Invoke("Generating...");
             var report = GenerateReport(reportName, ReportType.File, scenarioId.ToString());
 
@@ -102,7 +104,7 @@ namespace BridgeCareCore.Services
                 if (!reportObject.Errors.Any())
                 {
                     //SendRealTimeMessage($"Running {reportName}.");
-                    reportObject.Run(parameters, cancellationToken, updateStatusOnHandle).Wait();
+                    reportObject.Run(parameters, cancellationToken, _queueLogger).Wait();
                     //SendRealTimeMessage($"Completed running {reportName}");
                 }
 

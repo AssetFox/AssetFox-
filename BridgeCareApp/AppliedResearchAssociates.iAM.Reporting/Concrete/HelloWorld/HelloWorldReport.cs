@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -37,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status => "No report to run.";
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             try
             {

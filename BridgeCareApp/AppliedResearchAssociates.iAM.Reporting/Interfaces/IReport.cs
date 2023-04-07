@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Common.Logging;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -24,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// Runs the report, populating all read only fields
         /// </summary>
         /// <param name="parameters">JSON representation of data to be projected in report</param>
-        Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null);
+        Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null);
 
         /// <summary>
         /// Report results in format specified by ReportType

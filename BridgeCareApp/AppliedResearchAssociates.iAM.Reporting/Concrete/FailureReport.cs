@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Common.Logging;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -37,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status => String.Empty;
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             _isComplete = false;
             string errorMessage = parameters;

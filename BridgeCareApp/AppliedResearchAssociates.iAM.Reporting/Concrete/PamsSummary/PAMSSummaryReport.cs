@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -89,8 +90,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = false;
         }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
+            workQueueLog ??= new DoNotWorkQueueLog();
             //check for the parameters string
             if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
@@ -142,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var summaryReportPath = "";
             try
             {
-                summaryReportPath = GenerateSummaryReport(_networkId, _simulationId, cancellationToken, updateStatusOnHandle);
+                summaryReportPath = GenerateSummaryReport(_networkId, _simulationId, workQueueLog, cancellationToken);
             }
             catch (Exception e)
             {
@@ -166,7 +168,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private string GenerateSummaryReport(Guid networkId, Guid simulationId, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
+        private string GenerateSummaryReport(Guid networkId, Guid simulationId, IWorkQueueLog workQueueLog, CancellationToken? cancellationToken = null)
         {
             checkCancelled(cancellationToken);
             var functionReturnValue = "";
@@ -219,19 +221,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             checkCancelled(cancellationToken);
             // Parameters TAB
             reportDetailDto.Status = $"Creating Parameters TAB";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Parameters_Tab);
 
             checkCancelled(cancellationToken);
             // PAMS Data TAB
             reportDetailDto.Status = $"Creating Pams Data TAB";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PAMSData_Tab);
             var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData);
 
@@ -242,56 +240,44 @@ namespace AppliedResearchAssociates.iAM.Reporting
             checkCancelled(cancellationToken);
             //// Pavement Work Summary TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             var pamsWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
             var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
             checkCancelled(cancellationToken);
             //// Pavement Work Summary By Budget TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary By Budget TAB";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             var pavementWorkSummaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummaryByBudget_Tab);
             _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
 
             checkCancelled(cancellationToken);
             // Unfunded Pavement Projects TAB
             reportDetailDto.Status = $"Unfunded Pavement Projects TAB";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
             _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
 
             checkCancelled(cancellationToken);
             // County Summary TAB
             reportDetailDto.Status = $"County Summary TAB";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             var _countySummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.CountySummary_Tab);
             _countySummary.Fill(_countySummaryWorksheet, reportOutputData, simulationYears, simulation);
 
             checkCancelled(cancellationToken);
             //Graph TABs
             reportDetailDto.Status = $"Creating Graph TABs";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             _addGraphsInTabs.Add(excelPackage, worksheet, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
             checkCancelled(cancellationToken);
             // Legend TAB
             reportDetailDto.Status = $"Creating Legends TAB";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Legend_Tab);
             _summaryReportGlossary.Fill(shortNameWorksheet);
             checkCancelled(cancellationToken);
@@ -307,10 +293,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             functionReturnValue = filePath;
 
             reportDetailDto.Status = $"Report generation completed";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
 
             //return value
             return functionReturnValue;

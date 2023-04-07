@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -58,8 +59,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
+            workQueueLog ??= new DoNotWorkQueueLog();
             // Check for the parameters
             if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
@@ -104,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportPath = string.Empty;
             try
             {
-                reportPath = GeneratePAMSPBExportReport(_networkId, _simulationId, cancellationToken, updateStatusOnHandle);
+                reportPath = GeneratePAMSPBExportReport(_networkId, _simulationId, workQueueLog, cancellationToken);
             }
             catch (Exception e)
             {
@@ -128,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private string GeneratePAMSPBExportReport(Guid networkId, Guid simulationId, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
+        private string GeneratePAMSPBExportReport(Guid networkId, Guid simulationId, IWorkQueueLog workQueueLog, CancellationToken? cancellationToken = null)
         {
             checkCancelled(cancellationToken);
             var reportPath = string.Empty;
@@ -137,11 +139,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 SimulationId = simulationId,
                 Status = $"Generating..."
             };
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
 
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
             var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
@@ -164,11 +164,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             checkCancelled(cancellationToken);
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
             reportPath = Path.Combine(folderPathForSimulation, "PAMSPBExportReport.xlsx");
@@ -177,11 +175,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             File.WriteAllBytes(reportPath, bin);
 
             reportDetailDto.Status = $"Report generation completed";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status });
 
             return reportPath;
         }

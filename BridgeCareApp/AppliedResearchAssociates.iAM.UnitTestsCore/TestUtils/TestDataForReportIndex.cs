@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -105,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public string Status => "Report finished running";
 
-        public Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null) => throw new NotImplementedException();
+        public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }
 
     public class TestHTMLFileFactory : IReportFactory
@@ -156,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public string Status => "Report finished running";
 
-        public Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null) => throw new NotImplementedException();
+        public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }
 
     public class TestBadReportFactory : IReportFactory
@@ -197,6 +198,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public string Status => "Report finished running";
 
-        public Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null) => throw new NotImplementedException();
+        public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }
 }

@@ -29,15 +29,15 @@ namespace BridgeCareCore.Controllers
     {
         private readonly IReportGenerator _generator;
         private readonly ILog _log;
-        private readonly IWorkQueService _workQueueService;
+        private readonly IGeneralWorkQueueService _generalWorkQueueService;
         public const string ReportError = "Report Error";
 
         public ReportController(IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, ILog logger, IWorkQueService workQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, ILog logger, IGeneralWorkQueueService generalWorkQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _generator = generator ?? throw new ArgumentNullException(nameof(generator));
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
-            _workQueueService = workQueService ?? throw new ArgumentNullException(nameof(workQueService));
+            _generalWorkQueueService = generalWorkQueService ?? throw new ArgumentNullException(nameof(generalWorkQueService));
         }
 
         #region "API functions"
@@ -155,7 +155,7 @@ namespace BridgeCareCore.Controllers
                     scenarioId = Guid.NewGuid();
 
                 ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName);
-                var analysisHandle = _workQueueService.CreateAndRun(workItem);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
                 // Before sending a "queued" message that may overwrite early messages from the run,
                 // allow a brief moment for an empty queue to start running the submission.
                 await Task.Delay(500);
@@ -186,7 +186,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var hasBeenRemovedFromQueue = _workQueueService.Cancel(networkId);
+                var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(networkId);
                 await Task.Delay(125);
 
                 if (hasBeenRemovedFromQueue)

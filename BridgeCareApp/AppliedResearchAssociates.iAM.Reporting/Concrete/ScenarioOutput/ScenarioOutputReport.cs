@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -46,8 +47,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = false;
         }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, Action<string> updateStatusOnHandle = null)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
+            workQueueLog ??= new DoNotWorkQueueLog();
             // TODO:  Don't regenerate the report if it has already been generated AND the date on the file was after the LastRun date of the
             // scenario.
 
@@ -60,9 +62,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
             SimulationID = simulationGuid;
             Status = "Generating report";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(Status);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationGuid, Status = Status });
+            workQueueLog.UpdateWorkQueueStatus(SimulationID.Value, Status);
 
             // Check for simulation existence
             string reportFileName;
@@ -86,9 +86,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
            
             // Pull the simulation object
             Status = "Getting simulation output";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(Status);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationGuid, Status = Status });
+            workQueueLog.UpdateWorkQueueStatus(SimulationID.Value, Status);
             Analysis.Engine.SimulationOutput simulationOutput;
             try
             {
@@ -105,9 +103,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Save the output to a file
             Status = "Saving output";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(Status);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationGuid, Status = Status });
+            workQueueLog.UpdateWorkQueueStatus(SimulationID.Value, Status);
             try
             {
                 checkCancelled(cancellationToken);
@@ -127,9 +123,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Results = reportFileName;  // This is not set until here to ensure the file was created correctly
             IsComplete = true;
             Status = "File generated.";
-            if (updateStatusOnHandle != null)
-                updateStatusOnHandle.Invoke(Status);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationGuid, Status = Status });
+            workQueueLog.UpdateWorkQueueStatus(SimulationID.Value, Status);
             return;
         }
 

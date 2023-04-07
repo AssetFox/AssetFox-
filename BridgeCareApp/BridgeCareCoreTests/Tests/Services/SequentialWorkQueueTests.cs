@@ -16,7 +16,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void items_execute_in_the_order_they_were_added()
         {
-            SequentialWorkQueue queue = new();
+            SequentialWorkQueue<WorkQueueMetadata> queue = new();
             List<int> taskEffects = new();
 
             queue.Enqueue(new TestWorkItem(1, 0, taskEffects), out _).Wait();
@@ -43,13 +43,13 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(Enumerable.Range(1, 5), taskEffects);
         }
 
-        private record TestWorkItem(int Id, int MsDelay, List<int> WorkTarget) : IWorkSpecification
+        private record TestWorkItem(int Id, int MsDelay, List<int> WorkTarget) : IWorkSpecification<WorkQueueMetadata>
         {
             public string WorkId { get; } = Id.ToString();
 
             public string UserId => "";
 
-            public WorkType WorkType => throw new NotImplementedException();
+            public WorkQueueMetadata Metadata => throw new NotImplementedException();
 
             public string WorkDescription => "";
 

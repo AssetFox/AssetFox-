@@ -4,9 +4,9 @@ using System;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface IWorkQueService
+    public interface IGeneralWorkQueueService
     {
-        IQueuedWorkHandle CreateAndRun(IWorkSpecification workItem);
+        IQueuedWorkHandle<WorkQueueMetadata> CreateAndRun(IWorkSpecification<WorkQueueMetadata> workItem);
 
         bool Cancel(Guid simulationId);
     }

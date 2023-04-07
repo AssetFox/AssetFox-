@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -17,9 +17,9 @@ namespace BridgeCareCore.Services
     {
         private static IUnitOfWork _unitOfWork;
         private static ISimulationRepository _simulationRepository;
-        private SequentialWorkQueue _sequentialWorkQueue;
+        private SequentialWorkQueue<WorkQueueMetadata> _sequentialWorkQueue;
 
-        public WorkQueueService(IUnitOfWork unitOfWork, SequentialWorkQueue sequentialWorkQueue, ISimulationRepository simulationRepository)
+        public WorkQueueService(IUnitOfWork unitOfWork, SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue, ISimulationRepository simulationRepository)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
@@ -67,9 +67,9 @@ namespace BridgeCareCore.Services
             };
         }
 
-        private List<QueuedWorkDTO> GetQueuedWork(IReadOnlyList<IQueuedWorkHandle> workQueue)
+        private List<QueuedWorkDTO> GetQueuedWork(IReadOnlyList<IQueuedWorkHandle<WorkQueueMetadata>> workQueue)
         {
-            var simulationAnalysisIds = workQueue.Where(_ => _.WorkType == WorkType.SimulationAnalyis).Select(_ => Guid.Parse(_.WorkId)).ToList();
+            var simulationAnalysisIds = workQueue.Where(_ => _.Metadata.WorkType == WorkType.SimulationAnalysis).Select(_ => Guid.Parse(_.WorkId)).ToList();
 
             var queuedWork = new List<QueuedWorkDTO>();
 
@@ -77,7 +77,7 @@ namespace BridgeCareCore.Services
                 .Select(_ => _.ToQueuedWorkDTO(workQueue))
                 .ToList();
 
-            queuedWork = queuedWork.Concat(workQueue.Where(_ => _.WorkType == WorkType.DeleteNetwork).Select(_ => _.ToQueuedWorkDTO())).ToList();
+            queuedWork = queuedWork.Concat(workQueue.Where(_ => _.Metadata.WorkType != WorkType.SimulationAnalysis).Select(_ => _.ToQueuedWorkDTO())).ToList();
 
             return queuedWork;
         }
@@ -120,7 +120,7 @@ namespace BridgeCareCore.Services
 
     public static class QueuedWorkTransform
     {
-        public static QueuedWorkDTO ToQueuedWorkDTO(this SimulationDTO simulationDTO, IReadOnlyList<IQueuedWorkHandle> workQueue)
+        public static QueuedWorkDTO ToQueuedWorkDTO(this SimulationDTO simulationDTO, IReadOnlyList<IQueuedWorkHandle<WorkQueueMetadata>> workQueue)
         {
             var queuedWorkHandle = workQueue.SingleOrDefault(_ => new Guid(_.WorkId) == simulationDTO.Id);
 
@@ -137,7 +137,7 @@ namespace BridgeCareCore.Services
             return queuedSimulationDTO;
         }
 
-        public static QueuedWorkDTO ToQueuedWorkDTO(this IQueuedWorkHandle queuedWorkHandle)
+        public static QueuedWorkDTO ToQueuedWorkDTO(this IQueuedWorkHandle<WorkQueueMetadata> queuedWorkHandle)
         {
             QueuedWorkDTO queuedSimulationDTO = new QueuedWorkDTO()
             {

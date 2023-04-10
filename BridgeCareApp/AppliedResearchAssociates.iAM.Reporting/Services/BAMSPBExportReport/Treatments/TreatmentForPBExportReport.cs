@@ -87,7 +87,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
 
                 "Offset",
                 "Interstate", 
-                "IsCommitted",
                                 
                 "BRKEY",                
                 "OWNER_CODE",                
@@ -304,13 +303,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "INTERSTATE"); //Interstate
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-                            
-
-                            worksheet.Cells[rowNo, columnNo++].Value = assetDetailObject.TreatmentCause == TreatmentCause.CommittedProject ? "1": "0"; //IsCommitted
-                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                            
+                            ExcelHelper.HorizontalRightAlign(worksheet.Cells[rowNo, columnNo - 1]);                            
                                                         
 
                             worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "BRKEY_"); //BRKey

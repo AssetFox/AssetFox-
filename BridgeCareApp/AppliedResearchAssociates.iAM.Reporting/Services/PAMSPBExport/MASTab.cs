@@ -53,18 +53,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             masWorksheet.Cells[row, column++].Value = masDataModel.District;
             masWorksheet.Cells[row, column++].Value = masDataModel.Cnty;
             masWorksheet.Cells[row, column++].Value = masDataModel.Route;
+            masWorksheet.Cells[row, column++].Value = masDataModel.CRS;
             // masWorksheet.Cells[row, column++].Value = masDataModel.AssetName; // TODO Remove once confirmed from Dmitry
             masWorksheet.Cells[row, column++].Value = masDataModel.Direction;
             masWorksheet.Cells[row, column++].Value = masDataModel.FromSection;
             masWorksheet.Cells[row, column++].Value = masDataModel.ToSection;
+            SetDecimalFormat(masWorksheet.Cells[row, column]);
             masWorksheet.Cells[row, column++].Value = masDataModel.Area;            
             masWorksheet.Cells[row, column++].Value = masDataModel.Interstate;
             masWorksheet.Cells[row, column++].Value = masDataModel.Lanes;
             SetDecimalFormat(masWorksheet.Cells[row, column]);
             masWorksheet.Cells[row, column++].Value = masDataModel.Width;
             SetDecimalFormat(masWorksheet.Cells[row, column]);
-            masWorksheet.Cells[row, column++].Value = masDataModel.Length;
-            masWorksheet.Cells[row, column++].Value = masDataModel.CRS;
+            masWorksheet.Cells[row, column++].Value = masDataModel.Length;            
             masWorksheet.Cells[row, column++].Value = masDataModel.surfaceName;
             SetDecimalFormat(masWorksheet.Cells[row, column]);
             masWorksheet.Cells[row, column++].Value = masDataModel.RiskScore;
@@ -112,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             masDataModel.Direction = CheckGetTextValue(valuePerTextAttribute, "DIRECTION");            
             masDataModel.Interstate = CheckGetTextValue(valuePerTextAttribute, "INTERSTATE");
             masDataModel.Lanes = CheckGetNumericValue(valuePerNumericAttribute, "LANES");
-            masDataModel.Interstate = CheckGetTextValue(valuePerTextAttribute, "SURFACE_NAME");
+            masDataModel.surfaceName = CheckGetTextValue(valuePerTextAttribute, "SURFACE_NAME");
             masDataModel.RiskScore = CheckGetNumericValue(valuePerNumericAttribute, "RISKSCORE");
 
             return masDataModel;
@@ -134,6 +135,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             worksheet.Cells[headerRow, column++].Value = "District";
             worksheet.Cells[headerRow, column++].Value = "Cnty";
             worksheet.Cells[headerRow, column++].Value = "Route";
+            worksheet.Cells[headerRow, column++].Value = "CRS";
             // worksheet.Cells[headerRow, column++].Value = "Asset"; // TODO Remove once confirmed from Dmitry
             worksheet.Cells[headerRow, column++].Value = "Direction";
             worksheet.Cells[headerRow, column++].Value = "FromSection";
@@ -142,8 +144,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             worksheet.Cells[headerRow, column++].Value = "Interstate";
             worksheet.Cells[headerRow, column++].Value = "Lanes";
             worksheet.Cells[headerRow, column++].Value = "Width";
-            worksheet.Cells[headerRow, column++].Value = "Length";
-            worksheet.Cells[headerRow, column++].Value = "CRS";
+            worksheet.Cells[headerRow, column++].Value = "Length";            
             worksheet.Cells[headerRow, column++].Value = "SurfaceName";
             worksheet.Cells[headerRow, column++].Value = "Risk";
 

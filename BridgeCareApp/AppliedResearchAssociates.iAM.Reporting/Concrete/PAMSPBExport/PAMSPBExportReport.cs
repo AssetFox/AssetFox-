@@ -156,19 +156,19 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("PAMSPBExportReportData.xlsx"));
 
-            // Teatments Tab
-            reportDetailDto.Status = $"Creating PAMS Treatments TAB";
-            UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.TreatmentTab);
-            _treatmentTab.Fill(treatmentsWorksheet, simulationOutput, simulationId, simulation.Network.Id, simulation.Treatments, networkMaintainableAssets);
-
             // MAS Tab
             reportDetailDto.Status = $"Creating PAMS MAS TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var masWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.MASTab);
             _masTab.Fill(masWorksheet, simulationOutput, simulationId, simulation.Network.Id, networkMaintainableAssets);
+
+            // Teatments Tab
+            reportDetailDto.Status = $"Creating PAMS Treatments TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.TreatmentTab);
+            _treatmentTab.Fill(treatmentsWorksheet, simulationOutput, simulationId, simulation.Network.Id, simulation.Treatments, networkMaintainableAssets);
 
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";

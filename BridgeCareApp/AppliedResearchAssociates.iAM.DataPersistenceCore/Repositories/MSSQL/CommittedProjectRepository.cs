@@ -63,6 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Name = project.Name,
                     ShadowForAnyTreatment = project.ShadowForAnyTreatment,
                     ShadowForSameTreatment = project.ShadowForSameTreatment,
+                    PerformanceFactor = project.PerformanceFactor,
                     Cost = project.Cost,
                     Year = project.Year,
                     CommittedProjectLocation = project.CommittedProjectLocation,

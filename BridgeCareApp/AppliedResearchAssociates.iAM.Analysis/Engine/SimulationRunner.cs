@@ -149,6 +149,23 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             foreach (var treatment in Simulation.Treatments)
             {
+                if (treatment.PerformanceFactor > 0)
+                {
+                    foreach(var curves in CurvesPerAttribute)
+                    {
+                        // condition attribute ?
+                        // we need to set the performance curve adjustment factor tuple
+                        // with a condition attribute and the factor
+                        var conditionAttribute = curves.Key;
+                        treatment.PerformanceCurveAdjustmentFactors.Add(conditionAttribute, treatment.PerformanceFactor);
+
+                        foreach(var curve in curves)
+                        {
+                            var performanceCurve = curve;
+                            
+                        }
+                    }
+                }
                 treatment.SetConsequencesPerAttribute();
             }
 

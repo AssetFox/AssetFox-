@@ -908,7 +908,9 @@ export default class TreatmentEditor extends Vue {
                 criterionLibrary: treatmentDetails.criterionLibrary,
                 category: treatmentDetails.category,
                 assetType: treatmentDetails.assetType,
+                performanceFactor: treatmentDetails.performanceFactor,
             });
+            console.log("treatment factor: " + this.selectedTreatment.performanceFactor);
         }
     }
 

@@ -21,7 +21,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<IRemainingLifeLimitPagingService, RemainingLifeLimitPagingService>();
             services.AddScoped<ISimulationPagingService, SimulationPagingService>();
             services.AddScoped<ITreatmentPagingService, TreatmentPagingService>();
-            services.AddScoped<ISimulationQueueService, SimulationQueueService>();
+            services.AddScoped<IWorkQueueService, WorkQueueService>();
             services.AddScoped<ICashFlowPagingService, CashFlowPagingService>();
         }
     }

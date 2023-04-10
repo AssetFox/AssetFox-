@@ -19,13 +19,20 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
 {
-    public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserInfo) : IWorkSpecification
+    public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserInfo, string scenarioName) : IWorkSpecification<WorkQueueMetadata>
     {
         public string WorkId => SimulationId.ToString();
 
         public DateTime StartTime { get; set; }
 
         public string UserId => UserInfo.Name;
+
+        public string WorkDescription => "Run Simulation";
+
+        public WorkQueueMetadata Metadata =>
+            new WorkQueueMetadata() { WorkType = WorkType.SimulationAnalysis, DomainType = DomainType.Simulation };
+
+        public string WorkName => scenarioName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -65,6 +72,7 @@ namespace BridgeCareCore.Services
             var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status, StartTime);
 
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
@@ -269,6 +277,7 @@ namespace BridgeCareCore.Services
                     simulationAnalysisDetail.RunTime = interval.Value.ToString(@"hh\:mm\:ss");
                 }
                 _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+                updateStatusOnHandle.Invoke(simulationAnalysisDetail.Status);
             }
         }
 

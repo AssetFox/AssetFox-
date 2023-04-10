@@ -194,6 +194,7 @@ import  AddNetworkDialog from '@/components/networks/networks-dialogs/AddNetwork
 import { AddNetworkDialogData, emptyAddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
 import { Hub } from '@/connectionHub';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
+import { getBlankGuid} from '@/shared/utils/uuid-utils';
 
 @Component({
     components: {

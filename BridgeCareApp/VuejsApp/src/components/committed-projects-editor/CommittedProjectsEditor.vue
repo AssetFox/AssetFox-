@@ -95,6 +95,7 @@
                                                 && header.value !== 'year' 
                                                 && header.value !== 'brkey' 
                                                 && header.value !== 'treatment'
+                                                && header.value !== 'factor'
                                                 && header.value !== 'cost'"
                                                 readonly
                                                 class="sm-txt"
@@ -122,9 +123,9 @@
                                                 :value='formatAsCurrency(props.item[header.value])'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                            <!-- <v-text-field v-if="header.value === 'factor'"
-                                                :value='props.item[header.value]'
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/> -->
+                                            <v-text-field v-if="header.value === 'factor'"
+                                                :value='parseFloat(props.item[header.value]).toFixed(2)'
+                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'brkey'"
@@ -856,7 +857,10 @@ export default class CommittedProjectsEditor extends Vue  {
             }
             else if(property === 'brkey'){
                 this.handleBrkeyChange(row, scp, value);               
-            }            
+            }
+            else if(property === 'factor') {
+                this.handleFactorChange(row, scp, value);
+            }
             else if(property === 'budget'){
                 this.handleBudgetChange(row, scp, value)
             }
@@ -1089,6 +1093,11 @@ export default class CommittedProjectsEditor extends Vue  {
     handleBrkeyChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, brkey: string){
         row.locationKeys[this.brkey_] = brkey;
         this.updateCommittedProject(row, brkey, 'brkey');
+        this.onPaginationChanged();
+    }
+
+    handleFactorChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, factor: number) {
+        this.updateCommittedProject(row, factor, 'performanceFactor');
         this.onPaginationChanged();
     }
 

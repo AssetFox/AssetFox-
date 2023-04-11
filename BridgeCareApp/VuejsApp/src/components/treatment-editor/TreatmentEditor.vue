@@ -910,7 +910,6 @@ export default class TreatmentEditor extends Vue {
                 assetType: treatmentDetails.assetType,
                 performanceFactor: treatmentDetails.performanceFactor,
             });
-            console.log("treatment factor: " + this.selectedTreatment.performanceFactor);
         }
     }
 

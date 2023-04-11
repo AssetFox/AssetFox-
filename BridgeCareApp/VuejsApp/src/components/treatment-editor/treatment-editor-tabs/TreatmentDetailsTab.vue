@@ -98,8 +98,6 @@
                         <v-subheader class="ghd-control-label ghd-md-gray">Performance Factor</v-subheader>
                         <v-text-field
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
-                            :mask="'####'"
-                            rows="4"
                             @input="
                                 onEditTreatmentDetails(
                                     'performanceFactor',
@@ -108,7 +106,8 @@
                             "
                             label="Performance Factor"
                             outline
-                            v-model="
+                            :value='parseFloat(selectedTreatmentDetails.performanceFactor).toFixed(2)'
+                            v-model.number="
                                 selectedTreatmentDetails.performanceFactor
                             "
                             :rules="[rules['generalRules'].valueIsNotEmpty]"

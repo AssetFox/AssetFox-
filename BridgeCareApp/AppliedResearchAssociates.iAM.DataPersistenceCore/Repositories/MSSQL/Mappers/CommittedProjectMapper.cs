@@ -91,6 +91,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForAnyTreatment = dto.ShadowForAnyTreatment,
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Category = dto.Category.ToString(),
+                PerformanceFactor= dto.PerformanceFactor,
                 Year = dto.Year,
                 CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
             };

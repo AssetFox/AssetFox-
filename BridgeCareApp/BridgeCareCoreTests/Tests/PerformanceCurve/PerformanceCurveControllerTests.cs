@@ -11,6 +11,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.General_Work_Queue;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using MoreLinq;
@@ -33,6 +34,7 @@ namespace BridgeCareCoreTests.Tests
             var performanceCurvesService = new PerformanceCurvesService(unitOfWork.Object, hubService.Object, expressionValidationService.Object);
             var performanceCurvesPagingService = new PerformanceCurvesPagingService(unitOfWork.Object);
             var claimHelper = new Mock<IClaimHelper>();
+            var generalWorkQueue = GeneralWorkQueueServiceMocks.New();
             var controller = new PerformanceCurveController(
                 security.Object,
                 unitOfWork.Object,
@@ -40,7 +42,8 @@ namespace BridgeCareCoreTests.Tests
                 contextAccessor.Object,
                 performanceCurvesService,
                 performanceCurvesPagingService,
-                claimHelper.Object
+                claimHelper.Object,
+                generalWorkQueue.Object
                 );
             return controller;
         }

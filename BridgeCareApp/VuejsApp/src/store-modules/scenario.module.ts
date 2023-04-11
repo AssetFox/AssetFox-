@@ -1,4 +1,4 @@
-import {CloneScenarioData, emptyScenario, QueuedSimulation, Scenario} from '@/shared/models/iAM/scenario';
+import {CloneScenarioData, emptyScenario, QueuedWork, Scenario} from '@/shared/models/iAM/scenario';
 import ScenarioService from '@/services/scenario.service';
 import {AxiosResponse} from 'axios';
 import {any, clone, find, findIndex, prepend, propEq, reject, update} from 'ramda';
@@ -10,10 +10,10 @@ import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 
 const state = {
     scenarios: [] as Scenario[],
-    queuedSimulations: [] as QueuedSimulation[],
+    queuedSimulations: [] as QueuedWork[],
     currentSharedScenariosPage: [] as Scenario[],
     currentUserScenarioPage: [] as Scenario[],
-    currentSimulationQueuePage: [] as QueuedSimulation[],
+    currentWorkQueuePage: [] as QueuedWork[],
     totalSharedScenarios: 0 as number,
     totalUserScenarios: 0 as number,
     totalQueuedSimulations: 0 as number,
@@ -36,9 +36,21 @@ const mutations = {
     UserUserOrSharedScenarioMutator(state: any, scenario: Scenario){
         state.currentUserOrSharedScenario = clone(scenario);        
     },
-    SimulationQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedSimulation>){
-        state.currentSimulationQueuePage = clone(queuedSimulations.items);
+    workQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedWork>){
+        state.currentWorkQueuePage = clone(queuedSimulations.items);
         state.totalQueuedSimulations = queuedSimulations.totalItems;
+    },
+    workQueStatusUpdateMutator(state: any, queuedWorkUpdated: QueuedWork) {
+        if (any(propEq('id', queuedWorkUpdated.id), state.currentWorkQueuePage)) {
+            const updatedQueuedWork: QueuedWork = find(propEq('id', queuedWorkUpdated.id), state.currentWorkQueuePage) as QueuedWork;
+            updatedQueuedWork.status = queuedWorkUpdated.status;
+
+            state.currentWorkQueuePage = update(
+                findIndex(propEq('id', updatedQueuedWork.id), state.currentWorkQueuePage),
+                updatedQueuedWork,
+                state.currentWorkQueuePage
+            );           
+        }
     },
     selectedScenarioMutator(state: any, id: string) {
         if (any(propEq('id', id), state.currentSharedScenariosPage)) {
@@ -77,14 +89,14 @@ const mutations = {
                 state.currentUserScenarioPage
             );         
         }
-        if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage)) {
-            const updatedSimulation: QueuedSimulation = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage) as QueuedSimulation;
+        if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentWorkQueuePage)) {
+            const updatedSimulation: QueuedWork = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentWorkQueuePage) as QueuedWork;
             updatedSimulation.status = simulationAnalysisDetail.status;
 
-            state.currentSimulationQueuePage = update(
-                findIndex(propEq('id', updatedSimulation.id), state.currentSimulationQueuePage),
+            state.currentWorkQueuePage = update(
+                findIndex(propEq('id', updatedSimulation.id), state.currentWorkQueuePage),
                 updatedSimulation,
-                state.currentSimulationQueuePage
+                state.currentWorkQueuePage
             );         
         }        
     },
@@ -119,6 +131,9 @@ const actions = {
     updateSimulationAnalysisDetail({commit}: any, payload: any) {
         commit('simulationAnalysisDetailMutator', payload.simulationAnalysisDetail);
     },
+    updateQueuedWorkStatus({commit}: any, payload: any) {
+        commit('workQueStatusUpdateMutator', payload.workQueueStatusUpdate);
+    },
     updateSimulationReportDetail({commit}: any, payload: any) {
         commit('simulationReportDetailMutator', payload.simulationReportDetail);
     },
@@ -138,11 +153,11 @@ const actions = {
                 }
             });
     },
-    async getSimulationQueuePage({commit}: any, payload: PagingRequest<QueuedSimulation>) {
-        await ScenarioService.getSimulationQueuePage(payload)
+    async getWorkQueuePage({commit}: any, payload: PagingRequest<QueuedWork>) {
+        await ScenarioService.getWorkQueuePage(payload)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    commit('SimulationQueuePageMutator', response.data as PagingPage<QueuedSimulation>);
+                    commit('workQueuePageMutator', response.data as PagingPage<QueuedWork>);
                 }
             });
     },    

@@ -10,9 +10,9 @@ namespace BridgeCareCoreTests.Tests
 {
     public static class SimulationQueueServiceMocks
     {
-        public static Mock<ISimulationQueueService> New()
+        public static Mock<IWorkQueueService> New()
         {
-            var mock = new Mock<ISimulationQueueService>();
+            var mock = new Mock<IWorkQueueService>();
             return mock;
         }
     }

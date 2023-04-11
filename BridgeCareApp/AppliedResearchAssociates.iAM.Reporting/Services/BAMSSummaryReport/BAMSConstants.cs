@@ -20,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string BPNT = "BPN T";
         public const string BridgeCare = "Bridge Care";
         public const string BridgeTotal = "Bridge Total";
+        public const string Unspecified_Budget = "Unspecified";
         public const string CashNeededByBPN = "Cash Needed By BPN";
         public const string Closed = "Closed";
         public const string ClosedBridgeCountByBPN = "Close BPN Count";

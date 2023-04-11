@@ -63,6 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         SimulationId = entity.SimulationId,
                         Treatment = entity.Name,
                         Year = entity.Year,
+                        PerformanceFactor = entity.PerformanceFactor,
                         ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         Category = convertedCategory,

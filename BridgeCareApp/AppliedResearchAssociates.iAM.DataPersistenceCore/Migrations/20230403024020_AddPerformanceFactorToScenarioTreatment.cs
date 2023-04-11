@@ -13,21 +13,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 table: "SelectableTreatment",
                 type: "float",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 1.0);
 
             migrationBuilder.AddColumn<double>(
                 name: "PerformanceFactor",
                 table: "ScenarioSelectableTreatment",
                 type: "float",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 1.0);
 
             migrationBuilder.AddColumn<double>(
                 name: "PerformanceFactor",
                 table: "CommittedProject",
                 type: "float",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 1.0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

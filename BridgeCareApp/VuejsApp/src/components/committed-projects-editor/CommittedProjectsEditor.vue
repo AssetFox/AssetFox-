@@ -122,6 +122,10 @@
                                                 :value='formatAsCurrency(props.item[header.value])'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
+                                            <!-- <v-text-field v-if="header.value === 'factor'"
+                                                :value='props.item[header.value]'
+                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/> -->
+
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'brkey'"
                                                     label="Edit"
@@ -155,6 +159,12 @@
                                                     single-line
                                                     v-model.number="props.item[header.value]"
                                                     v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
+                                                    :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+
+                                                <v-text-field v-if="header.value === 'factor'"
+                                                    label="Edit"
+                                                    single-line
+                                                    v-model.number="props.item[header.value]"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                             </template>
@@ -445,6 +455,14 @@ export default class CommittedProjectsEditor extends Vue  {
             width: '10%',
         },
         {
+            text: 'Factor',
+            value: 'factor',
+            align: 'left',
+            sortable: true,
+            class: '',
+            width: '10%'
+        },
+        {
             text: 'Category',
             value: 'category',
             align: 'left',
@@ -681,8 +699,10 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.rowCache = clone(this.sectionCommittedProjects)
                     this.totalItems = data.totalItems;
                     const row = data.items.find(scp => scp.id == this.selectedCommittedProject)
-                    if(isNil(row))
-                        this.selectedCommittedProject = ''
+                    if(isNil(row)) {
+                        this.selectedCommittedProject = '';
+                    }
+                    console.log("cp: " + this.sectionCommittedProjects[0].performanceFactor);
                 }
             }); 
     }
@@ -1012,6 +1032,7 @@ export default class CommittedProjectsEditor extends Vue  {
             brkey: scp.locationKeys[this.brkey_],
             year: scp.year,
             cost: scp.cost,
+            factor: scp.performanceFactor,
             scenarioBudgetId: scp.scenarioBudgetId? scp.scenarioBudgetId : '',
             budget: budget? budget.name : '',
             treatment: scp.treatment,
@@ -1247,6 +1268,7 @@ export default class CommittedProjectsEditor extends Vue  {
                 this.sectionCommittedProjects = data.items;
                 this.rowCache = clone(this.sectionCommittedProjects)
                 this.totalItems = data.totalItems;
+                console.log("cp: " + this.sectionCommittedProjects[0].performanceFactor);
             }
         }); 
     }

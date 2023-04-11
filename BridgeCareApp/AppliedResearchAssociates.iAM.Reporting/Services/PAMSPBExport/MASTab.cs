@@ -19,31 +19,33 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             _reportHelper = new ReportHelper();
         }
 
-        public void Fill(ExcelWorksheet masWorksheet, SimulationOutput simulationOutput, Guid simulationId, Guid networkId, List<MaintainableAsset> networkMaintainableAssets)
+        public void Fill(ExcelWorksheet masWorksheet, SimulationOutput simulationOutput, Guid networkId, List<MaintainableAsset> networkMaintainableAssets)
         {
             var currentCell = AddHeadersCells(masWorksheet);
 
-            FillDynamicDataInWorkSheet(simulationOutput, masWorksheet, currentCell, simulationId, networkId, networkMaintainableAssets);
+            FillDynamicDataInWorkSheet(simulationOutput, masWorksheet, currentCell, networkId, networkMaintainableAssets);
 
             masWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
             masWorksheet.Cells.AutoFitColumns();
         }
 
-        private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, ExcelWorksheet masWorksheet, CurrentCell currentCell, Guid simulationId, Guid networkId, List<MaintainableAsset> networkMaintainableAssets)
+        private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, ExcelWorksheet masWorksheet, CurrentCell currentCell, Guid networkId, List<MaintainableAsset> networkMaintainableAssets)
         {
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
+                var assetId = initialAssetSummary.AssetId;                
+
                 // Generate data model                    
-                var masDataModel = GenerateMASDataModel(initialAssetSummary, simulationId, networkId, networkMaintainableAssets);
+                var masDataModel = GenerateMASDataModel(assetId, initialAssetSummary, networkId, networkMaintainableAssets);
 
                 // Fill in excel
                 currentCell = FillDataInWorksheet(masWorksheet, masDataModel, currentCell);
-               
+
             }
             ExcelHelper.ApplyBorder(masWorksheet.Cells[1, 1, currentCell.Row - 1, currentCell.Column]);
         }
 
-        private CurrentCell FillDataInWorksheet(ExcelWorksheet masWorksheet, MASDataModel masDataModel, CurrentCell currentCell)
+        private static CurrentCell FillDataInWorksheet(ExcelWorksheet masWorksheet, MASDataModel masDataModel, CurrentCell currentCell)
         {
             var row = currentCell.Row;
             int column = 1;
@@ -52,9 +54,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             masWorksheet.Cells[row, column++].Value = masDataModel.MaintainableAssetId;
             masWorksheet.Cells[row, column++].Value = masDataModel.District;
             masWorksheet.Cells[row, column++].Value = masDataModel.Cnty;
-            masWorksheet.Cells[row, column++].Value = masDataModel.Route;
-            masWorksheet.Cells[row, column++].Value = masDataModel.CRS;
-            // masWorksheet.Cells[row, column++].Value = masDataModel.AssetName; // TODO Remove once confirmed from Dmitry
+            masWorksheet.Cells[row, column++].Value = masDataModel.Route;            
+            masWorksheet.Cells[row, column++].Value = masDataModel.AssetName;
             masWorksheet.Cells[row, column++].Value = masDataModel.Direction;
             masWorksheet.Cells[row, column++].Value = masDataModel.FromSection;
             masWorksheet.Cells[row, column++].Value = masDataModel.ToSection;
@@ -75,18 +76,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
 
         private static void SetDecimalFormat(ExcelRange cell) => ExcelHelper.SetCustomFormat(cell, ExcelHelperCellFormat.DecimalPrecision3);
 
-        private MASDataModel GenerateMASDataModel(AssetSummaryDetail initialAssetSummary, Guid simulationId, Guid networkId, List<MaintainableAsset> networkMaintainableAssets)
+        private MASDataModel GenerateMASDataModel(Guid assetId, AssetSummaryDetail section, Guid networkId, List<MaintainableAsset> networkMaintainableAssets)
         {
-            var assetId = initialAssetSummary.AssetId;
             MASDataModel masDataModel = new MASDataModel
             {
                 NetworkId = networkId,
-                MaintainableAssetId = assetId,
+                MaintainableAssetId = assetId
             };
 
             var locationIdentifier = networkMaintainableAssets.FirstOrDefault(_ => _.Id == assetId)?.Location?.LocationIdentifier;
             masDataModel.AssetName = locationIdentifier;
-            masDataModel.CRS = locationIdentifier;
             var fromSection = string.Empty;
             var toSection = string.Empty;
             if (!string.IsNullOrEmpty(locationIdentifier))
@@ -99,8 +98,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             masDataModel.FromSection = fromSection;
             masDataModel.ToSection = toSection;            
 
-            var valuePerTextAttribute = initialAssetSummary.ValuePerTextAttribute;
-            var valuePerNumericAttribute = initialAssetSummary.ValuePerNumericAttribute;
+            var valuePerTextAttribute = section.ValuePerTextAttribute;
+            var valuePerNumericAttribute = section.ValuePerNumericAttribute;
 
             double pavementLength = CheckGetNumericValue(valuePerNumericAttribute, "SEGMENT_LENGTH");
             double pavementWidth = CheckGetNumericValue(valuePerNumericAttribute, "WIDTH");
@@ -134,9 +133,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             worksheet.Cells[headerRow, column++].Value = "AssetId";
             worksheet.Cells[headerRow, column++].Value = "District";
             worksheet.Cells[headerRow, column++].Value = "Cnty";
-            worksheet.Cells[headerRow, column++].Value = "Route";
-            worksheet.Cells[headerRow, column++].Value = "CRS";
-            // worksheet.Cells[headerRow, column++].Value = "Asset"; // TODO Remove once confirmed from Dmitry
+            worksheet.Cells[headerRow, column++].Value = "Route";            
+            worksheet.Cells[headerRow, column++].Value = "Asset";
             worksheet.Cells[headerRow, column++].Value = "Direction";
             worksheet.Cells[headerRow, column++].Value = "FromSection";
             worksheet.Cells[headerRow, column++].Value = "ToSection";

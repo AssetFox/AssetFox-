@@ -18,13 +18,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public string Route { get; set; }
 
-        public string AssetName { get; set; } // TODO Do we need this? Asset = CRS, keep 1 column only?
+        public string AssetName { get; set; }
 
         public string Direction { get; set; }
 
         public string FromSection { get; set; }
 
-        public string ToSection { get; set; }
+        public string ToSection { get; set; }        
 
         public double Area { get; set; }
 
@@ -36,10 +36,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public double Length { get; set; }
 
-        public string CRS { get; set; }
+        public string surfaceName { get; set; } // TODO keep?
 
-        public string surfaceName { get; set; }
-
-        public double RiskScore { get; set; }
+        public double RiskScore { get; set; } // TODO keep?
     }
 }

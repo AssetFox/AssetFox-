@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "County",
                 "Co No",
                 "Route",
-                "Segment",
+                "Section",
 
                 "Length",
                 "Width",

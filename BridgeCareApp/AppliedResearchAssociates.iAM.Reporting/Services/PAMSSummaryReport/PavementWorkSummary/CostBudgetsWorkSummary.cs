@@ -42,9 +42,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             FillCostOfCompositeWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
             FillCostOfConcreteWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
             FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
-            FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, workTypeTotals, yearlyBudgetAmount);
+            FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, workTypeTotals, yearlyBudgetAmount, out var totalSpendingRow);
             FillBudgetTotalSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount);
-            FillBudgetAnalysisSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount);
+            FillBudgetAnalysisSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount, totalSpendingRow);
 
             var chartRowsModel = new ChartRowsModel();
             return chartRowsModel;
@@ -384,7 +384,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         private void FillWorkTypeTotalsSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
-            Dictionary<string, Budget> yearlyBudgetAmount
+            Dictionary<string, Budget> yearlyBudgetAmount,
+            out int totalSpendingRow
             )
         {
             var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement };
@@ -445,6 +446,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 worksheet.Cells[row, column].Value = columnTotals[year];
                 column++;
             }
+            totalSpendingRow = row;
             worksheet.Cells[row, column].Value = totalSpentTotal;
 
             column = fromColumn + simulationYears.Count;
@@ -532,15 +534,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         private void FillBudgetAnalysisSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<string, Budget> yearlyBudgetAmount)
-        //int budgetTotalRow)
+            Dictionary<string, Budget> yearlyBudgetAmount,
+            int totalSpendingRow)
         {
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "", "Total Remaining Budget (all years)");
 
-            AddDetailsForBudgetAnalysis(worksheet, simulationYears, currentCell, yearlyBudgetAmount);//, budgetTotalRow);
+            AddDetailsForBudgetAnalysis(worksheet, simulationYears, currentCell, yearlyBudgetAmount, totalSpendingRow);
         }
 
-        private void AddDetailsForBudgetAnalysis(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell, Dictionary<string, Budget> yearlyBudgetAmount)
+        private void AddDetailsForBudgetAnalysis(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell, Dictionary<string, Budget> yearlyBudgetAmount, int totalSpendingRow)
         {
             int startRow, startColumn, row, column;
             _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
@@ -554,11 +556,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             {
                 row = startRow;
                 column = ++column;
+                var yearIndex = year - simulationYears[0];
+                var yearlyBudget = yearlyBudgetAmount.Sum(x => x.Value.YearlyAmounts[yearIndex].Value);
+                var totalSpending = worksheet.Cells[totalSpendingRow, column].Value;
+                if (totalSpending is decimal spending)
+                {
+                    worksheet.Cells[row, column].Value = yearlyBudget - spending;
 
-                var totalSpent = 0.0;
-                row++;
+                    row++;
 
-                worksheet.Cells[row, column].Formula = 1 + "-" + worksheet.Cells[row - 1, column];
+                    worksheet.Cells[row, column].Value = (yearlyBudget - spending) / yearlyBudget;
+                }
+                else
+                {
+                    worksheet.Cells[row, column].Value = yearlyBudget;
+                }
             }
             worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column] + ")";
 

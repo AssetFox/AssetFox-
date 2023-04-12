@@ -268,7 +268,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, column].Value = culvertCount;
 
                         var keyItem = treatment.Name + "_" + yearlyValues.Key;
-                        if (projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
+                        if (!projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem))
                         {
                             projectRowNumberModel.TreatmentsCount.Add(keyItem, row);
                         }
@@ -277,7 +277,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             var warningMessage = "Item key '" + keyItem + "' already exists in the list";
                             if (_warnings.Contains(warningMessage) == false) { _warnings.Add(warningMessage); }
                         }                        
-
                         row++;
 
                         //exclude No Treatment from total

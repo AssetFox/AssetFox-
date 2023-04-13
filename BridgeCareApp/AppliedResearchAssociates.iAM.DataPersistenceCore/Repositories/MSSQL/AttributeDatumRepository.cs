@@ -57,5 +57,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.AddAll(attributeDatumLocationEntities, _unitOfWork.UserEntity?.Id);
         }
+
+        public List<AttributeDatumDTO> GetAllInNetwork(IEnumerable<Guid> networkMaintainableAssetIds)
+        {
+            var atributeDatumDTOs = new List<AttributeDatumDTO>();
+            var attributeDTOs =_unitOfWork.AttributeRepo.GetAttributes();
+            var attributeDatums = _unitOfWork.Context.AttributeDatum.Select(_ => _);
+                        
+            foreach(var assetId in networkMaintainableAssetIds)
+            {                
+                var attributeDatum = attributeDatums.FirstOrDefault(_ => _.MaintainableAssetId == assetId);
+                var attributeDTO = attributeDTOs.FirstOrDefault(a => a.Id == attributeDatum.AttributeId);
+                var atributeDatumDTO = new AttributeDatumDTO
+                {
+                    MaintainableAssetId = assetId,
+                    Id = attributeDatum.Id,
+                    Attribute = attributeDTO.Name,
+                    NumericValue = attributeDatum.NumericValue,
+                    TextValue = attributeDatum.TextValue
+                };
+            }
+
+            return atributeDatumDTOs;
+        }
     }
 }

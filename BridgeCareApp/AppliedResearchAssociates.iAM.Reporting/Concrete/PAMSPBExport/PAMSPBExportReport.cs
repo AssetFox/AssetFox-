@@ -152,8 +152,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var simulation = network.Simulations.First();
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentsNoChildren(simulation);
             var networkMaintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(_networkId);
-            //_unitOfWork.AttributeDatumRepo.GetAttributeDatumData() New method? will return DTOs?
-            //_unitOfWork.AttributeRepo.GetSingleByName
+            var networkMaintainableAssetIds = networkMaintainableAssets.Select(x => x.Id);
+            var attributeDatumDTOs = _unitOfWork.AttributeDatumRepo.GetAllInNetwork(networkMaintainableAssetIds);
 
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("PAMSPBExportReportData.xlsx"));
@@ -163,7 +163,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var masWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.MASTab);
-            _masTab.Fill(masWorksheet, simulationOutput, simulation.Network.Id, networkMaintainableAssets);
+            _masTab.Fill(masWorksheet, simulationOutput, simulation.Network.Id, networkMaintainableAssets, attributeDatumDTOs);
 
             // Teatments Tab
             reportDetailDto.Status = $"Creating PAMS Treatments TAB";

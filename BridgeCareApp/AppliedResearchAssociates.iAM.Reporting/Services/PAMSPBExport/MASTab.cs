@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport;
@@ -19,24 +20,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             _reportHelper = new ReportHelper();
         }
 
-        public void Fill(ExcelWorksheet masWorksheet, SimulationOutput simulationOutput, Guid networkId, List<MaintainableAsset> networkMaintainableAssets)
+        public void Fill(ExcelWorksheet masWorksheet, SimulationOutput simulationOutput, Guid networkId, List<MaintainableAsset> networkMaintainableAssets, List<AttributeDatumDTO> attributeDatumDTOs)
         {
             var currentCell = AddHeadersCells(masWorksheet);
 
-            FillDynamicDataInWorkSheet(simulationOutput, masWorksheet, currentCell, networkId, networkMaintainableAssets);
+            FillDynamicDataInWorkSheet(simulationOutput, masWorksheet, currentCell, networkId, networkMaintainableAssets, attributeDatumDTOs);
 
             masWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
             masWorksheet.Cells.AutoFitColumns();
         }
 
-        private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, ExcelWorksheet masWorksheet, CurrentCell currentCell, Guid networkId, List<MaintainableAsset> networkMaintainableAssets)
+        private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, ExcelWorksheet masWorksheet, CurrentCell currentCell, Guid networkId, List<MaintainableAsset> networkMaintainableAssets, List<AttributeDatumDTO> attributeDatumDTOs)
         {
-            foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
+            foreach (var networkMaintainableAsset in networkMaintainableAssets)
             {
-                var assetId = initialAssetSummary.AssetId;                
+                var assetId = networkMaintainableAsset.Id;
 
-                // Generate data model                    
-                var masDataModel = GenerateMASDataModel(assetId, initialAssetSummary, networkId, networkMaintainableAssets);
+                // Generate data model
+                var attributeDatumDTOsForAsset = attributeDatumDTOs.Where(_ => _.MaintainableAssetId == assetId).ToList();
+                var masDataModel = GenerateMASDataModel(assetId, networkId, networkMaintainableAsset, attributeDatumDTOsForAsset);
 
                 // Fill in excel
                 currentCell = FillDataInWorksheet(masWorksheet, masDataModel, currentCell);
@@ -76,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
 
         private static void SetDecimalFormat(ExcelRange cell) => ExcelHelper.SetCustomFormat(cell, ExcelHelperCellFormat.DecimalPrecision3);
 
-        private MASDataModel GenerateMASDataModel(Guid assetId, AssetSummaryDetail section, Guid networkId, List<MaintainableAsset> networkMaintainableAssets)
+        private MASDataModel GenerateMASDataModel(Guid assetId, Guid networkId, MaintainableAsset networkMaintainableAsset, List<AttributeDatumDTO> attributeDatumDTOsForAsset)
         {
             MASDataModel masDataModel = new MASDataModel
             {
@@ -84,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
                 MaintainableAssetId = assetId
             };
 
-            var locationIdentifier = networkMaintainableAssets.FirstOrDefault(_ => _.Id == assetId)?.Location?.LocationIdentifier;
+            var locationIdentifier = networkMaintainableAsset.Location?.LocationIdentifier;
             masDataModel.AssetName = locationIdentifier;
             var fromSection = string.Empty;
             var toSection = string.Empty;
@@ -96,32 +98,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
                 toSection = fromTo?.Last();
             }
             masDataModel.FromSection = fromSection;
-            masDataModel.ToSection = toSection;            
-
-            var valuePerTextAttribute = section.ValuePerTextAttribute;
-            var valuePerNumericAttribute = section.ValuePerNumericAttribute;
-
-            double pavementLength = CheckGetNumericValue(valuePerNumericAttribute, "SEGMENT_LENGTH");
-            double pavementWidth = CheckGetNumericValue(valuePerNumericAttribute, "WIDTH");
+            masDataModel.ToSection = toSection;                        
+                        
+            double pavementLength = GetNumericValue(attributeDatumDTOsForAsset, "SEGMENT_LENGTH");
+            double pavementWidth = GetNumericValue(attributeDatumDTOsForAsset, "WIDTH");
             masDataModel.Length = pavementLength;
             masDataModel.Width = pavementWidth;
             masDataModel.Area = pavementLength * pavementWidth;
-            masDataModel.District = CheckGetTextValue(valuePerTextAttribute, "DISTRICT");
-            masDataModel.Cnty = CheckGetTextValue(valuePerTextAttribute, "CNTY");
-            masDataModel.Route = CheckGetTextValue(valuePerTextAttribute, "SR");
-            masDataModel.Direction = CheckGetTextValue(valuePerTextAttribute, "DIRECTION");            
-            masDataModel.Interstate = CheckGetTextValue(valuePerTextAttribute, "INTERSTATE");
-            masDataModel.Lanes = CheckGetNumericValue(valuePerNumericAttribute, "LANES");
-            masDataModel.surfaceName = CheckGetTextValue(valuePerTextAttribute, "SURFACE_NAME");
-            masDataModel.RiskScore = CheckGetNumericValue(valuePerNumericAttribute, "RISKSCORE");
+            masDataModel.District = GetTextValue(attributeDatumDTOsForAsset, "DISTRICT");
+            masDataModel.Cnty = GetTextValue(attributeDatumDTOsForAsset, "CNTY");
+            masDataModel.Route = GetTextValue(attributeDatumDTOsForAsset, "SR");
+            masDataModel.Direction = GetTextValue(attributeDatumDTOsForAsset, "DIRECTION");            
+            masDataModel.Interstate = GetTextValue(attributeDatumDTOsForAsset, "INTERSTATE");
+            masDataModel.Lanes = GetNumericValue(attributeDatumDTOsForAsset, "LANES");
+            masDataModel.surfaceName = GetTextValue(attributeDatumDTOsForAsset, "SURFACE_NAME");
+            masDataModel.RiskScore = GetNumericValue(attributeDatumDTOsForAsset, "RISKSCORE");
 
             return masDataModel;
         }
 
-        private double CheckGetNumericValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);
+        private double GetNumericValue(List<AttributeDatumDTO> attributeDatumDTOsForAsset, string attribute) => (double)attributeDatumDTOsForAsset.FirstOrDefault(_ => _.Attribute == attribute).NumericValue;
 
-        private string CheckGetTextValue(Dictionary<string, string> valuePerTextAttribute, string attribute) =>
-          _reportHelper.CheckAndGetValue<string>(valuePerTextAttribute, attribute);
+        private string GetTextValue(List<AttributeDatumDTO> attributeDatumDTOsForAsset, string attribute) => attributeDatumDTOsForAsset.FirstOrDefault(_ => _.Attribute == attribute).TextValue;
 
         private static CurrentCell AddHeadersCells(ExcelWorksheet worksheet)
         {

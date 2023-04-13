@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Common;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 
@@ -634,15 +635,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                     if (multiYearBudgetCost > 0)
                                     {
                                         //check budget and add abbreviation
-                                        budgetAmountAbbrName = multiYearBudgetCost.ToString();
-                                        if (multiYearBudgetCost > 1000000)
-                                        {
-                                            budgetAmountAbbrName = "$" + Math.Floor(multiYearBudgetCost / 1000000).ToString() + "M";
-                                        }
-                                        else if (cost > 1000)
-                                        {
-                                            budgetAmountAbbrName = "$" + Math.Floor(multiYearBudgetCost / 1000).ToString() + "K";
-                                        }
+                                        budgetAmountAbbrName = "$" + ReportCommon.FormatNumber(multiYearBudgetCost, 1);
 
                                         //set budget header name
                                         if (!string.IsNullOrEmpty(budgetAmountAbbrName) && !string.IsNullOrWhiteSpace(budgetAmountAbbrName))

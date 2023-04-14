@@ -119,13 +119,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
 
         private double GetNumericValue(List<AttributeDatumDTO> attributeDatumDTOsForAsset, List<AttributeDTO> attributeDTOs, string attribute)
         {
-            var attributeDatumDTOForAsset = attributeDatumDTOsForAsset.FirstOrDefault(_ => _.Attribute == attribute);            
+            var attributeDatumDTOForAsset = attributeDatumDTOsForAsset.FirstOrDefault(_ => _.Attribute == attribute);             
             return attributeDatumDTOForAsset != null ? (double)attributeDatumDTOForAsset.NumericValue : Convert.ToDouble(attributeDTOs.FirstOrDefault(_ => _.Name == attribute).DefaultValue);
         }
 
         private string GetTextValue(List<AttributeDatumDTO> attributeDatumDTOsForAsset, List<AttributeDTO> attributeDTOs, string attribute)
         {
-            var attributeDatumDTOForAsset = attributeDatumDTOsForAsset.FirstOrDefault(_ => _.Attribute == attribute);
+            var attributeDatumDTOForAsset = attributeDatumDTOsForAsset.FirstOrDefault(_ => _.Attribute == attribute);            
             return attributeDatumDTOForAsset != null ? attributeDatumDTOForAsset.TextValue : attributeDTOs.FirstOrDefault(_ => _.Name == attribute).DefaultValue;
         }
 

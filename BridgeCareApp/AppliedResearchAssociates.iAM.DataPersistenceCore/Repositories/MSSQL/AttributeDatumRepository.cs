@@ -60,25 +60,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<AttributeDatumDTO> GetAllInNetwork(IEnumerable<Guid> networkMaintainableAssetIds)
         {
-            var atributeDatumDTOs = new List<AttributeDatumDTO>();
-            var attributeDTOs =_unitOfWork.AttributeRepo.GetAttributes();
+            var attributeDatumDTOs = new List<AttributeDatumDTO>();            
             var attributeDatums = _unitOfWork.Context.AttributeDatum.Select(_ => _);
                         
             foreach(var assetId in networkMaintainableAssetIds)
-            {                
-                var attributeDatum = attributeDatums.FirstOrDefault(_ => _.MaintainableAssetId == assetId);
-                var attributeDTO = attributeDTOs.FirstOrDefault(a => a.Id == attributeDatum.AttributeId);
-                var atributeDatumDTO = new AttributeDatumDTO
+            {
+                var attributeDatumsForAsset = attributeDatums.Where(_ => _.MaintainableAssetId == assetId).ToList();
+                foreach (var attributeDatumForAsset in attributeDatumsForAsset)
                 {
-                    MaintainableAssetId = assetId,
-                    Id = attributeDatum.Id,
-                    Attribute = attributeDTO.Name,
-                    NumericValue = attributeDatum.NumericValue,
-                    TextValue = attributeDatum.TextValue
-                };
+                   // var attributeDTO = attributeDTOs.FirstOrDefault(a => a.Id == attributeDatumForAsset.AttributeId);
+                    var attributeDatumDTO = new AttributeDatumDTO
+                    {
+                        MaintainableAssetId = assetId,
+                        Id = attributeDatumForAsset.Id,
+                        Attribute = attributeDatumForAsset.Attribute.Name,
+                        NumericValue = attributeDatumForAsset.NumericValue,
+                        TextValue = attributeDatumForAsset.TextValue
+                    };
+                    attributeDatumDTOs.Add(attributeDatumDTO);
+                }
             }
 
-            return atributeDatumDTOs;
+            return attributeDatumDTOs;
         }
     }
 }

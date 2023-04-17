@@ -18,14 +18,12 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace BridgeCareCore.Services
 {
-    public record ReportGenerationWorkitem(Guid scenarioId, string userId, string scenarioName,  string reportName) : IWorkSpecification<WorkQueueMetadata>
+    public record ReportGenerationWorkitem(Guid scenarioId, string UserId, string scenarioName,  string reportName) : IWorkSpecification<WorkQueueMetadata>
 
     {
         public string WorkId => scenarioId.ToString();
 
         public DateTime StartTime { get; set; }
-
-        public string UserId => userId;
 
         public string WorkDescription => $"Generate {reportName} report";
 
@@ -135,7 +133,7 @@ namespace BridgeCareCore.Services
             }
 
             void SendRealTimeMessage(string message) =>
-                _hubService.SendRealTimeMessage(userId, HubConstant.BroadcastError, message);
+                _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, message);
         }
     }
 }

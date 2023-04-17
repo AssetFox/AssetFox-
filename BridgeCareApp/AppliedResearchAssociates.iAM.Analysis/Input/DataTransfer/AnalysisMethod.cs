@@ -18,11 +18,7 @@ public sealed class AnalysisMethod
 
     public List<DeficientConditionGoal> DeficientConditionGoals { get; set; }
 
-    public string Description { get; set; }
-
     public string FilterExpression { get; set; }
-
-    public Guid ID { get; set; }
 
     public OptimizationStrategy OptimizationStrategy { get; set; }
 

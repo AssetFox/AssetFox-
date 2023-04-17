@@ -4,9 +4,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 {
     public sealed class Network
     {
-        public List<Asset> Assets { get; set; }
-
         public AttributeSystem AttributeSystem { get; set; }
+
+        public List<MaintainableAsset> MaintainableAssets { get; set; }
 
         public string Name { get; set; }
     }

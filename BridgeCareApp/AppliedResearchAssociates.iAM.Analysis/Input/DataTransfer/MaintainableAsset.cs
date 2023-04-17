@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 {
-    public sealed class Asset
+    public sealed class MaintainableAsset
     {
+        public Guid ID { get; set; }
+
         public string Name { get; set; }
 
         public List<AttributeValueHistory<double>> NumberAttributeHistories { get; set; }

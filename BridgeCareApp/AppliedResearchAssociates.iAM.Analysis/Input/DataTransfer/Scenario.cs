@@ -62,14 +62,15 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
             TargetConditionGoals = source.TargetConditionGoals.Select(Convert).ToList(),
         };
 
-        private static Asset Convert(AnalysisMaintainableAsset source)
+        private static MaintainableAsset Convert(AnalysisMaintainableAsset source)
         {
             var numberAttributes = source.HistoricalAttributes.OfType<Analysis.NumberAttribute>();
             var textAttributes = source.HistoricalAttributes.OfType<Analysis.TextAttribute>();
 
             return new()
             {
-                Name = source.Id.ToString(),
+                ID = source.Id,
+                Name = source.AssetName,
                 NumberAttributeHistories = numberAttributes.Select(convert).OrderBy(_ => _.AttributeName).ToList(),
                 SpatialWeightExpression = source.SpatialWeighting.Expression,
                 TextAttributeHistories = textAttributes.Select(convert).OrderBy(_ => _.AttributeName).ToList(),
@@ -191,8 +192,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
         private static Network Convert(Analysis.Network source) => new()
         {
-            Assets = source.Assets.Select(Convert).ToList(),
             AttributeSystem = Convert(source.Explorer),
+            MaintainableAssets = source.Assets.Select(Convert).ToList(),
             Name = source.Name,
         };
 
@@ -296,7 +297,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
                 TreatmentByName = result.Treatments.ToDictionary(_ => _.Name);
 
-                foreach (var action in ActionsWhenTreatmentLookupIsAvailable)
+                while (ActionsWhenTreatmentLookupIsAvailable.TryDequeue(out var action))
                 {
                     action();
                 }
@@ -311,7 +312,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
                 return result;
             }
 
-            private readonly List<Action> ActionsWhenTreatmentLookupIsAvailable = new();
+            private readonly Queue<Action> ActionsWhenTreatmentLookupIsAvailable = new();
 
             private Dictionary<string, AnalysisMaintainableAsset> AssetByName;
             private Dictionary<string, Analysis.Attribute> AttributeByName;
@@ -373,7 +374,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
                 result.Criterion.Expression = source.CriterionExpression;
 
-                ActionsWhenTreatmentLookupIsAvailable.Add(
+                ActionsWhenTreatmentLookupIsAvailable.Enqueue(
                     () => result.Treatment = TreatmentByName[source.TreatmentName]);
             }
 
@@ -383,7 +384,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
                 target.Schedulings.Add(result);
 
-                ActionsWhenTreatmentLookupIsAvailable.Add(
+                ActionsWhenTreatmentLookupIsAvailable.Enqueue(
                     () => result.Treatment = TreatmentByName[source.TreatmentName]);
             }
 
@@ -566,9 +567,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
                 target.AllowFundingFromMultipleBudgets = source.AllowFundingFromMultipleBudgets;
                 target.Benefit.Attribute = NumericAttributeByName[source.BenefitAttributeName];
                 target.Benefit.Limit = source.BenefitLimit;
-                target.Description = source.Description;
                 target.Filter.Expression = source.FilterExpression;
-                target.Id = source.ID;
                 target.OptimizationStrategy = source.OptimizationStrategy;
                 target.ShouldApplyMultipleFeasibleCosts = source.ShouldApplyMultipleFeasibleCosts;
                 target.ShouldDeteriorateDuringCashFlow = source.ShouldDeteriorateDuringCashFlow;
@@ -661,7 +660,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
                 result.Name = source.Name;
 
-                foreach (var item in source.Assets)
+                foreach (var item in source.MaintainableAssets)
                 {
                     Convert(item, result);
                 }
@@ -671,10 +670,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
                 return result;
             }
 
-            private void Convert(Asset source, Analysis.Network target)
+            private void Convert(MaintainableAsset source, Analysis.Network target)
             {
                 var result = target.AddAsset();
 
+                result.Id = source.ID;
                 result.AssetName = source.Name;
                 result.SpatialWeighting.Expression = source.SpatialWeightExpression;
 

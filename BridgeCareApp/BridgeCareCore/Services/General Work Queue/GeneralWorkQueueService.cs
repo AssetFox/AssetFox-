@@ -8,11 +8,11 @@ using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
-    public class GeneralWorkQueService : IGeneralWorkQueueService
+    public class GeneralWorkQueueService : IGeneralWorkQueueService
     {
         private readonly SequentialWorkQueue<WorkQueueMetadata> _sequentialWorkQueue;
 
-        public GeneralWorkQueService(SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue)
+        public GeneralWorkQueueService(SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue)
         {
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
         }

@@ -11,20 +11,18 @@ using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
-    public record SimulationOutputConversionWorkitem(Guid scenarioId, string userId, string scenarioName) : IWorkSpecification<WorkQueueMetadata>
+    public record SimulationOutputConversionWorkitem(Guid ScenarioId, string UserId, string ScenarioName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => scenarioId.ToString();
+        public string WorkId => ScenarioId.ToString();
 
         public DateTime StartTime { get; set; }
-
-        public string UserId => userId;
 
         public string WorkDescription => "Convert scenario output to relational from json";
 
         public WorkQueueMetadata Metadata => new WorkQueueMetadata() { DomainType = DomainType.Simulation, WorkType = WorkType.SimulationOutputConversion};
 
-        public string WorkName => scenarioName;
+        public string WorkName => ScenarioName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -32,8 +30,8 @@ namespace BridgeCareCore.Services
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, userId, updateStatusOnHandle);
-            _unitOfWork.SimulationOutputRepo.ConvertSimulationOutpuFromJsonTorelational(scenarioId, cancellationToken, _queueLogger);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
+            _unitOfWork.SimulationOutputRepo.ConvertSimulationOutpuFromJsonTorelational(ScenarioId, cancellationToken, _queueLogger);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace BridgeCareCore.Services
                 throw new UnauthorizedAccessException(YouAreNotAuthorizedToModifyThisSimulation);
             }
 
-            return CreateAndRun(networkId, simulationId, userInfo,  scenarioName);
+            return CreateAndRun(networkId, simulationId, userInfo, scenarioName);
         }
 
         public IQueuedWorkHandle<WorkQueueMetadata> CreateAndRun(Guid networkId, Guid simulationId, UserInfo userInfo, string scenarioName)

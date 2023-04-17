@@ -15,21 +15,19 @@ using GreenDonut;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportLibraryInvestmentWorkitem(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter,bool overwriteBudgets, string userId, string networkName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportLibraryInvestmentWorkitem(Guid BudgetLibraryId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter,bool OverwriteBudgets, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => budgetLibraryId.ToString();
+        public string WorkId => BudgetLibraryId.ToString();
 
         public DateTime StartTime { get; set; }
-
-        public string UserId => userId;
 
         public string WorkDescription => "Import Library Investment";
 
         public WorkQueueMetadata Metadata =>
             new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryInvestment, DomainType = DomainType.Investment };
 
-        public string WorkName => networkName;
+        public string WorkName => NetworkName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -40,7 +38,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<IInvestmentBudgetsService>();
             var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
             _queueLogger.UpdateWorkQueueStatus(Guid.Parse(WorkId), "Starting Import");
-            var importResult = _committedProjectService.ImportLibraryInvestmentBudgetsFile(budgetLibraryId, excelPackage, currentUserCriteriaFilter, overwriteBudgets, cancellationToken, _queueLogger);
+            var importResult = _committedProjectService.ImportLibraryInvestmentBudgetsFile(BudgetLibraryId, ExcelPackage, CurrentUserCriteriaFilter, OverwriteBudgets, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null)
             {
                 _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWarning, importResult.WarningMessage);

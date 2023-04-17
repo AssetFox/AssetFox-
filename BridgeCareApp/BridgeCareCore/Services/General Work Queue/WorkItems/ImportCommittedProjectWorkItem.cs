@@ -11,21 +11,19 @@ using BridgeCareCore.Interfaces;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportCommittedProjectWorkItem(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment, string userId, string simulationName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportCommittedProjectWorkItem(Guid SimulationId, ExcelPackage ExcelPackage, string Filename, bool ApplyNoTreatment, string UserId, string SimulationName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => simulationId.ToString();
+        public string WorkId => SimulationId.ToString();
 
         public DateTime StartTime { get; set; }
-
-        public string UserId => userId;
 
         public string WorkDescription => "Import Committed Project";
 
         public WorkQueueMetadata Metadata =>
             new WorkQueueMetadata() { WorkType = WorkType.ImportCommittedProject, DomainType = DomainType.CommittedProject };
 
-        public string WorkName => simulationName;
+        public string WorkName => SimulationName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -35,7 +33,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<ICommittedProjectService>();
             var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
-            _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, filename, applyNoTreatment);
+            _committedProjectService.ImportCommittedProjectFiles(SimulationId, ExcelPackage, Filename, ApplyNoTreatment);
         }
     }
 }

@@ -13,21 +13,19 @@ using AppliedResearchAssociates.iAM.Hubs;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportScenarioPerformanceCurveWorkitem(Guid simulationId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter, string userId, string networkName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportScenarioPerformanceCurveWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => simulationId.ToString();
+        public string WorkId => SimulationId.ToString();
 
         public DateTime StartTime { get; set; }
-
-        public string UserId => userId;
 
         public string WorkDescription => "Import Scenario Performance Curve";
 
         public WorkQueueMetadata Metadata =>
             new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioPerformanceCurve, DomainType = DomainType.PerformanceCurve };
 
-        public string WorkName => networkName;
+        public string WorkName => NetworkName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -37,7 +35,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _performanceCurvesService = scope.ServiceProvider.GetRequiredService<IPerformanceCurvesService>();
             var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
-            var importResult = _performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, currentUserCriteriaFilter, cancellationToken, _queueLogger);
+            var importResult = _performanceCurvesService.ImportScenarioPerformanceCurvesFile(SimulationId, ExcelPackage, CurrentUserCriteriaFilter, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null)
             {
                 _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWarning, importResult.WarningMessage);

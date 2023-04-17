@@ -13,21 +13,19 @@ using AppliedResearchAssociates.iAM.Hubs;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportScenarioInvestmentWorkitem(Guid simulationId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter, bool overwriteBudgets, string userId, string networkName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportScenarioInvestmentWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter, bool OverwriteBudgets, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => simulationId.ToString();
+        public string WorkId => SimulationId.ToString();
 
         public DateTime StartTime { get; set; }
-
-        public string UserId => userId;
 
         public string WorkDescription => "Import Sceenario Investment";
 
         public WorkQueueMetadata Metadata =>
             new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioInvestment, DomainType = DomainType.Investment };
 
-        public string WorkName => networkName;
+        public string WorkName => NetworkName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -37,7 +35,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<IInvestmentBudgetsService>();
             var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
-            var importResult = _committedProjectService.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter, overwriteBudgets, cancellationToken, _queueLogger);
+            var importResult = _committedProjectService.ImportScenarioInvestmentBudgetsFile(SimulationId, ExcelPackage, CurrentUserCriteriaFilter, OverwriteBudgets, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null)
             {
                 _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWarning, importResult.WarningMessage);

@@ -12,21 +12,19 @@ using AppliedResearchAssociates.iAM.Hubs;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportScenarioTreatmentWorkitem(Guid simulationId, ExcelPackage excelPackage, string userId, string networkName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportScenarioTreatmentWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => simulationId.ToString();
+        public string WorkId => SimulationId.ToString();
 
         public DateTime StartTime { get; set; }
-
-        public string UserId => userId;
 
         public string WorkDescription => "Import Scenario Treatment";
 
         public WorkQueueMetadata Metadata =>
             new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioTreatment, DomainType = DomainType.Treatment };
 
-        public string WorkName => networkName;
+        public string WorkName => NetworkName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -36,7 +34,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _treatmentService = scope.ServiceProvider.GetRequiredService<ITreatmentService>();
             var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
-            var importResult = _treatmentService.ImportScenarioTreatmentsFile(simulationId, excelPackage, cancellationToken, _queueLogger);
+            var importResult = _treatmentService.ImportScenarioTreatmentsFile(SimulationId, ExcelPackage, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null && importResult.WarningMessage.Trim() != "")
             {
                 _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWarning, importResult.WarningMessage);

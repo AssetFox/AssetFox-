@@ -743,9 +743,9 @@ export default class TargetConditionGoalEditor extends Vue {
                 isNewLibrary: true,           
                  syncModel: {
                     libraryId: library.targetConditionGoals.length == 0 || !this.hasSelectedLibrary ? null : this.selectedTargetConditionGoalLibrary.id,
-                    rowsForDeletion: library.targetConditionGoals === [] ? [] : this.deletionIds,
-                    updateRows: library.targetConditionGoals === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: library.targetConditionGoals === [] ? [] : this.addedRows,
+                    rowsForDeletion: library.targetConditionGoals.length == 0 ? [] : this.deletionIds,
+                    updateRows: library.targetConditionGoals.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: library.targetConditionGoals.length == 0 ? [] : this.addedRows,
                     isModified: false
                  },
                  scenarioId: this.hasScenario ? this.selectedScenarioId : null
@@ -755,7 +755,7 @@ export default class TargetConditionGoalEditor extends Vue {
                     this.hasCreatedLibrary = true;
                     this.librarySelectItemValue = library.id;
                     
-                    if(library.targetConditionGoals === []){
+                    if(library.targetConditionGoals.length == 0){
                         this.clearChanges();
                     }
 

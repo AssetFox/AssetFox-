@@ -20,18 +20,16 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace BridgeCareCore.Services
 {
-    public record aggregationWorkitem(Guid NetworkId, string userId, string networkName, List<AttributeDTO> attributes) : IWorkSpecification<WorkQueueMetadata>
+    public record AggregationWorkitem(Guid NetworkId, string UserId, string NetworkName, List<AttributeDTO> Attributes) : IWorkSpecification<WorkQueueMetadata>
 
     {
         public string WorkId => NetworkId.ToString();
 
         public DateTime StartTime { get; set; }
 
-        public string UserId => userId;
-
         public string WorkDescription => "Network Aggregation";
 
-        public string WorkName => networkName;
+        public string WorkName => NetworkName;
 
         public WorkQueueMetadata Metadata => new WorkQueueMetadata() { DomainType = DomainType.Network, WorkType = WorkType.Aggregation };
 
@@ -51,7 +49,7 @@ namespace BridgeCareCore.Services
             
             try
             {
-                _aggregationService.AggregateNetworkData(channel.Writer, NetworkId, state, attributes, cancellationToken).Wait();
+                _aggregationService.AggregateNetworkData(channel.Writer, NetworkId, state, Attributes, cancellationToken).Wait();
             }
             catch (Exception e)
             {

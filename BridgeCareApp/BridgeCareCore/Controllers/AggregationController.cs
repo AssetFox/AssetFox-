@@ -83,7 +83,7 @@ namespace BridgeCareCore.Controllers
                     specificAttributes = AttributeService.ConvertAllAttributeList(attributes);
                     networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
                 });
-                aggregationWorkitem workItem = new aggregationWorkitem(networkId, UserInfo.Name, networkName, specificAttributes);
+                AggregationWorkitem workItem = new AggregationWorkitem(networkId, UserInfo.Name, networkName, specificAttributes);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
                 // Before sending a "queued" message that may overwrite early messages from the run,
                 // allow a brief moment for an empty queue to start running the submission.

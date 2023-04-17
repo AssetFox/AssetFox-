@@ -69,8 +69,7 @@
             public const string ImportCommittedProjects = "ImportCommittedProjects";
             public const string ModifyCommittedProjects = "ModifyCommittedProjects";
             public const string ViewCommittedProjects = "ViewCommittedProjects";
-            public const string ViewGraphQL = "ViewGraphQL";
-            public const string ModifyGraphQL = "ModifyGraphQL";
+            public const string UseGraphQL = "UseGraphQL";
         }
 
         public static class Role
@@ -220,10 +219,8 @@
             public const string CommittedProjectViewPermittedAccess = "CommittedProjectViewPermittedAccess";
             public const string AdminAccess = "AdminAccess";
             public const string SimulationAccess = "SimulationAccess";
-            public const string ViewAnyGraphQLAccess = "ViewAnyGraphQLAccess";
-            public const string ViewPermittedGraphQLAccess = "ViewPermittedGraphQLAccess";
-            public const string ModifyAnyGraphQLAccess = "ModifyAnyGraphQLAccess";
-            public const string ModifyPermittedGraphQLAccess = "ModifyPermittedGraphQLAccess";
+            public const string UseAnyGraphQLAccess = "UseAnyGraphQLAccess";
+            public const string UsePermittedGraphQLAccess = "UsePermittedGraphQLAccess";
         }
     }
 }

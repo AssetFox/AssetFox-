@@ -236,22 +236,8 @@ namespace BridgeCareCore.StartupExtension
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.CommittedProjectViewPermittedAccess, Claim.CommittedProjectViewAnyAccess));
 
                 // GraphQL
-                options.AddPolicy(Policy.ViewGraphQL,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.ViewAnyGraphQLAccess, Claim.ViewPermittedGraphQLAccess));
-                /*options.AddPolicy(Policy.ViewGraphQL,
-                    policy => policy.RequireAssertion(context =>
-                        context.User.HasClaim(c =>
-                            (c.Type == Claim.ViewAnyGraphQLAccess || c.Type == Claim.ViewPermittedGraphQLAccess))));
-                options.AddPolicy(Policy.ViewGraphQL,
-                    policy => {
-                        policy.RequireRole(new[] { "Administrator" });
-                    });*/
-                options.AddPolicy(Policy.ModifyGraphQL,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.ModifyAnyGraphQLAccess, Claim.ModifyPermittedGraphQLAccess));
-                /*options.AddPolicy(Policy.ModifyGraphQL,
-                    policy => policy.RequireAssertion(context =>
-                        context.User.HasClaim(c =>
-                            (c.Type == Claim.ModifyAnyGraphQLAccess || c.Type == Claim.ModifyPermittedGraphQLAccess))));*/
+                options.AddPolicy(Policy.UseGraphQL,
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.UseAnyGraphQLAccess, Claim.UsePermittedGraphQLAccess));
             });
 
             services.AddSingleton<IEsecSecurity, EsecSecurity>();

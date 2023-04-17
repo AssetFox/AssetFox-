@@ -84,8 +84,7 @@
             "CommittedProjectModifyAnyAccess",
             "CommittedProjectImportAnyAccess",
             "CommittedProjectViewAnyAccess",
-            "ViewAnyGraphQLAccess",
-            "ModifyAnyGraphQLAccess"
+            "UseAnyGraphQLAccess"
           ]
         },
         {
@@ -364,8 +363,7 @@
             "CommittedProjectModifyAnyAccess",
             "CommittedProjectImportAnyAccess",
             "CommittedProjectViewAnyAccess",
-            "ViewAnyGraphQLAccess",
-            "ModifyAnyGraphQLAccess"
+            "UseAnyGraphQLAccess"
           ]
         },
         {

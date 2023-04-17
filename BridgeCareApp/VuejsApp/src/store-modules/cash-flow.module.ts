@@ -85,7 +85,7 @@ const actions = {
             },
         );
     },
-    /*async upsertCashFlowRuleLibrary(
+    async upsertCashFlowRuleLibrary(
         { dispatch, commit }: any,
         library: LibraryUpsertPagingRequest<CashFlowRuleLibrary, CashFlowRule>,
     ) {
@@ -109,7 +109,7 @@ const actions = {
                 }
             },
         );
-    },*/
+    },
     async deleteCashFlowRuleLibrary(
         { dispatch, commit, state }: any,
         libraryId: string,

@@ -83,7 +83,9 @@
             "AnalysisMethodViewAnyAccess",
             "CommittedProjectModifyAnyAccess",
             "CommittedProjectImportAnyAccess",
-            "CommittedProjectViewAnyAccess"
+            "CommittedProjectViewAnyAccess",
+            "ViewAnyGraphQLAccess",
+            "ModifyAnyGraphQLAccess"
           ]
         },
         {
@@ -160,7 +162,7 @@
           "Claims": [
             "SimulationAccess",
             "AttributesViewAccess",
-            "NetworkViewAccess",            
+            "NetworkViewAccess",
             "AnnouncementViewAccess",
             "BudgetPriorityAddPermittedFromLibraryAccess",
             "BudgetPriorityUpdatePermittedFromLibraryAccess",
@@ -361,7 +363,9 @@
             "AnalysisMethodViewAnyAccess",
             "CommittedProjectModifyAnyAccess",
             "CommittedProjectImportAnyAccess",
-            "CommittedProjectViewAnyAccess"
+            "CommittedProjectViewAnyAccess",
+            "ViewAnyGraphQLAccess",
+            "ModifyAnyGraphQLAccess"
           ]
         },
         {

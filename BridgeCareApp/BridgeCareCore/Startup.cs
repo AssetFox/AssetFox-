@@ -22,6 +22,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using Claim = BridgeCareCore.Security.SecurityConstants.Claim;
+
 namespace BridgeCareCore
 {
     public class Startup
@@ -82,10 +84,21 @@ namespace BridgeCareCore
                 sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
                 );
 
+            /*services.AddAuthorization(options => {
+                options.AddPolicy("claim-policy-1", policy => {
+                    policy.RequireClaim(Claim.UseGraphQLAccess);
+                });
+                options.AddPolicy("CanUseGraphQLAccess", policy =>
+                    policy.RequireAssertion(context =>
+                        context.User.HasClaim(c => c.Type == Claim.UseGraphQLAccess)
+                    )
+                );
+            });*/
             services.AddGraphQLServer()
-                .AddQueryType<Query>()
+                .AddQueryType<QueryObjectType>()
                 .AddFiltering()
-                .AddSorting();
+                .AddSorting()
+                .AddAuthorization();
 
             SetupReporting(services);
             var reportLookup = new Dictionary<string, Type>();
@@ -133,6 +146,7 @@ namespace BridgeCareCore
 
             app.UseAuthorization();
 
+            //IMPORTANT - jake said i will likely have to code parameters into MapGraphQL() for authorization
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

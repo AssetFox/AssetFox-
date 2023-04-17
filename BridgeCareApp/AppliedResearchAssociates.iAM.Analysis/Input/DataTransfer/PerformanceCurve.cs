@@ -8,6 +8,8 @@
 
         public string EquationExpression { get; set; }
 
+        public string Name { get; set; }
+
         public bool Shift { get; set; }
     }
 }

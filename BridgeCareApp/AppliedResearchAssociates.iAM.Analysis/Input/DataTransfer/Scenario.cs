@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
@@ -209,6 +210,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
             AttributeName = source.Attribute.Name,
             CriterionExpression = source.Criterion.Expression,
             EquationExpression = source.Equation.Expression,
+            Name = source.Name,
             Shift = source.Shift,
         };
 
@@ -284,12 +286,19 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
 
                 foreach (var item in source.PerformanceCurves)
                 {
-                    //todo
+                    Convert(item, result);
                 }
 
                 foreach (var item in source.SelectableTreatments)
                 {
-                    //todo
+                    Convert(item, result);
+                }
+
+                TreatmentByName = result.Treatments.ToDictionary(_ => _.Name);
+
+                foreach (var action in ActionsWhenTreatmentLookupIsAvailable)
+                {
+                    action();
                 }
 
                 foreach (var item in source.CommittedProjects)
@@ -302,6 +311,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
                 return result;
             }
 
+            private readonly List<Action> ActionsWhenTreatmentLookupIsAvailable = new();
+
             private Dictionary<string, AnalysisMaintainableAsset> AssetByName;
             private Dictionary<string, Analysis.Attribute> AttributeByName;
             private Dictionary<string, Analysis.Budget> BudgetByName;
@@ -309,6 +320,101 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
             private Dictionary<string, INumericAttribute> NumericAttributeByName;
             private Dictionary<string, Analysis.TextAttribute> TextAttributeByName;
             private Dictionary<string, Analysis.SelectableTreatment> TreatmentByName;
+
+            private void Convert(SelectableTreatment source, Simulation target)
+            {
+                var result = target.AddTreatment();
+
+                result.Category = source.Category;
+                result.Name = source.Name;
+                result.ShadowForAnyTreatment = source.ShadowForAnyTreatment;
+                result.ShadowForSameTreatment = source.ShadowForSameTreatment;
+
+                foreach (var item in source.NamesOfUsableBudgets)
+                {
+                    result.Budgets.Add(BudgetByName[item]);
+                }
+
+                foreach (var item in source.Consequences)
+                {
+                    Convert(item, result);
+                }
+
+                foreach (var item in source.Costs)
+                {
+                    Convert(item, result);
+                }
+
+                foreach (var item in source.FeasibilityCriterionExpressions)
+                {
+                    result.AddFeasibilityCriterion().Expression = item;
+                }
+
+                foreach (var item in source.PerformanceCurveAdjustmentFactors)
+                {
+                    var attribute = AttributeByName[item.AttributeName];
+                    result.PerformanceCurveAdjustmentFactors[attribute] = item.Value;
+                }
+
+                foreach (var item in source.Schedulings)
+                {
+                    Convert(item, result);
+                }
+
+                foreach (var item in source.Supersessions)
+                {
+                    Convert(item, result);
+                }
+            }
+
+            private void Convert(TreatmentSupersession source, Analysis.SelectableTreatment target)
+            {
+                var result = target.AddSupersession();
+
+                result.Criterion.Expression = source.CriterionExpression;
+
+                ActionsWhenTreatmentLookupIsAvailable.Add(
+                    () => result.Treatment = TreatmentByName[source.TreatmentName]);
+            }
+
+            private void Convert(TreatmentScheduling source, Analysis.SelectableTreatment target)
+            {
+                var result = new Analysis.TreatmentScheduling { OffsetToFutureYear = source.OffsetToFutureYear };
+
+                target.Schedulings.Add(result);
+
+                ActionsWhenTreatmentLookupIsAvailable.Add(
+                    () => result.Treatment = TreatmentByName[source.TreatmentName]);
+            }
+
+            private static void Convert(CriterionEquationPair source, Analysis.SelectableTreatment target)
+            {
+                var result = target.AddCost();
+
+                result.Criterion.Expression = source.CriterionExpression;
+                result.Equation.Expression = source.EquationExpression;
+            }
+
+            private void Convert(ConditionalTreatmentConsequence source, Analysis.SelectableTreatment target)
+            {
+                var result = target.AddConsequence();
+
+                result.Attribute = AttributeByName[source.AttributeName];
+                result.Change.Expression = source.ChangeExpression;
+                result.Criterion.Expression = source.CriterionExpression;
+                result.Equation.Expression = source.EquationExpression;
+            }
+
+            private void Convert(PerformanceCurve source, Simulation target)
+            {
+                var result = target.AddPerformanceCurve();
+
+                result.Attribute = NumberAttributeByName[source.AttributeName];
+                result.Criterion.Expression = source.CriterionExpression;
+                result.Equation.Expression = source.EquationExpression;
+                result.Name = source.Name;
+                result.Shift = source.Shift;
+            }
 
             private static void Convert(BudgetPriority source, Analysis.AnalysisMethod target)
             {
@@ -460,7 +566,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
                 target.AllowFundingFromMultipleBudgets = source.AllowFundingFromMultipleBudgets;
                 target.Benefit.Attribute = NumericAttributeByName[source.BenefitAttributeName];
                 target.Benefit.Limit = source.BenefitLimit;
+                target.Description = source.Description;
                 target.Filter.Expression = source.FilterExpression;
+                target.Id = source.ID;
                 target.OptimizationStrategy = source.OptimizationStrategy;
                 target.ShouldApplyMultipleFeasibleCosts = source.ShouldApplyMultipleFeasibleCosts;
                 target.ShouldDeteriorateDuringCashFlow = source.ShouldDeteriorateDuringCashFlow;

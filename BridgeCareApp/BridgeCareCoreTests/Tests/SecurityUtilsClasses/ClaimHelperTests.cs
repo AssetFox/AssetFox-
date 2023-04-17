@@ -20,7 +20,7 @@ namespace BridgeCareCoreTests.Tests
             Mock<IHttpContextAccessor> contextAccessor,
             Mock<IUnitOfWork> unitOfWork = null)
         {
-            var simulationQueueService = new Mock<ISimulationQueueService>();
+            var simulationQueueService = new Mock<IWorkQueueService>();
             var resolveUnitOfWork = unitOfWork ?? UnitOfWorkMocks.New();
             var claimHelper = new ClaimHelper(
                 resolveUnitOfWork.Object,
@@ -29,7 +29,7 @@ namespace BridgeCareCoreTests.Tests
             return claimHelper;
         }
 
-        private ISimulationQueueService _simulationQueueService = new Mock<ISimulationQueueService>().Object;
+        private IWorkQueueService _simulationQueueService = new Mock<IWorkQueueService>().Object;
 
         [Fact]
         public void RequirePermittedCheck_AdminAccess_False()

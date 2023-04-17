@@ -5,6 +5,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
+using System.Threading;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Common.Logging;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -19,12 +22,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<Network> GetAllNetworks();
 
         NetworkEntity GetMainNetwork();
+        List<NetworkDTO> GetNetworksByIdsNoChildren(List<Guid> ids);
 
         Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true);
 
         void DeleteNetworkData();
 
-        void DeleteNetwork(Guid networkId);
+        void DeleteNetwork(Guid networkId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
 
         void UpsertNetworkRollupDetail(Guid networkId, string status);
 

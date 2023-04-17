@@ -9,6 +9,7 @@ namespace BridgeCareCore.Models
         public CalculatedAttributePagingSyncModel()
         {
             LibraryId = null;
+            IsModified = false;
             UpdatedCalculatedAttributes = new List<CalculatedAttributeDTO>();
             AddedPairs = new Dictionary<Guid, List<CalculatedAttributeEquationCriteriaPairDTO>>();
             UpdatedPairs = new Dictionary<Guid, List<CalculatedAttributeEquationCriteriaPairDTO>>();
@@ -17,6 +18,7 @@ namespace BridgeCareCore.Models
             DefaultEquations = new Dictionary<Guid, CalculatedAttributeEquationCriteriaPairDTO>();
         }
         public Guid? LibraryId { get; set; }
+        public bool IsModified { get; set; }
         public List<CalculatedAttributeDTO> UpdatedCalculatedAttributes { get; set; }
         public List<CalculatedAttributeDTO> AddedCalculatedAttributes { get; set; }
         public Dictionary<Guid, List<CalculatedAttributeEquationCriteriaPairDTO>> AddedPairs { get; set; }

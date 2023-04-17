@@ -12,6 +12,11 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using System.Threading;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Common.Logging;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -65,6 +70,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto(attributeDbSet, _unitOfWork.EncryptionKey))
                 .ToList();
             });
+        }
+
+        public List<NetworkDTO> GetNetworksByIdsNoChildren(List<Guid> ids)
+        {
+            return _unitOfWork.Context.Network.Where(_ => ids.Contains(_.Id)).Select(_ => _.ToDto(null, _unitOfWork.EncryptionKey)).ToList();
         }
 
         public NetworkEntity GetMainNetwork()
@@ -159,14 +169,46 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.SaveChanges();
         }
 
-        public void DeleteNetwork(Guid networkId)
+        public void DeleteNetwork(Guid networkId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             try
             {
+                queueLog ??= new DoNotWorkQueueLog();
                 _unitOfWork.BeginTransaction();
+                                   
+                if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                {
+                    _unitOfWork.Rollback();
+                    return;
+                }
+                queueLog.UpdateWorkQueueStatus(networkId, "Deleting Benefit Quantifier");
+
                 _unitOfWork.BenefitQuantifierRepo.DeleteBenefitQuantifier(networkId);
+                                   
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                {
+                    _unitOfWork.Rollback();
+                    return;
+                }
+                queueLog.UpdateWorkQueueStatus(networkId, "Deleting Simulations");
+
                 _unitOfWork.SimulationRepo.DeleteSimulationsByNetworkId(networkId);
+                                
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                {
+                    _unitOfWork.Rollback();
+                    return;
+                }
+                queueLog.UpdateWorkQueueStatus(networkId, "Deleting Maintainable Assets");
+
                 _unitOfWork.Context.DeleteEntity<NetworkEntity>(_ => _.Id == networkId);
+
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                {
+                    _unitOfWork.Rollback();
+                    return;
+                }
+
                 _unitOfWork.Commit();
             }
             catch (Exception e)

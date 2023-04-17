@@ -10,6 +10,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 
 import has = Reflect.has;
 import { getUserName } from '@/shared/utils/get-user-info';
+import { queuedWorkStatusUpdate } from './shared/models/iAM/queuedWorkStatusUpdate';
 
 export default {
     install(Vue: any) {
@@ -70,10 +71,16 @@ export default {
                 statusHub.$emit(
                     Hub.BroadcastEventType
                         .BroadcastSimulationAnalysisDetailEvent,
-                    { simulationAnalysisDetail },
+                    {simulationAnalysisDetail},
                 );
             },
         );
+
+        connection.on(Hub.BroadcastType.BroadcastWorkQueueStatusUpdate, (queueItem: queuedWorkStatusUpdate) => {
+            statusHub.$emit(Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent, {
+                queueItem,
+            });
+        });
 
         connection.on(Hub.BroadcastType.BroadcastError, error => {
             statusHub.$emit(Hub.BroadcastEventType.BroadcastErrorEvent, {
@@ -145,6 +152,7 @@ export const Hub = {
         BroadcastSimulationAnalysisDetail: 'BroadcastSimulationAnalysisDetail',
         BroadcastDataMigration: 'BroadcastDataMigration',
         BroadcastNetworkRollupDetail: 'BroadcastNetworkRollupDetail',
+        BroadcastWorkQueueStatusUpdate: 'BroadcastWorkQueueStatusUpdate'
     },
     BroadcastEventType: {
         BroadcastErrorEvent: 'BroadcastErrorEvent',
@@ -160,5 +168,6 @@ export const Hub = {
             'BroadcastSimulationAnalysisDetailEvent',
         BroadcastDataMigrationEvent: 'BroadcastDataMigrationEvent',
         BroadcastNetworkRollupDetailEvent: 'BroadcastNetworkRollupDetailEvent',
+        BroadcastWorkQueueStatusUpdateEvent: 'BroadcastWorkQueueStatusUpdateEvent'
     },
 };

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -8,56 +8,42 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
+using Microsoft.CodeAnalysis.Operations;
 using MoreLinq;
 
 namespace BridgeCareCore.Services
 {
-    public class SimulationQueueService : ISimulationQueueService
+    public class WorkQueueService : IWorkQueueService
     {
         private static IUnitOfWork _unitOfWork;
         private static ISimulationRepository _simulationRepository;
-        private ISimulationAnalysis _simulationAnalysis;
-        private ISimulationPagingService _simulationService;
-        private SequentialWorkQueue _sequentialWorkQueue;
+        private SequentialWorkQueue<WorkQueueMetadata> _sequentialWorkQueue;
 
-        public SimulationQueueService(IUnitOfWork unitOfWork, SequentialWorkQueue sequentialWorkQueue, ISimulationPagingService simulationService, ISimulationAnalysis simulationAnalysis, ISimulationRepository simulationRepository)
+        public WorkQueueService(IUnitOfWork unitOfWork, SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue, ISimulationRepository simulationRepository)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
 
-            _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
-            _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _simulationRepository = simulationRepository ?? throw new ArgumentNullException(nameof(simulationRepository));
         }
 
-        public QueuedSimulationDTO GetQueuedSimulation(Guid simulationId)
-        {
-            var simulation = _simulationRepository.GetSimulation(simulationId);
-            var simulationQueue = _sequentialWorkQueue.Snapshot;
-            return simulation.ToQueuedSimulationDTO(simulationQueue);
-        }
 
-
-        public PagingPageModel<QueuedSimulationDTO> GetSimulationQueuePage(PagingRequestModel<QueuedSimulationDTO> request)
+        public PagingPageModel<QueuedWorkDTO> GetWorkQueuePage(PagingRequestModel<QueuedWorkDTO> request)
         {
             var skip = 0;
             var take = 0;
-            var items = new List<QueuedSimulationDTO>();
-            var simulationQueue = _sequentialWorkQueue.Snapshot;
+            var items = new List<QueuedWorkDTO>();
+            var workQueue = _sequentialWorkQueue.Snapshot;
 
-            var simulationQueueIds = simulationQueue.Select(_ => new Guid(_.WorkId)).ToList();
-
-            var simulations = _simulationRepository.GetScenariosWithIds(simulationQueueIds)
-                .Select(_ => _.ToQueuedSimulationDTO(simulationQueue))
-                .ToList();
+            var queuedWork = GetQueuedWork(workQueue);
 
             if (request.sortColumn.Trim() == "")
             {
-                simulations = OrderByColumn(simulations, "queueposition", request.isDescending);
+                queuedWork = OrderByColumn(queuedWork, "queueposition", request.isDescending);
             }
             else
             {
-                simulations = OrderByColumn(simulations, request.sortColumn, request.isDescending);
+                queuedWork = OrderByColumn(queuedWork, request.sortColumn, request.isDescending);
             }
 
             int totalItemCount = 0;
@@ -65,81 +51,111 @@ namespace BridgeCareCore.Services
             {
                 take = request.RowsPerPage;
                 skip = request.RowsPerPage * (request.Page - 1);
-                items = simulations.Skip(skip).Take(take).ToList();
-                totalItemCount = simulations.Count();
+                items = queuedWork.Skip(skip).Take(take).ToList();
+                totalItemCount = queuedWork.Count();
             }
             else
             {
-                items = simulations.ToList();
+                items = queuedWork.ToList();
                 totalItemCount = items.Count;
             }
 
-            return new PagingPageModel<QueuedSimulationDTO>()
+            return new PagingPageModel<QueuedWorkDTO>()
             {
                 Items = items,
                 TotalItems = totalItemCount
             };
         }
 
-        private List<QueuedSimulationDTO> OrderByColumn(List<QueuedSimulationDTO> simulations, string sortColumn, bool isDescending)
+        private List<QueuedWorkDTO> GetQueuedWork(IReadOnlyList<IQueuedWorkHandle<WorkQueueMetadata>> workQueue)
+        {
+            var simulationAnalysisIds = workQueue.Where(_ => _.Metadata.WorkType == WorkType.SimulationAnalysis).Select(_ => Guid.Parse(_.WorkId)).ToList();
+
+            var queuedWork = new List<QueuedWorkDTO>();
+
+            queuedWork = _simulationRepository.GetScenariosWithIds(simulationAnalysisIds)
+                .Select(_ => _.ToQueuedWorkDTO(workQueue))
+                .ToList();
+
+            queuedWork = queuedWork.Concat(workQueue.Where(_ => _.Metadata.WorkType != WorkType.SimulationAnalysis).Select(_ => _.ToQueuedWorkDTO())).ToList();
+
+            return queuedWork;
+        }
+
+        private List<QueuedWorkDTO> OrderByColumn(List<QueuedWorkDTO> queuedWork, string sortColumn, bool isDescending)
         {
             sortColumn = sortColumn?.ToLower();
             switch (sortColumn)
             {
             case "name":
                 if (isDescending)
-                    return simulations.OrderByDescending(_ => _.Name.ToLower()).ToList();
+                    return queuedWork.OrderByDescending(_ => _.Name.ToLower()).ToList();
                 else
-                    return simulations.OrderBy(_ => _.Name.ToLower()).ToList();
+                    return queuedWork.OrderBy(_ => _.Name.ToLower()).ToList();
             case "queueinguser":
                 if (isDescending)
-                    return simulations.OrderByDescending(_ => _.QueueingUser).ToList();
+                    return queuedWork.OrderByDescending(_ => _.QueueingUser).ToList();
                 else
-                    return simulations.OrderBy(_ => _.QueueingUser).ToList();
+                    return queuedWork.OrderBy(_ => _.QueueingUser).ToList();
             case "queueentrytimestamp":
                 if (isDescending)
-                    return simulations.OrderByDescending(_ => _.QueueEntryTimestamp).ToList();
+                    return queuedWork.OrderByDescending(_ => _.QueueEntryTimestamp).ToList();
                 else
-                    return simulations.OrderBy(_ => _.QueueEntryTimestamp).ToList();
+                    return queuedWork.OrderBy(_ => _.QueueEntryTimestamp).ToList();
             case "workstartedtimestamp":
                 if (isDescending)
-                    return simulations.OrderByDescending(_ => _.WorkStartedTimestamp).ToList();
+                    return queuedWork.OrderByDescending(_ => _.WorkStartedTimestamp).ToList();
                 else
-                    return simulations.OrderBy(_ => _.WorkStartedTimestamp).ToList();
+                    return queuedWork.OrderBy(_ => _.WorkStartedTimestamp).ToList();
             case "queueposition":
                 if (isDescending)
-                    return simulations.OrderByDescending(_ => _.QueuePosition).ToList();
+                    return queuedWork.OrderByDescending(_ => _.QueuePosition).ToList();
                 else
-                    return simulations.OrderBy(_ => _.QueuePosition).ToList();
+                    return queuedWork.OrderBy(_ => _.QueuePosition).ToList();
             }
-            return simulations;
+            return queuedWork;
         }
     }
 
 
-    public static class QueuedSimulationTransform
+    public static class QueuedWorkTransform
     {
-        public static QueuedSimulationDTO ToQueuedSimulationDTO(this SimulationDTO simulationDTO, IReadOnlyList<IQueuedWorkHandle> simulationQueue)
+        public static QueuedWorkDTO ToQueuedWorkDTO(this SimulationDTO simulationDTO, IReadOnlyList<IQueuedWorkHandle<WorkQueueMetadata>> workQueue)
         {
-            var queuedWorkHandle = simulationQueue.SingleOrDefault(_ => new Guid(_.WorkId) == simulationDTO.Id);
+            var queuedWorkHandle = workQueue.SingleOrDefault(_ => new Guid(_.WorkId) == simulationDTO.Id);
 
             if (queuedWorkHandle == null)
             {
                 throw new RowNotInTableException("No queued simulation was found for the given id.");
             }
 
-            QueuedSimulationDTO queuedSimulationDTO = new QueuedSimulationDTO()
-            {
-                Id = simulationDTO.Id,
-                Name = simulationDTO.Name,
-                PreviousRunTime = simulationDTO.RunTime,
-                Status = simulationDTO.Status,
+            QueuedWorkDTO queuedSimulationDTO = ToQueuedWorkDTO(queuedWorkHandle);
 
+            queuedSimulationDTO.PreviousRunTime = simulationDTO.RunTime;
+            queuedSimulationDTO.Status = simulationDTO.Status;
+
+            return queuedSimulationDTO;
+        }
+
+        public static QueuedWorkDTO ToQueuedWorkDTO(this IQueuedWorkHandle<WorkQueueMetadata> queuedWorkHandle)
+        {
+            QueuedWorkDTO queuedSimulationDTO = new QueuedWorkDTO()
+            {
+                Id = Guid.Parse(queuedWorkHandle.WorkId),
+                Name = queuedWorkHandle.WorkName,             
                 QueueEntryTimestamp = queuedWorkHandle.QueueEntryTimestamp,
                 WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp,
                 QueueingUser = queuedWorkHandle.UserId,
                 QueuePosition = queuedWorkHandle.QueueIndex,
+                WorkDescription = queuedWorkHandle.WorkDescription
             };
+
+            if (queuedWorkHandle.WorkCancellationTokenSource != null)
+            {
+                queuedSimulationDTO.Status = queuedWorkHandle.WorkCancellationTokenSource.IsCancellationRequested ? "Cancelling" : queuedWorkHandle.MostRecentStatusMessage;
+            }
+            else
+                queuedSimulationDTO.Status = queuedWorkHandle.MostRecentStatusMessage;
 
             if (queuedWorkHandle.WorkHasStarted)
             {
@@ -154,5 +170,7 @@ namespace BridgeCareCore.Services
 
             return queuedSimulationDTO;
         }
+
+
     }
 }

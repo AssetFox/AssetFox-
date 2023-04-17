@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.WorkQueue;
+using BridgeCareCore.Models;
 using Microsoft.Extensions.Hosting;
 
 namespace BridgeCareCore.Services
@@ -9,9 +10,9 @@ namespace BridgeCareCore.Services
     public class SequentialWorkBackgroundService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly SequentialWorkQueue _sequentialWorkQueue;
+        private readonly SequentialWorkQueue<WorkQueueMetadata> _sequentialWorkQueue;
 
-        public SequentialWorkBackgroundService(IServiceProvider serviceProvider, SequentialWorkQueue sequentialWorkQueue)
+        public SequentialWorkBackgroundService(IServiceProvider serviceProvider, SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));

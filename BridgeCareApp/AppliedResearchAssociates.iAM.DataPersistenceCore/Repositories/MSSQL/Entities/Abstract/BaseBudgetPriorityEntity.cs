@@ -9,5 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public int PriorityLevel { get; set; }
 
         public int? Year { get; set; }
+
+        public Guid LibraryId { get; set; }
+
+        public bool IsModified { get; set; }
     }
 }

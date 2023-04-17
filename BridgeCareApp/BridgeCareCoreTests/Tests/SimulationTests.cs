@@ -23,7 +23,7 @@ namespace BridgeCareCoreTests.Tests
         private const string SimulationName = "Simulation";
         private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
-        private readonly Mock<ISimulationQueueService> _mockSimulationQueueService = new();
+        private readonly Mock<IWorkQueueService> _mockSimulationQueueService = new();
 
         private SimulationController CreateController(Mock<IUnitOfWork> unitOfWork)
         {

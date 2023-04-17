@@ -14,6 +14,7 @@
                             outlined
                         >
                         </v-select>
+                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -337,6 +338,7 @@ import {
     find,
     isNil,
     propEq,
+    isEmpty,
 } from 'ramda';
 import {
     ShareTargetConditionGoalLibraryDialogData,
@@ -521,6 +523,12 @@ export default class TargetConditionGoalEditor extends Vue {
     hasCreatedLibrary: boolean = false;
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
+    parentLibraryId: string = "";
+    parentLibraryName: string = "None";
+    scenarioLibraryIsModified: boolean = false;
+    loadedParentName: string = "";
+    loadedParentId: string = "";
+    newLibrarySelection: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -572,11 +580,14 @@ export default class TargetConditionGoalEditor extends Vue {
             this.onLibrarySelectItemValueChanged();
             this.unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged)
+        else if(this.librarySelectItemValueAllowedChanged) {
             this.CheckUnsavedDialog(this.onLibrarySelectItemValueChanged, () => {
                 this.librarySelectItemValueAllowedChanged = false;
                 this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
-            })
+            });
+        }
+        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
+        this.newLibrarySelection = true;
         this.librarySelectItemValueAllowedChanged = true;
     }
     onLibrarySelectItemValueChanged() {
@@ -629,6 +640,14 @@ export default class TargetConditionGoalEditor extends Vue {
 
     @Watch('currentPage')
     onCurrentPageChanged() {
+
+        // Get parent name from library id
+        this.librarySelectItems.forEach(library => {
+            if (library.value === this.parentLibraryId) {
+                this.parentLibraryName = library.text;
+            }
+        });
+
     }
     
     @Watch('isSharedLibrary')
@@ -650,6 +669,7 @@ export default class TargetConditionGoalEditor extends Vue {
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
                 addedRows: this.addedRows,
+                isModified: this.scenarioLibraryIsModified
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
@@ -726,6 +746,7 @@ export default class TargetConditionGoalEditor extends Vue {
                     rowsForDeletion: library.targetConditionGoals === [] ? [] : this.deletionIds,
                     updateRows: library.targetConditionGoals === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.targetConditionGoals === [] ? [] : this.addedRows,
+                    isModified: false
                  },
                  scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
@@ -748,7 +769,7 @@ export default class TargetConditionGoalEditor extends Vue {
 
     onAddTargetConditionGoal(newTargetConditionGoal: TargetConditionGoal) {
         this.showCreateTargetConditionGoalDialog = false;
-
+        newTargetConditionGoal.libraryId = this.selectedTargetConditionGoalLibrary.id;
         if (!isNil(newTargetConditionGoal)) {
             this.addedRows.push(newTargetConditionGoal);
             this.onPaginationChanged()
@@ -798,7 +819,8 @@ export default class TargetConditionGoalEditor extends Vue {
                 libraryId: this.selectedTargetConditionGoalLibrary.id === this.uuidNIL ? null : this.selectedTargetConditionGoalLibrary.id,
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                addedRows: this.addedRows
+                addedRows: this.addedRows,
+                isModified: false
                 },
                 scenarioId: null
         }
@@ -814,13 +836,18 @@ export default class TargetConditionGoalEditor extends Vue {
     }
 
     onUpsertScenarioTargetConditionGoals() {
+        if (this.selectedTargetConditionGoalLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
+        else { this.scenarioLibraryIsModified = false; }
+
         TargetConditionGoalService.upsertScenarioTargetConditionGoals({
             libraryId: this.selectedTargetConditionGoalLibrary.id === this.uuidNIL ? null : this.selectedTargetConditionGoalLibrary.id,
             rowsForDeletion: this.deletionIds,
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows           
+            addedRows: this.addedRows,
+            isModified: this.scenarioLibraryIsModified     
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.clearChanges();
                 this.librarySelectItemValue = null;
                 this.resetPage();
@@ -837,6 +864,8 @@ export default class TargetConditionGoalEditor extends Vue {
                 this.resetPage();
             }
         });
+        this.parentLibraryName = this.loadedParentName;
+        this.parentLibraryId = this.loadedParentId;
     }
 
     onRemoveTargetConditionGoals() {
@@ -973,6 +1002,17 @@ export default class TargetConditionGoalEditor extends Vue {
         }
     };
 
+    setParentLibraryName(libraryId: string) {
+        let foundLibrary: TargetConditionGoalLibrary = emptyTargetConditionGoalLibrary;
+        this.stateTargetConditionGoalLibraries.forEach(library => {
+            if (library.id === libraryId ) {
+                foundLibrary = clone(library);
+            }
+        });
+        this.parentLibraryId = foundLibrary.id;
+        this.parentLibraryName = foundLibrary.name;
+    }
+
     initializePages(){
         const request: PagingRequest<TargetConditionGoal>= {
             page: 1,
@@ -982,6 +1022,7 @@ export default class TargetConditionGoalEditor extends Vue {
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
+                isModified: false
             },           
             sortColumn: '',
             isDescending: false,
@@ -995,6 +1036,10 @@ export default class TargetConditionGoalEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
+                    this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
+                    this.loadedParentName = this.parentLibraryName; //store original
+                    this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
                 }
             });
     }

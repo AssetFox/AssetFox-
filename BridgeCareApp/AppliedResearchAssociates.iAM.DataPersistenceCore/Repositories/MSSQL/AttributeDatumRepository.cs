@@ -58,17 +58,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.AddAll(attributeDatumLocationEntities, _unitOfWork.UserEntity?.Id);
         }
 
-        public List<AttributeDatumDTO> GetAllInNetwork(IEnumerable<Guid> networkMaintainableAssetIds)
+        public List<AttributeDatumDTO> GetAllInNetwork(IEnumerable<Guid> networkMaintainableAssetIds, List<Guid> requiredAttributeIds)
         {
-            var attributeDatumDTOs = new List<AttributeDatumDTO>();            
-            var attributeDatums = _unitOfWork.Context.AttributeDatum.Select(_ => _);
+            var attributeDatumDTOs = new List<AttributeDatumDTO>();
+            var attributeDatumSet = _unitOfWork.Context.AttributeDatum;
+            var attributeDatums = requiredAttributeIds?.Count > 0 ? attributeDatumSet.Where(_ => requiredAttributeIds.Contains(_.AttributeId)) : attributeDatumSet.Select(_ => _);
                         
             foreach(var assetId in networkMaintainableAssetIds)
             {
                 var attributeDatumsForAsset = attributeDatums.Where(_ => _.MaintainableAssetId == assetId).ToList();
                 foreach (var attributeDatumForAsset in attributeDatumsForAsset)
-                {
-                   // var attributeDTO = attributeDTOs.FirstOrDefault(a => a.Id == attributeDatumForAsset.AttributeId);
+                {                   
                     var attributeDatumDTO = new AttributeDatumDTO
                     {
                         MaintainableAssetId = assetId,

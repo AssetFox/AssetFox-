@@ -149,12 +149,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
-            var simulation = network.Simulations.First();
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentsNoChildren(simulation);
-            var attributeDTOs = _unitOfWork.AttributeRepo.GetAttributes();
+            var simulation = network.Simulations.First();                
             var networkMaintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(_networkId);
             var networkMaintainableAssetIds = networkMaintainableAssets.Select(x => x.Id);
-            var attributeDatumDTOs = _unitOfWork.AttributeDatumRepo.GetAllInNetwork(networkMaintainableAssetIds);
+            var attributeDTOs = _unitOfWork.AttributeRepo.GetAttributes();
+            var requiredAttributeIds = GetRequiredAttributeIds(attributeDTOs);
+            var attributeDatumDTOs = _unitOfWork.AttributeDatumRepo.GetAllInNetwork(networkMaintainableAssetIds, requiredAttributeIds);
 
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("PAMSPBExportReportData.xlsx"));
@@ -189,6 +189,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
             return reportPath;
+        }
+
+        private static List<Guid> GetRequiredAttributeIds(List<AttributeDTO> attributeDTOs)
+        {
+            var requiredAttributes = new List<string>
+            {
+                "SEGMENT_LENGTH","WIDTH","DISTRICT","CNTY","SR","DIRECTION","INTERSTATE","LANES","SURFACE_NAME","RISKSCORE"
+            };
+            return attributeDTOs.Where(_ => requiredAttributes.Contains(_.Name)).Select(_ => _.Id).ToList();
         }
 
         private void UpsertSimulationReportDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);

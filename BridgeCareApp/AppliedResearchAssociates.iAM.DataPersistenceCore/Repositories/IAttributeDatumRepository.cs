@@ -9,6 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void AddAssignedData(List<MaintainableAsset> maintainableAssets, List<AttributeDTO> attributeDtos);
 
-        List<AttributeDatumDTO> GetAllInNetwork(IEnumerable<Guid> networkMaintainableAssetIds);
+        List<AttributeDatumDTO> GetAllInNetwork(IEnumerable<Guid> networkMaintainableAssetIds, List<Guid> requiredAttributeIds);
     }
 }

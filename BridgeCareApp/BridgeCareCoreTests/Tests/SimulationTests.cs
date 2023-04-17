@@ -50,21 +50,6 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        //[Fact] 
-        //public async Task DeleteSimulation_CallsDeleteOnRepo()
-        //{
-        //    var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-        //    var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
-        //    var simulationId = Guid.NewGuid();
-        //    var controller = CreateController(unitOfWork);
-        //    // Act
-        //    var result = await controller.DeleteSimulationOperation(simulationId);
-        //    // Assert
-        //    ActionResultAssertions.Ok(result);
-        //    var repoCall = repo.SingleInvocationWithName(nameof(ISimulationRepository.DeleteSimulation));
-        //    Assert.Equal(simulationId, repoCall.Arguments[0]);
-        //}
-
         [Fact]
         public async Task GetUserScenariosPage_CallsGetUserScenariosOnRepo()
         {

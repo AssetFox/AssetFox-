@@ -10,14 +10,12 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record DeleteSimulationWorkitem(Guid SimulationId, string userId, string scenarioName) : IWorkSpecification<WorkQueueMetadata>
+    public record DeleteSimulationWorkitem(Guid SimulationId, string UserId, string scenarioName) : IWorkSpecification<WorkQueueMetadata>
 
     {
         public string WorkId => SimulationId.ToString();
 
         public DateTime StartTime { get; set; }
-
-        public string UserId => userId;
 
         public string WorkDescription => "Delete Simulation";
 
@@ -32,7 +30,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-            var _queueLogger = new GeneralWorkQueLogger(_hubService, UserId, updateStatusOnHandle);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
             _unitOfWork.SimulationRepo.DeleteSimulation(SimulationId, cancellationToken, _queueLogger);
         }
     }

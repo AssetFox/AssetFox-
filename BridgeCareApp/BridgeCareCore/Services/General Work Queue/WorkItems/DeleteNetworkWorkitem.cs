@@ -24,20 +24,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
 {
-    public record DeleteNetworkWorkitem(Guid NetworkId, string userId, string networkName) : IWorkSpecification<WorkQueueMetadata>
+    public record DeleteNetworkWorkitem(Guid NetworkId, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
     {
         public string WorkId => NetworkId.ToString();
 
         public DateTime StartTime { get; set; }
-
-        public string UserId => userId;
 
         public string WorkDescription => "Delete Network";
 
         public WorkQueueMetadata Metadata =>
             new WorkQueueMetadata() { WorkType = WorkType.DeleteNetwork, DomainType = DomainType.Network};
 
-        public string WorkName => networkName;
+        public string WorkName => NetworkName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {

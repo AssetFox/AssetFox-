@@ -1328,7 +1328,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteSimulation(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            queueLog ??= new DoNotWorkQueueLog();
+            queueLog ??= new DoNothingWorkQueueLog();
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 return;

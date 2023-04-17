@@ -38,10 +38,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Common
                 // Set the return value to a rounded value with the suffix.
                 if (numberToFormat >= currentValue)
                 {
-                    if(currentValue <= 1000) {
+                    if (currentValue <= 1000)
+                    {
                         numberString = $"{Math.Round(numberToFormat / currentValue, 0, MidpointRounding.ToZero)}{suffixValue}";
                     }
-                    else {
+                    else
+                    {
                         numberString = $"{Math.Round(numberToFormat / currentValue, decimalPlaces, MidpointRounding.ToZero)}{suffixValue}";
                     }
                 }
@@ -51,5 +53,5 @@ namespace AppliedResearchAssociates.iAM.Reporting.Common
             //return formatted string
             return numberString;
         }
-    }    
+    }
 }

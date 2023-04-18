@@ -36,8 +36,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport
 
         public double Length { get; set; }
 
-        public string surfaceName { get; set; } // TODO keep?
+        public string surfaceName { get; set; } 
 
-        public double RiskScore { get; set; } // TODO keep?
+        public double RiskScore { get; set; } 
     }
 }

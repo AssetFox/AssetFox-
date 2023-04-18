@@ -1,16 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public class SimulationLogMessageBuilder
 {
-    public class SimulationLogMessageBuilder
-    {
-        public Guid SimulationId { get; set; }
-        public SimulationLogStatus Status { get; set; }
-        public SimulationLogSubject Subject { get; set; }
-        public string Message { get; set; }
-    }
+    public string Message { get; set; }
+
+    public Guid SimulationId { get; set; }
+
+    public SimulationLogStatus Status { get; set; }
+
+    public SimulationLogSubject Subject { get; set; }
+
+    public override string ToString() => $"[Simulation ID {SimulationId}, Status \"{Status}\", Subject \"{Subject}\"] {Message}";
 }

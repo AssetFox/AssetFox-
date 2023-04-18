@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
-{
-    public sealed class Budget
-    {
-        public string Name { get; set; }
+namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
-        public List<decimal> YearlyAmounts { get; set; }
-    }
+public sealed class Budget
+{
+    public string Name { get; set; }
+
+    public List<decimal> YearlyAmounts { get; set; }
 }

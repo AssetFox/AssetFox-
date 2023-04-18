@@ -1,9 +1,8 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
-{
-    public sealed class TreatmentSupersession
-    {
-        public string CriterionExpression { get; set; }
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
-        public string TreatmentName { get; set; }
-    }
+public sealed class TreatmentSupersession
+{
+    public string CriterionExpression { get; set; }
+
+    public string TreatmentName { get; set; }
 }

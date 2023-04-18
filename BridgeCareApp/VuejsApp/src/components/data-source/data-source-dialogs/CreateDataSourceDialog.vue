@@ -56,6 +56,7 @@ export default class CreateDataSourceDialog extends Vue {
 
     this.newDataSource = {
         id: getNewGuid(),
+        createdBy: getNewGuid(),
         name: this.datasourceName,
         type: DSSQL,
         connectionString: '',

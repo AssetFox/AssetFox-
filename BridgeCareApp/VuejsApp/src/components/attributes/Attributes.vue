@@ -350,9 +350,9 @@ export default class Attributes extends Vue {
                 }               
             }
             //when the parameter and ui sync an empty string is assigned to the parameter instead of null if the text box is empty
-            if(!isNil(this.selectedAttribute.maximum) && this.selectedAttribute.maximum === "")  
+            if(!isNil(this.selectedAttribute.maximum))  
                 this.selectedAttribute.maximum = null;
-            if(!isNil(this.selectedAttribute.minimum) && this.selectedAttribute.minimum === "")  
+            if(!isNil(this.selectedAttribute.minimum))  
                 this.selectedAttribute.minimum = null;
 
             if(this.selectedAttribute.dataSource.type === 'SQL'){

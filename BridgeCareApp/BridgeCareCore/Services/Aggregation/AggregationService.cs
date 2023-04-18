@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
@@ -26,7 +27,7 @@ namespace BridgeCareCore.Services.Aggregation
         }
 
         /// <summary>AggregationState can be just new AggregationState() object. Purpose is to allow calling class to access the state.</summary>
-        public async Task<bool> AggregateNetworkData(Writer writer, Guid networkId, AggregationState state, List<AttributeDTO> attributes)
+        public async Task<bool> AggregateNetworkData(Writer writer, Guid networkId, AggregationState state, List<AttributeDTO> attributes, CancellationToken? cancellationToken = null)
         {
             state.NetworkId = networkId;
             var isError = false;
@@ -42,7 +43,11 @@ namespace BridgeCareCore.Services.Aggregation
                     var maintainableAssets = new List<MaintainableAsset>();
                     var attributeData = new List<IAttributeDatum>();
                     var attributeIdsToBeUpdatedWithAssignedData = new List<Guid>();
-
+                    if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                    {
+                        _unitOfWork.Rollback();
+                        return;
+                    }
                     state.Status = "Preparing";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);  // DbUpdateException here -- "The wait operation timed out."
 
@@ -121,10 +126,14 @@ namespace BridgeCareCore.Services.Aggregation
                     var directory = Directory.GetCurrentDirectory();
                     var path = Path.Combine(directory, "Logs");
                     // Set up the log
-                    StringBuilder stringBuilder = new StringBuilder();
+                    var stringBuilder = new StringBuilder();
                     stringBuilder.AppendLine("Datum Name, Location Id, Datum Id");
                     StreamWriter streamWriter = new StreamWriter(path + "\\UnmatchedDatum.txt");
-                    
+                    if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                    {
+                        _unitOfWork.Rollback();
+                        return;
+                    } 
                     state.Status = "Aggregating";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                     // loop over maintainable assets and remove assigned data that has an attribute id
@@ -132,6 +141,11 @@ namespace BridgeCareCore.Services.Aggregation
                     // that was created
                     foreach (var maintainableAsset in maintainableAssets)
                     {
+                        if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                        {
+                            _unitOfWork.Rollback();
+                            return;
+                        }
                         if (i % 500 == 0)
                         {
                             state.Percentage = Math.Round(i / totalAssets * 100, 1);
@@ -183,6 +197,11 @@ namespace BridgeCareCore.Services.Aggregation
                             WriteError(writer, broadcastError);
                             throw;
                         }
+                    }
+                    if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                    {
+                        _unitOfWork.Rollback();
+                        return;
                     }
                     state.Status = "Saving";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);

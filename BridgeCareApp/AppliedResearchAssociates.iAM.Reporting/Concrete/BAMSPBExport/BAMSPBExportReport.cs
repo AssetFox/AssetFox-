@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -10,6 +11,8 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Services;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Treatments;
 using BridgeCareCore.Services;
 using OfficeOpenXml;
 
@@ -22,12 +25,18 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private Guid _networkId;        
         private readonly ReportHelper _reportHelper;
 
+        private readonly TreatmentForPBExportReport _treatmentForPBExportReportReport;
+
         public BAMSPBExportReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
             _reportHelper = new ReportHelper();
+
+            //create summary report objects
+            _treatmentForPBExportReportReport = new TreatmentForPBExportReport();
+            if (_treatmentForPBExportReportReport == null) { throw new ArgumentNullException(nameof(_treatmentForPBExportReportReport)); }
 
             // Check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -81,9 +90,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var simulationName = string.Empty;
             try
             {
-                var simulationObject = _unitOfWork.SimulationRepo.GetSimulation(_simulationId);
-                simulationName = simulationObject.Name;
-                _networkId = simulationObject.NetworkId;
+                var simulationDTO = _unitOfWork.SimulationRepo.GetSimulation(_simulationId);
+                simulationName = simulationDTO.Name;
+                _networkId = simulationDTO.NetworkId;
             }
             catch (Exception e)
             {
@@ -105,6 +114,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportPath = string.Empty;
             try
             {
+                //generate report
                 reportPath = GenerateBAMSPBExportReport(_networkId, _simulationId);
             }
             catch (Exception e)
@@ -141,23 +151,26 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
-            var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
 
-            // Sort data if needed..
-            
+            //Get Simulation object
+            var explorerObject = _unitOfWork.AttributeRepo.GetExplorer();
+            var networkObject = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorerObject);
+            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, networkObject);
+            var simulationObject = networkObject.Simulations?.First();
 
-            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
-            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
-            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
-            var simulation = network.Simulations.First();
-            // Get required data for report..
-
+            //include treatments in simulation
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationObject);
 
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("BAMSPBExportReportData.xlsx"));
 
-            // Tabs..
-
+            // BAMS Treatment TAB
+            reportDetailDto.Status = $"Creating BAMS Treatment TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PBExportReportTabNames.Treatments);
+            _treatmentForPBExportReportReport.Fill(treatmentsWorksheet, simulationObject, reportOutputData);
 
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";

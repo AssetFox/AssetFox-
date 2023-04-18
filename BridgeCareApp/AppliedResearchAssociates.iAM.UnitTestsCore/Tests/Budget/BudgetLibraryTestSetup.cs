@@ -39,16 +39,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
         }
 
-        public static BudgetLibraryDTO CreateBudgetLibraryDto(string name)
+        public static BudgetLibraryDTO CreateBudgetLibraryDto(string name, Guid? id = null)
         {
             //setup
             var budgetList = new List<BudgetDTO>();
             budgetList.Add(CreateBudgetDto("Budget 1"));
+            var resolveId = id ?? Guid.NewGuid();
 
             //create budget library
             return new BudgetLibraryDTO()
             {
-                Id = Guid.NewGuid(),
+                Id = resolveId,
                 Name = name,
                 Budgets = budgetList?.ToList(),
             };
@@ -65,10 +66,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
         }
 
-        public static BudgetLibraryDTO ModelForEntityInDb(IUnitOfWork unitOfWork, string budgetLibraryName = null)
+        public static BudgetLibraryDTO ModelForEntityInDb(IUnitOfWork unitOfWork, string budgetLibraryName = null, Guid? budgetLibraryId = null)
         {
             var resolveBudgetLibraryName = budgetLibraryName ?? RandomStrings.WithPrefix("BudgetLibrary");
-            var dto = CreateBudgetLibraryDto(resolveBudgetLibraryName);
+            var dto = CreateBudgetLibraryDto(resolveBudgetLibraryName, budgetLibraryId);
             unitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
             var dtoAfter = unitOfWork.BudgetRepo.GetBudgetLibrary(dto.Id);
             return dtoAfter;

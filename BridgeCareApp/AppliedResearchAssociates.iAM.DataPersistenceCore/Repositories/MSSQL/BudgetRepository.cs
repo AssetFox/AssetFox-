@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using Microsoft.Extensions.DependencyModel;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -165,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpdateBudgetLibraryAndUpsertOrDeleteBudgets(BudgetLibraryDTO dto)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 UpsertBudgetLibrary(dto);
                 UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
@@ -176,7 +177,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void CreateNewBudgetLibrary(BudgetLibraryDTO dto, Guid userId)
         {
             var users = LibraryUserDtolists.OwnerAccess(userId);
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 UpsertBudgetLibrary(dto);
                 UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
@@ -284,7 +285,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var user = users.FirstOrDefault();
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
-
+        public void AddLibraryIdToScenarioBudget(List<BudgetDTO> budgetDTOs, Guid? libraryId)
+        {
+            if (libraryId == null) return;
+            foreach (var dto in budgetDTOs)
+            {
+                dto.LibraryId = (Guid)libraryId;
+            }
+        }
+        public void AddModifiedToScenarioBudget(List<BudgetDTO> budgetDTOs, bool IsModified)
+        {
+            foreach (var dto in budgetDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
         public BudgetLibraryDTO GetBudgetLibrary(Guid libraryId)
         {
             if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
@@ -310,7 +325,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            return _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery().Where(_ => _.SimulationId == simulationId)
+            return _unitOfWork.Context.ScenarioBudget
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
@@ -347,8 +365,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.UpdateAll(
                 budgetEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
 
+            var budgetEntitiesToAdd = budgetEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList();
             _unitOfWork.Context.AddAll(
-                budgetEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
+                budgetEntitiesToAdd, _unitOfWork.UserEntity?.Id);
+            if (budgetEntitiesToAdd.Any())
+            {
+                var existingBudgetPriorities = _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId);
+                var percentagePairEntities = new List<BudgetPercentagePairEntity>();
+                foreach (var entity in budgetEntitiesToAdd)
+                {
+                    foreach (var priority in existingBudgetPriorities)
+                    {
+                        var newPercentagePair = new BudgetPercentagePairDTO
+                        {
+                            BudgetId = entity.Id,
+                            BudgetName = entity.Name,
+                            Id = Guid.NewGuid(),
+                            Percentage = 100,
+                        };
+                        var newPercentagePairEntity = BudgetPercentagePairMapper.ToEntity(newPercentagePair, priority.Id);
+                        percentagePairEntities.Add(newPercentagePairEntity);
+                    }
+                }
+                _unitOfWork.Context.AddRange(percentagePairEntities);
+            }
 
             var budgetAmountsPerBudgetId = budgets.ToDictionary(_ => _.Id, _ => _.BudgetAmounts);
 
@@ -387,10 +427,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteScenarioBudgetsWithInvestmentPlan(List<BudgetDTO> budgets, InvestmentPlanDTO investmentPlan, Guid simulationId)
         {
-            _unitOfWork.AsTransaction(u =>
+            _unitOfWork.AsTransaction(() =>
             {
                 UpsertOrDeleteScenarioBudgets(budgets, simulationId);
-                u.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
+                _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
             });
         }
 

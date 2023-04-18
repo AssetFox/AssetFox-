@@ -22,6 +22,8 @@ export interface Budget {
     id: string;
     budgetOrder: number;
     name: string;
+    libraryId: string;
+    isModified: boolean;
     budgetAmounts: BudgetAmount[];
     criterionLibrary: CriterionLibrary;
 }
@@ -99,6 +101,8 @@ export const emptyBudget: Budget = {
     id: getBlankGuid(),
     name: '',
     budgetAmounts: [],
+    libraryId: getBlankGuid(),
+    isModified: false,
     criterionLibrary: clone(emptyCriterionLibrary),
     budgetOrder: 0
 };

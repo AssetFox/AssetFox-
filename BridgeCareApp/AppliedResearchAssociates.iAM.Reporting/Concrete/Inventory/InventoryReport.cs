@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private const string DEFAULT_VALUE = "N";
         private const int DEFAULT_COLUMNS = 2;
 
-        private UnitOfDataPersistenceWork _unitofwork;
+        private IUnitOfWork _unitofwork;
         private Guid _networkId;
         private Dictionary<string, AttributeDescription> _fieldDescriptions;
 
@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private List<SegmentAttributeDatum> segmentData;
         private InventoryParameters segmentIds;
 
-        public InventoryReport(UnitOfDataPersistenceWork uow, string name, ReportIndexDTO results)
+        public InventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results)
         {
             _unitofwork = uow;
             ReportTypeName = name;

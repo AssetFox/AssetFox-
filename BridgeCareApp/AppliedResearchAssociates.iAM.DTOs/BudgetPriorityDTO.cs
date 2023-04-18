@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DTOs
@@ -8,6 +9,10 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public int PriorityLevel { get; set; }
 
         public int? Year { get; set; }
+
+        public Guid libraryId { get; set; }
+
+        public bool IsModified { get; set; }
 
         public List<BudgetPercentagePairDTO> BudgetPercentagePairs { get; set; }
 

@@ -18,11 +18,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertOrDeletePerformanceCurves(List<PerformanceCurveDTO> performanceCurves, Guid libraryId);
 
+        void UpsertOrDeletePerformanceCurveLibraryAndCurves(PerformanceCurveLibraryDTO library, bool isNewLibrary, Guid ownerIdForNewLibrary);
+
         void DeletePerformanceCurveLibrary(Guid libraryId);
 
         List<PerformanceCurveDTO> GetScenarioPerformanceCurves(Guid simulationId);
 
         void UpsertOrDeleteScenarioPerformanceCurves(List<PerformanceCurveDTO> scenarioPerformanceCurves, Guid simulationId);
+
+        void UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(List<PerformanceCurveDTO> scenarioPerformanceCurves, Guid simulationId);
 
         public List<PerformanceCurveDTO> GetPerformanceCurvesForLibrary(Guid performanceCurveLibraryId);
 
@@ -41,5 +45,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<LibraryUserDTO> GetLibraryUsers(Guid performanceCurveLibraryId);
 
         List<LibraryUserDTO> GetAccessForUser(Guid performanceCurveLibraryId, Guid userId);
+
+        void AddLibraryIdToScenarioPerformanceCurve(List<PerformanceCurveDTO> performanceCurveDTOs, Guid? libraryId);
+
+        void AddModifiedToScenarioPerformanceCurve(List<PerformanceCurveDTO> performanceCurveDTOs, bool IsModified);
     }
 }

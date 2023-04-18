@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
@@ -11,6 +12,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
     {
         private BridgesUnfundedTreatments _bridgesUnfundedTreatments;
         private ReportHelper _reportHelper;
+
+        public static HashSet<string> GetRequiredAttributes() => new()
+        {
+            $"{BAMSAuditReportConstants.DeckSeeded}",
+            $"{BAMSAuditReportConstants.SupSeeded}",
+            $"{BAMSAuditReportConstants.SubSeeded}",
+            $"{BAMSAuditReportConstants.CulvSeeded}",
+            $"{BAMSAuditReportConstants.DeckDurationN}",
+            $"{BAMSAuditReportConstants.SupDurationN}",
+            $"{BAMSAuditReportConstants.SubDurationN}",
+            $"{BAMSAuditReportConstants.CulvDurationN}"
+        };
 
         public DataTab()
         {            
@@ -36,78 +49,29 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
             bridgesWorksheet.Cells.AutoFitColumns();
             _bridgesUnfundedTreatments.PerformPostAutofitAdjustments(bridgesWorksheet);
-        }
+        }        
 
         private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
-        {
-            // facilityId, year, section
-            var treatmentsPerSection = new SortedDictionary<int, Tuple<SimulationYearDetail, AssetDetail>>();
-            // It will keep the Ids which has gone unfunded for all the years
-            var validFacilityIds = new List<int>();
-            var firstYear = true;
-            foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
+        {               
+            // TODO bridges in data tab need to match with bridges in Decision tab           
+            foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
-                var untreatedSections = _reportHelper.GetSectionsWithUnfundedTreatments(year);
-                var treatedSections = _reportHelper.GetSectionsWithFundedTreatments(year);
+                var brKey = CheckGetValue(initialAssetSummary.ValuePerNumericAttribute, "BRKEY_");
 
-                if (firstYear)
-                {
-                    validFacilityIds.AddRange(
-                        year.Assets.Select(_ => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))
-                            .Except(treatedSections.Select(_ => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_"))))
-                    );
-                    firstYear = false;
-                }
-                else
-                {
-                    validFacilityIds = validFacilityIds.Except(treatedSections.Select(_ => Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))).ToList();
-                }
+                // Generate data model
+                var bridgeDataModel = GenerateBridgeDataModel(brKey, initialAssetSummary);
 
-                foreach (var section in untreatedSections)
-                {
-                    var facilityId = Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_"));
-                    // skip if we already have a treatment for this section
-                    if (!treatmentsPerSection.ContainsKey(facilityId))
-                    {
-                        var treatmentOptions = section.TreatmentOptions.
-                            Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
-                        treatmentOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
-                        var chosenTreatment = treatmentOptions.FirstOrDefault();
-                        if (chosenTreatment != null)
-                        {
-                            var newTuple = new Tuple<SimulationYearDetail, AssetDetail>(year, section);
-                            if (validFacilityIds.Contains(facilityId))
-                            {
-                                treatmentsPerSection.Add(facilityId, newTuple);
-                            }
-                        }
-                    }
-                }
-            }
-
-            currentCell.Row += 1; // Data starts here
-            currentCell.Column = 1;
-
-            foreach (var facilityTuple in treatmentsPerSection.Values)
-            {
-                var section = facilityTuple.Item2;
-                var year = facilityTuple.Item1;                
-                _bridgesUnfundedTreatments.FillDataInWorkSheet(worksheet, currentCell, section, year.Year);
-                currentCell.Row++;
-                currentCell.Column = 1;
+                // Fill in excel
+                _bridgesUnfundedTreatments.FillDataInWorksheet(worksheet, currentCell, bridgeDataModel);
             }
         }
 
-        public HashSet<string> GetRequiredAttributes() => new HashSet<string>()
+        private static BridgeDataModel GenerateBridgeDataModel(double brKey, AssetSummaryDetail initialAssetSummary) => new()
         {
-            $"{AuditReportConstants.DeckSeeded}",
-            $"{AuditReportConstants.SupSeeded}",
-            $"{AuditReportConstants.SubSeeded}",
-            $"{AuditReportConstants.CulvSeeded}",
-            $"{AuditReportConstants.DeckDurationN}",
-            $"{AuditReportConstants.SupDurationN}",
-            $"{AuditReportConstants.SubDurationN}",
-            $"{AuditReportConstants.CulvDurationN}"
+            BRKey = brKey,
+            AssetSummaryDetail = initialAssetSummary
         };
+
+        private double CheckGetValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);        
     }
 }

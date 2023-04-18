@@ -14,6 +14,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -260,76 +261,79 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new InvalidOperationException("All target conditions must have an attribute.");
             }
-            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
-            var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
-
-            if (!scenarioTargetConditionGoal.All(_ => attributeNames.Contains(_.Attribute)))
+            _unitOfWork.AsTransaction(() =>
             {
-                var missingAttributes = scenarioTargetConditionGoal.Select(_ => _.Attribute)
-                    .Except(attributeNames).ToList();
-                if (missingAttributes.Count == 1)
+                var attributeEntities = _unitOfWork.Context.Attribute.ToList();
+                var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
+
+                if (!scenarioTargetConditionGoal.All(_ => attributeNames.Contains(_.Attribute)))
                 {
-                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
-                }
-
-                throw new RowNotInTableException(
-                    $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
-            }
-            var scenarioTargetConditionGoalEntities = scenarioTargetConditionGoal
-                .Select(_ =>
-                    _.ToScenarioEntity(simulationId, attributeEntities.Single(__ => __.Name == _.Attribute).Id))
-                .ToList();
-            var entityIds = scenarioTargetConditionGoal.Select(_ => _.Id).ToList();
-
-            var existingEntityIds = _unitOfWork.Context.ScenarioTargetConditionGoals
-                .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
-                .Select(_ => _.Id).ToList();
-
-            _unitOfWork.Context.DeleteAll<ScenarioTargetConditionGoalEntity>(_ =>
-                _.SimulationId == simulationId && !entityIds.Contains(_.Id));
-
-            _unitOfWork.Context.UpdateAll(scenarioTargetConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
-                .ToList(), _unitOfWork.UserEntity?.Id);
-
-            _unitOfWork.Context.AddAll(scenarioTargetConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
-                .ToList(), _unitOfWork.UserEntity?.Id);
-
-            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTargetConditionGoalEntity>(_ =>
-                _.ScenarioTargetConditionGoal.SimulationId == simulationId);
-
-            if (scenarioTargetConditionGoal.Any(_ =>
-                _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
-            {
-                var criterionLibraryEntities = new List<CriterionLibraryEntity>();
-                var criterionLibraryJoinEntities = new List<CriterionLibraryScenarioTargetConditionGoalEntity>();
-
-                scenarioTargetConditionGoal.Where(curve =>
-                        curve.CriterionLibrary?.Id != null && curve.CriterionLibrary?.Id != Guid.Empty &&
-                        !string.IsNullOrEmpty(curve.CriterionLibrary.MergedCriteriaExpression))
-                    .ForEach(goal =>
+                    var missingAttributes = scenarioTargetConditionGoal.Select(_ => _.Attribute)
+                        .Except(attributeNames).ToList();
+                    if (missingAttributes.Count == 1)
                     {
-                        var criterionLibraryEntity = new CriterionLibraryEntity
-                        {
-                            Id = Guid.NewGuid(),
-                            MergedCriteriaExpression = goal.CriterionLibrary.MergedCriteriaExpression,
-                            Name = $"{goal.Name} {goal.Attribute} Criterion",
-                            IsSingleUse = true
-                        };
-                        criterionLibraryEntities.Add(criterionLibraryEntity);
-                        criterionLibraryJoinEntities.Add(new CriterionLibraryScenarioTargetConditionGoalEntity
-                        {
-                            CriterionLibraryId = criterionLibraryEntity.Id,
-                            ScenarioTargetConditionGoalId = goal.Id
-                        });
-                    });
+                        throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
+                    }
 
-                _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
-                _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
-            }
-            // Update last modified date
-            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
-            _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+                    throw new RowNotInTableException(
+                        $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
+                }
+                var scenarioTargetConditionGoalEntities = scenarioTargetConditionGoal
+                    .Select(_ =>
+                        _.ToScenarioEntity(simulationId, attributeEntities.Single(__ => __.Name == _.Attribute).Id))
+                    .ToList();
+                var entityIds = scenarioTargetConditionGoal.Select(_ => _.Id).ToList();
+
+                var existingEntityIds = _unitOfWork.Context.ScenarioTargetConditionGoals
+                    .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
+                    .Select(_ => _.Id).ToList();
+
+                _unitOfWork.Context.DeleteAll<ScenarioTargetConditionGoalEntity>(_ =>
+                    _.SimulationId == simulationId && !entityIds.Contains(_.Id));
+
+                _unitOfWork.Context.UpdateAll(scenarioTargetConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
+                    .ToList(), _unitOfWork.UserEntity?.Id);
+
+                _unitOfWork.Context.AddAll(scenarioTargetConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                    .ToList(), _unitOfWork.UserEntity?.Id);
+
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTargetConditionGoalEntity>(_ =>
+                    _.ScenarioTargetConditionGoal.SimulationId == simulationId);
+
+                if (scenarioTargetConditionGoal.Any(_ =>
+                    _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                    !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+                {
+                    var criterionLibraryEntities = new List<CriterionLibraryEntity>();
+                    var criterionLibraryJoinEntities = new List<CriterionLibraryScenarioTargetConditionGoalEntity>();
+
+                    scenarioTargetConditionGoal.Where(curve =>
+                            curve.CriterionLibrary?.Id != null && curve.CriterionLibrary?.Id != Guid.Empty &&
+                            !string.IsNullOrEmpty(curve.CriterionLibrary.MergedCriteriaExpression))
+                        .ForEach(goal =>
+                        {
+                            var criterionLibraryEntity = new CriterionLibraryEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                MergedCriteriaExpression = goal.CriterionLibrary.MergedCriteriaExpression,
+                                Name = $"{goal.Name} {goal.Attribute} Criterion",
+                                IsSingleUse = true
+                            };
+                            criterionLibraryEntities.Add(criterionLibraryEntity);
+                            criterionLibraryJoinEntities.Add(new CriterionLibraryScenarioTargetConditionGoalEntity
+                            {
+                                CriterionLibraryId = criterionLibraryEntity.Id,
+                                ScenarioTargetConditionGoalId = goal.Id
+                            });
+                        });
+
+                    _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
+                }
+                // Update last modified date
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+            });
         }
 
         public List<TargetConditionGoalLibraryDTO> GetTargetConditionGoalLibrariesNoChildrenAccessibleToUser(Guid userId)
@@ -395,6 +399,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var users = GetAccessForUser(libraryId, userId);
             var user = users.FirstOrDefault();
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
+        }
+        public void AddLibraryIdToScenarioTargetConditionGoal(List<TargetConditionGoalDTO> targetConditionGoalDTOs, Guid? libraryId)
+        {
+            if (libraryId == null) return;
+            foreach (var dto in targetConditionGoalDTOs)
+            {
+                dto.LibraryId = (Guid)libraryId;
+            }
+        }
+
+        public void AddModifiedToScenarioTargetConditionGoal(List<TargetConditionGoalDTO> targetConditionGoalDTOs, bool IsModified)
+        {
+            foreach (var dto in targetConditionGoalDTOs)
+            {
+                dto.IsModified = IsModified;
+            }
+        }
+
+
+        public void UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser(TargetConditionGoalLibraryDTO dto, bool isNewLibrary, Guid ownerIdForNewLibrary)
+        {
+            _unitOfWork.AsTransaction(() =>
+            {
+                _unitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
+                _unitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
+                if (isNewLibrary)
+                {
+
+                    var users = LibraryUserDtolists.OwnerAccess(ownerIdForNewLibrary);
+                    _unitOfWork.TargetConditionGoalRepo.UpsertOrDeleteUsers(dto.Id, users);
+                }
+            });
         }
     }
 }

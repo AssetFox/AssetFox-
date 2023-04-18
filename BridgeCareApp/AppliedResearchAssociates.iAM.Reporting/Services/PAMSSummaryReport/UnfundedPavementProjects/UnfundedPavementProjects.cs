@@ -6,15 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.UnfundedPavementProjects
 {
-    internal class UnfundedPavementProjects : IUnfundedPavementProjects
+    internal class UnfundedPavementProjects
     {
-        private ISummaryReportHelper _summaryReportHelper;
+        private SummaryReportHelper _summaryReportHelper;
         private double PAVEMENT_AREA_THRESHOLD = 0;
 
         public UnfundedPavementProjects()
@@ -118,18 +117,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                 //get unfunded IDs
                 if (firstYear)
                 {
-                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "SR") + _.AssetName)));
+                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "SR") + _.AssetName)));
                     firstYear = false; if (simulationOutput.Years.Count > 1) { continue; }
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "SR") + _.AssetName))).ToList();
+                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "SR") + _.AssetName))).ToList();
                 }
 
                 foreach (var section in untreatedSections)
                 {
-                    var segmentNumber = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerNumericAttribute, "CNTY");
-                    segmentNumber += _summaryReportHelper.checkAndGetValue<string>(section.ValuePerNumericAttribute, "SR");
+                    var segmentNumber = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CNTY");
+                    segmentNumber += _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "SR");
                     segmentNumber += section.AssetName;
 
                     var facilityId = Convert.ToInt32(segmentNumber);

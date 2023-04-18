@@ -1,4 +1,4 @@
-import '@babel/polyfill';
+//import '@babel/polyfill';
 import '@fortawesome/fontawesome-free/css/all.css';
 import Vue from 'vue';
 import 'vuetify/dist/vuetify.min.css';

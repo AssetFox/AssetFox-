@@ -21,53 +21,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateInvestmentPlan(InvestmentPlan investmentPlan, Guid simulationId)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException("No simulation found for given scenario.");
-            }
-
-            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
-
-            var investmentPlanEntity = investmentPlan.ToEntity(simulationEntity.Id);
-
-            _unitOfWork.Context.AddEntity(investmentPlanEntity, _unitOfWork.UserEntity?.Id);
-
-            if (investmentPlan.Budgets.Any())
-            {
-                _unitOfWork.BudgetRepo.CreateScenarioBudgets(investmentPlan.Budgets.ToList(), simulationEntity.Id);
-            }
-
-            if (investmentPlan.BudgetConditions.Any())
-            {
-                var criterionJoins = new List<CriterionLibraryScenarioBudgetEntity>();
-                var criteria = investmentPlan.BudgetConditions
-                    .Where(_ => !_.Criterion.ExpressionIsBlank)
-                    .Select(condition =>
-                    {
-                        var budget = investmentPlan.Budgets.First(_ => _.Id == condition.Budget.Id);
-                        var criterion = condition.Criterion.ToEntity($"{budget.Name} Criterion");
-                        criterion.IsSingleUse = true;
-                        criterionJoins.Add(new CriterionLibraryScenarioBudgetEntity
-                        {
-                            CriterionLibraryId = criterion.Id, ScenarioBudgetId = budget.Id
-                        });
-                        return criterion;
-                    }).ToList();
-                _unitOfWork.Context.AddAll(criteria);
-                _unitOfWork.Context.AddAll(criterionJoins);
-            }
-
-            if (investmentPlan.CashFlowRules.Any())
-            {
-                CreateInvestmentPlanCashFlowRules(simulationEntity, investmentPlan.CashFlowRules.ToList());
-            }
-
-            // Update last modified date
-            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
-        }
-
         private void CreateInvestmentPlanCashFlowRules(SimulationEntity simulationEntity, List<CashFlowRule> cashFlowRules) =>
             _unitOfWork.CashFlowRuleRepo.CreateCashFlowRules(cashFlowRules, simulationEntity.Id);
 

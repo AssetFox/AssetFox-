@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -131,11 +132,14 @@ namespace BridgeCareCore.Controllers
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
 
                     var dtos = _investmentPagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);
+                    UnitOfWork.BudgetRepo.AddModifiedToScenarioBudget(dtos, pagingSync.IsModified);
+                    UnitOfWork.BudgetRepo.AddLibraryIdToScenarioBudget(dtos, pagingSync.LibraryId);
+
                     InvestmentDTO investment = new InvestmentDTO();
                     var investmentPlan = pagingSync.Investment;
                     investment.ScenarioBudgets = dtos;
                     investment.InvestmentPlan = investmentPlan;
-
+                    
                     UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgetsWithInvestmentPlan(dtos, investmentPlan, simulationId);
                 });
 

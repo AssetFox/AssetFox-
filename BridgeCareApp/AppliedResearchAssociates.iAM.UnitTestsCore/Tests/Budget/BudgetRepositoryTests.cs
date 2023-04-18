@@ -50,26 +50,50 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void CreateScenarioBudgets_SuccessfulWithValidInput()
+        public void UpsertOrDeleteScenarioBudgets_SimulationExistsAndBudgetInList_Inserts()
         {
-            //setup
-            var unitOfWork = TestHelper.UnitOfWork;
-            AttributeTestSetup.CreateAttributes(unitOfWork);
-            NetworkTestSetup.CreateNetwork(unitOfWork);
-            var simulationObject = SimulationTestSetup.DomainSimulation(unitOfWork);
-            var investmentPlan = simulationObject.InvestmentPlan;
-            var budgetObject = investmentPlan.AddBudget();
-            var budgetName = "Test Budget";
-            budgetObject.Name = budgetName;
-            var budgets = investmentPlan.Budgets.ToList();
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var budgetDto = BudgetDtos.New();
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
 
-            //testing and asserts
-            unitOfWork.BudgetRepo.CreateScenarioBudgets(budgets, simulationObject.Id);
+            // Act
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(budgetDtos, simulation.Id);
 
-            var budgetEntities = unitOfWork.Context.ScenarioBudget
-                                    .Where(w => w.SimulationId == simulationObject.Id)
-                                    .ToList();
-            var budgetEntityInTest = budgetEntities.Single(b => b.Name == budgetName);
+            var budgetsAfter = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            var budgetAfter = budgetsAfter.Single();
+            ObjectAssertions.EquivalentExcluding(budgetDto, budgetAfter, x => x.CriterionLibrary);
+        }
+
+        [Fact]
+        public void UpsertOrDeleteScenarioBudgets_SimulationInDbWithBudgetPriority_BudgetInList_InsertsWithPercentagePair()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulationId = simulation.Id;
+            var budgetPriority = BudgetPriorityDtos.New();
+            var budgetPriorities = new List<BudgetPriorityDTO> { budgetPriority };
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(budgetPriorities, simulationId);
+            var budgetDto = BudgetDtos.New();
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+
+            // Act
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(budgetDtos, simulation.Id);
+
+            var budgetsAfter = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            var budgetAfter = budgetsAfter.Single();
+            ObjectAssertions.EquivalentExcluding(budgetDto, budgetAfter, x => x.CriterionLibrary);
+            var budgetPrioritiesAfter = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId);
+            var budgetPriorityAfter = budgetPrioritiesAfter.Single();
+            var percentagePairs = budgetPriorityAfter.BudgetPercentagePairs;
+            var percentagePair = percentagePairs.Single();
+            Assert.Equal(100, percentagePair.Percentage);
+            Assert.Equal(budgetAfter.Name, percentagePair.BudgetName);
+            Assert.Equal(budgetAfter.Id, percentagePair.BudgetId);
         }
 
         [Fact]
@@ -212,11 +236,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
             var investmentPlan = simulation.InvestmentPlan;
             var budgetName = RandomStrings.WithPrefix("Budget");
-            var budget = investmentPlan.AddBudget();
-            budget.Name = budgetName;
-            var budgets = investmentPlan.Budgets.ToList();
-            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
+            var budgetId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.New(budgetId, budgetName);
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgetDtos, simulation.Id);
 
+            //testing and asserts
             var details = TestHelper.UnitOfWork.BudgetRepo.GetScenarioSimpleBudgetDetails(simulation.Id);
 
             var detail = details.Single();
@@ -229,18 +254,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
-            var investmentPlan = simulation.InvestmentPlan;
             var budgetName = RandomStrings.WithPrefix("Budget");
-            var budget = investmentPlan.AddBudget();
-            budget.Name = budgetName;
-            var budgets = investmentPlan.Budgets.ToList();
-            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
+            var budgetId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.New(budgetId, budgetName);
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgetDtos, simulation.Id);
 
             var actualBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
 
             var actualBudget = actualBudgets.Single();
             Assert.Equal(budgetName, actualBudget.Name);
-            Assert.Equal(budget.Id, actualBudget.Id);
+            Assert.Equal(budgetId, actualBudget.Id);
             Assert.Empty(actualBudget.BudgetAmounts);
             Assert.Equal(Guid.Empty, actualBudget.CriterionLibrary.Id);
         }
@@ -251,72 +275,45 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
-            var investmentPlan = simulation.InvestmentPlan;
-            TestHelper.UnitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(investmentPlan, simulation.Id);
-            investmentPlan.NumberOfYearsInAnalysisPeriod = 1;
+            var investmentPlanDto = TestHelper.UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulation.Id);
+            investmentPlanDto.NumberOfYearsInAnalysisPeriod = 1;
+            TestHelper.UnitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlanDto, simulation.Id);
+            TestHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             var budgetName = RandomStrings.WithPrefix("Budget");
-            var budget = investmentPlan.AddBudget();
-            budget.YearlyAmounts[0].Value = 1234;
-            budget.Name = budgetName;
-            var budgets = investmentPlan.Budgets.ToList();
-            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
+            var budgetId = Guid.NewGuid();
+            var amountId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.WithSingleAmount(budgetId, budgetName, 2023, 1234, amountId);
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgetDtos, simulation.Id);
 
             var actualBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
 
             var actualBudget = actualBudgets.Single();
             Assert.Equal(budgetName, actualBudget.Name);
-            Assert.Equal(budget.Id, actualBudget.Id);
+            Assert.Equal(budgetId, actualBudget.Id);
             var budgetAmount = actualBudget.BudgetAmounts.Single();
             Assert.Equal(1234m, budgetAmount.Value);
+            Assert.Equal(amountId, budgetAmount.Id);
             Assert.Equal(Guid.Empty, actualBudget.CriterionLibrary.Id);
         }
 
         [Fact]
         public void GetScenarioBudgets_SimulationInDbWithScenarioBudgetWithCriterionLibrary_GetsTheLibrary()
         {
-
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
-            var investmentPlan = simulation.InvestmentPlan;
             var budgetName = RandomStrings.WithPrefix("Budget");
-            var budget = investmentPlan.AddBudget();
-            budget.Name = budgetName;
-            var budgets = investmentPlan.Budgets.ToList();
-            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
-        }
+            var budgetId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.New(budgetId, budgetName);
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            budgetDto.CriterionLibrary = criterionLibrary;
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgetDtos, simulation.Id);
 
-        [Fact]
-        public void GetScenarioBudgets_CriterionLibraryInDb_GetsBudgetWithCriterionLibraryId()
-        {
-            var criterionLibraryName = RandomStrings.WithPrefix("Budget");
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, criterionLibraryName);
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
-            var investmentPlan = simulation.InvestmentPlan;
-            var budgetName = RandomStrings.WithPrefix("Budget");
-            var budget = investmentPlan.AddBudget();
-            budget.Name = budgetName;
-            var budgets = investmentPlan.Budgets.ToList();
-            var guids = new List<Guid> { budget.Id };
-            var dictionary = new Dictionary<string, List<Guid>>
-            {
-                {
-                    criterionLibrary.MergedCriteriaExpression,
-                    guids
-                }
-            };
-            TestHelper.UnitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(
-                dictionary, "BudgetEntity", simulation.Name
-                );
-            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
-
-            var scenarioBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
-
-            var scenarioBudget = scenarioBudgets.Single();
-            Assert.Equal(budgetName, scenarioBudget.Name);
-            var scenarioBudgetCriterionLibrary = scenarioBudget.CriterionLibrary;
+            var actualBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            var actualBudget = actualBudgets.Single();
+            Assert.Equal(criterionLibrary.MergedCriteriaExpression, actualBudget.CriterionLibrary.MergedCriteriaExpression);
         }
 
         [Fact]

@@ -4,7 +4,6 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using static System.Collections.Specialized.BitVector32;
@@ -20,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
     public static class PavementConditionExtensions
     {
-        private static ISummaryReportHelper _summaryReportHelper = new SummaryReportHelper();
+        private static SummaryReportHelper _summaryReportHelper = new SummaryReportHelper();
 
         // InRange excludes the high value to avoid overlap
         private static bool InRange(this double value, double low, double high) =>
@@ -59,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
     public class PavementWorkSummaryComputationHelper
     {
-        private ISummaryReportHelper _summaryReportHelper;
+        private SummaryReportHelper _summaryReportHelper;
 
         public PavementWorkSummaryComputationHelper()
         {
@@ -133,7 +132,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         {
             int segmentLength = 0;
 
-            costAndLengthPerTreatmentPerYear[yearsData.Year].Add(yearsData.TreatmentName, ((decimal)yearsData.Amount, (int)segmentLength));           
+            if (!costAndLengthPerTreatmentPerYear[yearsData.Year].ContainsKey(yearsData.TreatmentName))
+            {
+                costAndLengthPerTreatmentPerYear[yearsData.Year].Add(yearsData.TreatmentName, ((decimal)yearsData.Amount, (int)segmentLength));
+            }
         }
 
         private void PopulateTreatmentGroupCostAndLength(

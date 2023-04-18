@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Common;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 
@@ -17,13 +18,13 @@ using Org.BouncyCastle.Utilities.Encoders;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData
 {
-    public class BridgeDataForSummaryReport : IBridgeDataForSummaryReport
+    public class BridgeDataForSummaryReport
     {
         private List<int> _spacerColumnNumbers;
-        private IHighlightWorkDoneCells _highlightWorkDoneCells;
+        private HighlightWorkDoneCells _highlightWorkDoneCells;
         private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> _valueForMinC;
         private readonly List<int> _simulationYears = new List<int>();
-        private ISummaryReportHelper _summaryReportHelper;
+        private SummaryReportHelper _summaryReportHelper;
         private ReportHelper _reportHelper;
 
         // This is also used in Bridge Work Summary TAB
@@ -43,7 +44,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _reportHelper = new ReportHelper();
         }
 
-        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, Dictionary<string, string> treatmentCategoryLookup)
+        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData
+            , Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets)
         {
             //set default width
             worksheet.DefaultColWidth = 13;
@@ -66,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             AddBridgeDataModelsCells(worksheet, reportOutputData, currentCell);
-            AddDynamicDataCells(worksheet, reportOutputData, currentCell, treatmentCategoryLookup);
+            AddDynamicDataCells(worksheet, reportOutputData, currentCell, treatmentCategoryLookup, allowFundingFromMultipleBudgets);
 
             //autofit columns
             worksheet.Cells.AutoFitColumns();
@@ -128,7 +130,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SUBM_AGENCY"); //Submitting Agency
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Leaking Joints data here
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CUSTODIAN"); // Maintenance Responsibility
+
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_NAME"); // Planning Partner
+
+
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LOCATION"); // Location / Structure Name
+
 
                 //--------------------- Structure ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LENGTH"); //Structure Length
@@ -331,7 +340,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             return column;
         }
 
-        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, Dictionary<string, string> treatmentCategoryLookup)
+        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets)
         {
             var initialRow = 6;
             var row = initialRow; // Data starts here
@@ -585,22 +594,73 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause); //Project Pick
                     }
 
-                    var appliedTreatment = section.AppliedTreatment ?? "";
-                    var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == appliedTreatment);
-                    BudgetUsageDetail budgetUsage = null;
+                    var recommendedTreatment = section.AppliedTreatment; // Recommended Treatment
+                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis
 
-                    foreach (var item in treatmentConsideration)
+                    //get budget usages
+                    var appliedTreatment = section.AppliedTreatment ?? "";
+                    var treatmentConsiderations = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == appliedTreatment);
+                    var budgetUsages = new List<BudgetUsageDetail>();
+                    foreach (var item in treatmentConsiderations)
                     {
-                        budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCovered);
+                        var budgetUsagesFiltered = item.BudgetUsages.Where(_ => _.Status == BudgetUsageStatus.CostCovered).ToList();
+                        if (budgetUsagesFiltered?.Any() == true) { budgetUsages.AddRange(budgetUsagesFiltered); }
                     }
 
-                    var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName;
+                    //check budget usages
+                    var budgetName = "";
+                    if (budgetUsages?.Any() == true && cost > 0)
+                    {                        
+                        if (budgetUsages.Count == 1) //single budget
+                        {
+                            budgetName = budgetUsages.First().BudgetName ?? ""; // Budget
+                            if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName)) {
+                                budgetName = BAMSConstants.Unspecified_Budget;
+                            }
+                        }
+                        else //multiple budgets
+                        {
+                            //check for multi year budget
+                            if (allowFundingFromMultipleBudgets == true || budgetUsages.Count > 1)
+                            {
+                                foreach (var budgetUsage in budgetUsages)
+                                {
+                                    var multiYearBudgetCost = budgetUsage.CoveredCost;
+                                    var multiYearBudgetName = budgetUsage.BudgetName ?? ""; // Budget;
+                                    if (string.IsNullOrEmpty(multiYearBudgetName) || string.IsNullOrWhiteSpace(multiYearBudgetName)) {
+                                        multiYearBudgetName = BAMSConstants.Unspecified_Budget;
+                                    }
+
+                                    var budgetAmountAbbrName = "";
+                                    if (multiYearBudgetCost > 0)
+                                    {
+                                        //check budget and add abbreviation
+                                        budgetAmountAbbrName = "$" + ReportCommon.FormatNumber(multiYearBudgetCost, 1);
+
+                                        //set budget header name
+                                        if (!string.IsNullOrEmpty(budgetAmountAbbrName) && !string.IsNullOrWhiteSpace(budgetAmountAbbrName))
+                                        {
+                                            multiYearBudgetName += " (" + budgetAmountAbbrName + ")";
+                                        }
+
+                                        if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName))
+                                        {
+                                            budgetName = multiYearBudgetName;
+                                        }
+                                        else
+                                        {
+                                            budgetName += ", " + multiYearBudgetName;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
-                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Recommended Treatment
-                    var columnForAppliedTreatment = column;
+                    worksheet.Cells[row, ++column].Value = recommendedTreatment; // Recommended Treatment
+                    var columnForAppliedTreatment = column;                    
 
-                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis 
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column], ExcelFormatStrings.CurrencyWithoutCents);
 
@@ -672,7 +732,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "County\r\n(5A05)",
                 "Owner Code\r\n(5A21)",
                 "Submitting Agency\r\n(6A06)",
+                "Leaking Joints\r\n",
+                "Maintenance Responsibility\r\n(5A20)",
                 "Planning Partner\r\n(5A13)",
+
+
+                "Location / Structure Name\r\n(5A02)",
+
 
                 //--------------------- Structure ---------------------
                 "Structure Length\r\n(5B18)",
@@ -747,7 +813,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         break;
 
                     case "OWNERSHIP":
-                        totalNumOfColumns = 5; cellBGColor = ColorTranslator.FromHtml("#C6E0B4");
+                        totalNumOfColumns = 8; cellBGColor = ColorTranslator.FromHtml("#C6E0B4");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
                         break;
 

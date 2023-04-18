@@ -96,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.Calculate
             var scenarioCalcAttrs = new List<CalculatedAttributeDTO>() { calcAttr, newCalcAttr };
 
             //Act
-            TestHelper.UnitOfWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributes(scenarioCalcAttrs, scenarioId);
+            TestHelper.UnitOfWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributesNonAtomic(scenarioCalcAttrs, scenarioId);
 
             // Assert
             var actual = TestHelper.UnitOfWork.CalculatedAttributeRepo.GetScenarioCalculatedAttributes(scenarioId);
@@ -128,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.Calculate
             var scenarioCalcAttrs = new List<CalculatedAttributeDTO>() { calcAttr, calcAttr2 };
 
             //Act
-            TestHelper.UnitOfWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributes(scenarioCalcAttrs, scenarioId);
+            TestHelper.UnitOfWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributesNonAtomic(scenarioCalcAttrs, scenarioId);
 
             // Assert
             var actual = TestHelper.UnitOfWork.CalculatedAttributeRepo.GetScenarioCalculatedAttributes(scenarioId);

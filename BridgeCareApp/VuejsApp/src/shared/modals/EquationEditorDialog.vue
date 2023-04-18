@@ -853,7 +853,8 @@ export default class EquationEditorDialog extends Vue {
     const equationValidationParameters: EquationValidationParameters = {
       expression: this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression,
       isPiecewise: this.isPiecewise,
-      currentUserCriteriaFilter: {...emptyUserCriteriaFilter}
+      currentUserCriteriaFilter: {...emptyUserCriteriaFilter},
+      networkId: getBlankGuid()
     };
 
     ValidationService.getEquationValidationResult(equationValidationParameters)

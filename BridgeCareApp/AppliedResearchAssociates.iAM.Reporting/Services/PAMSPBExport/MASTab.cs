@@ -90,10 +90,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             masDataModel.AssetName = locationIdentifier;
             var fromSection = string.Empty;
             var toSection = string.Empty;
+            var direction = string.Empty;
             if (!string.IsNullOrEmpty(locationIdentifier))
             {
-                var parts = locationIdentifier.Split(new char[] { '_' }).Last();
-                var fromTo = parts.Split('-');
+                var parts = locationIdentifier.Split(new char[] { '_' });
+                direction = parts[2];
+                var fromTo = parts.Last()?.Split('-');
                 fromSection = fromTo?.First();
                 toSection = fromTo?.Last();
             }
@@ -108,7 +110,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             masDataModel.District = GetTextValue(attributeDatumDTOsForAsset, attributeDTOs, "DISTRICT");
             masDataModel.Cnty = GetTextValue(attributeDatumDTOsForAsset, attributeDTOs, "CNTY");
             masDataModel.Route = GetTextValue(attributeDatumDTOsForAsset, attributeDTOs, "SR");
-            masDataModel.Direction = GetTextValue(attributeDatumDTOsForAsset, attributeDTOs, "DIRECTION");            
+            masDataModel.Direction = direction; // GetTextValue(attributeDatumDTOsForAsset, attributeDTOs, "DIRECTION");            
             masDataModel.Interstate = GetTextValue(attributeDatumDTOsForAsset, attributeDTOs, "INTERSTATE");
             masDataModel.Lanes = GetNumericValue(attributeDatumDTOsForAsset, attributeDTOs, "LANES");
             masDataModel.surfaceName = GetTextValue(attributeDatumDTOsForAsset, attributeDTOs, "SURFACE_NAME");

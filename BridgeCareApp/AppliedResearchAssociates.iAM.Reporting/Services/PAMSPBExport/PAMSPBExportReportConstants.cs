@@ -9,5 +9,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
     public static class PAMSPBExportReportConstants
     {
         public const string TreatmentTab = "PAMS_TREATMENTS";
+
+        public const string MASTab = "PAMS_MAS";
     }
 }

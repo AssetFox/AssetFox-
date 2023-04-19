@@ -129,12 +129,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentDataModel.FromSection = fromSection;
             treatmentDataModel.ToSection = toSection;
 
-            treatmentDataModel.District = CheckGetTextValue(section.ValuePerTextAttribute, "DISTRICT");
-            treatmentDataModel.Cnty = CheckGetTextValue(section.ValuePerTextAttribute, "CNTY");
-            treatmentDataModel.Route = CheckGetTextValue(section.ValuePerTextAttribute, "SR");
-            treatmentDataModel.Direction = CheckGetTextValue(section.ValuePerTextAttribute, "DIRECTION");
+            var valuePerTextAttribute = section.ValuePerTextAttribute;
+            treatmentDataModel.District = CheckGetTextValue(valuePerTextAttribute, "DISTRICT");
+            treatmentDataModel.Cnty = CheckGetTextValue(valuePerTextAttribute, "CNTY");
+            treatmentDataModel.Route = CheckGetTextValue(valuePerTextAttribute, "SR");
+            treatmentDataModel.Direction = CheckGetTextValue(valuePerTextAttribute, "DIRECTION");
             treatmentDataModel.RiskScore = CheckGetNumericValue(section.ValuePerNumericAttribute, "RISKSCORE");
-            treatmentDataModel.Interstate = CheckGetTextValue(section.ValuePerTextAttribute, "INTERSTATE");
+            treatmentDataModel.Interstate = CheckGetTextValue(valuePerTextAttribute, "INTERSTATE");
 
             var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == appliedTreatment);
             treatmentDataModel.Cost = treatmentOption != null ? treatmentOption.Cost : 0;

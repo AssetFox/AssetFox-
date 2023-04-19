@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -36,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
         {
             return new List<string>
             {
-                "Asset Management Section",
+                "Segment ID",
                 "District",
                 "County",
                 "Co No",
@@ -47,7 +48,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "Width",
                 "Pavement Depth",
                 "Direction",
-
                 "Lanes",
                 "FamilyID",
                 "MPO/ RPO",
@@ -61,7 +61,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
                 "ADT",
                 "Truck %",
-                "ESALS",
                 "Risk Score",
             };
         }
@@ -226,16 +225,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             {
                 rowNo++; columnNo = 1;
 
-                worksheet.Cells[rowNo, columnNo++].Value = ""; //Asset Management Section Column Blank
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.AssetId; 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CNTY");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
 
-                var segmentNumber = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CNTY");
-                segmentNumber += _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
-                segmentNumber += sectionSummary.AssetName;
-                worksheet.Cells[rowNo, columnNo++].Value = segmentNumber;
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CRS");
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SEGMENT_LENGTH");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WIDTH");
@@ -253,7 +249,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LAST_STRUCTURAL_OVERLAY");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AADT");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "TRK_PERCENT");
-                worksheet.Cells[rowNo, columnNo++].Value = ""; //_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "ESLAS"); 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISKSCORE"); 
 
                 if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray); }

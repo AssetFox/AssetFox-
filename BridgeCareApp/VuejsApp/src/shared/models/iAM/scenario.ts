@@ -22,7 +22,7 @@ export interface Scenario {
     runTime?: string;
 }
 
-export interface QueuedSimulation {
+export interface QueuedWork {
     id: string;
     name: string;
     status?: string;
@@ -32,6 +32,7 @@ export interface QueuedSimulation {
     currentRunTime?: string;
     previousRunTime?: string;
     queuePosition: number;
+    workDescription: string;
 }
 
 export interface ScenarioActions {
@@ -62,11 +63,12 @@ export const emptyScenario: Scenario = {
     lastModifiedDate: new Date(),
 };
 
-export const emptySimulation: QueuedSimulation = {
+export const emptySimulation: QueuedWork = {
     id: getBlankGuid(),
     name: '',
     queueEntryTimestamp: new Date(),
     workStartedTimestamp: new Date(),
     queueingUser: '',
-    queuePosition: 0
+    queuePosition: 0,
+    workDescription: ''
 };

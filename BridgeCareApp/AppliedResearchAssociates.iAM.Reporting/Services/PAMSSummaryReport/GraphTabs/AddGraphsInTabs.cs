@@ -115,8 +115,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
             graphDataDependentTabs[PAMSConstants.OPI_Statewide_Tab].DataColumn = startColumn - columnsPerSet;
             graphDataDependentTabs[PAMSConstants.OPI_Statewide_Tab].type = ChartType.CountChart;
 
-            ////hide the graph data worksheet;
-            //graphDataWorksheet.Hidden = eWorkSheetHidden.Hidden;
+            //hide the graph data worksheet;
+            graphDataWorksheet.Hidden = eWorkSheetHidden.Hidden;
 
             //Add graphs
             foreach (var graphDataTab in graphDataDependentTabs.Values)

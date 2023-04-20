@@ -4,9 +4,8 @@ using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface ISimulationQueueService
+    public interface IWorkQueueService
     {
-        QueuedSimulationDTO GetQueuedSimulation(Guid simulationId);
-        PagingPageModel<QueuedSimulationDTO> GetSimulationQueuePage(PagingRequestModel<QueuedSimulationDTO> request);
+        PagingPageModel<QueuedWorkDTO> GetWorkQueuePage(PagingRequestModel<QueuedWorkDTO> request);
     }
 }

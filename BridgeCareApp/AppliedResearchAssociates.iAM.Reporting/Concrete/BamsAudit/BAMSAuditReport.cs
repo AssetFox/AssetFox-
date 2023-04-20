@@ -142,10 +142,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 SimulationId = simulationId,
                 Status = $"Generating..."
             };
-            UpdateSimulationAnalysisDetail(reportDetailDto);
+            UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);           
 
-            var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
+            var logger = new CallbackLogger(str => UpsertSimulationReportDetailWithStatus(reportDetailDto, str));
             var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);            
 
             // Sort data
@@ -175,7 +175,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             
             // Bridge Data TAB
             reportDetailDto.Status = $"Creating Data TAB";
-            UpdateSimulationAnalysisDetail(reportDetailDto);
+            UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var bridgesWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.BridgesTab);
             var dataTabRequiredAttributes = DataTab.GetRequiredAttributes();
@@ -184,7 +184,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Fill Decisions TAB
             reportDetailDto.Status = $"Creating Decision TAB";
-            UpdateSimulationAnalysisDetail(reportDetailDto);
+            UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var decisionsWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.DecisionsTab);
             var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
@@ -193,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";
-            UpdateSimulationAnalysisDetail(reportDetailDto);
+            UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
@@ -203,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             File.WriteAllBytes(reportPath, bin);                       
             
             reportDetailDto.Status = $"Report generation completed";
-            UpdateSimulationAnalysisDetail(reportDetailDto);
+            UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                         
             return reportPath;
@@ -218,7 +218,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 if (!initialSectionValues.ContainsKey(item))
                 {
                     reportDetailDto.Status = $"{item} was not found in initial section";
-                    UpdateSimulationAnalysisDetail(reportDetailDto);
+                    UpsertSimulationReportDetail(reportDetailDto);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                     Errors.Add(reportDetailDto.Status);
                     throw new KeyNotFoundException($"{item} was not found in initial section");
@@ -227,7 +227,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 if (!sectionValueAttribute.ContainsKey(item))
                 {
                     reportDetailDto.Status = $"{item} was not found in sections";
-                    UpdateSimulationAnalysisDetail(reportDetailDto);
+                    UpsertSimulationReportDetail(reportDetailDto);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                     Errors.Add(reportDetailDto.Status);
                     throw new KeyNotFoundException($"{item} was not found in sections");
@@ -235,12 +235,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
         }
 
-        private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
+        private void UpsertSimulationReportDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 
-        private void UpdateSimulationAnalysisDetailWithStatus(SimulationReportDetailDTO dto, string message)
+        private void UpsertSimulationReportDetailWithStatus(SimulationReportDetailDTO dto, string message)
         {
             dto.Status = message;
-            UpdateSimulationAnalysisDetail(dto);
+            UpsertSimulationReportDetail(dto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, dto.Status, dto.SimulationId);
         }
 

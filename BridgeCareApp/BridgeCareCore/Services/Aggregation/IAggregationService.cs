@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -13,6 +14,6 @@ namespace BridgeCareCore.Services.Aggregation
             ChannelWriter<AggregationStatusMemo> writer,
             Guid networkId,
             AggregationState state,
-            List<AttributeDTO> attributes);
+            List<AttributeDTO> attributes, CancellationToken? cancellationToken = null);
     }
 }

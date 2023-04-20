@@ -8,13 +8,13 @@
     "author": {
         "name": "Applied Research Associates"
     },
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build-prod": "vue-cli-service build",
-    "stage": "vue-cli-service build --mode staging",
-    "lint": "wotan 'src/**'",
-    "lint-fix": "wotan --fix 'src/**'"
-  },
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "build-prod": "vue-cli-service build",
+        "stage": "vue-cli-service build --mode staging",
+        "lint": "wotan 'src/**'",
+        "lint-fix": "wotan --fix 'src/**'"
+    },
     "dependencies": {
         "@microsoft/signalr": "^3.1.22",
         "@progress/kendo-charts-vue-wrapper": "2020.1.115",
@@ -34,6 +34,7 @@
         "popper.js": "^1.15.0",
         "ramda": "0.26.1",
         "socket.io-client": "^2.2.0",
+        "util": "^0.12.5",
         "uuid": "^8.3.2",
         "vue": "2.6.12",
         "vue-class-component": "6.0.0",
@@ -58,14 +59,14 @@
         "@fortawesome/fontawesome-free": "^5.15.4",
         "@types/node": "^17.0.8",
         "@types/uuid": "^8.3.4",
-        "@vue/cli-plugin-babel": "3.4.1",
-        "@vue/cli-plugin-typescript": "^4.5.15",
-        "@vue/cli-service": "^3.10.0",
+        "@vue/cli-plugin-babel": "^5.0.0",
+        "@vue/cli-plugin-typescript": "^5.0.0",
+        "@vue/cli-service": "^5.0.0",
         "axios-mock-adapter": "1.16.0",
         "core-js": "2.6.5",
-        "node-sass": "^4.14.1",
+        "sass": "1.57.1",
         "prettier": "1.19.1",
-        "sass-loader": "^7.1.0",
+        "sass-loader": "^13.0.0",
         "stylus": "^0.54.5",
         "stylus-loader": "^3.0.2",
         "tslint": "5.13.1",

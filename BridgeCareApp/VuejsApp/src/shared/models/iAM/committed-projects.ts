@@ -18,7 +18,6 @@ export interface SectionCommittedProjectTableData {
     id: string;
     brkey: string;
     year: number;
-    factor: number;
     treatment: string;
     treatmentId: string;
     scenarioBudgetId: string;
@@ -30,12 +29,13 @@ export interface SectionCommittedProjectTableData {
 }
 export interface SectionCommittedProject extends BaseCommittedProject{
     name: string;
-    performanceFactor: number;
+    factor: number;
 }
 
 export interface CommittedProjectConsequence {
     id: string;
     committedProjectId: string;
+    factor: number;
     attribute: string;
     changeValue: string;
 }
@@ -61,6 +61,7 @@ export const emptyCommittedProjectConsequence ={
     id: getBlankGuid(),
     committedProjectId: getBlankGuid(),
     attribute: '',
+    factor: 1.0,
     changeValue: ''
 }
 

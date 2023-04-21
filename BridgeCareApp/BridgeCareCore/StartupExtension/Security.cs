@@ -234,6 +234,10 @@ namespace BridgeCareCore.StartupExtension
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.CommittedProjectModifyPermittedAccess, Claim.CommittedProjectModifyAnyAccess));
                 options.AddPolicy(Policy.ViewCommittedProjects,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.CommittedProjectViewPermittedAccess, Claim.CommittedProjectViewAnyAccess));
+
+                // GraphQL
+                options.AddPolicy(Policy.UseGraphQL,
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.UseAnyGraphQLAccess, Claim.UsePermittedGraphQLAccess));
             });
 
             services.AddSingleton<IEsecSecurity, EsecSecurity>();

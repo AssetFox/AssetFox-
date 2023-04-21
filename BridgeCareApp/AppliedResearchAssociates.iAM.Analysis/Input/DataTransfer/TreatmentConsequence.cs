@@ -1,9 +1,8 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
-{
-    public class TreatmentConsequence
-    {
-        public string AttributeID { get; set; }
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
-        public string ChangeExpression { get; set; }
-    }
+public class TreatmentConsequence
+{
+    public string AttributeName { get; set; }
+
+    public string ChangeExpression { get; set; }
 }

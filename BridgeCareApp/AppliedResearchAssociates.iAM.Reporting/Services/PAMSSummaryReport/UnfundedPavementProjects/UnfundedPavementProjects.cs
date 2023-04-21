@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                 "District",
                 "County",
                 "SR",
-                "Segment",
+                "Section",
                 "Pavement Length",
                 "Pavement Area",
                 "Lanes",
@@ -117,18 +117,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                 //get unfunded IDs
                 if (firstYear)
                 {
-                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "SR") + _.AssetName)));
+                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "SR") + _.AssetName)));
                     firstYear = false; if (simulationOutput.Years.Count > 1) { continue; }
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "SR") + _.AssetName))).ToList();
+                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "SR") + _.AssetName))).ToList();
                 }
 
                 foreach (var section in untreatedSections)
                 {
-                    var segmentNumber = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerNumericAttribute, "CNTY");
-                    segmentNumber += _summaryReportHelper.checkAndGetValue<string>(section.ValuePerNumericAttribute, "SR");
+                    var segmentNumber = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CNTY");
+                    segmentNumber += _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "SR");
                     segmentNumber += section.AssetName;
 
                     var facilityId = Convert.ToInt32(segmentNumber);

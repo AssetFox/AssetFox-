@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
             int destRow = 1; int destCol = destStartCol; var summaryRow = sourceRow - 1;
 
             // Summary title; could merge 1-5
-            graphDataSheet.Cells[destRow, destCol].Formula = $"={pamsWorkSummaryWorksheet.Cells[summaryRow, sourceCol].FullAddress}";
+            graphDataSheet.Cells[destRow, destCol].Formula = $"{pamsWorkSummaryWorksheet.Cells[summaryRow, sourceCol].FullAddress}";
             destRow++; 
 
             // subtitle row = "Year", sourceRow + 3, sourceRow + 4, sourceRow + 5, sourceRow + 6            
@@ -24,19 +24,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
 
             //Excellent
             sourceRow++;
-            graphDataSheet.Cells[destRow, destCol++].Formula = $"={pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
+            graphDataSheet.Cells[destRow, destCol++].Formula = $"{pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
 
             //Good
             sourceRow++;
-            graphDataSheet.Cells[destRow, destCol++].Formula = $"={pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
+            graphDataSheet.Cells[destRow, destCol++].Formula = $"{pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
 
             //Fair
             sourceRow++;
-            graphDataSheet.Cells[destRow, destCol++].Formula = $"={pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
+            graphDataSheet.Cells[destRow, destCol++].Formula = $"{pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
 
             //Poor
             sourceRow++;
-            graphDataSheet.Cells[destRow, destCol++].Formula = $"={pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
+            graphDataSheet.Cells[destRow, destCol++].Formula = $"{pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
                         
 
             simulationYearsCount++; // add one for current year
@@ -51,26 +51,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
                 destRow++; destCol = destStartCol;
                 
                 // Year
-                graphDataSheet.Cells[destRow, destCol++].Formula = $"={pamsWorkSummaryWorksheet.Cells[yearRow, sourceCol].FullAddress}";
+                graphDataSheet.Cells[destRow, destCol++].Formula = $"{pamsWorkSummaryWorksheet.Cells[yearRow, sourceCol].FullAddress}";
 
                 // Excellent
-                graphDataSheet.Cells[destRow, destCol].Formula = $"={pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
+                graphDataSheet.Cells[destRow, destCol].Formula = $"{pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
                 graphDataSheet.Cells[destRow, destCol++].Style.Numberformat.Format = @"#0";
 
                 //Good
                 sourceRow++;
-                graphDataSheet.Cells[destRow, destCol].Formula = $"={pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
+                graphDataSheet.Cells[destRow, destCol].Formula = $"{pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
                 graphDataSheet.Cells[destRow, destCol++].Style.Numberformat.Format = @"#0";
 
 
                 //Fair
                 sourceRow++;
-                graphDataSheet.Cells[destRow, destCol].Formula = $"={pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
+                graphDataSheet.Cells[destRow, destCol].Formula = $"{pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
                 graphDataSheet.Cells[destRow, destCol++].Style.Numberformat.Format = @"#0";
 
                 //Poor
                 sourceRow++;
-                graphDataSheet.Cells[destRow, destCol].Formula = $"={pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
+                graphDataSheet.Cells[destRow, destCol].Formula = $"{pamsWorkSummaryWorksheet.Cells[sourceRow, sourceCol].FullAddress}";
                 graphDataSheet.Cells[destRow, destCol].Style.Numberformat.Format = @"#0";
             }
 

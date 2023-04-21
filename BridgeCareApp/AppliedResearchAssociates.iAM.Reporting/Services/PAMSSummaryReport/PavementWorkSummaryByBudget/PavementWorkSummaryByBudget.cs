@@ -47,6 +47,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             foreach (var budgetSummaryModel in workSummaryByBudgetModels)
             {
+                var noData = !budgetSummaryModel.YearlyData.Any(datum => datum.Amount != 0);
+                if (noData)
+                {
+                    continue;
+                }
+
                 // Inside iteration since each section has its own budget analysis section.
                 var costBudgetsWorkSummary = new CostBudgetsWorkSummary();
 
@@ -59,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 worksheet.Cells[currentCell.Row, currentCell.Column].Style.Font.Size = 18;
                 worksheet.Cells[currentCell.Row, currentCell.Column].Style.Font.Bold = true;
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[currentCell.Row, currentCell.Column]);
-                ExcelHelper.MergeCells(worksheet, currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count);
+                ExcelHelper.MergeCells(worksheet, currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count + 2);
 
                 if (budgetSummaryModel.YearlyData.Count == 0)
                 {

@@ -100,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             IEnumerable<Action> getConsequenceAction(IGrouping<Attribute, ConditionalTreatmentConsequence> consequences)
             {
                 consequences.Channel(
-                    consequence => consequence.Criterion.Evaluate(scope),
+                    consequence => scope.Evaluate(consequence.Criterion),
                     result => result ?? false,
                     result => !result.HasValue,
                     out var applicableConsequences,

@@ -67,14 +67,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         internal double CalculateSegmentMilesForBPNWithCondition(List<AssetSummaryDetail> initialSectionSummaries, string bpn, Func<AssetSummaryDetail, bool> conditionFunction)
         {
-            var postedSegments = !String.IsNullOrEmpty(bpn) ? initialSectionSummaries.FindAll(b => _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUS_PLAN_NETWORK") == bpn) : initialSectionSummaries;
+            var postedSegments = !String.IsNullOrEmpty(bpn) ? initialSectionSummaries.FindAll(b => _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUSIPLAN") == bpn) : initialSectionSummaries;
             var selectedSegments = postedSegments.FindAll(section => conditionFunction(section));
             return selectedSegments.Sum(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "SEGMENT_LENGTH")).FeetToMiles();
         }
 
         internal double CalculateSegmentMilesForBPNWithCondition(List<AssetDetail> sectionSummaries, string bpn, Func<AssetDetail, bool> conditionFunction)
         {
-            var postedSegments = !String.IsNullOrEmpty(bpn) ? sectionSummaries.FindAll(b => _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUS_PLAN_NETWORK") == bpn) : sectionSummaries;
+            var postedSegments = !String.IsNullOrEmpty(bpn) ? sectionSummaries.FindAll(b => _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUSIPLAN") == bpn) : sectionSummaries;
             var selectedSegments = postedSegments.FindAll(section => conditionFunction(section));
             return selectedSegments.Sum(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "SEGMENT_LENGTH")).FeetToMiles();
         }

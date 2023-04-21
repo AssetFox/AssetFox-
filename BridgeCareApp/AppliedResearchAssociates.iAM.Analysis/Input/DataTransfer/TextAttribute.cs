@@ -1,6 +1,5 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
+
+public sealed class TextAttribute : Attribute<string>
 {
-    public sealed class TextAttribute : Attribute<string>
-    {
-    }
 }

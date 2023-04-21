@@ -82,11 +82,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ChartRowsModel chartRowsModel
             )
         {
-            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Segment Miles BPN 1", chartRowsModel.IRI_BPN_1_ChartModel, BPNName.BPN1);
-            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Segment Miles BPN 2", chartRowsModel.IRI_BPN_2_ChartModel, BPNName.BPN2);
-            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Segment Miles BPN 3", chartRowsModel.IRI_BPN_3_ChartModel, BPNName.BPN3);
-            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Segment Miles BPN 4", chartRowsModel.IRI_BPN_4_ChartModel, BPNName.BPN4);
-            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Segment Miles Statewide", chartRowsModel.IRI_StateWide_ChartModel, BPNName.Statewide);
+            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Section Miles BPN 1", chartRowsModel.IRI_BPN_1_ChartModel, BPNName.BPN1);
+            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Section Miles BPN 2", chartRowsModel.IRI_BPN_2_ChartModel, BPNName.BPN2);
+            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Section Miles BPN 3", chartRowsModel.IRI_BPN_3_ChartModel, BPNName.BPN3);
+            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Section Miles BPN 4", chartRowsModel.IRI_BPN_4_ChartModel, BPNName.BPN4);
+            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Section Miles Statewide", chartRowsModel.IRI_StateWide_ChartModel, BPNName.Statewide);
 
             return chartRowsModel;
         }

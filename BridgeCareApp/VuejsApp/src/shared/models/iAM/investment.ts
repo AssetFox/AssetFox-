@@ -101,6 +101,8 @@ export const emptyBudget: Budget = {
     id: getBlankGuid(),
     name: '',
     budgetAmounts: [],
+    libraryId: getBlankGuid(),
+    isModified: false,
     criterionLibrary: clone(emptyCriterionLibrary),
     budgetOrder: 0
 };

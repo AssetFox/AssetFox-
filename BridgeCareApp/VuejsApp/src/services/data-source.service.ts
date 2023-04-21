@@ -1,6 +1,7 @@
 import {AxiosPromise} from 'axios';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
-import {ExcelDataSource, SqlDataSource, TestConnection} from '@/shared/models/iAM/data-source';
+import {ExcelDataSource, SqlDataSource} from '@/shared/models/iAM/data-source';
+import { TestStringData } from '@/shared/models/iAM/test-string';
 
 
 export default class DataSourceService {
@@ -41,7 +42,7 @@ export default class DataSourceService {
         );
     }
     static checkSqlConnection(
-        data: TestConnection
+        data: TestStringData
     ): AxiosPromise {
         return coreAxiosInstance.post(`${API.DataSource}/CheckSqlConnection`, data);
     }

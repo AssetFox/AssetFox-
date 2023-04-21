@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
-            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Segment Miles of Full Depth Asphalt Pavement Treatments", "PAMS Full Depth Asphalt Treatments");
+            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Section Miles of Full Depth Asphalt Pavement Treatments", "PAMS Full Depth Asphalt Treatments");
 
             var asphaltTreatments = _pavementWorkSummaryCommon.GetNoTreatments(simulationTreatments).Concat(_pavementWorkSummaryCommon.GetAsphaltTreatments(simulationTreatments)).ToList();
 
@@ -104,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
         )
     {
-        _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Segment Miles of Composite Pavement Treatments", "PAMS Composite Treatments");
+        _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Section Miles of Composite Pavement Treatments", "PAMS Composite Treatments");
 
             var asphaltTreatments = _pavementWorkSummaryCommon.GetNoTreatments(simulationTreatments).Concat(_pavementWorkSummaryCommon.GetAsphaltTreatments(simulationTreatments)).ToList();
 
@@ -160,7 +160,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         {
             var concreteTreatments = _pavementWorkSummaryCommon.GetNoTreatments(simulationTreatments).Concat(_pavementWorkSummaryCommon.GetConcreteTreatments(simulationTreatments)).ToList();
 
-            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Segment Miles of Concrete Pavement Treatments", "PAMS Concrete Treatments");
+            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Section Miles of Concrete Pavement Treatments", "PAMS Concrete Treatments");
             AddConcreteTreatmentSegmentMiles(worksheet, currentCell,
                 lengthPerTreatmentPerYear,
                 concreteTreatments
@@ -212,7 +212,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 return;// workTypeConcrete;
             }
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
-            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Segment Miles of Treatment Groups", "PAMS Treatment Groups Totals");
+            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Section Miles of Treatment Groups", "PAMS Treatment Groups Totals");
 
             AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, PavementTreatmentHelper.TreatmentGroupCategory.Bituminous);
             AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, PavementTreatmentHelper.TreatmentGroupCategory.Concrete);
@@ -264,7 +264,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         {
             var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement };
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
-            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Number of Segment Miles", "Work Type Totals");
+            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Number of Section Miles", "Work Type Totals");
 
             int startRow, startColumn, row, column;
             _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);

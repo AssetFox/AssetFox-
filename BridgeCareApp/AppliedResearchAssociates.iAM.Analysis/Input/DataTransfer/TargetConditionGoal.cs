@@ -1,9 +1,8 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer
-{
-    public sealed class TargetConditionGoal : ConditionGoal
-    {
-        public double Target { get; set; }
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
-        public int? Year { get; set; }
-    }
+public sealed class TargetConditionGoal : ConditionGoal
+{
+    public double Target { get; set; }
+
+    public int? Year { get; set; }
 }

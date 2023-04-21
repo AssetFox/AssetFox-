@@ -1,4 +1,4 @@
-﻿
+
 namespace BridgeCareCore.Models
 {
     public enum WorkType
@@ -11,6 +11,7 @@ namespace BridgeCareCore.Models
         ImportScenarioInvestment,
         ImportScenarioPerformanceCurve,
         ImportScenarioTreatment,
-        ImportCommittedProject
+        ImportCommittedProject,
+        Aggregation,
     }
 }

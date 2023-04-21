@@ -37,7 +37,8 @@ export const emptyNetwork: Network = {
     status: '',
     benefitQuantifier: clone(emptyBenefitQuantifier),
     networkDataAssignmentPercentage: 0,
-    KeyAttribute: getBlankGuid()
+    KeyAttribute: getBlankGuid(),
+    defaultSpatialWeighting: '',
 };
 
 export interface NetworkCreationData {

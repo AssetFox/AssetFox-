@@ -137,16 +137,21 @@ namespace BridgeCareCore.Services
 
             var runner = new SimulationRunner(simulation);
 
+            var databaseUsageLock = new object();
+
             runner.Progress += (sender, eventArgs) =>
             {
-                switch (eventArgs.ProgressStatus)
+                lock (databaseUsageLock)
                 {
-                case ProgressStatus.Started:
-                    simulationAnalysisDetail.Status = "Simulation initializing...";
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-                    break;
+                    switch (eventArgs.ProgressStatus)
+                    {
+                    case ProgressStatus.Started:
+                        simulationAnalysisDetail.Status = "Simulation initializing...";
+                        UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
+                        _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                        _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                        break;
 
                 case ProgressStatus.Running:
                     simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete)}%";
@@ -168,39 +173,41 @@ namespace BridgeCareCore.Services
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
                     break;
 
-                case ProgressStatus.Canceled:
-                    ReportCanceled();
-                    break;
+                    case ProgressStatus.Canceled:
+                        ReportCanceled();
+                        break;
+                    }
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                 }
-
-                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
 
             runner.SimulationLog += (sender, eventArgs) =>
             {
-                var message = eventArgs.MessageBuilder;
-                if (LoggedMessages.Add(message.Message))
+                lock (databaseUsageLock)
                 {
-                    var dto = SimulationLogMessageBuilderMapper.ToDTO(message);
-                    _unitOfWork.SimulationLogRepo.CreateLog(dto);
-                }
-                switch (message.Status)
-                {
-                case SimulationLogStatus.Warning:
-                    simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-                    break;
+                    var message = eventArgs.MessageBuilder;
+                    if (LoggedMessages.Add(message.Message))
+                    {
+                        var dto = SimulationLogMapper.ToDTO(message);
+                        _unitOfWork.SimulationLogRepo.CreateLog(dto);
+                    }
+                    switch (message.Status)
+                    {
+                    case SimulationLogStatus.Warning:
+                        simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
+                        _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                        _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                        break;
 
-                case SimulationLogStatus.Error:
-                case SimulationLogStatus.Fatal:
-                    simulationAnalysisDetail.Status = message.Message;
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-
-                    simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
-                    break;
+                    case SimulationLogStatus.Error:
+                    case SimulationLogStatus.Fatal:
+                        simulationAnalysisDetail.Status = message.Message;
+                        UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
+                        _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                        simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
+                        _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                        break;
+                    }
                 }
             };
 

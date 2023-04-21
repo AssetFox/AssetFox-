@@ -50,5 +50,5 @@ export const emptyAttribute: Attribute = {
     maximum: 0,
     name: '',
     type: 'STRING',
-    datasource: clone(emptyDatasource)
+    dataSource: clone(emptyDatasource)
 }

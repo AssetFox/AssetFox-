@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         internal double Calculate(AssetContext scope)
         {
             ValueSources.Channel(
-                source => source.Criterion.Evaluate(scope),
+                source => scope.Evaluate(source.Criterion),
                 result => result ?? false,
                 result => !result.HasValue,
                 out var applicableSources,

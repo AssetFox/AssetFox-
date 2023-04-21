@@ -83,9 +83,10 @@ namespace BridgeCareCore
                 );
 
             services.AddGraphQLServer()
-                .AddQueryType<Query>()
+                .AddQueryType<QueryObjectType>()
                 .AddFiltering()
-                .AddSorting();
+                .AddSorting()
+                .AddAuthorization();
 
             SetupReporting(services);
             var reportLookup = new Dictionary<string, Type>();

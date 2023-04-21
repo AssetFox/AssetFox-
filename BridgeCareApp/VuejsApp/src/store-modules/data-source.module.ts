@@ -8,13 +8,13 @@ import {
     SqlDataSource, 
     SqlCommandResponse, 
     emptySqlCommandResponse,
-    TestConnection,
     noneDatasource
 } from '@/shared/models/iAM/data-source';
 import {hasValue} from '@/shared/utils/has-value-util';
 import DataSourceService from '@/services/data-source.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import CommittedProjectsService from '@/services/committed-projects.service';
+import { TestStringData } from '@/shared/models/iAM/test-string';
 
 const state = {
     dataSources: [] as Datasource[],
@@ -118,7 +118,7 @@ const actions = {
     },
     async checkSqlCommand(
         {commit}: any,
-        payload: TestConnection
+        payload: TestStringData
     ) {
         await DataSourceService.checkSqlConnection(
             payload

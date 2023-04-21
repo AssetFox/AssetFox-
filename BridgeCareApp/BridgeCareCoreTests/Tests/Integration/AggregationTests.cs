@@ -7,6 +7,7 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Services.Aggregation;
 using BridgeCareCore.Utils;
 using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.General_Work_Queue;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +33,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
-            var controller = new AggregationController(_mockLog.Object, _mockService.Object, EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork, hubService, accessor);
+            var generalWorkQue = GeneralWorkQueueServiceMocks.New();
+            var controller = new AggregationController(_mockLog.Object, _mockService.Object, EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork, hubService, accessor, generalWorkQue.Object);
 
             controller.ControllerContext = new ControllerContext()
             {

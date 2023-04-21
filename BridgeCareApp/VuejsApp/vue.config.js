@@ -7,6 +7,9 @@ const security = JSON.parse(packageJson).security || 'B2C'
 
 module.exports = {
     configureWebpack: {
+        output: {
+            hashFunction: "sha256"
+        },
         devtool: 'source-map',
         plugins: [
             new webpack.DefinePlugin({

@@ -378,6 +378,7 @@ export default class InvestmentEditor extends Vue {
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
+    librarySelectItemNames: string[] = [];
     librarySelectItemValue: string | null = '';
     actionHeader: DataTableHeader = { text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: '' }
     budgetYearsGridHeaders: DataTableHeader[] = [
@@ -551,6 +552,7 @@ export default class InvestmentEditor extends Vue {
                 text: library.name,
                 value: library.id,
             }));
+        this.librarySelectItemNames = this.librarySelectItems.map((library: SelectItem) => library.text)
     }
 
     @Watch('selectedBudgetYearsGridData')

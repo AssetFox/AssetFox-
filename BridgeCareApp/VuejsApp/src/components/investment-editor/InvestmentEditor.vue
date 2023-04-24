@@ -858,12 +858,12 @@ export default class InvestmentEditor extends Vue {
             syncModel: {
                 libraryId: budgetLibrary.budgets.length === 0 || !this.hasSelectedLibrary ? null : this.selectedBudgetLibrary.id,
                 Investment: this.investmentPlan,
-                budgetsForDeletion: budgetLibrary.budgets === [] ? [] : this.deletionBudgetIds,
-                updatedBudgets: budgetLibrary.budgets === [] ? [] : Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
-                addedBudgets: budgetLibrary.budgets === [] ? [] : this.addedBudgets,
-                deletionyears: budgetLibrary.budgets === [] ? [] : this.deletionYears,
-                updatedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.updatedBudgetAmounts),
-                addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.addedBudgetAmounts),
+                budgetsForDeletion: budgetLibrary.budgets.length === 0 ? [] : this.deletionBudgetIds,
+                updatedBudgets: budgetLibrary.budgets.length === 0 ? [] : Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
+                addedBudgets: budgetLibrary.budgets.length === 0 ? [] : this.addedBudgets,
+                deletionyears: budgetLibrary.budgets.length === 0 ? [] : this.deletionYears,
+                updatedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(this.updatedBudgetAmounts),
+                addedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(this.addedBudgetAmounts),
                 firstYearAnalysisBudgetShift: 0,
                 isModified: false
             },
@@ -877,7 +877,7 @@ export default class InvestmentEditor extends Vue {
         
         InvestmentService.upsertBudgetLibrary(libraryUpsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') &&http2XX.test(response.status.toString())){
-                if(budgetLibrary.budgets === []){
+                if(budgetLibrary.budgets.length === 0){
                     this.clearChanges();
                 }
 

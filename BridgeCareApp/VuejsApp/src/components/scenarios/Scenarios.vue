@@ -1413,8 +1413,9 @@ export default class Scenarios extends Vue {
             this.deleteScenarioAction({
                 scenarioId: this.selectedScenario.id,
                 scenarioName: this.selectedScenario.name,
-            }).then(() => {
-                this.selectedScenario = clone(emptyScenario);              
+            }).then(async () => {
+                this.selectedScenario = clone(emptyScenario); 
+                await this.delay(1000);             
                 this.onScenariosPagination();
             });
         }

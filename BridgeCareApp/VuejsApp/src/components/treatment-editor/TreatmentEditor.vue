@@ -172,6 +172,19 @@
                                                 <v-card-text
                                                     class='card-tab-content'
                                                 >
+                                                    <PerformanceFactorTab
+                                                        :selectedTreatmentCosts='selectedTreatment.costs'
+                                                        :callFromScenario='hasScenario'
+                                                        :callFromLibrary='!hasScenario'
+                                                    />
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-tab-item>
+                                        <v-tab-item>
+                                            <v-card>
+                                                <v-card-text
+                                                    class='card-tab-content'
+                                                >
                                                     <ConsequencesTab
                                                         :selectedTreatmentConsequences='selectedTreatment.consequences'
                                                         :rules='rules'
@@ -336,6 +349,7 @@ import {
 } from 'ramda';
 import TreatmentDetailsTab from '@/components/treatment-editor/treatment-editor-tabs/TreatmentDetailsTab.vue';
 import CostsTab from '@/components/treatment-editor/treatment-editor-tabs/CostsTab.vue';
+import PerformanceFactorTab from '@/components/treatment-editor/treatment-editor-tabs/PerformanceFactorTab.vue';
 import ConsequencesTab from '@/components/treatment-editor/treatment-editor-tabs/ConsequencesTab.vue';
 import BudgetsTab from '@/components/treatment-editor/treatment-editor-tabs/BudgetsTab.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
@@ -370,6 +384,7 @@ import { isNullOrUndefined } from 'util';
         BudgetsTab,
         ConsequencesTab,
         CostsTab,
+        PerformanceFactorTab,
         TreatmentDetailsTab,
         CreateTreatmentDialog,
         CreateTreatmentLibraryDialog,

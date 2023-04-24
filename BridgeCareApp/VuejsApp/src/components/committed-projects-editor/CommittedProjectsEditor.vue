@@ -58,6 +58,7 @@
                     <v-layout justify-end class="px-4">
                         <p>Commited Projects: {{totalItems}}</p>
                     </v-layout>
+                    
                 </v-flex>       
                 
                 <v-flex xs12 >
@@ -123,9 +124,9 @@
                                                 :value='formatAsCurrency(props.item[header.value])'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                            <!-- <v-text-field v-if="header.value === 'factor'"
-                                                :value='parseFloat(props.item[header.value]).toFixed(2)'
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/> -->
+                                            <v-text-field v-if="header.value === 'factor'"
+                                                :value='parseFloat(props.item[header.value])'
+                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'brkey'"
@@ -147,7 +148,7 @@
                                                     label="Select a Budget"
                                                     v-model="props.item[header.value]">
                                                 </v-select>
-
+                                                
                                                 <v-text-field v-if="header.value === 'year'"
                                                     label="Edit"
                                                     single-line
@@ -290,12 +291,13 @@
                                     readonly 
                                     single-line
                                     class="sm-text"
-                                    :value='parseFloat(props.item.factor).toFixed(2)'
+                                    :value='props.item.factor'
                                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                 <template slot="input">
                                     <v-text-field
                                         label=""
                                         single-line
+                                        maxlength="5"
                                         v-model="props.item.factor"
                                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                 </template>    
@@ -305,7 +307,6 @@
                                 <v-btn @click="OnDeleteConsequence(props.item.id)"  class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
-                                
                             </td>
                         </template>
                     </v-data-table>    
@@ -361,6 +362,7 @@ import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import InvestmentService from '@/services/investment.service';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { isNullOrUndefined } from 'util';
+import { max } from 'moment';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -540,7 +542,7 @@ export default class CommittedProjectsEditor extends Vue  {
             align: 'left',
             sortable: false,
             class: '',
-            width: '40%',
+            width: '15%',
         },
         {
             text: '',
@@ -554,9 +556,9 @@ export default class CommittedProjectsEditor extends Vue  {
     
     mounted() {
         this.reverseCatMap.forEach(cat => {
-            this.categorySelectItems.push({text: cat, value: cat})
+            this.categorySelectItems.push({text: cat, value: cat})        
         })
-    }
+    }   
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }
@@ -733,7 +735,7 @@ export default class CommittedProjectsEditor extends Vue  {
                         this.selectedCommittedProject = '';
                     }
                     console.log("cp: " + this.sectionCommittedProjects[0].factor);
-                }
+                } 
             }); 
     }
 
@@ -1028,7 +1030,10 @@ export default class CommittedProjectsEditor extends Vue  {
                     ) === true &&
                     this.rules['generalRules'].valueIsNotEmpty(
                         consequence.changeValue,
-                    ) === true)
+                    ) === true &&
+                    this.rules['generalRules'].valueIsNotEmpty(
+                        consequence.factor,
+                    ) === true )
                 );
             },
         );
@@ -1067,7 +1072,6 @@ export default class CommittedProjectsEditor extends Vue  {
             brkey: scp.locationKeys[this.brkey_],
             year: scp.year,
             cost: scp.cost,
-            factor: scp.factor,
             scenarioBudgetId: scp.scenarioBudgetId? scp.scenarioBudgetId : '',
             budget: budget? budget.name : '',
             treatment: scp.treatment,

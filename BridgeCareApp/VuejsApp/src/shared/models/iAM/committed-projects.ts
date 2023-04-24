@@ -48,7 +48,7 @@ export const emptySectionCommittedProject = {
     year: 0,
     treatment: '',
     cost: 0,
-    performanceFactor: 1,
+    factor: 1,
     shadowForAnyTreatment: 0,
     shadowForSameTreatment: 0,
     consequences: [],

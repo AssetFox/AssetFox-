@@ -1,10 +1,11 @@
-﻿
+
 namespace BridgeCareCore.Models
 {
     public enum WorkType
     {
         SimulationAnalysis,
         DeleteNetwork,
-        Aggregation
+        Aggregation,
+        SimulationOutputConversion,
     }
 }

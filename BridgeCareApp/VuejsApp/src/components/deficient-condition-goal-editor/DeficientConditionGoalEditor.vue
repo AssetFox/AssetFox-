@@ -723,9 +723,9 @@ export default class DeficientConditionGoalEditor extends Vue {
                 isNewLibrary: true,           
                  syncModel: {
                     libraryId: library.deficientConditionGoals.length == 0 || !this.hasSelectedLibrary? null : this.selectedDeficientConditionGoalLibrary.id,
-                    rowsForDeletion: library.deficientConditionGoals === [] ? [] : this.deletionIds,
-                    updateRows: library.deficientConditionGoals === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: library.deficientConditionGoals === [] ? [] : this.addedRows,
+                    rowsForDeletion: library.deficientConditionGoals.length == 0 ? [] : this.deletionIds,
+                    updateRows: library.deficientConditionGoals.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: library.deficientConditionGoals.length == 0 ? [] : this.addedRows,
                     isModified: false,
                  },
                  scenarioId: this.hasScenario ? this.selectedScenarioId : null
@@ -735,7 +735,7 @@ export default class DeficientConditionGoalEditor extends Vue {
                     this.hasCreatedLibrary = true;
                     this.librarySelectItemValue = library.id;
                     
-                    if(library.deficientConditionGoals === []){
+                    if(library.deficientConditionGoals.length == 0){
                         this.clearChanges();
                     }
 

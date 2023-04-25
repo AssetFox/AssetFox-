@@ -930,9 +930,9 @@ export default class PerformanceCurveEditor extends Vue {
                 isNewLibrary: true,           
                  syncModel: {
                     libraryId: performanceCurveLibrary.performanceCurves.length == 0 || !this.hasSelectedLibrary ? null : this.selectedPerformanceCurveLibrary.id,
-                    rowsForDeletion: performanceCurveLibrary.performanceCurves === [] ? [] : this.deletionIds,
-                    updateRows: performanceCurveLibrary.performanceCurves === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: performanceCurveLibrary.performanceCurves === [] ? [] : this.addedRows,
+                    rowsForDeletion: performanceCurveLibrary.performanceCurves.length == 0 ? [] : this.deletionIds,
+                    updateRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : this.addedRows,
                     isModified: this.scenarioLibraryIsModified
                  },
                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
@@ -941,7 +941,7 @@ export default class PerformanceCurveEditor extends Vue {
                 this.hasCreatedLibrary = true;
                 this.librarySelectItemValue = performanceCurveLibrary.id;
                 
-                if(performanceCurveLibrary.performanceCurves === []){
+                if(performanceCurveLibrary.performanceCurves.length == 0){
                     this.clearChanges();
                 }
 

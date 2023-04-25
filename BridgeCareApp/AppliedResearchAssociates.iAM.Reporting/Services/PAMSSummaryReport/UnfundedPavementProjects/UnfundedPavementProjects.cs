@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                 "District",
                 "County",
                 "SR",
-                "Segment",
+                "Section",
                 "Pavement Length",
                 "Pavement Area",
                 "Lanes",

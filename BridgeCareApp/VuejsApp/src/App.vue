@@ -196,14 +196,14 @@
                     </v-btn>
                 </v-toolbar-title>
             </v-toolbar>
-            <div class="ara-blue-pantone-281 scenario-status" v-if="hasSelectedScenario">
-                <span class="font-weight-light">Scenario: </span>
+            <div class="scenario-status" v-if="hasSelectedScenario">
+                <br>
+                <span>Scenario: </span>
                     <span>{{ selectedScenario.name }}</span>
-                    <span
-                        v-if="selectedScenarioHasStatus"
-                        class="font-weight-light"
+                    <span v-if="selectedScenarioHasStatus"
                     >
-                        => Status:
+                    <br>
+                        Status:
                     </span>
                     <span v-if="selectedScenarioHasStatus">{{
                         selectedScenario.status

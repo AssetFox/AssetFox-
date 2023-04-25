@@ -173,7 +173,8 @@
                                                     class='card-tab-content'
                                                 >
                                                     <PerformanceFactorTab
-                                                        :selectedTreatmentCosts='selectedTreatment.costs'
+                                                        :selectedTreatmentConsequences='selectedTreatment.consequences'
+                                                        :rules='rules'
                                                         :callFromScenario='hasScenario'
                                                         :callFromLibrary='!hasScenario'
                                                     />
@@ -453,7 +454,7 @@ export default class TreatmentEditor extends Vue {
     selectedTreatment: Treatment = clone(emptyTreatment);
     selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     activeTab: number = 0;
-    treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences'];
+    treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Performance Factor', 'Consequences'];
     createTreatmentLibraryDialogData: CreateTreatmentLibraryDialogData = clone(
         emptyCreateTreatmentLibraryDialogData,
     );

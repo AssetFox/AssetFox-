@@ -75,11 +75,13 @@ export default class PerformanceFactorTab extends Vue {
     uuidNIL: string = getBlankGuid();
 
     mounted() {
+        console.log("" + this.selectedTreatmentConsequences);
         this.setAttributeSelectItems();
     }
 
     @Watch('selectedTreatmentConsequences')
     onSelectedTreatmentConsequencesChanged() {
+        console.log("inside");        
         this.factorGridData = clone(this.selectedTreatmentConsequences);
     }
 
@@ -90,6 +92,7 @@ export default class PerformanceFactorTab extends Vue {
 
     setAttributeSelectItems() {
         if (hasValue(this.stateAttributes)) {
+            console.log("state attributes: " + this.stateAttributes.length);
             this.attributeSelectItems = this.stateAttributes.map((attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name,

@@ -12,5 +12,11 @@ namespace BridgeCareCore.GraphQL
         [UseSorting]
         public List<SimulationDTO> GetSimulations([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork) =>
             _unitOfWork.SimulationRepo.GetAllScenario();
+
+
+        [UseFiltering]
+        [UseSorting]
+        public SimulationDTO GetSimulation([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork) =>
+            _unitOfWork.SimulationRepo.GetSimulation(new System.Guid("99113E90-9783-4CFE-B26F-00959E773430"));
     }
 }

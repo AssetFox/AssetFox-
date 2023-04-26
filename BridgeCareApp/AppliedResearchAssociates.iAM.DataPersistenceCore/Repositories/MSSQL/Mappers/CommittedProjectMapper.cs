@@ -188,7 +188,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 throw new InvalidOperationException($"{asset.Id} has a project type that was automatically added but is not the default treatment");
             }
-            
 
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));
             committedProject.Id = entity.Id;

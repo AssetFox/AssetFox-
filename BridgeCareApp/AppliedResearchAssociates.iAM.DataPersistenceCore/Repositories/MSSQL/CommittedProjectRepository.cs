@@ -3,21 +3,18 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Analysis;
-using Microsoft.EntityFrameworkCore;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using MoreLinq;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
-using AppliedResearchAssociates.CalculateEvaluate;
-using AppliedResearchAssociates.iAM.Data.Networking;
-using System.Text.RegularExpressions;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using Microsoft.EntityFrameworkCore;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -40,9 +37,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
             var noTreatment = simulationEntity.NoTreatmentBeforeCommittedProjects;
-            ScenarioSelectableTreatmentEntity noTreatmentEntity = null;
-            if (noTreatment)
-                noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id);
+            var noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id);
 
             var assets = _unitOfWork.Context.MaintainableAsset
                 .Where(_ => _.NetworkId == simulation.Network.Id)

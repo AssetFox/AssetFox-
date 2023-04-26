@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             IWorkQueueLog loggerForUserInfo = null, ILog loggerForTechnicalInfo = null, CancellationToken? cancellationToken = null)
         {
             loggerForTechnicalInfo ??= new DoNotLog();
-            loggerForUserInfo ??= new DoNotWorkQueueLog();
+            loggerForUserInfo ??= new DoNothingWorkQueueLog();
             loggerForUserInfo.UpdateWorkQueueStatus(simulationId, "Preparing to save to database");
             if (ShouldHackSaveOutputToFile)
             {
@@ -450,7 +450,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void ConvertSimulationOutpuFromJsonTorelational(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLogger = null)
         {
-            queueLogger ??= new DoNotWorkQueueLog();
+            queueLogger ??= new DoNothingWorkQueueLog();
             queueLogger.UpdateWorkQueueStatus(simulationId, "Getting simulation output Json");
             var output = GetSimulationOutputViaJson(simulationId);
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)

@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
-            workQueueLog ??= new DoNotWorkQueueLog();
+            workQueueLog ??= new DoNothingWorkQueueLog();
             // TODO:  Don't regenerate the report if it has already been generated AND the date on the file was after the LastRun date of the
             // scenario.
 

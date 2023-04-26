@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Common.Logging;
+using System.Threading;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -33,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         /// dto's list of users is empty, the users are unaffected.</summary> 
         void UpdateSimulationAndPossiblyUsers(SimulationDTO dto);
 
-        void DeleteSimulation(Guid simulationId);
+        void DeleteSimulation(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
 
         void DeleteSimulationsByNetworkId(Guid networkId);
 

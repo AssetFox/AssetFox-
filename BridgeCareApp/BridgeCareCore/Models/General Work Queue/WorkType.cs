@@ -7,5 +7,6 @@ namespace BridgeCareCore.Models
         DeleteNetwork,
         Aggregation,
         SimulationOutputConversion,
+        DeleteSimulation,
     }
 }

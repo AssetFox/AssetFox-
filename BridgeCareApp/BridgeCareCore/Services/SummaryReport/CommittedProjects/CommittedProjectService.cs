@@ -442,7 +442,7 @@ namespace BridgeCareCore.Services
 
         public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            queueLog ??= new DoNotWorkQueueLog();
+            queueLog ??= new DoNothingWorkQueueLog();
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)

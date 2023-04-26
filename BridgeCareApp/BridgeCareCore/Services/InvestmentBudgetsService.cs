@@ -242,7 +242,7 @@ namespace BridgeCareCore.Services
         public ScenarioBudgetImportResultDTO ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage,
             UserCriteriaDTO currentUserCriteriaFilter, bool overwriteBudgets, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            queueLog ??= new DoNotWorkQueueLog();
+            queueLog ??= new DoNothingWorkQueueLog();
             // InvestmentTests.ImportScenarioInvestmentBudgetsExcelFile
             var budgetWorksheet = excelPackage.Workbook.Worksheets[0];
             var budgetWorksheetEnd = budgetWorksheet.Dimension.End;
@@ -469,7 +469,7 @@ namespace BridgeCareCore.Services
         public BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter,
             bool overwriteBudgets, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            queueLog ??= new DoNotWorkQueueLog();
+            queueLog ??= new DoNothingWorkQueueLog();
             var budgetWorksheet = excelPackage.Workbook.Worksheets[0];
             var budgetWorksheetEnd = budgetWorksheet.Dimension.End;
 

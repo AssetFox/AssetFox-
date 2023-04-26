@@ -6,6 +6,7 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Utils;
+using BridgeCareCoreTests.Tests.General_Work_Queue;
 using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -30,6 +31,7 @@ namespace BridgeCareCoreTests.Tests
             var claimHelper = new ClaimHelper(unitOfWork.Object, simulationQueueService.Object, contextAccessor);
             var resolveInvestmentBudgetServiceMock = investmentBudgetServiceMock ?? InvestmentBudgetServiceMocks.New();
             var resolveInvestmentPagingServiceMock = investmentPagingServiceMock ?? new Mock<IInvestmentPagingService>();
+            var generalWorkQueue = GeneralWorkQueueServiceMocks.New();
             var controller = new InvestmentController(
                 resolveInvestmentBudgetServiceMock.Object,
                 resolveInvestmentPagingServiceMock.Object,
@@ -38,7 +40,8 @@ namespace BridgeCareCoreTests.Tests
                 resolveHubService.Object,
                 contextAccessor,
                 mockDataService.Object,
-                claimHelper);
+                claimHelper,
+                generalWorkQueue.Object);
             return controller;
 
         }

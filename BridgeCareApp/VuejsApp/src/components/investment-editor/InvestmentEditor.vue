@@ -511,7 +511,9 @@ export default class InvestmentEditor extends Vue {
                 }
             });
         }            
-        else if(this.hasSelectedLibrary)
+        else if(this.hasSelectedLibrary){
+            if(this.librarySelectItemValue === null)
+                return;
             await InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
@@ -522,7 +524,8 @@ export default class InvestmentEditor extends Vue {
                     this.totalItems = data.totalItems;
                     this.lastYear = data.lastYear
                 }
-            });     
+            }); 
+        }                
     }
 
     @Watch('deletionBudgetIds')

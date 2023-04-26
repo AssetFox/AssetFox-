@@ -16,6 +16,7 @@ using BridgeCareCore.Services;
 using BridgeCareCore.Services.DefaultData;
 using BridgeCareCore.Services.Paging;
 using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.General_Work_Queue;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;
@@ -50,6 +51,7 @@ namespace BridgeCareCoreTests.Tests
             var security = EsecSecurityMocks.Admin;
             var pagingService = new InvestmentPagingService(mockUnitOfWork.Object, dataService);
             var claimHelper = ClaimHelperMocks.New();
+            var generalWorkQueue = GeneralWorkQueueServiceMocks.New();
             var controller = new InvestmentController(
                 service,
                 pagingService,
@@ -58,7 +60,8 @@ namespace BridgeCareCoreTests.Tests
                 hubService.Object,
                 resolveAccessor.Object,
                 dataService,
-                claimHelper.Object);
+                claimHelper.Object,
+                generalWorkQueue.Object);
             return controller;
         }
 

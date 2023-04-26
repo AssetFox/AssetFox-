@@ -8,5 +8,12 @@ namespace BridgeCareCore.Models
         Aggregation,
         SimulationOutputConversion,
         DeleteSimulation,
+        ImportLibraryInvestment,
+        ImportLibraryPerformanceCurve,
+        ImportLibraryTreatment,
+        ImportScenarioInvestment,
+        ImportScenarioPerformanceCurve,
+        ImportScenarioTreatment,
+        ImportCommittedProject,
     }
 }

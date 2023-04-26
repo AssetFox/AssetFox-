@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Text;using System.Threading;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
@@ -57,9 +58,12 @@ namespace BridgeCareCore.Services
         }        
         public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
-            ExcelPackage excelPackage)
+            ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            var validationMessages = new List<string>();
+            queueLog ??= new DoNotWorkQueueLog();
+            queueLog.UpdateWorkQueueStatus(treatmentLibraryId, "Starting Import");
+            var validationMessages = new List<string>();            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                return new TreatmentImportResultDTO();
             var treatmentLibrary = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
             var library = new TreatmentLibraryDTO
             {
@@ -71,6 +75,8 @@ namespace BridgeCareCore.Services
             };
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
+                if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                    return new TreatmentImportResultDTO();
                 var loadTreatment = _treatmentLoader.LoadTreatment(worksheet);
                 library.Treatments.Add(loadTreatment.Treatment);
                 validationMessages.AddRange(loadTreatment.ValidationMessages);
@@ -88,18 +94,23 @@ namespace BridgeCareCore.Services
             {
                 TreatmentLibrary = library,
                 WarningMessage = combinedValidationMessage,
-            };
+            };            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                return new TreatmentImportResultDTO();
             if (combinedValidationMessage.Length == 0)
             {
+                queueLog.UpdateWorkQueueStatus(treatmentLibraryId, "Updating Treatment Library");
                 SaveToDatabase(returnValue);
             }
             return returnValue;
         }
-        public ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage)
+        public ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
+            queueLog ??= new DoNotWorkQueueLog();
             var validationMessages = new List<string>();
             var scenarioTreatments = new List<TreatmentDTO>();
-            var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                return new ScenarioTreatmentImportResultDTO();
+            queueLog.UpdateWorkQueueStatus(simulationId, "Loading Excel");
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {                
                 var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
@@ -124,6 +135,9 @@ namespace BridgeCareCore.Services
             };
             if (combinedValidationMessage.Length == 0)
             {
+                if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                    return new ScenarioTreatmentImportResultDTO();
+                queueLog.UpdateWorkQueueStatus(simulationId, "Upserting Treatments");
                 _unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
             }
             return scenarioTreatmentImportResult;

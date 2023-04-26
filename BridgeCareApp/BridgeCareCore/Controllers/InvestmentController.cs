@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -15,6 +16,7 @@ using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services.General_Work_Queue.WorkItems;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -36,6 +38,7 @@ namespace BridgeCareCore.Controllers
         private static IInvestmentBudgetsService _investmentBudgetsService;
         private static IInvestmentPagingService _investmentPagingService;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
+        public readonly IGeneralWorkQueueService _generalWorkQueueService;
         private readonly IClaimHelper _claimHelper;
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
@@ -48,12 +51,14 @@ namespace BridgeCareCore.Controllers
             IHubService hubService,
             IHttpContextAccessor httpContextAccessor,
             IInvestmentDefaultDataService investmentDefaultDataService,
-            IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IClaimHelper claimHelper,
+            IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _investmentBudgetsService = investmentBudgetsService ?? throw new ArgumentNullException(nameof(investmentBudgetsService));
             _investmentPagingService = investmentPagingService ?? throw new ArgumentNullException(nameof(investmentPagingService));
             _investmentDefaultDataService = investmentDefaultDataService ?? throw new ArgumentNullException(nameof(investmentDefaultDataService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+            this._generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
         }
 
         [HttpPost]
@@ -424,25 +429,33 @@ namespace BridgeCareCore.Controllers
                 }
 
                 var result = new BudgetImportResultDTO();
+                var budgetLibraryName = "";
                 await Task.Factory.StartNew(() =>
                 {
+                    var existingBudgetLibrary = UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren().FirstOrDefault(_ => _.Id == budgetLibraryId);
+                    if(existingBudgetLibrary != null)
+                        budgetLibraryName = existingBudgetLibrary.Name;
+
                     if (_claimHelper.RequirePermittedCheck())
-                    {
-                        var existingBudgetLibrary = UnitOfWork.BudgetRepo.GetBudgetLibraries().FirstOrDefault(_ => _.Id == libraryId);
+                    {                    
                         if (existingBudgetLibrary != null)
-                        {
+                        {                           
                             var accessModel = UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibraryId, UserId);
                             _claimHelper.CheckUserLibraryRecreateAuthorization(accessModel, UserId);
                         }
                     }
-                    result = _investmentBudgetsService.ImportLibraryInvestmentBudgetsFile(budgetLibraryId, excelPackage, currentUserCriteriaFilter, overwriteBudgets);
                 });
-
-                if (result.WarningMessage != null)
+              
+                ImportLibraryInvestmentWorkitem workItem = new ImportLibraryInvestmentWorkitem(budgetLibraryId, excelPackage, currentUserCriteriaFilter, overwriteBudgets, UserInfo.Name, budgetLibraryName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = budgetLibraryId, Status = analysisHandle.MostRecentStatusMessage });
                 }
-                return Ok(result.BudgetLibrary);
+                return Ok();
             }
             catch (UnauthorizedAccessException)
             {
@@ -499,18 +512,23 @@ namespace BridgeCareCore.Controllers
                             ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
                 }
 
-                var result = new ScenarioBudgetImportResultDTO();
+                var simulationName = "";
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    result = _investmentBudgetsService.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter, overwriteBudgets);
+                    simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 });
 
-                if (result.WarningMessage != null)
+                ImportScenarioInvestmentWorkitem workItem = new ImportScenarioInvestmentWorkitem(simulationId, excelPackage, currentUserCriteriaFilter, overwriteBudgets, UserInfo.Name, simulationName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = analysisHandle.MostRecentStatusMessage });
                 }
-                return Ok(result.Budgets);
+                return Ok();
             }
             catch (UnauthorizedAccessException)
             {

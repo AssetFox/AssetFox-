@@ -387,6 +387,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             return domain;
         }
+
+        /// <summary>
+        /// Method that GetSimulationsOutput query uses in order to retrieve simulation output object via simulation id.
+        /// Was created due GetSimulationsOutput query giving a simulation error when simulation isn't received beforehand.
+        /// </summary>
+        /// <param name="simulationId">The simulation id passed in.</param>
+        /// <returns>Simulation object based on simulation id.</returns>
+        public SimulationOutput GetSimulationOutputViaJsonGraphQL(Guid simulationId)
+        {
+            var simulationDTO = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
+            return simulationOutput;
+        }
         public SimulationOutput GetSimulationOutputViaJson(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         SimulationOutput GetSimulationOutputViaRelation(Guid simulationId, ILog loggerForUserInfo = null, ILog loggerForTechincalInfo = null);
 
         SimulationOutput GetSimulationOutputViaJson(Guid simulationId);
+        SimulationOutput GetSimulationOutputViaJsonGraphQL(Guid simulationId);
         void CreateSimulationOutputViaJson(Guid simulationId, SimulationOutput simulationOutput);
 
         void ConvertSimulationOutpuFromJsonTorelational(Guid simulationId);

@@ -1020,7 +1020,7 @@ export default class CalculatedAttributeEditor extends Vue {
         if(!isNil(addedPairs))
             equations = equations.concat(addedPairs);
 
-        if(equations === [] || equations.length === 0)
+        if(equations.length === 0)
             return false;
 
         var dataIsValid = false

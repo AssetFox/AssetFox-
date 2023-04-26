@@ -173,7 +173,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             try
             {
-                queueLog ??= new DoNotWorkQueueLog();
+                queueLog ??= new DoNothingWorkQueueLog();
                 _unitOfWork.BeginTransaction();
                                    
                 if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)

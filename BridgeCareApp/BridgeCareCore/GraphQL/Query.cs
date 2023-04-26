@@ -25,11 +25,11 @@ namespace BridgeCareCore.GraphQL
         /// <param name="simulationId">The simulation id passed in.</param>
         /// <returns>Simulation object based on simulation id.</returns>
         public SimulationOutput GetSimulationOutputs([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork, string simulationId) 
-            {
+        {
             _unitOfWork.SimulationRepo.GetSimulation(new Guid(simulationId));
             var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(new Guid(simulationId));
             return simulationOutput;
-            }
+        }
             
 
     }

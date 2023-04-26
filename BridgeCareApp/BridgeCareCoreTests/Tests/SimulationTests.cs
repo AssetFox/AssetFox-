@@ -11,6 +11,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.General_Work_Queue;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
@@ -34,6 +35,7 @@ namespace BridgeCareCoreTests.Tests
             var simulationAnalysis = SimulationAnalysisMocks.New();
             var pagingSerivce = new SimulationPagingService(unitOfWork.Object, unitOfWork.Object.SimulationRepo);
             var queueService = SimulationQueueServiceMocks.New();
+            var generalWorkQueueService = GeneralWorkQueueServiceMocks.New();
             var controller = new SimulationController(
                 simulationAnalysis.Object,
                 pagingSerivce,
@@ -42,7 +44,8 @@ namespace BridgeCareCoreTests.Tests
                 unitOfWork.Object,
                 hubService.Object,
                 contextAccessor.Object,
-                claimHelper.Object
+                claimHelper.Object,
+                generalWorkQueueService.Object
                 );
             return controller;
         }

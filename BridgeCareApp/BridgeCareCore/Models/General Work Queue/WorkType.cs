@@ -5,6 +5,9 @@ namespace BridgeCareCore.Models
     {
         SimulationAnalysis,
         DeleteNetwork,
+        Aggregation,
+        SimulationOutputConversion,
+        DeleteSimulation,
         ImportLibraryInvestment,
         ImportLibraryPerformanceCurve,
         ImportLibraryTreatment,
@@ -12,6 +15,5 @@ namespace BridgeCareCore.Models
         ImportScenarioPerformanceCurve,
         ImportScenarioTreatment,
         ImportCommittedProject,
-        Aggregation,
     }
 }

@@ -633,9 +633,9 @@ export default class RemainingLifeLimitEditor extends Vue {
                 isNewLibrary: true,           
                  syncModel: {
                     libraryId: library.remainingLifeLimits.length == 0 || !this.hasSelectedLibrary ? null : this.selectedRemainingLifeLimitLibrary.id,
-                    rowsForDeletion: library.remainingLifeLimits === [] ? [] : this.deletionIds,
-                    updateRows: library.remainingLifeLimits === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: library.remainingLifeLimits === [] ? [] : this.addedRows,
+                    rowsForDeletion: library.remainingLifeLimits.length == 0 ? [] : this.deletionIds,
+                    updateRows: library.remainingLifeLimits.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: library.remainingLifeLimits.length == 0 ? [] : this.addedRows,
                     isModified: false
                  },
                  scenarioId: this.hasScenario ? this.selectedScenarioId : null
@@ -645,7 +645,7 @@ export default class RemainingLifeLimitEditor extends Vue {
                     this.hasCreatedLibrary = true;
                     this.librarySelectItemValue = library.id;
                     
-                    if(library.remainingLifeLimits === []){
+                    if(library.remainingLifeLimits.length == 0){
                         this.clearChanges();
                     }
 

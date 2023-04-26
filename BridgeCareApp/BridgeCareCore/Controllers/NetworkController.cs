@@ -38,9 +38,9 @@ namespace BridgeCareCore.Controllers
 
         private readonly IGeneralWorkQueueService _workQueueService;
         public NetworkController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, IGeneralWorkQueueService workQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, IGeneralWorkQueueService workQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _workQueueService = workQueService ?? throw new ArgumentNullException(nameof(workQueService));
+            _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
         }
 
         [HttpGet]

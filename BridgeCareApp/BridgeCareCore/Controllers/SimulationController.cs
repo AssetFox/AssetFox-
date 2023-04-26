@@ -37,13 +37,14 @@ namespace BridgeCareCore.Controllers
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, IWorkQueueService workQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper, IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
+            IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
-            _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
+            _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentException(nameof(generalWorkQueueService));
         }
 
         [HttpPost]
@@ -434,11 +435,19 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                var scenarioName = "";
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.SimulationOutputRepo.ConvertSimulationOutpuFromJsonTorelational(simulationId);
+                    scenarioName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 });
+                SimulationOutputConversionWorkitem workItem = new SimulationOutputConversionWorkitem(simulationId, UserInfo.Name, scenarioName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
 
+                //await analysisHandle.WorkCompletion;
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
@@ -451,6 +460,6 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Converting Simulation Output from Json to Relationa::{e.Message}");
                 throw;
             }
-        }
+        }      
     }
 }

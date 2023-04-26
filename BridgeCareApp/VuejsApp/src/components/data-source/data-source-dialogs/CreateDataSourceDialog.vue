@@ -37,10 +37,14 @@ import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { Datasource, emptyDatasource, DSSQL } from '../../../shared/models/iAM/data-source';
 import { CreateDataSourceDialogData} from '@/shared/models/modals/data-source-dialog-data'
+import { Getter } from 'vuex-class';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component
 export default class CreateDataSourceDialog extends Vue {
   @Prop() dialogData: CreateDataSourceDialogData;
+  
+  @Getter('getIdByUserName') getIdByUserNameGetter: any;
 
   newDataSource: Datasource = emptyDatasource;
   rules: InputValidationRules = rules;
@@ -53,10 +57,9 @@ export default class CreateDataSourceDialog extends Vue {
     }
   @Watch('dialogData')
   onDialogDataChanged() {
-
     this.newDataSource = {
         id: getNewGuid(),
-        createdBy: getNewGuid(),
+        createdBy: this.getIdByUserNameGetter(getUserName()),
         name: this.datasourceName,
         type: DSSQL,
         connectionString: '',

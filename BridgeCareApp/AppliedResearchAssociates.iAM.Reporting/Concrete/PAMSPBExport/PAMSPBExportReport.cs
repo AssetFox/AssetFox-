@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -62,8 +64,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public async Task Run(string parameters)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
+            workQueueLog ??= new DoNothingWorkQueueLog();
             // Check for the parameters
             if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
@@ -108,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportPath = string.Empty;
             try
             {
-                reportPath = GeneratePAMSPBExportReport(_networkId, _simulationId);
+                reportPath = GeneratePAMSPBExportReport(_networkId, _simulationId, workQueueLog, cancellationToken);
             }
             catch (Exception e)
             {
@@ -132,14 +135,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private string GeneratePAMSPBExportReport(Guid networkId, Guid simulationId)
+        private string GeneratePAMSPBExportReport(Guid networkId, Guid simulationId, IWorkQueueLog workQueueLog, CancellationToken? cancellationToken = null)
         {
+            checkCancelled(cancellationToken);
             var reportPath = string.Empty;
             var reportDetailDto = new SimulationReportDetailDTO
             {
                 SimulationId = simulationId,
                 Status = $"Generating..."
             };
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
@@ -173,14 +178,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.TreatmentTab);
             _treatmentTab.Fill(treatmentsWorksheet, simulationOutput, simulationId, simulation.Network.Id, simulation.Treatments, networkMaintainableAssets);
 
+            checkCancelled(cancellationToken);
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";
+            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
             reportPath = Path.Combine(folderPathForSimulation, "PAMSPBExportReport.xlsx");
-
+            checkCancelled(cancellationToken);
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(reportPath, bin);
 
@@ -213,6 +220,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             Status = "PAMS PB Export output report completed with errors";
             IsComplete = true;
+        }
+
+        private void checkCancelled(CancellationToken? cancellationToken)
+        {
+            if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+            {
+                throw new Exception("Report was cancelled");
+            }
         }
     }
 }

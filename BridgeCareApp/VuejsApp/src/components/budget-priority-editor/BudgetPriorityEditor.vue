@@ -630,9 +630,9 @@ export default class BudgetPriorityEditor extends Vue {
                 isNewLibrary: true,           
                 syncModel: {
                     libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 || !this.hasSelectedLibrary ? null : this.selectedBudgetPriorityLibrary.id,
-                    rowsForDeletion: budgetPriorityLibrary.budgetPriorities === [] ? [] : this.deletionIds,
-                    updateRows: budgetPriorityLibrary.budgetPriorities === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: budgetPriorityLibrary.budgetPriorities === [] ? [] : this.addedRows,
+                    rowsForDeletion: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : this.deletionIds,
+                    updateRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : this.addedRows,
                     isModified: false
                 },
                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
@@ -641,7 +641,7 @@ export default class BudgetPriorityEditor extends Vue {
                 this.hasCreatedLibrary = true;
                 this.librarySelectItemValue = budgetPriorityLibrary.id;
                 
-                if(budgetPriorityLibrary.budgetPriorities === []){
+                if(budgetPriorityLibrary.budgetPriorities.length == 0){
                     this.clearChanges();
                 }
 

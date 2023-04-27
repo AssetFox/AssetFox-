@@ -174,6 +174,7 @@
                                                 >
                                                     <PerformanceFactorTab
                                                         :selectedTreatmentConsequences='selectedTreatment.consequences'
+                                                        :selectedTreatment='selectedTreatment'
                                                         :rules='rules'
                                                         :callFromScenario='hasScenario'
                                                         :callFromLibrary='!hasScenario'

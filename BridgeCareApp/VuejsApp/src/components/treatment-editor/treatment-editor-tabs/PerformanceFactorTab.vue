@@ -17,7 +17,7 @@
                                               :value='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                 <v-text-field v-if="header.value === 'factor'" readonly single-line class='ghd-control-text-sm'
-                                              :value='props.item.factor'
+                                              :value='parseFloat(props.item.factor).toFixed(2)'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                 <template slot='input'>
                                     <v-select v-if="header.value === 'attribute'" :items='attributeSelectItems'
@@ -25,7 +25,7 @@
                                               label='Edit'
                                               v-model='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    <v-text-field v-if="header.value === 'factor'" label='Edit'
+                                    <v-text-field v-if="header.value === 'factor'" label='Edit' single-line maxLength="5"
                                                   v-model='props.item.factor'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                 </template>
@@ -43,23 +43,22 @@ import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
 import { State } from 'vuex-class';
 import { clone, isNil } from 'ramda';
-import { emptyConsequence, TreatmentConsequence } from '@/shared/models/iAM/treatment';
+import { TreatmentAttributeFactor, TreatmentConsequence, Treatment } from '@/shared/models/iAM/treatment';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { InputValidationRules } from '@/shared/utils/input-validation-rules';
-import { Equation } from '@/shared/models/iAM/equation';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 
 @Component({
     components: {
     },
 })
 export default class PerformanceFactorTab extends Vue {
-    @Prop() selectedTreatmentConsequences: TreatmentConsequence[];
+    @Prop() treatmentAttributeFactor: TreatmentConsequence[];
+    @Prop() selectedTreatment: Treatment;
     @Prop() rules: InputValidationRules;
     @Prop() callFromScenario: boolean;
     @Prop() callFromLibrary: boolean;
@@ -70,7 +69,7 @@ export default class PerformanceFactorTab extends Vue {
         { text: 'Attribute', value: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
         { text: 'Performance Factor', value: 'factor', align: 'left', sortable: false, class: '', width: '125px' },
     ];
-    factorGridData: TreatmentConsequence[] = [];
+    factorGridData: TreatmentAttributeFactor[] = [];
     attributeSelectItems: SelectItem[] = [];
     uuidNIL: string = getBlankGuid();
 
@@ -81,7 +80,7 @@ export default class PerformanceFactorTab extends Vue {
 
     @Watch('selectedTreatmentConsequences')
     onSelectedTreatmentConsequencesChanged() {
-        console.log("inside");        
+        console.log("selected treatment: " + this.selectedTreatment.name);
         this.factorGridData = clone(this.selectedTreatmentConsequences);
     }
 
@@ -92,12 +91,20 @@ export default class PerformanceFactorTab extends Vue {
 
     setAttributeSelectItems() {
         if (hasValue(this.stateAttributes)) {
-            console.log("state attributes: " + this.stateAttributes.length);
             this.attributeSelectItems = this.stateAttributes.map((attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name,
             }));
+
+            this.factorGridData = this.attributeSelectItems.map(_ => ({
+                attribute : _.value,
+                factor : 1.0,
+            }));
         }
+    }
+    onModifyPerformanceFactor() {
+        // emit the attribute/factor object
+        //this.$emit('onAddConsequence', newConsequence);
     }
 }
 </script>

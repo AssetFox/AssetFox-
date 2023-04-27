@@ -20,6 +20,10 @@ export enum AssetType {
     culvert,
 }
 
+export interface TreatmentAttributeFactor {
+    attribute: string;
+    factor: number;
+}
 export interface TreatmentCost {
     id: string;
     equation: Equation;

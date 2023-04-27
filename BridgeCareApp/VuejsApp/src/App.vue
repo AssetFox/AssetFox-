@@ -196,21 +196,23 @@
                     </v-btn>
                 </v-toolbar-title>
             </v-toolbar>
-            <div class="scenario-status" v-if="hasSelectedScenario">
-                <br>
-                <span>Scenario: </span>
-                    <span style="font-weight: normal;">{{ selectedScenario.name }}</span>
-                    {{ "\xA0" }}
-                    <hr color="#798899" class="mx-1 navbar-divider v-divider v-divider--vertical theme--light">
-                    {{ "\xA0" }}
-                    <span v-if="selectedScenarioHasStatus">
-                    Status:
-                    </span>
-                    <span style="font-weight: normal;"
-                     v-if="selectedScenarioHasStatus">{{
-                        selectedScenario.status
-                    }}</span>
-            </div>
+                <div class="scenario-status" v-if="hasSelectedScenario">
+                    <br>
+                    <span>Scenario: </span>
+                        <span style="font-weight: normal;">{{ selectedScenario.name }}</span>
+                        {{ "\xA0" }}
+                        <span v-if="selectedScenarioHasStatus && hasSelectedScenario">
+                        <hr color="#798899" class="mx-1 navbar-divider v-divider v-divider--vertical theme--light">
+                        </span>
+                        {{ "\xA0" }}
+                        <span v-if="selectedScenarioHasStatus">
+                        Status:
+                        </span>
+                        <span style="font-weight: normal;"
+                         v-if="selectedScenarioHasStatus">{{
+                             selectedScenario.status
+                         }}</span>
+                </div>
             <v-container fluid v-bind="container">
                 <router-view></router-view>
             </v-container>

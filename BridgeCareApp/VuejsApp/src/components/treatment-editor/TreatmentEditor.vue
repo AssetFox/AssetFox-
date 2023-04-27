@@ -819,8 +819,8 @@ export default class TreatmentEditor extends Vue {
                  syncModel: {
                     libraryId: library.treatments.length === 0 || !this.hasSelectedLibrary ? null :  this.selectedTreatmentLibrary.id, // setting id required for create as new library
                     rowsForDeletion: [],
-                    updateRows: library.treatments === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: library.treatments === [] ? [] : this.addedRows,
+                    updateRows: library.treatments.length === 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: library.treatments.length === 0 ? [] : this.addedRows,
                     isModified: false
                  },
                  scenarioId: this.hasScenario ? this.selectedScenarioId : null
@@ -830,7 +830,7 @@ export default class TreatmentEditor extends Vue {
                     this.hasCreatedLibrary = true;
                     this.librarySelectItemValue = library.id;
                     
-                    if(library.treatments === []){
+                    if(library.treatments.length === 0){
                         this.clearChanges();
                     }
 

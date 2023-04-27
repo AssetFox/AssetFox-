@@ -9,6 +9,7 @@ using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCoreTests.Tests.General_Work_Queue;
 using BridgeCareCoreTests.Tests.PerformanceCurve;
 using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,7 @@ namespace BridgeCareCoreTests.Tests {
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
+            var generalWorkQueue = GeneralWorkQueueServiceMocks.New();
             var controller = new PerformanceCurveController(
                 esecSecurity,
                 unitOfWork,
@@ -30,7 +32,8 @@ namespace BridgeCareCoreTests.Tests {
                 accessor,
                 performanceCurvesService,
                 performanceCurvesPagingService,
-                _mockClaimHelper.Object);
+                _mockClaimHelper.Object,
+                generalWorkQueue.Object);
             return controller;
         }
         public static PerformanceCurveController CreateController(
@@ -48,6 +51,7 @@ namespace BridgeCareCoreTests.Tests {
             var claimHelper = new ClaimHelper(unitOfWork.Object, simulationQueueService.Object, contextAccessor);
             var resolvePerformanceCurveServiceMock = performanceCurveServiceMock ?? PerformanceCurveServiceMocks.New();
             var resolvePerformanceCurvePagingServiceMock = performanceCurvePagingServiceMock ?? PerformanceCurvesPagingServiceMocks.New();
+            var generalWorkQueue = GeneralWorkQueueServiceMocks.New();
             var controller = new PerformanceCurveController(
                 security,
                 unitOfWork.Object,
@@ -55,7 +59,8 @@ namespace BridgeCareCoreTests.Tests {
                 contextAccessor,
                 resolvePerformanceCurveServiceMock.Object,
                 resolvePerformanceCurvePagingServiceMock.Object,
-                claimHelper);
+                claimHelper,
+                generalWorkQueue.Object);
             return controller;
         }
 

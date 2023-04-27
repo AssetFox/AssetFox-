@@ -1105,7 +1105,11 @@ public sealed class SimulationRunner
                 }
             }
 
-            if (cost < 0)
+            // Some floating-point error may accumulate that could unintentionally trigger this
+            // error condition, but rounding (to the nearest tenth of a cent) should take care of
+            // it. If rounding doesn't take care of it, then there's probably more to it than just
+            // floating-point error.
+            if (Math.Round(cost, 3) < 0)
             {
                 throw new InvalidOperationException(MessageStrings.RemainingCostIsNegative);
             }

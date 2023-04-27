@@ -88,6 +88,17 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public void CopyDetailFrom(AssetContext other) => Detail = new AssetDetail(other.Detail);
 
+        public bool? Evaluate(Criterion criterion)
+        {
+            if (!EvaluationCache.TryGetValue(criterion.Expression, out var result))
+            {
+                result = criterion.Evaluate(this);
+                EvaluationCache.Add(criterion.Expression, result);
+            }
+
+            return result;
+        }
+
         public void FixCalculatedFieldValuesWithoutPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration));
 
         public void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PostDeterioration));
@@ -225,19 +236,19 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public override void SetNumber(string key, double value)
         {
-            NumberCache.Clear();
+            ClearCache();
             base.SetNumber(key, value);
         }
 
         public override void SetNumber(string key, Func<double> getValue)
         {
-            NumberCache.Clear();
+            ClearCache();
             base.SetNumber(key, getValue);
         }
 
         public override void SetText(string key, string value)
         {
-            NumberCache.Clear();
+            ClearCache();
             base.SetText(key, value);
         }
 
@@ -257,15 +268,17 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
-        private readonly IDictionary<string, int> FirstUnshadowedYearForSameTreatment = new Dictionary<string, int>();
+        private readonly Dictionary<string, bool?> EvaluationCache = new();
+
+        private readonly Dictionary<string, int> FirstUnshadowedYearForSameTreatment = new();
 
         private readonly Stack<string> GetNumber_ActiveKeysOfCurrentInvocation = new();
 
         private readonly Dictionary<Attribute, double> MostRecentAdjustmentFactorsForPerformanceCurves = new();
 
-        private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(KeyComparer);
+        private readonly Dictionary<string, double> NumberCache = new(KeyComparer);
 
-        private readonly IDictionary<string, double> NumberCache_Override = new Dictionary<string, double>(KeyComparer);
+        private readonly Dictionary<string, double> NumberCache_Override = new(KeyComparer);
 
         private Treatment AppliedTreatmentWithPendingMetadata;
 
@@ -358,6 +371,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
         }
 
+        private void ClearCache()
+        {
+            NumberCache.Clear();
+            EvaluationCache.Clear();
+        }
+
         private void CopyAttributeValuesToDetail(AssetSummaryDetail detail)
         {
             detail.ValuePerNumericAttribute.Add(Network.SpatialWeightIdentifier, GetNumber(Network.SpatialWeightIdentifier));
@@ -384,7 +403,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
         {
             curves.Channel(
-                curve => curve.Criterion.Evaluate(this),
+                curve => Evaluate(curve.Criterion),
                 result => result ?? false,
                 result => !result.HasValue,
                 out var applicableCurves,

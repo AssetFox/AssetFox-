@@ -775,7 +775,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             try
             {
                 var scenarioSelectableTreatments = GetScenarioSelectableTreatments(simulationId);
-                var defaultTreatment = scenarioSelectableTreatments.Single(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
+                var defaultTreatment = scenarioSelectableTreatments.SingleOrDefault(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
+                if (defaultTreatment == null)
+                    return null;
                 return defaultTreatment;
             }
             catch (InvalidOperationException)
@@ -789,7 +791,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             try
             {
                 var scenarioSelectableTreatments = GetScenarioSelectableTreatments(simulationId);
-                var defaultTreatment = scenarioSelectableTreatments.Single(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
+                var defaultTreatment = scenarioSelectableTreatments.SingleOrDefault(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
+                if (defaultTreatment == null)
+                    return null;
                 return _unitOfWork.Context.ScenarioSelectableTreatment.FirstOrDefault(_ => _.Id == defaultTreatment.Id);
             }
             catch (InvalidOperationException)

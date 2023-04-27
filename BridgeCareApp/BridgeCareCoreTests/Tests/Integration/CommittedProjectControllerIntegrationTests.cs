@@ -8,6 +8,7 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.General_Work_Queue;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Xunit;
 using IamAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
@@ -25,15 +26,16 @@ namespace BridgeCareCoreTests.Tests.Integration
             var hubService = HubServiceMocks.Default();
             var contextAccessor = HttpContextAccessorMocks.Default();
             var claimHelper = ClaimHelperMocks.New();
+            var generalWorkQueue = GeneralWorkQueueServiceMocks.New();
             return new CommittedProjectController(
-
                 service,
                 pagingService,
                 security,
                 TestHelper.UnitOfWork,
                 hubService,
                 contextAccessor,
-                claimHelper.Object
+                claimHelper.Object,
+                generalWorkQueue.Object
                 );
         }
 

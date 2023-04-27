@@ -19,6 +19,8 @@ using OfficeOpenXml;
 using BridgeCareCore.Utils.Interfaces;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using BridgeCareCore.Services;
+using BridgeCareCore.Services.General_Work_Queue.WorkItems;
 
 namespace BridgeCareCore.Controllers
 {
@@ -30,6 +32,7 @@ namespace BridgeCareCore.Controllers
         private static ICommittedProjectService _committedProjectService;
         private static ICommittedProjectPagingService _committedProjectPagingService;
         private readonly IClaimHelper _claimHelper;
+        private readonly IGeneralWorkQueueService _generalWorkQueueService;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public CommittedProjectController(ICommittedProjectService committedProjectService, ICommittedProjectPagingService committedProjectPagingService,
@@ -37,11 +40,12 @@ namespace BridgeCareCore.Controllers
             IUnitOfWork unitOfWork,
             IHubService hubService,
             IHttpContextAccessor httpContextAccessor,
-            IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IClaimHelper claimHelper, IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _committedProjectService = committedProjectService ?? throw new ArgumentNullException(nameof(committedProjectService));
             _committedProjectPagingService = committedProjectPagingService ?? throw new ArgumentNullException(nameof(committedProjectPagingService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+            _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
         }
 
         [HttpPost]
@@ -76,12 +80,21 @@ namespace BridgeCareCore.Controllers
                     applyNoTreatment = ContextAccessor.HttpContext.Request.Form["applyNoTreatment"].ToString() == "1";
                 }
 
+                var siulationName = "";
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, filename, applyNoTreatment);
+                    siulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 });
-
+                ImportCommittedProjectWorkItem workItem = new ImportCommittedProjectWorkItem(simulationId, excelPackage, filename,applyNoTreatment, UserInfo.Name, siulationName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() {Id = simulationId, Status = analysisHandle.MostRecentStatusMessage });
+                }
                 return Ok();
             }
             catch (UnauthorizedAccessException)

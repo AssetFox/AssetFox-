@@ -3,6 +3,10 @@
     public enum DomainType
     {
         Simulation,
-        Network
+        Network,
+        Investment,
+        PerformanceCurve,
+        Treatment,
+        CommittedProject
     }
 }

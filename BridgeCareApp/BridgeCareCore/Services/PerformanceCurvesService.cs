@@ -31,7 +31,7 @@ namespace BridgeCareCore.Services
 
         public PerformanceCurvesImportResultDTO ImportLibraryPerformanceCurvesFile(Guid performanceCurveLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            queueLog ??= new DoNotWorkQueueLog();
+            queueLog ??= new DoNothingWorkQueueLog();
             queueLog.UpdateWorkQueueStatus(performanceCurveLibraryId, "Starting Import");
             var performanceCurvesToImport = new List<PerformanceCurveDTO>();
             var performanceCurvesWithMissingAttributes = new List<string>();
@@ -88,7 +88,7 @@ namespace BridgeCareCore.Services
 
         public ScenarioPerformanceCurvesImportResultDTO ImportScenarioPerformanceCurvesFile(Guid simulationId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            queueLog ??= new DoNotWorkQueueLog();
+            queueLog ??= new DoNothingWorkQueueLog();
             var performanceCurvesToImport = new List<PerformanceCurveDTO>();
             var performanceCurvesWithMissingAttributes = new List<string>();
             var performanceCurvesWithInvalidCriteria = new List<string>();

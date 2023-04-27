@@ -60,7 +60,7 @@ namespace BridgeCareCore.Services
             Guid treatmentLibraryId,
             ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            queueLog ??= new DoNotWorkQueueLog();
+            queueLog ??= new DoNothingWorkQueueLog();
             queueLog.UpdateWorkQueueStatus(treatmentLibraryId, "Starting Import");
             var validationMessages = new List<string>();            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return new TreatmentImportResultDTO();
@@ -105,7 +105,7 @@ namespace BridgeCareCore.Services
         }
         public ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            queueLog ??= new DoNotWorkQueueLog();
+            queueLog ??= new DoNothingWorkQueueLog();
             var validationMessages = new List<string>();
             var scenarioTreatments = new List<TreatmentDTO>();
             var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)

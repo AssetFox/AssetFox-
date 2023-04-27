@@ -199,13 +199,15 @@
             <div class="scenario-status" v-if="hasSelectedScenario">
                 <br>
                 <span>Scenario: </span>
-                    <span>{{ selectedScenario.name }}</span>
-                    <span v-if="selectedScenarioHasStatus"
-                    >
-                    <br>
-                        Status:
+                    <span style="font-weight: normal;">{{ selectedScenario.name }}</span>
+                    {{ "\xA0" }}
+                    <hr color="#798899" class="mx-1 navbar-divider v-divider v-divider--vertical theme--light">
+                    {{ "\xA0" }}
+                    <span v-if="selectedScenarioHasStatus">
+                    Status:
                     </span>
-                    <span v-if="selectedScenarioHasStatus">{{
+                    <span style="font-weight: normal;"
+                     v-if="selectedScenarioHasStatus">{{
                         selectedScenario.status
                     }}</span>
             </div>

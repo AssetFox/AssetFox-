@@ -163,12 +163,6 @@
                                                     v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                                <!-- <v-text-field v-if="header.value === 'factor'"
-                                                    label="Edit"
-                                                    single-line
-                                                    v-model.number="props.item[header.value]"
-                                                    :rules="[rules['generalRules'].valueIsNotEmpty]"/> -->
-
                                             </template>
                                         </v-edit-dialog>
                                 
@@ -1037,7 +1031,7 @@ export default class CommittedProjectsEditor extends Vue  {
                 );
             },
         );
-
+        console.log("data is valid: " + dataIsValid);
         this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
@@ -1312,7 +1306,6 @@ export default class CommittedProjectsEditor extends Vue  {
                 this.sectionCommittedProjects = data.items;
                 this.rowCache = clone(this.sectionCommittedProjects)
                 this.totalItems = data.totalItems;
-                console.log("cp: " + this.sectionCommittedProjects[0].factor);
             }
         }); 
     }

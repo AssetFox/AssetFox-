@@ -24,7 +24,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 CommittedProjectId = entity.CommittedProjectId,
                 Attribute = entity.Attribute.Name,
-                ChangeValue = entity.ChangeValue
+                ChangeValue = entity.ChangeValue,
+                PerformanceFactor = entity.PerformanceFactor
             };
 
         public static CommittedProjectConsequenceEntity ToEntity(this CommittedProjectConsequenceDTO dto, IList<AttributeEntity> attributes)
@@ -37,7 +38,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = dto.Id,
                 CommittedProjectId = dto.CommittedProjectId,
                 AttributeId = attributeEntity.Id,
-                ChangeValue = dto.ChangeValue
+                ChangeValue = dto.ChangeValue,
+                PerformanceFactor = dto.PerformanceFactor
             };
         }
 

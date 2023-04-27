@@ -733,6 +733,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.ChangeValue).IsRequired();
 
+                entity.Property(e => e.PerformanceFactor).IsRequired();
+
                 entity.HasOne(d => d.CommittedProject)
                     .WithMany(p => p.CommittedProjectConsequences)
                     .HasForeignKey(d => d.CommittedProjectId)

@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
@@ -57,7 +59,46 @@ namespace BridgeCareCore.Controllers
                     assetKeyProperty2 => assetKeyProperty2.AssetId,
                     (keyid1, keyid2) => new KeyIDs { KeyProperty2 = keyid2.KeyValue.TextValue, KeyProperty1 = keyid1.KeyValue.TextValue }).ToList();
             }
-            return Ok(data.OrderBy(_ => _.KeyProperty2.Length).ThenBy(_ => _.KeyProperty2));
+            var list = new List<string> { keyProperty1, keyProperty2 };
+            return await GetInventory(list);  //Ok(data.OrderBy(_ => _.KeyProperty2.Length).ThenBy(_ => _.KeyProperty2));
+        }
+
+        [HttpGet]
+        [Route("GetInventory/{keyProperties}")]
+        [Authorize]
+        public async Task<IActionResult> GetInventory(List<string> keyProperties)
+        {
+            var assetKeyData = new Dictionary<Guid, List<string>>();
+            var keySegmentDatums = new List<List<KeySegmentDatum>>();
+
+            // Todo check how to handle sort, should we just sort first key property's ?
+
+            foreach (var keyProperty in keyProperties)
+            {
+                if (_assetData.KeyProperties.ContainsKey(keyProperty))
+                {
+                    keySegmentDatums.Add(_assetData.KeyProperties[keyProperty]);
+                }
+            }
+
+            foreach (var keySegmentDatum in keySegmentDatums)
+            {
+                foreach (var keyDatum in keySegmentDatum)
+                {
+                    var assetId = keyDatum.AssetId;
+                    var value = keyDatum.KeyValue.TextValue;
+                    if (!assetKeyData.ContainsKey(assetId))
+                    {
+                        assetKeyData.Add(assetId, new List<string> { value });
+                    }
+                    else
+                    {
+                        assetKeyData[assetId].Add(value);
+                    }
+                }
+            }            
+
+            return Ok(assetKeyData.Values);
         }
     }
 }

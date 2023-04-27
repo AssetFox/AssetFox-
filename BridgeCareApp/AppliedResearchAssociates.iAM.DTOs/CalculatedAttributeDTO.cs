@@ -14,6 +14,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public bool IsModified { get; set; }
 
-        public ICollection<CalculatedAttributeEquationCriteriaPairDTO> Equations { get; set; } = new List<CalculatedAttributeEquationCriteriaPairDTO>();
+        public IList<CalculatedAttributeEquationCriteriaPairDTO> Equations { get; set; } = new List<CalculatedAttributeEquationCriteriaPairDTO>();
     }
 }

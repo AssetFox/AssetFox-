@@ -48,7 +48,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="HotChocolate.Abstractions" Version="13.0.5" />
+    <PackageReference Include="HotChocolate.AspNetClassic.Abstractions" Version="10.5.5" />
     <PackageReference Include="HotChocolate.AspNetCore" Version="13.0.5" />
+    <PackageReference Include="HotChocolate.AspNetCore.Abstractions" Version="10.5.5" />
     <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="13.0.5" /> 
     <PackageReference Include="HotChocolate.Data" Version="13.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.AzureADB2C.UI" Version="6.0.1" />

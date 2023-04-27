@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
+
 namespace AppliedResearchAssociates.iAM.DTOs.Enums
 {
     public class TreatmentDTOEnum
@@ -15,10 +16,14 @@ namespace AppliedResearchAssociates.iAM.DTOs.Enums
             Maintenance,
             Other
         }
+
         public enum AssetType
         {
             Bridge,
             Culvert
         }
+
+      
+      
     }
 }

@@ -48,7 +48,8 @@ namespace BridgeCareCore.Utils
             {
                 throw new FileNotFoundException($"{filePath} does not exist");
             }
-                        
+
+            // wjwjwj filePath is roleToClaimsMapping.json
             var content = File.ReadAllText(filePath);
             var jObject = JObject.Parse(content);
             var securityTypeToken = jObject.SelectToken("SecurityTypes").FirstOrDefault(s => s.SelectToken("SecurityType")?.ToString() == securityType);

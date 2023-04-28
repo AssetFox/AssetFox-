@@ -48,6 +48,7 @@ export const setContentTypeCharset = (headers: any) => {
 };
 
 export const setAuthHeader = (headers: any) => {
+    console.log("http-utils security type is " + authenticationModule.state.securityType);
     if (
         headers &&
         authenticationModule.state.securityType === SecurityTypes.esec &&
@@ -57,6 +58,7 @@ export const setAuthHeader = (headers: any) => {
             localStorage.getItem('UserTokens') as string,
         ) as UserTokens;
         headers['Authorization'] = `Bearer ${userTokens.id_token}`;
+        console.log("set esec token");
     }
 
     if (
@@ -69,6 +71,7 @@ export const setAuthHeader = (headers: any) => {
             'access_token',
         ) as string;
         headers['Authorization'] = `Bearer ${accessToken}`;
+        console.log("set b2c token")
     }
 
     return headers;

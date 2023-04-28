@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
@@ -65,6 +66,19 @@ namespace BridgeCareCore.Services
                 Items = items,
                 TotalItems = totalItemCount
             };
+        }
+
+        public QueuedWorkDTO GetQueuedWorkByWorkId(Guid workId)
+        {
+            var workQueue = _sequentialWorkQueue.Snapshot;
+
+            var work = workQueue.FirstOrDefault(_ => _.WorkId == workId.ToString());
+
+            if(work != null)
+            {
+                return work.ToQueuedWorkDTO();
+            }
+            return null;
         }
 
         private List<QueuedWorkDTO> GetQueuedWork(IReadOnlyList<IQueuedWorkHandle<WorkQueueMetadata>> workQueue)
@@ -147,7 +161,9 @@ namespace BridgeCareCore.Services
                 WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp,
                 QueueingUser = queuedWorkHandle.UserId,
                 QueuePosition = queuedWorkHandle.QueueIndex,
-                WorkDescription = queuedWorkHandle.WorkDescription
+                WorkDescription = queuedWorkHandle.WorkDescription,
+                WorkType = queuedWorkHandle.Metadata.WorkType,
+                DomainType = queuedWorkHandle.Metadata.DomainType
             };
 
             if (queuedWorkHandle.WorkCancellationTokenSource != null)

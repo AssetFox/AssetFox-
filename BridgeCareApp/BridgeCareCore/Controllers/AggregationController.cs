@@ -108,34 +108,5 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpDelete]
-        [Route("CancelNetworkAggregation/{networkId}")]
-        [Authorize]
-        public async Task<IActionResult> CancelNetworkAggregation(Guid networkId)
-        {
-            try
-            {
-                var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(networkId);
-                await Task.Delay(125);
-
-                if (hasBeenRemovedFromQueue)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceled" });
-                }
-                else
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceling network deletion..." });
-
-                }
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling network deltion for {networkName}::{e.Message}");
-                throw;
-            }
-        }
-
     }
 }

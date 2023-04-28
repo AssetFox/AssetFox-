@@ -8,6 +8,9 @@ using System;
 using OfficeOpenXml;
 using Microsoft.Extensions.DependencyInjection;
 using BridgeCareCore.Interfaces;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Hubs;
+using BridgeCareCore.Controllers;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
@@ -32,8 +35,16 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<ICommittedProjectService>();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, SimulationId);
             _committedProjectService.ImportCommittedProjectFiles(SimulationId, ExcelPackage, Filename, ApplyNoTreatment);
+        }
+
+        public void OnFault(IServiceProvider serviceProvider, string errorMessage)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{CommittedProjectController.CommittedProjectError}::ImportCommittedProjects - {errorMessage}");
         }
     }
 }

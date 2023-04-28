@@ -1,5 +1,4 @@
-
-namespace BridgeCareCore.Models
+namespace AppliedResearchAssociates.iAM.DTOs.Enums
 {
     public enum WorkType
     {
@@ -8,6 +7,7 @@ namespace BridgeCareCore.Models
         Aggregation,
         SimulationOutputConversion,
         DeleteSimulation,
+        ReportGeneration,
         ImportLibraryInvestment,
         ImportLibraryPerformanceCurve,
         ImportLibraryTreatment,

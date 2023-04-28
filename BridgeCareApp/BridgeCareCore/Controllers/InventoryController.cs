@@ -12,8 +12,7 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.SqlServer.TransactSql.ScriptDom;
-using NuGet.Packaging;
+using Newtonsoft.Json;
 
 namespace BridgeCareCore.Controllers
 {
@@ -44,42 +43,26 @@ namespace BridgeCareCore.Controllers
             if (!_assetData.KeyProperties.ContainsKey(propertyName)) return BadRequest($"Requested key property ({propertyName}) does not exist");
             return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
         }
+        
+        // TODO update UI to call new API, check from where to get keys, setting?
 
         [HttpGet]
-        [Route("GetInventory/{keyProperty1}/{keyProperty2}")]
+        [Route("GetInventory")]
         [Authorize]
-        public async Task<IActionResult> GetInventory(string keyProperty1, string keyProperty2)
-        {
-            var data = new List<KeyIDs>();
-            if (_assetData.KeyProperties.ContainsKey(keyProperty1))
-            {
-                data = _assetData.KeyProperties[keyProperty1].Join(
-                    _assetData.KeyProperties[keyProperty2],
-                    assetKeyProperty1 => assetKeyProperty1.AssetId,
-                    assetKeyProperty2 => assetKeyProperty2.AssetId,
-                    (keyid1, keyid2) => new KeyIDs { KeyProperty2 = keyid2.KeyValue.TextValue, KeyProperty1 = keyid1.KeyValue.TextValue }).ToList();
-            }
-            var list = new List<string> { keyProperty1, keyProperty2 };
-            return await GetInventory(list);  //Ok(data.OrderBy(_ => _.KeyProperty2.Length).ThenBy(_ => _.KeyProperty2));
-        }
-
-        [HttpGet]
-        [Route("GetInventory/{keyProperties}")]
-        [Authorize]
-        public async Task<IActionResult> GetInventory(List<string> keyProperties)
+        public async Task<IActionResult> GetInventory(string keyProperties)
         {
             var assetKeyData = new Dictionary<Guid, List<string>>();
             var keySegmentDatums = new List<List<KeySegmentDatum>>();
 
             // Todo check how to handle sort, should we just sort first key property's ?
-
-            foreach (var keyProperty in keyProperties)
+            var keyPropertiesList = JsonConvert.DeserializeObject<List<string>>(keyProperties);
+            foreach (var keyProperty in keyPropertiesList)
             {
                 if (_assetData.KeyProperties.ContainsKey(keyProperty))
                 {
                     keySegmentDatums.Add(_assetData.KeyProperties[keyProperty]);
                 }
-            }
+            }            
 
             foreach (var keySegmentDatum in keySegmentDatums)
             {

@@ -65,15 +65,14 @@ const actions = {
             });
     },
     async getInventory({commit}: any, payload: any) {
-        await InventoryService.getInventory(payload.key1, payload.key2)
+        await InventoryService.getInventory(payload)
             .then((response: AxiosResponse<MappedInventoryItem[]>) => {
                 if (hasValue(response, 'data')) {
                     var mappedItems: InventoryItem[] = [];
                     var r = response.data;
                     r.forEach(resp => {
-                        var mappedItem: InventoryItem = {bmsId:"", brKey:0};
-                        mappedItem.bmsId = resp.keyProperty1;
-                        mappedItem.brKey = resp.keyProperty2;
+                        var mappedItem: InventoryItem = {keyProperties:[]};
+                        mappedItem.keyProperties = resp.keyProperties
                         mappedItems.push(mappedItem);
                     });
                     commit('inventoryItemsMutator', mappedItems);
@@ -81,7 +80,7 @@ const actions = {
             });
     },
 
-    async getInventoryItemDetailByBMSId({commit}: any, payload: any) {
+    /* async getInventoryItemDetailByBMSId({commit}: any, payload: any) {
         await InventoryService.getInventoryItemDetailByBMSId(payload.bmsId)
             .then((response: AxiosResponse<InventoryItemDetail>) => {
                 if (hasValue(response, 'data')) {
@@ -96,7 +95,7 @@ const actions = {
                     commit('inventoryItemDetailMutator', response.data);
                 }
             });
-    },
+    }, */
 
     async getStaticInventoryHTML({commit}: any, payload: any){
         await InventoryService.getStaticInventoryHTML(payload.reportType, payload.filterData)

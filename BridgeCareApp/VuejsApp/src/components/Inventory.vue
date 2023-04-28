@@ -64,8 +64,8 @@
 
         @Action('getInventory') getInventoryAction: any;
         @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
-        @Action('getInventoryItemDetailByBMSId') getInventoryItemDetailByBMSIdAction: any;
-        @Action('getInventoryItemDetailByBRKey') getInventoryItemDetailByBRKeyAction: any;
+        //@Action('getInventoryItemDetailByBMSId') getInventoryItemDetailByBMSIdAction: any;
+        //@Action('getInventoryItemDetailByBRKey') getInventoryItemDetailByBRKeyAction: any;
         @Action('appendBmsIdSearchString') appendBmsIdSearchStringAction: any;
         @Action('appendBrKeySearchNumber') appendBrKeySearchNumberAction: any;
         @Action('setIsBusy') setIsBusyAction: any;
@@ -164,12 +164,8 @@
         /**
          * Vue component has been mounted
          */
-        mounted() {
-            //this.$forceUpdate();
-            var inventoryDetail = {
-                key1: "BMSID",
-                key2: "BRKEY_"
-            };
+        mounted() {                        
+            const inventoryDetail = ["BMSID","BRKEY_"]; // TODO: these should go in config setting and updated per implementation requirements.
             this.getInventoryAction(inventoryDetail);
         }
 

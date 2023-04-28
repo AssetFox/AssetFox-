@@ -32,12 +32,12 @@
                         Raw Data
                     </v-btn>
                     <v-btn
-                        @click="onNavigate('/UserCriteria/')"
+                        @click="onNavigate('/EditAdmin/')"
                         class="ara-blue-pantone-281"
                         flat
                         v-if="hasAdminAccess"
                     >
-                        Security
+                        Administration
                     </v-btn>
                     <v-btn
                         @click="onNavigate('/Inventory/')"

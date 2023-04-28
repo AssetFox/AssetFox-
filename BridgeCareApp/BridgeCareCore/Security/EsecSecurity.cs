@@ -1,14 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.StartupExtension;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using static BridgeCareCore.Security.SecurityConstants;
 
 namespace BridgeCareCore.Security
 {
@@ -29,8 +31,11 @@ namespace BridgeCareCore.Security
         {
             _revokedTokens = new ConcurrentDictionary<string, long>();
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            _securityType = _config.GetSection("SecurityType").Value;
-           // _esecPublicKey = SecurityFunctions.GetPublicKey(_config.GetSection("EsecConfig"));
+            _securityType = SecurityConfigurationReader.GetSecurityType(config);
+            if (_securityType == SecurityTypes.Esec)
+            {
+                _esecPublicKey = SecurityFunctions.GetPublicKey(config.GetSection("EsecConfig"));
+            }
             _roleClaimsMapper = roleClaimsMapper ?? throw new ArgumentNullException(nameof(roleClaimsMapper));
         }
 

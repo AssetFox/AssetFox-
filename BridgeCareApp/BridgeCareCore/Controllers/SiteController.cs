@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
+
     [Route("api/site/[controller]")]
     [ApiController]
     public class SiteController : BridgeCareCoreBaseController

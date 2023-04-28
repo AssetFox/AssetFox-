@@ -23,6 +23,7 @@ namespace BridgeCareCore.Security
         }
         public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
+            // wjwjwj _config here is a chained provider with nine children; the first child is apsettings.json
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.Esec)
             {
                 // Obtain the role(s) from the claims principal

@@ -80,7 +80,7 @@
         // brKeys: any[] = [];
         lastFiveBrKeySearches: any[] = [];
         brKeysSelectList: number[] = [];
-        selectedBrKey: number = 0;
+        selectedBrKey: string = '';
         conditionTableHeaders: DataTableHeader[] = [
             {text: '', value: '', align: 'center', sortable: false, class: '', width: ''},
             {text: 'Condition', value: '', align: 'center', sortable: false, class: '', width: ''},
@@ -185,22 +185,22 @@
                                 const brKeys: any[] = [];
 
                                 inventoryItems.forEach((item: InventoryItem, index: number) => {
-                                    if (index === 0) {
+                                    if (index === 0) { /* TODO: headers will be populated based on number of key attributes from settings */
                                         bmsIds.push({header: 'BMS Ids'});
 
                                         brKeys.push({header: 'BR Keys'});
                                     }
-
-                                    if (stateLastFiveBmsIdSearches.indexOf(item.bmsId) === -1) {
+                                    
+                                    if (stateLastFiveBmsIdSearches.indexOf(item.keyProperties[0]) === -1) {
                                         bmsIds.push({
-                                            identifier: item.bmsId,
+                                            identifier: item.keyProperties[0],
                                             group: 'BMS Ids'
                                         });
                                     }
 
-                                    if (stateLastFiveBrKeySearches.indexOf(item.brKey) === -1) {
+                                    if (stateLastFiveBrKeySearches.indexOf(item.keyProperties[1]) === -1) {
                                         brKeys.push({
-                                            identifier: item.brKey,
+                                            identifier: item.keyProperties[1],
                                             group: 'BR Keys'
                                         });
                                     }
@@ -310,34 +310,37 @@
          * BMS id has been selected
          */
         onSelectInventoryItemByBMSId(bmsId: string) {
-            var data : InventoryItem = {
-                bmsId: bmsId,
-                brKey: -1
-            };
+            var key : string = '-1';
+            var data : InventoryItem = { keyProperties: [
+                bmsId,
+                'key'
+                ]
+            };            
             this.selectedBmsId = bmsId;
-            const inventoryItem: InventoryItem = find(propEq('bmsId', bmsId), this.inventoryItems) as InventoryItem;
-            this.selectedBrKey = inventoryItem.brKey;
+            const inventoryItem: InventoryItem = find(propEq('bmsId', bmsId), this.inventoryItems) as InventoryItem; // TODO
+            this.selectedBrKey = inventoryItem.keyProperties[1];
             this.getStaticInventoryHTMLAction(({reportType: 'InventoryLookup', filterData: data}));
         }
 
         /**
          * BR key has been selected
          */
-        onSelectInventoryItemsByBRKey(brKey: number) {
-            var data : InventoryItem = {
-                bmsId: '',
-                brKey: brKey
+        onSelectInventoryItemsByBRKey(brKey: string) {
+            var data : InventoryItem = {keyProperties: [
+                '',
+                brKey
+                ],
             };
             this.selectedBrKey = brKey;
-            const inventoryItem: InventoryItem = find(propEq('brKey', brKey), this.inventoryItems) as InventoryItem;
-            this.selectedBmsId = inventoryItem.bmsId;
+            const inventoryItem: InventoryItem = find(propEq('brKey', brKey), this.inventoryItems) as InventoryItem; // TODO
+            this.selectedBmsId = inventoryItem.keyProperties[1];
             this.getStaticInventoryHTMLAction({reportType: 'InventoryLookup', filterData: data});
         }
 
         getGMapsUrl() {
             var url = `https://maps.google.com/maps?q=${this.inventoryItemDetail.name}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
             return encodeURI(url);
-        }
+        }    
     }
 </script>
 

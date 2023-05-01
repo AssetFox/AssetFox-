@@ -1,6 +1,4 @@
 export interface InventoryItem {
-    //bmsId: string;
-    //brKey: number;
     keyProperties: string[];
 }
 export interface MappedInventoryItem {

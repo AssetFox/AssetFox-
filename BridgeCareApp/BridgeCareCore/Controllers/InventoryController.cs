@@ -62,11 +62,11 @@ namespace BridgeCareCore.Controllers
                 {
                     keySegmentDatums.Add(_assetData.KeyProperties[keyProperty]);
                 }
-            }            
-
+            }
+            
             foreach (var keySegmentDatum in keySegmentDatums)
             {
-                foreach (var keyDatum in keySegmentDatum)
+                foreach (var keyDatum in keySegmentDatum.OrderBy(_ => _.KeyValue.TextValue))
                 {
                     var assetId = keyDatum.AssetId;
                     var value = keyDatum.KeyValue.TextValue;
@@ -81,7 +81,13 @@ namespace BridgeCareCore.Controllers
                 }
             }            
 
-            return Ok(assetKeyData.Values);
+            List<InventoryItem> inventoryItems = new List<InventoryItem>();
+            foreach(var assetKeyDataValue in  assetKeyData.Values)
+            {
+                inventoryItems.Add(new InventoryItem { keyProperties = assetKeyDataValue });
+            }
+
+            return Ok(inventoryItems);
         }
     }
 }

@@ -72,30 +72,13 @@ const actions = {
                     var r = response.data;
                     r.forEach(resp => {
                         var mappedItem: InventoryItem = {keyProperties:[]};
-                        mappedItem.keyProperties = resp.keyProperties
+                        mappedItem.keyProperties = resp.keyProperties;
                         mappedItems.push(mappedItem);
                     });
                     commit('inventoryItemsMutator', mappedItems);
                 }
             });
     },
-
-    /* async getInventoryItemDetailByBMSId({commit}: any, payload: any) {
-        await InventoryService.getInventoryItemDetailByBMSId(payload.bmsId)
-            .then((response: AxiosResponse<InventoryItemDetail>) => {
-                if (hasValue(response, 'data')) {
-                    commit('inventoryItemDetailMutator', response.data);
-                }
-            });
-    },
-    async getInventoryItemDetailByBRKey({commit}: any, payload: any) {
-        await InventoryService.getInventoryItemDetailByBRKey(payload.brKey)
-            .then((response: AxiosResponse<InventoryItemDetail>) => {
-                if (hasValue(response, 'data')) {
-                    commit('inventoryItemDetailMutator', response.data);
-                }
-            });
-    }, */
 
     async getStaticInventoryHTML({commit}: any, payload: any){
         await InventoryService.getStaticInventoryHTML(payload.reportType, payload.filterData)

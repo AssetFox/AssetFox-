@@ -1,8 +1,9 @@
-﻿namespace AppliedResearchAssociates.iAM.DTOs
+﻿using System.Collections.Generic;
+
+namespace AppliedResearchAssociates.iAM.DTOs
 {
-    public class KeyIDs
-    { 
-        public string KeyProperty1 { get; set; }
-        public string KeyProperty2 { get; set; }
+    public class InventoryItem
+    {
+        public List<string> keyProperties { get; set; }
     }
 }

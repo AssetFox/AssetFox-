@@ -161,32 +161,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             double noTreatmentDefaultCost,
             ScenarioSelectableTreatmentEntity noTreatmentEntity)
         {
-            var asset = simulation.Network.Assets.Single(_ =>
-                _.Id == maintainableAssetId);
+            var asset = simulation.Network.Assets.Single(_ => _.Id == maintainableAssetId);
 
-            // Ensure a no treatment committed project does not already exist
+            // Check for "colliding" CPs (a group of 2 or more CPs with the same asset-year). If CPs
+            // collide and at most one of the CPs is an active treatment, remove (duplicate) passive
+            // treatments. If more than one colliding CP is an active treatment, that's an error.
             try
             {
-                var existingCommittedProject = simulation.CommittedProjects.SingleOrDefault(_ => _.Asset.Id == asset.Id && _.Year == entity.Year);
-                if (existingCommittedProject != null)
+                var existingCommittedProjectsForThisAssetYear =
+                    simulation.CommittedProjects
+                    .Where(cp => (cp.Asset.Id, cp.Year) == (asset.Id, entity.Year))
+                    .ToList();
+
+                var mainProject =
+                    existingCommittedProjectsForThisAssetYear.SingleOrDefault(cp => cp.Name != noTreatmentEntity.Name) ??
+                    existingCommittedProjectsForThisAssetYear.FirstOrDefault();
+
+                foreach (var otherProject in existingCommittedProjectsForThisAssetYear.Where(cp => cp != mainProject))
                 {
-                    if (existingCommittedProject.Name == noTreatmentEntity.Name)
-                    {
-                        simulation.CommittedProjects.Remove(existingCommittedProject);
-                    }
-                    else
-                    {
-                        throw new ArgumentException();
-                    }
+                    _ = simulation.CommittedProjects.Remove(otherProject);
                 }
             }
             catch (InvalidOperationException)
             {
                 throw new InvalidOperationException($"{asset.Id} has multiple committed projects in year {entity.Year}");
-            }
-            catch (ArgumentException)
-            {
-                throw new InvalidOperationException($"{asset.Id} has a project type that was automatically added but is not the default treatment");
             }
 
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));

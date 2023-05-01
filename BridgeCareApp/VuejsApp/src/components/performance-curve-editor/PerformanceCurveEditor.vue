@@ -151,7 +151,6 @@
                                         "
                                         large
                                         lazy
-                                        persistent
                                     >
                                         <v-text-field
                                             readonly
@@ -190,7 +189,6 @@
                                         "
                                         large
                                         lazy
-                                        persistent
                                     >
                                         <v-text-field
                                             readonly

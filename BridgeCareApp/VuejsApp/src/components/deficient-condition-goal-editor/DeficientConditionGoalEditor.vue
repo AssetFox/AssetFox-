@@ -93,8 +93,7 @@
                                     :return-value.sync="props.item[header.value]"
                                     @save="onEditDeficientConditionGoalProperty(props.item,header.value,props.item[header.value])"
                                     large
-                                    lazy
-                                    persistent>
+                                    lazy>
                                     <v-text-field v-if="header.value !== 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"

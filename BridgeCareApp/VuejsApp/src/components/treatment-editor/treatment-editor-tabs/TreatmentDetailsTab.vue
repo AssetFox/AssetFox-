@@ -57,7 +57,7 @@
                     </v-flex>
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Years Before Any</v-subheader>
-                        <v-text-field
+                        <v-text-field 
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
                             :mask="'####'"
                             @input="
@@ -94,7 +94,7 @@
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
                     </v-flex>
-                    <v-flex xs3>
+<!--                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Performance Factor</v-subheader>
                         <v-text-field
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
@@ -113,7 +113,7 @@
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
                     </v-flex>
-                </v-layout>                
+ -->                </v-layout>                
                 <v-flex class="criteria-flex">
                     <v-menu
                         full-width

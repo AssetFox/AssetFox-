@@ -173,11 +173,12 @@
                                                     class='card-tab-content'
                                                 >
                                                     <PerformanceFactorTab
-                                                        :selectedTreatmentConsequences='selectedTreatment.consequences'
+                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performancefactor'
                                                         :selectedTreatment='selectedTreatment'
                                                         :rules='rules'
                                                         :callFromScenario='hasScenario'
                                                         :callFromLibrary='!hasScenario'
+                                                        @onModifyPerformanceFactor='modifySelectedTreatmentPerformanceFactor'
                                                     />
                                                 </v-card-text>
                                             </v-card>
@@ -331,6 +332,7 @@ import {
     SimpleTreatment,
     Treatment,
     TreatmentConsequence,
+    TreatmentPerformanceFactor,
     TreatmentCost,
     TreatmentDetails,
     TreatmentLibrary,
@@ -957,6 +959,19 @@ export default class TreatmentEditor extends Vue {
             this.modifySelectedTreatment({
                 ...clone(this.selectedTreatment),
                 costs: reject(propEq('id', costId), this.selectedTreatment.costs,),
+            });
+        }
+    }
+
+    modifySelectedTreatmentPerformanceFactor(modifiedPerformanceFactor: TreatmentPerformanceFactor,) {
+        if (this.hasSelectedTreatment) {
+            this.modifySelectedTreatment({
+                ...clone(this.selectedTreatment),
+                performancefactor: update(
+                    findIndex(propEq('id', modifiedPerformanceFactor.id), this.selectedTreatment.performancefactor,),
+                    modifiedPerformanceFactor,
+                    this.selectedTreatment.performancefactor,
+                ),
             });
         }
     }

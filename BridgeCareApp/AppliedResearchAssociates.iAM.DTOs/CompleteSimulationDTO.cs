@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public IList<CalculatedAttributeDTO> CalculatedAttributes { get; set; }
 
-        public IList<ReducedTreatmentDTO> Treatments { get; set; }
+        public IList<TreatmentDTO> Treatments { get; set; }
 
         public IList<TargetConditionGoalDTO> TargetConditionGoals { get; set; }
 

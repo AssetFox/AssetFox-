@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Enums
 {
     public class TreatmentDTOEnum
     {
-        public enum TreatmentCategory
+        public enum TreatmentType
         {
             Preservation,
             CapacityAdding,

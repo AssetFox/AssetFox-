@@ -461,9 +461,11 @@ table.v-table tbody td input {
 }
 
 .scenario-status {
-    display: inline;
-    min-inline-size: 90%; 
-    padding: 2%;  
+    display: block;
+    padding-left: 18px;
+    color: #2a578d !important;
+    font-weight: bold;
+    font-size: 16px;
 }
 
 .notification-message {

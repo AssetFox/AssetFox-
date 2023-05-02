@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -12,6 +13,7 @@ using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services.General_Work_Queue.WorkItems;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -31,16 +33,18 @@ namespace BridgeCareCore.Controllers
         private readonly IPerformanceCurvesService _performanceCurvesService;
         private readonly IPerformanceCurvesPagingService _performanceCurvePagingService;
         private readonly IClaimHelper _claimHelper;
+        private readonly IGeneralWorkQueueService _generalWorkQueueService;
 
         public PerformanceCurveController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService,
             IHttpContextAccessor httpContextAccessor,
             IPerformanceCurvesService performanceCurvesService, IPerformanceCurvesPagingService performanceCurvesPagingService,
-            IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IClaimHelper claimHelper, IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _performanceCurvesService = performanceCurvesService ?? throw new ArgumentNullException(nameof(performanceCurvesService));
             _performanceCurvePagingService = performanceCurvesPagingService ?? throw new ArgumentNullException(nameof(performanceCurvesPagingService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+            _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
         }
 
         [HttpPost]
@@ -264,26 +268,32 @@ namespace BridgeCareCore.Controllers
                         Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
                             ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
                 }
-                                
-                var result= new PerformanceCurvesImportResultDTO();
+
+                var libraryName = "";
                 await Task.Factory.StartNew(() =>
                 {
+                    var existingPerformanceCurveLibrary = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(performanceCurveLibraryId);
+                    if(existingPerformanceCurveLibrary != null)
+                        libraryName = existingPerformanceCurveLibrary.Name;
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        var existingPerformanceCurveLibrary = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(performanceCurveLibraryId);
+                        
                         if (existingPerformanceCurveLibrary != null)
                         {
                             _claimHelper.CheckIfAdminOrOwner(existingPerformanceCurveLibrary.Owner, UserId);
                         }
                     }
-                    result = _performanceCurvesService.ImportLibraryPerformanceCurvesFile(performanceCurveLibraryId, excelPackage, currentUserCriteriaFilter);
                 });
-
-                if (result.WarningMessage != null)
+                ImportLibraryPerformanceCurveWorkitem workItem = new ImportLibraryPerformanceCurveWorkitem(performanceCurveLibraryId, excelPackage, currentUserCriteriaFilter, UserInfo.Name, libraryName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = performanceCurveLibraryId, Status = analysisHandle.MostRecentStatusMessage });
                 }
-                return Ok(result.PerformanceCurveLibraryDTO);
+                return Ok();
             }
             catch (UnauthorizedAccessException)
             {
@@ -332,18 +342,23 @@ namespace BridgeCareCore.Controllers
                             ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
                 }
 
-                var result = new ScenarioPerformanceCurvesImportResultDTO();
+                var simulationName = "";
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    result = _performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, currentUserCriteriaFilter);
+                    simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 });
 
-                if (result.WarningMessage != null)
+                ImportScenarioPerformanceCurveWorkitem workItem = new ImportScenarioPerformanceCurveWorkitem(simulationId, excelPackage, currentUserCriteriaFilter, UserInfo.Name, simulationName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = analysisHandle.MostRecentStatusMessage });
                 }
-                return Ok(result.PerformanceCurves);
+                return Ok();
             }
             catch (UnauthorizedAccessException)
             {

@@ -72,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
-            workQueueLog ??= new DoNotWorkQueueLog();
+            workQueueLog ??= new DoNothingWorkQueueLog();
             // Check for the parameters
             if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {

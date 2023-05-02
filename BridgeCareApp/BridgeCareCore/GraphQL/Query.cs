@@ -37,7 +37,7 @@ namespace BridgeCareCore.GraphQL
             fullSimulation.ReportIndexes = _unitOfWork.ReportIndexRepository.GetAllForScenario(simulationGuid);
             fullSimulation.CommittedProjects = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationGuid);
             fullSimulation.CalculatedAttributes = _unitOfWork.CalculatedAttributeRepo.GetScenarioCalculatedAttributes(simulationGuid).ToList();            
-           // fullSimulation.Treatments = (IList<ReducedTreatmentDTO>)_unitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(simulationGuid);
+            fullSimulation.Treatments = _unitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(simulationGuid);
             fullSimulation.TargetConditionGoals = _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationGuid);
             fullSimulation.Budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationGuid);
             fullSimulation.DeficientConditionGoals = _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationGuid);

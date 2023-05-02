@@ -9,11 +9,12 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using BridgeCareCore.Security;
 
 namespace BridgeCareCore.Controllers
 {
 
-    [Route("api/site/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class SiteController : BridgeCareCoreBaseController
     {
@@ -29,7 +30,8 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                return Ok();
+                var name = UnitOfWork.SiteRepo.GetImplementationName();
+                return Ok(name);
             }
             catch (Exception e)
             {
@@ -41,11 +43,12 @@ namespace BridgeCareCore.Controllers
         //[HttpPost]
         [HttpPut]
         [Route("SetImplementationName/{name}")]
-        [Authorize]
+        [ClaimAuthorize("AdminAccess")]
         public async Task<IActionResult> SetImplementationName(string name)
         {
             try
             {
+
                 return Ok();
             }
             catch (Exception e)

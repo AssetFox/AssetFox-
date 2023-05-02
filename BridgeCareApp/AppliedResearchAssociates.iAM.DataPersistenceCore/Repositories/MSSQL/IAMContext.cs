@@ -62,6 +62,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HavePrecision(18, 2);
         }
 
+        public virtual DbSet<AdminSettingEntity> AdminSettingsSite { get; set; }
+
         public virtual DbSet<AggregatedResultEntity> AggregatedResult { get; set; }
 
         public virtual DbSet<AnalysisMethodEntity> AnalysisMethod { get; set; }
@@ -228,7 +230,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<UserEntity> User { get; set; }
 
         public virtual DbSet<SimulationUserEntity> SimulationUser { get; set; }
-
+        
         public virtual DbSet<CriterionLibraryUserEntity> CriterionLibraryUser { get; set; }
 
         public virtual DbSet<NetworkRollupDetailEntity> NetworkRollupDetail { get; set; }
@@ -2188,7 +2190,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
-
+            modelBuilder.Entity<AdminSettingEntity>(entity =>
+            {
+                entity.HasNoKey();
+            });
             modelBuilder.Entity<SimulationUserEntity>(entity =>
             {
                 entity.HasKey(e => new { e.SimulationId, e.UserId });

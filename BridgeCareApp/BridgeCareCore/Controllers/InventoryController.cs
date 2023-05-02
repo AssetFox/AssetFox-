@@ -53,8 +53,7 @@ namespace BridgeCareCore.Controllers
         {
             var assetKeyData = new Dictionary<Guid, List<string>>();
             var keySegmentDatums = new List<List<KeySegmentDatum>>();
-
-            // Todo check how to handle sort, should we just sort first key property's ?
+                        
             var keyPropertiesList = JsonConvert.DeserializeObject<List<string>>(keyProperties);
             foreach (var keyProperty in keyPropertiesList)
             {

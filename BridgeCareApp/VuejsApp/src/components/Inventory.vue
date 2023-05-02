@@ -64,20 +64,14 @@
 
         @Action('getInventory') getInventoryAction: any;
         @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
-        //@Action('getInventoryItemDetailByBMSId') getInventoryItemDetailByBMSIdAction: any;
-        //@Action('getInventoryItemDetailByBRKey') getInventoryItemDetailByBRKeyAction: any;
         @Action('appendBmsIdSearchString') appendBmsIdSearchStringAction: any;
         @Action('appendBrKeySearchNumber') appendBrKeySearchNumberAction: any;
         @Action('setIsBusy') setIsBusyAction: any;
         @Action('clearInventoryItemDetail') clearInventoryItemDetailAction: any;
-
-        /*referenceIndexTypes: number = 0;
-        referenceIndexTypesLabels = ['BMS ID', 'BR KEY'];*/
-        // bmsIds: any[] = [];
+        
         lastFiveBmsIdSearches: any[] = [];
         bmsIdsSelectList: any[] = [];
         selectedBmsId: string = '';
-        // brKeys: any[] = [];
         lastFiveBrKeySearches: any[] = [];
         brKeysSelectList: number[] = [];
         selectedBrKey: string = '';
@@ -185,9 +179,8 @@
                                 const brKeys: any[] = [];
 
                                 inventoryItems.forEach((item: InventoryItem, index: number) => {
-                                    if (index === 0) { /* TODO: headers will be populated based on number of key attributes from settings */
+                                    if (index === 0) { /* TODO: headers will be populated based on number of key attributes display names from config setting */
                                         bmsIds.push({header: 'BMS Ids'});
-
                                         brKeys.push({header: 'BR Keys'});
                                     }
                                     
@@ -312,12 +305,12 @@
         onSelectInventoryItemByBMSId(bmsId: string) {
             var key : string = '-1';
             var data : InventoryItem = { keyProperties: [
-                bmsId,
-                'key'
+                    bmsId,
+                    key
                 ]
             };            
             this.selectedBmsId = bmsId;
-            const inventoryItem: InventoryItem = find(propEq('bmsId', bmsId), this.inventoryItems) as InventoryItem; // TODO
+            const inventoryItem: InventoryItem = this.inventoryItems.filter(function(item){if(item.keyProperties.indexOf(bmsId) !== -1) return item;})[0];
             this.selectedBrKey = inventoryItem.keyProperties[1];
             this.getStaticInventoryHTMLAction(({reportType: 'InventoryLookup', filterData: data}));
         }
@@ -326,14 +319,14 @@
          * BR key has been selected
          */
         onSelectInventoryItemsByBRKey(brKey: string) {
-            var data : InventoryItem = {keyProperties: [
-                '',
-                brKey
+            var data : InventoryItem = { keyProperties: [
+                    '',
+                    brKey
                 ],
             };
             this.selectedBrKey = brKey;
-            const inventoryItem: InventoryItem = find(propEq('brKey', brKey), this.inventoryItems) as InventoryItem; // TODO
-            this.selectedBmsId = inventoryItem.keyProperties[1];
+            const inventoryItem = this.inventoryItems.filter(function(item){if(item.keyProperties.indexOf(brKey) !== -1) return item;})[0];
+            this.selectedBmsId = inventoryItem.keyProperties[0];
             this.getStaticInventoryHTMLAction({reportType: 'InventoryLookup', filterData: data});
         }
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -18,7 +19,7 @@ namespace BridgeCareCoreTests.Tests
         {
             SequentialWorkQueue<WorkQueueMetadata> queue = new();
             List<int> taskEffects = new();
-
+            
             queue.Enqueue(new TestWorkItem(1, 0, taskEffects), out _).Wait();
             queue.Enqueue(new TestWorkItem(2, 1000, taskEffects), out _).Wait();
             queue.Enqueue(new TestWorkItem(3, 0, taskEffects), out _).Wait();
@@ -60,6 +61,8 @@ namespace BridgeCareCoreTests.Tests
                 WorkTarget.Add(Id);
                 Task.Delay(MsDelay).Wait();
             }
+
+            public void OnFault(IServiceProvider serviceProvider, string errorMessage) => throw new NotImplementedException();
         }
     }
 }

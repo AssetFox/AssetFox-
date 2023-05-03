@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.Common.Logging
 {
     public class DoNothingWorkQueueLog : IWorkQueueLog
     {
-        public void UpdateWorkQueueStatus(Guid workId, string statusMessage) { }
+        public void UpdateWorkQueueStatus(string statusMessage) { }
     }
 }

@@ -43,9 +43,7 @@ namespace BridgeCareCore.Controllers
             if (!_assetData.KeyProperties.ContainsKey(propertyName)) return BadRequest($"Requested key property ({propertyName}) does not exist");
             return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
         }
-        
-        // TODO update UI to call new API, check from where to get keys, setting?
-
+                
         [HttpGet]
         [Route("GetInventory")]
         [Authorize]

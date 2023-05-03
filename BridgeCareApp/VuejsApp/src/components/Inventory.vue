@@ -160,7 +160,7 @@
          * Vue component has been mounted
          */
         mounted() {                        
-            const inventoryDetail = ["BMSID","BRKEY_"]; // TODO: Implementation based setting for keyAttributes should be defined in and read from config
+            const inventoryDetail = ["BMSID","BRKEY_"]; // TODO: Implementation based setting for keyAttributes should be defined and used here
             this.getInventoryAction(inventoryDetail);
         }
 
@@ -180,7 +180,8 @@
                                 const brKeys: any[] = [];
 
                                 inventoryItems.forEach((item: InventoryItem, index: number) => {
-                                    if (index === 0) { /* TODO: headers to be populated based on number of key attributes display names from config setting */
+                                    if (index === 0) { 
+                                        // TODO: headers to be populated based on number of key attributes display names from setting
                                         bmsIds.push({header: 'BMS Ids'});
                                         brKeys.push({header: 'BR Keys'});
                                     }

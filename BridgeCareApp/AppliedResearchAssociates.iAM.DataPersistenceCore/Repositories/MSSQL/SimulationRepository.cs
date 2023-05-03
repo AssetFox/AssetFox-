@@ -382,7 +382,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 if (simulationToClone.AnalysisMethod.CriterionLibraryAnalysisMethodJoin != null)
                 {
-                    throw new UntestedCodeException();
                     var criterionId = Guid.NewGuid();
                     simulationToClone.AnalysisMethod.CriterionLibraryAnalysisMethodJoin.CriterionLibrary.Id =
                         criterionId;

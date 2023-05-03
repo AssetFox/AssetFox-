@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.BudgetPriority;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
@@ -36,13 +37,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var networkId = networkEntity.Id;
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
-            var explorer = new Explorer(TestAttributeNames.Age);
-            var network2 = NetworkMapper.ToDomain(networkEntity, explorer);
-           // var networks = TestHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
-          //  var network = networks.Single(n => n.Id == networkId);
+            var explorer = TestHelper.UnitOfWork.AttributeRepo.GetExplorer();
+            var network = NetworkMapper.ToDomain(networkEntity, explorer);
             var date = new DateTime(2023, 5, 3);
-            SimulationMapper.CreateSimulation(simulationEntity, network2, date, date);
-            var simulation = network2.Simulations.Single(s => s.Id == simulationId);
+            SimulationMapper.CreateSimulation(simulationEntity, network, date, date);
+            var simulation = network.Simulations.Single(s => s.Id == simulationId);
             var analysisMethodId = Guid.NewGuid();
             var analysisMethodDto = TestHelper.UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationId);
             analysisMethodDto.Benefit = new BenefitDTO
@@ -51,12 +50,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Limit = 0.0,
                 Attribute = TestHelper.UnitOfWork.Context.Attribute.First().Name
             };
+            analysisMethodDto.CriterionLibrary = CriterionLibraryDtos.Dto();
+            var budgetPriority = BudgetPriorityTestSetup.SetupSingleBudgetPriorityForSimulationInDb(simulationId);
             TestHelper.UnitOfWork.AnalysisMethodRepo.UpsertAnalysisMethod(simulationId, analysisMethodDto);
             TestHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, "");
             var newSimulationName = RandomStrings.WithPrefix("cloned");
 
             var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
 
+            var clonedSimulation = cloningResult.Simulation;
+            var clonedAnalysisMethod = TestHelper.UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(clonedSimulation.Id);
+            Assert.NotEqual(analysisMethodDto.Id, clonedAnalysisMethod.Id);
+            Assert.NotEqual(analysisMethodDto.CriterionLibrary.Id, clonedAnalysisMethod.CriterionLibrary.Id);
+            Assert.Equal("mergedCriteriaExpression", clonedAnalysisMethod.CriterionLibrary.MergedCriteriaExpression);
         }
 
         [Fact]
@@ -153,10 +159,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
-            var budgetPriority = BudgetPriorityDtos.New();
-            var budgetPriorities = new List<BudgetPriorityDTO> { budgetPriority };
-            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(budgetPriorities, simulationId);
-            
+            var budgetPriority = BudgetPriorityTestSetup.SetupSingleBudgetPriorityForSimulationInDb(simulationId);
+
             var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
 
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);

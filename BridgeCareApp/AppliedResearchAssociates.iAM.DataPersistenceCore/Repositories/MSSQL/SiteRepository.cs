@@ -19,13 +19,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public string GetImplementationName()
         {
-            var name = _unitOfWork.Context.AdminSettingsSite.First().ImplementationName;
+            var name = _unitOfWork.Context.AdminSiteSettings.First().ImplementationName;
             return  name;
         }
 
         public void SetImplementationName(string name)
         {
-
+            var settings = _unitOfWork.Context.AdminSiteSettings.FirstOrDefault();
+            if (name == null)
+            {
+                return;
+            } 
+            settings.ImplementationName = name;
+            _unitOfWork.Context.AdminSiteSettings.Update(settings);
+            _unitOfWork.Context.SaveChanges();
         }
     }
 }

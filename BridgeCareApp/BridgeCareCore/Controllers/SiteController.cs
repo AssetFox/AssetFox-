@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Security;
+using Humanizer;
 
 namespace BridgeCareCore.Controllers
 {
@@ -48,7 +49,10 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.SiteRepo.SetImplementationName(name);
+                });
                 return Ok();
             }
             catch (Exception e)

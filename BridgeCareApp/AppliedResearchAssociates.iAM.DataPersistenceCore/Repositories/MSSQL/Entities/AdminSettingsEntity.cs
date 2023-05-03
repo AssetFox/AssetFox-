@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,5 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class AdminSettingEntity
     {
         public string ImplementationName { get; set; }
+        public int ID { get; set; }
+        public Image SiteLogo { get; set; }
+        public Image ImplementationLogo { get; set; }
     }
 }

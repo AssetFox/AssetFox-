@@ -10,13 +10,15 @@
                 </v-toolbar-title>
                 <v-toolbar-items>
                     <v-btn
+                        id="App-btn-scenarios"
                         @click="onNavigate('/Scenarios/')"
-                        flat
                         class="ara-blue-pantone-281"
+                        flat                        
                     >
                         Scenarios
                     </v-btn>                   
                      <v-btn
+                        id="App-btn-libraries"
                         @click="onNavigate('/EditLibrary/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -24,6 +26,7 @@
                         Libraries
                     </v-btn>
                     <v-btn
+                        id="App-btn-rawData"
                         @click="onNavigate('/EditRawData/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -32,6 +35,7 @@
                         Raw Data
                     </v-btn>
                     <v-btn
+                        id="App-btn-administration"
                         @click="onNavigate('/EditAdmin/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -40,6 +44,7 @@
                         Administration
                     </v-btn>
                     <v-btn
+                        id="App-btn-inventory"
                         @click="onNavigate('/Inventory/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -47,6 +52,7 @@
                         Inventory
                     </v-btn>
                      <v-btn
+                        id="App-btn-news"
                         @click="onShowNewsDialog()"
                         class="ara-blue-pantone-281"
                         flat

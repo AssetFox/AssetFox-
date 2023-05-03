@@ -11,7 +11,7 @@
                             <v-edit-dialog
                                 v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
                                 :return-value.sync='props.item[header.value]'
-                                @save='onEditConsequenceProperty(props.item, header.value, props.item[header.value])'
+                                @save='onEditPerformanceFactorProperty(props.item, header.value, props.item[header.value])'
                                 large lazy persistent>
                                 <v-text-field v-if="header.value === 'attribute'" readonly single-line class='ghd-control-text-sm'
                                               :value='props.item.attribute'
@@ -43,7 +43,7 @@ import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
 import { State } from 'vuex-class';
 import { clone, isNil } from 'ramda';
-import { TreatmentAttributeFactor, TreatmentConsequence, Treatment } from '@/shared/models/iAM/treatment';
+import { TreatmentAttributeFactor, TreatmentPerformanceFactor, Treatment } from '@/shared/models/iAM/treatment';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -57,7 +57,7 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
     },
 })
 export default class PerformanceFactorTab extends Vue {
-    @Prop() treatmentAttributeFactor: TreatmentConsequence[];
+    @Prop() treatmentAttributeFactor: TreatmentPerformanceFactor[];
     @Prop() selectedTreatment: Treatment;
     @Prop() rules: InputValidationRules;
     @Prop() callFromScenario: boolean;
@@ -74,14 +74,14 @@ export default class PerformanceFactorTab extends Vue {
     uuidNIL: string = getBlankGuid();
 
     mounted() {
-        console.log("" + this.selectedTreatmentConsequences);
+        console.log("" + this.selectedTreatmentPerformanceFactors);
         this.setAttributeSelectItems();
     }
 
-    @Watch('selectedTreatmentConsequences')
-    onSelectedTreatmentConsequencesChanged() {
+    @Watch('selectedTreatmentPerformanceFactors')
+    onSelectedTreatmentPerformanceFactorsChanged() {
         console.log("selected treatment: " + this.selectedTreatment.name);
-        this.factorGridData = clone(this.selectedTreatmentConsequences);
+        this.factorGridData = clone(this.selectedTreatmentPerformanceFactors);
     }
 
     @Watch('stateAttributes')
@@ -95,13 +95,17 @@ export default class PerformanceFactorTab extends Vue {
                 text: attribute.name,
                 value: attribute.name,
             }));
-
+  
             this.factorGridData = this.attributeSelectItems.map(_ => ({
                 attribute : _.value,
                 factor : 1.0,
             }));
         }
     }
+    onEditPerformanceFactorProperty(performancefactor: TreatmentPerformanceFactor, property: string, value: any) {
+        this.$emit('onModifyPerformanceFactor', setItemPropertyValue(property, value, performancefactor));
+    }
+
     onModifyPerformanceFactor() {
         // emit the attribute/factor object
         //this.$emit('onAddConsequence', newConsequence);

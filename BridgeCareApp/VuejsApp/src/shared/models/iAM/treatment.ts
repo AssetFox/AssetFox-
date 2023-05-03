@@ -30,6 +30,12 @@ export interface TreatmentCost {
     criterionLibrary: CriterionLibrary;
 }
 
+export interface TreatmentPerformanceFactor {
+    id: string;
+    attribute: string;
+    performancefactor: string;
+}
+
 export interface TreatmentConsequence {
     id: string;
     attribute: string;
@@ -47,6 +53,7 @@ export interface Treatment {
     criterionLibrary: CriterionLibrary;
     costs: TreatmentCost[];
     consequences: TreatmentConsequence[];
+    performancefactor: TreatmentPerformanceFactor[];
     budgetIds: string[];
     addTreatment: boolean;
     category: TreatmentCategory;
@@ -98,6 +105,7 @@ export const emptyCost: TreatmentCost = {
     criterionLibrary: clone(emptyCriterionLibrary),
 };
 
+
 export const emptyConsequence: TreatmentConsequence = {
     id: getBlankGuid(),
     attribute: '',
@@ -121,7 +129,8 @@ export const emptyTreatment: Treatment = {
     assetType: AssetType.bridge,
     performanceFactor: 1,
     isModified: false,
-    libraryId: ''
+    libraryId: '',
+    performancefactor: []
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {

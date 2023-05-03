@@ -1320,7 +1320,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // add simulation user
             if (simulationToClone.SimulationUserJoins.Any())
             {
-                throw new UntestedCodeException();
                 _unitOfWork.Context.AddAll(simulationToClone.SimulationUserJoins.ToList());
                 simulationToClone.SimulationUserJoins.ToList()
                     .ForEach(join => join.User = _unitOfWork.UserEntity ?? new UserEntity

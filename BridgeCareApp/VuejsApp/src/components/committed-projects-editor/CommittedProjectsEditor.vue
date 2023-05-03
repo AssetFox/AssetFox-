@@ -96,7 +96,7 @@
                                                 && header.value !== 'year' 
                                                 && header.value !== 'brkey' 
                                                 && header.value !== 'treatment'
-                                                && header.value !== 'factor'
+                                                && header.value !== 'performanceFactor'
                                                 && header.value !== 'cost'"
                                                 readonly
                                                 class="sm-txt"
@@ -124,7 +124,7 @@
                                                 :value='formatAsCurrency(props.item[header.value])'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                            <v-text-field v-if="header.value === 'factor'"
+                                            <v-text-field v-if="header.value === 'performanceFactor'"
                                                 :value='parseFloat(props.item[header.value])'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
@@ -276,23 +276,23 @@
                             </td>
                             <td>
                                 <v-edit-dialog
-                                :return-value.sync="props.item.factor"
+                                :return-value.sync="props.item.performanceFactor"
                                 large
                                 lazy
                                 persistent
-                                @save="onEditConsequenceProperty(props.item,'factor',props.item.factor)">
+                                @save="onEditConsequenceProperty(props.item,'performanceFactor',props.item.performanceFactor)">
                                 <v-text-field
                                     readonly 
                                     single-line
                                     class="sm-text"
-                                    :value='props.item.factor'
+                                    :value='props.item.performanceFactor'
                                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                 <template slot="input">
                                     <v-text-field
                                         label=""
                                         single-line
                                         maxlength="5"
-                                        v-model="props.item.factor"
+                                        v-model="props.item.performanceFactor"
                                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                 </template>    
                                 </v-edit-dialog>
@@ -532,7 +532,7 @@ export default class CommittedProjectsEditor extends Vue  {
         },
         {
             text: 'Factor',
-            value: 'factor',
+            value: 'performanceFactor',
             align: 'left',
             sortable: false,
             class: '',
@@ -728,7 +728,6 @@ export default class CommittedProjectsEditor extends Vue  {
                     if(isNil(row)) {
                         this.selectedCommittedProject = '';
                     }
-                    console.log("cp: " + this.sectionCommittedProjects[0].factor);
                 } 
             }); 
     }
@@ -776,7 +775,6 @@ export default class CommittedProjectsEditor extends Vue  {
         const newRow: SectionCommittedProject = clone(emptySectionCommittedProject)
         newRow.id = getNewGuid();
         newRow.name = '';
-        newRow.factor = 1.0;
         newRow.locationKeys[this.brkey_] = '';
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = this.scenarioId;
@@ -790,7 +788,7 @@ export default class CommittedProjectsEditor extends Vue  {
         newRow.committedProjectId = this.selectedCommittedProject;
         newRow.attribute = '';
         newRow.changeValue = '';
-        newRow.factor = 1.0;
+        newRow.performanceFactor = 1.0;
         this.selectedConsequences.push(newRow);
      }
 
@@ -885,7 +883,7 @@ export default class CommittedProjectsEditor extends Vue  {
             else if(property === 'brkey'){
                 this.handleBrkeyChange(row, scp, value);               
             }
-            else if(property === 'factor') {
+            else if(property === 'performanceFactor') {
                 this.handleFactorChange(row, scp, value);
             }
             else if(property === 'budget'){
@@ -1026,7 +1024,7 @@ export default class CommittedProjectsEditor extends Vue  {
                         consequence.changeValue,
                     ) === true &&
                     this.rules['generalRules'].valueIsNotEmpty(
-                        consequence.factor,
+                        consequence.performanceFactor,
                     ) === true )
                 );
             },
@@ -1126,7 +1124,7 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     handleFactorChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, factor: number) {
-        this.updateCommittedProject(row, factor, 'factor');
+        this.updateCommittedProject(row, factor, 'performanceFactor');
         this.onPaginationChanged();
     }
 
@@ -1202,6 +1200,7 @@ export default class CommittedProjectsEditor extends Vue  {
                     value,
                     row
                 ) as SectionCommittedProject
+        console.log("updated 0 consequence: " + updatedRow.consequences[0].performanceFactor);
         this.onUpdateRow(row.id, updatedRow);
         this.sectionCommittedProjects = update(
             findIndex(

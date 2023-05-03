@@ -135,6 +135,9 @@ namespace BridgeCareCore.Services
                         {
                             var specificChangeValue = project.Consequences.FirstOrDefault(_ => _.Attribute == attribute)?.ChangeValue ?? "";
                             worksheet.Cells[row, column++].Value = specificChangeValue;
+
+                            var performanceFactorValue = project.Consequences.FirstOrDefault(_ => _.Attribute == attribute)?.PerformanceFactor ?? 1.2;
+                            worksheet.Cells[row, column++].Value = performanceFactorValue;
                         });
                         row++;
                     });
@@ -164,7 +167,15 @@ namespace BridgeCareCore.Services
                         _.Consequences.Select(__ => __.Attribute).Distinct().OrderBy(__ => __))
                     .Distinct()
                     .ToList();
-                AddHeaderCells(worksheet, attributeNames);
+                List<string> attributesWithFactorNames = new List<string>();
+                foreach(var attributeName in attributeNames)
+                {
+                    var attributeWithFactor = attributeName + "_factor";
+                    attributesWithFactorNames.Add(attributeName);
+                    attributesWithFactorNames.Add(attributeWithFactor);
+                }
+                //AddHeaderCells(worksheet, attributeNames);
+                AddHeaderCells(worksheet, attributesWithFactorNames);
                 AddDataCells(worksheet, committedProjectDTOs, attributeNames);
             }
             else

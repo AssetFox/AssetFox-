@@ -14,7 +14,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                {
                    ID = table.Column<int>(type: "int", nullable: false)
                        .Annotation("SqlServer:Identity", "1, 1"),
-                   ImplementationName = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                   ImplementationName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                   SiteLogo = table.Column<string>(type: "image", nullable: true),
+                   ImplementationLogo = table.Column<string>(type: "image", nullable: true)
                },
                constraints: table =>
                {

@@ -1345,7 +1345,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                queueLog.UpdateWorkQueueStatus(simulationId, "Deleting Budgets");
+                queueLog.UpdateWorkQueueStatus("Deleting Budgets");
                 _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
                     _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
@@ -1367,7 +1367,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                queueLog.UpdateWorkQueueStatus(simulationId, "Deleting Committed Projects");
+                queueLog.UpdateWorkQueueStatus("Deleting Committed Projects");
                 _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
                     _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
@@ -1382,7 +1382,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                queueLog.UpdateWorkQueueStatus(simulationId, "Deleting Simulation");
+                queueLog.UpdateWorkQueueStatus("Deleting Simulation");
                 _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
                 _unitOfWork.Commit();
             }

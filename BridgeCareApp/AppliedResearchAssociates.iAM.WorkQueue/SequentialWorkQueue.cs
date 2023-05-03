@@ -5,7 +5,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using Microsoft.Extensions.DependencyInjection;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace AppliedResearchAssociates.iAM.WorkQueue;
 
@@ -137,21 +139,16 @@ public class SequentialWorkQueue<T>
                 }
                 else
                 {
-                    // Send a message
-                    using var scope = serviceProvider.CreateScope();
-                    var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-                    var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var message = new SimulationAnalysisDetailDTO()
-                    {
-                        SimulationId = Guid.Parse(WorkSpec.WorkId),
-                        Status = $"Run Failed. {WorkCompletion.Exception?.InnerException?.Message ?? "Unknown status."}",
-                        LastRun = DateTime.Now
-                    };
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, message);
-                    _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(message);
+                    WorkSpec.OnFault(serviceProvider, WorkCompletion.Exception?.InnerException?.Message ?? "");
                 }
 
                 RemoveFromQueue(false);
+                if(serviceProvider != null)
+                {
+                    using var scope = serviceProvider.CreateScope();
+                    var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+                    _hubService.SendRealTimeMessage(WorkSpec.UserId, HubConstant.BroadcastWorkQueueStatusUpdate, null);
+                }             
             }
             else
             {

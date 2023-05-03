@@ -33,6 +33,18 @@ export interface QueuedWork {
     previousRunTime?: string;
     queuePosition: number;
     workDescription: string;
+    workType: WorkType;
+    domainType: DomainType;
+}
+
+export enum WorkType {
+    SimulationAnalysis,
+    DeleteNetwork
+}
+
+export enum DomainType {
+    Simulation,
+    Network
 }
 
 export interface ScenarioActions {
@@ -63,12 +75,15 @@ export const emptyScenario: Scenario = {
     lastModifiedDate: new Date(),
 };
 
-export const emptySimulation: QueuedWork = {
+export const emptyQueuedWork: QueuedWork = {
     id: getBlankGuid(),
     name: '',
     queueEntryTimestamp: new Date(),
     workStartedTimestamp: new Date(),
     queueingUser: '',
     queuePosition: 0,
-    workDescription: ''
+    workDescription: '',
+    workType: WorkType.SimulationAnalysis,
+    domainType: DomainType.Simulation
+
 };

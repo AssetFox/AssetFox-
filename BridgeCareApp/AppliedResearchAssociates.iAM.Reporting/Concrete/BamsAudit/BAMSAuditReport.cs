@@ -151,7 +151,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             };
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
 
             var logger = new CallbackLogger(str => UpsertSimulationReportDetailWithStatus(reportDetailDto, str));
             var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);            
@@ -186,7 +186,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             reportDetailDto.Status = $"Creating Data TAB";
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var bridgesWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.BridgesTab);
             var dataTabRequiredAttributes = DataTab.GetRequiredAttributes();
             ValidateSections(simulationOutput, reportDetailDto, simulationId, dataTabRequiredAttributes);
@@ -197,7 +197,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             reportDetailDto.Status = $"Creating Decision TAB";
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var decisionsWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.DecisionsTab);
             var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
             ValidateSections(simulationOutput, reportDetailDto, simulationId, new HashSet<string>(performanceCurvesAttributes.Except(dataTabRequiredAttributes)));
@@ -208,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             reportDetailDto.Status = $"Creating Report file";
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
             reportPath = Path.Combine(folderPathForSimulation, "BAMSAuditReport.xlsx");
@@ -220,7 +220,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             reportDetailDto.Status = $"Report generation completed";          
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
 
             return reportPath;
         }

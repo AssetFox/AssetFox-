@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Models;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
@@ -288,6 +289,20 @@ namespace BridgeCareCore.Services
             }
         }
 
+        public void OnFault(IServiceProvider serviceProvider, string errorMessage)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            var message = new SimulationAnalysisDetailDTO()
+            {
+                SimulationId = Guid.Parse(WorkId),
+                Status = $"Run Failed. {errorMessage ?? "Unknown status."}",
+                LastRun = DateTime.Now
+            };
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, message);
+            _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(message);
+        }
         private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status, DateTime lastRun) => new()
         {
             SimulationId = SimulationId,

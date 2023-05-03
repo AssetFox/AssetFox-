@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
             SimulationID = simulationGuid;
             Status = "Generating report";
-            workQueueLog.UpdateWorkQueueStatus(SimulationID.Value, Status);
+            workQueueLog.UpdateWorkQueueStatus(Status);
 
             // Check for simulation existence
             string reportFileName;
@@ -86,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
            
             // Pull the simulation object
             Status = "Getting simulation output";
-            workQueueLog.UpdateWorkQueueStatus(SimulationID.Value, Status);
+            workQueueLog.UpdateWorkQueueStatus(Status);
             Analysis.Engine.SimulationOutput simulationOutput;
             try
             {
@@ -103,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Save the output to a file
             Status = "Saving output";
-            workQueueLog.UpdateWorkQueueStatus(SimulationID.Value, Status);
+            workQueueLog.UpdateWorkQueueStatus(Status);
             try
             {
                 checkCancelled(cancellationToken);
@@ -123,7 +123,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Results = reportFileName;  // This is not set until here to ensure the file was created correctly
             IsComplete = true;
             Status = "File generated.";
-            workQueueLog.UpdateWorkQueueStatus(SimulationID.Value, Status);
+            workQueueLog.UpdateWorkQueueStatus(Status);
             return;
         }
 

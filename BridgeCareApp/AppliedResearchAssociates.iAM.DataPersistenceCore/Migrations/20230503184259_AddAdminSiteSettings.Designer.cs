@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20230503181515_AddAdminSiteSettings")]
+    [Migration("20230503184259_AddAdminSiteSettings")]
     partial class AddAdminSiteSettings
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

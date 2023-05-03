@@ -26,6 +26,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         IAttributeDatumRepository AttributeDatumRepo { get; }
 
+        IExtendedAttributeDatumRepository ExtendedAttributeDatumRepo { get; }
+
         IAttributeRepository AttributeRepo { get; }
 
         IAttributeValueHistoryRepository AttributeValueHistoryRepo { get; }

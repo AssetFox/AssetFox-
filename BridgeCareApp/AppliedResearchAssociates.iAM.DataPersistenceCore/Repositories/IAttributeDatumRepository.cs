@@ -11,4 +11,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<AttributeDatumDTO> GetAllInNetwork(IEnumerable<Guid> networkMaintainableAssetIds, List<Guid> requiredAttributeIds);
     }
+
+    public interface IExtendedAttributeDatumRepository : IAttributeDatumRepository
+    {
+        List<AttributeDatumDTO> GetRawData(Guid networkId, Dictionary<AttributeDTO, string> dictionary);
+        //void GetRawData(Guid networkId, HashSet<AttributeDTO> attributeDtos);
+    }
+
 }

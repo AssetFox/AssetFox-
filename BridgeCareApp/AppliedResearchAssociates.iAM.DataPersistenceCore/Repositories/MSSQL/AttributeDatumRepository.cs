@@ -48,8 +48,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributeDatumEntities = maintainableAssets
                 .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id)));
 
-             var configAttributeIds = configurableAttributes.Select(s => s.Id).ToHashSet();
-             var filteredEntities = attributeDatumEntities.Where(_ => configAttributeIds.Contains(_.AttributeId)).ToList();
+            var configAttributeIds = configurableAttributes.Select(s => s.Id).ToHashSet();
+            var filteredEntities = attributeDatumEntities.Where(_ => configAttributeIds.Contains(_.AttributeId)).ToList();
 
             _unitOfWork.Context.AddAll(filteredEntities, _unitOfWork.UserEntity?.Id);
 
@@ -63,12 +63,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributeDatumDTOs = new List<AttributeDatumDTO>();
             var attributeDatumSet = _unitOfWork.Context.AttributeDatum;
             var attributeDatums = requiredAttributeIds?.Count > 0 ? attributeDatumSet.Where(_ => requiredAttributeIds.Contains(_.AttributeId)) : attributeDatumSet.Select(_ => _);
-                        
-            foreach(var assetId in networkMaintainableAssetIds)
+
+            foreach (var assetId in networkMaintainableAssetIds)
             {
                 var attributeDatumsForAsset = attributeDatums.Where(_ => _.MaintainableAssetId == assetId).ToList();
                 foreach (var attributeDatumForAsset in attributeDatumsForAsset)
-                {                   
+                {
                     var attributeDatumDTO = new AttributeDatumDTO
                     {
                         MaintainableAssetId = assetId,
@@ -82,6 +82,55 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return attributeDatumDTOs;
+        }
+    }
+
+    public class ExtendedAttributeDatumRepository : IExtendedAttributeDatumRepository
+    {
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private AttributeDatumRepository attributeDatumRepo;
+
+        public ExtendedAttributeDatumRepository(UnitOfDataPersistenceWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            attributeDatumRepo = new AttributeDatumRepository(unitOfWork);
+        }
+
+        public void AddAssignedData(List<MaintainableAsset> maintainableAssets, List<AttributeDTO> attributeDtos) =>
+            attributeDatumRepo.AddAssignedData(maintainableAssets, attributeDtos);
+
+        public List<AttributeDatumDTO> GetAllInNetwork(IEnumerable<Guid> networkMaintainableAssetIds, List<Guid> requiredAttributeIds) =>
+            attributeDatumRepo.GetAllInNetwork(networkMaintainableAssetIds, requiredAttributeIds);
+
+
+
+        public List<AttributeDatumDTO> GetRawData(Guid networkId, Dictionary<AttributeDTO, string> dictionary)
+        {
+            //Get all AttributeDatumDTOs in a network. (We call the GetAttributes() function here, because otherwise the Attribute properties inside our attributeDatumDTOs would be unpopulated & null. Hugo & I faced a similar problem before.)
+            //https://stackoverflow.com/questions/1577822/passing-a-single-item-as-ienumerablet
+            _unitOfWork.AttributeRepo.GetAttributes();
+            List<AttributeDatumDTO> attributeDatumDTOs = _unitOfWork.AttributeDatumRepo.GetAllInNetwork(new[] { networkId }, null);
+            HashSet<AttributeDatumDTO> returnSet = new();
+
+            //In each AttributeDatumDTO,
+            foreach (AttributeDatumDTO ad in attributeDatumDTOs)
+            {
+                //TODO: this will throw an error if dictionary is null.
+                //In each dictionary value,
+                int counter = 0;
+                foreach (KeyValuePair<AttributeDTO, string> kvp in dictionary)
+                {
+                    //TODO
+                    //Check if this appears in every dictionary value.
+                    if (kvp.Value.Contains(ad.TextValue) || kvp.Value.Contains(ad.NumericValue.ToString()))
+                        counter++;
+                }
+                //TODO
+                //If it did appear in every dictionary value, add it to return list. Do not allow duplicate attributes. 
+                if (counter == dictionary.Count)
+                    returnSet.Add(ad);
+            }
+            return returnSet.ToList();
         }
     }
 }

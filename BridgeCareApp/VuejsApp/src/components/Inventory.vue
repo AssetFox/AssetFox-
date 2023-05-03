@@ -4,6 +4,7 @@
             <v-layout justify-space-between row>
                 <v-spacer></v-spacer>
                 <v-flex xs2>
+                <!--TODO: lists should be dynamically created based on no. of implementation based keyAttributes-->
                     <v-autocomplete :items="bmsIdsSelectList" @change="onSelectInventoryItemByBMSId" item-text="identifier" item-value="identifier"
                                     label="Select by BMS Id" outline
                                     v-model="selectedBmsId">
@@ -159,7 +160,7 @@
          * Vue component has been mounted
          */
         mounted() {                        
-            const inventoryDetail = ["BMSID","BRKEY_"]; // TODO: these should go in config setting and updated per implementation requirements.
+            const inventoryDetail = ["BMSID","BRKEY_"]; // TODO: Implementation based setting for keyAttributes should be defined in and read from config
             this.getInventoryAction(inventoryDetail);
         }
 
@@ -179,7 +180,7 @@
                                 const brKeys: any[] = [];
 
                                 inventoryItems.forEach((item: InventoryItem, index: number) => {
-                                    if (index === 0) { /* TODO: headers will be populated based on number of key attributes display names from config setting */
+                                    if (index === 0) { /* TODO: headers to be populated based on number of key attributes display names from config setting */
                                         bmsIds.push({header: 'BMS Ids'});
                                         brKeys.push({header: 'BR Keys'});
                                     }

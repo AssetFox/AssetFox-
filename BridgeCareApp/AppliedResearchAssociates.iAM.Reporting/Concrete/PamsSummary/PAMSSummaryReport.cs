@@ -221,14 +221,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             checkCancelled(cancellationToken);
             // Parameters TAB
             reportDetailDto.Status = $"Creating Parameters TAB";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Parameters_Tab);
 
             checkCancelled(cancellationToken);
             // PAMS Data TAB
             reportDetailDto.Status = $"Creating Pams Data TAB";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PAMSData_Tab);
             var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData);
@@ -240,7 +240,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             checkCancelled(cancellationToken);
             //// Pavement Work Summary TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pamsWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
             var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
@@ -248,7 +248,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             checkCancelled(cancellationToken);
             //// Pavement Work Summary By Budget TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary By Budget TAB";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pavementWorkSummaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummaryByBudget_Tab);
             _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
@@ -256,28 +256,28 @@ namespace AppliedResearchAssociates.iAM.Reporting
             checkCancelled(cancellationToken);
             // Unfunded Pavement Projects TAB
             reportDetailDto.Status = $"Unfunded Pavement Projects TAB";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
             _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
 
             checkCancelled(cancellationToken);
             // County Summary TAB
             reportDetailDto.Status = $"County Summary TAB";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var _countySummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.CountySummary_Tab);
             _countySummary.Fill(_countySummaryWorksheet, reportOutputData, simulationYears, simulation);
 
             checkCancelled(cancellationToken);
             //Graph TABs
             reportDetailDto.Status = $"Creating Graph TABs";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _addGraphsInTabs.Add(excelPackage, worksheet, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
             checkCancelled(cancellationToken);
             // Legend TAB
             reportDetailDto.Status = $"Creating Legends TAB";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Legend_Tab);
             _summaryReportGlossary.Fill(shortNameWorksheet);
             checkCancelled(cancellationToken);
@@ -293,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             functionReturnValue = filePath;
 
             reportDetailDto.Status = $"Report generation completed";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
 
             //return value

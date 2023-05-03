@@ -15,6 +15,8 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using BridgeCareCore.Controllers;
 
 namespace BridgeCareCore.Services
 {
@@ -29,7 +31,7 @@ namespace BridgeCareCore.Services
 
         public string WorkName => scenarioName;
 
-        public WorkQueueMetadata Metadata => new WorkQueueMetadata() {DomainType = DomainType.Simulation };
+        public WorkQueueMetadata Metadata => new WorkQueueMetadata() {DomainType = DomainType.Simulation, WorkType = WorkType.ReportGeneration};
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -39,7 +41,7 @@ namespace BridgeCareCore.Services
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _log = scope.ServiceProvider.GetRequiredService<ILog>();
             var _generator = scope.ServiceProvider.GetRequiredService<IReportGenerator>();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, scenarioId);
             updateStatusOnHandle.Invoke("Generating...");
             var report = GenerateReport(reportName, ReportType.File, scenarioId.ToString());
 
@@ -134,6 +136,14 @@ namespace BridgeCareCore.Services
 
             void SendRealTimeMessage(string message) =>
                 _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, message);
+        }
+
+        public void OnFault(IServiceProvider serviceProvider, string errorMessage)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{ReportController.ReportError}::GetFile - {errorMessage}");
         }
     }
 }

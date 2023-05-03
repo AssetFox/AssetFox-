@@ -144,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 SimulationId = simulationId,
                 Status = $"Generating..."
             };
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
@@ -181,7 +181,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             checkCancelled(cancellationToken);
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var folderPathForSimulation = $"Reports\\{simulationId}";

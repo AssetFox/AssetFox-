@@ -181,7 +181,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                queueLog.UpdateWorkQueueStatus(networkId, "Deleting Benefit Quantifier");
+                queueLog.UpdateWorkQueueStatus("Deleting Benefit Quantifier");
 
                 _unitOfWork.BenefitQuantifierRepo.DeleteBenefitQuantifier(networkId);
                                    
@@ -190,7 +190,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                queueLog.UpdateWorkQueueStatus(networkId, "Deleting Simulations");
+                queueLog.UpdateWorkQueueStatus("Deleting Simulations");
 
                 _unitOfWork.SimulationRepo.DeleteSimulationsByNetworkId(networkId);
                                 
@@ -199,7 +199,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                queueLog.UpdateWorkQueueStatus(networkId, "Deleting Maintainable Assets");
+                queueLog.UpdateWorkQueueStatus("Deleting Maintainable Assets");
 
                 _unitOfWork.Context.DeleteEntity<NetworkEntity>(_ => _.Id == networkId);
 

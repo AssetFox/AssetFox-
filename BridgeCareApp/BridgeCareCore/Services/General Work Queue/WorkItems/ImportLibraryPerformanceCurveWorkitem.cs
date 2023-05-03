@@ -10,6 +10,8 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
+using BridgeCareCore.Controllers;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
@@ -34,12 +36,20 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _performanceCurvesService = scope.ServiceProvider.GetRequiredService<IPerformanceCurvesService>();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, PerformanceCurveLibraryId);
             var importResult = _performanceCurvesService.ImportLibraryPerformanceCurvesFile(PerformanceCurveLibraryId, ExcelPackage, CurrentUserCriteriaFilter);
             if (importResult.WarningMessage != null)
             {
                 _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWarning, importResult.WarningMessage);
             }
+        }
+
+        public void OnFault(IServiceProvider serviceProvider, string errorMessage)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{PerformanceCurveController.DeteriorationModelError}::ImportLibraryPerformanceCurvesExcelFile - {errorMessage}");
         }
     }
 }

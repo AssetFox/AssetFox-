@@ -61,7 +61,7 @@ namespace BridgeCareCore.Services
             ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
-            queueLog.UpdateWorkQueueStatus(treatmentLibraryId, "Starting Import");
+            queueLog.UpdateWorkQueueStatus("Starting Import");
             var validationMessages = new List<string>();            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return new TreatmentImportResultDTO();
             var treatmentLibrary = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
@@ -98,7 +98,7 @@ namespace BridgeCareCore.Services
                 return new TreatmentImportResultDTO();
             if (combinedValidationMessage.Length == 0)
             {
-                queueLog.UpdateWorkQueueStatus(treatmentLibraryId, "Updating Treatment Library");
+                queueLog.UpdateWorkQueueStatus("Updating Treatment Library");
                 SaveToDatabase(returnValue);
             }
             return returnValue;
@@ -110,7 +110,7 @@ namespace BridgeCareCore.Services
             var scenarioTreatments = new List<TreatmentDTO>();
             var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return new ScenarioTreatmentImportResultDTO();
-            queueLog.UpdateWorkQueueStatus(simulationId, "Loading Excel");
+            queueLog.UpdateWorkQueueStatus("Loading Excel");
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {                
                 var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
@@ -137,7 +137,7 @@ namespace BridgeCareCore.Services
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     return new ScenarioTreatmentImportResultDTO();
-                queueLog.UpdateWorkQueueStatus(simulationId, "Upserting Treatments");
+                queueLog.UpdateWorkQueueStatus("Upserting Treatments");
                 _unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
             }
             return scenarioTreatmentImportResult;

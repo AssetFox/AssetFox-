@@ -8,11 +8,12 @@ using Moq;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public static class SimulationAnalysisMocks
+    public static class ServiceProviderMock
     {
-        public static Mock<ISimulationAnalysis> New()
+        public static Mock<IServiceProvider> New()
         {
-            return new Mock<ISimulationAnalysis>();
+            var mock = new Mock<IServiceProvider>();
+            return mock;
         }
     }
 }

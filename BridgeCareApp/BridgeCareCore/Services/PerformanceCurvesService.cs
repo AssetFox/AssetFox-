@@ -32,7 +32,7 @@ namespace BridgeCareCore.Services
         public PerformanceCurvesImportResultDTO ImportLibraryPerformanceCurvesFile(Guid performanceCurveLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
-            queueLog.UpdateWorkQueueStatus(performanceCurveLibraryId, "Starting Import");
+            queueLog.UpdateWorkQueueStatus("Starting Import");
             var performanceCurvesToImport = new List<PerformanceCurveDTO>();
             var performanceCurvesWithMissingAttributes = new List<string>();
             var performanceCurvesWithInvalidCriteria = new List<string>();
@@ -61,11 +61,11 @@ namespace BridgeCareCore.Services
                 #endregion
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     return new PerformanceCurvesImportResultDTO();
-                queueLog.UpdateWorkQueueStatus(performanceCurveLibraryId, "Updating Library");
+                queueLog.UpdateWorkQueueStatus("Updating Library");
                 performanceCurveRepo.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     return new PerformanceCurvesImportResultDTO();
-                queueLog.UpdateWorkQueueStatus(performanceCurveLibraryId, "Updating Performance Curves");
+                queueLog.UpdateWorkQueueStatus("Updating Performance Curves");
                 performanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurvesToImport, performanceCurveLibraryId);
             }
             catch (Exception ex)
@@ -99,7 +99,7 @@ namespace BridgeCareCore.Services
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     return new ScenarioPerformanceCurvesImportResultDTO();
-                queueLog.UpdateWorkQueueStatus(simulationId, "Creating Performance Curves To Be Imported");
+                queueLog.UpdateWorkQueueStatus("Creating Performance Curves To Be Imported");
                 CreatePerformanceCurvesDtos(excelPackage, currentUserCriteriaFilter, performanceCurvesWithMissingAttributes, performanceCurvesWithInvalidCriteria, performanceCurvesWithInvalidEquation, performanceCurvesToImport);
 
                 #region Commented update of existing and keeping existing curves
@@ -117,7 +117,7 @@ namespace BridgeCareCore.Services
                 #endregion
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     return new ScenarioPerformanceCurvesImportResultDTO();
-                queueLog.UpdateWorkQueueStatus(simulationId, "Upserting Performance Curves");
+                queueLog.UpdateWorkQueueStatus("Upserting Performance Curves");
                 performanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(performanceCurvesToImport, simulationId);
             }
             catch (Exception ex)

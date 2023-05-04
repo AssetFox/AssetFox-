@@ -1,4 +1,6 @@
-﻿namespace BridgeCareCore.Models
+﻿using AppliedResearchAssociates.iAM.DTOs.Enums;
+
+namespace BridgeCareCore.Models
 {
     public class WorkQueueMetadata
     {

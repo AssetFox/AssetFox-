@@ -20,6 +20,9 @@ using System.Linq;
 using BridgeCareCore.Security;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
+using AppliedResearchAssociates.iAM.Hubs.Services;
+using Microsoft.CodeAnalysis;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace BridgeCareCore.Controllers
 {
@@ -29,22 +32,19 @@ namespace BridgeCareCore.Controllers
     {
         public const string SimulationError = "Scenario Error";
 
-        private readonly ISimulationAnalysis _simulationAnalysis;
         private readonly ISimulationPagingService _simulationService;
         private readonly IWorkQueueService _workQueueService;
         private readonly IGeneralWorkQueueService _generalWorkQueueService;
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, IWorkQueueService workQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
-            IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public SimulationController(ISimulationPagingService simulationService, IWorkQueueService workQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
+            IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper, IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
-            _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentException(nameof(generalWorkQueueService));
+            this._generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
         }
 
         [HttpPost]
@@ -269,7 +269,8 @@ namespace BridgeCareCore.Controllers
                 {
                     scenarioName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 });
-                var analysisHandle = _simulationAnalysis.CreateAndRun(networkId, simulationId, UserInfo, scenarioName);
+                AnalysisWorkItem workItem = new(networkId, simulationId, UserInfo, scenarioName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
                 // Before sending a "queued" message that may overwrite early messages from the run,
                 // allow a brief moment for an empty queue to start running the submission.
                 await Task.Delay(500);
@@ -304,44 +305,57 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpDelete]
-        [Route("CancelSimulation/{simulationId}")]
+        [Route("CancelSimulation/{workId}")]
         [Authorize]
-        public async Task<IActionResult> CancelSimulation(Guid simulationId)
+        public async Task<IActionResult> CancelSimulation(Guid workId)
         {
             try
             {
-                _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(simulationId, UserInfo.Name, false);
-                var hasBeenRemovedFromQueue = _simulationAnalysis.Cancel(simulationId);
-                await Task.Delay(125);
-
-                if (hasBeenRemovedFromQueue)
+                var work = _workQueueService.GetQueuedWorkByWorkId(workId);
+                if(work == null)
+                    return Ok();
+                if(work.WorkType == WorkType.SimulationAnalysis)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                    _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(workId, UserInfo.Name, false);
+                    var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(workId);
+                    await Task.Delay(125);
+
+                    if (hasBeenRemovedFromQueue)
                     {
-                        SimulationId = simulationId,
-                        Status = "Canceled"
-                    });
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                        {
+                            SimulationId = workId,
+                            Status = "Canceled"
+                        });
+                    }
+                    else
+                    {
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                        {
+                            SimulationId = workId,
+                            Status = "Canceling analysis..."
+                        });
+                    }
                 }
                 else
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
-                    {
-                        SimulationId = simulationId,
-                        Status = "Canceling analysis..."
-                    });
+                    var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(workId);
+                    if(hasBeenRemovedFromQueue)
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, null);
+                }                           
 
-                }
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(workId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Current user role does not have permission to cancel analysis for {simulationName} ::{e.Message}");
                 throw;
             }
             catch (Exception e)
             {
-                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(workId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis for {simulationName}::{e.Message}");
                 throw;
             }

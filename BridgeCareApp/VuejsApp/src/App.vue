@@ -10,7 +10,7 @@
                 </v-toolbar-title>
                 <v-toolbar-items>
                     <v-btn
-                        id="App-btn-scenarios"
+                        id="App-scenarios-btn"
                         @click="onNavigate('/Scenarios/')"
                         class="ara-blue-pantone-281"
                         flat                        
@@ -18,7 +18,7 @@
                         Scenarios
                     </v-btn>                   
                      <v-btn
-                        id="App-btn-libraries"
+                        id="App-libraries-btn"
                         @click="onNavigate('/EditLibrary/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -26,7 +26,7 @@
                         Libraries
                     </v-btn>
                     <v-btn
-                        id="App-btn-rawData"
+                        id="App-rawData-btn"
                         @click="onNavigate('/EditRawData/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -35,7 +35,7 @@
                         Raw Data
                     </v-btn>
                     <v-btn
-                        id="App-btn-administration"
+                        id="App-administration-btn"
                         @click="onNavigate('/EditAdmin/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -44,7 +44,7 @@
                         Administration
                     </v-btn>
                     <v-btn
-                        id="App-btn-inventory"
+                        id="App-inventory-btn"
                         @click="onNavigate('/Inventory/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -52,7 +52,7 @@
                         Inventory
                     </v-btn>
                      <v-btn
-                        id="App-btn-news"
+                        id="App-news-btn"
                         @click="onShowNewsDialog()"
                         class="ara-blue-pantone-281"
                         flat

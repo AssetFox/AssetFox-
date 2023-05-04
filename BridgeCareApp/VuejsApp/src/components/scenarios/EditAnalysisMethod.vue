@@ -7,7 +7,7 @@
                         <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
-                                id="EditAnalysisMethod-select-weighting"
+                                id="EditAnalysisMethod-weighting-select"
                                 class="ghd-select ghd-control-border ghd-control-text"
                                 :items="weightingAttributes"
                                 append-icon=$vuetify.icons.ghd-down
@@ -27,7 +27,7 @@
                         <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
                             <v-select 
-                                id="EditAnalysisMethod-select-optimizationStrategy"
+                                id="EditAnalysisMethod-optimizationStrategy-select"
                                 class="ghd-select ghd-control-border ghd-control-text"
                                 :items="optimizationStrategy"
                                 append-icon=$vuetify.icons.ghd-down
@@ -46,7 +46,7 @@
                         <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Spending Strategy</v-subheader>
                             <v-select
-                                id="EditAnalysisMethod-select-spendingStrategy"
+                                id="EditAnalysisMethod-spendingStrategy-select"
                                 class="ghd-select ghd-control-border ghd-control-text"
                                 :items="spendingStrategy"
                                 append-icon=$vuetify.icons.ghd-down
@@ -67,7 +67,7 @@
                          <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
                             <v-select
-                                id="EditAnalysisMethod-select-benefitAttribute"
+                                id="EditAnalysisMethod-benefitAttribute-select"
                                 class="ghd-select ghd-control-text ghd-control-border"
                                 :items="benefitAttributes"
                                 append-icon=$vuetify.icons.ghd-down
@@ -83,7 +83,7 @@
                         <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
                             <v-text-field
-                                id="EditAnalysisMethod-textField-benefitLimit"
+                                id="EditAnalysisMethod-benefitLimit-textField"
                                 style="margin:0px"
                                 class="ghd-control-text ghd-control-border"
                                 @input="onSetBenefitProperty('limit', $event)"
@@ -103,7 +103,7 @@
                         </v-flex>
                         <v-flex xs4 class="ghd-constant-header">
                             <v-switch style="margin-left:10px;margin-top:30px;"
-                                id="EditAnalysisMethod-switch-allowMultiBudgetFunding"
+                                id="EditAnalysisMethod-allowMultiBudgetFunding-switch"
                                 class="ghd-checkbox"
                                 label="Allow Multi Budget Funding"
                                 :disabled="!hasAdminAccess"
@@ -117,7 +117,7 @@
                         <v-flex xs6>
                             <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                             <v-textarea
-                                id="EditAnalysisMethod-textArea-description"
+                                id="EditAnalysisMethod-description-textArea"
                                 class="ghd-control-text ghd-control-border"
                                 @input="
                                     onSetAnalysisMethodProperty(
@@ -140,7 +140,7 @@
                                 </v-flex>
                                 <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
                                     <v-btn
-                                        id="EditAnalysisMethod-btn-criteriaEditor"
+                                        id="EditAnalysisMethod-criteriaEditor-btn"
                                         style="padding-right:20px !important;"
                                         @click="
                                             onShowCriterionEditorDialog
@@ -153,7 +153,7 @@
                                 </v-flex>
                             </v-layout>
                             <v-textarea
-                                id="EditAnalysisMethod-textArea-criteria"
+                                id="EditAnalysisMethod-criteria-textArea"
                                 class="ghd-control-text ghd-control-border"
                                 style="padding-bottom: 0px; height: 90px;"
                                 no-resize
@@ -167,7 +167,7 @@
                             >
                             </v-textarea>
                             <v-checkbox
-                                id="EditAnalysisMethod-checkbox-criteria"
+                                id="EditAnalysisMethod-criteria-checkbox"
                                 style="padding-top: 0px; margin-top: 4px;"
                                 class="ghd-checkbox ghd-md-gray"
                                 label="Criteria is intentionally empty (MUST check to Save)" 
@@ -184,14 +184,14 @@
             <v-flex xs6>
                 <v-layout justify-center row>
                     <v-btn
-                        id="EditAnalysisMethod-btn-cancel"
+                        id="EditAnalysisMethod-cancel-btn"
                         @click="onDiscardChanges"
                         class="ghd-white-bg ghd-blue ghd-button-text ghd-button"
                         depressed
                         >Cancel</v-btn
                     >
                     <v-btn
-                        id="EditAnalysisMethod-btn-save"
+                        id="EditAnalysisMethod-save-btn"
                         @click="onUpsertAnalysisMethod"
                         :disabled="criteriaIsInvalid() || !valid"
                         depressed

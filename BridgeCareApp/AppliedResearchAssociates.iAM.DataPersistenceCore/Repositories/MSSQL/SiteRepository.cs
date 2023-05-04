@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -19,19 +20,44 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public string GetImplementationName()
         {
-            var name = _unitOfWork.Context.AdminSiteSettings.First().ImplementationName;
-            return  name;
+            if (_unitOfWork.Context.AdminSiteSettings.FirstOrDefault() == null)
+            {
+                return null;
+            }
+            else
+            {
+                var name = _unitOfWork.Context.AdminSiteSettings.First().ImplementationName;
+                return name;
+            }
+            
         }
 
         public void SetImplementationName(string name)
         {
             var settings = _unitOfWork.Context.AdminSiteSettings.FirstOrDefault();
-            if (name == null)
+
+            //If there is no existing entry in the database, it will create one.
+            if (settings == null)
             {
-                return;
-            } 
-            settings.ImplementationName = name;
-            _unitOfWork.Context.AdminSiteSettings.Update(settings);
+                _unitOfWork.Context.AdminSiteSettings.Add(new AdminSettingEntity
+                {
+                    ID = 1,
+                    ImplementationName = name,
+                    SiteLogo = null,
+                    ImplementationLogo = null
+                }) ;
+            }
+            //If there is an existing entry in the database, it updates it.
+            else
+            {              
+                if (name == null)
+                {
+                    return;
+                }
+                settings.ImplementationName = name;
+                _unitOfWork.Context.AdminSiteSettings.Update(settings);
+                
+            }
             _unitOfWork.Context.SaveChanges();
         }
     }

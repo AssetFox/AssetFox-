@@ -17,11 +17,6 @@ using System.Threading;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class UntestedCodeException: Exception
-    {
-
-    }
-
     public class SimulationRepository : ISimulationRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
@@ -502,7 +497,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (cashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin != null)
                     {
-                        throw new UntestedCodeException();
                         var criterionId = Guid.NewGuid();
                         cashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin.CriterionLibrary.Id = criterionId;
                         cashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin.CriterionLibrary.IsSingleUse = true;
@@ -528,7 +522,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.CommittedProjects.Any())
             {
-                throw new UntestedCodeException();
                 var committedProjectsAffected = simulationToClone.CommittedProjects.Where(_ =>
                     !simulationToClone.Budgets.Any(budget => budget.Name == _.ScenarioBudget.Name)).ToList();
 
@@ -620,7 +613,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.CalculatedAttributes.Any())
             {
-                throw new UntestedCodeException();
                 simulationToClone.CalculatedAttributes.ForEach(calculatedAttribute =>
                 {
                     calculatedAttribute.Id = Guid.NewGuid();
@@ -702,7 +694,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.ScenarioDeficientConditionGoals.Any())
             {
-                throw new UntestedCodeException();
                 simulationToClone.ScenarioDeficientConditionGoals.ForEach(goal =>
                 {
                     goal.Id = Guid.NewGuid();
@@ -729,7 +720,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.ScenarioTargetConditionalGoals.Any())
             {
-                throw new UntestedCodeException();
                 simulationToClone.ScenarioTargetConditionalGoals.ForEach(goal =>
                 {
                     goal.Id = Guid.NewGuid();
@@ -755,7 +745,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.SelectableTreatments.Any())
             {
-                throw new UntestedCodeException();
                 simulationToClone.SelectableTreatments.ForEach(treatment =>
                 {
                     treatment.Id = Guid.NewGuid();
@@ -1011,7 +1000,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 if (simulationToClone.CashFlowRules.Any(_ =>
                     _.CriterionLibraryScenarioCashFlowRuleJoin?.CriterionLibrary != null))
                 {
-                    throw new UntestedCodeException();
                     var cashFlowRuleCriteriaJoins = simulationToClone.CashFlowRules
                         .Where(_ => _.CriterionLibraryScenarioCashFlowRuleJoin?.CriterionLibrary != null)
                         .Select(_ => _.CriterionLibraryScenarioCashFlowRuleJoin).ToList();
@@ -1025,14 +1013,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // add committed projects
             if (simulationToClone.CommittedProjects.Any())
             {
-                throw new UntestedCodeException();
                 _unitOfWork.Context.AddAll(simulationToClone.CommittedProjects.ToList());
                 var committedProjectLocations = simulationToClone.CommittedProjects.Select(_ => _.CommittedProjectLocation).ToList();
                 _unitOfWork.Context.AddAll(committedProjectLocations);
                 // add committed project consequences
                 if (simulationToClone.CommittedProjects.Any(_ => _.CommittedProjectConsequences.Any()))
                 {
-                    throw new UntestedCodeException();
                     _unitOfWork.Context.AddAll(simulationToClone.CommittedProjects
                         .Where(_ => _.CommittedProjectConsequences.Any())
                         .SelectMany(_ => _.CommittedProjectConsequences
@@ -1070,12 +1056,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // add calculated attributes
             if (simulationToClone.CalculatedAttributes.Any())
             {
-                throw new UntestedCodeException();
                 _unitOfWork.Context.AddAll(simulationToClone.CalculatedAttributes.ToList());
 
                 if (simulationToClone.CalculatedAttributes.Any(_ => _.Equations.Any()))
                 {
-                    throw new UntestedCodeException();
                     _unitOfWork.Context.AddAll(simulationToClone.CalculatedAttributes
                         .Where(_ => _.Equations.Any())
                         .SelectMany(_ => _.Equations
@@ -1086,13 +1070,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 if (simulationToClone.CalculatedAttributes.Any(_ =>
                 _.Equations.Any()))
                 {
-                    throw new UntestedCodeException();
                     simulationToClone.CalculatedAttributes.ForEach(calculatedAttribute =>
                     {
                         // add calculated attribute equations
                         if (calculatedAttribute.Equations.Any(_ => _.EquationCalculatedAttributeJoin?.Equation != null))
                         {
-                            throw new UntestedCodeException();
                             var calculatedAttributeEquationJoins = calculatedAttribute.Equations
                            .Where(_ => _.EquationCalculatedAttributeJoin?.Equation != null)
                            .Select(_ => _.EquationCalculatedAttributeJoin).ToList();
@@ -1103,7 +1085,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         // add calculated attribute criteria
                         if (calculatedAttribute.Equations.Any(_ => _.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary != null))
                         {
-                            throw new UntestedCodeException();
                             var calculatedAttributeCriteriaJoins = calculatedAttribute.Equations
                                 .Where(_ => _.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary != null)
                                 .Select(_ => _.CriterionLibraryCalculatedAttributeJoin)
@@ -1118,13 +1099,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // add remaining life limits
             if (simulationToClone.RemainingLifeLimits.Any())
             {
-                throw new UntestedCodeException();
                 _unitOfWork.Context.AddAll(simulationToClone.RemainingLifeLimits.ToList());
                 // add remaining life limit criteria
                 if (simulationToClone.RemainingLifeLimits.Any(_ =>
                     _.CriterionLibraryScenarioRemainingLifeLimitJoin?.CriterionLibrary != null))
                 {
-                    throw new UntestedCodeException();
                     var remainingLifeLimitCriteriaJoins = simulationToClone.RemainingLifeLimits
                         .Where(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin?.CriterionLibrary != null)
                         .Select(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
@@ -1138,13 +1117,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // add deficient condition goals
             if (simulationToClone.ScenarioDeficientConditionGoals.Any())
             {
-                throw new UntestedCodeException();
                 _unitOfWork.Context.AddAll(simulationToClone.ScenarioDeficientConditionGoals.ToList());
                 // add deficient condition goal criteria
                 if (simulationToClone.ScenarioDeficientConditionGoals.Any(_ =>
                     _.CriterionLibraryScenarioDeficientConditionGoalJoin?.CriterionLibrary != null))
                 {
-                    throw new UntestedCodeException();
                     var deficientConditionGoalCriteriaJoins = simulationToClone.ScenarioDeficientConditionGoals
                         .Where(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin?.CriterionLibrary != null)
                         .Select(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
@@ -1158,13 +1135,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // add target condition goals
             if (simulationToClone.ScenarioTargetConditionalGoals.Any())
             {
-                throw new UntestedCodeException();
                 _unitOfWork.Context.AddAll(simulationToClone.ScenarioTargetConditionalGoals.ToList());
                 // add target condition goal criteria
                 if (simulationToClone.ScenarioTargetConditionalGoals.Any(_ =>
                     _.CriterionLibraryScenarioTargetConditionGoalJoin?.CriterionLibrary != null))
                 {
-                    throw new UntestedCodeException();
                     var targetConditionGoalCriteriaJoins = simulationToClone.ScenarioTargetConditionalGoals
                         .Where(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin?.CriterionLibrary != null)
                         .Select(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
@@ -1178,13 +1153,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // add selectable treatments
             if (simulationToClone.SelectableTreatments.Any())
             {
-                throw new UntestedCodeException();
                 _unitOfWork.Context.AddAll(simulationToClone.SelectableTreatments.ToList());
                 // add selectable treatment criteria
                 if (simulationToClone.SelectableTreatments.Any(_ =>
                     _.CriterionLibraryScenarioSelectableTreatmentJoin?.CriterionLibrary != null))
                 {
-                    throw new UntestedCodeException();
                     var treatmentCriteriaJoins = simulationToClone.SelectableTreatments
                         .Where(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin?.CriterionLibrary != null)
                         .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
@@ -1196,7 +1169,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 // add treatment consequences
                 if (simulationToClone.SelectableTreatments.Any(_ => _.ScenarioTreatmentConsequences.Any()))
                 {
-                    throw new UntestedCodeException();
                     var treatmentConsequences = simulationToClone.SelectableTreatments
                         .Where(_ => _.ScenarioTreatmentConsequences.Any())
                         .SelectMany(_ => _.ScenarioTreatmentConsequences
@@ -1207,7 +1179,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     if (treatmentConsequences.Any(_ =>
                         _.ScenarioConditionalTreatmentConsequenceEquationJoin?.Equation != null))
                     {
-                        throw new UntestedCodeException();
                         var treatmentConsequenceEquationJoins = treatmentConsequences
                             .Where(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin?.Equation != null)
                             .Select(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
@@ -1220,7 +1191,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     if (treatmentConsequences.Any(_ =>
                         _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin?.CriterionLibrary != null))
                     {
-                        throw new UntestedCodeException();
                         var treatmentConsequenceCriteriaJoins = treatmentConsequences
                             .Where(_ =>
                                 _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin?.CriterionLibrary != null)
@@ -1235,7 +1205,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 // add treatment costs
                 if (simulationToClone.SelectableTreatments.Any(_ => _.ScenarioTreatmentCosts.Any()))
                 {
-                    throw new UntestedCodeException();
                     var treatmentCosts = simulationToClone.SelectableTreatments
                         .Where(_ => _.ScenarioTreatmentCosts.Any())
                         .SelectMany(_ => _.ScenarioTreatmentCosts
@@ -1245,7 +1214,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     // add treatment cost equations
                     if (treatmentCosts.Any(_ => _.ScenarioTreatmentCostEquationJoin?.Equation != null))
                     {
-                        throw new UntestedCodeException();
                         var treatmentCostEquationJoins = treatmentCosts
                             .Where(_ => _.ScenarioTreatmentCostEquationJoin?.Equation != null)
                             .Select(_ => _.ScenarioTreatmentCostEquationJoin)
@@ -1257,7 +1225,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     // add treatment cost criteria
                     if (treatmentCosts.Any(_ => _.CriterionLibraryScenarioTreatmentCostJoin?.CriterionLibrary != null))
                     {
-                        throw new UntestedCodeException();
                         var treatmentCostCriteriaJoins = treatmentCosts
                             .Where(_ => _.CriterionLibraryScenarioTreatmentCostJoin?.CriterionLibrary != null)
                             .Select(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
@@ -1270,7 +1237,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 // add treatment schedulings
                 if (simulationToClone.SelectableTreatments.Any(_ => _.ScenarioTreatmentSchedulings.Any()))
                 {
-                    throw new UntestedCodeException();
                     _unitOfWork.Context.AddAll(simulationToClone.SelectableTreatments
                         .Where(_ => _.ScenarioTreatmentSchedulings.Any())
                         .SelectMany(_ => _.ScenarioTreatmentSchedulings
@@ -1281,7 +1247,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 // add treatment supersessions
                 if (simulationToClone.SelectableTreatments.Any(_ => _.ScenarioTreatmentSupersessions.Any()))
                 {
-                    throw new UntestedCodeException();
                     var treatmentSupersessions = simulationToClone.SelectableTreatments
                         .Where(_ => _.ScenarioTreatmentSupersessions.Any())
                         .SelectMany(_ => _.ScenarioTreatmentSupersessions
@@ -1292,7 +1257,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     if (treatmentSupersessions.Any(_ =>
                         _.CriterionLibraryScenarioTreatmentSupersessionJoin?.CriterionLibrary != null))
                     {
-                        throw new UntestedCodeException();
                         var treatmentSupersessionCriteriaJoins = treatmentSupersessions
                             .Where(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin?.CriterionLibrary != null)
                             .Select(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
@@ -1306,7 +1270,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 // add treatment available budgets
                 if (simulationToClone.SelectableTreatments.Any(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins.Any()))
                 {
-                    throw new UntestedCodeException();
                     var budgetJoins = simulationToClone.SelectableTreatments
                         .Where(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
                         .SelectMany(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
@@ -1377,7 +1340,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             try
             {
                 _unitOfWork.BeginTransaction();
-                if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 {
                     _unitOfWork.Rollback();
                     return;
@@ -1427,7 +1390,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 _unitOfWork.Rollback();
                 throw;
-            }                   
+            }
         }
 
         public void DeleteSimulationsByNetworkId(Guid networkId)

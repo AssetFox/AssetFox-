@@ -606,7 +606,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.Equivalent(dtoBefore, dtoAfter);
             Assert.NotEqual(updateDto.Name, dtoAfter.Name);
         }
-        [Fact (Skip ="WJwjwjwj unskip before PR")]
+        [Fact]
         public void SimulationInDb_Clone_Clones()
         {
             // Arrange

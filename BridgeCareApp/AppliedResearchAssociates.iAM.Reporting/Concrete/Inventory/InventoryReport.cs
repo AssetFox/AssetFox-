@@ -38,10 +38,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
 
-        private InventoryParams _failedQuery = new InventoryParams { keyProperties = new List<string> { string.Empty, "-1" } };
+        private InventoryParameters _failedQuery = new InventoryParameters { keyProperties = new List<string> { string.Empty, "-1" } };
 
         private List<SegmentAttributeDatum> segmentData;
-        private InventoryParams segmentIds;
+        private InventoryParameters segmentIds;
 
         public InventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results)
         {
@@ -103,11 +103,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private InventoryParams Parse(string parameters)
+        private InventoryParameters Parse(string parameters)
         {
             try
             {
-                InventoryParams query = JsonConvert.DeserializeObject<InventoryParams>(parameters);
+                InventoryParameters query = JsonConvert.DeserializeObject<InventoryParameters>(parameters);
                 if (query == null)
                 {
                     Errors.Add($"Unable to run.  No query parameters provided in request body.");

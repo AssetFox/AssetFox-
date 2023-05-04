@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             {
                 Id = Guid.NewGuid(),
                 Limit = 0.0,
-                Attribute = TestHelper.UnitOfWork.Context.Attribute.First().Name
+                Attribute = TestAttributeNames.CulvDurationN,
             };
             analysisMethodDto.CriterionLibrary = CriterionLibraryDtos.Dto();
             var budgetPriority = BudgetPriorityTestSetup.SetupSingleBudgetPriorityForSimulationInDb(simulationId);

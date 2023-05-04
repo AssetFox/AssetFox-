@@ -51,7 +51,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 simulation.AnalysisMethod.Benefit.Limit = entity.Benefit.Limit;
                 if (entity.Benefit.Attribute != null)
                 {
-                    var debugThis = simulation.Network.Explorer.NumericAttributes.ToList();
                     simulation.AnalysisMethod.Benefit.Attribute = simulation.Network.Explorer.NumericAttributes
                         .Single(_ => _.Name == entity.Benefit.Attribute.Name);
                 }

@@ -127,6 +127,37 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.CriterionLibrary);
         }
 
+        [Fact]
+        public void SimulationInDbWithScenarioBudgetInCriterionLibrary_Clone_Clones()
+        {
+            var networkId = TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.New(budgetId);
+            var budgets = new List<BudgetDTO> { budget };
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            budget.CriterionLibrary = criterionLibrary;
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
+            var clonedBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(cloningResult.Simulation.Id);
+            var clonedBudget = clonedBudgets.Single();
+            ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.CriterionLibrary);
+            var expectedCriterionLibrary = new CriterionLibraryDTO
+            {
+                Name = "Budget Criterion",
+                MergedCriteriaExpression = "mergedCriteriaExpression",
+                IsSingleUse = true,
+                Owner = TestHelper.UnitOfWork.CurrentUser.Id,
+            };
+            ObjectAssertions.EquivalentExcluding(expectedCriterionLibrary, clonedBudget.CriterionLibrary, c => c.Id);
+        }
 
         [Fact]
         public void SimulationInDbWithScenarioBudgetWithAmount_Clone_Clones()

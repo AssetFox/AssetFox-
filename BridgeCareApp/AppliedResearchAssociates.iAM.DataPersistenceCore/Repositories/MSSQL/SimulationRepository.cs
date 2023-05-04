@@ -422,7 +422,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (budget.CriterionLibraryScenarioBudgetJoin != null)
                     {
-                        throw new UntestedCodeException();
                         var criterionId = Guid.NewGuid();
                         budget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary.Id = criterionId;
                         budget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary.IsSingleUse = true;

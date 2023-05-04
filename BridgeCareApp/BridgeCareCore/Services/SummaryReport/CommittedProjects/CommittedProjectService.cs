@@ -458,16 +458,16 @@ namespace BridgeCareCore.Services
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
-            queueLog.UpdateWorkQueueStatus(simulationId, "Creating Committed Projects");
+            queueLog.UpdateWorkQueueStatus("Creating Committed Projects");
             var committedProjectDTOs =
                 CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
-            queueLog.UpdateWorkQueueStatus(simulationId, "Deleting Old Committed Projects");
+            queueLog.UpdateWorkQueueStatus("Deleting Old Committed Projects");
             _unitOfWork.CommittedProjectRepo.DeleteSimulationCommittedProjects(simulationId);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
-            queueLog.UpdateWorkQueueStatus(simulationId, "Upserting Created Committed Projects");
+            queueLog.UpdateWorkQueueStatus("Upserting Created Committed Projects");
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
         

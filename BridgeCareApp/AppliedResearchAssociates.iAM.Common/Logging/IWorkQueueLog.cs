@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.Common.Logging
 {
     public interface IWorkQueueLog
     {
-        void UpdateWorkQueueStatus(Guid workId, string statusMessage);
+        void UpdateWorkQueueStatus(string statusMessage);
     }
 }

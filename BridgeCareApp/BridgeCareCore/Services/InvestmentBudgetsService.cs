@@ -273,7 +273,7 @@ namespace BridgeCareCore.Services
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     return new ScenarioBudgetImportResultDTO();
-                queueLog.UpdateWorkQueueStatus(simulationId, "Deleting Old Budgets");
+                queueLog.UpdateWorkQueueStatus("Deleting Old Budgets");
                 if (criteriaPerBudgetName.Values.Any())
                 {
                     var budgetNames = criteriaPerBudgetName.Keys.ToList();
@@ -346,7 +346,7 @@ namespace BridgeCareCore.Services
             }
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return new ScenarioBudgetImportResultDTO();
-            queueLog.UpdateWorkQueueStatus(simulationId, "Adding New Budgets");
+            queueLog.UpdateWorkQueueStatus("Adding New Budgets");
             _unitOfWork.BudgetRepo.AddScenarioBudgets(simulationId, newBudgets);
             _unitOfWork.BudgetRepo.AddScenarioBudgetAmounts(newBudgetAmounts);
             var values = budgetAmountsPerBudgetYearTuple.Values.ToList();
@@ -358,7 +358,7 @@ namespace BridgeCareCore.Services
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     return new ScenarioBudgetImportResultDTO();
-                queueLog.UpdateWorkQueueStatus(simulationId, "Updating Criteria");
+                queueLog.UpdateWorkQueueStatus("Updating Criteria");
                 var allBudgets = new List<BudgetDTO>();
                 allBudgets.AddRange(existingBudgets);
                 allBudgets.AddRange(newBudgets);
@@ -499,7 +499,7 @@ namespace BridgeCareCore.Services
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     return new BudgetImportResultDTO();
-                queueLog.UpdateWorkQueueStatus(budgetLibraryId, "Deleting Old Budgets");
+                queueLog.UpdateWorkQueueStatus("Deleting Old Budgets");
                 if (criteriaPerBudgetName.Values.Any())
                 {
                     var budgetNames = criteriaPerBudgetName.Keys.ToList();
@@ -510,7 +510,7 @@ namespace BridgeCareCore.Services
             }
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return new BudgetImportResultDTO();
-            queueLog.UpdateWorkQueueStatus(budgetLibraryId, "Deleting Old Budgets");
+            queueLog.UpdateWorkQueueStatus("Deleting Old Budgets");
             var existingBudgets = _unitOfWork.BudgetRepo.GetLibraryBudgets(budgetLibraryId);
 
             var existingBudgetNames = existingBudgets.Select(existingBudget => existingBudget.Name).ToList();
@@ -572,7 +572,7 @@ namespace BridgeCareCore.Services
 
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return new BudgetImportResultDTO();
-            queueLog.UpdateWorkQueueStatus(budgetLibraryId, "Adding New Budgets");
+            queueLog.UpdateWorkQueueStatus("Adding New Budgets");
             _unitOfWork.BudgetRepo.AddBudgets(newBudgets);
             _unitOfWork.BudgetRepo.AddLibraryBudgetAmounts(newBudgetAmounts);
             var values = budgetAmountsPerBudgetYearTuple.Values.ToList();
@@ -582,7 +582,7 @@ namespace BridgeCareCore.Services
             var criteriaBudgetNamesNotPresentInBudgetTab = new List<string>();
             if (criteriaPerBudgetName.Values.Any())
             {
-                queueLog.UpdateWorkQueueStatus(budgetLibraryId, "Updating Criteria");
+                queueLog.UpdateWorkQueueStatus("Updating Criteria");
                 var allBudgets = new List<BudgetDTO>();
                 allBudgets.AddRange(existingBudgets);
                 allBudgets.AddRange(newBudgets.Select(b => b.Budget));

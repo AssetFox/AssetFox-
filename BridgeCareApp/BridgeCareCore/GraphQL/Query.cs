@@ -22,8 +22,8 @@ namespace BridgeCareCore.GraphQL
         [UseSorting]
         public CompleteSimulationDTO GetSimulation([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork, string simulationId)
         {
-            var coreSimulation = _unitOfWork.SimulationRepo.GetSimulation(new System.Guid(simulationId));
             var simulationGuid = new Guid(simulationId);
+            var coreSimulation = _unitOfWork.SimulationRepo.GetSimulation(simulationGuid);
             var fullSimulation = new CompleteSimulationDTO()
             {
                 Name = coreSimulation.Name,

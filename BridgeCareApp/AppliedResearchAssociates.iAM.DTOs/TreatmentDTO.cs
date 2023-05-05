@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public double PerformanceFactor { get; set; }
 
-        public TreatmentCategory Category { get; set; }
+        public TreatmentType Category { get; set; }
 
         public AssetType AssetType { get; set; }
 

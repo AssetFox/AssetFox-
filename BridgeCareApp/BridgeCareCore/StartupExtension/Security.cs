@@ -23,7 +23,7 @@ namespace BridgeCareCore.StartupExtension
     {
         public static void AddSecurityConfig(this IServiceCollection services, IConfiguration Configuration)
         {
-            var securityType = Configuration.GetSection("SecurityType").Value;
+            var securityType = SecurityConfigurationReader.GetSecurityType(Configuration);
 
             if (securityType == SecurityConstants.SecurityTypes.Esec)
             {

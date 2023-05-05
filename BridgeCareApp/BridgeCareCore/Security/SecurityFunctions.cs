@@ -55,7 +55,8 @@ namespace BridgeCareCore.Security
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
 
-            using var client = new HttpClient(handler) { BaseAddress = new Uri(esecConfig["EsecBaseAddress"]) };
+            var baseAddress = esecConfig["EsecBaseAddress"];
+            using var client = new HttpClient(handler) { BaseAddress = new Uri(baseAddress) };
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 

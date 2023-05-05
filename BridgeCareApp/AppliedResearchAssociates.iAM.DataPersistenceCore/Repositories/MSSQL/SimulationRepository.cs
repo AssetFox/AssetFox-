@@ -1340,7 +1340,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             try
             {
                 _unitOfWork.BeginTransaction();
-                if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 {
                     _unitOfWork.Rollback();
                     return;
@@ -1390,7 +1390,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 _unitOfWork.Rollback();
                 throw;
-            }                   
+            }
         }
 
         public void DeleteSimulationsByNetworkId(Guid networkId)

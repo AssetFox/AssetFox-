@@ -33,9 +33,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<string>("ImplementationName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("InventoryReportNames")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KeyFields")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PrimaryNetwork")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SimulationReportNames")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("ID");
 
-                    b.ToTable("AdminSiteSettings");
+                    b.ToTable("AdminSettings");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AggregatedResultEntity", b =>

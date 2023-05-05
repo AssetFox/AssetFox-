@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20230503184259_AddAdminSiteSettings")]
-    partial class AddAdminSiteSettings
+    [Migration("20230505140704_AddAdminSettingsTable")]
+    partial class AddAdminSettingsTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -33,11 +33,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
                     b.Property<string>("ImplementationName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varchar(max)");
+
+                    b.Property<string>("InventoryReportNames")
+                        .HasColumnType("varchar(max)");
+
+                    b.Property<string>("KeyFields")
+                        .HasColumnType("varchar(max)");
+
+                    b.Property<string>("PrimaryNetwork")
+                        .HasColumnType("varchar(max)");
+
+                    b.Property<string>("SimulationReportNames")
+                        .HasColumnType("varchar(max)");
 
                     b.HasKey("ID");
 
-                    b.ToTable("AdminSiteSettings");
+                    b.ToTable("AdminSettings");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AggregatedResultEntity", b =>

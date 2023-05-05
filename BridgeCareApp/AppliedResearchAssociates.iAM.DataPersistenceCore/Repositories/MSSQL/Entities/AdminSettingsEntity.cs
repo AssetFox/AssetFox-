@@ -14,5 +14,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public int ID { get; set; }
         public Image SiteLogo { get; set; }
         public Image ImplementationLogo { get; set; }
+        public string PrimaryNetwork { get; set; }
+        public string KeyFields { get; set; }
+        public string InventoryReportNames { get; set; }
+        public string SimulationReportNames { get; set; }
     }
 }

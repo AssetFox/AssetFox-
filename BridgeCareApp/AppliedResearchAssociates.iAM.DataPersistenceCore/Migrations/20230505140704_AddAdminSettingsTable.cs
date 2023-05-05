@@ -4,19 +4,23 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
-    public partial class AddAdminSiteSettings : Migration
+    public partial class AddAdminSettingsTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-               name: "AdminSiteSettings",
+               name: "AdminSettings",
                columns: table => new
                {
                    ID = table.Column<int>(type: "int", nullable: false)
                        .Annotation("SqlServer:Identity", "1, 1"),
-                   ImplementationName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                   ImplementationName = table.Column<string>(type: "varchar(max)", nullable: true),
                    SiteLogo = table.Column<string>(type: "image", nullable: true),
-                   ImplementationLogo = table.Column<string>(type: "image", nullable: true)
+                   ImplementationLogo = table.Column<string>(type: "image", nullable: true),
+                   PrimaryNetwork = table.Column<string>(type: "varchar(max)", nullable: true),
+                   KeyFields = table.Column<string>(type: "varchar(max)", nullable: true),
+                   InventoryReportNames = table.Column<string>(type: "varchar(max)", nullable: true),
+                   SimulationReportNames = table.Column<string>(type: "varchar(max)", nullable: true)
                },
                constraints: table =>
                {

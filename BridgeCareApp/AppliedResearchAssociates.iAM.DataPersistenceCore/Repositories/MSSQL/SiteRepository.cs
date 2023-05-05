@@ -20,20 +20,39 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public string GetImplementationName()
         {
-            var name = _unitOfWork.Context.AdminSiteSettings.First().ImplementationName;
-            return name;
+            if (_unitOfWork.Context.AdminSettings.FirstOrDefault() == null)
+            {
+                return null;
+            }
+            else
+            {
+                var name = _unitOfWork.Context.AdminSettings.First().ImplementationName;
+                return name;
+            }
+            
         }
 
         public void SetImplementationName(string name)
         {
-            var settings = _unitOfWork.Context.AdminSiteSettings.FirstOrDefault();
-            //If there is an existing entry in the database, it updates it.
-            if (name == null)
+            var settings = _unitOfWork.Context.AdminSettings.FirstOrDefault();
+            //If there isn't an existing entry in the database, it adds it.
+            if (settings == null)
             {
-                return;
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingEntity
+                {
+                    ImplementationName = name
+                });
             }
-            settings.ImplementationName = name;
-            _unitOfWork.Context.AdminSiteSettings.Update(settings);
+            //If there is an existing entry in the database, it updates it.
+            else
+            {               
+                if (name == null)
+                {
+                    return;
+                }
+                settings.ImplementationName = name;
+                _unitOfWork.Context.AdminSettings.Update(settings);              
+            }
             _unitOfWork.Context.SaveChanges();
         }
     }

@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HavePrecision(18, 2);
         }
 
-        public virtual DbSet<AdminSettingEntity> AdminSiteSettings { get; set; }
+        public virtual DbSet<AdminSettingEntity> AdminSettings { get; set; }
 
         public virtual DbSet<AggregatedResultEntity> AggregatedResult { get; set; }
 

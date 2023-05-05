@@ -1081,6 +1081,10 @@ export default class EquationEditorDialog extends Vue {
 
 .invalid-message {
   color: red;
+  padding-left: 100px;
+  word-break: break-all; 
+  word-wrap: break-word;
+  z-index: 2!important;
 }
 
 .attributes-list-container, .formulas-list-container {

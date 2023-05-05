@@ -136,7 +136,7 @@ namespace BridgeCareCore.Services
                             var specificChangeValue = project.Consequences.FirstOrDefault(_ => _.Attribute == attribute)?.ChangeValue ?? "";
                             worksheet.Cells[row, column++].Value = specificChangeValue;
 
-                            var performanceFactorValue = project.Consequences.FirstOrDefault(_ => _.Attribute == attribute)?.PerformanceFactor ?? 1.2;
+                            var performanceFactorValue = project.Consequences.FirstOrDefault(_ => _.Attribute == attribute)?.PerformanceFactor ?? float.Parse(_unitOfWork.Config["PerformanceFactorDefaults:CommittedProject"]);
                             worksheet.Cells[row, column++].Value = performanceFactorValue;
                         });
                         row++;

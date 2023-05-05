@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public int ShadowForSameTreatment { get; set; }
 
-        public TreatmentCategory Category { get; set; }
+        public TreatmentType Category { get; set; }
 
         public AssetType AssetType { get; set; }
 

@@ -32,12 +32,11 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.DefaultMock();
             var contextAccessor = HttpContextAccessorMocks.DefaultMock();
             var claimHelper = ClaimHelperMocks.New();
-            var simulationAnalysis = SimulationAnalysisMocks.New();
+            var generalWorkQueueService = GeneralWorkQueueServiceMocks.New();
             var pagingSerivce = new SimulationPagingService(unitOfWork.Object, unitOfWork.Object.SimulationRepo);
             var queueService = SimulationQueueServiceMocks.New();
-            var generalWorkQueueService = GeneralWorkQueueServiceMocks.New();
+            var generalWorkQueService = GeneralWorkQueueServiceMocks.New();
             var controller = new SimulationController(
-                simulationAnalysis.Object,
                 pagingSerivce,
                 queueService.Object,
                 security.Object,
@@ -48,21 +47,6 @@ namespace BridgeCareCoreTests.Tests
                 generalWorkQueueService.Object
                 );
             return controller;
-        }
-
-        [Fact] 
-        public async Task DeleteSimulation_CallsDeleteOnRepo()
-        {
-            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
-            var simulationId = Guid.NewGuid();
-            var controller = CreateController(unitOfWork);
-            // Act
-            var result = await controller.DeleteSimulationOperation(simulationId);
-            // Assert
-            ActionResultAssertions.Ok(result);
-            var repoCall = repo.SingleInvocationWithName(nameof(ISimulationRepository.DeleteSimulation));
-            Assert.Equal(simulationId, repoCall.Arguments[0]);
         }
 
         [Fact]

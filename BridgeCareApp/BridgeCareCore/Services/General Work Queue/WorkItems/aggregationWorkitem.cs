@@ -9,14 +9,14 @@ using BridgeCareCore.Services.Aggregation;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs.Services;
 using AppliedResearchAssociates.iAM.Hubs;
 using BridgeCareCore.Models;
 using System.Text;
-using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 
 namespace BridgeCareCore.Services
 {
@@ -43,12 +43,12 @@ namespace BridgeCareCore.Services
             var _log = scope.ServiceProvider.GetRequiredService<ILog>();
             var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
             var state = new AggregationState();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, NetworkId);
             var timer = KeepUserInformedOfState(state);
             var readTask = Task.Run(() => ReadMessages(channel.Reader));
-            
+                 
             try
-            {
+            {              
                 _aggregationService.AggregateNetworkData(channel.Writer, NetworkId, state, Attributes, cancellationToken).Wait();
             }
             catch (Exception e)
@@ -127,7 +127,7 @@ namespace BridgeCareCore.Services
                 var queueMessage = state.Status;
                 if (state.Percentage > 0)
                     queueMessage = queueMessage + $": {state.Percentage}%";
-                _queueLogger.UpdateWorkQueueStatus(NetworkId, queueMessage);
+                _queueLogger.UpdateWorkQueueStatus(queueMessage);
                 state.Count++;
             }
 
@@ -140,6 +140,15 @@ namespace BridgeCareCore.Services
                 }
                 return builder.ToString();
             }
+        }
+
+        public void OnFault(IServiceProvider serviceProvider, string errorMessage)
+        {
+            string AggregationError = "Aggregation Error";
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{AggregationError}::NetworkAggregateAccess - {errorMessage}");
         }
     }
 }

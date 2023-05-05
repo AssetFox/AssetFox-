@@ -42,7 +42,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var noTreatment = simulationEntity.NoTreatmentBeforeCommittedProjects;
             ScenarioSelectableTreatmentEntity noTreatmentEntity = null;
             if (noTreatment)
+            {
                 noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id);
+                if(noTreatmentEntity == null)
+                {
+                    throw new RowNotInTableException("Simulation has no default treatments");
+                }
+            }               
 
             var assets = _unitOfWork.Context.MaintainableAsset
                 .Where(_ => _.NetworkId == simulation.Network.Id)
@@ -77,24 +83,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         }).ToList(),
                 };
             }
-            //.Select(project => new CommittedProjectEntity
-            //{
-            //    Id = project.Id,
-            //    Name = project.Name,
-            //    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-            //    ShadowForSameTreatment = project.ShadowForSameTreatment,
-            //    Cost = project.Cost,
-            //    Year = project.Year,
-            //    CommittedProjectLocation = project.CommittedProjectLocation,
-            //    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
-            //    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
-            //        new CommittedProjectConsequenceEntity
-            //        {
-            //            Id = consequence.Id,
-            //            ChangeValue = consequence.ChangeValue,
-            //            Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
-            //        }).ToList(),
-            //}).AsNoTracking().ToList();
             if (projects.Any())
             {
                 projects.ForEach(_ => {
@@ -104,6 +92,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         if (noTreatment)
                         {
                             var defaultNoTreatment = selectableTreatmentRepository.GetDefaultNoTreatment(simulation.Id);
+                            if(defaultNoTreatment == null)
+                            {
+                                throw new RowNotInTableException("Simulation has no default treatments");
+                            }
                             noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
                         }
                         _.CreateCommittedProject(simulation, asset.Id, noTreatment, noTreatmentDefaultCost, noTreatmentEntity);

@@ -109,6 +109,18 @@ const Networks = () =>
     import(
         /*webpackChunkName: "Networks" */ '@/components/networks/Networks.vue'
     );
+const EditAdmin = () =>
+import(
+    /*webpackChunkName: "EditAdmin" */ '@/components/admin/EditAdmin.vue'
+);
+const Site = () =>
+import(
+    /*webpackChunkName: "Site" */ '@/components/site/Site.vue'
+);
+const Data = () =>
+import(
+    /*webpackChunkName: "Data" */ '@/components/data/Data.vue'
+);
 
 const onHandlingUnsavedChanges = (to: any, next: any): void => {
     // @ts-ignore
@@ -335,6 +347,25 @@ const router = new VueRouter({
             ],
         },
         {
+            path: '/EditAdmin/',
+            name: 'EditAdmin',
+            component: EditAdmin,
+            children: [
+                {
+                    path: '/UserCriteria/',
+                    component: UserCriteriaEditor,
+                },
+                {
+                    path: '/Data/',
+                    component: Data,
+                },
+                {
+                    path: '/Site/',
+                    component: Site,
+                },
+            ],
+        },
+        {
             path: '/DataSource/',
             name: 'DataSource',
             component: DataSource,
@@ -344,6 +375,18 @@ const router = new VueRouter({
             path: '/Attributes/',
             name: 'Attributes',
             component: Attributes,
+            props: true,
+        },
+        {
+            path: '/Site/',
+            name: 'Site',
+            component: Site,
+            props: true,
+        },
+        {
+            path: '/Data/',
+            name: 'Data',
+            component: Data,
             props: true,
         },
         {

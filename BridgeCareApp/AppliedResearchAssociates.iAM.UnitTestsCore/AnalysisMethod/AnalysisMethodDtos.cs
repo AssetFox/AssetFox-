@@ -7,11 +7,11 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace BridgeCareCoreTests.Tests.AnalysisMethod
+namespace AppliedResearchAssociates.iAM.UnitTestsCore
 {
     public static class AnalysisMethodDtos
     {
-        internal static AnalysisMethodDTO Default(Guid id)
+        public static AnalysisMethodDTO Default(Guid id)
         {
             var benefit = new BenefitDTO();
             var criterionLibrary = new CriterionLibraryDTO();

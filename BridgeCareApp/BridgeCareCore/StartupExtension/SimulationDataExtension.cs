@@ -1,4 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -21,7 +21,6 @@ namespace BridgeCareCore.StartupExtension
 
             services.AddSingleton<SequentialWorkQueue<WorkQueueMetadata>>();
             services.AddHostedService<SequentialWorkBackgroundService>();
-            services.AddScoped<ISimulationAnalysis, SimulationAnalysisService>();
             services.AddScoped<IGeneralWorkQueueService, GeneralWorkQueueService>();
             services.AddScoped<AttributeService>();
             services.AddScoped<IExcelRawDataImportService, ExcelRawDataImportService>();

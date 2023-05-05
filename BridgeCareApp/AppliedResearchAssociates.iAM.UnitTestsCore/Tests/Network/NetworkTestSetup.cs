@@ -30,10 +30,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         };
 
         private static readonly object NetworkCreationLock = new object();
+        private static NetworkEntity CacheNetworkEntity = null;
 
-        public static void CreateNetwork(UnitOfDataPersistenceWork unitOfWork)
+
+        public static NetworkEntity CreateNetwork(UnitOfDataPersistenceWork unitOfWork)
         {
-            if (!unitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
+            if (CacheNetworkEntity == null)
             {
                 lock (NetworkCreationLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
                 {
@@ -41,9 +43,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     {
                         var network = TestNetwork();
                         unitOfWork.Context.AddEntity(network);
+                        CacheNetworkEntity = network;
+                        return network;
                     }
                 }
             }
+            return CacheNetworkEntity;
         }
 
         public static TNetwork ModelForEntityInDbWithKeyAttribute(

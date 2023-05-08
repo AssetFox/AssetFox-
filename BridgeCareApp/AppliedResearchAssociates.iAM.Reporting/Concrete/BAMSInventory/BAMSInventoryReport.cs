@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     /// Use BRKey = 0 when that parameter is not known and an BMSID = String.Empty when that parameter is not known.  An error will occur
     /// if you send both parameters as known values and they do not exist on the same asset.
     /// </remarks>
-    public class InventoryReport : IReport
+    public class BAMSInventoryReport : IReport
     {
         private const string DEFAULT_VALUE = "N";
         private const int DEFAULT_COLUMNS = 2;
@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private List<SegmentAttributeDatum> segmentData;
         private InventoryParameters segmentIds;
 
-        public InventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results)
+        public BAMSInventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results)
         {
             _unitofwork = uow;
             ReportTypeName = name;

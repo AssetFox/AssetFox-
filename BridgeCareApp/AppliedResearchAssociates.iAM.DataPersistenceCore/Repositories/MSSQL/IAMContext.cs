@@ -2195,7 +2195,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Value)
                 .HasColumnType("nvarchar(max)")
                 .IsRequired();
+                entity.HasIndex(p => p.Key).IsUnique();
                 entity.HasKey(p => p.Key);
+                
             });
             modelBuilder.Entity<SimulationUserEntity>(entity =>
             {

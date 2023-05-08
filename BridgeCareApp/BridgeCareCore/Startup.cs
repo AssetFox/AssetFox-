@@ -108,7 +108,8 @@ namespace BridgeCareCore
             reportFactoryList.Add(new BAMSAuditReportFactory());
             reportFactoryList.Add(new BAMSPBExportReportFactory());
             reportFactoryList.Add(new PAMSPBExportReportFactory());
-            reportFactoryList.Add(new PAMSInventoryReportFactory());
+            reportFactoryList.Add(new PAMSInventorySectionsReportFactory());
+            reportFactoryList.Add(new PAMSInventorySegmentsReportFactory());
             services.AddSingleton<IReportLookupLibrary>(service => new ReportLookupLibrary(reportFactoryList));
         }
 

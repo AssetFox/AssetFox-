@@ -8,9 +8,9 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
-    public class PAMSInventoryReport : IReport
+    public class PAMSInventorySegmentsReport : IReport
     {
-        public PAMSInventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results)
+        public PAMSInventorySegmentsReport(IUnitOfWork uow, string name, ReportIndexDTO results)
         {
             // TODO
         }

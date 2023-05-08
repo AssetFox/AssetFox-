@@ -89,7 +89,9 @@
 
         inventoryData: any  = null;
         sanitizedHTML: any = null;
-        implementationName = 'BAMS'; // TODO get from implementation name setting
+        implementationName = 'BAMS'; // TODO: get from implementation name setting
+        // FYI BAMS inventoy report name is now changed to BAMSInventoryLookup
+        // TODO: if PAMS, build inventoryReportName as PAMSInventoryLookupSegments or PAMSInventoryLookupSections        
         inventoryReportName: string = this.implementationName + 'InventoryLookup';
 
         /**

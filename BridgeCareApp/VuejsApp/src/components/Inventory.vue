@@ -89,6 +89,10 @@
 
         inventoryData: any  = null;
         sanitizedHTML: any = null;
+        implementationName = 'BAMS'; // TODO: get from implementation name setting
+        // FYI BAMS inventoy report name is now changed to BAMSInventoryLookup
+        // TODO: if PAMS, build inventoryReportName as PAMSInventoryLookupSegments or PAMSInventoryLookupSections        
+        inventoryReportName: string = this.implementationName + 'InventoryLookup';
 
         /**
          * Calls the setInventorySelectLists function to set both inventory type select lists
@@ -314,7 +318,7 @@
             this.selectedBmsId = bmsId;
             const inventoryItem: InventoryItem = this.inventoryItems.filter(function(item){if(item.keyProperties.indexOf(bmsId) !== -1) return item;})[0];
             this.selectedBrKey = inventoryItem.keyProperties[1];
-            this.getStaticInventoryHTMLAction(({reportType: 'InventoryLookup', filterData: data}));
+            this.getStaticInventoryHTMLAction(({reportType: this.inventoryReportName, filterData: data}));
         }
 
         /**
@@ -329,7 +333,7 @@
             this.selectedBrKey = brKey;
             const inventoryItem = this.inventoryItems.filter(function(item){if(item.keyProperties.indexOf(brKey) !== -1) return item;})[0];
             this.selectedBmsId = inventoryItem.keyProperties[0];
-            this.getStaticInventoryHTMLAction({reportType: 'InventoryLookup', filterData: data});
+            this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});
         }
 
         getGMapsUrl() {

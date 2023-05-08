@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using Org.BouncyCastle.Asn1.Cms;
+using SQLitePCL;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -20,38 +21,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public string GetImplementationName()
         {
-            if (_unitOfWork.Context.AdminSettings.FirstOrDefault() == null)
+            var existingImplementationName = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "ImplementationName").FirstOrDefault();
+            if (existingImplementationName == null)
             {
                 return null;
             }
-            else
+            else 
             {
-                var name = _unitOfWork.Context.AdminSettings.First().ImplementationName;
-                return name;
-            }
-            
+                return existingImplementationName.Value;
+            }           
         }
+
 
         public void SetImplementationName(string name)
         {
-            var settings = _unitOfWork.Context.AdminSettings.FirstOrDefault();
-            //If there isn't an existing entry in the database, it adds it.
-            if (settings == null)
+            var existingImplementationName = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "ImplementationName").FirstOrDefault();
+            if (existingImplementationName == null)
             {
-                _unitOfWork.Context.AdminSettings.Add(new AdminSettingEntity
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
                 {
-                    ImplementationName = name
-                });
+                    Key = "ImplementationName",
+                    Value = name
+                }) ;
             }
-            //If there is an existing entry in the database, it updates it.
             else
-            {               
-                if (name == null)
-                {
-                    return;
-                }
-                settings.ImplementationName = name;
-                _unitOfWork.Context.AdminSettings.Update(settings);              
+            {
+                existingImplementationName.Value = name;
+                _unitOfWork.Context.AdminSettings.Update(existingImplementationName);
             }
             _unitOfWork.Context.SaveChanges();
         }

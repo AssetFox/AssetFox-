@@ -8,15 +8,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class AdminSettingEntity
+    public class AdminSettingsEntity
     {
-        public string ImplementationName { get; set; }
-        public int ID { get; set; }
-        public Image SiteLogo { get; set; }
-        public Image ImplementationLogo { get; set; }
-        public string PrimaryNetwork { get; set; }
-        public string KeyFields { get; set; }
-        public string InventoryReportNames { get; set; }
-        public string SimulationReportNames { get; set; }
+        public string Key { get; set; }
+        public string Value { get; set; }
     }
 }

@@ -41,8 +41,7 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        //[HttpPost]
-        [HttpPut]
+        [HttpPost]
         [Route("SetImplementationName/{name}")]
         [ClaimAuthorize("AdminAccess")]
         public async Task<IActionResult> SetImplementationName(string name)

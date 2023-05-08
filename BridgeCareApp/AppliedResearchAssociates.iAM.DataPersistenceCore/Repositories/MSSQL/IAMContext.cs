@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HavePrecision(18, 2);
         }
 
-        public virtual DbSet<AdminSettingEntity> AdminSettings { get; set; }
+        public virtual DbSet<AdminSettingsEntity> AdminSettings { get; set; }
 
         public virtual DbSet<AggregatedResultEntity> AggregatedResult { get; set; }
 
@@ -2190,11 +2190,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
-            modelBuilder.Entity<AdminSettingEntity>(entity =>
+            modelBuilder.Entity<AdminSettingsEntity>(entity =>
             {
-                entity.HasKey(p => p.ID);
-                entity.Ignore(p => p.SiteLogo);
-                entity.Ignore(p => p.ImplementationLogo);
+                entity.Property(e => e.Value)
+                .HasColumnType("nvarchar(max)")
+                .IsRequired();
+                entity.HasKey(p => p.Key);
             });
             modelBuilder.Entity<SimulationUserEntity>(entity =>
             {

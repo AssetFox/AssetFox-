@@ -8,8 +8,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
-
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class ReportIndexRepository : IReportIndexRepository
@@ -53,30 +51,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
 
-public List<ReportListItem> GetAllReportsInSystem()
-{
-    var scenarios = GetAllScenario();
-    var reportList = new List<ReportListItem>();
-
-    foreach (var scenario in scenarios)
-    {
-        var reports = _unitOfDataPersistenceWork.ReportIndexRepository.GetAllForScenario(scenario.Id);
-
-        foreach (var report in reports)
-        {
-            var listEntry = new ReportListItem
+       
+            public IList<Generics.ReportItemList> GetAllReportsInSystem()
             {
-                ReportId = report.Id,
-                ReportName = report.Type
-            };
-            reportList.Add(listEntry);
-        }
-    }
+                var scenarios = GetAllScenario();
+                var reportList = new List<Generics.ReportItemList>();
 
-    return reportList;
-}
+                foreach (var scenario in scenarios)
+                {
+                    var reports = _unitOfDataPersistenceWork.ReportIndexRepository.GetAllForScenario(scenario.Id);
 
-public List<SimulationDTO> GetAllScenario()
+                    foreach (var report in reports)
+                    {
+                        var listEntry = new Generics.ReportItemList
+                        {
+                            ReportId = report.Id,
+                            ReportName = report.Type
+                        };
+                        reportList.Add(listEntry);
+                    }
+                }
+
+                return reportList;
+            }
+
+
+            public List<SimulationDTO> GetAllScenario()
 {
     if (!_unitOfDataPersistenceWork.Context.Simulation.Any())
     {
@@ -118,12 +118,6 @@ public List<SimulationDTO> GetAllScenario()
         {
             _unitOfDataPersistenceWork.Context.DeleteEntity<ReportIndexEntity>(_ => _.Id == reportId);
             return true;
-        }
-
-        public class ReportListItem
-        {
-            public Guid ReportId { get; set; }
-            public string ReportName { get; set; }
         }
 
         public ReportIndexDTO Get(Guid reportId) => _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.Id == reportId).ToDTONullPropagating();

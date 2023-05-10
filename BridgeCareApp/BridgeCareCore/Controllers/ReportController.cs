@@ -83,8 +83,6 @@ namespace BridgeCareCore.Controllers
             return validResult;
         }
 
-
-
         [HttpGet]
         [Route("GetAllReportNamesInSystem")]
         [Authorize]
@@ -92,22 +90,21 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var reportList = UnitOfWork.ReportIndexRepository.GetAllReportsInSystem();
+                var reportList = await Task.Run(() => UnitOfWork.ReportIndexRepository.GetAllReportsInSystem());
                 var reportNames = reportList.Select(report => new { report.ReportId, report.ReportName });
                 return Ok(reportNames);
             }
             catch (Exception ex)
             {
-                // Handle the exception
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred.");
+
+                // Return a meaningful error message to the client
+                var errorMessage = $"An error occurred while retrieving the report names. Error: {ex.Message}";
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, errorMessage);
+                return BadRequest();
             }
         }
 
-    
-
-
-
-    [HttpDelete]
+        [HttpDelete]
         [Route("Cancel/{networkId}")]
         [Authorize]
         public async Task<IActionResult> CancelNetworkDeletion(Guid networkId)

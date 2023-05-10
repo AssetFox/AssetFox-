@@ -15,8 +15,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public int ShadowForSameTreatment { get; set; }
 
-        public double PerformanceFactor { get; set; }
-
         public TreatmentType Category { get; set; }
 
         public AssetType AssetType { get; set; }
@@ -30,6 +28,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public List<TreatmentCostDTO> Costs { get; set; }
 
         public List<TreatmentConsequenceDTO> Consequences { get; set; }
+
+        public List<TreatmentPerformanceFactorDTO> PerformanceFactors { get; set; }
 
         public List<Guid> BudgetIds { get; set; }
 

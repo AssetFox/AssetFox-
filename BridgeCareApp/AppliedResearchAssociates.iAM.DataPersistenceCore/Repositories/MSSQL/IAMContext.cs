@@ -203,6 +203,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<TreatmentCostEntity> TreatmentCost { get; set; }
 
+        public virtual DbSet<TreatmentPerformanceFactorEntity> TreatmentPerformanceFactor { get; set; }
+
         public virtual DbSet<TreatmentCostEquationEntity> TreatmentCostEquation { get; set; }
 
         public virtual DbSet<TreatmentLibraryEntity> TreatmentLibrary { get; set; }
@@ -250,6 +252,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<CriterionLibraryScenarioPerformanceCurveEntity> CriterionLibraryScenarioPerformanceCurve { get; set; }
 
         public virtual DbSet<ScenarioSelectableTreatmentEntity> ScenarioSelectableTreatment { get; set; }
+
+        public virtual DbSet<ScenarioTreatmentPerformanceFactorEntity> ScenarioTreatmentPerformanceFactor { get; set; }
         public virtual DbSet<ScenarioTreatmentCostEntity> ScenarioTreatmentCost { get; set; }
         public virtual DbSet<ScenarioTreatmentCostEquationEntity> ScenarioTreatmentCostEquation { get; set; }
         public virtual DbSet<ScenarioConditionalTreatmentConsequenceEquationEntity> ScenarioConditionalTreatmentConsequenceEquations { get; set; }
@@ -1770,7 +1774,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.ShadowForAnyTreatment).IsRequired();
                 entity.Property(e => e.ShadowForSameTreatment).IsRequired();
-                entity.Property(e => e.PerformanceFactor).IsRequired();
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.IsModified).IsRequired();
@@ -2017,6 +2020,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .HasForeignKey(d => d.TreatmentId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<TreatmentPerformanceFactorEntity>(entity =>
+            {
+                entity.HasIndex(e => e.TreatmentId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.SelectableTreatment)
+                    .WithMany(p => p.TreatmentPerformanceFactors)
+                    .HasForeignKey(d => d.TreatmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<ScenarioTreatmentCostEntity>(entity =>
             {
@@ -2026,6 +2040,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.ScenarioSelectableTreatment)
                     .WithMany(p => p.ScenarioTreatmentCosts)
+                    .HasForeignKey(d => d.ScenarioSelectableTreatmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ScenarioTreatmentPerformanceFactorEntity>(entity =>
+            {
+                entity.HasIndex(e => e.ScenarioSelectableTreatmentId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.ScenarioSelectableTreatment)
+                    .WithMany(p => p.ScenarioTreatmentPerformanceFactors)
                     .HasForeignKey(d => d.ScenarioSelectableTreatmentId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

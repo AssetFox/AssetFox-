@@ -454,13 +454,14 @@ namespace BridgeCareCore.Services
         public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
+            var committedProjectDTOs =
+                CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
+
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
             queueLog.UpdateWorkQueueStatus("Creating Committed Projects");
-            var committedProjectDTOs =
-                CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
             queueLog.UpdateWorkQueueStatus("Deleting Old Committed Projects");

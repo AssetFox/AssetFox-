@@ -74,13 +74,11 @@ export default class PerformanceFactorTab extends Vue {
     uuidNIL: string = getBlankGuid();
 
     mounted() {
-        console.log("" + this.selectedTreatmentPerformanceFactors);
         this.setAttributeSelectItems();
     }
 
     @Watch('selectedTreatmentPerformanceFactors')
     onSelectedTreatmentPerformanceFactorsChanged() {
-        console.log("selected treatment: " + this.selectedTreatment.name);
         this.factorGridData = clone(this.selectedTreatmentPerformanceFactors);
     }
 
@@ -97,13 +95,18 @@ export default class PerformanceFactorTab extends Vue {
             }));
   
             this.factorGridData = this.attributeSelectItems.map(_ => ({
-                attribute : _.value,
+                id: getNewGuid(),
+                attribute : _.value.toString(),
                 factor : 1.0,
             }));
         }
     }
     onEditPerformanceFactorProperty(performancefactor: TreatmentPerformanceFactor, property: string, value: any) {
+        performancefactor.performancefactor = value;
+        console.log("emiting: " + property + " + " + value);
+        console.log("perf: " + performancefactor.id);
         this.$emit('onModifyPerformanceFactor', setItemPropertyValue(property, value, performancefactor));
+        //this.$emit('onModifyPerformanceFactor', performancefactor);
     }
 
     onModifyPerformanceFactor() {

@@ -63,7 +63,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         SimulationId = entity.SimulationId,
                         Treatment = entity.Name,
                         Year = entity.Year,
-                        PerformanceFactor = entity.PerformanceFactor,
                         ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         Category = convertedCategory,
@@ -91,7 +90,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForAnyTreatment = dto.ShadowForAnyTreatment,
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Category = dto.Category.ToString(),
-                PerformanceFactor= dto.PerformanceFactor,
                 Year = dto.Year,
                 CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
             };
@@ -220,7 +218,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         projectToAdd.ShadowForAnyTreatment = 0;
                         projectToAdd.ShadowForSameTreatment = 0;
                         projectToAdd.Cost = noTreatmentDefaultCost;
-                        projectToAdd.PerformanceFactor = noTreatmentEntity.PerformanceFactor;
                         projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
                         //projectToAdd.Budget = null;  // This would be the better way, but it fails vaildation
                         projectToAdd.LastModifiedDate = noTreatmentEntity.LastModifiedDate;

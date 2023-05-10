@@ -927,7 +927,6 @@ export default class TreatmentEditor extends Vue {
                 criterionLibrary: treatmentDetails.criterionLibrary,
                 category: treatmentDetails.category,
                 assetType: treatmentDetails.assetType,
-                performanceFactor: treatmentDetails.performanceFactor,
             });
         }
     }
@@ -963,7 +962,9 @@ export default class TreatmentEditor extends Vue {
         }
     }
 
-    modifySelectedTreatmentPerformanceFactor(modifiedPerformanceFactor: TreatmentPerformanceFactor,) {
+    modifySelectedTreatmentPerformanceFactor(modifiedPerformanceFactor: TreatmentPerformanceFactor) {
+        console.log("modified: " + modifiedPerformanceFactor.performancefactor);
+        console.log("selected: " +  this.selectedTreatment.performancefactor.length);
         if (this.hasSelectedTreatment) {
             this.modifySelectedTreatment({
                 ...clone(this.selectedTreatment),

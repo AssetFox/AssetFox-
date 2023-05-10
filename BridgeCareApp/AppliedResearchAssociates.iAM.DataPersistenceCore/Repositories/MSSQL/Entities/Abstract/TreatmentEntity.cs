@@ -12,6 +12,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public int ShadowForSameTreatment { get; set; }
 
-        public double PerformanceFactor { get; set; }
     }
 }

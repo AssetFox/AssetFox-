@@ -58,7 +58,7 @@ export interface Treatment {
     addTreatment: boolean;
     category: TreatmentCategory;
     assetType: AssetType;
-    performanceFactor: number;
+    performanceFactor: TreatmentPerformanceFactor[];
     isModified: boolean;
     libraryId: string;
 }

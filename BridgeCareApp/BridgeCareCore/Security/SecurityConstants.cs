@@ -70,6 +70,7 @@
             public const string ModifyCommittedProjects = "ModifyCommittedProjects";
             public const string ViewCommittedProjects = "ViewCommittedProjects";
             public const string UseGraphQL = "UseGraphQL";
+            public const string ModifyAdminSettings = "ModifyAdminSettings";
         }
 
         public static class Role
@@ -221,6 +222,7 @@
             public const string SimulationAccess = "SimulationAccess";
             public const string UseAnyGraphQLAccess = "UseAnyGraphQLAccess";
             public const string UsePermittedGraphQLAccess = "UsePermittedGraphQLAccess";
+            public const string AdminSettingsAccess = "AdminSettingsAccess";
         }
     }
 }

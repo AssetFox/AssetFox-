@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Security;
 using Humanizer;
+using System.Data;
+using System.Drawing;
+using static BridgeCareCore.Security.SecurityConstants;
 
 namespace BridgeCareCore.Controllers
 {
@@ -26,7 +29,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetImplementationName")]
-        [Authorize]
         public async Task<IActionResult> GetImplementationName()
         {
             try
@@ -43,7 +45,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("SetImplementationName/{name}")]
-        [ClaimAuthorize("AdminAccess")]
+        [Authorize(Policy = Policy.ModifyAdminSettings)]
         public async Task<IActionResult> SetImplementationName(string name)
         {
             try
@@ -61,14 +63,36 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        //[HttpPost]
-        [HttpPut]
-        [Route("SetAgencyLogo/{agencyLogo}")]
-        [Authorize]
-        public async Task<IActionResult> SetAgencyLogo(string agencyLogo)
+        [HttpGet]
+        [Route("GetAgencyLogo")]
+        public async Task<IActionResult> GetAgencyLogo()
         {
             try
             {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.SiteRepo.GetAgencyLogo());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetAgencyLogo - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("SetAgencyLogo")]
+        [Authorize(Policy = Policy.ModifyAdminSettings)]
+        public async Task<IActionResult> SetAgencyLogo()
+        {
+            try
+            {
+                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+                    throw new ConstraintException("Request MIME type is invalid.");
+                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+                    throw new ConstraintException("Attributes file not found.");
+                //https://stackoverflow.com/questions/8848725/asp-net-c-sharp-convert-filestream-to-image
+                Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+                await Task.Factory.StartNew(() => UnitOfWork.SiteRepo.SetAgencyLogo(logo));
                 return Ok();
             }
             catch (Exception e)
@@ -78,14 +102,35 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        //[HttpPost]
-        [HttpPut]
-        [Route("SetImplementationLogo/{productLogo}")]
-        [Authorize]
-        public async Task<IActionResult> SetImplementationLogo(string productLogo)
+        [HttpGet]
+        [Route("GetImplementationLogo")]
+        public async Task<IActionResult> GetImplementationLogo()
         {
             try
             {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.SiteRepo.GetImplementationLogo());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetImplementationLogo - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("SetImplementationLogo")]
+        [Authorize(Policy = Policy.ModifyAdminSettings)]
+        public async Task<IActionResult> SetImplementationLogo()
+        {
+            try
+            {
+                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+                    throw new ConstraintException("Request MIME type is invalid.");
+                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+                    throw new ConstraintException("Attributes file not found.");
+                Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+                await Task.Factory.StartNew( () => UnitOfWork.SiteRepo.SetImplementationLogo(logo) );
                 return Ok();
             }
             catch (Exception e)

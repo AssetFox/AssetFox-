@@ -13,9 +13,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public MaintainableAssetDataRepository(UnitOfDataPersistenceWork uow)
         {
-            // TODO:  Switch this to be non-PennDOT specific.  It should take in an array
-            // of strings that name the key values and build KeyProperties
-
             _unitOfWork = uow;
             var network = _unitOfWork.NetworkRepo.GetMainNetwork();
             var keyDatumFieldNames = _unitOfWork.Config.GetSection("InventoryData:KeyProperties").GetChildren()
@@ -103,6 +100,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return returnValueList;
         }
+
         public Dictionary<int, SegmentAttributeDatum> GetAttributeValueHistory(string keyName, string keyValue, string attribute)
         {
             // Check for the existence of the given key

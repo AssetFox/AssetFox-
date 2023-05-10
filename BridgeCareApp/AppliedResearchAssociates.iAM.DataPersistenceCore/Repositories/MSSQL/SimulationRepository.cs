@@ -1340,12 +1340,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             try
             {
                 _unitOfWork.BeginTransaction();
-                if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 {
                     _unitOfWork.Rollback();
                     return;
                 }
-                queueLog.UpdateWorkQueueStatus(simulationId, "Deleting Budgets");
+                queueLog.UpdateWorkQueueStatus("Deleting Budgets");
                 _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
                     _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
@@ -1367,7 +1367,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                queueLog.UpdateWorkQueueStatus(simulationId, "Deleting Committed Projects");
+                queueLog.UpdateWorkQueueStatus("Deleting Committed Projects");
                 _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
                     _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
@@ -1382,7 +1382,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                queueLog.UpdateWorkQueueStatus(simulationId, "Deleting Simulation");
+                queueLog.UpdateWorkQueueStatus("Deleting Simulation");
                 _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
                 _unitOfWork.Commit();
             }
@@ -1390,7 +1390,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 _unitOfWork.Rollback();
                 throw;
-            }                   
+            }
         }
 
         public void DeleteSimulationsByNetworkId(Guid networkId)

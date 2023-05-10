@@ -1,4 +1,4 @@
-﻿namespace BridgeCareCore.Models
+﻿namespace AppliedResearchAssociates.iAM.DTOs.Enums
 {
     public enum DomainType
     {

@@ -25,6 +25,7 @@
                                     <v-flex xs6>
                                         <v-layout>
                                             <v-text-field
+                                                id="Scenarios-searchScenarios-textField"
                                                 type="text"
                                                 placeholder="Search in scenarios"
                                                 prepend-inner-icon=$vuetify.icons.ghd-search
@@ -37,7 +38,8 @@
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
                                             >
                                             </v-text-field>
-                                            <v-btn style="margin-top: 2px;" 
+                                            <v-btn id="Scenarios-performSearch-button" 
+                                                style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 outline 
                                                 @click="onMineSearchClick()">
@@ -48,6 +50,7 @@
                                     <v-flex xs4></v-flex>
                                     <v-flex class="justify-end xs2">
                                         <v-btn
+                                           id="Scenarios-createScenario-btn"
                                             @click="
                                                 showCreateScenarioDialog = true
                                             "
@@ -152,6 +155,7 @@
                                                     }"
                                                 >
                                                     <v-btn
+                                                        id="Scenarios-actionMenu-vbtn"
                                                         color="green--text darken-1"
                                                         icon
                                                         v-bind="attrs"
@@ -497,7 +501,7 @@ import {
     ScenarioActions,
     TabItems,
     ScenarioUser,
-    emptySimulation,
+    emptyQueuedWork,
     QueuedWork,
 } from '@/shared/models/iAM/scenario';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -854,7 +858,7 @@ export default class Scenarios extends Vue {
     confirmCancelAlertData: AlertData = clone(emptyAlertData);
     showCreateScenarioDialog: boolean = false;
     selectedScenario: Scenario = clone(emptyScenario);
-    selectedSimulation: QueuedWork = clone(emptySimulation);
+    selectedQueuedWork: QueuedWork = clone(emptyQueuedWork);
     networkDataAssignmentStatus: string = '';
     rules: InputValidationRules = rules;
     showMigrateLegacySimulationDialog: boolean = false;
@@ -1094,7 +1098,7 @@ export default class Scenarios extends Vue {
         ];
         this.actionItemsForWorkQueue = [
              {
-                title: 'Cancel Analysis',
+                title: 'Cancel Work',
                 action: this.availableSimulationActions.cancel,
                 icon: require("@/assets/icons/x-circle.svg"),
                 isCustomIcon: true
@@ -1110,7 +1114,7 @@ export default class Scenarios extends Vue {
         this.tabItems.push(
             { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: this.totalUserScenarios },
             { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: this.totalSharedScenarios },
-            { name: 'Simulation queue', icon: require("@/assets/icons/queue.svg"), count: this.totalQueuedSimulations },
+            { name: 'General work queue', icon: require("@/assets/icons/queue.svg"), count: this.totalQueuedSimulations },
         );
         this.tab = 'My scenarios';
     }
@@ -1396,13 +1400,13 @@ export default class Scenarios extends Vue {
 
 
     onShowConfirmCancelAlert(simulation: QueuedWork) {
-        this.selectedSimulation = clone(simulation);
+        this.selectedQueuedWork = clone(simulation);
 
         this.confirmCancelAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
-            message: 'Are you sure you want to cancel the analysis?',
+            message: 'Are you sure you want to cancel this process?',
         };
     }
 
@@ -1424,11 +1428,11 @@ export default class Scenarios extends Vue {
     onConfirmCancelAlertSubmit(submit: boolean) {
         this.confirmCancelAlertData = clone(emptyAlertData);
 
-        if (submit && this.selectedSimulation.id !== getBlankGuid()) {
+        if (submit && this.selectedQueuedWork.id !== getBlankGuid()) {
             this.cancelSimulationAction({
-                simulationId: this.selectedSimulation.id,
+                simulationId: this.selectedQueuedWork.id,
             }).then(() => {
-                this.selectedSimulation = clone(emptySimulation);
+                this.selectedQueuedWork = clone(emptyQueuedWork);
             });
         }
     }
@@ -1470,6 +1474,13 @@ export default class Scenarios extends Vue {
     }
 
     getWorkQueueUpdate(data: any) {
+        if(isNil(data.queueItem)){
+            (async () => { 
+            await this.delay(1000);
+                this.doWorkQueuePagination();
+            })();
+        }
+          
         var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
         var queueItem = this.stateWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
         if(!isNil(queueItem)){
@@ -1477,7 +1488,7 @@ export default class Scenarios extends Vue {
                 workQueueStatusUpdate: updatedQueueItem
             })
         }
-        else{
+        else if(this.workQueuePagination.page === 1){
             (async () => { 
             await this.delay(1000);
                 this.doWorkQueuePagination();
@@ -1708,7 +1719,7 @@ export default class Scenarios extends Vue {
             return "Retrieving data..."
         }
         else {
-            return "No running simulations"
+            return "No queued work"
         }
     }
 }

@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using Newtonsoft.Json;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -22,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     /// Use BRKey = 0 when that parameter is not known and an BMSID = String.Empty when that parameter is not known.  An error will occur
     /// if you send both parameters as known values and they do not exist on the same asset.
     /// </remarks>
-    public class InventoryReport : IReport
+    public class BAMSInventoryReport : IReport
     {
         private const string DEFAULT_VALUE = "N";
         private const int DEFAULT_COLUMNS = 2;
@@ -40,12 +38,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
 
-        private InventoryParameters _failedQuery = new InventoryParameters() { BRKey = -1, BMSID = String.Empty };
+        private InventoryParameters _failedQuery = new InventoryParameters { keyProperties = new List<string> { string.Empty, "-1" } };
 
         private List<SegmentAttributeDatum> segmentData;
         private InventoryParameters segmentIds;
 
-        public InventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results)
+        public BAMSInventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results)
         {
             _unitofwork = uow;
             ReportTypeName = name;
@@ -55,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             ID = Guid.NewGuid();
             Errors = new List<string>();
             Status = "Report definition created.";
-            Results = String.Empty;
+            Results = string.Empty;
             IsComplete = false;
             _networkId = _unitofwork.NetworkRepo.GetMainNetwork().Id;
         }
@@ -63,20 +61,21 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             segmentIds = Parse(parameters);
-            if (segmentIds.BRKey == -1 && string.IsNullOrEmpty(segmentIds.BMSID)) return; // report failed due to bad parameters
-            if (!Validate(segmentIds)) return; // report failed due to validation
+            var keyProperties = segmentIds.keyProperties;
+            if (keyProperties[1] == "-1" && string.IsNullOrEmpty(keyProperties[0])) return; // report failed due to bad parameters
+            if (!Validate(keyProperties)) return; // report failed due to validation
 
             // Check if asset actually exists
             string providedKey;
-            if (segmentIds.BRKey < 1)
+            if (Convert.ToInt32(segmentIds.keyProperties[1]) < 1)
             {
-                providedKey = $"BMSID: {segmentIds.BMSID}";
-                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BMSID", segmentIds.BMSID);
+                providedKey = $"BMSID: {segmentIds.keyProperties[0]}";
+                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BMSID", segmentIds.keyProperties[0]);
             }
             else
             {
-                providedKey = $"BRKEY_:  {segmentIds.BRKey}";
-                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BRKEY_", segmentIds.BRKey.ToString());
+                providedKey = $"BRKEY_:  {segmentIds.keyProperties[1]}";
+                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BRKEY_", segmentIds.keyProperties[1]);
             }
             if (segmentData.Count() < 1)
             {
@@ -123,35 +122,35 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
         }
 
-        private bool Validate(InventoryParameters parameters)
+        private bool Validate(List<string> keyProperties)
         {
-            if (parameters.BRKey < 1 && String.IsNullOrEmpty(parameters.BMSID))
+            if (Convert.ToInt32(keyProperties[1]) < 1 && string.IsNullOrEmpty(keyProperties[0]))
             {
                 // No parameters provided
                 return false;
             }
 
-            if (parameters.BRKey > 0 && !String.IsNullOrEmpty(parameters.BMSID))
+            if (Convert.ToInt32(keyProperties[1]) > 0 && !string.IsNullOrEmpty(keyProperties[0]))
             {
                 // Both parameters provided.  Check to see if they are the same asset
-                var BRKeyGuid = _unitofwork.AssetDataRepository.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == parameters.BRKey.ToString());
+                var BRKeyGuid = _unitofwork.AssetDataRepository.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == keyProperties[1].ToString());
                 if (BRKeyGuid == null)
                 {
                     // BRKey was not found
-                    Errors.Add($"Unable to find BRKey {parameters.BRKey}.  Did not attempt to find {parameters.BMSID}");
+                    Errors.Add($"Unable to find BRKey {keyProperties[1]}.  Did not attempt to find {keyProperties[0]}");
                     return false;
                 }
-                var BMSIDGuid = _unitofwork.AssetDataRepository.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == parameters.BMSID);
+                var BMSIDGuid = _unitofwork.AssetDataRepository.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == keyProperties[0]);
                 if (BMSIDGuid == null)
                 {
                     // BMSID was not found
-                    Errors.Add($"Unable to find BMSID {parameters.BMSID}.  Will not use {parameters.BRKey}");
+                    Errors.Add($"Unable to find BMSID {keyProperties[0]}.  Will not use {keyProperties[1]}");
                     return false;
                 }
                 if (BRKeyGuid.AssetId != BMSIDGuid.AssetId)
                 {
                     // Keys were provided for two different assets
-                    Errors.Add($"The BRKey {parameters.BRKey} and BMSID {parameters.BMSID}.  No report will be provided");
+                    Errors.Add($"The BRKey {keyProperties[1]} and BMSID {keyProperties[0]}.  No report will be provided");
                     return false;
                 }
             }
@@ -172,13 +171,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
             else
             {
                 Dictionary<int, SegmentAttributeDatum> attrubuteValueHistory;
-                if (segmentIds.BRKey < 1)
+                if (Convert.ToInt32(segmentIds.keyProperties[1]) < 1)
                 {
-                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BMSID", segmentIds.BMSID, attributeName);
+                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BMSID", segmentIds.keyProperties[0], attributeName);
                 }
                 else
                 {
-                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BRKEY_", segmentIds.BRKey.ToString(), attributeName);
+                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BRKEY_", segmentIds.keyProperties[1], attributeName);
                 }
                 if (attrubuteValueHistory.Count < 2) return DEFAULT_VALUE;  // The default value is returned if there is either no values OR one value (the previous value is still unknown)
 
@@ -375,6 +374,4 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return descriptions;
         }
     }
-
-
 }

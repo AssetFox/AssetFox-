@@ -135,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CriterionLibrary = entity.CriterionLibrarySelectableTreatmentJoin != null
                     ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),
-                Category = (TreatmentDTOEnum.TreatmentCategory)entity.Category,
+                Category = (TreatmentDTOEnum.TreatmentType)entity.Category,
                 AssetType = (TreatmentDTOEnum.AssetType)entity.AssetType
             };
 
@@ -196,7 +196,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         : new CriterionLibraryDTO(),
                 ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                 ShadowForSameTreatment = entity.ShadowForSameTreatment,
-                Category = (TreatmentDTOEnum.TreatmentCategory)entity.Category,
+                Category = (TreatmentDTOEnum.TreatmentType)entity.Category,
 
                 IsModified = entity.IsModified,
                 LibraryId = entity.LibraryId,

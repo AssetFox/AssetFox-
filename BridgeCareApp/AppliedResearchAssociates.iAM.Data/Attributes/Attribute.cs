@@ -13,6 +13,7 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
             new RuleDefinition { RuleName = "PREDOMINANT", IsText = true, IsNumeric = true },
             new RuleDefinition { RuleName = "AVERAGE", IsText = false, IsNumeric = true },
             new RuleDefinition { RuleName = "LAST", IsText = true, IsNumeric = true },
+            new RuleDefinition { RuleName = "ADD", IsText = false, IsNumeric= true }
         };
 
         private static List<string> validDataTypes = new List<string>()

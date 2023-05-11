@@ -29,6 +29,7 @@ namespace BridgeCareCore.Services
         private readonly string _networkKeyField = "BRKEY_";
         private Dictionary<string, List<KeySegmentDatum>> _keyProperties;
         private List<string> _keyFields;
+        private bool newImportFile = false;
 
         private static readonly List<string> InitialHeaders = new()
         {
@@ -220,9 +221,22 @@ namespace BridgeCareCore.Services
             var attributeDTOs = _unitOfWork.AttributeRepo.GetAttributes();
             var attributeNames = attributeDTOs.Select(_ => _.Name).ToList();
 
+            // Ignore factor columns as bad columns (used for performance factor)
+            foreach (var missingAttribute in consequenceAttributeNames)
+            {
+                if (missingAttribute.Contains("_factor"))
+                {
+                    attributeNames.Add(missingAttribute);
+
+                    newImportFile = true;
+                }
+            }
+
             if (consequenceAttributeNames.Any(name => !attributeNames.Contains(name)))
             {
                 var missingAttributes = consequenceAttributeNames.Except(attributeNames).ToList();
+
+
                 if (missingAttributes.Count == 1)
                 {
                     throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
@@ -379,18 +393,22 @@ namespace BridgeCareCore.Services
                     Category = convertedCategory,
                     Consequences = new List<CommittedProjectConsequenceDTO>()
                 };
-
+                // factor needs additional column, so increment by 2
+                // otherwise support old export files
+                int incrementCount = 1;
+                if (newImportFile) { incrementCount = 2; }
                 if (end.Column > _keyFields.Count + InitialHeaders.Count)
                 {
                     // There are consequences in the committed project file - add them to the DTO
-                    for (var column = _keyFields.Count + InitialHeaders.Count + 1; column <= end.Column; column++)
+                    for (var column = _keyFields.Count + InitialHeaders.Count + 1; column <= end.Column; column+=incrementCount)
                     {
                         project.Consequences.Add(new CommittedProjectConsequenceDTO
                         {
                             Id = Guid.NewGuid(),
                             CommittedProjectId = project.Id,
                             Attribute = worksheet.GetCellValue<string>(1, column),
-                            ChangeValue = worksheet.GetCellValue<string>(row, column)
+                            ChangeValue = worksheet.GetCellValue<string>(row, column),
+                            PerformanceFactor = newImportFile ? worksheet.GetCellValue<float>(row, column + 1) : worksheet.GetCellValue<float>(row, column),
                         });
                     }
                 }
@@ -454,14 +472,13 @@ namespace BridgeCareCore.Services
         public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
-            var committedProjectDTOs =
-                CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
-
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
             queueLog.UpdateWorkQueueStatus("Creating Committed Projects");
+            var committedProjectDTOs =
+              CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
             queueLog.UpdateWorkQueueStatus("Deleting Old Committed Projects");

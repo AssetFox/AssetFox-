@@ -14,13 +14,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class AdminDataRepository : IAdminDataRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly NetworkRepository _networkRepo;
 
-        public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork) =>
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork, NetworkRepository networkRepo)
+        { 
+                _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
+                _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        }
 
         public string GetPrimaryNetwork()
         {
-            var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "PrimaryNetwork").FirstOrDefault();
+            var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == "PrimaryNetwork");
             if (existingPrimaryNetwork == null)               
             {
                 return null;
@@ -36,23 +40,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SetPrimaryNetwork(string name)
         {
-            var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "PrimaryNetwork").FirstOrDefault();
-            if (!_unitOfWork.Context.Network.Any(_ => _.Name == name))
+            var existingNetworkAdminSetting = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "PrimaryNetwork").FirstOrDefault();
+            var existingNetwork = _unitOfWork.Context.Network.FirstOrDefault(_ => _.Name == name);
+            if (existingNetwork == null)
             {
                 throw new RowNotInTableException("The specified network was not found.");
             }
-            else if (existingPrimaryNetwork == null)
+            if (existingNetworkAdminSetting == null)
             {
+
                 _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
                 {
                     Key = "PrimaryNetwork",
-                    Value = name
+                    Value = Guid.NewGuid().ToString()
                 });
             }
             else
             {
-                existingPrimaryNetwork.Value = name;
-                _unitOfWork.Context.AdminSettings.Update(existingPrimaryNetwork);
+
+                existingNetworkAdminSetting.Value = existingNetwork.Id.ToString();
+                _unitOfWork.Context.AdminSettings.Update(existingNetworkAdminSetting);
             }
             _unitOfWork.Context.SaveChanges();
         }

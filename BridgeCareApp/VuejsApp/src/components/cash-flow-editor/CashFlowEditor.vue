@@ -79,8 +79,8 @@
                                 :return-value.sync="props.item.name"
                                 large
                                 lazy
-                                persistent
-                                @save="onEditSelectedLibraryListData(props.item,'description')">
+                                @save="onEditSelectedLibraryListData(props.item,'description')"
+                                >
                                 <v-text-field
                                     readonly
                                     single-line

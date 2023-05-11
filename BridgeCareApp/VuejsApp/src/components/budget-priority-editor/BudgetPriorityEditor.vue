@@ -67,7 +67,7 @@
                                 <v-edit-dialog
                                     :return-value.sync='props.item[header.value]'
                                     @save='onEditBudgetPriority(props.item, header.value, props.item[header.value])'
-                                    large lazy persistent>
+                                    large lazy>
                                     <v-text-field v-if="header.value === 'priorityLevel'" readonly single-line
                                                   class='sm-txt'
                                                   :value='props.item[header.value]'
@@ -115,7 +115,7 @@
                                 <v-edit-dialog
                                     :return-value.sync='props.item[header.value]'
                                     @save='onEditBudgetPercentagePair(props.item, header.value, props.item[header.value])'
-                                    large lazy persistent>
+                                    large lazy>
                                     <v-text-field readonly single-line class='sm-txt' :value='props.item[header.value]'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [0, 100])]" />
                                     <template slot='input'>

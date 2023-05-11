@@ -97,7 +97,6 @@
                                     "
                                     large
                                     lazy
-                                    persistent
                                 >
                                     <v-text-field
                                         v-if="header.value === 'year'"

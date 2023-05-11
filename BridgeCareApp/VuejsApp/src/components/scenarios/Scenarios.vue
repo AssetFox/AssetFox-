@@ -25,6 +25,7 @@
                                     <v-flex xs6>
                                         <v-layout>
                                             <v-text-field
+                                                id="Scenarios-searchScenarios-textField"
                                                 type="text"
                                                 placeholder="Search in scenarios"
                                                 prepend-inner-icon=$vuetify.icons.ghd-search
@@ -37,7 +38,8 @@
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
                                             >
                                             </v-text-field>
-                                            <v-btn style="margin-top: 2px;" 
+                                            <v-btn id="Scenarios-performSearch-button" 
+                                                style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 outline 
                                                 @click="onMineSearchClick()">
@@ -48,6 +50,7 @@
                                     <v-flex xs4></v-flex>
                                     <v-layout class="flex-end xs2" style="justify-content: end; padding-right: 70px">
                                         <v-btn
+                                           id="Scenarios-createScenario-btn"
                                             @click="
                                                 showCreateScenarioDialog = true
                                             "
@@ -152,6 +155,7 @@
                                                     }"
                                                 >
                                                     <v-btn
+                                                        id="Scenarios-actionMenu-vbtn"
                                                         color="green--text darken-1"
                                                         icon
                                                         v-bind="attrs"

@@ -91,7 +91,7 @@
                                             @save="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])"
                                             large
                                             lazy
-                                            persistent>
+                                            >
                                             <v-text-field v-if="header.value !== 'budget' 
                                                 && header.value !== 'year' 
                                                 && header.value !== 'brkey' 

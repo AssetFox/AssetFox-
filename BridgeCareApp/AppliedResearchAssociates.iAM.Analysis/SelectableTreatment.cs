@@ -4,6 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.Validation;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
@@ -179,6 +180,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private readonly List<ConditionalTreatmentConsequence> _Consequences = new List<ConditionalTreatmentConsequence>();
 
         private readonly List<TreatmentCost> _Costs = new List<TreatmentCost>();
+
+        private readonly List<TreatmentPerformanceFactor> _PerformanceFactors = new List<TreatmentPerformanceFactor>();
 
         private readonly List<Criterion> _FeasibilityCriteria = new List<Criterion>();
 

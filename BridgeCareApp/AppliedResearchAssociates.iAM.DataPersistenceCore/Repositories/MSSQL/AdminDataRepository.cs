@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using MoreLinq.Extensions;
 using Org.BouncyCastle.Asn1.Cms;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -18,43 +21,72 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public string GetPrimaryNetwork()
+        
+        //Reads in KeyFields record as a string but places values in a list to return.
+        public IList<string> GetKeyFields()
         {
-            var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "PrimaryNetwork").FirstOrDefault();
-            if (existingPrimaryNetwork == null)               
+            var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").FirstOrDefault();
+            if (existingKeyFields == null)
             {
                 return null;
             }
             else
             {
-                var name = _unitOfWork.Context.AdminSettings.First().Value;
-                return name;
+                var keyFields = existingKeyFields.Value;
+                IList<string> KeyFieldsList = keyFields.Split(',').ToList();
+                return KeyFieldsList;
             }
-
         }
 
-
-        public void SetPrimaryNetwork(string name)
+        //String is to be passed in as parameter. Sets the KeyFields in the AdminSettings table. 
+        public void SetKeyFields(string keyFields)
         {
-            var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "PrimaryNetwork").FirstOrDefault();
-            if (!_unitOfWork.Context.Network.Any(_ => _.Name == name))
+            var boolAttributeExistence = false;
+            var boolDuplicateExistence = false;
+            IList<string> KeyFieldsList = keyFields.Split(',').ToList();
+            var duplicateCount = KeyFieldsList.GroupBy(x => x).Where(y => y.Count() > 1).Select(z => z.Key).ToList();
+
+            //This if statement checks if there are duplicates
+            if (duplicateCount.Count >0)
             {
-                throw new RowNotInTableException("The specified network was not found.");
+                boolDuplicateExistence = true;
+                throw new RowNotInTableException("A duplicate attribute is selected.");
+                
             }
-            else if (existingPrimaryNetwork == null)
+            //This checks that each attribute exists in the attribute table
+            foreach (string KeyField in KeyFieldsList)
             {
-                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                if(!_unitOfWork.Context.Attribute.Any(_ => _.Name == KeyField))
                 {
-                    Key = "PrimaryNetwork",
-                    Value = name
-                });
+                    boolAttributeExistence = false;
+                    throw new RowNotInTableException("The specified attribute was not found.");                    
+                }
+                else
+                    boolAttributeExistence = true;
             }
-            else
+            //If each attribute is unique and exists in the attribute table
+            if(boolAttributeExistence && !boolDuplicateExistence)
             {
-                existingPrimaryNetwork.Value = name;
-                _unitOfWork.Context.AdminSettings.Update(existingPrimaryNetwork);
+                var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").SingleOrDefault();
+                var KeyFieldsString = string.Join(",", keyFields);
+                //If the entry doesn't exist in the AdminSettings table
+                if (existingKeyFields == null)
+                {
+                    _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                    {
+                        Key = "KeyFields",
+                        Value = KeyFieldsString
+                    });
+                }
+                //Updates existing KeyFields entry in the AdminSettings table
+                else
+                {
+                    existingKeyFields.Value = KeyFieldsString;
+                    _unitOfWork.Context.AdminSettings.Update(existingKeyFields);
+                }
+                _unitOfWork.Context.SaveChanges();
             }
-            _unitOfWork.Context.SaveChanges();
+            
         }
     }
 }

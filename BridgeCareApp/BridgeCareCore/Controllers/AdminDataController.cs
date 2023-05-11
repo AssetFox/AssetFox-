@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Security;
 using Humanizer;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Controllers
 {
@@ -25,15 +26,16 @@ namespace BridgeCareCore.Controllers
                          base(esecSecurity, unitOfWork, hubService, contextAccessor)
         { }
 
+
         [HttpGet]
-        [Route("GetPrimaryNetwork")]
+        [Route("GetKeyFields")]
         [Authorize]
-        public async Task<IActionResult> GetPrimaryNetwork()
+        public async Task<IActionResult> GetKeyFields()
         {
             try
             {
-                var name = UnitOfWork.AdminDataRepo.GetPrimaryNetwork();
-                return Ok(name);
+                var KeyFields = UnitOfWork.AdminDataRepo.GetKeyFields();
+                return Ok(KeyFields);
             }
             catch (Exception e)
             {
@@ -43,15 +45,15 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("SetPrimaryNetwork/{name}")]
+        [Route("SetKeyFields/{KeyFields}")]
         [ClaimAuthorize("AdminAccess")]
-        public async Task<IActionResult> SetPrimaryNetwork(string name)
+        public async Task<IActionResult> SetKeyFields(string KeyFields)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.AdminDataRepo.SetPrimaryNetwork(name);
+                    UnitOfWork.AdminDataRepo.SetKeyFields(KeyFields);
                 });
                 return Ok();
             }

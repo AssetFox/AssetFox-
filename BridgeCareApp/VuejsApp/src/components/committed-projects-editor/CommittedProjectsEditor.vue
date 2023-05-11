@@ -745,7 +745,7 @@ export default class CommittedProjectsEditor extends Vue  {
     //Events
     onCancelClick() {
         this.clearChanges()
-        this.resetPage();
+        //this.resetPage();
         this.selectedCommittedProject = '';
         this.selectedCpItems = [];
         this.isNoTreatmentBefore = this.isNoTreatmentBeforeCache

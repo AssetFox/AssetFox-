@@ -37,7 +37,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         }
 
-
         public void SetPrimaryNetwork(string name)
         {
             var existingNetworkAdminSetting = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "PrimaryNetwork").FirstOrDefault();

@@ -7,6 +7,7 @@ using System;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.Graph.Models;
 
 namespace BridgeCareCore.Security
 {
@@ -14,14 +15,15 @@ namespace BridgeCareCore.Security
     {
         private readonly IConfiguration _config;
         private readonly IRoleClaimsMapper _roleClaimsMapper;
+        private readonly GraphApiClientService _graphApiClientService; // TODO we can create interface and use it, register dependency in Security.cs
 
         public ClaimsTransformation(IConfiguration config, IRoleClaimsMapper roleClaimsMapper, IHttpContextAccessor contextAccessor)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _roleClaimsMapper = roleClaimsMapper ?? throw new ArgumentNullException(nameof(roleClaimsMapper));
-            
+            _graphApiClientService = new GraphApiClientService(config);
         }
-        public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
+        public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.Esec)
             {
@@ -44,14 +46,28 @@ namespace BridgeCareCore.Security
 
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.B2C)
             {
-                var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, new List<string>
-                { SecurityConstants.Role.Administrator });
+                // TRY TODO goal to read group name set in Azure B2C(that will be IP role name: then retrieve internal role and then claims as below post end TRY
+                var groupNames = new List<string>();
+                var groupClaimType = "group";
+                if (!principal.HasClaim(claim => claim.Type == groupClaimType))
+                {
+                    var nameidentifierClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+                    var nameidentifier = principal.Claims.FirstOrDefault(t => t.Type == nameidentifierClaimType);
+
+                    groupNames = await _graphApiClientService.GetGraphApiUserMemberGroup(nameidentifier.Value);
+                }
+                var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, groupNames);
+                // end TRY
+
+                // TODO new List<string>{ SecurityConstants.Role.Administrator } will get replaced by role found in group above
+                internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, new List<string>
+                 { SecurityConstants.Role.Administrator });
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRolesFromMapper);
                 principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper));
 
             }
 
-            return Task.FromResult(principal);
+            return principal;
         }
     }
 }

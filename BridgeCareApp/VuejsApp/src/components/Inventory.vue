@@ -3,45 +3,29 @@
         <v-flex xs12>
             <v-layout justify-space-between row>
                 <v-spacer></v-spacer>
-                <v-flex xs2>
-                <!--TODO: lists should be dynamically created based on no. of implementation based keyAttributes-->
-                    <v-autocomplete :items="bmsIdsSelectList" @change="onSelectInventoryItemByBMSId" item-text="identifier" item-value="identifier"
-                                    label="Select by BMS Id" outline
-                                    v-model="selectedBmsId">
-                        <template slot="item" slot-scope="data">
-                            <template v-if="typeof data.item !== 'object'">
-                                <v-list-tile-content v-text="data.item"></v-list-tile-content>
+                <v-layout>
+                    <div class="flex xs2" v-for="(key, index) in inventoryDetails">
+                        <v-autocomplete :items="keyAttirbuteValues[index]" @change="onSelectInventoryItem(index)" item-text="identifier" item-value="identifier"
+                                        :label="`Select by ${key} Key`" outline
+                                        v-model="selectedKeys[index]">
+                            <template slot="item" slot-scope="data">
+                                <template v-if="typeof data.item !== 'object'">
+                                    <v-list-tile-content v-text="data.item"></v-list-tile-content>
+                                </template>
+                                <template v-else>
+                                    <v-list-tile-content>
+                                        <v-list-tile-title v-html="data.item.identifier"></v-list-tile-title>
+                                    </v-list-tile-content>
+                                </template>
                             </template>
-                            <template v-else>
-                                <v-list-tile-content>
-                                    <v-list-tile-title v-html="data.item.identifier"></v-list-tile-title>
-                                </v-list-tile-content>
-                            </template>
-                        </template>
-                    </v-autocomplete>
-                </v-flex>
-                <v-flex xs2>
-                    <v-autocomplete :items="brKeysSelectList" @change="onSelectInventoryItemsByBRKey" item-text="identifier" item-value="identifier"
-                                    label="Select by BR Key" outline
-                                    v-model="selectedBrKey">
-                        <template slot="item" slot-scope="data">
-                            <template v-if="typeof data.item !== 'object'">
-                                <v-list-tile-content v-text="data.item"></v-list-tile-content>
-                            </template>
-                            <template v-else>
-                                <v-list-tile-content>
-                                    <v-list-tile-title v-html="data.item.identifier"></v-list-tile-title>
-                                </v-list-tile-content>
-                            </template>
-                        </template>
-                    </v-autocomplete>
-                </v-flex>
+                        </v-autocomplete>
+                    </div>
+                </v-layout>
                 <v-spacer></v-spacer>
             </v-layout>
             <v-divider></v-divider>
             <div class="container" v-html="sanitizedHTML"></div>
         </v-flex>
-
     </v-layout>
 </template>
 
@@ -61,14 +45,14 @@
         @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
         @Action('setIsBusy') setIsBusyAction: any;
 
-        brKeysSelectList: number[] = [];
-        bmsIdsSelectList: any[] = [];
-        inventoryItem: any[][] = [];
-        selectedBmsId: string = '';
-        selectedBrKey: string = '0';
+        keyAttirbuteValues: string[][] = [];
 
-        inventoryDetails: KeyProperty[];       
-        
+        inventoryItem: any[][] = [];
+
+        selectedKeys: string[] = [];
+
+        inventoryDetails: string[] = [];
+                       
         inventorySelectListsWorker: any = null;
 
         inventoryData: any  = null;
@@ -95,14 +79,12 @@
          * Vue component has been mounted
          */
         mounted() {
-            const foo = ["BMSID","BRKEY_"]; // TODO: Implementation based setting for keyAttributes should be defined and used here
+            const keys = ["BMSID","BRKEY_"]; // TODO: Implementation based setting for keyAttributes should be defined and used here
 
-            this.inventoryDetails = this.$config.inventoryKeyProperties;
-            var inventoryDetail = {
-                key1: this.inventoryDetails[0].name,
-                key2: this.inventoryDetails[1].name
-            };
-            this.getInventoryAction(foo);
+            this.inventoryDetails = keys;
+            this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
+           
+            this.getInventoryAction(this.inventoryDetails);
         }
 
         created() {
@@ -114,82 +96,66 @@
                                 
                                 const inventoryItems = data.inventoryItems;
 
-                                const bmsIds: any[] = [];
-                                const brKeys: any[] = [];
+                                const keys: any[][] = []
 
                                 inventoryItems.forEach((item: InventoryItem, index: number) => {
                                     if (index === 0) { 
-                                        // TODO: headers to be populated based on number of key attributes display names from setting
-                                        bmsIds.push({header: 'BMS Ids'});
-                                        brKeys.push({header: 'BR Keys'});
-                                     }
-                                   
-                                        bmsIds.push({
-                                            identifier: item.keyProperties[0],
-                                            group: 'BMS Ids'
-                                        });
-
-                                        brKeys.push({
-                                            identifier: item.keyProperties[1],
-                                            group: 'BR Keys'
-                                        });
+                                        for(let i = 0; i < data.inventoryDetails.length; i++){
+                                            keys.push([])
+                                            keys[i].push({header: `${data.inventoryDetails[i]}'s`})
+                                        }
+                                    }                              
                                     
+                                    for(let i = 0; i < data.inventoryDetails.length; i++){
+                                        keys[i].push({
+                                            identifier: item.keyProperties[i],
+                                            group: data.inventoryDetails[i]
+                                        })
+                                    }
                                 });
-
-                                const bmsIdsSelectList = bmsIds;
-                                const brKeysSelectList = brKeys;
-
-                                return {bmsIdsSelectList: bmsIdsSelectList, brKeysSelectList: brKeysSelectList};
+                           
+                                return {keys: keys};
                             }
 
-                            return {bmsIdsSelectList: [], brKeysSelectList: []};
+                            return  {keys: []};
                         }
                     }
                 ]
             );
         }
 
-
         setupSelectLists() {
             const data: any = {
                 inventoryItems: this.inventoryItems,
+                inventoryDetails: this.inventoryDetails
             };
             this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])
                 .then((result: any) => {
-                    this.bmsIdsSelectList = result.bmsIdsSelectList;
-                    this.brKeysSelectList = result.brKeysSelectList;
+                    if(result.keys.length > 0){
+                        this.bmsIdsSelectList = result.keys[0];
+                        this.brKeysSelectList = result.keys[1];
+                        for(let i = 0; i < this.inventoryDetails.length; i++){
+                            this.keyAttirbuteValues[i] = result.keys[i];
+                        }
+                    }                   
                 });
         }
 
-        /**
-         * BMS id has been selected
-         */
-        onSelectInventoryItemByBMSId(bmsId: string) {
-            var key : string = '-1';
-            var data : InventoryItem = { keyProperties: [
-                    bmsId,
-                    key
-                ]
-            };            
-            this.selectedBmsId = bmsId;
-            const inventoryItem: InventoryItem = this.inventoryItems.filter(function(item){if(item.keyProperties.indexOf(bmsId) !== -1) return item;})[0];
-            this.selectedBrKey = inventoryItem.keyProperties[1];
-            this.getStaticInventoryHTMLAction(({reportType: this.inventoryReportName, filterData: data}));
-        }
+        onSelectInventoryItem(index: number){
+            const key = this.selectedKeys[index];
+            let data: InventoryItem = {keyProperties: []};
 
-        /**
-         * BR key has been selected
-         */
-        onSelectInventoryItemsByBRKey(brKey: string) {
-            var data : InventoryItem = { keyProperties: [
-                    '',
-                    brKey
-                ],
-            };
-            this.selectedBrKey = brKey;
-            const inventoryItem = this.inventoryItems.filter(function(item){if(item.keyProperties.indexOf(brKey) !== -1) return item;})[0];
-            this.selectedBmsId = inventoryItem.keyProperties[0];
-            this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});
+            for(let i = 0; i < this.inventoryDetails.length; i++){
+                if(i === index){
+                    data.keyProperties[i] = key;
+                    continue;
+                }
+                const inventoryItem = this.inventoryItems.filter(function(item){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
+                const otherKeyValue = inventoryItem.keyProperties[i]; 
+                this.selectedKeys[i] = otherKeyValue;
+                data.keyProperties[i] = otherKeyValue;
+            }
+            this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});           
         }
     }
 </script>

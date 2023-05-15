@@ -1,10 +1,8 @@
 export interface InventoryItem {
-    bmsId: string;
-    brKey: number;
+    keyProperties: string[];
 }
 export interface MappedInventoryItem {
-    keyProperty1: string;
-    keyProperty2: number;
+    keyProperties: string[];
 }
 export interface LabelValue {
     label: string;

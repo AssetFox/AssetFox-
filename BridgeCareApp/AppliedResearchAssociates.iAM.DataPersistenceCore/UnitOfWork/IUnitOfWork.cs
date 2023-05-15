@@ -74,6 +74,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         ISimulationRepository SimulationRepo { get; }
 
+        ISiteRepository SiteRepo { get; }
+
         ITargetConditionGoalRepository TargetConditionGoalRepo { get; }
 
         ITreatmentConsequenceRepository TreatmentConsequenceRepo { get; }

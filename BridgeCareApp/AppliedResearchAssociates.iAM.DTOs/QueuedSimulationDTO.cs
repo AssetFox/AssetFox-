@@ -1,4 +1,5 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
@@ -14,5 +15,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string PreviousRunTime { get; set; }
         public int QueuePosition { get; set; }
         public string WorkDescription { get; set; }
+        public WorkType WorkType { get; set; }
+        public DomainType DomainType { get; set; }
     }
 }

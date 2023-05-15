@@ -38,9 +38,9 @@ namespace BridgeCareCore.Controllers
 
         private readonly IGeneralWorkQueueService _workQueueService;
         public NetworkController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, IGeneralWorkQueueService workQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, IGeneralWorkQueueService workQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _workQueueService = workQueService ?? throw new ArgumentNullException(nameof(workQueService));
+            _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
         }
 
         [HttpGet]
@@ -135,11 +135,9 @@ namespace BridgeCareCore.Controllers
                 var analysisHandle = _workQueueService.CreateAndRun(workItem);
                 // Before sending a "queued" message that may overwrite early messages from the run,
                 // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, analysisHandle.MostRecentStatusMessage);
-                }
+                
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, null);
+                
 
                 //await analysisHandle.WorkCompletion;
                 return Ok();
@@ -152,35 +150,6 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::DeleteNetwork - {e.Message}");
-                throw;
-            }
-        }
-
-        [HttpDelete]
-        [Route("CancelNetworkDeletion/{networkId}")]
-        [Authorize]
-        public async Task<IActionResult> CancelNetworkDeletion(Guid networkId)
-        {
-            try
-            {
-                var hasBeenRemovedFromQueue = _workQueueService.Cancel(networkId);
-                await Task.Delay(125);
-
-                if (hasBeenRemovedFromQueue)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceled" });
-                }
-                else
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceling network deletion..." });
-
-                }
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling network deltion for {networkName}::{e.Message}");
                 throw;
             }
         }

@@ -79,8 +79,8 @@
                                 :return-value.sync="props.item.name"
                                 large
                                 lazy
-                                persistent
-                                @save="onEditSelectedLibraryListData(props.item,'description')">
+                                @save="onEditSelectedLibraryListData(props.item,'description')"
+                                >
                                 <v-text-field
                                     readonly
                                     single-line
@@ -697,9 +697,9 @@ export default class CashFlowEditor extends Vue {
                 isNewLibrary: true,           
                  syncModel: {
                     libraryId: cashFlowRuleLibrary.cashFlowRules.length == 0 || !this.hasSelectedLibrary ? null : this.selectedCashFlowRuleLibrary.id,
-                    rowsForDeletion: cashFlowRuleLibrary.cashFlowRules === [] ? [] : this.deletionIds,
-                    updateRows: cashFlowRuleLibrary.cashFlowRules === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: cashFlowRuleLibrary.cashFlowRules === [] ? [] : this.addedRows,
+                    rowsForDeletion: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : this.deletionIds,
+                    updateRows: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : this.addedRows,
                     isModified: false
                  },
                  scenarioId: this.hasScenario ? this.selectedScenarioId : null
@@ -709,7 +709,7 @@ export default class CashFlowEditor extends Vue {
                     this.hasCreatedLibrary = true;
                     this.librarySelectItemValue = cashFlowRuleLibrary.id;
                     
-                    if(cashFlowRuleLibrary.cashFlowRules === []){
+                    if(cashFlowRuleLibrary.cashFlowRules.length == 0){
                         this.clearChanges();
                     }
 

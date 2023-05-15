@@ -1,9 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -64,8 +66,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public async Task Run(string parameters)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
+            workQueueLog ??= new DoNothingWorkQueueLog();
             // Check for the parameters
             if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
@@ -110,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportPath = string.Empty;
             try
             {
-                reportPath = GenerateBAMSAuditReport(_networkId, _simulationId);
+                reportPath = GenerateBAMSAuditReport(_networkId, _simulationId, workQueueLog, cancellationToken);
             }
             catch (Exception e)
             {
@@ -134,8 +137,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private string GenerateBAMSAuditReport(Guid networkId, Guid simulationId)
+        private string GenerateBAMSAuditReport(Guid networkId, Guid simulationId, IWorkQueueLog workQueueLog, CancellationToken? cancellationToken = null)
         {
+            if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+            {
+                throw new Exception("Report was cancelled");
+            }
             var reportPath = string.Empty;
             var reportDetailDto = new SimulationReportDetailDTO
             {
@@ -143,7 +150,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 Status = $"Generating..."
             };
             UpsertSimulationReportDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);           
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
 
             var logger = new CallbackLogger(str => UpsertSimulationReportDetailWithStatus(reportDetailDto, str));
             var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);            
@@ -173,28 +181,34 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("BAMSAuditReportData.xlsx"));
             
+            checkCancelled(cancellationToken);
             // Bridge Data TAB
             reportDetailDto.Status = $"Creating Data TAB";
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var bridgesWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.BridgesTab);
             var dataTabRequiredAttributes = DataTab.GetRequiredAttributes();
             ValidateSections(simulationOutput, reportDetailDto, simulationId, dataTabRequiredAttributes);
             _dataTab.Fill(bridgesWorksheet, simulationOutput);
 
+            checkCancelled(cancellationToken);
             // Fill Decisions TAB
             reportDetailDto.Status = $"Creating Decision TAB";
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var decisionsWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.DecisionsTab);
             var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
             ValidateSections(simulationOutput, reportDetailDto, simulationId, new HashSet<string>(performanceCurvesAttributes.Except(dataTabRequiredAttributes)));
             _decisionTab.Fill(decisionsWorksheet, simulationOutput, simulation, performanceCurvesAttributes);
 
+            checkCancelled(cancellationToken);
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
             reportPath = Path.Combine(folderPathForSimulation, "BAMSAuditReport.xlsx");
@@ -202,10 +216,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(reportPath, bin);                       
             
-            reportDetailDto.Status = $"Report generation completed";
+            checkCancelled(cancellationToken);
+            reportDetailDto.Status = $"Report generation completed";          
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-                        
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+
             return reportPath;
         }
 
@@ -248,6 +264,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             Status = "Audit output report completed with errors";
             IsComplete = true;
+        }
+
+        private void checkCancelled(CancellationToken? cancellationToken)
+        {
+            if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+            {
+                throw new Exception("Report was cancelled");
+            }
         }
     }
 }

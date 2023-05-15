@@ -19,6 +19,7 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using BridgeCareCore.Services.General_Work_Queue.WorkItems;
 
 namespace BridgeCareCore.Controllers
 {
@@ -31,6 +32,7 @@ namespace BridgeCareCore.Controllers
         private readonly ITreatmentService _treatmentService;
         private readonly ITreatmentPagingService _treatmentPagingService;
         private readonly IClaimHelper _claimHelper;
+        private readonly IGeneralWorkQueueService _generalWorkQueueService;
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         public TreatmentController(ITreatmentService treatmentService, ITreatmentPagingService treatmentPagingService,
@@ -38,11 +40,12 @@ namespace BridgeCareCore.Controllers
             IUnitOfWork unitOfWork,
             IHubService hubService,
             IHttpContextAccessor httpContextAccessor,
-            IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IClaimHelper claimHelper, IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _treatmentService = treatmentService;
-            _treatmentPagingService = treatmentPagingService;
+            _treatmentService = treatmentService ?? throw new ArgumentNullException(nameof(treatmentService));
+            _treatmentPagingService = treatmentPagingService ?? throw new ArgumentNullException(nameof(treatmentPagingService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+            _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
         }
 
         [HttpGet]
@@ -113,9 +116,16 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     var selectableTreatment = UnitOfWork.SelectableTreatmentRepo.GetDefaultTreatment(simulationId);
-                    var library = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == selectableTreatment.LibraryId);
-                    if (library != null) library.IsModified = selectableTreatment.IsModified;
-                    result = library;
+                    if (selectableTreatment == null)
+                    {
+                        result = null;                     
+                    }
+                    else
+                    {
+                        var library = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == selectableTreatment.LibraryId);
+                        if (library != null) library.IsModified = selectableTreatment.IsModified;
+                        result = library;
+                    }                                         
                 });
                 return Ok(result);
             }
@@ -458,27 +468,33 @@ namespace BridgeCareCore.Controllers
 
                 var treatmentLibraryId = Guid.Parse(libraryId.ToString());
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                var result = new TreatmentImportResultDTO();
+  
+                var libraryName = "";
                 await Task.Factory.StartNew(() =>
                 {
+                    var existingTreatmentLibrary = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+                    if (existingTreatmentLibrary != null)
+                        libraryName = existingTreatmentLibrary.Name;
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        var existingTreatmentLibrary = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+                        
                         if (existingTreatmentLibrary != null)
                         {
                             _claimHelper.CheckIfAdminOrOwner(existingTreatmentLibrary.Owner, UserId);
                         }
                     }
-                    result = _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
                 });
 
-                if (!string.IsNullOrEmpty(result.WarningMessage))
+                ImportLibraryTreatmentWorkitem workItem = new ImportLibraryTreatmentWorkitem(treatmentLibraryId, excelPackage, UserInfo.Name, libraryName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
-                    return Ok(null);
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = treatmentLibraryId, Status = analysisHandle.MostRecentStatusMessage });
                 }
-
-                return Ok(result.TreatmentLibrary);
+                return Ok();
             }
             catch (UnauthorizedAccessException)
             {
@@ -577,20 +593,24 @@ namespace BridgeCareCore.Controllers
 
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
                 var simulationId = Guid.Parse(id.ToString());
-                var result = new ScenarioTreatmentImportResultDTO();
+
+                var simulationName = "";
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    result = _treatmentService.ImportScenarioTreatmentsFile(simulationId, excelPackage);
+                    simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 });
 
-                if (!string.IsNullOrEmpty(result.WarningMessage))
+                ImportScenarioTreatmentWorkitem workItem = new ImportScenarioTreatmentWorkitem(simulationId, excelPackage, UserInfo.Name, simulationName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
-                    return Ok(null);
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = analysisHandle.MostRecentStatusMessage });
                 }
-
-                return Ok(result.Treatments);
+                return Ok();
             }
             catch (UnauthorizedAccessException)
             {

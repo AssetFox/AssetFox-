@@ -5,7 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -438,15 +440,23 @@ namespace BridgeCareCore.Services
             return projectsPerLocationIdentifierAndYearTuple.Values.ToList();
         }
 
-        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
+        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
+            queueLog ??= new DoNothingWorkQueueLog();
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
+            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                return;
+            queueLog.UpdateWorkQueueStatus("Creating Committed Projects");
             var committedProjectDTOs =
                 CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
-
+            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                return;
+            queueLog.UpdateWorkQueueStatus("Deleting Old Committed Projects");
             _unitOfWork.CommittedProjectRepo.DeleteSimulationCommittedProjects(simulationId);
-
+            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                return;
+            queueLog.UpdateWorkQueueStatus("Upserting Created Committed Projects");
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
         

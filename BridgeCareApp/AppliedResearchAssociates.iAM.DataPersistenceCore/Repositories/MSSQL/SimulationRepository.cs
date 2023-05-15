@@ -12,6 +12,8 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Information;
+using AppliedResearchAssociates.iAM.Common.Logging;
+using System.Threading;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -1324,17 +1326,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
         }
 
-        public void DeleteSimulation(Guid simulationId)
+        public void DeleteSimulation(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
+            queueLog ??= new DoNothingWorkQueueLog();
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 return;
             }
-            _unitOfWork.AsTransaction(() =>
+            if (_unitOfWork.Context.Database.CurrentTransaction != null)
             {
+                throw new InvalidOperationException(UnitOfDataPersistenceWorkExtensions.CannotStartTransactionWhileAnotherTransactionIsInProgress);
+            }
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                {
+                    _unitOfWork.Rollback();
+                    return;
+                }
+                queueLog.UpdateWorkQueueStatus("Deleting Budgets");
                 _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
                     _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                {
+                    _unitOfWork.Rollback();
+                    return;
+                }
                 _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
                     _.ScenarioSelectableTreatment.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
@@ -1343,7 +1362,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 var committedEntities = _unitOfWork.Context.CommittedProject.Where(_ =>
                     _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).ToList();
-
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                {
+                    _unitOfWork.Rollback();
+                    return;
+                }
+                queueLog.UpdateWorkQueueStatus("Deleting Committed Projects");
                 _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
                     _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
@@ -1353,9 +1377,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.Entry(committedEntities[index]).Reload();
                     index++;
                 }
-
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                {
+                    _unitOfWork.Rollback();
+                    return;
+                }
+                queueLog.UpdateWorkQueueStatus("Deleting Simulation");
                 _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
-            });
+                _unitOfWork.Commit();
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
         }
 
         public void DeleteSimulationsByNetworkId(Guid networkId)

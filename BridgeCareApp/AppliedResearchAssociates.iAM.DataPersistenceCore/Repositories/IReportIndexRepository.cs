@@ -16,5 +16,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         /// Deletes any ReportIndex with an ExpirationDate before the current date
         /// </summary>
         bool DeleteExpiredReports();
+        IList<Generics.ReportItemList> GetAllReportsInSystem();
     }
 }

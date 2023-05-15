@@ -6,7 +6,9 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -20,6 +22,7 @@ using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace BridgeCareCore.Controllers
 {
@@ -80,6 +83,61 @@ namespace BridgeCareCore.Controllers
             return validResult;
         }
 
+        [HttpGet]
+        [Route("GetAllReportNamesInSystem")]
+        [Authorize]
+        public async Task<IActionResult> GetReportNames()
+        {
+            try
+            {
+                var reportList = await Task.Run(() => UnitOfWork.ReportIndexRepository.GetAllReportsInSystem());
+                var reportNames = reportList.Select(report => new { report.ReportId, report.ReportName });
+                return Ok(reportNames);
+            }
+            catch (Exception ex)
+            {
+
+                // Return a meaningful error message to the client
+                var errorMessage = $"An error occurred while retrieving the report names. Error: {ex.Message}";
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, errorMessage);
+                return BadRequest();
+            }
+        }
+
+        [HttpDelete]
+        [Route("Cancel/{networkId}")]
+        [Authorize]
+        public async Task<IActionResult> CancelNetworkDeletion(Guid networkId)
+        {
+            try
+            {
+                var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(networkId);
+                await Task.Delay(125);
+
+                if (hasBeenRemovedFromQueue)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceled" });
+                }
+                else
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceling network deletion..." });
+
+                }
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling network deltion for {networkName}::{e.Message}");
+                throw;
+            }
+        }
+
+
+
+
+
+
         [HttpPost]
         [Route("GetFile/{reportName}")]
         [Authorize]
@@ -121,35 +179,6 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {e.Message}");
-                throw;
-            }
-        }
-
-        [HttpDelete]
-        [Route("Cancel/{networkId}")]
-        [Authorize]
-        public async Task<IActionResult> CancelNetworkDeletion(Guid networkId)
-        {
-            try
-            {
-                var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(networkId);
-                await Task.Delay(125);
-
-                if (hasBeenRemovedFromQueue)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceled" });
-                }
-                else
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceling network deletion..." });
-
-                }
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling network deltion for {networkName}::{e.Message}");
                 throw;
             }
         }

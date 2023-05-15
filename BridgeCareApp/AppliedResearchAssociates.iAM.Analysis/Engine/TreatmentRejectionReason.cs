@@ -1,5 +1,8 @@
 ﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
+    /// <summary>
+    /// .
+    /// </summary>
     public enum TreatmentRejectionReason
     {
         /// <summary>

@@ -21,10 +21,19 @@ namespace AppliedResearchAssociates.iAM.DTOs
             ChangeValue = fullConsequence.ChangeValue;
         }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public Guid CommittedProjectId { get; set; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public string Attribute { get; set; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public string ChangeValue { get; set; }
     }
 }

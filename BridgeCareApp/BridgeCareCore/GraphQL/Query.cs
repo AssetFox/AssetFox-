@@ -10,14 +10,26 @@ using HotChocolate.Data;
 
 namespace BridgeCareCore.GraphQL
 {
+    /// <summary>
+    /// The GraphQL query.
+    /// </summary>
     public class Query
     {
+        /// <summary>
+        /// Get all simulations.
+        /// </summary>
+        /// <param name="_unitOfWork">An instance of a transaction with the database.</param>
+        /// <returns>List of all simulations.</returns>
         [UseFiltering]
         [UseSorting]
-        public List<SimulationDTO> GetSimulations([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork) =>
-            _unitOfWork.SimulationRepo.GetAllScenario();
+        public List<SimulationDTO> GetSimulations([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork) => _unitOfWork.SimulationRepo.GetAllScenario();
 
-
+        /// <summary>
+        /// Get a simulation object and its repositories.
+        /// </summary>
+        /// <param name="_unitOfWork">An instance of a transaction with the database.</param>
+        /// <param name="simulationId">The simulation ID passed in.</param>
+        /// <returns>Simulation object with access to all its repositories, based on simulation ID.</returns>
         [UseFiltering]
         [UseSorting]
         public CompleteSimulationDTO GetSimulation([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork, string simulationId)
@@ -28,9 +40,9 @@ namespace BridgeCareCore.GraphQL
             {
                 Name = coreSimulation.Name,
                 NetworkId = coreSimulation.NetworkId,
-                ReportStatus = coreSimulation.ReportStatus,
-
+                ReportStatus = coreSimulation.ReportStatus
             };
+
             fullSimulation.AnalysisMethod = _unitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationGuid);
             fullSimulation.BudgetPriorities = _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationGuid);
             fullSimulation.InvestmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationGuid);
@@ -44,25 +56,24 @@ namespace BridgeCareCore.GraphQL
             fullSimulation.BudgetPriorities = _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationGuid);
             fullSimulation.RemainingLifeLimits = _unitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationGuid);
             fullSimulation.CashFlowRules = _unitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulationGuid);
-         
 
             return fullSimulation;
         }
 
+        /// <summary>
+        /// Get the simulation results of an analysis.
+        /// </summary>
+        /// <param name="_unitOfWork">An instance of a transaction with the database.</param>
+        /// <param name="simulationId">The simulation ID passed in.</param>
+        /// <returns>Simulation output object, based on simulation ID.</returns>
         [UseFiltering]
         [UseSorting]
-        /// <summary>
-        /// Method that GetSimulationsOutput query uses in order to retrieve simulation output object via simulation id.
-        /// </summary>
-        /// <param name="simulationId">The simulation id passed in.</param>
-        /// <returns>Simulation output object based on simulation id.</returns>
-        public SimulationOutput GetSimulationOutputs([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork, string simulationId) 
+        public SimulationOutput GetSimulationOutput([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork, string simulationId) 
         {
-            _unitOfWork.SimulationRepo.GetSimulation(new Guid(simulationId));
-            var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(new Guid(simulationId));
+            var simulationGuid = new Guid(simulationId);
+            _unitOfWork.SimulationRepo.GetSimulation(simulationGuid);
+            var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationGuid);
             return simulationOutput;
         }
- 
-    }
-    
+    }  
 }

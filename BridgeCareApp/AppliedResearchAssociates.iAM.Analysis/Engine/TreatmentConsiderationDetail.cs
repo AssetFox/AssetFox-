@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
+    /// <summary>
+    /// .
+    /// </summary>
     public sealed class TreatmentConsiderationDetail
     {
         public TreatmentConsiderationDetail(string treatmentName)
@@ -16,6 +19,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             TreatmentName = treatmentName;
         }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public int? BudgetPriorityLevel { get; set; }
 
         /// <summary>
@@ -23,10 +29,19 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         /// </summary>
         public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
 
+        /// <summary>
+        /// .
+        /// </summary>
         public List<BudgetUsageDetail> BudgetUsages { get; } = new List<BudgetUsageDetail>();
 
+        /// <summary>
+        /// .
+        /// </summary>
         public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new List<CashFlowConsiderationDetail>();
 
+        /// <summary>
+        /// .
+        /// </summary>
         public string TreatmentName { get; }
 
         internal TreatmentConsiderationDetail(TreatmentConsiderationDetail original)

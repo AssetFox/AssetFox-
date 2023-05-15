@@ -2,6 +2,9 @@
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
+    /// <summary>
+    /// .
+    /// </summary>
     public sealed class BudgetUsageDetail
     {
         public BudgetUsageDetail(string budgetName)
@@ -14,10 +17,19 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             BudgetName = budgetName;
         }
 
-        public string BudgetName { get; } 
+        /// <summary>
+        /// .
+        /// </summary>
+        public string BudgetName { get; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public decimal CoveredCost { get; set; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public BudgetUsageStatus Status { get; set; }
 
         internal BudgetUsageDetail(BudgetUsageDetail original)

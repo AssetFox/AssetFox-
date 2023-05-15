@@ -2,6 +2,9 @@
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
+    /// <summary>
+    /// .
+    /// </summary>
     public enum BudgetUsageStatus
     {
         /// <summary>

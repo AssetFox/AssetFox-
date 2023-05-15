@@ -2,6 +2,9 @@
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
+    /// <summary>
+    /// .
+    /// </summary>
     public sealed class CashFlowConsiderationDetail
     {
         public CashFlowConsiderationDetail(string cashFlowRuleName)
@@ -14,8 +17,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             CashFlowRuleName = cashFlowRuleName;
         }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public string CashFlowRuleName { get; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public ReasonAgainstCashFlow ReasonAgainstCashFlow { get; set; }
 
         internal CashFlowConsiderationDetail(CashFlowConsiderationDetail original)

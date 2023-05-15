@@ -3,6 +3,9 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
+    /// <summary>
+    /// .
+    /// </summary>
     public sealed class BudgetDetail
     {
         public BudgetDetail(Budget budget, decimal availableFunding)
@@ -18,8 +21,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             BudgetName = budgetName ?? throw new ArgumentNullException(nameof(budgetName));
         }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public decimal AvailableFunding { get; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public string BudgetName { get; }
 
         internal BudgetDetail(BudgetDetail original)

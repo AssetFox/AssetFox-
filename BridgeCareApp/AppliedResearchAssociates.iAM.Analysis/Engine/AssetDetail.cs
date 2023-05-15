@@ -6,6 +6,9 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
+    /// <summary>
+    /// .
+    /// </summary>
     public sealed class AssetDetail : AssetSummaryDetail
     {
         public AssetDetail(AnalysisMaintainableAsset asset) : base(asset)
@@ -15,22 +18,46 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         [JsonConstructor]
         public AssetDetail(string assetName, Guid assetId) : base(assetName, assetId)
         {
-        }        
+        }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public string AppliedTreatment { get; set; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public TreatmentCause TreatmentCause { get; set; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public List<TreatmentConsiderationDetail> TreatmentConsiderations { get; } = new List<TreatmentConsiderationDetail>();
 
+        /// <summary>
+        /// .
+        /// </summary>
         public bool TreatmentFundingIgnoresSpendingLimit { get; set; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public List<TreatmentOptionDetail> TreatmentOptions { get; } = new List<TreatmentOptionDetail>();
 
+        /// <summary>
+        /// .
+        /// </summary>
         public List<TreatmentRejectionDetail> TreatmentRejections { get; } = new List<TreatmentRejectionDetail>();
 
+        /// <summary>
+        /// .
+        /// </summary>
         public List<TreatmentSchedulingCollisionDetail> TreatmentSchedulingCollisions { get; } = new List<TreatmentSchedulingCollisionDetail>();
 
+        /// <summary>
+        /// .
+        /// </summary>
         public TreatmentStatus TreatmentStatus { get; set; }
 
         internal AssetDetail(AssetDetail original) : base(original)

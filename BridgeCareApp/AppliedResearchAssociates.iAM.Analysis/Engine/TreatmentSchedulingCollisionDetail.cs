@@ -2,6 +2,9 @@
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
+    /// <summary>
+    /// .
+    /// </summary>
     public sealed class TreatmentSchedulingCollisionDetail
     {
         public TreatmentSchedulingCollisionDetail(int year, string nameOfUnscheduledTreatment)
@@ -10,8 +13,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             NameOfUnscheduledTreatment = nameOfUnscheduledTreatment ?? throw new ArgumentNullException(nameof(nameOfUnscheduledTreatment));
         }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public string NameOfUnscheduledTreatment { get; set; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public int Year { get; set; }
 
         internal TreatmentSchedulingCollisionDetail(TreatmentSchedulingCollisionDetail original)

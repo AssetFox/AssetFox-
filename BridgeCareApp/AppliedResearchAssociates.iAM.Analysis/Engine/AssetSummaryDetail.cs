@@ -5,6 +5,9 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
+    /// <summary>
+    /// .
+    /// </summary>
     public class AssetSummaryDetail
     {
         public AssetSummaryDetail(AnalysisMaintainableAsset asset)
@@ -25,8 +28,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             AssetId = assetId;
         }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public string AssetName { get; }
 
+        /// <summary>
+        /// .
+        /// </summary>
         public Guid AssetId { get; }
 
         public Dictionary<string, double> ValuePerNumericAttribute { get; } = new Dictionary<string, double>();

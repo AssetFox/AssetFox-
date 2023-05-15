@@ -28,5 +28,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             treatmentPerformanceFactor.Attribute = entity.Attribute;
             treatmentPerformanceFactor.PerformanceFactor = entity.PerformanceFactor;
         }
+
+        public static TreatmentPerformanceFactorDTO ToDto(this ScenarioTreatmentPerformanceFactorEntity entity) =>
+            new TreatmentPerformanceFactorDTO
+            {
+                Id = entity.Id,
+                Attribute = entity.Attribute,
+                PerformanceFactor = entity.PerformanceFactor,
+            };
+        public static ScenarioTreatmentPerformanceFactorEntity ToScenarioEntity(this TreatmentPerformanceFactor domain, Guid treatmentId) =>
+            new ScenarioTreatmentPerformanceFactorEntity
+            {
+                Attribute = domain.Attribute,
+                PerformanceFactor = domain.PerforamanceFactor
+            };
+
+
+        public static ScenarioTreatmentPerformanceFactorEntity ToScenarioEntity(this TreatmentPerformanceFactorDTO dto, Guid treatmentId) =>
+            new ScenarioTreatmentPerformanceFactorEntity { Id = dto.Id, ScenarioSelectableTreatmentId = treatmentId };
     }
 }

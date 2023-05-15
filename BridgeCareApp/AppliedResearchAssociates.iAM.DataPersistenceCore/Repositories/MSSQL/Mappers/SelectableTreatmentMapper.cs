@@ -196,6 +196,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Costs = entity.ScenarioTreatmentCosts.Any()
                         ? entity.ScenarioTreatmentCosts.Select(_ => _.ToDto()).ToList()
                         : new List<TreatmentCostDTO>(),
+                PerformanceFactors = entity.ScenarioTreatmentPerformanceFactors.Any()
+                        ? entity.ScenarioTreatmentPerformanceFactors.Select(_ => _.ToDto()).ToList()
+                        : new List<TreatmentPerformanceFactorDTO>(),
                 CriterionLibrary = entity.CriterionLibraryScenarioSelectableTreatmentJoin != null
                         ? entity.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary.ToDto()
                         : new CriterionLibraryDTO(),

@@ -163,6 +163,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentSchedulings)
                 .Include(_ => _.ScenarioTreatmentSupersessions)
+                .Include(_ => _.ScenarioTreatmentPerformanceFactors)
                 .ToList();
 
             treatments.ForEach(_ => _.CreateSelectableTreatment(simulation));
@@ -538,7 +539,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteScenarioTreatmentConsequences(
                         consequencesPerTreatmentId, simulationId);
                 }
-
+                if (scenarioSelectableTreatments.Any(_ => _.PerformanceFactors.Any()))
+                {
+                    var performancePerTreatmentId = scenarioSelectableTreatments.Where(_ => _.PerformanceFactors.Any()).ToList()
+                    .ToDictionary(_ => _.Id, _ => _.PerformanceFactors);
+                    _unitOfWork.TreatmentPerformanceFactorRepo.UpsertOrDeleteScenarioTreatmentPerformanceFactors(performancePerTreatmentId, simulationId);
+                }
                 if (scenarioSelectableTreatments.Any(_ => _.BudgetIds.Any()))
                 {
                     var treatmentBudgetJoinsToAdd = scenarioSelectableTreatments.Where(_ => _.BudgetIds.Any()).SelectMany(
@@ -720,6 +726,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.ScenarioBudget)
                 .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.ScenarioTreatmentPerformanceFactors)
                 .Single(_ => _.Id == id)
                 .ToDtoWithSimulationId();
         }

@@ -53,12 +53,11 @@ export interface Treatment {
     criterionLibrary: CriterionLibrary;
     costs: TreatmentCost[];
     consequences: TreatmentConsequence[];
-    performancefactor: TreatmentPerformanceFactor[];
+    performanceFactors: TreatmentPerformanceFactor[];
     budgetIds: string[];
     addTreatment: boolean;
     category: TreatmentCategory;
     assetType: AssetType;
-    performanceFactor: TreatmentPerformanceFactor[];
     isModified: boolean;
     libraryId: string;
 }
@@ -92,7 +91,6 @@ export interface TreatmentDetails {
     criterionLibrary: CriterionLibrary;
     category: TreatmentCategory;
     assetType: AssetType;
-    performanceFactor: number;
 }
 
 export interface BudgetGridRow {
@@ -127,10 +125,9 @@ export const emptyTreatment: Treatment = {
     addTreatment: false,
     category: TreatmentCategory.preservation,
     assetType: AssetType.bridge,
-    performanceFactor: 1,
+    performanceFactors: [],
     isModified: false,
     libraryId: '',
-    performancefactor: []
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {
@@ -157,7 +154,6 @@ export const emptyTreatmentDetails: TreatmentDetails = {
     criterionLibrary: clone(emptyCriterionLibrary),
     category: TreatmentCategory.preservation,
     assetType: AssetType.bridge,
-    performanceFactor: 1
 };
 
 export const assetTypeMap: Map<string, AssetType> = new Map([

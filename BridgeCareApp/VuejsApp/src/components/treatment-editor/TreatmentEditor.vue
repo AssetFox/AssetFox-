@@ -173,7 +173,7 @@
                                                     class='card-tab-content'
                                                 >
                                                     <PerformanceFactorTab
-                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performancefactor'
+                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
                                                         :selectedTreatment='selectedTreatment'
                                                         :rules='rules'
                                                         :callFromScenario='hasScenario'
@@ -694,7 +694,6 @@ export default class TreatmentEditor extends Vue {
             criterionLibrary: this.selectedTreatment.criterionLibrary,
             category: this.selectedTreatment.category,
             assetType: this.selectedTreatment.assetType,
-            performanceFactor: this.selectedTreatment.performanceFactor
         };
 
         this.isNoTreatmentSelected = this.selectedTreatment.name == 'No Treatment';
@@ -963,17 +962,24 @@ export default class TreatmentEditor extends Vue {
     }
 
     modifySelectedTreatmentPerformanceFactor(modifiedPerformanceFactor: TreatmentPerformanceFactor) {
-        console.log("modified: " + modifiedPerformanceFactor.performancefactor);
-        console.log("selected: " +  this.selectedTreatment.performancefactor.length);
+        console.log("modified: " + modifiedPerformanceFactor.id + " , " + modifiedPerformanceFactor.attribute + " , " + modifiedPerformanceFactor.performancefactor);
+        console.log("init pf: " + this.selectedTreatment.performanceFactors.length);
         if (this.hasSelectedTreatment) {
-            this.modifySelectedTreatment({
-                ...clone(this.selectedTreatment),
-                performancefactor: update(
-                    findIndex(propEq('id', modifiedPerformanceFactor.id), this.selectedTreatment.performancefactor,),
-                    modifiedPerformanceFactor,
-                    this.selectedTreatment.performancefactor,
-                ),
-            });
+            if (this.selectedTreatment.performanceFactors.length === 0) {
+                this.modifySelectedTreatment({
+                    ...clone(this.selectedTreatment),
+                    performanceFactors: prepend(modifiedPerformanceFactor, this.selectedTreatment.performanceFactors)
+                });
+            } else {
+                this.modifySelectedTreatment({
+                    ...clone(this.selectedTreatment),
+                    performanceFactors: update(
+                        findIndex(propEq('id', modifiedPerformanceFactor.id), this.selectedTreatment.performanceFactors),
+                        modifiedPerformanceFactor,
+                        this.selectedTreatment.performanceFactors,
+                    ),
+                });
+            }
         }
     }
 

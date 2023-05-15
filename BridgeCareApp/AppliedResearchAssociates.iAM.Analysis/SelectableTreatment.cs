@@ -16,6 +16,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public IReadOnlyCollection<TreatmentCost> Costs => _Costs;
 
+        public IReadOnlyCollection<TreatmentPerformanceFactor> PerformanceFactors => _PerformanceFactors;
+
         public string Description { get; set; }
 
         public TreatmentCategory Category { get; set; }

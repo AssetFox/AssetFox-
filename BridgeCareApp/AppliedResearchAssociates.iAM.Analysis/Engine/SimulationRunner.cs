@@ -152,7 +152,7 @@ public sealed class SimulationRunner
 
             foreach (var treatment in Simulation.Treatments)
             {
-                if (treatment.PerformanceFactor > 0)
+                if (treatment.PerformanceFactors.Count > 0)
                 {
                     foreach(var curves in CurvesPerAttribute)
                     {
@@ -160,7 +160,14 @@ public sealed class SimulationRunner
                         // we need to set the performance curve adjustment factor tuple
                         // with a condition attribute and the factor
                         var conditionAttribute = curves.Key;
-                        treatment.PerformanceCurveAdjustmentFactors.Add(conditionAttribute, treatment.PerformanceFactor);
+
+                        foreach (var factors in treatment.PerformanceFactors)
+                        {
+                            if (factors.Attribute == conditionAttribute.Name)
+                            {
+                                treatment.PerformanceCurveAdjustmentFactors.Add(conditionAttribute, factors.PerforamanceFactor);
+                            }
+                        }
 
                         foreach(var curve in curves)
                         {

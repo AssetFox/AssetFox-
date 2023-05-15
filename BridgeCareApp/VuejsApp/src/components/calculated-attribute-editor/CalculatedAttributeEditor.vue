@@ -7,6 +7,7 @@
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Calculated Attribute</v-subheader>
                         <v-select
+                            id="CalculatedAttribute-CalculatedAttribute-select"
                             :items="librarySelectItems"
                             append-icon=$vuetify.icons.ghd-down
                             outline
@@ -36,6 +37,7 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout align-end>
                         <v-text-field
+                                    id="CalculatedAttribute-search-textField"
                                     prepend-inner-icon=$vuetify.icons.ghd-search
                                     hide-details
                                     lablel="Search"
@@ -48,7 +50,7 @@
                                     class="ghd-text-field-border ghd-text-field search-icon-general"
                                     style="margin-top:20px !important">
                         </v-text-field>
-                        <v-btn style="position: relative; top: 3px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
+                        <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
 
                         <v-btn
                             @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
@@ -69,6 +71,7 @@
                 <v-layout column style="float:left; width: 100%">
                     <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                     <v-select
+                        id="CalculatedAttribute-Attribute-select"   
                         :items="attributeSelectItems"
                         append-icon=$vuetify.icons.ghd-down
                         outline
@@ -83,6 +86,7 @@
                 <v-layout column style="float:right; width: 100%">
                     <v-subheader class="ghd-md-gray ghd-control-label">Timing</v-subheader>
                     <v-select
+                        id="CalculatedAttribute-Timing-select"
                         :items="attributeTimingSelectItems"
                         append-icon=$vuetify.icons.ghd-down
                         outline
@@ -102,12 +106,14 @@
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
                         <v-text-field
+                            id="CalculatedAttribute-defaultEquation-textfield"
                             readonly
                             class="sm-txt"
                             v-model="defaultEquation.equation.expression"
                             :disabled="!hasAdminAccess">
                             <template slot="append-outer">
                                 <v-btn
+                                    id="CalculatedAttribute-defaultEquationEditor-btn"
                                     @click="onShowEquationEditorDialogForDefaultEquation()"
                                     class="ghd-blue"
                                     icon
@@ -123,6 +129,7 @@
         <!-- data table -->
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
             <v-data-table
+                id="CalculatedAttribute-equation-table"    
                 :headers="calculatedAttributeGridHeaders"
                 :items="selectedGridItem"
                 :pagination.sync="pagination"

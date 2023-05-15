@@ -175,6 +175,7 @@
                                                     <PerformanceFactorTab
                                                         :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
                                                         :selectedTreatment='selectedTreatment'
+                                                        :scenarioId='loadedScenarioId'
                                                         :rules='rules'
                                                         :callFromScenario='hasScenario'
                                                         :callFromLibrary='!hasScenario'
@@ -339,6 +340,10 @@ import {
     TreatmentLibraryUser,
     TreatmentsFileImport
 } from '@/shared/models/iAM/treatment';
+import {
+    emptyPerformanceCurve,
+    PerformanceCurve,
+} from '@/shared/models/iAM/performance';
 import CreateTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentDialog.vue';
 import {
     any,
@@ -413,6 +418,8 @@ export default class TreatmentEditor extends Vue {
     @State(state => state.treatmentModule.simpleScenarioSelectableTreatments) stateSimpleScenarioSelectableTreatments: SimpleTreatment[];
     @State(state => state.treatmentModule.simpleSelectableTreatments) stateSimpleSelectableTreatments: SimpleTreatment[];
     @State(state => state.treatmentModule.isSharedLibrary) isSharedLibrary: boolean;
+    @State(state => state.performanceCurveModule.scenarioPerformanceCurves) stateScenarioPerformanceCurves: PerformanceCurve[];
+
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addWarningNotification') addWarningNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
@@ -441,7 +448,8 @@ export default class TreatmentEditor extends Vue {
     @Action('getIsSharedTreatmentLibrary') getIsSharedLibraryAction: any;
     @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
     @Action('selectScenario') selectScenarioAction: any;
-    
+    @Action('getScenarioPerformanceCurves') getScenarioPerformanceCurvesAction: any;
+
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     @Mutation('addedOrUpdatedTreatmentLibraryMutator') addedOrUpdatedTreatmentLibraryMutator: any;
@@ -496,7 +504,7 @@ export default class TreatmentEditor extends Vue {
     librarySelectItemValue: string = "";
 
     shareTreatmentLibraryDialogData: ShareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
-
+    loadedScenarioId: string = '';
     parentLibraryId: string = '';
     parentLibraryName: string = 'None';
     scenarioLibraryIsModified: boolean = false;
@@ -510,6 +518,7 @@ export default class TreatmentEditor extends Vue {
             vm.getTreatmentLibrariesAction();
             if (to.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
+                vm.loadedScenarioId = vm.selectedScenarioId;
                 if (vm.selectedScenarioId === vm.uuidNIL) {
                     vm.addErrorNotificationAction({
                         message: 'Found no selected scenario for edit',
@@ -519,6 +528,7 @@ export default class TreatmentEditor extends Vue {
                 vm.hasScenario = true;
                 vm.getSimpleScenarioSelectableTreatmentsAction(vm.selectedScenarioId);
                 vm.getTreatmentLibraryBySimulationIdAction(vm.selectedScenarioId);
+                vm.getScenarioPerformanceCurvesAction(vm.selectedScenarioId);
                 vm.treatmentTabs = [...vm.treatmentTabs, 'Budgets'];
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId, }).then(()=> {
                     vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
@@ -546,6 +556,10 @@ export default class TreatmentEditor extends Vue {
                 value: library.id,
             })
         );
+    }
+    @Watch('stateScenarioPerformanceCurves')
+    onStateScenarioPerformanceCurvesChanged() {
+        console.log("loaded perf factors: " + this.selectedTreatment.performanceFactors.length);
     }
     
     @Watch('stateScenarioTreatmentLibrary')
@@ -669,6 +683,7 @@ export default class TreatmentEditor extends Vue {
                     if(hasValue(response, 'data')) {
                         var data = response.data as Treatment;
                         this.selectedTreatment = data;
+                        console.log("treatment loaded: " + data.performanceFactors.length);
                         if(isNil(this.treatmentCache.find(_ => _.id === data.id))){ this.treatmentCache.push(data); }
                         this.scenarioLibraryIsModified = this.selectedTreatment ? this.selectedTreatment.isModified : false;
                     }

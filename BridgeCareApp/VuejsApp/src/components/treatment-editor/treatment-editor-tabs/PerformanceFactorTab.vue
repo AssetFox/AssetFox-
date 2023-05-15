@@ -41,8 +41,8 @@
 <script lang='ts'>
 import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
-import { State } from 'vuex-class';
-import { clone, isNil } from 'ramda';
+import { State, Action } from 'vuex-class';
+import { clone, isNil, findIndex, isEmpty } from 'ramda';
 import { TreatmentAttributeFactor, TreatmentPerformanceFactor, Treatment } from '@/shared/models/iAM/treatment';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -52,22 +52,35 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { InputValidationRules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 
+import {
+    emptyPerformanceCurve,
+    emptyPerformanceCurveLibrary,
+    PerformanceCurve,
+    PerformanceCurveLibrary,
+    PerformanceCurvesFileImport
+} from '@/shared/models/iAM/performance';
+import { isNullOrUndefined } from 'util';
+
 @Component({
     components: {
     },
 })
 export default class PerformanceFactorTab extends Vue {
-    @Prop() treatmentAttributeFactor: TreatmentPerformanceFactor[];
+    @Prop() selectedTreatmentPerformanceFactors: TreatmentPerformanceFactor[];
     @Prop() selectedTreatment: Treatment;
+    @Prop() scenarioId: string;
     @Prop() rules: InputValidationRules;
     @Prop() callFromScenario: boolean;
     @Prop() callFromLibrary: boolean;
 
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+    @State(state => state.performanceCurveModule.scenarioPerformanceCurves) stateScenarioPerformanceCurves: PerformanceCurve[];
+
+    @Action('getScenarioPerformanceCurves') getScenarioPerformanceCurvesAction: any;
 
     factorGridHeaders: DataTableHeader[] = [
         { text: 'Attribute', value: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
-        { text: 'Performance Factor', value: 'factor', align: 'left', sortable: false, class: '', width: '125px' },
+        { text: 'Performance Factor', value: 'factor', align: 'left', sortable: false, class: '', width: '100px' },
     ];
     factorGridData: TreatmentAttributeFactor[] = [];
     attributeSelectItems: SelectItem[] = [];
@@ -75,43 +88,59 @@ export default class PerformanceFactorTab extends Vue {
 
     mounted() {
         this.setAttributeSelectItems();
-    }
+        this.getScenarioPerformanceCurvesAction(this.scenarioId);
+   }
 
     @Watch('selectedTreatmentPerformanceFactors')
     onSelectedTreatmentPerformanceFactorsChanged() {
-        this.factorGridData = clone(this.selectedTreatmentPerformanceFactors);
+        // console.log(this.selectedTreatmentPerformanceFactors.length);
+        // console.log(this.selectedTreatmentPerformanceFactors[0].attribute);
+        this.factorGridData.forEach(data => {
+            this.selectedTreatmentPerformanceFactors.forEach(factors => {
+                if (factors.attribute === data.attribute && factors.performancefactor === data.factor.toString()) {
+                    console.log("updating" );
+                    data.attribute = factors.attribute;
+                    data.factor = parseFloat( factors.performancefactor );
+                }
+            });
+        });
     }
 
     @Watch('stateAttributes')
     onStateAttributesChanged() {
         this.setAttributeSelectItems();
     }
+    @Watch('stateScenarioPerformanceCurves')
+    onStatePerformanceCurvesChanged() {
+ 
+        let testStateAttributes:Attribute[] = [];
+        this.stateScenarioPerformanceCurves.forEach(curve => {
+            this.stateAttributes.forEach(state => {
+                if (state.name === curve.attribute) {
+                    if (testStateAttributes.findIndex((o) => { return o.name === curve.attribute }) === -1){
+                        testStateAttributes.push(state);
+                    }
+                }
+            });
+        });
 
+        this.factorGridData = testStateAttributes.map(_ => ({
+            id: getNewGuid(),
+            attribute: _.name,
+            factor: 1.0
+        }));
+    }
     setAttributeSelectItems() {
         if (hasValue(this.stateAttributes)) {
             this.attributeSelectItems = this.stateAttributes.map((attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name,
             }));
-  
-            this.factorGridData = this.attributeSelectItems.map(_ => ({
-                id: getNewGuid(),
-                attribute : _.value.toString(),
-                factor : 1.0,
-            }));
         }
     }
     onEditPerformanceFactorProperty(performancefactor: TreatmentPerformanceFactor, property: string, value: any) {
         performancefactor.performancefactor = value;
-        console.log("emiting: " + property + " + " + value);
-        console.log("perf: " + performancefactor.id);
         this.$emit('onModifyPerformanceFactor', setItemPropertyValue(property, value, performancefactor));
-        //this.$emit('onModifyPerformanceFactor', performancefactor);
-    }
-
-    onModifyPerformanceFactor() {
-        // emit the attribute/factor object
-        //this.$emit('onAddConsequence', newConsequence);
     }
 }
 </script>

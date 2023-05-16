@@ -107,45 +107,50 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("SetInventoryReports/{InventoryReports}")]
         [ClaimAuthorize("AdminAccess")]
-        public async Task<IActionResult> SetInventoryRepos(string inventoryReports)
+        public async Task<IActionResult> SetInventoryReports(string inventoryReports)
         {
             try
             {
-                var reportCriteriaCheck = false;
-                var reportFactoryList = new List<IReportFactory>();
-                reportFactoryList.Add(new BAMSInventoryReportFactory());
-                reportFactoryList.Add(new PAMSInventorySectionsReportFactory());
-                reportFactoryList.Add(new PAMSInventorySegmentsReportFactory());
-                ReportLookupLibrary library = new ReportLookupLibrary(reportFactoryList);
-                IList<string> InventoryReportsList = inventoryReports.Split(',').ToList();
-
-
-                foreach (string inventoryReport in InventoryReportsList)
+                await Task.Factory.StartNew(async () =>
                 {
-                    var reportObject = await _generator.Generate(inventoryReport);
-                    //If report is in factory list
-                    if (library.CanGenerateReport(inventoryReport) == true)
+
+                    //For verifying Inventory Reports
+                    var reportCriteriaCheck = false;
+                    var reportFactoryList = new List<IReportFactory>();
+                    reportFactoryList.Add(new BAMSInventoryReportFactory());
+                    reportFactoryList.Add(new PAMSInventorySectionsReportFactory());
+                    reportFactoryList.Add(new PAMSInventorySegmentsReportFactory());
+                    ReportLookupLibrary library = new ReportLookupLibrary(reportFactoryList);
+                    IList<string> InventoryReportsList = inventoryReports.Split(',').ToList();
+
+                    //Checking every report being passed in from the parameter
+                    foreach (string inventoryReport in InventoryReportsList)
                     {
-                        reportCriteriaCheck = true;
-                    }
-                    else if (library.CanGenerateReport(inventoryReport) == false)
-                    {
-                        reportCriteriaCheck = false;
-                        throw new Exception("Report Type Does Not Exist.");
-                    }
-                    else if (reportObject.Type != ReportType.HTML)
-                    {
-                        reportCriteriaCheck = false;
-                        throw new Exception("You can't use this particular report for an inventory report");
-                    }
-                   
-                    //If all reports in list exist, save to database.
+                        var reportObject = await _generator.Generate(inventoryReport);
+                        //If report is in factory list
+                        if (library.CanGenerateReport(inventoryReport))
+                        {
+                            reportCriteriaCheck = true;
+                        }
+                        else if (!library.CanGenerateReport(inventoryReport))
+                        {
+                            reportCriteriaCheck = false;
+                            throw new Exception("Report Type Does Not Exist.");
+                        }
+                        else if (reportObject.Type != ReportType.HTML)
+                        {
+                            reportCriteriaCheck = false;
+                            throw new Exception("You can't use this particular report for an inventory report");
+                        }
+
+                        //If all reports in list exist, save to database.
+
+                    };
                     if (reportCriteriaCheck)
                     {
                         UnitOfWork.AdminDataRepo.SetInventoryReports(inventoryReports);
                     }
-                    
-                };
+                });
                 return Ok();
             }
             catch (Exception e)

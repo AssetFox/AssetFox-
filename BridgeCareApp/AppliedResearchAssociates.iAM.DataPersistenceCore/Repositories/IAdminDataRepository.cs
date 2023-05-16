@@ -11,6 +11,8 @@ public interface IAdminDataRepository
 {
     IList<string> GetKeyFields();
     void SetKeyFields(string keyFields);
+
+    void SetInventoryReports(string inventoryReports);
 }
 
 

@@ -33,7 +33,7 @@ export interface TreatmentCost {
 export interface TreatmentPerformanceFactor {
     id: string;
     attribute: string;
-    performancefactor: string;
+    performanceFactor: number;
 }
 
 export interface TreatmentConsequence {

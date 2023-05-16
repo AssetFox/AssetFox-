@@ -88,19 +88,20 @@ export default class PerformanceFactorTab extends Vue {
 
     mounted() {
         this.setAttributeSelectItems();
-        this.getScenarioPerformanceCurvesAction(this.scenarioId);
+        //this.getScenarioPerformanceCurvesAction(this.scenarioId);
    }
 
     @Watch('selectedTreatmentPerformanceFactors')
     onSelectedTreatmentPerformanceFactorsChanged() {
-        // console.log(this.selectedTreatmentPerformanceFactors.length);
-        // console.log(this.selectedTreatmentPerformanceFactors[0].attribute);
+        console.log(this.selectedTreatmentPerformanceFactors.length);
+        console.log(this.selectedTreatmentPerformanceFactors[0].attribute);
+        console.log(this.selectedTreatmentPerformanceFactors[0].performanceFactor);
         this.factorGridData.forEach(data => {
             this.selectedTreatmentPerformanceFactors.forEach(factors => {
-                if (factors.attribute === data.attribute && factors.performancefactor === data.factor.toString()) {
+                if (factors.attribute === data.attribute) {
                     console.log("updating" );
                     data.attribute = factors.attribute;
-                    data.factor = parseFloat( factors.performancefactor );
+                    data.factor = factors.performanceFactor;
                 }
             });
         });
@@ -139,7 +140,7 @@ export default class PerformanceFactorTab extends Vue {
         }
     }
     onEditPerformanceFactorProperty(performancefactor: TreatmentPerformanceFactor, property: string, value: any) {
-        performancefactor.performancefactor = value;
+        performancefactor.performanceFactor = value;
         this.$emit('onModifyPerformanceFactor', setItemPropertyValue(property, value, performancefactor));
     }
 }
@@ -151,7 +152,7 @@ export default class PerformanceFactorTab extends Vue {
 }
 
 .factor-data-table {
-    height: 215px;
+    height: 415px;
     overflow-y: auto;
     font-family: 'Montserrat', sans-serif;
 }

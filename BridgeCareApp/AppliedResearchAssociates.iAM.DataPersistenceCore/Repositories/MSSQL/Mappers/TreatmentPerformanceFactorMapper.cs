@@ -45,6 +45,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
 
         public static ScenarioTreatmentPerformanceFactorEntity ToScenarioEntity(this TreatmentPerformanceFactorDTO dto, Guid treatmentId) =>
-            new ScenarioTreatmentPerformanceFactorEntity { Id = dto.Id, ScenarioSelectableTreatmentId = treatmentId };
+            new ScenarioTreatmentPerformanceFactorEntity { Id = dto.Id, ScenarioSelectableTreatmentId = treatmentId, Attribute = dto.Attribute, PerformanceFactor = dto.PerformanceFactor };
     }
 }

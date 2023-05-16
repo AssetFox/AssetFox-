@@ -21,13 +21,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertOrDeleteScenarioTreatmentPerformanceFactors(Dictionary<Guid, List<TreatmentPerformanceFactorDTO>> scenarioTreatmentPerformanceFactorsPerTreatmentId,
             Guid SimulationId)
         {
+            //var scenarioTreatmentPerformanceFactorEntities = scenarioTreatmentPerformanceFactorsPerTreatmentId.SelectMany(_ => _.Value.ToList()).ToList();
+
             var scenarioTreatmentPerformanceFactorEntities = scenarioTreatmentPerformanceFactorsPerTreatmentId
-                .SelectMany(_ => _.Value.Select(factor => factor.ToScenarioEntity(_.Key)))
+                .SelectMany(_ => _.Value.Select(factor => factor
+                    .ToScenarioEntity(_.Key)))
                 .ToList();
+            //var scenarioTreatmentPerformanceFactorEntities = scenarioTreatmentPerformanceFactorsPerTreatmentId
+            //    .SelectMany(_ => _.Value.Select(factor => factor.ToScenarioEntity(_.Key)))
+            //    .ToList();
 
             var entityIds = scenarioTreatmentPerformanceFactorEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfWork.Context.ScenarioTreatmentCost.AsNoTracking()
+            var existingEntityIds = _unitOfWork.Context.ScenarioTreatmentPerformanceFactor.AsNoTracking()
                 .Where(_ => _.ScenarioSelectableTreatment.SimulationId == SimulationId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 

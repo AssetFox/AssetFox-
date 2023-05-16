@@ -559,7 +559,6 @@ export default class TreatmentEditor extends Vue {
     }
     @Watch('stateScenarioPerformanceCurves')
     onStateScenarioPerformanceCurvesChanged() {
-        console.log("loaded perf factors: " + this.selectedTreatment.performanceFactors.length);
     }
     
     @Watch('stateScenarioTreatmentLibrary')
@@ -683,7 +682,6 @@ export default class TreatmentEditor extends Vue {
                     if(hasValue(response, 'data')) {
                         var data = response.data as Treatment;
                         this.selectedTreatment = data;
-                        console.log("treatment loaded: " + data.performanceFactors.length);
                         if(isNil(this.treatmentCache.find(_ => _.id === data.id))){ this.treatmentCache.push(data); }
                         this.scenarioLibraryIsModified = this.selectedTreatment ? this.selectedTreatment.isModified : false;
                     }
@@ -977,8 +975,6 @@ export default class TreatmentEditor extends Vue {
     }
 
     modifySelectedTreatmentPerformanceFactor(modifiedPerformanceFactor: TreatmentPerformanceFactor) {
-        console.log("modified: " + modifiedPerformanceFactor.id + " , " + modifiedPerformanceFactor.attribute + " , " + modifiedPerformanceFactor.performancefactor);
-        console.log("init pf: " + this.selectedTreatment.performanceFactors.length);
         if (this.hasSelectedTreatment) {
             if (this.selectedTreatment.performanceFactors.length === 0) {
                 this.modifySelectedTreatment({

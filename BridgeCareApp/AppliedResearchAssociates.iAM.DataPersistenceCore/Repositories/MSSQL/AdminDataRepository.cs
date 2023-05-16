@@ -16,9 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly NetworkRepository _networkRepo;
 
-        public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork, NetworkRepository networkRepo)
+        public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork)
         { 
-                _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
+               
                 _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
@@ -34,7 +34,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var name = _unitOfWork.Context.AdminSettings.First().Value;
                 return name;
             }
-
         }
 
         public void SetPrimaryNetwork(string name)

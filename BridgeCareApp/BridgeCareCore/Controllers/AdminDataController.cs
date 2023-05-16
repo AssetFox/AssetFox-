@@ -53,12 +53,12 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.AdminDataRepo.SetPrimaryNetwork(name);
                 });
-                return Ok();
+                    return Ok();
             }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetPrimaryNetwork - {e.Message}");
-                throw;
+                return BadRequest($"{SiteError}::SetPrimaryNetwork - {e.Message}");
             }
         }
 

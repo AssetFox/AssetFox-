@@ -13,4 +13,5 @@ public interface IWorkSpecification<T>
     T Metadata { get; } 
 
     void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken);
+    void OnFault(IServiceProvider serviceProvider, string errorMessage);
 }

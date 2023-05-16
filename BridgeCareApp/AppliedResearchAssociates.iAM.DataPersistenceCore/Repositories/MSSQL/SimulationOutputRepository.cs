@@ -41,8 +41,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             IWorkQueueLog loggerForUserInfo = null, ILog loggerForTechnicalInfo = null, CancellationToken? cancellationToken = null)
         {
             loggerForTechnicalInfo ??= new DoNotLog();
-            loggerForUserInfo ??= new DoNotWorkQueueLog();
-            loggerForUserInfo.UpdateWorkQueueStatus(simulationId, "Preparing to save to database");
+            loggerForUserInfo ??= new DoNothingWorkQueueLog();
+            loggerForUserInfo.UpdateWorkQueueStatus("Preparing to save to database");
             if (ShouldHackSaveOutputToFile)
             {
 #pragma warning disable CS0162 // Unreachable code detected
@@ -103,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Commit();
                  foreach (var year in simulationOutput.Years)
                 {                  
-                    loggerForUserInfo.UpdateWorkQueueStatus(simulationId, $"Saving year {year.Year}");
+                    loggerForUserInfo.UpdateWorkQueueStatus($"Saving year {year.Year}");
                     _unitOfWork.BeginTransaction();
                     if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                     {
@@ -145,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     WriteTimingsToFile(saveMemos, timingsOutputFilename);
                     WriteTimingsToFile(simulationMemos, simulationOutputFilename);
                 }
-                loggerForUserInfo.UpdateWorkQueueStatus(simulationId, SimulationUserMessages.SimulationOutputSavedToDatabase);
+                loggerForUserInfo.UpdateWorkQueueStatus(SimulationUserMessages.SimulationOutputSavedToDatabase);
             }
             catch (Exception ex)
             {
@@ -402,6 +402,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             return domain;
         }
+
+        
         public SimulationOutput GetSimulationOutputViaJson(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -448,19 +450,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void ConvertSimulationOutpuFromJsonTorelational(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLogger = null)
         {
-            queueLogger ??= new DoNotWorkQueueLog();
-            queueLogger.UpdateWorkQueueStatus(simulationId, "Getting simulation output Json");
+            queueLogger ??= new DoNothingWorkQueueLog();
+            queueLogger.UpdateWorkQueueStatus("Getting simulation output Json");
             var output = GetSimulationOutputViaJson(simulationId);
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
             {
                 return;
             }
-            queueLogger.UpdateWorkQueueStatus(simulationId, "Starting conversion to relational");
+            queueLogger.UpdateWorkQueueStatus("Starting conversion to relational");
             CreateSimulationOutputViaRelational(simulationId, output, queueLogger, cancellationToken: cancellationToken);
             try
             {
                 _unitOfWork.BeginTransaction();
-                queueLogger.UpdateWorkQueueStatus(simulationId, "Attaching relational ouput to Json ouput");
+                queueLogger.UpdateWorkQueueStatus("Attaching relational ouput to Json ouput");
                 var outputId = _unitOfWork.Context.SimulationOutput.First(_ => _.SimulationId == simulationId).Id;
                 var outputJsons = _unitOfWork.Context.SimulationOutputJson.Where(_ => _.SimulationId == simulationId).ToList();
                 if (outputJsons.Count != 0)

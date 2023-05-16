@@ -4,7 +4,6 @@
     "port": "8080",
     "private": true,
     "description": "BridgeCare",
-    "security": "ESEC",
     "author": {
         "name": "Applied Research Associates"
     },

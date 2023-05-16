@@ -10,6 +10,7 @@ using NLog;
 using AppliedResearchAssociates.iAM.Hubs.Services;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Common.Logging;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Logging
 {
@@ -18,17 +19,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Logging
         private readonly IHubService _hubService;
         private readonly string _username;
         private Action<string> _updateAction;
+        private Guid _workId;
 
-        public GeneralWorkQueueLogger(IHubService hubService, string userName, Action<string> updateAction)
+        public GeneralWorkQueueLogger(IHubService hubService, string userName, Action<string> updateAction, Guid workId)
         {
             _hubService = hubService;
             _username = userName;
             _updateAction = updateAction;
+            _workId = workId;
         }
 
-        public void UpdateWorkQueueStatus(Guid workId, string statusMessage)
+        public void UpdateWorkQueueStatus( string statusMessage)
         {
-            var queueStatusUpdate = new QueuedWorkStatusUpdateModel() { Id = workId, Status = statusMessage };
+            var queueStatusUpdate = new QueuedWorkStatusUpdateModel() { Id = _workId, Status = statusMessage};
             _updateAction.Invoke(statusMessage);
             _hubService.SendRealTimeMessage(_username, HubConstant.BroadcastWorkQueueStatusUpdate, queueStatusUpdate);
         }

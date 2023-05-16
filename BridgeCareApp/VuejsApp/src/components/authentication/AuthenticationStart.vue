@@ -11,7 +11,9 @@
                             You should be redirected to the PennDOT login page shortly. If you are not redirected within
                             5 seconds, press the button below.
                         </v-card-text>
-                        <v-btn v-if="securityType === esecSecurityType" @click="onRedirect" class="v-btn theme--light ara-blue-bg white--text">
+                        <v-btn id="AuthenticationStart-goToLoginPage-btn"
+                               v-if="securityType === esecSecurityType" 
+                               @click="onRedirect" class="v-btn theme--light ara-blue-bg white--text">
                             Go to login page
                         </v-btn>
                         <v-card-text v-if="securityType === b2cSecurityType">

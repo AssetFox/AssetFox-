@@ -13,6 +13,7 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.General_Work_Queue;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
@@ -29,6 +30,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var expressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
             var service = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, expressionValidationService.Object);
             var pagingService = new PerformanceCurvesPagingService(TestHelper.UnitOfWork);
+            var generalWorkQueue = GeneralWorkQueueServiceMocks.New();
             var controller = new PerformanceCurveController(
                 security,
                 TestHelper.UnitOfWork,
@@ -36,7 +38,8 @@ namespace BridgeCareCoreTests.Tests.Integration
                 contextAccessor,
                 service,
                 pagingService,
-                claimHelper.Object);
+                claimHelper.Object,
+                generalWorkQueue.Object);
             return controller;
         }
 

@@ -72,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
-            workQueueLog ??= new DoNotWorkQueueLog();
+            workQueueLog ??= new DoNothingWorkQueueLog();
             // Check for the parameters
             if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
@@ -161,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 SimulationId = simulationId,
                 Status = $"Generating..."
             };
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);          
 
@@ -193,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);          
             var folderPathForSimulation = $"Reports\\{simulationId}";
@@ -208,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             File.WriteAllBytes(reportPath, bin);
 
             reportDetailDto.Status = $"Report generation completed";
-            workQueueLog.UpdateWorkQueueStatus(simulationId, reportDetailDto.Status);
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);           
 

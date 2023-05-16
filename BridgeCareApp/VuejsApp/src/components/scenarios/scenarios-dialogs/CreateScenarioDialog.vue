@@ -13,6 +13,7 @@
 
             <v-card-text>
               <v-select
+                    id="CreateScenarioDialog-selectANetwork-select"
                     :items="stateNetworks"
                     label="Select a network"
                     item-text="name"
@@ -23,6 +24,7 @@
                     outline
                 ></v-select>
                 <v-text-field
+                    id="CreateScenarioDialog-scenarioName-textField"
                     label="Scenario name"
                     outline
                     v-model="newScenario.name"
@@ -32,6 +34,7 @@
             <v-card-actions>
                 <v-layout justify-space-between row>
                     <v-btn
+                        id="CreateScenarioDialog-save-btn"
                         :disabled="newScenario.name === '' || !isNetworkSelected"
                         @click="onSubmit(true)"
                         class="ara-blue-bg white--text"
@@ -39,6 +42,7 @@
                         Save
                     </v-btn>
                     <v-btn
+                        id="CreateScenarioDialog-cancel-btn"
                         @click="onSubmit(false)"
                         class="ara-orange-bg white--text"
                         >Cancel</v-btn

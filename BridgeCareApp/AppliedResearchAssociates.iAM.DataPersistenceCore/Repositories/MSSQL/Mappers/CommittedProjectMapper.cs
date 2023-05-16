@@ -166,12 +166,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             // Check for "colliding" CPs (a group of 2 or more CPs with the same asset-year). If CPs
             // collide and at most one of the CPs is an active treatment, remove (duplicate) passive
             // treatments. If more than one colliding CP is an active treatment, that's an error.
+
+            void throwError_MultipleCommittedProjects(Exception innerException)
+                => throw new InvalidOperationException($"{asset.Id} has multiple committed projects in year {entity.Year}.", innerException);
+
             try
             {
                 var existingCommittedProjectsForThisAssetYear =
                     simulation.CommittedProjects
                     .Where(cp => (cp.Asset.Id, cp.Year) == (asset.Id, entity.Year))
                     .ToList();
+
+                var projectToAddHasActiveTreatment = entity.Name != noTreatmentEntity.Name;
+                var projectWithActiveTreatmentAlreadyExists = existingCommittedProjectsForThisAssetYear.Any(cp => cp.Name != noTreatmentEntity.Name);
+
+                if (projectToAddHasActiveTreatment && projectWithActiveTreatmentAlreadyExists)
+                {
+                    throwError_MultipleCommittedProjects(null);
+                }
 
                 var mainProject =
                     existingCommittedProjectsForThisAssetYear.SingleOrDefault(cp => cp.Name != noTreatmentEntity.Name) ??
@@ -182,9 +194,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     _ = simulation.CommittedProjects.Remove(otherProject);
                 }
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException e)
             {
-                throw new InvalidOperationException($"{asset.Id} has multiple committed projects in year {entity.Year}");
+                throwError_MultipleCommittedProjects(e);
             }
 
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));

@@ -168,7 +168,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             // treatments. If more than one colliding CP is an active treatment, that's an error.
 
             void throwError_MultipleCommittedProjects(Exception innerException)
-                => throw new InvalidOperationException($"{asset.Id} has multiple committed projects in year {entity.Year}.", innerException);
+                => throw new InvalidOperationException($"Asset {asset.Id} has multiple committed projects in year {entity.Year}.", innerException);
 
             try
             {

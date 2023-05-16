@@ -128,5 +128,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             _unitOfWork.Context.SaveChanges();
         }
+
+        public IList<string> GetSimulationReportNames()
+        {
+            var existingSimulationReports = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == "SimulationReportNames");
+            if (existingSimulationReports == null)
+            {
+                return null;
+            }
+            else
+            {
+                var name = existingSimulationReports.Value;
+                IList<string> GetSimulationReportNames = name.Split(',').ToList();
+
+                return GetSimulationReportNames;
+            }
+
+        }
+
+
     }
 }

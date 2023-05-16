@@ -24,10 +24,12 @@ namespace BridgeCareCore.Controllers
     public class AdminDataController : BridgeCareCoreBaseController
     {
         public const string SiteError = "Site Error";
-
-        public AdminDataController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor) :
+        private readonly IReportGenerator _generator;
+        public AdminDataController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor, IReportGenerator generator) :
                          base(esecSecurity, unitOfWork, hubService, contextAccessor)
-        { }
+        {
+            _generator = generator ?? throw new ArgumentNullException(nameof(generator));
+        }
         [HttpGet]
         [Route("GetKeyFields")]
         [Authorize]
@@ -109,45 +111,47 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                await Task.Factory.StartNew(() =>
+                var reportCriteriaCheck = false;
+                var reportFactoryList = new List<IReportFactory>();
+                reportFactoryList.Add(new BAMSInventoryReportFactory());
+                reportFactoryList.Add(new PAMSInventorySectionsReportFactory());
+                reportFactoryList.Add(new PAMSInventorySegmentsReportFactory());
+                ReportLookupLibrary library = new ReportLookupLibrary(reportFactoryList);
+                IList<string> InventoryReportsList = inventoryReports.Split(',').ToList();
+
+
+                foreach (string inventoryReport in InventoryReportsList)
                 {
-                    //To verify existence of reports since repository cannot
-                    var reportExistence = false;
-                    var reportFactoryList = new List<IReportFactory>();
-                    reportFactoryList.Add(new BAMSInventoryReportFactory());
-                    reportFactoryList.Add(new PAMSInventorySectionsReportFactory());
-                    reportFactoryList.Add(new PAMSInventorySegmentsReportFactory());
-                    ReportLookupLibrary library = new ReportLookupLibrary(reportFactoryList);
-                    IList<string> InventoryReportsList = inventoryReports.Split(',').ToList();
-                    
-                  
-                    foreach (string inventoryReport in InventoryReportsList)
+                    var reportObject = await _generator.Generate(inventoryReport);
+                    //If report is in factory list
+                    if (library.CanGenerateReport(inventoryReport) == true)
                     {
-                        //If report is in factory list
-                        if (library.CanGenerateReport(inventoryReport)== true)
-                        {
-                            reportExistence= true;
-                        }
-                        else
-                        {
-                            reportExistence= false;
-                            throw new Exception("Report Type Does Not Exist.");
-                        }
-                        
+                        reportCriteriaCheck = true;
                     }
+                    else if (library.CanGenerateReport(inventoryReport) == false)
+                    {
+                        reportCriteriaCheck = false;
+                        throw new Exception("Report Type Does Not Exist.");
+                    }
+                    else if (reportObject.Type != ReportType.HTML)
+                    {
+                        reportCriteriaCheck = false;
+                        throw new Exception("You can't use this particular report for an inventory report");
+                    }
+                   
                     //If all reports in list exist, save to database.
-                    if (reportExistence)
+                    if (reportCriteriaCheck)
                     {
                         UnitOfWork.AdminDataRepo.SetInventoryReports(inventoryReports);
                     }
                     
-                });
+                };
                 return Ok();
             }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetPrimaryNetwork - {e.Message}");
-                throw;
+                return BadRequest($"{SiteError}::SetInventoryReports - {e.Message}");
             }
         }
 

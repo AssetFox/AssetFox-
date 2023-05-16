@@ -976,7 +976,8 @@ export default class TreatmentEditor extends Vue {
 
     modifySelectedTreatmentPerformanceFactor(modifiedPerformanceFactor: TreatmentPerformanceFactor) {
         if (this.hasSelectedTreatment) {
-            if (this.selectedTreatment.performanceFactors.length === 0) {
+            if (findIndex(propEq('id', modifiedPerformanceFactor.id), this.selectedTreatment.performanceFactors) < 0)
+            {
                 this.modifySelectedTreatment({
                     ...clone(this.selectedTreatment),
                     performanceFactors: prepend(modifiedPerformanceFactor, this.selectedTreatment.performanceFactors)

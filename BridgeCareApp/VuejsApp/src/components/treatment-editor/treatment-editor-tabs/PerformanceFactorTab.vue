@@ -41,8 +41,7 @@
 <script lang='ts'>
 import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
-import { State, Action } from 'vuex-class';
-import { clone, isNil, findIndex, isEmpty } from 'ramda';
+import { State } from 'vuex-class';
 import { TreatmentAttributeFactor, TreatmentPerformanceFactor, Treatment } from '@/shared/models/iAM/treatment';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -53,11 +52,7 @@ import { InputValidationRules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 
 import {
-    emptyPerformanceCurve,
-    emptyPerformanceCurveLibrary,
     PerformanceCurve,
-    PerformanceCurveLibrary,
-    PerformanceCurvesFileImport
 } from '@/shared/models/iAM/performance';
 import { isNullOrUndefined } from 'util';
 
@@ -76,8 +71,6 @@ export default class PerformanceFactorTab extends Vue {
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
     @State(state => state.performanceCurveModule.scenarioPerformanceCurves) stateScenarioPerformanceCurves: PerformanceCurve[];
 
-    @Action('getScenarioPerformanceCurves') getScenarioPerformanceCurvesAction: any;
-
     factorGridHeaders: DataTableHeader[] = [
         { text: 'Attribute', value: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
         { text: 'Performance Factor', value: 'factor', align: 'left', sortable: false, class: '', width: '100px' },
@@ -88,18 +81,13 @@ export default class PerformanceFactorTab extends Vue {
 
     mounted() {
         this.setAttributeSelectItems();
-        //this.getScenarioPerformanceCurvesAction(this.scenarioId);
    }
 
     @Watch('selectedTreatmentPerformanceFactors')
     onSelectedTreatmentPerformanceFactorsChanged() {
-        console.log(this.selectedTreatmentPerformanceFactors.length);
-        console.log(this.selectedTreatmentPerformanceFactors[0].attribute);
-        console.log(this.selectedTreatmentPerformanceFactors[0].performanceFactor);
         this.factorGridData.forEach(data => {
             this.selectedTreatmentPerformanceFactors.forEach(factors => {
                 if (factors.attribute === data.attribute) {
-                    console.log("updating" );
                     data.attribute = factors.attribute;
                     data.factor = factors.performanceFactor;
                 }

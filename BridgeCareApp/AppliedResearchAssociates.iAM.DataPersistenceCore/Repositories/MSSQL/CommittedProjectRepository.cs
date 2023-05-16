@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -31,11 +30,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             double noTreatmentDefaultCost = 0.0;
             var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
+
             var simulationEntity = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulation.Id);
             if (simulationEntity == null)
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
+
             var noTreatment = simulationEntity.NoTreatmentBeforeCommittedProjects;
             var noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id);
 
@@ -50,62 +51,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CommittedProjectConsequences)
                 .ThenInclude(_ => _.Attribute)
                 .Where(_ => _.SimulationId == simulation.Id).ToList();
+
             foreach (var project in projects)
             {
-                new CommittedProjectEntity
+                var asset = assets.FirstOrDefault(a => project.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
+                if (asset != null)
                 {
-                    Id = project.Id,
-                    Name = project.Name,
-                    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-                    ShadowForSameTreatment = project.ShadowForSameTreatment,
-                    Cost = project.Cost,
-                    Year = project.Year,
-                    CommittedProjectLocation = project.CommittedProjectLocation,
-                    ScenarioBudget = project.ScenarioBudget != null ? new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name } : null,
-                    LastModifiedDate = project.LastModifiedDate,
-                    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
-                        new CommittedProjectConsequenceEntity
-                        {
-                            Id = consequence.Id,
-                            ChangeValue = consequence.ChangeValue,
-                            Attribute = new AttributeEntity { Name = consequence.Attribute.Name }
-                        }).ToList(),
-                };
-            }
-            //.Select(project => new CommittedProjectEntity
-            //{
-            //    Id = project.Id,
-            //    Name = project.Name,
-            //    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-            //    ShadowForSameTreatment = project.ShadowForSameTreatment,
-            //    Cost = project.Cost,
-            //    Year = project.Year,
-            //    CommittedProjectLocation = project.CommittedProjectLocation,
-            //    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
-            //    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
-            //        new CommittedProjectConsequenceEntity
-            //        {
-            //            Id = consequence.Id,
-            //            ChangeValue = consequence.ChangeValue,
-            //            Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
-            //        }).ToList(),
-            //}).AsNoTracking().ToList();
-            if (projects.Any())
-            {
-                projects.ForEach(_ => {
-                    var asset = assets.FirstOrDefault(a => _.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
-                    if (asset != null)
+                    if (noTreatment)
                     {
-                        if (noTreatment)
-                        {
-                            var defaultNoTreatment = selectableTreatmentRepository.GetDefaultNoTreatment(simulation.Id);
-                            noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
-                        }
-                        _.CreateCommittedProject(simulation, asset.Id, noTreatment, noTreatmentDefaultCost, noTreatmentEntity);
+                        var defaultNoTreatment = selectableTreatmentRepository.GetDefaultNoTreatment(simulation.Id);
+                        noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
                     }
-                });
+
+                    project.CreateCommittedProject(simulation, asset.Id, noTreatment, noTreatmentDefaultCost, noTreatmentEntity);
+                }
             }
         }
+
         public double GetDefaultNoTreatmentCost(TreatmentDTO treatment, Guid assetId)
         {
             double totalCost = 0.0;
@@ -144,6 +106,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
             return totalCost;
         }
+
         private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
         {
             var modifiedExpression = mergedCriteriaExpression
@@ -180,6 +143,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return attributes;
         }
+
         public List<SectionCommittedProjectDTO> GetSectionCommittedProjectDTOs(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

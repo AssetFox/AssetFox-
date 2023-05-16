@@ -12,6 +12,9 @@ public interface IAdminDataRepository
     IList<string> GetKeyFields();
     void SetKeyFields(string keyFields);
 
+    void SetPrimaryNetwork(string name);
+    string GetPrimaryNetwork();
+
     void SetInventoryReports(string inventoryReports);
 }
 

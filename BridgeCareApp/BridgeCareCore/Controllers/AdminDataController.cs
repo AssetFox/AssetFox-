@@ -28,8 +28,6 @@ namespace BridgeCareCore.Controllers
         public AdminDataController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor) :
                          base(esecSecurity, unitOfWork, hubService, contextAccessor)
         { }
-
-
         [HttpGet]
         [Route("GetKeyFields")]
         [Authorize]
@@ -64,6 +62,43 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetPrimaryNetwork - {e.Message}");
                 throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetPrimaryNetwork")]
+        [Authorize]
+        public async Task<IActionResult> GetPrimaryNetwork()
+        {
+            try
+            {
+                var name = UnitOfWork.AdminDataRepo.GetPrimaryNetwork();
+                return Ok(name);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetPrimaryNetwork - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("SetPrimaryNetwork/{name}")]
+        [ClaimAuthorize("AdminAccess")]
+        public async Task<IActionResult> SetPrimaryNetwork(string name)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.AdminDataRepo.SetPrimaryNetwork(name);
+                });
+                    return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetPrimaryNetwork - {e.Message}");
+                return BadRequest($"{SiteError}::SetPrimaryNetwork - {e.Message}");
             }
         }
 

@@ -333,7 +333,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
             {
                 MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
-                // This needs to work for the curve to be computed with and adjustment? line 327.
             }
         }
 

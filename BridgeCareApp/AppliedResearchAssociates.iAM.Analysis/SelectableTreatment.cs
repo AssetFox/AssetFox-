@@ -36,6 +36,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public TreatmentCost AddCost() => _Costs.GetAdd(new TreatmentCost(Simulation.Network.Explorer));
 
+        public TreatmentPerformanceFactor AddPerformanceFactor() => _PerformanceFactors.GetAdd(new TreatmentPerformanceFactor(Simulation.Network.Explorer));
+
         public Criterion AddFeasibilityCriterion() => _FeasibilityCriteria.GetAdd(new Criterion(Simulation.Network.Explorer));
 
         public TreatmentSupersession AddSupersession() => _Supersessions.GetAdd(new TreatmentSupersession(Simulation.Network.Explorer));

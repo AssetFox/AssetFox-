@@ -23,10 +23,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static void CreateTreatmentPerformanceFactor(this ScenarioTreatmentPerformanceFactorEntity entity, SelectableTreatment selectableTreatment)
         {
-            var treatmentPerformanceFactor = new TreatmentPerformanceFactorDTO();
-            treatmentPerformanceFactor.Id = entity.Id;
-            treatmentPerformanceFactor.Attribute = entity.Attribute;
-            treatmentPerformanceFactor.PerformanceFactor = entity.PerformanceFactor;
+            var performanceFactor = selectableTreatment.AddPerformanceFactor();
+            performanceFactor.Id = entity.Id;
+            performanceFactor.Attribute = entity.Attribute;
+            performanceFactor.Factor = entity.PerformanceFactor;
         }
 
         public static TreatmentPerformanceFactorDTO ToDto(this ScenarioTreatmentPerformanceFactorEntity entity) =>
@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new ScenarioTreatmentPerformanceFactorEntity
             {
                 Attribute = domain.Attribute,
-                PerformanceFactor = domain.PerforamanceFactor
+                PerformanceFactor = domain.Factor
             };
 
 

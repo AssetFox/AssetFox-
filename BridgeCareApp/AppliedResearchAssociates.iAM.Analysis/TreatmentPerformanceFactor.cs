@@ -1,15 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public class TreatmentPerformanceFactor
+    public sealed class TreatmentPerformanceFactor : PerformanceFactor
     {
-        public string Attribute { get; set; }
-
-        public float PerforamanceFactor { get; set; }
+        internal TreatmentPerformanceFactor(Explorer explorer) : base(explorer)
+        {
+            if (explorer == null)
+            {
+                throw new ArgumentNullException(nameof(explorer));
+            }
+        }
     }
 }

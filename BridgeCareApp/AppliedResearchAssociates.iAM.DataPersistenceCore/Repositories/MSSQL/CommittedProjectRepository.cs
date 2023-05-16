@@ -31,14 +31,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             double noTreatmentDefaultCost = 0.0;
             var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
 
-            var simulationEntity = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulation.Id);
-            if (simulationEntity == null)
-            {
-                throw new RowNotInTableException("No simulation was found for the given scenario.");
-            }
+            var simulationEntity = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulation.Id)
+                ?? throw new RowNotInTableException("No simulation was found for the given scenario.");
 
-            var noTreatment = simulationEntity.NoTreatmentBeforeCommittedProjects;
-            var noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id);
+            var noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id)
+                ?? throw new RowNotInTableException("Simulation has no default treatments");
 
             var assets = _unitOfWork.Context.MaintainableAsset
                 .Where(_ => _.NetworkId == simulation.Network.Id)
@@ -57,13 +54,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var asset = assets.FirstOrDefault(a => project.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
                 if (asset != null)
                 {
-                    if (noTreatment)
+                    if (simulationEntity.NoTreatmentBeforeCommittedProjects)
                     {
                         var defaultNoTreatment = selectableTreatmentRepository.GetDefaultNoTreatment(simulation.Id);
                         noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
                     }
 
-                    project.CreateCommittedProject(simulation, asset.Id, noTreatment, noTreatmentDefaultCost, noTreatmentEntity);
+                    project.CreateCommittedProject(simulation, asset.Id, simulationEntity.NoTreatmentBeforeCommittedProjects, noTreatmentDefaultCost, noTreatmentEntity);
                 }
             }
         }

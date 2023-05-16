@@ -88,6 +88,7 @@ namespace BridgeCareCore.Controllers
                   
                     foreach (string inventoryReport in InventoryReportsList)
                     {
+                        //If report is in factory list
                         if (library.CanGenerateReport(inventoryReport)== true)
                         {
                             reportExistence= true;
@@ -95,9 +96,11 @@ namespace BridgeCareCore.Controllers
                         else
                         {
                             reportExistence= false;
-                            throw new Exception("Report Does Not Exist.");
+                            throw new Exception("Report Type Does Not Exist.");
                         }
+                        
                     }
+                    //If all reports in list exist, save to database.
                     if (reportExistence)
                     {
                         UnitOfWork.AdminDataRepo.SetInventoryReports(inventoryReports);

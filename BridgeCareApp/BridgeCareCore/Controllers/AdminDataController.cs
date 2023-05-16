@@ -111,9 +111,6 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                await Task.Factory.StartNew(async () =>
-                {
-
                     //For verifying Inventory Reports
                     var reportCriteriaCheck = false;
                     var reportFactoryList = new List<IReportFactory>();
@@ -135,7 +132,7 @@ namespace BridgeCareCore.Controllers
                         else if (!library.CanGenerateReport(inventoryReport))
                         {
                             reportCriteriaCheck = false;
-                            throw new Exception("Report Type Does Not Exist.");
+                            throw new Exception("Report type Does Not Exist.");
                         }
                         else if (reportObject.Type != ReportType.HTML)
                         {
@@ -150,12 +147,11 @@ namespace BridgeCareCore.Controllers
                     {
                         UnitOfWork.AdminDataRepo.SetInventoryReports(inventoryReports);
                     }
-                });
-                return Ok();
+                    return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetPrimaryNetwork - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetInventoryReports - {e.Message}");
                 return BadRequest($"{SiteError}::SetInventoryReports - {e.Message}");
             }
         }

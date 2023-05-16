@@ -134,7 +134,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
         public void SetInventoryReports(string InventoryReports)
         {
-            var existingInventoryReports = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").SingleOrDefault();
+            var existingInventoryReports = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "InventoryReportNames").SingleOrDefault();
             if (existingInventoryReports == null)
             {
                 _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity

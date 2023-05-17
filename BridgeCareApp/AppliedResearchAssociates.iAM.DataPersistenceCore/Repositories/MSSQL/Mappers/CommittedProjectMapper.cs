@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using MoreLinq;
-using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -159,7 +159,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             Guid maintainableAssetId,
             bool noTreatmentForCommittedProjects,
             double noTreatmentDefaultCost,
-            ScenarioSelectableTreatmentEntity noTreatmentEntity)
+            ScenarioSelectableTreatmentEntity noTreatmentEntity,
+            List<string> keyPropertyNames = null)
         {
             var asset = simulation.Network.Assets.Single(_ => _.Id == maintainableAssetId);
 
@@ -168,7 +169,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             // treatments. If more than one colliding CP is an active treatment, that's an error.
 
             void throwError_MultipleCommittedProjects(Exception innerException)
-                => throw new InvalidOperationException($"Asset {asset.Id} has multiple committed projects in year {entity.Year}.", innerException);
+            {
+                string assetLabel;
+                if (keyPropertyNames is null)
+                {
+                    assetLabel = asset.Id.ToString();
+                }
+                else
+                {
+                    var attributeByName = simulation.Network.Explorer.AllAttributes.ToDictionary(a => a.Name);
+                    var keyProperties = keyPropertyNames.Select(name => $"[{name}]: {asset.GetHistory(attributeByName[name]).MostRecentValue}");
+                    assetLabel = string.Join(", ", keyProperties);
+                }
+
+                throw new InvalidOperationException($"Asset ({assetLabel}) has multiple committed projects in year {entity.Year}.", innerException);
+            }
 
             try
             {

@@ -49,6 +49,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Attribute)
                 .Where(_ => _.SimulationId == simulation.Id).ToList();
 
+            var keyPropertyNames = _unitOfWork.Config
+                .GetSection("InventoryData:KeyProperties")
+                .GetChildren()
+                .Select(_ => _.Value)
+                .ToList();
+
             foreach (var project in projects)
             {
                 var asset = assets.FirstOrDefault(a => project.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
@@ -60,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
                     }
 
-                    project.CreateCommittedProject(simulation, asset.Id, simulationEntity.NoTreatmentBeforeCommittedProjects, noTreatmentDefaultCost, noTreatmentEntity);
+                    project.CreateCommittedProject(simulation, asset.Id, simulationEntity.NoTreatmentBeforeCommittedProjects, noTreatmentDefaultCost, noTreatmentEntity, keyPropertyNames);
                 }
             }
         }

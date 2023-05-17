@@ -21,15 +21,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertOrDeleteScenarioTreatmentPerformanceFactors(Dictionary<Guid, List<TreatmentPerformanceFactorDTO>> scenarioTreatmentPerformanceFactorsPerTreatmentId,
             Guid SimulationId)
         {
-            //var scenarioTreatmentPerformanceFactorEntities = scenarioTreatmentPerformanceFactorsPerTreatmentId.SelectMany(_ => _.Value.ToList()).ToList();
-
             var scenarioTreatmentPerformanceFactorEntities = scenarioTreatmentPerformanceFactorsPerTreatmentId
                 .SelectMany(_ => _.Value.Select(factor => factor
                     .ToScenarioEntity(_.Key)))
                 .ToList();
-            //var scenarioTreatmentPerformanceFactorEntities = scenarioTreatmentPerformanceFactorsPerTreatmentId
-            //    .SelectMany(_ => _.Value.Select(factor => factor.ToScenarioEntity(_.Key)))
-            //    .ToList();
 
             var entityIds = scenarioTreatmentPerformanceFactorEntities.Select(_ => _.Id).ToList();
 

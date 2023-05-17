@@ -23,11 +23,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             set => _ShadowForSameTreatment = Math.Max(value, DEFAULT_SHADOW);
         }
 
-        public double PerformanceFactor
-        {
-            get => _PerformanceFactor;
-            set => _PerformanceFactor = value;
-        }
         public string ShortDescription => Name;
 
         public virtual ValidatorBag Subvalidators => new();
@@ -69,8 +64,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         internal abstract double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts);
 
         private const int DEFAULT_SHADOW = 1;
-
-        private double _PerformanceFactor = 1.0;
 
         private int _ShadowForAnyTreatment = DEFAULT_SHADOW;
 

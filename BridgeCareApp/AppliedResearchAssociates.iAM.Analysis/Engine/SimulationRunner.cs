@@ -149,32 +149,45 @@ public sealed class SimulationRunner
         CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
         NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
         SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(_ => _, rule => rule.DistributionRules.ToSortedDictionary(distributionRule => distributionRule.CostCeiling ?? decimal.MaxValue));
-
-            foreach (var treatment in Simulation.Treatments)
+        foreach (var cp in Simulation.CommittedProjects)
+        {
+            foreach (var curves in CurvesPerAttribute)
             {
-                if (treatment.PerformanceFactors.Count > 0)
+                var conditionAttribute = curves.Key;
+                foreach (var consequence in cp.Consequences)
                 {
-                    foreach(var curves in CurvesPerAttribute)
+                    if (consequence.Attribute.Name == conditionAttribute.Name)
                     {
-                        var conditionAttribute = curves.Key;
-
-                        foreach (var factors in treatment.PerformanceFactors)
-                        {
-                            if (factors.Attribute == conditionAttribute.Name)
-                            {
-                                treatment.PerformanceCurveAdjustmentFactors.Add(conditionAttribute, factors.Factor);
-                            }
-                        }
-
-                        foreach(var curve in curves)
-                        {
-                            var performanceCurve = curve;
-                            
-                        }
+                        cp.PerformanceCurveAdjustmentFactors.Add(conditionAttribute, consequence.PerformanceFactor);
                     }
                 }
-                treatment.SetConsequencesPerAttribute();
             }
+        }
+        foreach (var treatment in Simulation.Treatments)
+        {
+            if (treatment.PerformanceFactors.Count > 0)
+            {
+                foreach(var curves in CurvesPerAttribute)
+                {
+                    var conditionAttribute = curves.Key;
+
+                    foreach (var factors in treatment.PerformanceFactors)
+                    {
+                        if (factors.Attribute == conditionAttribute.Name)
+                        {
+                            treatment.PerformanceCurveAdjustmentFactors.Add(conditionAttribute, factors.Factor);
+                        }
+                    }
+
+                    foreach(var curve in curves)
+                    {
+                        var performanceCurve = curve;
+                        
+                    }
+                }
+            }
+            treatment.SetConsequencesPerAttribute();
+        }
 
         AssetContexts = Simulation.Network.Assets
 #if !DEBUG

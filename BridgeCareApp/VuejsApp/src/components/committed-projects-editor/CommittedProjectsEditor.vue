@@ -787,7 +787,7 @@ export default class CommittedProjectsEditor extends Vue  {
         newRow.committedProjectId = this.selectedCommittedProject;
         newRow.attribute = '';
         newRow.changeValue = '';
-        newRow.performanceFactor = 1.0;
+        newRow.performanceFactor = 1.2;
         this.selectedConsequences.push(newRow);
      }
 
@@ -906,7 +906,7 @@ export default class CommittedProjectsEditor extends Vue  {
      onAddCommittedProjectConsequenc(newConsequence: CommittedProjectConsequence) {
         this.showCreateCommittedProjectConsequenceDialog = false;     
         if (!isNil(newConsequence)) {
-            newConsequence.committedProjectId = this.selectedCommittedProject
+            newConsequence.committedProjectId = this.selectedCommittedProject;
             this.selectedConsequences.push(newConsequence);
             this.updateSelectedProjectConsequences();  
         }
@@ -1028,7 +1028,6 @@ export default class CommittedProjectsEditor extends Vue  {
                 );
             },
         );
-        console.log("data is valid: " + dataIsValid);
         this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
@@ -1199,7 +1198,6 @@ export default class CommittedProjectsEditor extends Vue  {
                     value,
                     row
                 ) as SectionCommittedProject
-        console.log("updated 0 consequence: " + updatedRow.consequences[0].performanceFactor);
         this.onUpdateRow(row.id, updatedRow);
         this.sectionCommittedProjects = update(
             findIndex(

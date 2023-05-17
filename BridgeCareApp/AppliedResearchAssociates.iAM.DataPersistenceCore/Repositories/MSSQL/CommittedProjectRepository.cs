@@ -79,7 +79,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             Id = consequence.Id,
                             ChangeValue = consequence.ChangeValue,
-                            Attribute = new AttributeEntity { Name = consequence.Attribute.Name }
+                            Attribute = new AttributeEntity { Name = consequence.Attribute.Name },
+                            PerformanceFactor = consequence.PerformanceFactor
                         }).ToList(),
                 };
             }
@@ -271,16 +272,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Select(_ => _.Id);
                 allExistingCommittedProjectIds.AddRange(simulationProjects);
             }
-
             _unitOfWork.BeginTransaction();
             try
             {
                 // Upsert(update/insert) all
                 _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
-
+                //_unitOfWork.Context.UpdateAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Commit();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _unitOfWork.Rollback();
                 throw;

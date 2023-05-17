@@ -149,6 +149,7 @@ public sealed class SimulationRunner
         CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
         NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
         SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(_ => _, rule => rule.DistributionRules.ToSortedDictionary(distributionRule => distributionRule.CostCeiling ?? decimal.MaxValue));
+        // Set performance factor for committed projects
         foreach (var committed in Simulation.CommittedProjects)
         {
             foreach (var curves in CurvesPerAttribute)
@@ -163,6 +164,7 @@ public sealed class SimulationRunner
                 }
             }
         }
+        // Set performance factor for treatments
         foreach (var treatment in Simulation.Treatments)
         {
             if (treatment.PerformanceFactors.Count > 0)
@@ -177,12 +179,6 @@ public sealed class SimulationRunner
                         {
                             treatment.PerformanceCurveAdjustmentFactors.Add(conditionAttribute, factors.Factor);
                         }
-                    }
-
-                    foreach(var curve in curves)
-                    {
-                        var performanceCurve = curve;
-                        
                     }
                 }
             }

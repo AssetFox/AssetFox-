@@ -149,16 +149,16 @@ public sealed class SimulationRunner
         CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
         NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
         SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(_ => _, rule => rule.DistributionRules.ToSortedDictionary(distributionRule => distributionRule.CostCeiling ?? decimal.MaxValue));
-        foreach (var cp in Simulation.CommittedProjects)
+        foreach (var committed in Simulation.CommittedProjects)
         {
             foreach (var curves in CurvesPerAttribute)
             {
                 var conditionAttribute = curves.Key;
-                foreach (var consequence in cp.Consequences)
+                foreach (var consequence in committed.Consequences)
                 {
                     if (consequence.Attribute.Name == conditionAttribute.Name)
                     {
-                        cp.PerformanceCurveAdjustmentFactors.Add(conditionAttribute, consequence.PerformanceFactor);
+                        committed.PerformanceCurveAdjustmentFactors.Add(conditionAttribute, consequence.PerformanceFactor);
                     }
                 }
             }

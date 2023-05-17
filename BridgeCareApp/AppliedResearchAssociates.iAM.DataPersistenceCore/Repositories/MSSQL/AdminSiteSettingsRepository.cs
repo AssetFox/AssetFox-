@@ -14,11 +14,11 @@ using SQLitePCL;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class SiteRepository : ISiteRepository
+    public class AdminSiteSettingsRepository : IAdminSiteSettingsRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public SiteRepository(UnitOfDataPersistenceWork unitOfWork) =>
+        public AdminSiteSettingsRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public string GetImplementationName()
@@ -111,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public string GetImplementationLogo()
         {
-        var implementationLogo = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "ImplementationLogo").FirstOrDefault();
+            var implementationLogo = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "ImplementationLogo").FirstOrDefault();
             if (implementationLogo == null) return "";
             if (!implementationLogo.Value.StartsWith("data:image/jpg;base64,")) return "";
             return _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "ImplementationLogo").FirstOrDefault().Value;

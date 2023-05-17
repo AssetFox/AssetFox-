@@ -305,9 +305,9 @@ export default class AppComponent extends Vue {
     securityType: string;
     @State(state => state.announcementModule.announcements) announcements: Announcement[];
     @State(state => state.userModule.currentUser) currentUser: User;
-    @State(state => state.adminSettingsModule.agencyLogo) agencyLogoBase64: string;
-    @State(state => state.adminSettingsModule.productLogo) productLogoBase64: string;
-
+    @State(state => state.adminSiteSettingsModule.agencyLogo) agencyLogoBase64: string;
+    @State(state => state.adminSiteSettingsModule.productLogo) productLogoBase64: string;
+    
     @Action('logOut') logOutAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
     @Action('getNetworks') getNetworksAction: any;

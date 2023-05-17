@@ -20,11 +20,11 @@ namespace BridgeCareCore.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class SiteController : BridgeCareCoreBaseController
+    public class AdminSiteSettingsController : BridgeCareCoreBaseController
     {
-        public const string SiteError = "Site Error";
+        public const string AdminSiteSettingsError = "Admin Site Settings Error";
 
-        public SiteController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor):
+        public AdminSiteSettingsController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor):
                          base(esecSecurity, unitOfWork, hubService, contextAccessor) { }
 
         [HttpGet]
@@ -33,32 +33,32 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var name = UnitOfWork.SiteRepo.GetImplementationName();
+                var name = UnitOfWork.AdminSiteSettingsRepo.GetImplementationName();
                 return Ok(name);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetImplementationName - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSiteSettingsError}::GetImplementationName - {e.Message}");
                 throw;
             }
         }
 
         [HttpPost]
         [Route("SetImplementationName/{name}")]
-        [Authorize(Policy = Policy.ModifyAdminSettings)]
+        [Authorize(Policy = Policy.ModifyAdminSiteSettings)]
         public async Task<IActionResult> SetImplementationName(string name)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.SiteRepo.SetImplementationName(name);
+                    UnitOfWork.AdminSiteSettingsRepo.SetImplementationName(name);
                 });
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetImplementationName - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSiteSettingsError}::SetImplementationName - {e.Message}");
                 throw;
             }
         }
@@ -69,19 +69,19 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.SiteRepo.GetAgencyLogo());
+                var result = await Task.Factory.StartNew(() => UnitOfWork.AdminSiteSettingsRepo.GetAgencyLogo());
                 return Ok(result);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetAgencyLogo - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSiteSettingsError}::GetAgencyLogo - {e.Message}");
                 throw;
             }
         }
 
         [HttpPost]
         [Route("SetAgencyLogo")]
-        [Authorize(Policy = Policy.ModifyAdminSettings)]
+        [Authorize(Policy = Policy.ModifyAdminSiteSettings)]
         public async Task<IActionResult> SetAgencyLogo()
         {
             try
@@ -92,12 +92,12 @@ namespace BridgeCareCore.Controllers
                     throw new ConstraintException("Attributes file not found.");
                 //https://stackoverflow.com/questions/8848725/asp-net-c-sharp-convert-filestream-to-image
                 Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                await Task.Factory.StartNew(() => UnitOfWork.SiteRepo.SetAgencyLogo(logo));
+                await Task.Factory.StartNew(() => UnitOfWork.AdminSiteSettingsRepo.SetAgencyLogo(logo));
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetAgencyLogo - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSiteSettingsError}::SetAgencyLogo - {e.Message}");
                 throw;
             }
         }
@@ -108,19 +108,19 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.SiteRepo.GetImplementationLogo());
+                var result = await Task.Factory.StartNew(() => UnitOfWork.AdminSiteSettingsRepo.GetImplementationLogo());
                 return Ok(result);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetImplementationLogo - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSiteSettingsError}::GetImplementationLogo - {e.Message}");
                 throw;
             }
         }
 
         [HttpPost]
         [Route("SetImplementationLogo")]
-        [Authorize(Policy = Policy.ModifyAdminSettings)]
+        [Authorize(Policy = Policy.ModifyAdminSiteSettings)]
         public async Task<IActionResult> SetImplementationLogo()
         {
             try
@@ -130,12 +130,12 @@ namespace BridgeCareCore.Controllers
                 if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
                     throw new ConstraintException("Attributes file not found.");
                 Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                await Task.Factory.StartNew( () => UnitOfWork.SiteRepo.SetImplementationLogo(logo) );
+                await Task.Factory.StartNew( () => UnitOfWork.AdminSiteSettingsRepo.SetImplementationLogo(logo) );
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetImplementationLogo - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSiteSettingsError}::SetImplementationLogo - {e.Message}");
                 throw;
             }
         }

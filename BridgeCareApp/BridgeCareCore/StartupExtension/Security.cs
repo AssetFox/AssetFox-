@@ -240,8 +240,8 @@ namespace BridgeCareCore.StartupExtension
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.UseAnyGraphQLAccess, Claim.UsePermittedGraphQLAccess));
 
                 // Admin Settings
-                options.AddPolicy(Policy.ModifyAdminSettings,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.AdminSettingsAccess));
+                options.AddPolicy(Policy.ModifyAdminSiteSettings,
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.AdminSiteSettingsAccess));
             });
 
             services.AddSingleton<IEsecSecurity, EsecSecurity>();

@@ -1,7 +1,7 @@
 import {AxiosPromise} from 'axios';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 
-export default class AdminSettingsService {
+export default class AdminSiteSettingsService {
     static getAgencyLogo(): AxiosPromise {
         return coreAxiosInstance.get(`${API.AdminSettings}/GetAgencyLogo`);
     }

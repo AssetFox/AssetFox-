@@ -7,7 +7,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
 
-    public interface ISiteRepository
+    public interface IAdminSiteSettingsRepository
     {
         string GetImplementationName();
 

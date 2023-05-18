@@ -25,9 +25,11 @@ namespace BridgeCareCore.Controllers
     {
         public const string SiteError = "Site Error";
         private readonly IReportGenerator _generator;
-        public AdminDataController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor, IReportGenerator generator) :
+        private readonly IReportLookupLibrary _factory;
+        public AdminDataController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor, IReportGenerator generator, IReportLookupLibrary factory) :
                          base(esecSecurity, unitOfWork, hubService, contextAccessor)
         {
+            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             _generator = generator ?? throw new ArgumentNullException(nameof(generator));
         }
         [HttpGet]
@@ -111,43 +113,42 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                    //For verifying Inventory Reports
-                    var reportCriteriaCheck = false;
-                    var reportFactoryList = new List<IReportFactory>();
-                    reportFactoryList.Add(new BAMSInventoryReportFactory());
-                    reportFactoryList.Add(new PAMSInventorySectionsReportFactory());
-                    reportFactoryList.Add(new PAMSInventorySegmentsReportFactory());
-                    ReportLookupLibrary library = new ReportLookupLibrary(reportFactoryList);
-                    IList<string> InventoryReportsList = inventoryReports.Split(',').ToList();
-
-                    //Checking every report being passed in from the parameter
-                    foreach (string inventoryReport in InventoryReportsList)
+                var reportCriteriaCheck = true;
+                IList<string> InventoryReportsList = inventoryReports.Split(',').ToList();
+                   
+                //Checking every report being passed in from the parameter
+                foreach (string inventoryReport in InventoryReportsList)
+                {
+                    try
                     {
+                        _factory.ReportList.Count();
                         var reportObject = await _generator.Generate(inventoryReport);
-                        //If report is in factory list
-                        if (library.CanGenerateReport(inventoryReport))
-                        {
-                            reportCriteriaCheck = true;
-                        }
-                        else if (!library.CanGenerateReport(inventoryReport))
+                        //If cannot be created in lookup library (Existence Check)
+                        if (!_factory.CanGenerateReport(inventoryReport))
                         {
                             reportCriteriaCheck = false;
-                            throw new Exception("Report type Does Not Exist.");
+                            throw new InvalidOperationException($"You can't use {inventoryReport} for an inventory report.");
                         }
+                        //Report type isn't HTML
                         else if (reportObject.Type != ReportType.HTML)
                         {
                             reportCriteriaCheck = false;
-                            throw new Exception("You can't use this particular report for an inventory report");
-                        }
-
-                        //If all reports in list exist, save to database.
-
-                    };
-                    if (reportCriteriaCheck)
-                    {
-                        UnitOfWork.AdminDataRepo.SetInventoryReports(inventoryReports);
+                            throw new InvalidOperationException($"You can't use {inventoryReport} for an inventory report.");
+                        }                       
                     }
-                    return Ok();
+                    catch (Exception e)
+                    {
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetInventoryReports - {e.Message}");
+                        return BadRequest($"{SiteError}::SetInventoryReports - {e.Message}");
+                    }
+                    
+                };
+                //If all reports in list exist, save to database.
+                if (reportCriteriaCheck)
+                {
+                    UnitOfWork.AdminDataRepo.SetInventoryReports(inventoryReports);
+                }
+                return Ok();
             }
             catch (Exception e)
             {

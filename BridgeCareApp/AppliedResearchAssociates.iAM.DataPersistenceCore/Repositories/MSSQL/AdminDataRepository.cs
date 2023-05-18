@@ -19,8 +19,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly NetworkRepository _networkRepo;
 
-        public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork) =>
+        public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork)
+        {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        }
+            
 
 
         //Reads in KeyFields record as a string but places values in a list to return.
@@ -94,16 +97,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == "PrimaryNetwork");
             var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
-            var existingNetwork = _unitOfWork.Context.Network.Where(_ => _.Id == adminNetworkGuid).SingleOrDefault();
+            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
 
             if (existingPrimaryNetwork == null)
             {
                 return null;
             }
             else
-            {
-                var name = existingNetwork.Name;
-                return name;
+            {                
+                return existingNetwork.Name;
             }
         }
 

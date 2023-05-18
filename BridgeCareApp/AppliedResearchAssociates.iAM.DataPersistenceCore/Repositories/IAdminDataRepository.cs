@@ -14,6 +14,8 @@ public interface IAdminDataRepository
 
     void SetPrimaryNetwork(string name);
     string GetPrimaryNetwork();
+
+    IList<string> GetSimulationReportNames();
 }
 
 

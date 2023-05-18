@@ -76,6 +76,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         IAdminSiteSettingsRepository AdminSiteSettingsRepo { get; }
 
+        IAdminDataRepository AdminDataRepo { get; }
+
         ITargetConditionGoalRepository TargetConditionGoalRepo { get; }
 
         ITreatmentConsequenceRepository TreatmentConsequenceRepo { get; }

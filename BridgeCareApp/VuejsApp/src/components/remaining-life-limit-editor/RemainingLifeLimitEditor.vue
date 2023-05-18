@@ -74,7 +74,6 @@
                                 :return-value.sync="props.item.attribute"
                                 large
                                 lazy
-                                persistent
                                 @save="
                                     onEditRemainingLifeLimitProperty(
                                         props.item,
@@ -112,7 +111,6 @@
                                 :return-value.sync="props.item.value"
                                 large
                                 lazy
-                                persistent
                                 @save="
                                     onEditRemainingLifeLimitProperty(
                                         props.item,

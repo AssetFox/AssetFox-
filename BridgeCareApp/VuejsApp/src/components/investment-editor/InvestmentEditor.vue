@@ -171,7 +171,7 @@
                             <div v-if="header.value !== 'year' && header.value !== 'action'">
                                 <v-edit-dialog :return-value.sync='props.item.values[header.value]'
                                                @save='onEditBudgetYearValue(props.item.year, header.value, props.item.values[header.value])'
-                                               large lazy persistent>
+                                               large lazy>
                                     <v-text-field readonly single-line class='sm-txt'
                                                   :value='formatAsCurrency(props.item.values[header.value])'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />

@@ -121,7 +121,6 @@ namespace BridgeCareCore.Controllers
                 {
                     try
                     {
-                        _factory.ReportList.Count();
                         var reportObject = await _generator.Generate(inventoryReport);
                         //If cannot be created in lookup library (Existence Check)
                         if (!_factory.CanGenerateReport(inventoryReport))
@@ -143,7 +142,7 @@ namespace BridgeCareCore.Controllers
                     }
                     
                 };
-                //If all reports in list exist, save to database.
+                //If all reports in list exist and use the right type, save to database.
                 if (reportCriteriaCheck)
                 {
                     UnitOfWork.AdminDataRepo.SetInventoryReports(inventoryReports);

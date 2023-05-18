@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// <remarks>
         /// 1 is default
         /// </remarks>
-        public double PerformanceFactor { get; set; }
+        public float PerformanceFactor { get; set; }
 
         /// <summary>
         /// The year in which the committed project will be applied (YYYY)

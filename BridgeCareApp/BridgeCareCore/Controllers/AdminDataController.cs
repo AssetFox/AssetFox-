@@ -36,7 +36,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetPrimaryNetwork - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetKeyFields - {e.Message}");
                 throw;
             }
         }
@@ -97,6 +97,24 @@ namespace BridgeCareCore.Controllers
                 return BadRequest($"{SiteError}::SetPrimaryNetwork - {e.Message}");
             }
         }
+
+        [HttpGet]
+        [Route("GetSimulationReportNames")]
+        [Authorize]
+        public async Task<IActionResult> GetSimulationReportNames()
+        {
+            try
+            {
+                var SimulationReportNames = UnitOfWork.AdminDataRepo.GetSimulationReportNames();
+                return Ok(SimulationReportNames);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetSimulationReportNames - {e.Message}");
+                throw;
+            }
+        }
+
 
     }
 }

@@ -234,13 +234,8 @@ namespace BridgeCareCore.Controllers
                 });
                 DeleteSimulationWorkitem workItem = new DeleteSimulationWorkitem(simulationId, UserInfo.Name, simulationName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, analysisHandle.MostRecentStatusMessage);
-                }
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
 
                 return Ok();
             }
@@ -341,7 +336,9 @@ namespace BridgeCareCore.Controllers
                 {
                     var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(workId);
                     if(hasBeenRemovedFromQueue)
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, null);
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, workId);
+                    else
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = workId, Status = "Canceling" });
                 }                           
 
                 return Ok();
@@ -457,11 +454,9 @@ namespace BridgeCareCore.Controllers
                 });
                 SimulationOutputConversionWorkitem workItem = new SimulationOutputConversionWorkitem(simulationId, UserInfo.Name, scenarioName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
 
-                //await analysisHandle.WorkCompletion;
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException e)

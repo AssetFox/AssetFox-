@@ -76,11 +76,17 @@ export default {
             },
         );
 
+        connection.on(Hub.BroadcastType.BroadcastWorkQueueUpdate, workId => {
+            statusHub.$emit(Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent, {
+                workId,
+            });
+        });
+
         connection.on(Hub.BroadcastType.BroadcastWorkQueueStatusUpdate, (queueItem: queuedWorkStatusUpdate) => {
             statusHub.$emit(Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent, {
                 queueItem,
             });
-        });
+        });       
 
         connection.on(Hub.BroadcastType.BroadcastError, error => {
             statusHub.$emit(Hub.BroadcastEventType.BroadcastErrorEvent, {
@@ -152,7 +158,9 @@ export const Hub = {
         BroadcastSimulationAnalysisDetail: 'BroadcastSimulationAnalysisDetail',
         BroadcastDataMigration: 'BroadcastDataMigration',
         BroadcastNetworkRollupDetail: 'BroadcastNetworkRollupDetail',
-        BroadcastWorkQueueStatusUpdate: 'BroadcastWorkQueueStatusUpdate'
+        BroadcastWorkQueueUpdate: 'testytest',
+        BroadcastWorkQueueStatusUpdate: 'BroadcastWorkQueueStatusUpdate',
+        
     },
     BroadcastEventType: {
         BroadcastErrorEvent: 'BroadcastErrorEvent',
@@ -168,6 +176,8 @@ export const Hub = {
             'BroadcastSimulationAnalysisDetailEvent',
         BroadcastDataMigrationEvent: 'BroadcastDataMigrationEvent',
         BroadcastNetworkRollupDetailEvent: 'BroadcastNetworkRollupDetailEvent',
-        BroadcastWorkQueueStatusUpdateEvent: 'BroadcastWorkQueueStatusUpdateEvent'
+        BroadcastWorkQueueUpdateEvent: 'testytestEvent',
+        BroadcastWorkQueueStatusUpdateEvent: 'BroadcastWorkQueueStatusUpdateEvent',
+        
     },
 };

@@ -175,7 +175,6 @@ namespace BridgeCareCore.Services
                     attributesWithFactorNames.Add(attributeName);
                     attributesWithFactorNames.Add(attributeWithFactor);
                 }
-                //AddHeaderCells(worksheet, attributeNames);
                 AddHeaderCells(worksheet, attributesWithFactorNames);
                 AddDataCells(worksheet, committedProjectDTOs, attributeNames);
             }

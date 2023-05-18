@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 public interface IAdminDataRepository
 {
@@ -16,6 +17,8 @@ public interface IAdminDataRepository
     string GetPrimaryNetwork();
 
     IList<string> GetSimulationReportNames();
+
+    string GetAttributeName(Guid attributeId);
 }
 
 

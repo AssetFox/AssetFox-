@@ -15,7 +15,6 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Models;
-using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
@@ -45,6 +44,11 @@ namespace BridgeCareCore.Services
             // end-to-end. (Knowledge which I (WR) lacked at the time of writing.)
 
             var memos = EventMemoModelLists.GetFreshInstance("Simulation");
+
+            //retrieve config.
+            //build logger according to config.
+            //define local fn to wrap memo marking so that the logger is used.
+            //add progress event handler to runner that uses logger.
 
             memos.Mark("start");
 

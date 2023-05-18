@@ -35,7 +35,6 @@ namespace BridgeCareCoreTests.Tests
             var generalWorkQueueService = GeneralWorkQueueServiceMocks.New();
             var pagingSerivce = new SimulationPagingService(unitOfWork.Object, unitOfWork.Object.SimulationRepo);
             var queueService = SimulationQueueServiceMocks.New();
-            var generalWorkQueService = GeneralWorkQueueServiceMocks.New();
             var controller = new SimulationController(
                 pagingSerivce,
                 queueService.Object,

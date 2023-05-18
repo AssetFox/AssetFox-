@@ -6,16 +6,31 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using System.Drawing;
 
-public interface IAdminDataRepository
+public interface IAdminSettingsRepository
 {
     IList<string> GetKeyFields();
+
     void SetKeyFields(string keyFields);
 
     void SetPrimaryNetwork(string name);
+
     string GetPrimaryNetwork();
 
     IList<string> GetSimulationReportNames();
+
+    string GetImplementationName();
+
+    void SetImplementationName(string name);
+
+    string GetAgencyLogo();
+
+    void SetAgencyLogo(Image agencyLogo);
+
+    string GetImplementationLogo();
+
+    void SetImplementationLogo(Image productLogo);
 }
 
 

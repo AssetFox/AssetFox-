@@ -33,7 +33,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var name = UnitOfWork.AdminSiteSettingsRepo.GetImplementationName();
+                var name = UnitOfWork.AdminSettingsRepo.GetImplementationName();
                 return Ok(name);
             }
             catch (Exception e)
@@ -52,7 +52,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.AdminSiteSettingsRepo.SetImplementationName(name);
+                    UnitOfWork.AdminSettingsRepo.SetImplementationName(name);
                 });
                 return Ok();
             }
@@ -69,7 +69,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.AdminSiteSettingsRepo.GetAgencyLogo());
+                var result = await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.GetAgencyLogo());
                 return Ok(result);
             }
             catch (Exception e)
@@ -92,7 +92,7 @@ namespace BridgeCareCore.Controllers
                     throw new ConstraintException("Attributes file not found.");
                 //https://stackoverflow.com/questions/8848725/asp-net-c-sharp-convert-filestream-to-image
                 Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                await Task.Factory.StartNew(() => UnitOfWork.AdminSiteSettingsRepo.SetAgencyLogo(logo));
+                await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.SetAgencyLogo(logo));
                 return Ok();
             }
             catch (Exception e)
@@ -108,7 +108,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.AdminSiteSettingsRepo.GetImplementationLogo());
+                var result = await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.GetImplementationLogo());
                 return Ok(result);
             }
             catch (Exception e)
@@ -130,7 +130,7 @@ namespace BridgeCareCore.Controllers
                 if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
                     throw new ConstraintException("Attributes file not found.");
                 Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                await Task.Factory.StartNew( () => UnitOfWork.AdminSiteSettingsRepo.SetImplementationLogo(logo) );
+                await Task.Factory.StartNew( () => UnitOfWork.AdminSettingsRepo.SetImplementationLogo(logo) );
                 return Ok();
             }
             catch (Exception e)

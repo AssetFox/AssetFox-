@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using MoreLinq.Extensions;
 using Org.BouncyCastle.Asn1.Cms;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -17,11 +15,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class AdminDataRepository : IAdminDataRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly NetworkRepository _networkRepo;
 
-        public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork) =>
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-
-        
+        public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork)
+        { 
+               
+                _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        }
         //Reads in KeyFields record as a string but places values in a list to return.
         public IList<string> GetKeyFields()
         {
@@ -47,25 +47,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var duplicateCount = KeyFieldsList.GroupBy(x => x).Where(y => y.Count() > 1).Select(z => z.Key).ToList();
 
             //This if statement checks if there are duplicates
-            if (duplicateCount.Count >0)
+            if (duplicateCount.Count > 0)
             {
                 boolDuplicateExistence = true;
                 throw new RowNotInTableException("A duplicate attribute is selected.");
-                
+
             }
             //This checks that each attribute exists in the attribute table
             foreach (string KeyField in KeyFieldsList)
             {
-                if(!_unitOfWork.Context.Attribute.Any(_ => _.Name == KeyField))
+                if (!_unitOfWork.Context.Attribute.Any(_ => _.Name == KeyField))
                 {
                     boolAttributeExistence = false;
-                    throw new RowNotInTableException("The specified attribute was not found.");                    
+                    throw new RowNotInTableException("The specified attribute was not found.");
                 }
                 else
                     boolAttributeExistence = true;
             }
             //If each attribute is unique and exists in the attribute table
-            if(boolAttributeExistence && !boolDuplicateExistence)
+            if (boolAttributeExistence && !boolDuplicateExistence)
             {
                 var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").SingleOrDefault();
                 var KeyFieldsString = string.Join(",", keyFields);
@@ -86,7 +86,66 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
                 _unitOfWork.Context.SaveChanges();
             }
-            
+
         }
+
+        public string GetPrimaryNetwork()
+        {
+            var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == "PrimaryNetwork");
+            if (existingPrimaryNetwork == null)               
+            {
+                return null;
+            }
+            else
+            {
+                var name = _unitOfWork.Context.AdminSettings.First().Value;
+                return name;
+            }
+        }
+
+        public void SetPrimaryNetwork(string name)
+        {
+            var existingNetworkAdminSetting = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "PrimaryNetwork").FirstOrDefault();
+            var existingNetwork = _unitOfWork.Context.Network.FirstOrDefault(_ => _.Name == name);
+            if (existingNetwork == null)
+            {
+                throw new RowNotInTableException("The specified network was not found.");
+            }
+            if (existingNetworkAdminSetting == null)
+            {
+
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                {
+                    Key = "PrimaryNetwork",
+                    Value = Guid.NewGuid().ToString()
+                });
+            }
+            else
+            {
+
+                existingNetworkAdminSetting.Value = existingNetwork.Id.ToString();
+                _unitOfWork.Context.AdminSettings.Update(existingNetworkAdminSetting);
+            }
+            _unitOfWork.Context.SaveChanges();
+        }
+
+        public IList<string> GetSimulationReportNames()
+        {
+            var existingSimulationReports = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == "SimulationReportNames");
+            if (existingSimulationReports == null)
+            {
+                return null;
+            }
+            else
+            {
+                var name = existingSimulationReports.Value;
+                IList<string> GetSimulationReportNames = name.Split(',').ToList();
+
+                return GetSimulationReportNames;
+            }
+
+        }
+
+
     }
 }

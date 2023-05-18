@@ -205,7 +205,7 @@
                 <div class="scenario-status" v-if="hasSelectedScenario">
                         <br>
                         <span>Scenario: </span>
-                            <span style="font-weight: normal;">{{ selectedScenario.name }}</span>
+                            <span id = 'App-scenarioName-span' style="font-weight: normal;">{{ selectedScenario.name }}</span>
                             {{ "\xA0" }}
                             <span v-if="selectedScenarioHasStatus && hasSelectedScenario">
                             <hr color="#798899" class="mx-1 navbar-divider v-divider v-divider--vertical theme--light">

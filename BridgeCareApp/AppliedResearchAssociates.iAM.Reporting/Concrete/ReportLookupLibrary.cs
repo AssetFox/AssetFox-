@@ -43,5 +43,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var factory = GetReportFactory(type);
             return factory != null;
         }
+        public IList<IReportFactory> ReportList
+        {
+            get { return _reportFactories; }
+
+        }
     }
 }

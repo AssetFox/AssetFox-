@@ -24,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule
                 CriterionLibrary = new CriterionLibraryDTO
                 {
                     Name = "TestCriterionLibrary",
+                    MergedCriteriaExpression = "mergedCriteriaExpression",
                     Id = resolveLibraryId,
                     IsSingleUse = true,
                 },

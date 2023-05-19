@@ -10,13 +10,15 @@
                 </v-toolbar-title>
                 <v-toolbar-items>
                     <v-btn
+                        id="App-scenarios-btn"
                         @click="onNavigate('/Scenarios/')"
-                        flat
                         class="ara-blue-pantone-281"
+                        flat                        
                     >
                         Scenarios
                     </v-btn>                   
                      <v-btn
+                        id="App-libraries-btn"
                         @click="onNavigate('/EditLibrary/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -24,6 +26,7 @@
                         Libraries
                     </v-btn>
                     <v-btn
+                        id="App-rawData-btn"
                         @click="onNavigate('/EditRawData/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -32,6 +35,7 @@
                         Raw Data
                     </v-btn>
                     <v-btn
+                        id="App-administration-btn"
                         @click="onNavigate('/EditAdmin/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -40,6 +44,7 @@
                         Administration
                     </v-btn>
                     <v-btn
+                        id="App-inventory-btn"
                         @click="onNavigate('/Inventory/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -47,6 +52,7 @@
                         Inventory
                     </v-btn>
                      <v-btn
+                        id="App-news-btn"
                         @click="onShowNewsDialog()"
                         class="ara-blue-pantone-281"
                         flat
@@ -199,7 +205,7 @@
                 <div class="scenario-status" v-if="hasSelectedScenario">
                         <br>
                         <span>Scenario: </span>
-                            <span style="font-weight: normal;">{{ selectedScenario.name }}</span>
+                            <span id = 'App-scenarioName-span' style="font-weight: normal;">{{ selectedScenario.name }}</span>
                             {{ "\xA0" }}
                             <span v-if="selectedScenarioHasStatus && hasSelectedScenario">
                             <hr color="#798899" class="mx-1 navbar-divider v-divider v-divider--vertical theme--light">

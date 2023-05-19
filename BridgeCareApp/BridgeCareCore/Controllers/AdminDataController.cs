@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Security;
 using Humanizer;
+using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting;
+using System.Linq;
 
 namespace BridgeCareCore.Controllers
 {

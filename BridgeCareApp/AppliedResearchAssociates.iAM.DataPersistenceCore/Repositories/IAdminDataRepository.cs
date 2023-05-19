@@ -23,6 +23,8 @@ public interface IAdminDataRepository
     string GetAttributeName(Guid attributeId);
 
     void SetSimulationReports(string simulationReports);
+
+    IList<string> GetInventoryReports();
 }
 
 

@@ -11,10 +11,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Security;
 using Humanizer;
-using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting;
-using System.Linq;
 
 namespace BridgeCareCore.Controllers
 {
@@ -172,6 +168,31 @@ namespace BridgeCareCore.Controllers
                 return BadRequest($"{SiteError}::SetInventoryReports - {e.Message}");
             }
         }
+
+        [HttpGet]
+        [Route("GetAttributeName")]
+        [ClaimAuthorize("AttributesViewAccess")]
+        public async Task<IActionResult> Attributes()
+        {
+            try
+            {
+                var result = await UnitOfWork.AttributeRepo.GetAttributesAsync();
+                var allAttributes = await UnitOfWork.AttributeRepo.GetAttributesAsync();
+                var attributeNameLookup = new Dictionary<Guid, string>();
+                foreach (var attribute in allAttributes)
+                {
+                    attributeNameLookup[attribute.Id] = attribute.Name;
+                }
+                //return attributeNameLookup;
+                return Ok(attributeNameLookup);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetAttributeName - {e.Message}");
+                throw;
+            }
+        }
+
 
     }
 }

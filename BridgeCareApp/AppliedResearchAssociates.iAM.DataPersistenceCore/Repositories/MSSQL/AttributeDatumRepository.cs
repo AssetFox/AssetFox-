@@ -105,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<AttributeDatumDTO> GetRawData(Guid networkId, Dictionary<AttributeDTO, string> dictionary)
         {
-            if (dictionary.Select(_ => _.Key).Distinct().Count() != dictionary.Count())
+            if (dictionary.Select(_ => _.Key).Distinct().Count() < dictionary.Count())
                 throw new InvalidAttributeException("Dictionary has repeated attributes.");
 
             //https://stackoverflow.com/questions/1577822/passing-a-single-item-as-ienumerablet
@@ -115,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             foreach (AttributeDatumDTO ad in attributeDatumDTOs)
             {
-                if (attributeDatumDTOs.Where(_ => _.Attribute == ad.Attribute).Count() > 1)
+                if (attributeDatumDTOs.Where(_ => _.Id == ad.Id).Count() > 1)
                     throw new ArgumentException("More than one asset matches the criteria.");
                 foreach (KeyValuePair<AttributeDTO, string> kvp in dictionary)
                     if (kvp.Key.Name.ToUpper() == ad.Attribute.ToUpper() && (kvp.Value.ToUpper() == ad.TextValue?.ToUpper() || kvp.Value == ad.NumericValue?.ToString()))

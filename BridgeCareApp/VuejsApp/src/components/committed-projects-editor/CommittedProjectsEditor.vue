@@ -177,7 +177,8 @@
                                 </td>
                             </template>
                         </v-data-table>    
-                        <v-btn @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
+                        <v-btn id="CommittedProjectsEditor-addCommittedProject-vbtn" 
+                        @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
                         class="ghd-white-bg ghd-blue ghd-button btn-style" outline>Add Committed Project</v-btn> 
                     </v-layout>
                 </v-flex>

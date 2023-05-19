@@ -10,7 +10,7 @@ public sealed class AnalysisEventLoggingService : IAnalysisEventLoggingService
     public AnalysisEventLoggingService(IConfiguration configuration)
     {
         var logFolderPath = configuration["AnalysisEventLogging:LogFolderPath"];
-        if (logFolderPath != null)
+        if (!string.IsNullOrWhiteSpace(logFolderPath))
         {
             _ = Directory.CreateDirectory(logFolderPath);
             var logTimestamp = Regex.Replace(DateTimeOffset.UtcNow.ToString("O"), @"[:.]", "_");

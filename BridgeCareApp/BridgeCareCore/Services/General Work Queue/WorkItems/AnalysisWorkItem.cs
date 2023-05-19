@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
@@ -29,8 +30,11 @@ namespace BridgeCareCore.Services
 
         public string WorkDescription => "Run Simulation";
 
-        public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.SimulationAnalysis, DomainType = DomainType.Simulation };
+        public WorkQueueMetadata Metadata => new()
+        {
+            WorkType = WorkType.SimulationAnalysis,
+            DomainType = DomainType.Simulation,
+        };
 
         public string WorkName => ScenarioName;
 
@@ -45,16 +49,18 @@ namespace BridgeCareCore.Services
 
             var memos = EventMemoModelLists.GetFreshInstance("Simulation");
 
-            //retrieve config.
-            //build logger according to config.
-            //define local fn to wrap memo marking so that the logger is used.
-            //add progress event handler to runner that uses logger.
-
-            memos.Mark("start");
-
-            HashSet<string> LoggedMessages = new();
+            HashSet<string> loggedMessages = new();
 
             using var scope = serviceProvider.CreateScope();
+
+            var loggingService = scope.ServiceProvider.GetRequiredService<IAnalysisEventLoggingService>();
+            void markAndLog(string message)
+            {
+                memos.Mark(message);
+                loggingService.Log(new(SimulationId, ScenarioName, message));
+            }
+
+            markAndLog("start");
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             if (!string.IsNullOrEmpty(UserInfo.Name))
@@ -71,7 +77,7 @@ namespace BridgeCareCore.Services
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
             var status = "Creating input...";
-            memos.Mark("CreatingInput");
+            markAndLog("CreatingInput");
             StartTime = DateTime.Now;
 
             var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status, StartTime);
@@ -90,7 +96,7 @@ namespace BridgeCareCore.Services
             if (CheckCanceled()) { return; }
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(NetworkId, explorer);
 
-            memos.Mark("GetSimulationAnalysisNetwork");
+            markAndLog("GetSimulationAnalysisNetwork");
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(SimulationId, network);
 
             if (CheckCanceled()) { return; }
@@ -102,23 +108,23 @@ namespace BridgeCareCore.Services
             var simulation = network.Simulations.Single(_ => _.Id == SimulationId);
 
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            memos.Mark("GetSimulationInvestmentPlan");
+            markAndLog("GetSimulationInvestmentPlan");
 
             var userCriteria = _unitOfWork.UserCriteriaRepo.GetUserCriteria(_unitOfWork.CurrentUser.Id);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, userCriteria);
 
-            memos.Mark("GetSimulationAnalysisMethod");
+            markAndLog("GetSimulationAnalysisMethod");
 
             if (CheckCanceled()) { return; }
 
             simulationAnalysisDetail.Status = "Getting performance curve";
             UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-            memos.Mark("UpdateSimulationAnalysisDetail");
+            markAndLog("UpdateSimulationAnalysisDetail");
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
 
-            memos.Mark("GetScenarioPerformanceCurves");
+            markAndLog("GetScenarioPerformanceCurves");
 
             if (CheckCanceled()) { return; }
 
@@ -127,10 +133,10 @@ namespace BridgeCareCore.Services
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
-            memos.Mark("GetScenarioSelectableTreatments");
+            markAndLog("GetScenarioSelectableTreatments");
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
 
-            memos.Mark("GetSimulationCommittedProjects");
+            markAndLog("GetSimulationCommittedProjects");
 
             if (CheckCanceled()) { return; }
 
@@ -191,7 +197,7 @@ namespace BridgeCareCore.Services
                 lock (databaseUsageLock)
                 {
                     var message = eventArgs.MessageBuilder;
-                    if (LoggedMessages.Add(message.Message))
+                    if (loggedMessages.Add(message.Message))
                     {
                         var dto = SimulationLogMessageBuilderMapper.ToDTO(message);
                         _unitOfWork.SimulationLogRepo.CreateLog(dto);
@@ -226,9 +232,9 @@ namespace BridgeCareCore.Services
 
             RunValidation(runner);
 
-            memos.Mark("RunValidation");
+            markAndLog("RunValidation");
             runner.Run(false, cancellationToken);
-            memos.Mark("Run complete");
+            markAndLog("Run complete");
 
             void RunValidation(SimulationRunner runner)
             {

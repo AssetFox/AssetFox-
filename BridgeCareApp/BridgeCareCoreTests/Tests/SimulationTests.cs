@@ -33,10 +33,10 @@ namespace BridgeCareCoreTests.Tests
             var contextAccessor = HttpContextAccessorMocks.DefaultMock();
             var claimHelper = ClaimHelperMocks.New();
             var generalWorkQueueService = GeneralWorkQueueServiceMocks.New();
-            var pagingSerivce = new SimulationPagingService(unitOfWork.Object, unitOfWork.Object.SimulationRepo);
+            var pagingService = new SimulationPagingService(unitOfWork.Object, unitOfWork.Object.SimulationRepo);
             var queueService = SimulationQueueServiceMocks.New();
             var controller = new SimulationController(
-                pagingSerivce,
+                pagingService,
                 queueService.Object,
                 security.Object,
                 unitOfWork.Object,

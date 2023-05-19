@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+
 using AppliedResearchAssociates.iAM.DTOs;
 using Org.BouncyCastle.Asn1.Cms;
 
@@ -18,10 +20,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private readonly NetworkRepository _networkRepo;
 
         public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork)
-        { 
-               
-                _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
+            
+
+
         //Reads in KeyFields record as a string but places values in a list to return.
         public IList<string> GetKeyFields()
         {
@@ -92,14 +96,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public string GetPrimaryNetwork()
         {
             var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == "PrimaryNetwork");
-            if (existingPrimaryNetwork == null)               
+            var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
+            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
+
+            if (existingPrimaryNetwork == null)
             {
                 return null;
             }
             else
-            {
-                var name = _unitOfWork.Context.AdminSettings.First().Value;
-                return name;
+            {                
+                return existingNetwork.Name;
             }
         }
 
@@ -147,5 +153,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
 
+        public void SetInventoryReports(string InventoryReports)
+        {
+            var existingInventoryReports = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "InventoryReportNames").SingleOrDefault();
+            if (existingInventoryReports == null)
+            {
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                {
+                    Key = "InventoryReportNames",
+                    Value = InventoryReports
+                }) ;
+            }
+            else
+            {
+                existingInventoryReports.Value = InventoryReports;
+                _unitOfWork.Context.AdminSettings.Update(existingInventoryReports);
+            }
+            _unitOfWork.Context.SaveChanges();
+        }
     }
 }

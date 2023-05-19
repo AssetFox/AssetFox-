@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.Data.Networking;
@@ -102,34 +103,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public List<AttributeDatumDTO> GetAllInNetwork(IEnumerable<Guid> networkMaintainableAssetIds, List<Guid> requiredAttributeIds) =>
             attributeDatumRepo.GetAllInNetwork(networkMaintainableAssetIds, requiredAttributeIds);
 
-
-
         public List<AttributeDatumDTO> GetRawData(Guid networkId, Dictionary<AttributeDTO, string> dictionary)
         {
-            //Get all AttributeDatumDTOs in a network. (We call the GetAttributes() function here, because otherwise the Attribute properties inside our attributeDatumDTOs would be unpopulated & null. Hugo & I faced a similar problem before.)
+            if (dictionary.Select(_ => _.Key).Distinct().Count() != dictionary.Count())
+                throw new InvalidAttributeException("Dictionary has repeated attributes.");
+
             //https://stackoverflow.com/questions/1577822/passing-a-single-item-as-ienumerablet
             _unitOfWork.AttributeRepo.GetAttributes();
-            List<AttributeDatumDTO> attributeDatumDTOs = _unitOfWork.AttributeDatumRepo.GetAllInNetwork(new[] { networkId }, null);
+            List<AttributeDatumDTO> attributeDatumDTOs = _unitOfWork.AttributeDatumRepo.GetAllInNetwork(new[] { networkId }, dictionary.Select(_ => _.Key.Id).ToList());
             HashSet<AttributeDatumDTO> returnSet = new();
 
-            //In each AttributeDatumDTO,
             foreach (AttributeDatumDTO ad in attributeDatumDTOs)
             {
-                //TODO: this will throw an error if dictionary is null.
-                //In each dictionary value,
-                int counter = 0;
+                if (attributeDatumDTOs.Where(_ => _.Attribute == ad.Attribute).Count() > 1)
+                    throw new ArgumentException("More than one asset matches the criteria.");
                 foreach (KeyValuePair<AttributeDTO, string> kvp in dictionary)
-                {
-                    //TODO
-                    //Check if this appears in every dictionary value.
-                    if (kvp.Value.Contains(ad.TextValue) || kvp.Value.Contains(ad.NumericValue.ToString()))
-                        counter++;
-                }
-                //TODO
-                //If it did appear in every dictionary value, add it to return list. Do not allow duplicate attributes. 
-                if (counter == dictionary.Count)
-                    returnSet.Add(ad);
+                    if (kvp.Key.Name.ToUpper() == ad.Attribute.ToUpper() && (kvp.Value.ToUpper() == ad.TextValue?.ToUpper() || kvp.Value == ad.NumericValue?.ToString()))
+                        returnSet.Add(ad);
             }
+
+            if (returnSet.Count == 0)
+                throw new RowNotInTableException("No records are found matching all attributes.");
             return returnSet.ToList();
         }
     }

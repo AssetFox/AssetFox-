@@ -179,5 +179,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             _unitOfWork.Context.SaveChanges();
         }
+
+        public void SetSimulationReports(string SimulationReports)
+        {
+            var existingSimulationReports = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "SimulationReportsNames").SingleOrDefault();
+            if (existingSimulationReports == null)
+            {
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                {
+                    Key = "SimulationReportsNames",
+                    Value = SimulationReports
+                });
+            }
+            else
+            {
+                existingSimulationReports.Value = SimulationReports;
+                _unitOfWork.Context.AdminSettings.Update(existingSimulationReports);
+            }
+            _unitOfWork.Context.SaveChanges();
+        }
     }
 }

@@ -1,7 +1,10 @@
 # Glossary document provided by Gregg Larson, 2020-03-26
 
-This document specifies most of the behavior of the iAM analysis engine, particularly the incarnation used in the desktop app ancestor of iAM (i.e. RoadCare v3).
-The details of this document are not necessarily completely up-to-date with the current iAM analysis engine, but most of it remains accurate.
+This document specifies most of the behavior of the iAM analysis engine,
+particularly the incarnation used in the desktop app ancestor of iAM (i.e.
+RoadCare v3). The details of this document are not necessarily completely
+up-to-date with the current iAM analysis engine, but most of it remains
+accurate.
 
 ---
 

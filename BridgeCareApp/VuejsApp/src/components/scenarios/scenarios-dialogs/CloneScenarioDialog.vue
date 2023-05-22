@@ -26,14 +26,14 @@
                 <v-text-field
                     label="Scenario name"
                     outline
-                    v-model="newScenario.name"
+                    v-model="dialogData.scenario.name"
                 ></v-text-field>
                 <v-checkbox v-model="shared" label="Share with all?" />
             </v-card-text>
             <v-card-actions>
                 <v-layout justify-space-between row>
                     <v-btn
-                        :disabled="newScenario.name === '' || !isNetworkSelected"
+                        :disabled="dialogData.scenario.name === '' || !isNetworkSelected"
                         @click="onSubmit(true)"
                         class="ara-blue-bg white--text"
                     >
@@ -157,7 +157,8 @@ export default class CloneScenarioDialog extends Vue {
     onSubmit(submit: boolean) {
         if (submit) {
             this.newScenario.networkId = this.selectedNetworkId;
-            this.newScenario.networkName = this.selectedNetworkName;
+            this.newScenario.networkName = this.selectedNetworkName;      
+            this.newScenario.name = this.dialogData.scenario.name;
             this.$emit('submit', this.newScenario);
         } else {
             this.$emit('submit', null);

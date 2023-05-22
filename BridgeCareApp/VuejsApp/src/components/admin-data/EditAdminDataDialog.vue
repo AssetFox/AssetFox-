@@ -52,13 +52,13 @@ import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
-import { EditDataDialogData } from '@/shared/models/modals/edit-data-dialog-data';
+import { EditAdminDataDialogData } from '@/shared/models/modals/edit-data-dialog-data';
 import { clone, isNil } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
 
 @Component
-export default class EditDataDialog extends Vue {
-    @Prop() DialogData: EditDataDialogData;
+export default class EditAdminDataDialog extends Vue {
+    @Prop() DialogData: EditAdminDataDialogData;
         
     rules: InputValidationRules = rules;
 

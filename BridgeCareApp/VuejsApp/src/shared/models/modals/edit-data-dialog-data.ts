@@ -1,11 +1,11 @@
-export interface EditDataDialogData{
+export interface EditAdminDataDialogData{
     showDialog: boolean;
     settingName: string;
     settingsList: string[];
     selectedSettings: string[];
 }
 
-export const emptyEditDataDialogData: EditDataDialogData = {
+export const emptyEditAdminDataDialogData: EditAdminDataDialogData = {
     showDialog: false,
     selectedSettings: [],
     settingName: '',

@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 using AppliedResearchAssociates.iAM.DTOs;
+using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Asn1.Cms;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -152,6 +153,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         }
 
+        public string GetAttributeName(Guid attributeId)
+        {
+            var attributeName = _unitOfWork.Context.Attribute.AsNoTracking().FirstOrDefault(a => a.Id == attributeId)?.Name;
+            return attributeName ?? throw new InvalidOperationException("Cannot find attribute for the given id.");
+        }
+
+
 
         public void SetInventoryReports(string InventoryReports)
         {
@@ -168,6 +176,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 existingInventoryReports.Value = InventoryReports;
                 _unitOfWork.Context.AdminSettings.Update(existingInventoryReports);
+            }
+            _unitOfWork.Context.SaveChanges();
+        }
+
+        public void SetSimulationReports(string SimulationReports)
+        {
+            var existingSimulationReports = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "SimulationReportsNames").SingleOrDefault();
+            if (existingSimulationReports == null)
+            {
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                {
+                    Key = "SimulationReportsNames",
+                    Value = SimulationReports
+                });
+            }
+            else
+            {
+                existingSimulationReports.Value = SimulationReports;
+                _unitOfWork.Context.AdminSettings.Update(existingSimulationReports);
             }
             _unitOfWork.Context.SaveChanges();
         }

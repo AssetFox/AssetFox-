@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 public interface IAdminDataRepository
 {
@@ -18,6 +19,10 @@ public interface IAdminDataRepository
     IList<string> GetSimulationReportNames();
 
     void SetInventoryReports(string inventoryReports);
+
+    string GetAttributeName(Guid attributeId);
+
+    void SetSimulationReports(string simulationReports);
 }
 
 

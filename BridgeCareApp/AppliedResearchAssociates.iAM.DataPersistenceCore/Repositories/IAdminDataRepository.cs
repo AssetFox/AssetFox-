@@ -21,6 +21,8 @@ public interface IAdminDataRepository
     void SetInventoryReports(string inventoryReports);
 
     string GetAttributeName(Guid attributeId);
+
+    void SetSimulationReports(string simulationReports);
 }
 
 

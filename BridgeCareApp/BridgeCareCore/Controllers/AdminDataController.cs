@@ -197,6 +197,55 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("SetSimulationReports/{SimulationReports}")]
+        [ClaimAuthorize("AdminAccess")]
+        public async Task<IActionResult> SetSimulationReports(string simulationReports)
+        {
+            try
+            {
+                var reportCriteriaCheck = true;
+                IList<string> SimulationReportsList = simulationReports.Split(',').ToList();
+
+                //Checking every report being passed in from the parameter
+                foreach (string simulationReport in SimulationReportsList)
+                {
+                    try
+                    {
+                        var reportObject = await _generator.Generate(simulationReport);
+                        //If cannot be created in lookup library (Existence Check)
+                        if (!_factory.CanGenerateReport(simulationReport))
+                        {
+                            reportCriteriaCheck = false;
+                            throw new InvalidOperationException($"You can't use {simulationReport} for an simulation report.");
+                        }
+                        //Report type isn't File Type
+                        else if (reportObject.Type != ReportType.File)
+                        {
+                            reportCriteriaCheck = false;
+                            throw new InvalidOperationException($"You can't use {simulationReport} for an simulation report.");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetSimulationReports - {e.Message}");
+                        return BadRequest($"{SiteError}::SetSimulationReports - {e.Message}");
+                    }
+
+                };
+                //If all reports in list exist and use the right type, save to database.
+                if (reportCriteriaCheck)
+                {
+                    UnitOfWork.AdminDataRepo.SetSimulationReports(simulationReports);
+                }
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetSimulationReports - {e.Message}");
+                return BadRequest($"{SiteError}::SetSimulationReports - {e.Message}");
+            }
+        }
 
     }
 }

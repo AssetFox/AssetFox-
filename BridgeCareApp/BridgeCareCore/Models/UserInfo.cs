@@ -4,7 +4,7 @@ namespace BridgeCareCore.Models
 {
     public class UserInfo
     {
-        public string Name { get; set; }        
+        public string Name { get; set; }
 
         public bool HasAdminAccess { get; set; }
 

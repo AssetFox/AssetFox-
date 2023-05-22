@@ -1,21 +1,27 @@
 ﻿using System.Collections.Generic;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public interface IAttributeValueHistory
 {
-    public interface IAttributeValueHistory<T> : IEnumerable<KeyValuePair<int, T>>
-    {
-        T MostRecentValue { get; }
+    string MostRecentValue { get; }
+}
 
-        int? MostRecentYear { get; }
+public interface IAttributeValueHistory<T> : IAttributeValueHistory, IEnumerable<KeyValuePair<int, T>>
+{
+    string IAttributeValueHistory.MostRecentValue => MostRecentValue.ToString();
 
-        IEnumerable<int> Years { get; }
+    new T MostRecentValue { get; }
 
-        T this[int year] { get; set; }
+    int? MostRecentYear { get; }
 
-        void Add(int year, T value);
+    IEnumerable<int> Years { get; }
 
-        void Add(KeyValuePair<int, T> yearValue);
+    T this[int year] { get; set; }
 
-        bool TryGetValue(int year, out T value);
-    }
+    void Add(int year, T value);
+
+    void Add(KeyValuePair<int, T> yearValue);
+
+    bool TryGetValue(int year, out T value);
 }

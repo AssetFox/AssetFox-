@@ -1,4 +1,7 @@
-﻿namespace AppliedResearchAssociates.iAM.Reporting
+﻿using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
+
+namespace AppliedResearchAssociates.iAM.Reporting
 {
     public interface IReportLookupLibrary
     {
@@ -8,5 +11,6 @@
             DataPersistenceCore.UnitOfWork.UnitOfDataPersistenceWork _dataRepository,
             DTOs.ReportIndexDTO results,
             Hubs.Interfaces.IHubService _hubService);
+        IList<IReportFactory> ReportList { get; }
     }
 }

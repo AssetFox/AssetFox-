@@ -158,7 +158,7 @@ export const Hub = {
         BroadcastSimulationAnalysisDetail: 'BroadcastSimulationAnalysisDetail',
         BroadcastDataMigration: 'BroadcastDataMigration',
         BroadcastNetworkRollupDetail: 'BroadcastNetworkRollupDetail',
-        BroadcastWorkQueueUpdate: 'testytest',
+        BroadcastWorkQueueUpdate: 'BroadcastWorkQueueUpdate',
         BroadcastWorkQueueStatusUpdate: 'BroadcastWorkQueueStatusUpdate',
         
     },
@@ -176,7 +176,7 @@ export const Hub = {
             'BroadcastSimulationAnalysisDetailEvent',
         BroadcastDataMigrationEvent: 'BroadcastDataMigrationEvent',
         BroadcastNetworkRollupDetailEvent: 'BroadcastNetworkRollupDetailEvent',
-        BroadcastWorkQueueUpdateEvent: 'testytestEvent',
+        BroadcastWorkQueueUpdateEvent: 'BroadcastWorkQueueUpdateEvent',
         BroadcastWorkQueueStatusUpdateEvent: 'BroadcastWorkQueueStatusUpdateEvent',
         
     },

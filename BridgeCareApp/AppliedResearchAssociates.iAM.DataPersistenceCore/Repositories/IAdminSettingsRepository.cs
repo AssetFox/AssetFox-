@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using System.Drawing;
 
 public interface IAdminSettingsRepository
@@ -20,6 +21,12 @@ public interface IAdminSettingsRepository
 
     IList<string> GetSimulationReportNames();
 
+    void SetInventoryReports(string inventoryReports);
+
+    string GetAttributeName(Guid attributeId);
+
+    void SetSimulationReports(string simulationReports);
+
     string GetImplementationName();
 
     void SetImplementationName(string name);
@@ -32,5 +39,3 @@ public interface IAdminSettingsRepository
 
     void SetImplementationLogo(Image productLogo);
 }
-
-

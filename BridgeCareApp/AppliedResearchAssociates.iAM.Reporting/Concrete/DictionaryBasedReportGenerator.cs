@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             var generatedReport = _reportLookup.GetReport(reportName, _dataRepository, results, _hubService);
             //Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName, results, _hubService);
-            if (generatedReport is FailureReport failure) { 
+            if (generatedReport is FailureReport failure) {
                 await failure.Run($"No report was found with the name {reportName}");
                 return await Task.FromResult(failure);
             }

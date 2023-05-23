@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -49,6 +50,53 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return true;
         }
 
+
+       
+            public IList<Generics.ReportItemList> GetAllReportsInSystem()
+            {
+                var scenarios = GetAllScenario();
+                var reportList = new List<Generics.ReportItemList>();
+
+                foreach (var scenario in scenarios)
+                {
+                    var reports = _unitOfDataPersistenceWork.ReportIndexRepository.GetAllForScenario(scenario.Id);
+
+                    foreach (var report in reports)
+                    {
+                        var listEntry = new Generics.ReportItemList
+                        {
+                            ReportId = report.Id,
+                            ReportName = report.Type
+                        };
+                        reportList.Add(listEntry);
+                    }
+                }
+
+                return reportList;
+            }
+
+
+            public List<SimulationDTO> GetAllScenario()
+{
+    if (!_unitOfDataPersistenceWork.Context.Simulation.Any())
+    {
+        return new List<SimulationDTO>();
+    }
+
+    var users = _unitOfDataPersistenceWork.Context.User.ToList();
+
+    var simulationEntities = _unitOfDataPersistenceWork.Context.Simulation
+        .Include(_ => _.SimulationAnalysisDetail)
+        .Include(_ => _.SimulationReportDetail)
+        .Include(_ => _.SimulationUserJoins)
+        .ThenInclude(_ => _.User)
+        .Include(_ => _.Network)
+        .ToList();
+
+    return simulationEntities.Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
+        .ToList();
+}
+
         public bool DeleteAllSimulationReports(Guid simulationId)
         {
             var scenarioReports = _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == simulationId);
@@ -59,7 +107,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             return false;
         }
-
 
         public bool DeleteExpiredReports()
         {

@@ -78,7 +78,7 @@ export default class EditAdmin extends Vue {
             tabName: 'Data',
             tabIcon: "",
             navigation: {
-                path: '/Data/',
+                path: '/AdminData/',
             },
         },
     ];

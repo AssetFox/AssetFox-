@@ -17,7 +17,13 @@ export default class AdminDataService {
     static getSimulationReportNames(): AxiosPromise {
         return coreAxiosInstance.get(`${API.AdminData}/GetSimulationReportNames`);
     }
-    static SetInventoryReports(reportNames: string): AxiosPromise {
+    static setSimulationReports(simulationReports: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.AdminData}/SetSimulationReports/${simulationReports}`);
+    }
+    static getInventoryReports(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AdminData}/GetInventoryReports`);
+    }
+    static setInventoryReports(reportNames: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.AdminData}/SetInventoryReports/${reportNames}`);
     }
     static GetAttributeName(): AxiosPromise {

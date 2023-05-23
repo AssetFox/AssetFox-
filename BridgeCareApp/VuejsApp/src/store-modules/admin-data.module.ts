@@ -10,22 +10,22 @@ import AdminDataService from '@/services/admin-data.service';
 const state = {
     simulationReportNames: [] as string[],
     inventoryReportNames: [] as string[],
-    primaryNetwork: clone(emptyNetwork) as Network,
+    primaryNetwork: '' as string,
     keyFields: [] as string[],
 };
 
 const mutations = {
     simulationReportsMutator(state: any, simulationReports: string[]) {
-        state.simulationReportNames = clone(simulationReports);
+        state.simulationReportNames = simulationReports !== null ? clone(simulationReports) : [];
     },
     inventoryReportsMutator(state: any, inventoryReports: string[]) {
-        state.inventoryReportNames = clone(inventoryReports);
+        state.inventoryReportNames = inventoryReports !== null ? clone(inventoryReports) : [];
     },
     keyFieldsMutator(state: any, keyFields: string[]) {
-        state.keyFields = clone(keyFields);
+        state.keyFields = keyFields !== null ? clone(keyFields) : [];
     },
-    primaryNetworkMutator(state: any, network: Network) {
-        state.primaryNetwork = clone(network);
+    primaryNetworkMutator(state: any, network: string) {
+        state.primaryNetwork = network !== null ? network : '';
     },
 };
 
@@ -38,8 +38,8 @@ const actions = {
                 }
             });
     },
-    async getInventoryReports({commit}: any) {//not in yet
-        await AdminDataService.getSimulationReportNames()
+    async getInventoryReports({commit}: any) {
+        await AdminDataService.getInventoryReports()
             .then((response: AxiosResponse<string[]>) => {
                 if (hasValue(response, 'data')) {
                     commit('inventoryReportsMutator', response.data);
@@ -47,10 +47,10 @@ const actions = {
             });
     },
     async getPrimaryNetwork({commit}: any) {
-        await AdminDataService.getSimulationReportNames()
-            .then((response: AxiosResponse<string[]>) => {
+        await AdminDataService.getPrimaryNetwork()
+            .then((response: AxiosResponse<string>) => {
                 if (hasValue(response, 'data')) {
-                    commit('simulationReportsMutator', response.data);
+                    commit('primaryNetworkMutator', response.data);
                 }
             });
     },
@@ -62,11 +62,11 @@ const actions = {
                 }
             });
     },
-    async setSimulationReports( //not in yet
+    async setSimulationReports(
         { dispatch, commit }: any,
         reports: string,
     ) {
-        await AdminDataService.SetInventoryReports(reports).then((response: AxiosResponse) => {
+        await AdminDataService.setSimulationReports(reports).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                 commit('simulationReportsMutator', reports.split(','));
                 dispatch('addSuccessNotification', {
@@ -79,7 +79,7 @@ const actions = {
         { dispatch, commit }: any,
         reports: string,
     ) {
-        await AdminDataService.SetInventoryReports(reports).then((response: AxiosResponse) => {
+        await AdminDataService.setInventoryReports(reports).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                 commit('inventoryReportsMutator', reports.split(','));
                 dispatch('addSuccessNotification', {
@@ -90,9 +90,9 @@ const actions = {
     },
     async setPrimaryNetwork(
         { dispatch, commit }: any,
-        network: Network,
+        network: string,
     ) {
-        await AdminDataService.setPrimaryNetwork(network.name).then((response: AxiosResponse) => {
+        await AdminDataService.setPrimaryNetwork(network).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                 commit('primaryNetworkMutator', network);
                 dispatch('addSuccessNotification', {

@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Org.BouncyCastle.Asn1.Cms;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -18,14 +19,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class AdminDataRepository : IAdminDataRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private readonly NetworkRepository _networkRepo;
 
         public AdminDataRepository(UnitOfDataPersistenceWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
-            
 
+        private const string inventoryReportKey = "InventoryReportNames";
+        private const string simulationReportKey = "SimulationReportNames";
+        private const string keyFieldKey = "KeyFields";
+        private const string primaryNetworkKey = "PrimaryNetwork";
 
         //Reads in KeyFields record as a string but places values in a list to return.
         public IList<string> GetKeyFields()
@@ -79,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
                     {
-                        Key = "KeyFields",
+                        Key = keyFieldKey,
                         Value = KeyFieldsString
                     });
                 }
@@ -96,7 +99,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public string GetPrimaryNetwork()
         {
-            var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == "PrimaryNetwork");
+            var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == primaryNetworkKey);
             var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
             var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
 
@@ -112,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SetPrimaryNetwork(string name)
         {
-            var existingNetworkAdminSetting = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "PrimaryNetwork").FirstOrDefault();
+            var existingNetworkAdminSetting = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == primaryNetworkKey).FirstOrDefault();
             var existingNetwork = _unitOfWork.Context.Network.FirstOrDefault(_ => _.Name == name);
             if (existingNetwork == null)
             {
@@ -123,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
                 {
-                    Key = "PrimaryNetwork",
+                    Key = primaryNetworkKey,
                     Value = Guid.NewGuid().ToString()
                 });
             }
@@ -138,7 +141,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public IList<string> GetSimulationReportNames()
         {
-            var existingSimulationReports = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == "SimulationReportNames");
+            var existingSimulationReports = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == simulationReportKey);
             if (existingSimulationReports == null)
             {
                 return null;
@@ -155,16 +158,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public IList<string> GetInventoryReports()
         {
-            if (!_unitOfWork.Context.AdminSettings.Any())
-            {
-                throw new RowNotInTableException("No AdminSettings available");
-            }
-
-            var existingInventoryReports = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == "InventoryReportNames");
+            var existingInventoryReports = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == inventoryReportKey);
 
             if (existingInventoryReports == null)
             {
-                throw new KeyNotFoundException("InventoryReportNames setting not found in AdminSettings");
+                return null;
             }
 
             var name = existingInventoryReports.Value;
@@ -182,12 +180,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SetInventoryReports(string InventoryReports)
         {
-            var existingInventoryReports = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "InventoryReportNames").SingleOrDefault();
+            var existingInventoryReports = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == inventoryReportKey).SingleOrDefault();
             if (existingInventoryReports == null)
             {
                 _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
                 {
-                    Key = "InventoryReportNames",
+                    Key = inventoryReportKey,
                     Value = InventoryReports
                 }) ;
             }
@@ -201,12 +199,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SetSimulationReports(string SimulationReports)
         {
-            var existingSimulationReports = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "SimulationReportsNames").SingleOrDefault();
+            var existingSimulationReports = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == simulationReportKey).SingleOrDefault();
             if (existingSimulationReports == null)
             {
                 _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
                 {
-                    Key = "SimulationReportsNames",
+                    Key = simulationReportKey,
                     Value = SimulationReports
                 });
             }

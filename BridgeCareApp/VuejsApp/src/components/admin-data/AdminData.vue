@@ -13,18 +13,18 @@
                     </v-layout>
                     <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                        @click="onSaveClick">
+                        @click="onSaveClick" :disabled='disableCrudButtons() || !hasUnsavedChanges'>
                         Save
                     </v-btn>
                 </v-layout>
             </v-flex>
-            <v-flex xs6 class="ghd-constant-header">
+            <v-flex xs8 class="ghd-constant-header">
                 <v-layout>
-                    <v-flex xs3>
+                    <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Key Field(s): </v-subheader> 
                     </v-flex>
-                    <v-flex xs3>
-                        <v-subheader class="ghd-md-gray ghd-control-label">{{keyFieldsDelimited}}</v-subheader>  
+                    <v-flex xs5>
+                        <div class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
                     </v-flex>                        
                     <v-btn style="margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
@@ -33,13 +33,13 @@
                     </v-btn>
                 </v-layout>
             </v-flex>
-            <v-flex xs6 class="ghd-constant-header">
+            <v-flex xs8 class="ghd-constant-header">
                 <v-layout>
-                    <v-flex xs3>
+                    <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Inventory Report(s): </v-subheader> 
                     </v-flex>
-                    <v-flex xs3>
-                         <v-subheader class="ghd-md-gray ghd-control-label">{{inventoryReportsDelimited}}</v-subheader> 
+                    <v-flex xs5>
+                         <div class="ghd-md-gray ghd-control-label elipsisList">{{inventoryReportsDelimited}}</div> 
                     </v-flex>                 
                     <v-btn style="margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
@@ -48,13 +48,13 @@
                     </v-btn>
                 </v-layout>
             </v-flex>
-            <v-flex xs6 class="ghd-constant-header">
+            <v-flex xs8 class="ghd-constant-header">
                 <v-layout>
-                    <v-flex xs3>
+                    <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Simulation Report(s): </v-subheader> 
                     </v-flex>
-                    <v-flex xs3>
-                        <v-subheader class="ghd-md-gray ghd-control-label">{{simulationReportsDelimited}}</v-subheader> 
+                    <v-flex xs5>
+                        <div class="ghd-md-gray ghd-control-label elipsisList">{{simulationReportsDelimited}}</div> 
                     </v-flex>                     
                     <v-btn style="margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
@@ -83,6 +83,8 @@ import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { getNewGuid } from '@/shared/utils/uuid-utils';
 import { Action, Getter, Mutation, State } from 'vuex-class';
 import { Attribute } from '@/shared/models/iAM/attribute';
+import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 
 
 @Component({
@@ -96,9 +98,9 @@ export default class Data extends Vue {
     @State(state => state.adminDataModule.inventoryReportNames)
     stateInventoryReportNames: string[];
     @State(state => state.adminDataModule.primaryNetwork)
-    statePrimaryNetwork: Network;   
+    statePrimaryNetwork: string;   
     @State(state => state.adminDataModule.keyFields)
-    stateKeyFields: string[];
+    stateKeyFields: string[] ;
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
     @State(state => state.networkModule.networks) stateNetworks: Network[];
@@ -114,9 +116,10 @@ export default class Data extends Vue {
     @Action('setKeyFields') setKeyFieldsAction: any;
     @Action('getNetworks') getNetworks: any;
     @Action('getAttributes') getAttributes: any;
+    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
     selectPrimaryNetworkItems: SelectItem[] = [];
-    selectPrimaryNetworkItemValue: string | null = '';
+    selectPrimaryNetworkItemValue: string | null = null;
 
     editAdminDataDialogData: EditAdminDataDialogData = clone(emptyEditAdminDataDialogData)
 
@@ -128,7 +131,7 @@ export default class Data extends Vue {
     selectedKeyFields: string[] = [];
     selectedSimulationReports: string[] = [];
     selectedInventoryReports: string[] = [];
-    primaryNetwork: Network = clone(emptyNetwork);
+    primaryNetwork: string = '';
 
     keyFieldsDelimited: string = '';
     simulationReportsDelimited: string = '';
@@ -138,30 +141,25 @@ export default class Data extends Vue {
     simulationReportsName: string = 'SimulationReports';
     inventoryReportsName: string = 'InventoryReports';
 
+    rules: InputValidationRules = rules;
+
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
-            vm.selectPrimaryNetworkItemValue = null;
             (async () => { 
                 await vm.getAttributes();
                 await vm.getNetworks();
                 await vm.getSimulationReportsAction();
                 await vm.getInventoryReportsAction();
                 await vm.getPrimaryNetworkAction();
+                if(vm.selectPrimaryNetworkItemValue === null)
+                    vm.onStatePrimaryNetworkChanged();
                 await vm.getKeyFieldsAction();
             })();
-
-            vm.primaryNetworks = [{...emptyNetwork, name: 'test 1', id: getNewGuid()}, 
-                {...emptyNetwork, name: 'test 2', id: getNewGuid()},
-                {...emptyNetwork, name: 'test 3', id: getNewGuid()}]
-
-            vm.selectedKeyFields = ['test 1', 'test 2', 'test 3'];
-            vm.selectedSimulationReports = ['test 1', 'test 2', 'test 3'];
-            vm.selectedInventoryReports = ['test 1', 'test 2', 'test 3'];
-
-            vm.keyFields = ['test 1', 'test 2', 'test 3'];
-            vm.simulationReports = ['test 1', 'test 2', 'test 3'];
-            vm.inventoryReports = ['test 1', 'test 2', 'test 3'];
         });
+    }
+
+    beforeDestroy() {
+        this.setHasUnsavedChangesAction({ value: false });
     }
 
     mounted() {
@@ -169,7 +167,7 @@ export default class Data extends Vue {
         this.simulationReports = clone(reports);
         this.inventoryReports = clone(reports);
     }
-
+    //Watches
     @Watch('stateNetworks')
     onStateNetworksChanged(){
         this.networks = clone(this.stateNetworks);
@@ -192,7 +190,7 @@ export default class Data extends Vue {
 
     @Watch('statePrimaryNetwork')
     onStatePrimaryNetworkChanged(){
-        this.primaryNetwork = clone(this.statePrimaryNetwork)
+        this.selectPrimaryNetworkItemValue = this.statePrimaryNetwork
     }
 
     @Watch('stateKeyFields')
@@ -203,51 +201,54 @@ export default class Data extends Vue {
     @Watch('networks')
     onNetworksChanged(){
         this.selectPrimaryNetworkItems = this.networks.map(_ => {
-            return {text: _.name, value: _.id}
+            return {text: _.name, value: _.name}
         });
     }
 
     @Watch('selectedKeyFields')
     onSelectedKeyFieldsChanged(){
         this.keyFieldsDelimited = '';
-        for(let i = 0; i < this.selectedKeyFields.length; i++){
-            this.keyFieldsDelimited += this.selectedKeyFields[i];
-            if(i !== this.selectedKeyFields.length - 1){
-                this.keyFieldsDelimited += ", ";
-            }
-        }
+        this.keyFieldsDelimited = this.convertToDelimited(this.selectedKeyFields, ', ')
+        this.checkHasUnsaved();       
     }
 
     @Watch('selectedSimulationReports')
     onSelectedSimulationReportsChanged(){
         this.simulationReportsDelimited = '';
-        for(let i = 0; i < this.selectedSimulationReports.length; i++){
-            this.simulationReportsDelimited += this.selectedKeyFields[i];
-            if(i !== this.selectedSimulationReports.length - 1){
-                this.simulationReportsDelimited += ", ";
-            }
-        }
+        this.simulationReportsDelimited = this.convertToDelimited(this.selectedSimulationReports, ', ')
+        this.checkHasUnsaved();       
     }
 
     @Watch('selectedInventoryReports')
     onSelectedInventoryReportsChanged(){
         this.inventoryReportsDelimited = '';
-        for(let i = 0; i < this.selectedInventoryReports.length; i++){
-            this.inventoryReportsDelimited += this.selectedInventoryReports[i];
-            if(i !== this.selectedInventoryReports.length - 1){
-                this.inventoryReportsDelimited += ", ";
-            }
-        }
+        this.inventoryReportsDelimited = this.convertToDelimited(this.selectedInventoryReports, ', ')
+        this.checkHasUnsaved();       
+    }
+
+    @Watch('selectPrimaryNetworkItemValue')
+    onSelectPrimaryNetworkItemValueChanged(){
+        if(this.selectPrimaryNetworkItemValue === null)
+            this.primaryNetwork = ''
+        else
+            this.primaryNetwork = this.selectPrimaryNetworkItemValue;  
+        this.checkHasUnsaved();       
     }
 
     @Watch('primaryNetwork')
     onPrimaryNetworkChanged(){
-        this.selectPrimaryNetworkItemValue = this.primaryNetwork.id;
+        this.checkHasUnsaved();       
     }
-
+    //Buttons
     onSaveClick(){
-
+        (async () => { 
+            await this.setSimulationReportsAction(this.convertToDelimited(this.selectedSimulationReports, ','));
+            await this.setInventoryReportsAction(this.convertToDelimited(this.selectedInventoryReports, ','));
+            await this.setKeyFieldsAction(this.convertToDelimited(this.selectedKeyFields, ','));
+            await this.setPrimaryNetworkAction(this.primaryNetwork);
+        })();
     }
+
     onEditKeyFieldsClick(){
         this.editAdminDataDialogData.showDialog = true;
         this.editAdminDataDialogData.selectedSettings = clone(this.selectedKeyFields);
@@ -266,7 +267,7 @@ export default class Data extends Vue {
         this.editAdminDataDialogData.settingName = this.simulationReportsName;
         this.editAdminDataDialogData.settingsList = clone(this.simulationReports);
     }
-    onSubmitEditDataDialogResult(selectedSettings: string[]){
+    onSubmitEditAdminDataDialogResult(selectedSettings: string[]){
         if(selectedSettings !== null)
             switch(this.editAdminDataDialogData.settingName){
                 case this.keyFieldsName:
@@ -282,10 +283,42 @@ export default class Data extends Vue {
 
         this.editAdminDataDialogData = clone(emptyEditAdminDataDialogData);
     }
+    //Subroutines
+    checkHasUnsaved(){
+        const hasChanged = hasUnsavedChangesCore('', this.selectedInventoryReports, this.stateInventoryReportNames) ||
+            hasUnsavedChangesCore('', this.selectedSimulationReports, this.stateSimulationReportNames) ||
+            hasUnsavedChangesCore('', this.selectedKeyFields, this.stateKeyFields) ||
+            this.primaryNetwork != this.statePrimaryNetwork
+        this.setHasUnsavedChangesAction({ value: hasChanged });
+    }
+    convertToDelimited(listToBeDelimited: string[], delimitValue: string){
+        let delimitedList = '';
+        for(let i = 0; i < listToBeDelimited.length; i++){
+            delimitedList += listToBeDelimited[i];
+            if(i !== listToBeDelimited.length - 1){
+                delimitedList += delimitValue;
+            }
+        }
+
+        return delimitedList
+    }
+
+    disableCrudButtons() {
+        let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedKeyFields) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedInventoryReports) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedSimulationReports) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.primaryNetwork.trim()) === true
+
+        return !allValid;
+    }
 }
 
 </script>
 
 <style>
-
+.elipsisList { 
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
 </style>

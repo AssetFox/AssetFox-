@@ -13,7 +13,7 @@
                     v-model='settingSelectItemValue'                         
                     class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>   
-                    <v-btn style="margin-left: 20px !important" 
+                    <v-btn style="margin-top: 2px !important; margin-left: 10px !important"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                     @click="onAddClick"
                     :disabled='isAddDisabled()'>

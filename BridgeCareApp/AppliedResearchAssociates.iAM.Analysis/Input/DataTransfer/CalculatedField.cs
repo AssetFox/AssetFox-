@@ -8,5 +8,5 @@ public sealed class CalculatedField : Attribute
 
     public CalculatedFieldTiming Timing { get; set; }
 
-    public List<CriterionEquationPair> ValueDefinitions { get; set; }
+    public List<CriterionEquationPair> ValueDefinitions { get; set; } = new();
 }

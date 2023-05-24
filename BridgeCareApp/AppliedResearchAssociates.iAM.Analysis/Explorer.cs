@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             if (string.IsNullOrWhiteSpace(ageAttributeName))
             {
-                throw new ArgumentException("Age attribute name is blank.", nameof(ageAttributeName));
+                ageAttributeName = DefaultAgeAttributeName;
             }
 
             _ = AddNumberAttribute(AgeAttributeName = ageAttributeName);

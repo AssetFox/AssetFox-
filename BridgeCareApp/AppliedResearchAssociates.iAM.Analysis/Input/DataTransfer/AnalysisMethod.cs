@@ -13,15 +13,15 @@ public sealed class AnalysisMethod
 
     public string BenefitWeightAttributeName { get; set; }
 
-    public List<BudgetPriority> BudgetPriorities { get; set; }
+    public List<BudgetPriority> BudgetPriorities { get; set; } = new();
 
-    public List<DeficientConditionGoal> DeficientConditionGoals { get; set; }
+    public List<DeficientConditionGoal> DeficientConditionGoals { get; set; } = new();
 
     public string FilterExpression { get; set; }
 
     public OptimizationStrategy OptimizationStrategy { get; set; }
 
-    public List<RemainingLifeLimit> RemainingLifeLimits { get; set; }
+    public List<RemainingLifeLimit> RemainingLifeLimits { get; set; } = new();
 
     public bool ShouldApplyMultipleFeasibleCosts { get; set; }
 
@@ -31,5 +31,5 @@ public sealed class AnalysisMethod
 
     public SpendingStrategy SpendingStrategy { get; set; }
 
-    public List<TargetConditionGoal> TargetConditionGoals { get; set; }
+    public List<TargetConditionGoal> TargetConditionGoals { get; set; } = new();
 }

@@ -1,0 +1,77 @@
+﻿{
+  "InitialConditionOfNetwork": 85,
+  "InitialAssetSummaries": [
+    {
+      "AssetName": "LA 1",
+      "AssetId": "00000000-0000-0000-0000-000000000000",
+      "ValuePerNumericAttribute": {
+        "AREA": 1,
+        "AGE": 25,
+        "HEALTH": 85
+      },
+      "ValuePerTextAttribute": {}
+    }
+  ],
+  "Years": [
+    {
+      "Budgets": [
+        {
+          "AvailableFunding": 840000.0,
+          "BudgetName": "Bag of money"
+        }
+      ],
+      "ConditionOfNetwork": 94,
+      "DeficientConditionGoals": [],
+      "Assets": [
+        {
+          "AppliedTreatment": "Eldritch wizardry",
+          "TreatmentCause": "SelectedTreatment",
+          "TreatmentConsiderations": [
+            {
+              "BudgetPriorityLevel": 0,
+              "BudgetsAtDecisionTime": [
+                {
+                  "AvailableFunding": 1000000.0,
+                  "BudgetName": "Bag of money"
+                }
+              ],
+              "BudgetUsages": [
+                {
+                  "BudgetName": "Bag of money",
+                  "CoveredCost": 160000.0,
+                  "Status": "CostCovered"
+                }
+              ],
+              "CashFlowConsiderations": [],
+              "TreatmentName": "Eldritch wizardry"
+            }
+          ],
+          "TreatmentFundingIgnoresSpendingLimit": false,
+          "TreatmentOptions": [
+            {
+              "Benefit": 890,
+              "ConditionChange": 10,
+              "Cost": 160000,
+              "RemainingLife": null,
+              "TreatmentName": "Eldritch wizardry"
+            }
+          ],
+          "TreatmentRejections": [],
+          "TreatmentSchedulingCollisions": [],
+          "TreatmentStatus": "Applied",
+          "AssetName": "LA 1",
+          "AssetId": "00000000-0000-0000-0000-000000000000",
+          "ValuePerNumericAttribute": {
+            "AREA": 1,
+            "AGE": 25,
+            "HEALTH": 94
+          },
+          "ValuePerTextAttribute": {}
+        }
+      ],
+      "TargetConditionGoals": [],
+      "Year": 2020
+    }
+  ],
+  "LastModifiedDate": "0001-01-01T00:00:00"
+}

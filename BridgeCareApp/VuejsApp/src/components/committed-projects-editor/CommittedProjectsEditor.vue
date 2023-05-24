@@ -16,7 +16,9 @@
                 </v-flex>
 
                 <v-flex xs12>
-                    <v-checkbox class='ghd-checkbox' label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
+                    <v-checkbox 
+                    id="CommittedProjectsEditor-noTreatmentsBeforeCommittedProjects-ghdcheckbox"
+                    class='ghd-checkbox' label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
                 </v-flex>
 
                 <v-flex xs12 class="ghd-constant-header">
@@ -38,6 +40,7 @@
                             <v-subheader class="ghd-control-label ghd-md-gray"></v-subheader>
                             <v-layout>                                
                                 <v-text-field
+                                    id="CommittedProjectsEditor-search-vtextfield"
                                     prepend-inner-icon=$vuetify.icons.ghd-search
                                     hide-details
                                     lablel="Search"
@@ -49,7 +52,9 @@
                                     @click:clear="onClearClick()"
                                     class="ghd-text-field-border ghd-text-field search-icon-general">
                                 </v-text-field>
-                                <v-btn style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
+                                <v-btn 
+                                id="CommittedProjectsEditor-performSearch-vbtn"
+                                style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
                             </v-layout>
                            
                         </v-flex>
@@ -164,10 +169,13 @@
                                 
                                         <div v-if="header.value === 'actions'">
                                             <v-layout style='flex-wrap:nowrap'>
-                                                <v-btn @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
+                                                <v-btn 
+                                                    id="CommittedProjectsEditor-deleteCommittedProject-vbtn"
+                                                    @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
                                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
                                                 <v-btn
+                                                    id="CommittedProjectsEditor-editCommittedProject-vbtn"
                                                     @click="onSelectCommittedProject(props.item.id)"
                                                     class="ghd-blue"
                                                     icon>

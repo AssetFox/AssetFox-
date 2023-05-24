@@ -131,6 +131,7 @@
                 <v-flex xs12>
                     <v-card class="elevation-0">
                         <v-data-table
+                            id="PerformanceCurveEditor-deteriorationModels-datatable"
                             :headers="performanceCurveGridHeaders"
                             :items="currentPage"                       
                             :pagination.sync="performancePagination"

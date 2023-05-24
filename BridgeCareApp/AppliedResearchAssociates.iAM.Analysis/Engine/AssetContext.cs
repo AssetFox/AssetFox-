@@ -33,11 +33,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             InitializeCalculatedFields();
         }
 
+        public AnalysisMaintainableAsset Asset { get; }
+
         public AssetDetail Detail { get; private set; }
 
         public IDictionary<int, Choice<Treatment, TreatmentProgress>> EventSchedule { get; } = new Dictionary<int, Choice<Treatment, TreatmentProgress>>();
-
-        public AnalysisMaintainableAsset Asset { get; }
 
         public SimulationRunner SimulationRunner { get; }
 
@@ -50,8 +50,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 return detail;
             }
         }
-
-        private AnalysisMethod AnalysisMethod => SimulationRunner.Simulation.AnalysisMethod;
 
         public void ApplyPassiveTreatment(int year)
         {
@@ -98,12 +96,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             return result;
         }
-
-        public void FixCalculatedFieldValuesWithoutPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration));
-
-        public void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PostDeterioration));
-
-        public void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PreDeterioration));
 
         public double GetBenefit() => GetBenefit(true);
 
@@ -186,10 +178,24 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             Detail.TreatmentStatus = TreatmentStatus.Progressed;
         }
 
-        public void PreapplyPassiveTreatment()
+        public void PrepareForTreatment()
         {
-            CheckPassiveTreatmentCostIsZero();
-            ApplyTreatmentButNotMetadata(SimulationRunner.Simulation.DesignatedPassiveTreatment);
+            FixCalculatedFieldValuesWithPreDeteriorationTiming();
+
+            if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+            {
+                FixCalculatedFieldValuesWithoutPreDeteriorationTiming();
+            }
+
+            ApplyPerformanceCurves();
+
+            if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+            {
+                PreapplyPassiveTreatment();
+                UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming();
+            }
+
+            FixCalculatedFieldValuesWithPostDeteriorationTiming();
         }
 
         public void ResetDetail() => Detail = new AssetDetail(Asset);
@@ -212,21 +218,29 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 getMostRecentYearPerAttribute(SimulationRunner.Simulation.Network.Explorer.TextAttributes)
                 ).Min();
 
-            if (earliestYearOfMostRecentValue < SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
+            var earliestYearOfSchedule = EventSchedule.Keys.AsNullables().Min();
+
+            var firstYearOfRollForward = (earliestYearOfMostRecentValue.HasValue, earliestYearOfSchedule.HasValue) switch
             {
-                SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-                SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+                (true, true) => Math.Min(earliestYearOfMostRecentValue.Value, earliestYearOfSchedule.Value),
+                (true, false) => earliestYearOfMostRecentValue.Value,
+                (false, true) => earliestYearOfSchedule.Value,
+                (false, false) => (int?)null
+            };
 
-                ApplyPerformanceCurves();
-                ApplyPassiveTreatment(earliestYearOfMostRecentValue.Value);
+            if (firstYearOfRollForward < SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
+            {
+                SetHistoricalValues(firstYearOfRollForward.Value, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+                SetHistoricalValues(firstYearOfRollForward.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-                foreach (var year in Static.RangeFromBounds(earliestYearOfMostRecentValue.Value + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1))
+                HandleTreatmentDuringRollForward(firstYearOfRollForward.Value);
+
+                foreach (var year in Static.RangeFromBounds(firstYearOfRollForward.Value + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1))
                 {
                     SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
                     SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-                    ApplyPerformanceCurves();
-                    ApplyPassiveTreatment(year);
+                    HandleTreatmentDuringRollForward(year);
                 }
             }
 
@@ -254,14 +268,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public void UnfixCalculatedFieldValues() => NumberCache_Override.Clear();
 
-        public void UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming()
-        {
-            foreach (var calculatedField in AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration))
-            {
-                _ = NumberCache_Override.Remove(calculatedField.Name);
-            }
-        }
-
         public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
 
         public bool YearIsWithinShadowForSameTreatment(int year, Treatment treatment) => FirstUnshadowedYearForSameTreatment.TryGetValue(treatment.Name, out var firstUnshadowedYear) && year < firstUnshadowedYear;
@@ -285,6 +291,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         private int? FirstUnshadowedYearForAnyTreatment;
 
         private IEnumerable<CalculatedField> AllCalculatedFields => SimulationRunner.Simulation.Network.Explorer.CalculatedFields;
+
+        private AnalysisMethod AnalysisMethod => SimulationRunner.Simulation.AnalysisMethod;
 
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
@@ -399,6 +407,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
         }
 
+        private void FixCalculatedFieldValuesWithoutPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration));
+
+        private void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PostDeterioration));
+
+        private void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PreDeterioration));
+
         private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
         {
             curves.Channel(
@@ -445,6 +459,25 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
 
+        private void HandleTreatmentDuringRollForward(int year)
+        {
+            PrepareForTreatment();
+
+            if (EventSchedule.TryGetValue(year, out var scheduledEvent) &&
+                scheduledEvent.IsT1(out var treatment) &&
+                treatment is CommittedProject project)
+            {
+                ApplyTreatment(project, year);
+            }
+            else if (!SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+            {
+                ApplyPassiveTreatment(year);
+            }
+
+            ApplyTreatmentMetadataIfPending(year);
+            UnfixCalculatedFieldValues();
+        }
+
         private void Initialize()
         {
             var initialReferenceYear = SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
@@ -488,6 +521,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             base.SetNumber(Network.SpatialWeightIdentifier, GetSpatialWeight);
         }
 
+        private void PreapplyPassiveTreatment()
+        {
+            CheckPassiveTreatmentCostIsZero();
+            ApplyTreatmentButNotMetadata(SimulationRunner.Simulation.DesignatedPassiveTreatment);
+        }
+
         private void SendToSimulationLogIfNeeded(PerformanceCurve curve, double value)
         {
             if (double.IsNaN(value) || double.IsInfinity(value))
@@ -529,6 +568,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             {
                 var initialValue = Asset.GetHistory(attribute).MostRecentValue;
                 setValue(attribute.Name, initialValue);
+            }
+        }
+
+        private void UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming()
+        {
+            foreach (var calculatedField in AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration))
+            {
+                _ = NumberCache_Override.Remove(calculatedField.Name);
             }
         }
     }

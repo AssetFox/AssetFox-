@@ -175,6 +175,7 @@ public sealed class SimulationRunner
             var logMessage = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
             Send(logMessage);
         }
+
         InParallel(AssetContexts, context =>
         {
             context.RollForward();
@@ -427,22 +428,7 @@ public sealed class SimulationRunner
             }
             else
             {
-                context.FixCalculatedFieldValuesWithPreDeteriorationTiming();
-
-                if (Simulation.ShouldPreapplyPassiveTreatment)
-                {
-                    context.FixCalculatedFieldValuesWithoutPreDeteriorationTiming();
-                }
-
-                context.ApplyPerformanceCurves();
-
-                if (Simulation.ShouldPreapplyPassiveTreatment)
-                {
-                    context.PreapplyPassiveTreatment();
-                    context.UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming();
-                }
-
-                context.FixCalculatedFieldValuesWithPostDeteriorationTiming();
+                context.PrepareForTreatment();
 
                 if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                 {

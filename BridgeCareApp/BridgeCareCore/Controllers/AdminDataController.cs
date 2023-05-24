@@ -181,7 +181,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var SimulationReportNames = UnitOfWork.AdminDataRepo.GetInventoryReports();
+                var SimulationReportNames = UnitOfWork.AdminSettingsRepo.GetInventoryReports();
                 return Ok(SimulationReportNames);
             }
             catch (Exception e)

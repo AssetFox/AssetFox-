@@ -85,46 +85,4 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return attributeDatumDTOs;
         }
     }
-
-    public class ExtendedAttributeDatumRepository : IExtendedAttributeDatumRepository
-    {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private AttributeDatumRepository attributeDatumRepo;
-
-        public ExtendedAttributeDatumRepository(UnitOfDataPersistenceWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            attributeDatumRepo = new AttributeDatumRepository(unitOfWork);
-        }
-
-        public void AddAssignedData(List<MaintainableAsset> maintainableAssets, List<AttributeDTO> attributeDtos) =>
-            attributeDatumRepo.AddAssignedData(maintainableAssets, attributeDtos);
-
-        public List<AttributeDatumDTO> GetAllInNetwork(IEnumerable<Guid> networkMaintainableAssetIds, List<Guid> requiredAttributeIds) =>
-            attributeDatumRepo.GetAllInNetwork(networkMaintainableAssetIds, requiredAttributeIds);
-
-        public List<AttributeDatumDTO> GetRawData(Guid networkId, Dictionary<AttributeDTO, string> dictionary)
-        {
-            if (dictionary.Select(_ => _.Key).Distinct().Count() < dictionary.Count())
-                throw new InvalidAttributeException("Dictionary has repeated attributes.");
-
-            //https://stackoverflow.com/questions/1577822/passing-a-single-item-as-ienumerablet
-            _unitOfWork.AttributeRepo.GetAttributes();
-            List<AttributeDatumDTO> attributeDatumDTOs = _unitOfWork.AttributeDatumRepo.GetAllInNetwork(new[] { networkId }, dictionary.Select(_ => _.Key.Id).ToList());
-            HashSet<AttributeDatumDTO> returnSet = new();
-
-            foreach (AttributeDatumDTO ad in attributeDatumDTOs)
-            {
-                if (attributeDatumDTOs.Where(_ => _.Id == ad.Id).Count() > 1)
-                    throw new ArgumentException("More than one asset matches the criteria.");
-                foreach (KeyValuePair<AttributeDTO, string> kvp in dictionary)
-                    if (kvp.Key.Name.ToUpper() == ad.Attribute.ToUpper() && (kvp.Value.ToUpper() == ad.TextValue?.ToUpper() || kvp.Value == ad.NumericValue?.ToString()))
-                        returnSet.Add(ad);
-            }
-
-            if (returnSet.Count == 0)
-                throw new RowNotInTableException("No records are found matching all attributes.");
-            return returnSet.ToList();
-        }
-    }
 }

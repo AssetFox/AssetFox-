@@ -34,9 +34,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         private IAnalysisMethodRepository _analysisMethodRepo;
         private IAttributeDatumRepository _attributeDatumRepo;
-
-        private IExtendedAttributeDatumRepository _extendedAttributeDatumRepo;
-
         private IAttributeMetaDataRepository _attributeMetaDataRepo;
         private IAttributeRepository _attributeRepo;
         private IAttributeValueHistoryRepository _attributeValueHistoryRepo;
@@ -85,10 +82,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public IAnalysisMethodRepository AnalysisMethodRepo => _analysisMethodRepo ??= new AnalysisMethodRepository(this);
 
         public IAttributeDatumRepository AttributeDatumRepo => _attributeDatumRepo ??= new AttributeDatumRepository(this);
-
-
-        public IExtendedAttributeDatumRepository ExtendedAttributeDatumRepo => _extendedAttributeDatumRepo ??= new ExtendedAttributeDatumRepository(this);
-
 
         public IAttributeRepository AttributeRepo => _attributeRepo ??= new AttributeRepository(this);
         public IAttributeMetaDataRepository AttributeMetaDataRepo => _attributeMetaDataRepo ?? new AttributeMetaDataRepository();

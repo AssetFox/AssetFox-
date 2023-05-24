@@ -10,6 +10,10 @@ using System.Data;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using Microsoft.EntityFrameworkCore;
 using EFCore.BulkExtensions;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.CellData;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -58,16 +62,74 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteEntity<DataSourceEntity>(_ => _.Id == id);
             return;
         }
-                
+
         public void UpsertDatasource(BaseDataSourceDTO dataSource)
         {
             if (!_unitOfWork.Context.DataSource.Any(_ => _.Id == dataSource.Id) && _unitOfWork.Context.DataSource.Any(_ => _.Name == dataSource.Name))
                 throw new ArgumentException("An existing data source with the same name already exists");
 
             if (!dataSource.Validate())
-                throw new ArgumentException("The data source could not be validated");                
+                throw new ArgumentException("The data source could not be validated");
 
             _unitOfWork.Context.Upsert(dataSource.ToEntity(_unitOfWork.EncryptionKey), dataSource.Id, _unitOfWork.UserEntity?.Id);
-        }           
+        }
+
+        public Dictionary<string, string> GetRawData(Dictionary<AttributeDTO, string> dictionary)
+        {
+            if (dictionary.Keys.Distinct().Count() < dictionary.Count())
+                throw new InvalidAttributeException("Dictionary has repeated attributes.");
+
+            //  https://stackoverflow.com/questions/51514029/get-objects-from-dictionary-with-equal-properties-values-for-every-key
+            if (dictionary.Keys.Select(_ => _.DataSource.Id).Distinct().Count() != 1 || !dictionary.Keys.Select(_ => _.DataSource.Type).All(_ => _ == "Excel"))
+                throw new ArgumentException("Not all attributes are from the same Excel data source.");
+
+            var excelSpreadsheet = _unitOfWork.ExcelWorksheetRepository.GetExcelRawDataByDataSourceId(dictionary.Keys.FirstOrDefault().DataSource.Id);
+            if (excelSpreadsheet is null)
+            {
+                var warningMessage = $@"Found DataSource {dictionary.Keys.FirstOrDefault().DataSource.Name}. The DataSource was of type ""EXCEL"". However, we did not find an ExcelRawData for that data source.";
+                throw new RowNotInTableException(warningMessage);
+            }
+            var worksheet = ExcelRawDataSpreadsheetSerializer.Deserialize(excelSpreadsheet.SerializedWorksheetContent).Worksheet;
+
+            List<List<int>> indices = new();
+            foreach (KeyValuePair<AttributeDTO, string> kvp in dictionary)
+            {
+                List<int> ints = new();
+                foreach (var column in worksheet.Columns)
+                    for (int i = 1; i < column.Entries.Count; i++)
+                    {
+                        string columnHeader = column.Entries[0].ObjectValue().ToString();
+                        // AttributeDTO's name does not always equal ExcelRawDataDTO's column headers. BRKEY_/BRKEY and SEGMENT/SEGMENT_TXT are examples.
+                        if ( column.Entries[i].GetType() != typeof(EmptyExcelCellDatum) &&
+                        (columnHeader == kvp.Key.Name || columnHeader == "BRKEY" || columnHeader == "SEGMENT_TXT")
+                        && kvp.Value == column.Entries[i].ObjectValue().ToString() )
+                            ints.Add(i);
+                    }
+
+                if (ints.Count > 0)
+                    indices.Add(ints);
+                else
+                    throw new ArgumentException("No assets match the criteria: " + kvp.Key.Name + ", \'" + kvp.Value + "\'.");
+            }
+
+            // https://stackoverflow.com/questions/45255495/find-common-items-in-multiple-lists-in-c-sharp-linq
+            List<int> aggregate = indices.Aggregate<IEnumerable<int>>((a, b) => a.Intersect(b)).ToList();
+            if (aggregate.Count > 1)
+                throw new ArgumentException("More than one asset matches the criteria.");
+            if (aggregate.Count == 0)
+                throw new RowNotInTableException("No assets match all criteria.");
+
+            Dictionary<string, string> results = new();
+            foreach (var column in worksheet.Columns)
+                if (column.Entries[aggregate[0]].GetType() != typeof(EmptyExcelCellDatum))
+                {
+                    string name = column.Entries[0].ObjectValue().ToString();
+                    string value = column.Entries[aggregate[0]].ObjectValue().ToString();
+                    results.Add(name, value);
+                }
+            if (results.Count == 0)
+                throw new RowNotInTableException("The row of assets does not exist.");
+            return results;
+        }
     }
 }

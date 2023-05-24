@@ -173,6 +173,25 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+
+        [HttpGet]
+        [Route("GetInventoryReports")]
+        [Authorize]
+        public async Task<IActionResult> GetInventoryReports()
+        {
+            try
+            {
+                var SimulationReportNames = UnitOfWork.AdminDataRepo.GetInventoryReports();
+                return Ok(SimulationReportNames);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetInventoryReportNames - {e.Message}");
+                return BadRequest();
+            }
+        }
+
+
         [HttpGet]
         [Route("GetAttributeName")]
         [ClaimAuthorize("AttributesViewAccess")]

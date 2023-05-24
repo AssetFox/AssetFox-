@@ -1,28 +1,27 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.DTOs.Static;
-using BridgeCareCore.Controllers.BaseController;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
+using BridgeCareCore.Services.General_Work_Queue.WorkItems;
+using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using BridgeCareCore.Models;
-using BridgeCareCore.Utils.Interfaces;
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;using MoreLinq;
-using System.Linq;
-using BridgeCareCore.Security;
-using BridgeCareCore.Services;
-using BridgeCareCore.Services.General_Work_Queue.WorkItems;
-using AppliedResearchAssociates.iAM.Hubs.Services;
-using Microsoft.CodeAnalysis;
-using AppliedResearchAssociates.iAM.DTOs.Enums;
+using MoreLinq;
+
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCore.Controllers
 {
@@ -36,15 +35,23 @@ namespace BridgeCareCore.Controllers
         private readonly IWorkQueueService _workQueueService;
         private readonly IGeneralWorkQueueService _generalWorkQueueService;
         private readonly IClaimHelper _claimHelper;
+
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public SimulationController(ISimulationPagingService simulationService, IWorkQueueService workQueueService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper, IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public SimulationController(
+            ISimulationPagingService simulationService,
+            IWorkQueueService workQueueService,
+            IEsecSecurity esecSecurity,
+            IUnitOfWork unitOfWork,
+            IHubService hubService,
+            IHttpContextAccessor httpContextAccessor,
+            IClaimHelper claimHelper,
+            IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
-            this._generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
+            _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
         }
 
         [HttpPost]
@@ -234,13 +241,8 @@ namespace BridgeCareCore.Controllers
                 });
                 DeleteSimulationWorkitem workItem = new DeleteSimulationWorkitem(simulationId, UserInfo.Name, simulationName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, analysisHandle.MostRecentStatusMessage);
-                }
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
 
                 return Ok();
             }
@@ -341,7 +343,9 @@ namespace BridgeCareCore.Controllers
                 {
                     var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(workId);
                     if(hasBeenRemovedFromQueue)
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, null);
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, workId);
+                    else
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = workId, Status = "Canceling" });
                 }                           
 
                 return Ok();
@@ -457,11 +461,9 @@ namespace BridgeCareCore.Controllers
                 });
                 SimulationOutputConversionWorkitem workItem = new SimulationOutputConversionWorkitem(simulationId, UserInfo.Name, scenarioName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
 
-                //await analysisHandle.WorkCompletion;
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException e)

@@ -155,12 +155,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         }
 
+        public IList<string> GetInventoryReports()
+        {
+            if (!_unitOfWork.Context.AdminSettings.Any())
+            {
+                throw new RowNotInTableException("No AdminSettings available");
+            }
+
+            var existingInventoryReports = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == "InventoryReportNames");
+
+            if (existingInventoryReports == null)
+            {
+                throw new KeyNotFoundException("InventoryReportNames setting not found in AdminSettings");
+            }
+
+            var name = existingInventoryReports.Value;
+            IList<string> getSimulationReportNames = name.Split(',').ToList();
+
+            return getSimulationReportNames;
+        }
+
         public string GetAttributeName(Guid attributeId)
         {
             var attributeName = _unitOfWork.Context.Attribute.AsNoTracking().FirstOrDefault(a => a.Id == attributeId)?.Name;
             return attributeName ?? throw new InvalidOperationException("Cannot find attribute for the given id.");
         }
-
 
 
         public void SetInventoryReports(string InventoryReports)

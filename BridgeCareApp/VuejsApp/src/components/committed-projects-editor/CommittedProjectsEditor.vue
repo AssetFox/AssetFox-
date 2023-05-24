@@ -25,6 +25,7 @@
                             <v-layout column>
                                 <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                                 <v-select
+                                    id="CommittedProjectsEditor-treatmentLibrary-vSelect"
                                     outline
                                     append-icon=$vuetify.icons.ghd-down
                                     class="ghd-select ghd-text-field ghd-text-field-border pa-0"
@@ -107,6 +108,7 @@
 
                                             <v-text-field v-if="header.value === 'brkey'"
                                                 readonly
+                                                id = "CommittedProjectsEditor-enterBrKey-vTextField"
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"

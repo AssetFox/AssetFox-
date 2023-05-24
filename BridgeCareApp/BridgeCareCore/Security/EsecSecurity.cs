@@ -100,7 +100,7 @@ namespace BridgeCareCore.Security
 
                 return new UserInfo
                 {
-                    Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],                    
+                    Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],
                     Email = decodedToken.GetClaimValue("email"),
                     HasAdminAccess = HasAdminAccess,
                     HasSimulationAccess = HasSimulationAccess,

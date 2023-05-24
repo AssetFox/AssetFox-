@@ -147,7 +147,7 @@ public class SequentialWorkQueue<T>
                 {
                     using var scope = serviceProvider.CreateScope();
                     var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-                    _hubService.SendRealTimeMessage(WorkSpec.UserId, HubConstant.BroadcastWorkQueueStatusUpdate, null);
+                    _hubService.SendRealTimeMessage(WorkSpec.UserId, HubConstant.BroadcastWorkQueueUpdate, WorkSpec.WorkId);
                 }             
             }
             else

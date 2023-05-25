@@ -114,7 +114,6 @@
 
                                             <v-text-field v-if="header.value === 'brkey'"
                                                 readonly
-                                                id = "CommittedProjectsEditor-enterBrKey-vTextField"
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"

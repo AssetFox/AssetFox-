@@ -116,7 +116,7 @@ public class SequentialWorkQueue<T>
             {
                 WorkStartTimestamp = DateTime.Now;
                 WorkCancellationTokenSource = new CancellationTokenSource();
-
+                var isCanceled = false;
                 try
                 {
                     WorkSpec.DoWork(
@@ -130,6 +130,7 @@ public class SequentialWorkQueue<T>
                 }
                 finally
                 {
+                    isCanceled = WorkCancellationTokenSource.IsCancellationRequested;
                     WorkCancellationTokenSource.Dispose();
                 }
 
@@ -147,6 +148,8 @@ public class SequentialWorkQueue<T>
                 {
                     using var scope = serviceProvider.CreateScope();
                     var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+                    if (isCanceled)
+                        _hubService.SendRealTimeMessage(WorkSpec.UserId, HubConstant.BroadcastTaskCompleted, $"Work queue operation '{WorkSpec.WorkDescription}' canceled");
                     _hubService.SendRealTimeMessage(WorkSpec.UserId, HubConstant.BroadcastWorkQueueUpdate, WorkSpec.WorkId);
                 }             
             }

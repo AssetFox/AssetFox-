@@ -1,10 +1,15 @@
 ﻿using Azure.Identity;
-using Microsoft.AspNetCore.Mvc;
+using GreenDonut;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Microsoft.Identity.Client;
+using NuGet.Protocol;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+
 
 namespace BridgeCareCore.Security
 {
@@ -42,9 +47,17 @@ namespace BridgeCareCore.Security
         public async Task<List<string>> GetGraphApiUserMemberGroup(string userId)
         {
             var groupNames = new List<string>();
+            var groups = _graphServiceClient.Groups.GetAsync();
 
-            var test = await _graphServiceClient.Users[userId].MemberOf.GetAsync();
-            // TODO groupNames
+            var objectCollectionResponse = _graphServiceClient.Users[userId].MemberOf.GetAsync();
+            var result = objectCollectionResponse.Result;
+
+
+            foreach (Group group in result.Value)
+            {
+                groupNames.Add(group.DisplayName);
+            }
+
             return groupNames;
         }
     }

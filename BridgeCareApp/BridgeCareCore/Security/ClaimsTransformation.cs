@@ -7,7 +7,6 @@ using System;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Collections.Generic;
-using Microsoft.Graph.Models;
 
 namespace BridgeCareCore.Security
 {

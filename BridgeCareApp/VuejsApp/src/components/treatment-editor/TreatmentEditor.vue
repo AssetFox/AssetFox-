@@ -478,11 +478,12 @@ export default class TreatmentEditor extends Vue {
 
     shareTreatmentLibraryDialogData: ShareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
 
-    parentLibraryId: string = '';
+    parentLibraryId: string  = this.uuidNIL;
     parentLibraryName: string = 'None';
+    scenarioParentLIbrary: string | null = null;
     scenarioLibraryIsModified: boolean = false;
     loadedParentName: string = "";
-    loadedParentId: string = "";
+    loadedParentId: string  = this.uuidNIL;
     newLibrarySelection: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
@@ -533,7 +534,7 @@ export default class TreatmentEditor extends Vue {
     onStateScenarioTreatmentLibraryChanged() {
         this.setParentLibraryName(this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.id : "None");
         this.scenarioLibraryIsModified = this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.isModified : false;
-        this.loadedParentId = this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.id : "";
+        this.loadedParentId = this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.id : this.uuidNIL;
         this.loadedParentName = this.parentLibraryName;
     }
 
@@ -825,7 +826,7 @@ export default class TreatmentEditor extends Vue {
     }
 
     setParentLibraryName(libraryId: string) {
-        if (libraryId === "None") {
+        if (libraryId === "None" || libraryId === this.uuidNIL) {
             this.parentLibraryName = "None";
             return;
         }
@@ -891,6 +892,10 @@ export default class TreatmentEditor extends Vue {
         this.showCreateTreatmentDialog = false;
 
         if (!isNil(newTreatment)) {
+            if(this.hasScenario)
+                newTreatment.libraryId = this.parentLibraryId
+            else
+                newTreatment.libraryId = this.selectedTreatmentLibrary.id
             this.addedRows = append(newTreatment, this.addedRows);
             this.simpleTreatments = append({name: newTreatment.name, id: newTreatment.id}, this.simpleTreatments);
             setTimeout(() => (this.treatmentSelectItemValue = newTreatment.id));

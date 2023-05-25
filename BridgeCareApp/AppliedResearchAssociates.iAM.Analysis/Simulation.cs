@@ -73,6 +73,16 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             var results = new ValidationResultBag();
 
+            var treatmentsWithEmptyFeasibility = Treatments.Where(treatment => treatment.FeasibilityCriteria.Count == 0).ToList();
+            if (treatmentsWithEmptyFeasibility.Count != 1)
+            {
+                results.Add(ValidationStatus.Error, $"There are {treatmentsWithEmptyFeasibility.Count} treatments with empty feasibility.", this, nameof(Treatments));
+            }
+            else if (DesignatedPassiveTreatment != null && DesignatedPassiveTreatment != treatmentsWithEmptyFeasibility[0])
+            {
+                results.Add(ValidationStatus.Error, "Designated passive treatment is not the single treatment with empty feasibility.", this, nameof(DesignatedPassiveTreatment));
+            }
+
             if (DesignatedPassiveTreatment == null)
             {
                 results.Add(ValidationStatus.Error, "Designated passive treatment is unset.", this, nameof(DesignatedPassiveTreatment));
@@ -90,6 +100,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
             if (NumberOfYearsOfTreatmentOutlook < 1)
             {
                 results.Add(ValidationStatus.Error, "Number of years of treatment outlook is less than one.", this, nameof(NumberOfYearsOfTreatmentOutlook));
+            }
+            else if (NumberOfYearsOfTreatmentOutlook < 10)
+            {
+                results.Add(ValidationStatus.Warning, "Number of years of treatment outlook is less than ten.", this, nameof(NumberOfYearsOfTreatmentOutlook));
             }
 
             if (Treatments.Select(treatment => treatment.Name).Distinct().Count() < Treatments.Count)

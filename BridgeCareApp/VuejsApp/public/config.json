@@ -5,5 +5,5 @@
   "reportType": [ "BAMSSummaryReport", "BAMSPBExportReport", "InventoryLookup", "PAMSSummaryReport", "ScenarioOutput", "BAMSAuditReport", "PAMSPBExportReport" ],
   "agencyLogo": "",
   "productLogo": "",
-  "securityType": "ESEC"  
+  "securityType": "B2C"  
 }

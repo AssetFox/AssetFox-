@@ -39,7 +39,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var KeyFields = UnitOfWork.AdminDataRepo.GetKeyFields();
+                var KeyFields = UnitOfWork.AdminSettingsRepo.GetKeyFields();
                 return Ok(KeyFields);
             }
             catch (Exception e)
@@ -57,8 +57,8 @@ namespace BridgeCareCore.Controllers
             try
             {
                 await Task.Factory.StartNew(() =>
-                {                    
-                    UnitOfWork.AdminDataRepo.SetKeyFields(KeyFields);
+                {
+                    UnitOfWork.AdminSettingsRepo.SetKeyFields(KeyFields);
                 });
                 return Ok();
             }
@@ -76,7 +76,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var name = UnitOfWork.AdminDataRepo.GetPrimaryNetwork();
+                var name = UnitOfWork.AdminSettingsRepo.GetPrimaryNetwork();
                 return Ok(name);
             }
             catch (Exception e)
@@ -95,7 +95,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.AdminDataRepo.SetPrimaryNetwork(name);
+                    UnitOfWork.AdminSettingsRepo.SetPrimaryNetwork(name);
                 });
                     return Ok();
             }
@@ -113,7 +113,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var SimulationReportNames = UnitOfWork.AdminDataRepo.GetSimulationReportNames();
+                var SimulationReportNames = UnitOfWork.AdminSettingsRepo.GetSimulationReportNames();
                 return Ok(SimulationReportNames);
             }
             catch (Exception e)
@@ -162,7 +162,7 @@ namespace BridgeCareCore.Controllers
                 //If all reports in list exist and use the right type, save to database.
                 if (reportCriteriaCheck)
                 {
-                    UnitOfWork.AdminDataRepo.SetInventoryReports(inventoryReports);
+                    UnitOfWork.AdminSettingsRepo.SetInventoryReports(inventoryReports);
                 }
                 return Ok();
             }
@@ -172,6 +172,25 @@ namespace BridgeCareCore.Controllers
                 return BadRequest($"{SiteError}::SetInventoryReports - {e.Message}");
             }
         }
+
+
+        [HttpGet]
+        [Route("GetInventoryReports")]
+        [Authorize]
+        public async Task<IActionResult> GetInventoryReports()
+        {
+            try
+            {
+                var SimulationReportNames = UnitOfWork.AdminSettingsRepo.GetInventoryReports();
+                return Ok(SimulationReportNames);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetInventoryReportNames - {e.Message}");
+                return BadRequest();
+            }
+        }
+
 
         [HttpGet]
         [Route("GetAttributeName")]
@@ -197,6 +216,55 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("SetSimulationReports/{SimulationReports}")]
+        [ClaimAuthorize("AdminAccess")]
+        public async Task<IActionResult> SetSimulationReports(string simulationReports)
+        {
+            try
+            {
+                var reportCriteriaCheck = true;
+                IList<string> SimulationReportsList = simulationReports.Split(',').ToList();
+
+                //Checking every report being passed in from the parameter
+                foreach (string simulationReport in SimulationReportsList)
+                {
+                    try
+                    {
+                        var reportObject = await _generator.Generate(simulationReport);
+                        //If cannot be created in lookup library (Existence Check)
+                        if (!_factory.CanGenerateReport(simulationReport))
+                        {
+                            reportCriteriaCheck = false;
+                            throw new InvalidOperationException($"You can't use {simulationReport} for an simulation report.");
+                        }
+                        //Report type isn't File Type
+                        else if (reportObject.Type != ReportType.File)
+                        {
+                            reportCriteriaCheck = false;
+                            throw new InvalidOperationException($"You can't use {simulationReport} for an simulation report.");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetSimulationReports - {e.Message}");
+                        return BadRequest($"{SiteError}::SetSimulationReports - {e.Message}");
+                    }
+
+                };
+                //If all reports in list exist and use the right type, save to database.
+                if (reportCriteriaCheck)
+                {
+                    UnitOfWork.AdminSettingsRepo.SetSimulationReports(simulationReports);
+                }
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetSimulationReports - {e.Message}");
+                return BadRequest($"{SiteError}::SetSimulationReports - {e.Message}");
+            }
+        }
 
     }
 }

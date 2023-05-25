@@ -316,7 +316,6 @@
             @submit="onEditTargetConditionGoalCriterionLibrary"
         />
     </v-layout>
-    </v-layout>
 </template>
 
 <script lang="ts">
@@ -825,8 +824,7 @@ export default class TargetConditionGoalEditor extends Vue {
         }
         TargetConditionGoalService.upsertTargetConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
-                this.resetPage();
+                this.clearChanges();
                 this.addedOrUpdatedTargetConditionGoalLibraryMutator(this.selectedTargetConditionGoalLibrary);
                 this.selectedTargetConditionGoalLibraryMutator(this.selectedTargetConditionGoalLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated target condition goal library",});

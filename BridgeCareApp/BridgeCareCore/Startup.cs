@@ -21,6 +21,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore
 {
@@ -95,6 +96,8 @@ namespace BridgeCareCore
 
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
             services.AddScoped<IAggregationService, AggregationService>();
+
+            services.AddSingleton<IAnalysisEventLoggingService, AnalysisEventLoggingService>();
         }
 
         private void SetupReporting(IServiceCollection services)

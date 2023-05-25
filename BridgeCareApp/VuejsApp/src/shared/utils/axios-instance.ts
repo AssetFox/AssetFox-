@@ -47,5 +47,6 @@ export const API = {
     Aggregation: '/api/Aggregation',
     DataSource: '/api/DataSource',
     RawData: '/api/RawData',
-    AdminSettings: '/api/AdminSiteSettings'
+    AdminSettings: '/api/AdminSiteSettings',
+    AdminData: '/api/AdminData'
 };

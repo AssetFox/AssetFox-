@@ -305,7 +305,9 @@ export default class AppComponent extends Vue {
     securityType: string;
     @State(state => state.announcementModule.announcements) announcements: Announcement[];
     @State(state => state.userModule.currentUser) currentUser: User;
-
+    @State(state => state.adminSiteSettingsModule.agencyLogo) agencyLogoBase64: string;
+    @State(state => state.adminSiteSettingsModule.productLogo) productLogoBase64: string;
+    
     @Action('logOut') logOutAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
     @Action('getNetworks') getNetworksAction: any;
@@ -326,6 +328,8 @@ export default class AppComponent extends Vue {
     @Action('azureB2CLogout') azureB2CLogoutAction: any;
     @Action('getCurrentUserByUserName') getCurrentUserByUserNameAction: any;
     @Action('updateUserLastNewsAccessDate') updateUserLastNewsAccessDateAction: any;
+    @Action('getAgencyLogo') getAgencyLogoAction: any;
+    @Action('getProductLogo') getProductLogoAction: any;
 
     drawer: boolean = false;
     latestNewsDate: string = '0001-01-01';
@@ -405,6 +409,16 @@ export default class AppComponent extends Vue {
     onCurrentUserChange() {
         this.currentUserLastNewsAccessDate = getDateOnly(this.currentUser.lastNewsAccessDate);
         this.checkLastNewsAccessDate();
+    }
+
+    @Watch('agencyLogoBase64')
+    onAgencyLogoBase64Change() {
+        this.agencyLogo = this.agencyLogoBase64;
+    }
+
+    @Watch('productLogoBase64')
+    onProductLogoBase64Change() {
+        this.productLogo = this.productLogoBase64;
     }
 
     created() {
@@ -616,6 +630,10 @@ export default class AppComponent extends Vue {
         if (this.username != null && this.username != '') {
             this.getCurrentUserByUserNameAction(this.username);
         }
+
+        //If these gets are placed before authorization, GetUserInformation() in EsecSecurity.cs will throw an error, as its HttpRequest will have no Authorization header!
+        this.getAgencyLogoAction();
+        this.getProductLogoAction();
     }
 
     /**

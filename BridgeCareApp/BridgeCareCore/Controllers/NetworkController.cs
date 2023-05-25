@@ -133,13 +133,9 @@ namespace BridgeCareCore.Controllers
                 });
                 DeleteNetworkWorkitem workItem = new DeleteNetworkWorkitem(networkId, UserInfo.Name, networkName);
                 var analysisHandle = _workQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
                 
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, null);
-                
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, null);
 
-                //await analysisHandle.WorkCompletion;
                 return Ok();
             }
             catch (UnauthorizedAccessException)

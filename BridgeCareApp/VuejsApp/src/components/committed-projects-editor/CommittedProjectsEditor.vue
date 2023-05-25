@@ -69,6 +69,7 @@
                 <v-flex xs12 >
                     <v-layout column>
                         <v-data-table
+                        id="CommittedProjectsEditor-committedProjects-vdatatable"
                         :headers="cpGridHeaders"
                         :items="currentPage"
                         sort-icon=$vuetify.icons.ghd-table-sort

@@ -26,6 +26,8 @@ import calculatedAttributeModule from '@/store-modules/calculated-attribute.modu
 import notificationModule from '@/store-modules/notification.module';
 import datasourceModule from '@/store-modules/data-source.module';
 import committedProjectsModule from '@/store-modules/committed-project.module';
+import adminDataModule from '@/store-modules/admin-data.module';
+import adminSiteSettingsModule from '@/store-modules/admin-site-settings.module';
 
 Vue.use(Vuex);
 
@@ -56,5 +58,7 @@ export default new Vuex.Store({
         notificationModule,
         datasourceModule,
         committedProjectsModule,
+        adminDataModule,
+        adminSiteSettingsModule
     },
 });

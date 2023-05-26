@@ -117,9 +117,9 @@ const Site = () =>
 import(
     /*webpackChunkName: "Site" */ '@/components/site/Site.vue'
 );
-const Data = () =>
+const AdminData = () =>
 import(
-    /*webpackChunkName: "Data" */ '@/components/data/Data.vue'
+    /*webpackChunkName: "AdminData" */ '@/components/admin-data/AdminData.vue'
 );
 
 const onHandlingUnsavedChanges = (to: any, next: any): void => {
@@ -356,8 +356,8 @@ const router = new VueRouter({
                     component: UserCriteriaEditor,
                 },
                 {
-                    path: '/Data/',
-                    component: Data,
+                    path: '/AdminData/',
+                    component: AdminData,
                 },
                 {
                     path: '/Site/',
@@ -384,9 +384,9 @@ const router = new VueRouter({
             props: true,
         },
         {
-            path: '/Data/',
-            name: 'Data',
-            component: Data,
+            path: '/AdminData/',
+            name: 'AdminData',
+            component: AdminData,
             props: true,
         },
         {

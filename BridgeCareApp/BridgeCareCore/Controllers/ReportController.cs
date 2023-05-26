@@ -5,8 +5,11 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -20,6 +23,7 @@ using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace BridgeCareCore.Controllers
 {
@@ -80,48 +84,24 @@ namespace BridgeCareCore.Controllers
             return validResult;
         }
 
-        [HttpPost]
-        [Route("GetFile/{reportName}")]
+        [HttpGet]
+        [Route("GetAllReportNamesInSystem")]
         [Authorize]
-        public async Task<IActionResult> GetFile(string reportName)
+        public async Task<IActionResult> GetReportNames()
         {
             try
             {
-                var parameters = await GetParameters();
-                var scenarioName = "";
-                var scenarioId = new Guid();
-                if (Guid.TryParse(parameters, out scenarioId))
-                {
-                    await Task.Factory.StartNew(() =>
-                    {
-                        scenarioName = UnitOfWork.SimulationRepo.GetSimulationName(scenarioId);
-                    });
-                }
-                else
-                    scenarioId = Guid.NewGuid();
-
-                ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName);
-                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, analysisHandle.MostRecentStatusMessage);
-                }
-
-                //await analysisHandle.WorkCompletion;
-                return Ok();
+                var reportList = await Task.Run(() => UnitOfWork.ReportIndexRepository.GetAllReportsInSystem());
+                var reportNames = reportList.Select(report => new { report.ReportId, report.ReportName });
+                return Ok(reportNames);
             }
-            catch (UnauthorizedAccessException)
+            catch (Exception ex)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {HubService.errorList["Unauthorized"]}");
-                throw;
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {e.Message}");
-                throw;
+
+                // Return a meaningful error message to the client
+                var errorMessage = $"An error occurred while retrieving the report names. Error: {ex.Message}";
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, errorMessage);
+                return BadRequest();
             }
         }
 
@@ -150,6 +130,50 @@ namespace BridgeCareCore.Controllers
             {
                 var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling network deltion for {networkName}::{e.Message}");
+                throw;
+            }
+        }
+
+
+
+
+
+
+        [HttpPost]
+        [Route("GetFile/{reportName}")]
+        [Authorize]
+        public async Task<IActionResult> GetFile(string reportName)
+        {
+            try
+            {
+                var parameters = await GetParameters();
+                var scenarioName = "";
+                var scenarioId = new Guid();
+                if (Guid.TryParse(parameters, out scenarioId))
+                {
+                    await Task.Factory.StartNew(() =>
+                    {
+                        scenarioName = UnitOfWork.SimulationRepo.GetSimulationName(scenarioId);
+                    });
+                }
+                else
+                    scenarioId = Guid.NewGuid();
+
+                ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, scenarioId.ToString());
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {e.Message}");
                 throw;
             }
         }

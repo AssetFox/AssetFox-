@@ -20,6 +20,7 @@ using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Controllers
 {
@@ -487,13 +488,9 @@ namespace BridgeCareCore.Controllers
 
                 ImportLibraryTreatmentWorkitem workItem = new ImportLibraryTreatmentWorkitem(treatmentLibraryId, excelPackage, UserInfo.Name, libraryName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = treatmentLibraryId, Status = analysisHandle.MostRecentStatusMessage });
-                }
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, libraryId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)
@@ -603,13 +600,9 @@ namespace BridgeCareCore.Controllers
 
                 ImportScenarioTreatmentWorkitem workItem = new ImportScenarioTreatmentWorkitem(simulationId, excelPackage, UserInfo.Name, simulationName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = analysisHandle.MostRecentStatusMessage });
-                }
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)

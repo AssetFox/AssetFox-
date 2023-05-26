@@ -111,6 +111,11 @@
                             Add Year(s)
                         </v-btn>
                     </v-layout>
+                    <v-layout row>
+                        <div class = "ghd-md-gray ghd-control-subheader" style="margin-left:2% !important;"> 
+                            Number of Budget Records: {{ currentPage.length }}
+                        </div>
+                    </v-layout>
                 </v-flex>
                 <v-spacer></v-spacer>
                 <v-flex xs4>

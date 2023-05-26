@@ -448,13 +448,9 @@ namespace BridgeCareCore.Controllers
               
                 ImportLibraryInvestmentWorkitem workItem = new ImportLibraryInvestmentWorkitem(budgetLibraryId, excelPackage, currentUserCriteriaFilter, overwriteBudgets, UserInfo.Name, budgetLibraryName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = budgetLibraryId, Status = analysisHandle.MostRecentStatusMessage });
-                }
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, libraryId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)
@@ -521,13 +517,9 @@ namespace BridgeCareCore.Controllers
 
                 ImportScenarioInvestmentWorkitem workItem = new ImportScenarioInvestmentWorkitem(simulationId, excelPackage, currentUserCriteriaFilter, overwriteBudgets, UserInfo.Name, simulationName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = analysisHandle.MostRecentStatusMessage });
-                }
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)

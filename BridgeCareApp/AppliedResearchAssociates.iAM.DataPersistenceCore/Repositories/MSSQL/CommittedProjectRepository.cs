@@ -229,6 +229,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .SelectMany(_ => _.CommittedProjectConsequences)
                     .ToList();
 
+            var allProvidedConsequenceEntityIds = committedProjectConsequenceEntities.Select(_ => _.Id).ToList();
+            _unitOfWork.Context.DeleteAll<CommittedProjectConsequenceEntity>(_ => !allProvidedConsequenceEntityIds.Contains(_.Id));
+
             var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
 
             // Determine the committed projects that exist
@@ -245,6 +248,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             try
             {
                 // Upsert(update/insert) all
+                _unitOfWork.Context.UpsertAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Commit();
             }

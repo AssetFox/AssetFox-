@@ -20,7 +20,7 @@ const state = {
     hasSimulationAccess: false,
     username: '',
     refreshing: false,
-    securityType: SecurityTypes.esec,
+    securityType: '',
     pennDotSecurityType: 'ESEC',
     azureSecurityType: 'B2C',
 };

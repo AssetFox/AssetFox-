@@ -197,8 +197,12 @@
 
                 <v-flex xs12>
                     <v-layout justify-center>
-                        <v-btn @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" flat>Cancel</v-btn>    
-                        <v-btn @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
+                        <v-btn 
+                        id="CommittedProjectsEditor-cancel-vbtn"
+                        @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" flat>Cancel</v-btn>    
+                        <v-btn 
+                        id="CommittedProjectsEditor-save-vbtn"
+                        @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
                     </v-layout>
                 </v-flex> 
             </v-layout>

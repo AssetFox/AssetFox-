@@ -115,7 +115,7 @@ import(
 );
 const Site = () =>
 import(
-    /*webpackChunkName: "Site" */ '@/components/site/Site.vue'
+    /*webpackChunkName: "Site" */ '@/components/admin-site-settings/AdminSiteSettingsEditor.vue'
 );
 const AdminData = () =>
 import(

@@ -6,7 +6,7 @@
                 height="100%"
                 elevation="0"
             >
-                <div class="raw-data-list-header" style="padding-right: 175px !important">
+                <div class="raw-data-list-header" style="padding-right: 125px !important">
                     Administration
                 </div>
                 <v-list class="ghd-navigation-list">
@@ -78,7 +78,7 @@ export default class EditAdmin extends Vue {
             tabName: 'Data',
             tabIcon: "",
             navigation: {
-                path: '/Data/',
+                path: '/AdminData/',
             },
         },
     ];

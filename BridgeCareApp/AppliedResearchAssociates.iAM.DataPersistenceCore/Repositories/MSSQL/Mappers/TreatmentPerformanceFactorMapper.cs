@@ -21,14 +21,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 PerformanceFactor = entity.PerformanceFactor,
             };
 
-        public static void CreateTreatmentPerformanceFactor(this ScenarioTreatmentPerformanceFactorEntity entity, SelectableTreatment selectableTreatment)
-        {
-            var performanceFactor = selectableTreatment.AddPerformanceFactor();
-            performanceFactor.Id = entity.Id;
-            performanceFactor.Attribute = entity.Attribute;
-            performanceFactor.Factor = entity.PerformanceFactor;
-        }
-
         public static TreatmentPerformanceFactorDTO ToDto(this ScenarioTreatmentPerformanceFactorEntity entity) =>
             new TreatmentPerformanceFactorDTO
             {

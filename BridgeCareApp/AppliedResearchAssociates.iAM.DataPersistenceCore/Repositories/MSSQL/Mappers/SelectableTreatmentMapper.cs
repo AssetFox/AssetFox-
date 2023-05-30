@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.Extensions.DependencyModel;
+using MathNet.Numerics.Statistics.Mcmc;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -41,9 +42,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 LibraryId = dto.LibraryId,
 
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
-                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType
+                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
+                ScenarioTreatmentPerformanceFactors = dto.ToScenarioSelectableTreatmentPerformanceFactorEntity(),
             };
-
+            
         public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this Treatment domain, Guid simulationId) =>
             new ScenarioSelectableTreatmentEntity
             {
@@ -51,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 SimulationId = simulationId,
                 Name = domain.Name,
                 ShadowForAnyTreatment = domain.ShadowForAnyTreatment,
-                ShadowForSameTreatment = domain.ShadowForSameTreatment
+                ShadowForSameTreatment = domain.ShadowForSameTreatment,
             };
 
         public static TreatmentLibraryEntity ToEntity(this TreatmentLibraryDTO dto) =>
@@ -91,7 +93,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 simulation.InvestmentPlan.Budgets.Where(_ => budgetIds.Contains(_.Id)).ToList()
                     .ForEach(budget => selectableTreatment.Budgets.Add(budget));
             }
-
+            if (entity.ScenarioTreatmentPerformanceFactors.Any())
+            {
+                entity.ScenarioTreatmentPerformanceFactors.ForEach(_ =>
+                {
+                    selectableTreatment.PerformanceCurveAdjustmentFactors.Add(new Analysis.Attribute(_.Attribute), _.PerformanceFactor);
+                });
+            }
             if (entity.ScenarioTreatmentConsequences.Any())
             {
                 entity.ScenarioTreatmentConsequences.ForEach(_ => _.CreateConditionalTreatmentConsequence(selectableTreatment, simulation.Network.Explorer.AllAttributes));
@@ -100,10 +108,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (entity.ScenarioTreatmentCosts.Any())
             {
                 entity.ScenarioTreatmentCosts.ForEach(_ => _.CreateTreatmentCost(selectableTreatment));
-            }
-            if (entity.ScenarioTreatmentPerformanceFactors.Any())
-            {
-                entity.ScenarioTreatmentPerformanceFactors.ForEach(_ => _.CreateTreatmentPerformanceFactor(selectableTreatment));
             }
             var feasibility = selectableTreatment.AddFeasibilityCriterion();
             feasibility.Expression = entity.CriterionLibraryScenarioSelectableTreatmentJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
@@ -154,7 +158,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Treatment = treatmentDto,
             };
         }
-
+        public static List<ScenarioTreatmentPerformanceFactorEntity> ToScenarioSelectableTreatmentPerformanceFactorEntity(this TreatmentDTO dto)
+        {
+            List<ScenarioTreatmentPerformanceFactorEntity> treatmentPerformanceFactors = new List<ScenarioTreatmentPerformanceFactorEntity>();
+            // need to return a list of scenariotretmentperformancefactorentities
+            // how do i get the attribute from the dto?
+            dto.PerformanceFactors.ForEach(p =>
+            {
+                treatmentPerformanceFactors.Add(new ScenarioTreatmentPerformanceFactorEntity()
+                {
+                    Attribute = p.Attribute,
+                    PerformanceFactor = p.PerformanceFactor
+                });
+            });
+            return treatmentPerformanceFactors;
+        }
         public static TreatmentLibraryDTO ToDto(this TreatmentLibraryEntity entity) =>
             new TreatmentLibraryDTO
             {

@@ -16,8 +16,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public IReadOnlyCollection<TreatmentCost> Costs => _Costs;
 
-        public IReadOnlyCollection<TreatmentPerformanceFactor> PerformanceFactors => _PerformanceFactors;
-
         public string Description { get; set; }
 
         public TreatmentCategory Category { get; set; }
@@ -35,8 +33,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public ConditionalTreatmentConsequence AddConsequence() => _Consequences.GetAdd(new ConditionalTreatmentConsequence(Simulation.Network.Explorer));
 
         public TreatmentCost AddCost() => _Costs.GetAdd(new TreatmentCost(Simulation.Network.Explorer));
-
-        public TreatmentPerformanceFactor AddPerformanceFactor() => _PerformanceFactors.GetAdd(new TreatmentPerformanceFactor(Simulation.Network.Explorer));
 
         public Criterion AddFeasibilityCriterion() => _FeasibilityCriteria.GetAdd(new Criterion(Simulation.Network.Explorer));
 
@@ -184,8 +180,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private readonly List<ConditionalTreatmentConsequence> _Consequences = new List<ConditionalTreatmentConsequence>();
 
         private readonly List<TreatmentCost> _Costs = new List<TreatmentCost>();
-
-        private readonly List<TreatmentPerformanceFactor> _PerformanceFactors = new List<TreatmentPerformanceFactor>();
 
         private readonly List<Criterion> _FeasibilityCriteria = new List<Criterion>();
 

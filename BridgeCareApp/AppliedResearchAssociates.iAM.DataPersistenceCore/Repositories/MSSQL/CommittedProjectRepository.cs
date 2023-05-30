@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Attribute)
                 .Where(_ => _.SimulationId == simulation.Id).ToList();
 
-            var keyPropertyNames = (List<string>)_unitOfWork.AdminDataRepo.GetKeyFields();
+            var keyPropertyNames = (List<string>)_unitOfWork.AdminSettingsRepo.GetKeyFields();
 
             foreach (var project in projects)
             {

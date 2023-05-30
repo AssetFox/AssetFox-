@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             _unitOfWork = uow;
             var network = _unitOfWork.NetworkRepo.GetMainNetwork();
-            var keyDatumFieldNames = _unitOfWork.AdminDataRepo.GetKeyFields();
+            var keyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
             var keyDatumFields = _unitOfWork.Context.Attribute
                 .Where(_ => keyDatumFieldNames.Contains(_.Name))
                 .Select(_ => new {_.Id, _.Name, Type = _.DataType})

@@ -456,11 +456,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             foreach (var committedProject in SimulationRunner.CommittedProjectsPerAsset[Asset])
             {
                 EventSchedule.Add(committedProject.Year, committedProject);
-
-                foreach (var (attribute, factor) in committedProject.PerformanceCurveAdjustmentFactors)
-                {
-                    MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
-                }
             }
 
             InitializeCalculatedFields();

@@ -4,7 +4,7 @@
             <v-layout justify-space-between row>
                 <v-spacer></v-spacer>
                 <v-layout>
-                    <div class="flex xs2" v-for="(key, index) in inventoryDetails">
+                    <div class="flex xs4" v-for="(key, index) in inventoryDetails">
                         <v-autocomplete :items="keyAttirbuteValues[index]" @change="onSelectInventoryItem(index)" item-text="identifier" item-value="identifier"
                                         :label="`Select by ${key} Key`" outline
                                         v-model="selectedKeys[index]">
@@ -34,16 +34,20 @@
     import {Component, Watch} from 'vue-property-decorator';
     import {Action, State} from 'vuex-class';
     import {InventoryItem, KeyProperty} from '@/shared/models/iAM/inventory';
-    import {find, propEq} from 'ramda';
+    import {clone, find, propEq} from 'ramda';
 
     @Component
     export default class Inventory extends Vue {
         @State(state => state.inventoryModule.inventoryItems) inventoryItems: InventoryItem[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
+        @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
+        @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
 
         @Action('getInventory') getInventoryAction: any;
         @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
         @Action('setIsBusy') setIsBusyAction: any;
+        @Action('getInventoryReports') getInventoryReportsAction: any;
+        @Action('getKeyFields') getKeyFieldsAction: any;
 
         keyAttirbuteValues: string[][] = [];
 
@@ -57,10 +61,8 @@
 
         inventoryData: any  = null;
         sanitizedHTML: any = null;
-        implementationName = 'BAMS'; // TODO: get from implementation name setting
-        // FYI BAMS inventoy report name is now changed to BAMSInventoryLookup
-        // TODO: if PAMS, build inventoryReportName as PAMSInventoryLookupSegments or PAMSInventoryLookupSections        
-        inventoryReportName: string = this.implementationName + 'InventoryLookup';
+  
+        inventoryReportName: string = '';
 
         /**
          * Calls the setInventorySelectLists function to set both inventory type select lists
@@ -74,17 +76,30 @@
         onStaticHTMLForInventory(){
             this.sanitizedHTML = this.$sanitize(this.staticHTMLForInventory);
         }
+        
+        @Watch('stateKeyFields')
+        onStateKeyFieldsChanged(){
+            this.inventoryDetails = clone(this.stateKeyFields);
+            this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
+            this.getInventoryAction(this.inventoryDetails);
+        }
+
+        @Watch('stateInventoryReportNames')
+        onStateInventoryReportNamesChanged(){
+            if(this.stateInventoryReportNames.length > 0)
+                this.inventoryReportName = this.stateInventoryReportNames[0]
+        }
 
         /**
          * Vue component has been mounted
          */
         mounted() {
-            const keys = ["BMSID","BRKEY_"]; // TODO: Implementation based setting for keyAttributes should be defined and used here
+            (async () => { 
+                await this.getInventoryReportsAction();
+                await this.getKeyFieldsAction();
+            })();
+            
 
-            this.inventoryDetails = keys;
-            this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
-           
-            this.getInventoryAction(this.inventoryDetails);
         }
 
         created() {

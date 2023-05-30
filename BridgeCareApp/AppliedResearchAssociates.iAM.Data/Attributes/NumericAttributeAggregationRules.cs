@@ -8,8 +8,9 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
     {
         public const string Average = "AVERAGE";
         public const string Last = "LAST";
+        public const string Add = "ADD";
         static string[] ValidRuleList = new string[] {
-            Average, Last
+            Average, Last, Add
         };
 
 

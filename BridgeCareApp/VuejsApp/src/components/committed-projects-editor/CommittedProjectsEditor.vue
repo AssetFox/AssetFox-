@@ -1115,8 +1115,10 @@ export default class CommittedProjectsEditor extends Vue  {
     checkYear(scp:SectionCommittedProjectTableData){
         if(!hasValue(scp.year))
             scp.yearErrors = ['Value cannot be empty'];
-        else if(scp.year < this.firstYear || scp.year > this.lastYear)
-            scp.yearErrors = ['Year is outside of Analysis period'];
+        else if (this.investmentYears.length === 0)
+            scp.yearErrors = ['There are no years in the investment']
+        else if(scp.year < this.firstYear )
+            scp.yearErrors = ['Year is outside of Analysis period'];      
         else
             scp.yearErrors = [];
     }

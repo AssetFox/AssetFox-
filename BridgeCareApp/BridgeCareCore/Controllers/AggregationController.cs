@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -85,15 +86,9 @@ namespace BridgeCareCore.Controllers
                 });
                 AggregationWorkitem workItem = new AggregationWorkitem(networkId, UserInfo.Name, networkName, specificAttributes);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() {Id = networkId, Status = analysisHandle.MostRecentStatusMessage });
-                }
 
-                //await analysisHandle.WorkCompletion;
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, networkId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)

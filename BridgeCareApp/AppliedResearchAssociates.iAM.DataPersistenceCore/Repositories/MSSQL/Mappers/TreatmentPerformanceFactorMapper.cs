@@ -28,12 +28,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Attribute = entity.Attribute,
                 PerformanceFactor = entity.PerformanceFactor,
             };
-        public static ScenarioTreatmentPerformanceFactorEntity ToScenarioEntity(this TreatmentPerformanceFactor domain, Guid treatmentId) =>
-            new ScenarioTreatmentPerformanceFactorEntity
-            {
-                Attribute = domain.Attribute,
-                PerformanceFactor = domain.Factor
-            };
 
 
         public static ScenarioTreatmentPerformanceFactorEntity ToScenarioEntity(this TreatmentPerformanceFactorDTO dto, Guid treatmentId) =>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.Validation;
 
@@ -25,8 +24,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             return results;
         }
-        public float PerformanceFactor { get; set; }
-
         public string ShortDescription => nameof(TreatmentConsequence);
 
         internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(AssetContext scope, Treatment treatment)

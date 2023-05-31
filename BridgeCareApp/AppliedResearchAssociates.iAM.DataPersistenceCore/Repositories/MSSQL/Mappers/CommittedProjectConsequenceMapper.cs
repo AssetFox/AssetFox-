@@ -16,7 +16,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CommittedProjectId = committedProjectId,
                 AttributeId = attributeId,
                 ChangeValue = domain.Change.Expression,
-                PerformanceFactor = domain.PerformanceFactor,
             };
 
         public static CommittedProjectConsequenceDTO ToDTO(this CommittedProjectConsequenceEntity entity) =>
@@ -49,7 +48,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var consequence = committedProject.Consequences.GetAdd(new TreatmentConsequence());
             consequence.Id = entity.Id;
             consequence.Change.Expression = entity.ChangeValue;
-            consequence.PerformanceFactor = entity.PerformanceFactor;
             consequence.Attribute = committedProject.Asset.Network.Explorer.NumberAttributes
                 .SingleOrDefault(_ => _.Name == entity.Attribute.Name);
             if (consequence.Attribute == null)

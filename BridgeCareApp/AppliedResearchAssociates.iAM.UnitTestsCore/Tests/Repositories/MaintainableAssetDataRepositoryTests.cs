@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             _mockedAttributeSet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, _testData.AttributeLibrary);
 
             var mockedConfiguration = new Mock<IConfiguration>();
-            MockedContextBuilder.AddConfigurationKeys(mockedConfiguration, "InventoryData:KeyProperties", new List<string> { "BRKEY_", "BMSID" });
+            MockedContextBuilder.AddConfigurationKeys(mockedConfiguration, _testRepo.AdminSettingsRepo.GetKeyFields(), new List<string> { "BRKEY_", "BMSID" });
 
             var mockedRepo = new Mock<UnitOfDataPersistenceWork>(mockedConfiguration.Object, _mockedContext.Object);
             mockedRepo.Setup(_ => _.NetworkRepo.GetMainNetwork()).Returns(_testData.TestNetwork);

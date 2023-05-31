@@ -61,6 +61,7 @@
                                     </v-layout>
                                 </v-card-title>
                                 <v-data-table
+                                    id="Scenarios-scenarios-datatable"
                                     :items="currentUserScenariosPage"                      
                                     :totalItems="totalUserScenarios"
                                     :pagination.sync="userScenariosPagination"

@@ -16,7 +16,9 @@
                 </v-flex>
 
                 <v-flex xs12>
-                    <v-checkbox class='ghd-checkbox' label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
+                    <v-checkbox 
+                    id="CommittedProjectsEditor-noTreatmentsBeforeCommittedProjects-ghdcheckbox"
+                    class='ghd-checkbox' label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
                 </v-flex>
 
                 <v-flex xs12 class="ghd-constant-header">
@@ -25,6 +27,7 @@
                             <v-layout column>
                                 <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                                 <v-select
+                                    id="CommittedProjectsEditor-treatmentLibrary-vSelect"
                                     outline
                                     append-icon=$vuetify.icons.ghd-down
                                     class="ghd-select ghd-text-field ghd-text-field-border pa-0"
@@ -37,6 +40,7 @@
                             <v-subheader class="ghd-control-label ghd-md-gray"></v-subheader>
                             <v-layout>                                
                                 <v-text-field
+                                    id="CommittedProjectsEditor-search-vtextfield"
                                     prepend-inner-icon=$vuetify.icons.ghd-search
                                     hide-details
                                     lablel="Search"
@@ -48,7 +52,9 @@
                                     @click:clear="onClearClick()"
                                     class="ghd-text-field-border ghd-text-field search-icon-general">
                                 </v-text-field>
-                                <v-btn style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
+                                <v-btn 
+                                id="CommittedProjectsEditor-performSearch-vbtn"
+                                style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
                             </v-layout>
                            
                         </v-flex>
@@ -64,6 +70,7 @@
                 <v-flex xs12 >
                     <v-layout column>
                         <v-data-table
+                        id="CommittedProjectsEditor-committedProjects-vdatatable"
                         :headers="cpGridHeaders"
                         :items="currentPage"
                         sort-icon=$vuetify.icons.ghd-table-sort
@@ -168,10 +175,13 @@
                                 
                                         <div v-if="header.value === 'actions'">
                                             <v-layout style='flex-wrap:nowrap'>
-                                                <v-btn @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
+                                                <v-btn 
+                                                    id="CommittedProjectsEditor-deleteCommittedProject-vbtn"
+                                                    @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
                                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
                                                 <v-btn
+                                                    id="CommittedProjectsEditor-editCommittedProject-vbtn"
                                                     @click="onSelectCommittedProject(props.item.id)"
                                                     class="ghd-blue"
                                                     icon>
@@ -183,7 +193,8 @@
                                 </td>
                             </template>
                         </v-data-table>    
-                        <v-btn @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
+                        <v-btn id="CommittedProjectsEditor-addCommittedProject-vbtn" 
+                        @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
                         class="ghd-white-bg ghd-blue ghd-button btn-style" outline>Add Committed Project</v-btn> 
                     </v-layout>
                 </v-flex>
@@ -192,8 +203,12 @@
 
                 <v-flex xs12>
                     <v-layout justify-center>
-                        <v-btn @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" flat>Cancel</v-btn>    
-                        <v-btn @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
+                        <v-btn 
+                        id="CommittedProjectsEditor-cancel-vbtn"
+                        @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" flat>Cancel</v-btn>    
+                        <v-btn 
+                        id="CommittedProjectsEditor-save-vbtn"
+                        @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
                     </v-layout>
                 </v-flex> 
             </v-layout>

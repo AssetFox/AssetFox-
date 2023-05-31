@@ -61,6 +61,7 @@
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
+                                    id="Scenarios-scenarios-datatable"
                                     :items="currentUserScenariosPage"                      
                                     :totalItems="totalUserScenarios"
                                     :pagination.sync="userScenariosPagination"
@@ -1031,9 +1032,14 @@ export default class Scenarios extends Vue {
             this.getScenarioAnalysisDetailUpdate,
         );
         this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent,
+            this.updateWorkQueue,
+        );
+        this.$statusHub.$on(
             Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent,
             this.getWorkQueueUpdate,
         );
+        
         this.$statusHub.$on(
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             this.getReportStatus,
@@ -1127,6 +1133,10 @@ export default class Scenarios extends Vue {
         this.$statusHub.$off(
             Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent,
             this.getScenarioAnalysisDetailUpdate,
+        );
+        this.$statusHub.$off(
+            Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent,
+            this.updateWorkQueue,
         );
         this.$statusHub.$off(
             Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent,
@@ -1419,8 +1429,6 @@ export default class Scenarios extends Vue {
                 scenarioName: this.selectedScenario.name,
             }).then(async () => {
                 this.selectedScenario = clone(emptyScenario); 
-                await this.delay(1000);             
-                this.onScenariosPagination();
             });
         }
     }
@@ -1461,39 +1469,32 @@ export default class Scenarios extends Vue {
         this.updateSimulationAnalysisDetailAction({
             simulationAnalysisDetail: data.simulationAnalysisDetail,
         });
-        (async () => { 
-            if ((data.simulationAnalysisDetail.status == "Queued to run.") ||
-                (data.simulationAnalysisDetail.status == "Getting simulation analysis network") ||
-                (data.simulationAnalysisDetail.status == "Simulation complete. 100%") ||
-                (data.simulationAnalysisDetail.status == "Canceled"))
-            {
-                await this.delay(1000);
-                this.doWorkQueuePagination();
-            }
-        })();                            
+        const updatedQueueItem: queuedWorkStatusUpdate = {
+            id: data.simulationAnalysisDetail.simulationId,
+            status: data.simulationAnalysisDetail.status
+        }
+        this.updateQueuedWorkStatusAction({
+            workQueueStatusUpdate: updatedQueueItem
+        })                            
     }
 
     getWorkQueueUpdate(data: any) {
-        if(isNil(data.queueItem)){
-            (async () => { 
+            var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
+            if(isNil(updatedQueueItem))
+                return;
+            var queueItem = this.stateWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
+            if(!isNil(queueItem)){
+                this.updateQueuedWorkStatusAction({
+                    workQueueStatusUpdate: updatedQueueItem
+                })
+            }                                
+    }
+
+    updateWorkQueue(data: any) {
+        (async () => { 
             await this.delay(1000);
                 this.doWorkQueuePagination();
             })();
-        }
-          
-        var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
-        var queueItem = this.stateWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
-        if(!isNil(queueItem)){
-            this.updateQueuedWorkStatusAction({
-                workQueueStatusUpdate: updatedQueueItem
-            })
-        }
-        else if(this.workQueuePagination.page === 1){
-            (async () => { 
-            await this.delay(1000);
-                this.doWorkQueuePagination();
-            })();
-        }                                  
     }
 
     getReportStatus(data: any) {

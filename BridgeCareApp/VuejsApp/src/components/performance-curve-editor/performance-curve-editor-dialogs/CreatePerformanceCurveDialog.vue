@@ -12,17 +12,21 @@
         <v-card-text class="ghd-dialog">
           <v-layout column>
             <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>            
-            <v-text-field class="ghd-control-text ghd-control-border"
-                          v-model="newPerformanceCurve.name"
-                          :rules="[rules['generalRules'].valueIsNotEmpty]"
-                          outline/>
+            <v-text-field
+              id="CreatePerformanceCurveDialog-name-text"
+              class="ghd-control-text ghd-control-border"
+              v-model="newPerformanceCurve.name"
+              :rules="[rules['generalRules'].valueIsNotEmpty]"
+              outline/>
             <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>            
-            <v-select class="ghd-select ghd-control-text ghd-control-border"
-                      v-model="newPerformanceCurve.attribute"
-                      :items="attributeSelectItems"
-                      append-icon=$vuetify.icons.ghd-down
-                      :rules="[rules['generalRules'].valueIsNotEmpty]"
-                      outline
+            <v-select
+              id="CreatePerformanceCurveDialog-attribute-select"
+              class="ghd-select ghd-control-text ghd-control-border"
+              v-model="newPerformanceCurve.attribute"
+              :items="attributeSelectItems"
+              append-icon=$vuetify.icons.ghd-down
+              :rules="[rules['generalRules'].valueIsNotEmpty]"
+              outline
             >
               <template v-slot:selection="{ item }">
                 <span class="ghd-control-text">{{ item.text }}</span>
@@ -44,16 +48,18 @@
         <v-card-actions>
           <v-layout justify-center row>
             <v-btn
-                   class="ghd-white-bg ghd-blue ghd-button-text"
-                   depressed
-                   @click="onSubmit(false)">
+              id="CreatePerformanceCurveDialog-cancel-button"
+              class="ghd-white-bg ghd-blue ghd-button-text"
+              depressed
+              @click="onSubmit(false)">
               Cancel
             </v-btn>
-            <v-btn :disabled="newPerformanceCurve.name === '' || newPerformanceCurve.attribute === ''"
-                   class="ghd-blue-bg ghd-white ghd-button-text"
-                   @click="onSubmit(true)"
-                   depressed                   
-                   >
+            <v-btn
+              id="CreatePerformanceCurveDialog-save-button"
+              :disabled="newPerformanceCurve.name === '' || newPerformanceCurve.attribute === ''"
+              class="ghd-blue-bg ghd-white ghd-button-text"
+              @click="onSubmit(true)"
+              depressed>
               Save
             </v-btn>
           </v-layout>

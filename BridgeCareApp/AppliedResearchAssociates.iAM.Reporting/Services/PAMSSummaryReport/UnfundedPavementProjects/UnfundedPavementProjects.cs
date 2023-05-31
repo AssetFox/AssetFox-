@@ -215,7 +215,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             var cashFlowPerYr = "1 / " + String.Format("{0:C0}", treatmentCost);
             worksheet.Cells[rowNo, columnNo++].Value = cashFlowPerYr;
 
-            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "OPI")));
+            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "OPI_CALCULATED")));
             worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "ROUGHNESS")), 2);
 
             if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo - 1], Color.LightGray); }

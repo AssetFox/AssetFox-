@@ -416,7 +416,7 @@ export default class BudgetPriorityEditor extends Vue {
         this.addedRows = [];
         this.initializing = false;
         if(this.hasSelectedLibrary)
-            this.onPaginationChanged();
+            this.onPaginationChanged();//
     }
 
     @Watch('stateScenarioBudgetPriorities')
@@ -772,7 +772,7 @@ export default class BudgetPriorityEditor extends Vue {
         BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
-                this.resetPage();
+                
                 this.budgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary);
                 this.selectedBudgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated budget priority library",});

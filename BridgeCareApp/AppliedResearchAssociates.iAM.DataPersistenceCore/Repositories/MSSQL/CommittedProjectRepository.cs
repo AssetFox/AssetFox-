@@ -3,21 +3,17 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Analysis;
-using Microsoft.EntityFrameworkCore;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using MoreLinq;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
-using AppliedResearchAssociates.CalculateEvaluate;
-using AppliedResearchAssociates.iAM.Data.Networking;
-using System.Text.RegularExpressions;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using Microsoft.EntityFrameworkCore;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -34,21 +30,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             double noTreatmentDefaultCost = 0.0;
             var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
-            var simulationEntity = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulation.Id);
-            if (simulationEntity == null)
-            {
-                throw new RowNotInTableException("No simulation was found for the given scenario.");
-            }
-            var noTreatment = simulationEntity.NoTreatmentBeforeCommittedProjects;
-            ScenarioSelectableTreatmentEntity noTreatmentEntity = null;
-            if (noTreatment)
-            {
-                noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id);
-                if(noTreatmentEntity == null)
-                {
-                    throw new RowNotInTableException("Simulation has no default treatments");
-                }
-            }               
+
+            var simulationEntity = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulation.Id)
+                ?? throw new RowNotInTableException("No simulation was found for the given scenario.");
+
+            var noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id)
+                ?? throw new RowNotInTableException("Simulation has no default treatments");
 
             var assets = _unitOfWork.Context.MaintainableAsset
                 .Where(_ => _.NetworkId == simulation.Network.Id)
@@ -61,48 +48,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CommittedProjectConsequences)
                 .ThenInclude(_ => _.Attribute)
                 .Where(_ => _.SimulationId == simulation.Id).ToList();
+
+            var keyPropertyNames = _unitOfWork.Config
+                .GetSection("InventoryData:KeyProperties")
+                .GetChildren()
+                .Select(_ => _.Value)
+                .ToList();
+
             foreach (var project in projects)
             {
-                new CommittedProjectEntity
+                var asset = assets.FirstOrDefault(a => project.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
+                if (asset != null)
                 {
-                    Id = project.Id,
-                    Name = project.Name,
-                    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-                    ShadowForSameTreatment = project.ShadowForSameTreatment,
-                    Cost = project.Cost,
-                    Year = project.Year,
-                    CommittedProjectLocation = project.CommittedProjectLocation,
-                    ScenarioBudget = project.ScenarioBudget != null ? new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name } : null,
-                    LastModifiedDate = project.LastModifiedDate,
-                    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
-                        new CommittedProjectConsequenceEntity
-                        {
-                            Id = consequence.Id,
-                            ChangeValue = consequence.ChangeValue,
-                            Attribute = new AttributeEntity { Name = consequence.Attribute.Name }
-                        }).ToList(),
-                };
-            }
-            if (projects.Any())
-            {
-                projects.ForEach(_ => {
-                    var asset = assets.FirstOrDefault(a => _.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
-                    if (asset != null)
+                    if (simulationEntity.NoTreatmentBeforeCommittedProjects)
                     {
-                        if (noTreatment)
-                        {
-                            var defaultNoTreatment = selectableTreatmentRepository.GetDefaultNoTreatment(simulation.Id);
-                            if(defaultNoTreatment == null)
-                            {
-                                throw new RowNotInTableException("Simulation has no default treatments");
-                            }
-                            noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
-                        }
-                        _.CreateCommittedProject(simulation, asset.Id, noTreatment, noTreatmentDefaultCost, noTreatmentEntity);
+                        var defaultNoTreatment = selectableTreatmentRepository.GetDefaultNoTreatment(simulation.Id);
+                        noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
                     }
-                });
+
+                    project.CreateCommittedProject(simulation, asset.Id, simulationEntity.NoTreatmentBeforeCommittedProjects, noTreatmentDefaultCost, noTreatmentEntity, keyPropertyNames);
+                }
             }
         }
+
         public double GetDefaultNoTreatmentCost(TreatmentDTO treatment, Guid assetId)
         {
             double totalCost = 0.0;
@@ -141,6 +109,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
             return totalCost;
         }
+
         private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
         {
             var modifiedExpression = mergedCriteriaExpression
@@ -177,6 +146,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return attributes;
         }
+
         public List<SectionCommittedProjectDTO> GetSectionCommittedProjectDTOs(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -259,6 +229,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .SelectMany(_ => _.CommittedProjectConsequences)
                     .ToList();
 
+            var allProvidedConsequenceEntityIds = committedProjectConsequenceEntities.Select(_ => _.Id).ToList();
+            _unitOfWork.Context.DeleteAll<CommittedProjectConsequenceEntity>(_ => !allProvidedConsequenceEntityIds.Contains(_.Id));
+
             var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
 
             // Determine the committed projects that exist
@@ -277,10 +250,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 // Upsert(update/insert) all
                 _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
-
+                _unitOfWork.Context.UpsertAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Commit();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _unitOfWork.Rollback();
                 throw;

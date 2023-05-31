@@ -6,5 +6,6 @@ namespace BridgeCareCore.Models
     {
         public WorkType WorkType { get; set; }
         public DomainType DomainType { get; set; }
+        public string PreviousRunTime { get; set; }
     }
 }

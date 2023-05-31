@@ -161,11 +161,12 @@ export default class EditBudgetsDialog extends Vue {
     onAddBudget() {
         const unnamedBudgets = this.editBudgetsDialogGridData
             .filter((budget: Budget) => budget.name.match(/Unnamed Budget/));
+    
         const budget: Budget = {
             ...emptyBudget,
             id: getNewGuid(),
-            budgetOrder: 0,
-            name: `Unnamed Budget ${unnamedBudgets.length + 1}`,
+            budgetOrder: this.editBudgetsDialogGridData.length + 1,
+            name: `Unnamed Budget ${this.editBudgetsDialogGridData.length + 1}`,
             criterionLibrary: clone(emptyCriterionLibrary),
         }
         this.editBudgetsDialogGridData.push(budget);

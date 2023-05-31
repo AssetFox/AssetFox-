@@ -1,4 +1,4 @@
-import {emptyInventoryItemDetail, InventoryItem, InventoryItemDetail, MappedInventoryItem} from '@/shared/models/iAM/inventory';
+import {InventoryItem, MappedInventoryItem} from '@/shared/models/iAM/inventory';
 import InventoryService from '@/services/inventory.service';
 import {append, clone, contains} from 'ramda';
 import {AxiosResponse} from 'axios';
@@ -6,9 +6,6 @@ import {hasValue} from '@/shared/utils/has-value-util';
 
 const state = {
     inventoryItems: [] as InventoryItem[],
-    inventoryItemDetail: emptyInventoryItemDetail as InventoryItemDetail,
-    lastFiveBmsIdSearches: [] as string[],
-    lastFiveBrKeySearches: [] as number[],
     staticHTMLForInventory: '' as any
 };
 
@@ -16,54 +13,12 @@ const mutations = {
     inventoryItemsMutator(state: any, inventoryItems: InventoryItem[]) {
         state.inventoryItems = clone(inventoryItems);
     },
-    inventoryItemDetailMutator(state: any, inventoryItemDetail: InventoryItemDetail) {
-        state.inventoryItemDetail = clone(inventoryItemDetail);
-    },
     inventoryStaticHTMLMutator(state: any, staticHTMLPage: any){
         state.staticHTMLForInventory = clone(staticHTMLPage);
     },
-    lastFiveBmsIdSearchesMutator(state: any, searchString: string) {
-        if (!contains(searchString, state.lastFiveBmsIdSearches)) {
-            if (state.lastFiveBmsIdSearches.length === 5) {
-                const filteredSearches = state.lastFiveBmsIdSearches
-                    .filter((value: string) => value !== state.lastFiveBmsIdSearches[0]);
-                state.lastFiveBmsIdSearches = append(searchString, filteredSearches);
-            } else {
-                state.lastFiveBmsIdSearches = append(searchString, state.lastFiveBmsIdSearches);
-            }
-        }
-    },
-    lastFiveBrKeySearchesMutator(state: any, searchNumber: number) {
-        if (!contains(searchNumber, state.lastFiveBrKeySearches)) {
-            if (state.lastFiveBrKeySearches.length === 5) {
-                const filteredSearches = state.lastFiveBrKeySearches
-                    .filter((value: number) => value !== state.lastFiveBrKeySearches[0]);
-                state.lastFiveBrKeySearches = append(searchNumber, filteredSearches);
-            } else {
-                state.lastFiveBrKeySearches = append(searchNumber, state.lastFiveBrKeySearches);
-            }
-        }
-    }
 };
 
 const actions = {
-    clearInventoryItemDetail({commit}: any) {
-        commit('inventoryItemDetailMutator', emptyInventoryItemDetail);
-    },
-    appendBmsIdSearchString({commit}: any, payload: any) {
-        commit('lastFiveBmsIdSearchesMutator', payload.bmsId);
-    },
-    appendBrKeySearchNumber({commit}: any, payload: any) {
-        commit('lastFiveBrKeySearchesMutator', payload.brKey);
-    },
-    async getPennDOTInventory({commit}: any) {
-        await InventoryService.getPennDOTInventory()
-            .then((response: AxiosResponse<InventoryItem[]>) => {
-                if (hasValue(response, 'data')) {
-                    commit('inventoryItemsMutator', response.data);
-                }
-            });
-    },
     async getInventory({commit}: any, payload: any) {
         await InventoryService.getInventory(payload)
             .then((response: AxiosResponse<MappedInventoryItem[]>) => {

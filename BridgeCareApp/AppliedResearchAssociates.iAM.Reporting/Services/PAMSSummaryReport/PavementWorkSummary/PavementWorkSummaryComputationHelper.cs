@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             detail.IriCondition() >= 170;
 
         private static double OpiCondition(this AssetDetail detail) =>
-            _summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "OPI");
+            _summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "OPI_CALCULATED");
 
         public static bool OpiConditionIsExcellent(this AssetDetail detail) =>
             detail.OpiCondition().InRange(90, 100);

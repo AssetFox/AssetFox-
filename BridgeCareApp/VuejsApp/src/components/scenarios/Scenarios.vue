@@ -61,6 +61,7 @@
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
+                                    id="Scenarios-scenarios-datatable"
                                     :items="currentUserScenariosPage"                      
                                     :totalItems="totalUserScenarios"
                                     :pagination.sync="userScenariosPagination"
@@ -1468,16 +1469,13 @@ export default class Scenarios extends Vue {
         this.updateSimulationAnalysisDetailAction({
             simulationAnalysisDetail: data.simulationAnalysisDetail,
         });
-        (async () => { 
-            if ((data.simulationAnalysisDetail.status == "Queued to run.") ||
-                (data.simulationAnalysisDetail.status == "Getting simulation analysis network") ||
-                (data.simulationAnalysisDetail.status == "Simulation complete. 100%") ||
-                (data.simulationAnalysisDetail.status == "Canceled"))
-            {
-                await this.delay(1000);
-                this.doWorkQueuePagination();
-            }
-        })();                            
+        const updatedQueueItem: queuedWorkStatusUpdate = {
+            id: data.simulationAnalysisDetail.simulationId,
+            status: data.simulationAnalysisDetail.status
+        }
+        this.updateQueuedWorkStatusAction({
+            workQueueStatusUpdate: updatedQueueItem
+        })                            
     }
 
     getWorkQueueUpdate(data: any) {

@@ -39,7 +39,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var KeyFields = UnitOfWork.AdminDataRepo.GetKeyFields();
+                var KeyFields = UnitOfWork.AdminSettingsRepo.GetKeyFields();
                 return Ok(KeyFields);
             }
             catch (Exception e)
@@ -57,8 +57,8 @@ namespace BridgeCareCore.Controllers
             try
             {
                 await Task.Factory.StartNew(() =>
-                {                    
-                    UnitOfWork.AdminDataRepo.SetKeyFields(KeyFields);
+                {
+                    UnitOfWork.AdminSettingsRepo.SetKeyFields(KeyFields);
                 });
                 return Ok();
             }
@@ -76,7 +76,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var name = UnitOfWork.AdminDataRepo.GetPrimaryNetwork();
+                var name = UnitOfWork.AdminSettingsRepo.GetPrimaryNetwork();
                 return Ok(name);
             }
             catch (Exception e)
@@ -95,7 +95,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.AdminDataRepo.SetPrimaryNetwork(name);
+                    UnitOfWork.AdminSettingsRepo.SetPrimaryNetwork(name);
                 });
                     return Ok();
             }
@@ -113,7 +113,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var SimulationReportNames = UnitOfWork.AdminDataRepo.GetSimulationReportNames();
+                var SimulationReportNames = UnitOfWork.AdminSettingsRepo.GetSimulationReportNames();
                 return Ok(SimulationReportNames);
             }
             catch (Exception e)
@@ -162,7 +162,7 @@ namespace BridgeCareCore.Controllers
                 //If all reports in list exist and use the right type, save to database.
                 if (reportCriteriaCheck)
                 {
-                    UnitOfWork.AdminDataRepo.SetInventoryReports(inventoryReports);
+                    UnitOfWork.AdminSettingsRepo.SetInventoryReports(inventoryReports);
                 }
                 return Ok();
             }
@@ -181,7 +181,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var SimulationReportNames = UnitOfWork.AdminDataRepo.GetInventoryReports();
+                var SimulationReportNames = UnitOfWork.AdminSettingsRepo.GetInventoryReports();
                 return Ok(SimulationReportNames);
             }
             catch (Exception e)
@@ -255,7 +255,7 @@ namespace BridgeCareCore.Controllers
                 //If all reports in list exist and use the right type, save to database.
                 if (reportCriteriaCheck)
                 {
-                    UnitOfWork.AdminDataRepo.SetSimulationReports(simulationReports);
+                    UnitOfWork.AdminSettingsRepo.SetSimulationReports(simulationReports);
                 }
                 return Ok();
             }

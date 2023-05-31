@@ -56,14 +56,6 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         public double Cost { get; set; }
 
         /// <summary>
-        /// Factor to change the performance curve
-        /// </summary>
-        /// <remarks>
-        /// 1 is default
-        /// </remarks>
-        public float PerformanceFactor { get; set; }
-
-        /// <summary>
         /// The year in which the committed project will be applied (YYYY)
         /// </summary>
         public int Year { get; set; }

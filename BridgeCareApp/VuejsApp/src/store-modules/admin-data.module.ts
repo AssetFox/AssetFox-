@@ -12,6 +12,7 @@ const state = {
     inventoryReportNames: [] as string[],
     primaryNetwork: '' as string,
     keyFields: [] as string[],
+    constraintType: '' as string,
 };
 
 const mutations = {
@@ -26,6 +27,9 @@ const mutations = {
     },
     primaryNetworkMutator(state: any, network: string) {
         state.primaryNetwork = network !== null ? network : '';
+    },
+    constraintTypeMutator(state: any, constraintType: string) {
+        state.constraintType = constraintType !== null ? constraintType : '';
     },
 };
 
@@ -59,6 +63,14 @@ const actions = {
             .then((response: AxiosResponse<string[]>) => {
                 if (hasValue(response, 'data')) {
                     commit('keyFieldsMutator', response.data);
+                }
+            });
+    },
+    async getConstraintType({commit}: any) {
+        await AdminDataService.getConstraintType()
+            .then((response: AxiosResponse<string>) => {
+                if (hasValue(response, 'data')) {
+                    commit('constraintTypeMutator', response.data);
                 }
             });
     },
@@ -110,6 +122,19 @@ const actions = {
                 commit('keyFieldsMutator', keyFields.split(','));
                 dispatch('addSuccessNotification', {
                     message: 'Modified key fields',
+                });
+            }
+        });
+    },
+    async setConstraintType(
+        { dispatch, commit }: any,
+        constraintType: string,
+    ) {
+        await AdminDataService.setConstraintType(constraintType).then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                commit('constraintTypeMutator', constraintType);
+                dispatch('addSuccessNotification', {
+                    message: 'Modified constraint type',
                 });
             }
         });

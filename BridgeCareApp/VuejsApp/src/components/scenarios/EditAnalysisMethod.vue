@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <v-form ref="form" v-model="valid" lazy-validation>
         <v-layout column>
             <v-flex xs6>
@@ -7,7 +7,7 @@
                         <v-flex id="EditAnalysisMethod-weightingParent-vflex" xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
-                                id="EditAnalysisMethod-weighting-select"
+                                id="EditAnalysisMethod-weighting-vselect"
                                 class="ghd-select ghd-control-border ghd-control-text"
                                 :items="weightingAttributes"
                                 append-icon=$vuetify.icons.ghd-down

@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
             var anyDuplicate = attributeData.GroupBy(datum => datum.Location.LocationIdentifier).Any(g => g.Count() > 1);
             if(anyDuplicate)
             {
-                throw new InvalidOperationException("Networks may not contain maintainable assets with non-unique location identifiers.");
+                attributeData = attributeData.GroupBy(datum => datum.Location.LocationIdentifier).Select(g => g.First());
             }
             var networkId = Guid.NewGuid();
             var maintenanceAssets = (from attributeDatum in attributeData

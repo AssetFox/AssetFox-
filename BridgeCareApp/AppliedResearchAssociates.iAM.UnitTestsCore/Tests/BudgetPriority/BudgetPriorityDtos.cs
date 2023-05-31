@@ -27,6 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var dto = New(id, priorityLevel, year);
             var pair = new BudgetPercentagePairDTO
             {
+                Id = Guid.NewGuid(),
                 BudgetName = budgetName,
                 BudgetId = budgetId,
                 Percentage = 92,

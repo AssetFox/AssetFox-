@@ -97,14 +97,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 List<int> ints = new();
                 foreach (var column in worksheet.Columns)
                     for (int i = 1; i < column.Entries.Count; i++)
-                    {
-                        string columnHeader = column.Entries[0].ObjectValue().ToString();
-                        // AttributeDTO's name does not always equal ExcelRawDataDTO's column headers. BRKEY_/BRKEY and SEGMENT/SEGMENT_TXT are examples.
                         if ( column.Entries[i].GetType() != typeof(EmptyExcelCellDatum) &&
-                        (columnHeader == kvp.Key.Name || columnHeader == "BRKEY" || columnHeader == "SEGMENT_TXT")
-                        && kvp.Value == column.Entries[i].ObjectValue().ToString() )
+                            column.Entries[0].ObjectValue().ToString().ToUpper() == kvp.Key.Command.ToUpper() &&
+                            kvp.Value == column.Entries[i].ObjectValue().ToString() )
                             ints.Add(i);
-                    }
 
                 if (ints.Count > 0)
                     indices.Add(ints);

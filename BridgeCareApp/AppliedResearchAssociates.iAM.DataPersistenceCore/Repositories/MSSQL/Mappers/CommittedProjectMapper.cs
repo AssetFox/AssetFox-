@@ -227,7 +227,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 entity.CommittedProjectConsequences.ForEach(_ =>
                 {
                     _.CreateCommittedProjectConsequence(committedProject);
-                    committedProject.PerformanceCurveAdjustmentFactors.Add(new iAM.Analysis.Attribute(_.Attribute.Name), _.PerformanceFactor);
+                    var numberAttributes = simulation.Network.Explorer.NumberAttributes;
+                    foreach (var attribute in numberAttributes)
+                    {
+                        if (attribute.Name == _.Attribute.Name)
+                        {
+                            committedProject.PerformanceCurveAdjustmentFactors.Add(attribute, _.PerformanceFactor);
+                        }
+                    }
                 });
             }
             if (noTreatmentForCommittedProjects)

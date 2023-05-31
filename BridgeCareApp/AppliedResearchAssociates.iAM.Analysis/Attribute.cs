@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public class Attribute
     {
-        public Attribute(string name)
+        internal Attribute(string name)
         {
             if (name == null || !NamePattern.IsMatch(name))
             {

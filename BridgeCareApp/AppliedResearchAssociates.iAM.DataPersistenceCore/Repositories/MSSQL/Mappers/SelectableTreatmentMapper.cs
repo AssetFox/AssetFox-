@@ -97,7 +97,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 entity.ScenarioTreatmentPerformanceFactors.ForEach(_ =>
                 {
-                    selectableTreatment.PerformanceCurveAdjustmentFactors.Add(new Analysis.Attribute(_.Attribute), _.PerformanceFactor);
+                    var numberAttributes = simulation.Network.Explorer.NumberAttributes;
+                    foreach (var attribute in numberAttributes)
+                    {
+                        if (attribute.Name == _.Attribute)
+                        {
+                            selectableTreatment.PerformanceCurveAdjustmentFactors.Add(attribute, _.PerformanceFactor);
+                        }
+                    }
                 });
             }
             if (entity.ScenarioTreatmentConsequences.Any())

@@ -11,6 +11,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public int ShadowForAnyTreatment { get; set; }
 
         public int ShadowForSameTreatment { get; set; }
-
     }
 }

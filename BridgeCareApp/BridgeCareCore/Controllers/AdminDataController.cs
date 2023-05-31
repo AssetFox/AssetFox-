@@ -286,7 +286,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("SetConstraintType/{constraintType}")]
-        [Authorize(Policy = Policy.ModifyAdminSiteSettings)]
+        [ClaimAuthorize("AdminAccess")]
         public async Task<IActionResult> SetConstraintType(string constraintType)
         {
             try

@@ -63,6 +63,19 @@
                     </v-btn>
                 </v-layout>
             </v-flex>            
+            <v-flex xs8 class="ghd-constant-header">
+                <v-layout>
+                    <v-flex xs2>
+                        <v-subheader class="ghd-md-gray ghd-control-label">Constraint Type: </v-subheader> 
+                    </v-flex>
+                    <v-flex xs5>
+                        <v-radio-group v-model="constraintTypeRadioGroup" row>
+                            <v-radio class="admin-radio" label="OR" value="OR"></v-radio>
+                            <v-radio class="admin-radio" label="AND" value="AND"></v-radio>
+                        </v-radio-group>
+                    </v-flex>                     
+                </v-layout>
+            </v-flex>     
         </v-flex>
         <EditAdminDataDialog :DialogData='editAdminDataDialogData'
                                      @submit='onSubmitEditAdminDataDialogResult' />
@@ -100,7 +113,8 @@ export default class Data extends Vue {
     @State(state => state.adminDataModule.primaryNetwork)
     statePrimaryNetwork: string;   
     @State(state => state.adminDataModule.keyFields)
-    stateKeyFields: string[] ;
+    stateKeyFields: string[];
+    @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
     @State(state => state.networkModule.networks) stateNetworks: Network[];
@@ -110,10 +124,12 @@ export default class Data extends Vue {
     @Action('getInventoryReports') getInventoryReportsAction: any;
     @Action('getPrimaryNetwork') getPrimaryNetworkAction: any;
     @Action('getKeyFields') getKeyFieldsAction: any;
+    @Action('getConstraintType') getConstraintTypeAction: any;
     @Action('setSimulationReports') setSimulationReportsAction: any;
     @Action('setInventoryReports') setInventoryReportsAction: any;
     @Action('setPrimaryNetwork') setPrimaryNetworkAction: any;
     @Action('setKeyFields') setKeyFieldsAction: any;
+    @Action('setConstraintType') setConstraintTypeAction: any;
     @Action('getNetworks') getNetworks: any;
     @Action('getAttributes') getAttributes: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
@@ -143,6 +159,8 @@ export default class Data extends Vue {
 
     rules: InputValidationRules = rules;
 
+    constraintTypeRadioGroup: string = '';
+
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             (async () => { 
@@ -154,6 +172,8 @@ export default class Data extends Vue {
                 if(vm.selectPrimaryNetworkItemValue === null)
                     vm.onStatePrimaryNetworkChanged();
                 await vm.getKeyFieldsAction();
+                await vm.getConstraintTypeAction();
+                vm.onStateConstraintTypeChanged();
             })();
         });
     }
@@ -198,6 +218,11 @@ export default class Data extends Vue {
         this.selectedKeyFields = clone(this.stateKeyFields);
     }
 
+    @Watch('stateConstraintType')
+    onStateConstraintTypeChanged(){
+        this.constraintTypeRadioGroup = this.stateConstraintType
+    }
+
     @Watch('networks')
     onNetworksChanged(){
         this.selectPrimaryNetworkItems = this.networks.map(_ => {
@@ -239,13 +264,19 @@ export default class Data extends Vue {
     onPrimaryNetworkChanged(){
         this.checkHasUnsaved();       
     }
+
+    @Watch('constraintTypeRadioGroup')
+    onConstraintTypeRadioGroupChanged(){
+        this.checkHasUnsaved();
+    }
     //Buttons
     onSaveClick(){
         (async () => { 
+            await this.setConstraintTypeAction(this.constraintTypeRadioGroup);
             await this.setSimulationReportsAction(this.convertToDelimited(this.selectedSimulationReports, ','));
             await this.setInventoryReportsAction(this.convertToDelimited(this.selectedInventoryReports, ','));
             await this.setKeyFieldsAction(this.convertToDelimited(this.selectedKeyFields, ','));
-            await this.setPrimaryNetworkAction(this.primaryNetwork);
+            await this.setPrimaryNetworkAction(this.primaryNetwork);          
         })();
     }
 
@@ -288,7 +319,8 @@ export default class Data extends Vue {
         const hasChanged = hasUnsavedChangesCore('', this.selectedInventoryReports, this.stateInventoryReportNames) ||
             hasUnsavedChangesCore('', this.selectedSimulationReports, this.stateSimulationReportNames) ||
             hasUnsavedChangesCore('', this.selectedKeyFields, this.stateKeyFields) ||
-            this.primaryNetwork != this.statePrimaryNetwork
+            this.primaryNetwork != this.statePrimaryNetwork ||
+            this.constraintTypeRadioGroup != this.stateConstraintType
         this.setHasUnsavedChangesAction({ value: hasChanged });
     }
     convertToDelimited(listToBeDelimited: string[], delimitValue: string){
@@ -308,6 +340,7 @@ export default class Data extends Vue {
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedInventoryReports) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedSimulationReports) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.primaryNetwork.trim()) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.constraintTypeRadioGroup.trim()) === true
 
         return !allValid;
     }
@@ -316,9 +349,20 @@ export default class Data extends Vue {
 </script>
 
 <style>
-.elipsisList { 
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
+    .elipsisList { 
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .v-input--radio-group {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    .admin-radio label{
+        margin-bottom: 0 !important;
+        font-weight: 500 !important;
+    }
+
 </style>

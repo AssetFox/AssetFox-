@@ -47,7 +47,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, TestEntitiesForCommittedProjects.AttribureEntities.AsQueryable());
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.InvestmentPlan, TestEntitiesForCommittedProjects.InvestmentPlanEntities().AsQueryable());
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioBudget, TestEntitiesForCommittedProjects.ScenarioBudgetEntities.AsQueryable());
-            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.SelectableTreatment, TestEntitiesForCommittedProjects.SelectableTreatmentEntities.AsQueryable());
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioSelectableTreatment, TestEntitiesForCommittedProjects.FourYearScenarioNoTreatmentEntities().AsQueryable());
 
             _testUOW = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, _mockedContext.Object);

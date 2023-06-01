@@ -64,6 +64,7 @@
                     <v-layout justify-end class="px-4">
                         <p>Commited Projects: {{totalItems}}</p>
                     </v-layout>
+                    
                 </v-flex>       
                 
                 <v-flex xs12 >
@@ -102,6 +103,7 @@
                                                 && header.value !== 'year' 
                                                 && header.value !== 'brkey' 
                                                 && header.value !== 'treatment'
+                                                && header.value !== 'performanceFactor'
                                                 && header.value !== 'cost'"
                                                 readonly
                                                 class="sm-txt"
@@ -129,6 +131,10 @@
                                                 :value='formatAsCurrency(props.item[header.value])'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
+                                            <v-text-field v-if="header.value === 'performanceFactor'"
+                                                :value='parseFloat(props.item[header.value])'
+                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'brkey'"
                                                     label="Edit"
@@ -149,7 +155,7 @@
                                                     label="Select a Budget"
                                                     v-model="props.item[header.value]">
                                                 </v-select>
-
+                                                
                                                 <v-text-field v-if="header.value === 'year'"
                                                     label="Edit"
                                                     single-line
@@ -260,7 +266,6 @@
                             </v-edit-dialog>
                             </td>
                             <td>
-                                
                                 <v-edit-dialog
                                     :return-value.sync="props.item.changeValue"
                                     @save="onEditConsequenceProperty(props.item,'changeValue',props.item.changeValue) "
@@ -285,10 +290,32 @@
                                 </v-edit-dialog>
                             </td>
                             <td>
+                                <v-edit-dialog
+                                :return-value.sync="props.item.performanceFactor"
+                                large
+                                lazy
+                                persistent
+                                @save="onEditConsequenceProperty(props.item,'performanceFactor',props.item.performanceFactor)">
+                                <v-text-field
+                                    readonly 
+                                    single-line
+                                    class="sm-text"
+                                    :value='props.item.performanceFactor'
+                                    :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                <template slot="input">
+                                    <v-text-field
+                                        label=""
+                                        single-line
+                                        maxlength="5"
+                                        v-model="props.item.performanceFactor"
+                                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                </template>    
+                                </v-edit-dialog>
+                            </td>
+                            <td>
                                 <v-btn @click="OnDeleteConsequence(props.item.id)"  class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
-                                
                             </td>
                         </template>
                     </v-data-table>    
@@ -344,6 +371,7 @@ import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import InvestmentService from '@/services/investment.service';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { isNullOrUndefined } from 'util';
+import { max } from 'moment';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -459,6 +487,14 @@ export default class CommittedProjectsEditor extends Vue  {
             class: '',
             width: '10%',
         },
+        // {
+        //     text: 'Factor',
+        //     value: 'factor',
+        //     align: 'left',
+        //     sortable: true,
+        //     class: '',
+        //     width: '10%'
+        // },
         {
             text: 'Category',
             value: 'category',
@@ -510,6 +546,14 @@ export default class CommittedProjectsEditor extends Vue  {
             width: '40%',
         },
         {
+            text: 'Factor',
+            value: 'performanceFactor',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '15%',
+        },
+        {
             text: '',
             value: 'actions',
             align: 'left',
@@ -521,9 +565,9 @@ export default class CommittedProjectsEditor extends Vue  {
     
     mounted() {
         this.reverseCatMap.forEach(cat => {
-            this.categorySelectItems.push({text: cat, value: cat})
+            this.categorySelectItems.push({text: cat, value: cat})        
         })
-    }
+    }   
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }
@@ -696,9 +740,10 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.rowCache = clone(this.sectionCommittedProjects)
                     this.totalItems = data.totalItems;
                     const row = data.items.find(scp => scp.id == this.selectedCommittedProject)
-                    if(isNil(row))
-                        this.selectedCommittedProject = ''
-                }
+                    if(isNil(row)) {
+                        this.selectedCommittedProject = '';
+                    }
+                } 
             }); 
     }
 
@@ -715,7 +760,6 @@ export default class CommittedProjectsEditor extends Vue  {
     //Events
     onCancelClick() {
         this.clearChanges()
-        this.resetPage();
         this.selectedCommittedProject = '';
         this.selectedCpItems = [];
         this.isNoTreatmentBefore = this.isNoTreatmentBeforeCache
@@ -756,8 +800,9 @@ export default class CommittedProjectsEditor extends Vue  {
         const newRow: CommittedProjectConsequence = clone(emptyCommittedProjectConsequence)
         newRow.id = getNewGuid();
         newRow.committedProjectId = this.selectedCommittedProject;
-        newRow.attribute = ''
-        newRow.changeValue = ''
+        newRow.attribute = '';
+        newRow.changeValue = '';
+        newRow.performanceFactor = 1.2;
         this.selectedConsequences.push(newRow);
      }
 
@@ -851,7 +896,10 @@ export default class CommittedProjectsEditor extends Vue  {
             }
             else if(property === 'brkey'){
                 this.handleBrkeyChange(row, scp, value);               
-            }            
+            }
+            else if(property === 'performanceFactor') {
+                this.handleFactorChange(row, scp, value);
+            }
             else if(property === 'budget'){
                 this.handleBudgetChange(row, scp, value)
             }
@@ -873,7 +921,7 @@ export default class CommittedProjectsEditor extends Vue  {
      onAddCommittedProjectConsequenc(newConsequence: CommittedProjectConsequence) {
         this.showCreateCommittedProjectConsequenceDialog = false;     
         if (!isNil(newConsequence)) {
-            newConsequence.committedProjectId = this.selectedCommittedProject
+            newConsequence.committedProjectId = this.selectedCommittedProject;
             this.selectedConsequences.push(newConsequence);
             this.updateSelectedProjectConsequences();  
         }
@@ -988,11 +1036,13 @@ export default class CommittedProjectsEditor extends Vue  {
                     ) === true &&
                     this.rules['generalRules'].valueIsNotEmpty(
                         consequence.changeValue,
-                    ) === true)
+                    ) === true &&
+                    this.rules['generalRules'].valueIsNotEmpty(
+                        consequence.performanceFactor,
+                    ) === true )
                 );
             },
         );
-
         this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
@@ -1083,6 +1133,11 @@ export default class CommittedProjectsEditor extends Vue  {
     handleBrkeyChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, brkey: string){
         row.locationKeys[this.brkey_] = brkey;
         this.updateCommittedProject(row, brkey, 'brkey');
+        this.onPaginationChanged();
+    }
+
+    handleFactorChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, factor: number) {
+        this.updateCommittedProject(row, factor, 'performanceFactor');
         this.onPaginationChanged();
     }
 

@@ -48,7 +48,7 @@
                                         </v-layout>
                                     </v-flex>
                                     <v-flex xs4></v-flex>
-                                    <v-flex class="justify-end xs2">
+                                    <v-layout class="flex-end xs2" style="justify-content: end; padding-right: 70px">
                                         <v-btn
                                            id="Scenarios-createScenario-btn"
                                             @click="
@@ -58,7 +58,7 @@
                                         >
                                             Create new scenario
                                         </v-btn>
-                                    </v-flex>
+                                    </v-layout>
                                 </v-card-title>
                                 <v-data-table
                                     id="Scenarios-scenarios-datatable"

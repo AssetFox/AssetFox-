@@ -32,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
                 Description = "Treatment description",
                 Costs = new List<TreatmentCostDTO>(),
                 Consequences = new List<TreatmentConsequenceDTO>(),
+                PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
             };
             return dto;
         }

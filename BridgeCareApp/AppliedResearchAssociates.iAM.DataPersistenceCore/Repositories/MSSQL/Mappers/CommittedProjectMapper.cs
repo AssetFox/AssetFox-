@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using MoreLinq;
-using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = domain.ShadowForSameTreatment,
                 Cost = domain.Cost,
                 Year = domain.Year,
-                treatmentCategory = domain.treatmentCategory
+                treatmentCategory = domain.treatmentCategory,
             };
 
             entity.CommittedProjectLocation = maintainableAsset.MaintainableAssetLocation.ToCommittedProjectLocation(entity);
@@ -159,36 +159,60 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             Guid maintainableAssetId,
             bool noTreatmentForCommittedProjects,
             double noTreatmentDefaultCost,
-            ScenarioSelectableTreatmentEntity noTreatmentEntity)
+            ScenarioSelectableTreatmentEntity noTreatmentEntity,
+            List<string> keyPropertyNames = null)
         {
-            var asset = simulation.Network.Assets.Single(_ =>
-                _.Id == maintainableAssetId);
+            var asset = simulation.Network.Assets.Single(_ => _.Id == maintainableAssetId);
 
-            // Ensure a no treatment committed project does not already exist
+            // Check for "colliding" CPs (a group of 2 or more CPs with the same asset-year). If CPs
+            // collide and at most one of the CPs is an active treatment, remove (duplicate) passive
+            // treatments. If more than one colliding CP is an active treatment, that's an error.
+
+            void throwError_MultipleCommittedProjects(Exception innerException)
+            {
+                string assetLabel;
+                if (keyPropertyNames is null)
+                {
+                    assetLabel = asset.Id.ToString();
+                }
+                else
+                {
+                    var attributeByName = simulation.Network.Explorer.AllAttributes.ToDictionary(a => a.Name);
+                    var keyProperties = keyPropertyNames.Select(name => $"[{name}]: {asset.GetHistory(attributeByName[name]).MostRecentValue}");
+                    assetLabel = string.Join(", ", keyProperties);
+                }
+
+                throw new InvalidOperationException($"Asset ({assetLabel}) has multiple committed projects in year {entity.Year}.", innerException);
+            }
+
             try
             {
-                var existingCommittedProject = simulation.CommittedProjects.SingleOrDefault(_ => _.Asset.Id == asset.Id && _.Year == entity.Year);
-                if (existingCommittedProject != null)
+                var existingCommittedProjectsForThisAssetYear =
+                    simulation.CommittedProjects
+                    .Where(cp => (cp.Asset.Id, cp.Year) == (asset.Id, entity.Year))
+                    .ToList();
+
+                var projectToAddHasActiveTreatment = entity.Name != noTreatmentEntity.Name;
+                var projectWithActiveTreatmentAlreadyExists = existingCommittedProjectsForThisAssetYear.Any(cp => cp.Name != noTreatmentEntity.Name);
+
+                if (projectToAddHasActiveTreatment && projectWithActiveTreatmentAlreadyExists)
                 {
-                    if (existingCommittedProject.Name == noTreatmentEntity.Name)
-                    {
-                        simulation.CommittedProjects.Remove(existingCommittedProject);
-                    }
-                    else
-                    {
-                        throw new ArgumentException();
-                    }
+                    throwError_MultipleCommittedProjects(null);
+                }
+
+                var mainProject =
+                    existingCommittedProjectsForThisAssetYear.SingleOrDefault(cp => cp.Name != noTreatmentEntity.Name) ??
+                    existingCommittedProjectsForThisAssetYear.FirstOrDefault();
+
+                foreach (var otherProject in existingCommittedProjectsForThisAssetYear.Where(cp => cp != mainProject))
+                {
+                    _ = simulation.CommittedProjects.Remove(otherProject);
                 }
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException e)
             {
-                throw new InvalidOperationException($"{asset.Id} has multiple committed projects in year {entity.Year}");
+                throwError_MultipleCommittedProjects(e);
             }
-            catch (ArgumentException)
-            {
-                throw new InvalidOperationException($"{asset.Id} has a project type that was automatically added but is not the default treatment");
-            }
-            
 
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));
             committedProject.Id = entity.Id;
@@ -198,10 +222,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             committedProject.Cost = entity.Cost; 
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
             committedProject.LastModifiedDate = entity.LastModifiedDate;
-
             if (entity.CommittedProjectConsequences.Any())
             {
-                entity.CommittedProjectConsequences.ForEach(_ => _.CreateCommittedProjectConsequence(committedProject));
+                entity.CommittedProjectConsequences.ForEach(_ =>
+                {
+                    _.CreateCommittedProjectConsequence(committedProject);
+                    var numberAttributes = simulation.Network.Explorer.NumberAttributes;
+                    foreach (var attribute in numberAttributes)
+                    {
+                        if (attribute.Name == _.Attribute.Name)
+                        {
+                            committedProject.PerformanceCurveAdjustmentFactors.Add(attribute, _.PerformanceFactor);
+                        }
+                    }
+                });
             }
             if (noTreatmentForCommittedProjects)
             {

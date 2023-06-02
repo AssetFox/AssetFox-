@@ -270,7 +270,7 @@
                   <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" flat class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
                 </v-layout>
                 <v-layout justify-center row>
-                  <v-btn @click="onSubmit(false)" outline class='ghd-blue ghd-button ghd-button-text'>Cancel</v-btn>
+                  <v-btn @click="onSubmit(false)" outline class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>
                   <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
                          class="white--text ghd-blue ghd-button ghd-button-text">Save
                   </v-btn>                  
@@ -1081,6 +1081,10 @@ export default class EquationEditorDialog extends Vue {
 
 .invalid-message {
   color: red;
+  padding-left: 100px;
+  word-break: break-all; 
+  word-wrap: break-word;
+  z-index: 2!important;
 }
 
 .attributes-list-container, .formulas-list-container {

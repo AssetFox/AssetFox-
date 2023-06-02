@@ -16,7 +16,9 @@
                 </v-flex>
 
                 <v-flex xs12>
-                    <v-checkbox class='ghd-checkbox' label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
+                    <v-checkbox 
+                    id="CommittedProjectsEditor-noTreatmentsBeforeCommittedProjects-ghdcheckbox"
+                    class='ghd-checkbox' label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
                 </v-flex>
 
                 <v-flex xs12 class="ghd-constant-header">
@@ -25,6 +27,7 @@
                             <v-layout column>
                                 <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                                 <v-select
+                                    id="CommittedProjectsEditor-treatmentLibrary-vSelect"
                                     outline
                                     append-icon=$vuetify.icons.ghd-down
                                     class="ghd-select ghd-text-field ghd-text-field-border pa-0"
@@ -37,6 +40,7 @@
                             <v-subheader class="ghd-control-label ghd-md-gray"></v-subheader>
                             <v-layout>                                
                                 <v-text-field
+                                    id="CommittedProjectsEditor-search-vtextfield"
                                     prepend-inner-icon=$vuetify.icons.ghd-search
                                     hide-details
                                     lablel="Search"
@@ -48,7 +52,9 @@
                                     @click:clear="onClearClick()"
                                     class="ghd-text-field-border ghd-text-field search-icon-general">
                                 </v-text-field>
-                                <v-btn style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
+                                <v-btn 
+                                id="CommittedProjectsEditor-performSearch-vbtn"
+                                style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
                             </v-layout>
                            
                         </v-flex>
@@ -58,11 +64,13 @@
                     <v-layout justify-end class="px-4">
                         <p>Commited Projects: {{totalItems}}</p>
                     </v-layout>
+                    
                 </v-flex>       
                 
                 <v-flex xs12 >
                     <v-layout column>
                         <v-data-table
+                        id="CommittedProjectsEditor-committedProjects-vdatatable"
                         :headers="cpGridHeaders"
                         :items="currentPage"
                         sort-icon=$vuetify.icons.ghd-table-sort
@@ -95,6 +103,7 @@
                                                 && header.value !== 'year' 
                                                 && header.value !== 'brkey' 
                                                 && header.value !== 'treatment'
+                                                && header.value !== 'performanceFactor'
                                                 && header.value !== 'cost'"
                                                 readonly
                                                 class="sm-txt"
@@ -122,6 +131,10 @@
                                                 :value='formatAsCurrency(props.item[header.value])'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
+                                            <v-text-field v-if="header.value === 'performanceFactor'"
+                                                :value='parseFloat(props.item[header.value])'
+                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'brkey'"
                                                     label="Edit"
@@ -142,7 +155,7 @@
                                                     label="Select a Budget"
                                                     v-model="props.item[header.value]">
                                                 </v-select>
-
+                                                
                                                 <v-text-field v-if="header.value === 'year'"
                                                     label="Edit"
                                                     single-line
@@ -162,10 +175,13 @@
                                 
                                         <div v-if="header.value === 'actions'">
                                             <v-layout style='flex-wrap:nowrap'>
-                                                <v-btn @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
+                                                <v-btn 
+                                                    id="CommittedProjectsEditor-deleteCommittedProject-vbtn"
+                                                    @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
                                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
                                                 <v-btn
+                                                    id="CommittedProjectsEditor-editCommittedProject-vbtn"
                                                     @click="onSelectCommittedProject(props.item.id)"
                                                     class="ghd-blue"
                                                     icon>
@@ -177,7 +193,8 @@
                                 </td>
                             </template>
                         </v-data-table>    
-                        <v-btn @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
+                        <v-btn id="CommittedProjectsEditor-addCommittedProject-vbtn" 
+                        @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
                         class="ghd-white-bg ghd-blue ghd-button btn-style" outline>Add Committed Project</v-btn> 
                     </v-layout>
                 </v-flex>
@@ -186,8 +203,12 @@
 
                 <v-flex xs12>
                     <v-layout justify-center>
-                        <v-btn @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" flat>Cancel</v-btn>    
-                        <v-btn @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
+                        <v-btn 
+                        id="CommittedProjectsEditor-cancel-vbtn"
+                        @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" flat>Cancel</v-btn>    
+                        <v-btn 
+                        id="CommittedProjectsEditor-save-vbtn"
+                        @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
                     </v-layout>
                 </v-flex> 
             </v-layout>
@@ -245,7 +266,6 @@
                             </v-edit-dialog>
                             </td>
                             <td>
-                                
                                 <v-edit-dialog
                                     :return-value.sync="props.item.changeValue"
                                     @save="onEditConsequenceProperty(props.item,'changeValue',props.item.changeValue) "
@@ -270,10 +290,32 @@
                                 </v-edit-dialog>
                             </td>
                             <td>
+                                <v-edit-dialog
+                                :return-value.sync="props.item.performanceFactor"
+                                large
+                                lazy
+                                persistent
+                                @save="onEditConsequenceProperty(props.item,'performanceFactor',props.item.performanceFactor)">
+                                <v-text-field
+                                    readonly 
+                                    single-line
+                                    class="sm-text"
+                                    :value='props.item.performanceFactor'
+                                    :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                <template slot="input">
+                                    <v-text-field
+                                        label=""
+                                        single-line
+                                        maxlength="5"
+                                        v-model="props.item.performanceFactor"
+                                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                </template>    
+                                </v-edit-dialog>
+                            </td>
+                            <td>
                                 <v-btn @click="OnDeleteConsequence(props.item.id)"  class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
-                                
                             </td>
                         </template>
                     </v-data-table>    
@@ -329,6 +371,7 @@ import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import InvestmentService from '@/services/investment.service';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { isNullOrUndefined } from 'util';
+import { max } from 'moment';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -444,6 +487,14 @@ export default class CommittedProjectsEditor extends Vue  {
             class: '',
             width: '10%',
         },
+        // {
+        //     text: 'Factor',
+        //     value: 'factor',
+        //     align: 'left',
+        //     sortable: true,
+        //     class: '',
+        //     width: '10%'
+        // },
         {
             text: 'Category',
             value: 'category',
@@ -495,6 +546,14 @@ export default class CommittedProjectsEditor extends Vue  {
             width: '40%',
         },
         {
+            text: 'Factor',
+            value: 'performanceFactor',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '15%',
+        },
+        {
             text: '',
             value: 'actions',
             align: 'left',
@@ -506,9 +565,9 @@ export default class CommittedProjectsEditor extends Vue  {
     
     mounted() {
         this.reverseCatMap.forEach(cat => {
-            this.categorySelectItems.push({text: cat, value: cat})
+            this.categorySelectItems.push({text: cat, value: cat})        
         })
-    }
+    }   
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }
@@ -681,9 +740,10 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.rowCache = clone(this.sectionCommittedProjects)
                     this.totalItems = data.totalItems;
                     const row = data.items.find(scp => scp.id == this.selectedCommittedProject)
-                    if(isNil(row))
-                        this.selectedCommittedProject = ''
-                }
+                    if(isNil(row)) {
+                        this.selectedCommittedProject = '';
+                    }
+                } 
             }); 
     }
 
@@ -700,7 +760,6 @@ export default class CommittedProjectsEditor extends Vue  {
     //Events
     onCancelClick() {
         this.clearChanges()
-        this.resetPage();
         this.selectedCommittedProject = '';
         this.selectedCpItems = [];
         this.isNoTreatmentBefore = this.isNoTreatmentBeforeCache
@@ -741,8 +800,9 @@ export default class CommittedProjectsEditor extends Vue  {
         const newRow: CommittedProjectConsequence = clone(emptyCommittedProjectConsequence)
         newRow.id = getNewGuid();
         newRow.committedProjectId = this.selectedCommittedProject;
-        newRow.attribute = ''
-        newRow.changeValue = ''
+        newRow.attribute = '';
+        newRow.changeValue = '';
+        newRow.performanceFactor = 1.2;
         this.selectedConsequences.push(newRow);
      }
 
@@ -836,7 +896,10 @@ export default class CommittedProjectsEditor extends Vue  {
             }
             else if(property === 'brkey'){
                 this.handleBrkeyChange(row, scp, value);               
-            }            
+            }
+            else if(property === 'performanceFactor') {
+                this.handleFactorChange(row, scp, value);
+            }
             else if(property === 'budget'){
                 this.handleBudgetChange(row, scp, value)
             }
@@ -858,7 +921,7 @@ export default class CommittedProjectsEditor extends Vue  {
      onAddCommittedProjectConsequenc(newConsequence: CommittedProjectConsequence) {
         this.showCreateCommittedProjectConsequenceDialog = false;     
         if (!isNil(newConsequence)) {
-            newConsequence.committedProjectId = this.selectedCommittedProject
+            newConsequence.committedProjectId = this.selectedCommittedProject;
             this.selectedConsequences.push(newConsequence);
             this.updateSelectedProjectConsequences();  
         }
@@ -973,11 +1036,13 @@ export default class CommittedProjectsEditor extends Vue  {
                     ) === true &&
                     this.rules['generalRules'].valueIsNotEmpty(
                         consequence.changeValue,
-                    ) === true)
+                    ) === true &&
+                    this.rules['generalRules'].valueIsNotEmpty(
+                        consequence.performanceFactor,
+                    ) === true )
                 );
             },
         );
-
         this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
@@ -1071,6 +1136,11 @@ export default class CommittedProjectsEditor extends Vue  {
         this.onPaginationChanged();
     }
 
+    handleFactorChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, factor: number) {
+        this.updateCommittedProject(row, factor, 'performanceFactor');
+        this.onPaginationChanged();
+    }
+
     checkBrkey(scp: SectionCommittedProjectTableData, brkey: string){
         CommittedProjectsService.ValidateBRKEY(this.network, brkey).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
@@ -1115,8 +1185,10 @@ export default class CommittedProjectsEditor extends Vue  {
     checkYear(scp:SectionCommittedProjectTableData){
         if(!hasValue(scp.year))
             scp.yearErrors = ['Value cannot be empty'];
-        else if(scp.year < this.firstYear || scp.year > this.lastYear)
-            scp.yearErrors = ['Year is outside of Analysis period'];
+        else if (this.investmentYears.length === 0)
+            scp.yearErrors = ['There are no years in the investment']
+        else if(scp.year < this.firstYear )
+            scp.yearErrors = ['Year is outside of Analysis period'];      
         else
             scp.yearErrors = [];
     }

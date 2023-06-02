@@ -4,10 +4,10 @@
             <v-flex xs6>
                 <v-layout column>
                     <v-layout justify-center>
-                        <v-flex xs4>
+                        <v-flex id="EditAnalysisMethod-weightingParent-vflex" xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
-                                id="EditAnalysisMethod-weighting-select"
+                                id="EditAnalysisMethod-weighting-vselect"
                                 class="ghd-select ghd-control-border ghd-control-text"
                                 :items="weightingAttributes"
                                 append-icon=$vuetify.icons.ghd-down
@@ -24,7 +24,7 @@
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs4>
+                        <v-flex id="EditAnalysisMethod-optimizationStrategyParent-vflex" xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
                             <v-select 
                                 id="EditAnalysisMethod-optimizationStrategy-select"
@@ -43,7 +43,7 @@
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs4>
+                        <v-flex xs4 id="EditAnalysisMethod-spendingStrategyParent-vflex">
                             <v-subheader class="ghd-control-label ghd-md-gray">Spending Strategy</v-subheader>
                             <v-select
                                 id="EditAnalysisMethod-spendingStrategy-select"

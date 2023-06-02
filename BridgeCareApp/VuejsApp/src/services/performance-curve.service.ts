@@ -46,6 +46,11 @@ export default class PerformanceCurveService {
         );
     }
 
+    static GetPerformanceCurves(scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.PerformanceCurve}/GetScenarioPerformanceCurves/${scenarioId}`
+        );
+    }
 
     static importPerformanceCurves(
         file: File,

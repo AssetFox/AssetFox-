@@ -35,5 +35,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// .
         /// </summary>
         public string ChangeValue { get; set; }
+
+        public float PerformanceFactor { get; set; }
     }
 }

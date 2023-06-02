@@ -65,6 +65,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// </summary>
         public List<TreatmentConsequenceDTO> Consequences { get; set; }
 
+        public List<TreatmentPerformanceFactorDTO> PerformanceFactors { get; set; }
+
         /// <summary>
         /// .
         /// </summary>

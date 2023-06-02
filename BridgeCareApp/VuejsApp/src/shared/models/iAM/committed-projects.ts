@@ -34,6 +34,7 @@ export interface SectionCommittedProject extends BaseCommittedProject{
 export interface CommittedProjectConsequence {
     id: string;
     committedProjectId: string;
+    performanceFactor: number;
     attribute: string;
     changeValue: string;
 }
@@ -58,6 +59,7 @@ export const emptyCommittedProjectConsequence ={
     id: getBlankGuid(),
     committedProjectId: getBlankGuid(),
     attribute: '',
+    performanceFactor: 1.2,
     changeValue: ''
 }
 

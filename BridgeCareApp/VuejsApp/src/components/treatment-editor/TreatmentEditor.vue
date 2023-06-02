@@ -172,6 +172,23 @@
                                                 <v-card-text
                                                     class='card-tab-content'
                                                 >
+                                                    <PerformanceFactorTab
+                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
+                                                        :selectedTreatment='selectedTreatment'
+                                                        :scenarioId='loadedScenarioId'
+                                                        :rules='rules'
+                                                        :callFromScenario='hasScenario'
+                                                        :callFromLibrary='!hasScenario'
+                                                        @onModifyPerformanceFactor='modifySelectedTreatmentPerformanceFactor'
+                                                    />
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-tab-item>
+                                        <v-tab-item>
+                                            <v-card>
+                                                <v-card-text
+                                                    class='card-tab-content'
+                                                >
                                                     <ConsequencesTab
                                                         :selectedTreatmentConsequences='selectedTreatment.consequences'
                                                         :rules='rules'
@@ -316,12 +333,17 @@ import {
     SimpleTreatment,
     Treatment,
     TreatmentConsequence,
+    TreatmentPerformanceFactor,
     TreatmentCost,
     TreatmentDetails,
     TreatmentLibrary,
     TreatmentLibraryUser,
     TreatmentsFileImport
 } from '@/shared/models/iAM/treatment';
+import {
+    emptyPerformanceCurve,
+    PerformanceCurve,
+} from '@/shared/models/iAM/performance';
 import CreateTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentDialog.vue';
 import {
     any,
@@ -336,6 +358,7 @@ import {
 } from 'ramda';
 import TreatmentDetailsTab from '@/components/treatment-editor/treatment-editor-tabs/TreatmentDetailsTab.vue';
 import CostsTab from '@/components/treatment-editor/treatment-editor-tabs/CostsTab.vue';
+import PerformanceFactorTab from '@/components/treatment-editor/treatment-editor-tabs/PerformanceFactorTab.vue';
 import ConsequencesTab from '@/components/treatment-editor/treatment-editor-tabs/ConsequencesTab.vue';
 import BudgetsTab from '@/components/treatment-editor/treatment-editor-tabs/BudgetsTab.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
@@ -370,6 +393,7 @@ import { isNullOrUndefined } from 'util';
         BudgetsTab,
         ConsequencesTab,
         CostsTab,
+        PerformanceFactorTab,
         TreatmentDetailsTab,
         CreateTreatmentDialog,
         CreateTreatmentLibraryDialog,
@@ -394,6 +418,8 @@ export default class TreatmentEditor extends Vue {
     @State(state => state.treatmentModule.simpleScenarioSelectableTreatments) stateSimpleScenarioSelectableTreatments: SimpleTreatment[];
     @State(state => state.treatmentModule.simpleSelectableTreatments) stateSimpleSelectableTreatments: SimpleTreatment[];
     @State(state => state.treatmentModule.isSharedLibrary) isSharedLibrary: boolean;
+    @State(state => state.performanceCurveModule.scenarioPerformanceCurves) stateScenarioPerformanceCurves: PerformanceCurve[];
+
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addWarningNotification') addWarningNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
@@ -422,7 +448,8 @@ export default class TreatmentEditor extends Vue {
     @Action('getIsSharedTreatmentLibrary') getIsSharedLibraryAction: any;
     @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
     @Action('selectScenario') selectScenarioAction: any;
-    
+    @Action('getScenarioPerformanceCurves') getScenarioPerformanceCurvesAction: any;
+
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     @Mutation('addedOrUpdatedTreatmentLibraryMutator') addedOrUpdatedTreatmentLibraryMutator: any;
@@ -438,7 +465,7 @@ export default class TreatmentEditor extends Vue {
     selectedTreatment: Treatment = clone(emptyTreatment);
     selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     activeTab: number = 0;
-    treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences'];
+    treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Performance Factor', 'Consequences'];
     createTreatmentLibraryDialogData: CreateTreatmentLibraryDialogData = clone(
         emptyCreateTreatmentLibraryDialogData,
     );
@@ -477,12 +504,13 @@ export default class TreatmentEditor extends Vue {
     librarySelectItemValue: string = "";
 
     shareTreatmentLibraryDialogData: ShareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
-
-    parentLibraryId: string = '';
+    loadedScenarioId: string = '';
+    parentLibraryId: string  = this.uuidNIL;
     parentLibraryName: string = 'None';
+    scenarioParentLIbrary: string | null = null;
     scenarioLibraryIsModified: boolean = false;
     loadedParentName: string = "";
-    loadedParentId: string = "";
+    loadedParentId: string  = this.uuidNIL;
     newLibrarySelection: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
@@ -491,6 +519,7 @@ export default class TreatmentEditor extends Vue {
             vm.getTreatmentLibrariesAction();
             if (to.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
+                vm.loadedScenarioId = vm.selectedScenarioId;
                 if (vm.selectedScenarioId === vm.uuidNIL) {
                     vm.addErrorNotificationAction({
                         message: 'Found no selected scenario for edit',
@@ -500,6 +529,7 @@ export default class TreatmentEditor extends Vue {
                 vm.hasScenario = true;
                 vm.getSimpleScenarioSelectableTreatmentsAction(vm.selectedScenarioId);
                 vm.getTreatmentLibraryBySimulationIdAction(vm.selectedScenarioId);
+                vm.getScenarioPerformanceCurvesAction(vm.selectedScenarioId);
                 vm.treatmentTabs = [...vm.treatmentTabs, 'Budgets'];
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId, }).then(()=> {
                     vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
@@ -528,12 +558,15 @@ export default class TreatmentEditor extends Vue {
             })
         );
     }
+    @Watch('stateScenarioPerformanceCurves')
+    onStateScenarioPerformanceCurvesChanged() {
+    }
     
     @Watch('stateScenarioTreatmentLibrary')
     onStateScenarioTreatmentLibraryChanged() {
         this.setParentLibraryName(this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.id : "None");
         this.scenarioLibraryIsModified = this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.isModified : false;
-        this.loadedParentId = this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.id : "";
+        this.loadedParentId = this.stateScenarioTreatmentLibrary ? this.stateScenarioTreatmentLibrary.id : this.uuidNIL;
         this.loadedParentName = this.parentLibraryName;
     }
 
@@ -623,7 +656,7 @@ export default class TreatmentEditor extends Vue {
 
     @Watch('treatmentSelectItemValue')
     onTreatmentSelectItemValueChanged() {
-        if(!isNil(this.treatmentSelectItemValue)){
+        if(!isNil(this.treatmentSelectItemValue) && this.treatmentSelectItemValue !== ""){
             var mapEntry = this.updatedRowsMap.get(this.treatmentSelectItemValue);
             var addedRow = this.addedRows.find(_ => _.id == this.treatmentSelectItemValue);
             var treatment = this.treatmentCache.find(_ => _.id === this.treatmentSelectItemValue);
@@ -825,7 +858,7 @@ export default class TreatmentEditor extends Vue {
     }
 
     setParentLibraryName(libraryId: string) {
-        if (libraryId === "None") {
+        if (libraryId === "None" || libraryId === this.uuidNIL) {
             this.parentLibraryName = "None";
             return;
         }
@@ -891,6 +924,10 @@ export default class TreatmentEditor extends Vue {
         this.showCreateTreatmentDialog = false;
 
         if (!isNil(newTreatment)) {
+            if(this.hasScenario)
+                newTreatment.libraryId = this.parentLibraryId
+            else
+                newTreatment.libraryId = this.selectedTreatmentLibrary.id
             this.addedRows = append(newTreatment, this.addedRows);
             this.simpleTreatments = append({name: newTreatment.name, id: newTreatment.id}, this.simpleTreatments);
             setTimeout(() => (this.treatmentSelectItemValue = newTreatment.id));
@@ -939,6 +976,27 @@ export default class TreatmentEditor extends Vue {
                 ...clone(this.selectedTreatment),
                 costs: reject(propEq('id', costId), this.selectedTreatment.costs,),
             });
+        }
+    }
+
+    modifySelectedTreatmentPerformanceFactor(modifiedPerformanceFactor: TreatmentPerformanceFactor) {
+        if (this.hasSelectedTreatment) {
+            if (findIndex(propEq('id', modifiedPerformanceFactor.id), this.selectedTreatment.performanceFactors) < 0)
+            {
+                this.modifySelectedTreatment({
+                    ...clone(this.selectedTreatment),
+                    performanceFactors: prepend(modifiedPerformanceFactor, this.selectedTreatment.performanceFactors)
+                });
+            } else {
+                this.modifySelectedTreatment({
+                    ...clone(this.selectedTreatment),
+                    performanceFactors: update(
+                        findIndex(propEq('id', modifiedPerformanceFactor.id), this.selectedTreatment.performanceFactors),
+                        modifiedPerformanceFactor,
+                        this.selectedTreatment.performanceFactors,
+                    ),
+                });
+            }
         }
     }
 

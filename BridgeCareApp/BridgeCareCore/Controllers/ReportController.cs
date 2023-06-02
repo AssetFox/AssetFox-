@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -133,11 +134,6 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-
-
-
-
-
         [HttpPost]
         [Route("GetFile/{reportName}")]
         [Authorize]
@@ -160,15 +156,9 @@ namespace BridgeCareCore.Controllers
 
                 ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, analysisHandle.MostRecentStatusMessage);
-                }
 
-                //await analysisHandle.WorkCompletion;
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, scenarioId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)
@@ -350,7 +340,7 @@ namespace BridgeCareCore.Controllers
 
             var returnValue = Content(errorHtml.ToString());
             returnValue.ContentType = "text/html";
-            returnValue.StatusCode = (int?)HttpStatusCode.BadRequest;
+            returnValue.StatusCode = (int?)HttpStatusCode.OK;
             return returnValue;
         }
 

@@ -14,5 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertDatasource(BaseDataSourceDTO dataSource);
 
         void DeleteDataSource(Guid id);
+
+        Dictionary<string, string> GetRawData(Dictionary<AttributeDTO, string> dictionary);
     }
 }

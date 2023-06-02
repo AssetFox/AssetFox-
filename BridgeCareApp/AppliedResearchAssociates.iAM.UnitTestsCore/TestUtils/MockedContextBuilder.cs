@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         /// <param name="keyName">The name of the configuration key.  It may be a subordinate key such as "InventoryData:KeyProperties"</param>
         /// <param name="configurationValues">The values that the keyName will provide</param>
         /// <remarks>It is also possible to do this as one key, but that will only be added if required</remarks>
-        public static void AddConfigurationKeys(Mock<IConfiguration> configuration, string keyName, List<string> configurationValues)
+        public static void AddConfigurationKeys(Mock<IConfiguration> configuration, IList<string> keyName, List<string> configurationValues)
         {
             var mockedKeySection = new Mock<IConfigurationSection>();
             var mockedKeySectionList = new List<IConfigurationSection>();
@@ -51,7 +51,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 mockedKeySectionList.Add(section.Object);
             }
             mockedKeySection.Setup(_ => _.GetChildren()).Returns(mockedKeySectionList.AsEnumerable());
-            configuration.Setup(_ => _.GetSection(keyName)).Returns(mockedKeySection.Object);
+            var KeyFieldsString = String.Join(",", keyName);
+            configuration.Setup(_ => _.GetSection(KeyFieldsString)).Returns(mockedKeySection.Object);
         }
     }
 }

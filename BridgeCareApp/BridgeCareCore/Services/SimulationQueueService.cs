@@ -146,7 +146,6 @@ namespace BridgeCareCore.Services
             QueuedWorkDTO queuedSimulationDTO = ToQueuedWorkDTO(queuedWorkHandle);
 
             queuedSimulationDTO.PreviousRunTime = simulationDTO.RunTime;
-            queuedSimulationDTO.Status = simulationDTO.Status;
 
             return queuedSimulationDTO;
         }

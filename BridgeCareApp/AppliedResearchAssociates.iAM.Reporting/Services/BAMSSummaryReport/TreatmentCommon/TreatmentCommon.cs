@@ -4,6 +4,7 @@ using System.Drawing;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
@@ -72,14 +73,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             var long_minutes = Math.Floor((longitude - 10_000 * long_degrees) / 100);
             var long_seconds = longitude - 10_000 * long_degrees - 100 * long_minutes;
 
-            var lat_string = $"{lat_degrees}°{lat_minutes}'{lat_seconds}\"N";
-            var long_string = $"{long_degrees}°{long_minutes}'{long_seconds}\"W";
+            // The "s are doubled up here so that they will be properly escaped in the excel formula.
+            var lat_string = $"{lat_degrees}°{lat_minutes}'{lat_seconds}\"\"N";
+            var long_string = $"{long_degrees}°{long_minutes}'{long_seconds}\"\"W";
 
-            worksheet.Cells[row, columnNo].Hyperlink = new Uri($"https://www.google.com/maps/place/{lat_string},{long_string}/data=!3m1!1e3", UriKind.Absolute);
             worksheet.Cells[row, columnNo].Style.Font.UnderLine = true;
             worksheet.Cells[row, columnNo].Style.Font.Color.SetColor(Color.Blue);
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+            var key = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+            worksheet.Cells[row, columnNo++].Formula = $"HYPERLINK(\"https://www.google.com/maps/place/{lat_string},{long_string}/data=!3m1!1e3\", \"{key}\")";
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             var district_string = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "DISTRICT");

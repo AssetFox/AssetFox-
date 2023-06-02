@@ -45,7 +45,7 @@ namespace BridgeCareCore.Security
 
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.B2C)
             {
-                // TRY TODO goal to read group name set in Azure B2C(that will be IP role name: then retrieve internal role and then claims as below post end TRY
+                // Read group name(s) set in Azure B2C(that will be IP role name: then retrieve internal role and then claims as below
                 var groupNames = new List<string>();
                 var groupClaimType = "group";
                 if (!principal.HasClaim(claim => claim.Type == groupClaimType))
@@ -56,8 +56,7 @@ namespace BridgeCareCore.Security
                     groupNames = await _graphApiClientService.GetGraphApiUserMemberGroup(nameidentifier.Value);
                 }
                 var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, groupNames);
-                // end TRY
-
+                
                 // TODO new List<string>{ SecurityConstants.Role.Administrator } will get replaced by role found in group above
                 internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, new List<string>
                  { SecurityConstants.Role.Administrator });

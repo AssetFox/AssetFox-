@@ -3,7 +3,8 @@
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     /// <summary>
-    /// .
+    /// The logic used to determine if a specific treatment should be funded through the
+    /// cash flow system which allows a treatment to be funded over mutliple years.
     /// </summary>
     public sealed class CashFlowConsiderationDetail
     {
@@ -18,12 +19,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         }
 
         /// <summary>
-        /// .
+        /// Name of the cash flow rule being considered
         /// </summary>
         public string CashFlowRuleName { get; }
 
         /// <summary>
-        /// .
+        /// Result of the decision regarding this specific treatment and cash flow rule
         /// </summary>
         public ReasonAgainstCashFlow ReasonAgainstCashFlow { get; set; }
 

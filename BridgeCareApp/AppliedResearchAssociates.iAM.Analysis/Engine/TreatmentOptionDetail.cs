@@ -3,7 +3,8 @@
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     /// <summary>
-    /// .
+    /// Results of applying a specific treatment.  Note that is does NOT mean that this specific treatment was applied.
+    /// The applied treatment is part of the AssetDetail object.
     /// </summary>
     public sealed class TreatmentOptionDetail
     {
@@ -22,27 +23,28 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         }
 
         /// <summary>
-        /// .
+        /// The benefit of applying this treatment as calculated by the difference between the do nothing option and
+        /// the resulting value of the benefit attribute if the treatment was applied.
         /// </summary>
         public double Benefit { get; }
 
         /// <summary>
-        /// .
+        /// The change in condition immedatley after the treatment is applied.
         /// </summary>
         public double ConditionChange { get; }
 
         /// <summary>
-        /// .
+        /// The cost of the treatment for the specific asset
         /// </summary>
         public double Cost { get; }
 
         /// <summary>
-        /// .
+        /// The remaining lift of the asset if the treatment is applied
         /// </summary>
         public double? RemainingLife { get; }
 
         /// <summary>
-        /// .
+        /// The name of the treatment being considered
         /// </summary>
         public string TreatmentName { get; }
 

@@ -221,6 +221,7 @@ export default class Data extends Vue {
     @Watch('stateConstraintType')
     onStateConstraintTypeChanged(){
         this.constraintTypeRadioGroup = this.stateConstraintType
+        console.log("Constrait here");
     }
 
     @Watch('networks')

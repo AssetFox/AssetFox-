@@ -95,8 +95,7 @@
 
         @Watch('stateInventoryReportNames')
         onStateInventoryReportNamesChanged(){
-/*             this.constraintDetails = this.stateConstraintType;
- */            if(this.stateInventoryReportNames.length > 0)
+            if(this.stateInventoryReportNames.length > 0)
                 this.inventoryReportName = this.stateInventoryReportNames[0]
         }
 
@@ -116,15 +115,13 @@
             })();
         }
 
-        
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            (async () => { 
-                await vm.getConstraintTypeAction();
-            })();
-        });
-    }
-
+        beforeRouteEnter(to: any, from: any, next: any) {
+            next((vm: any) => {
+                (async () => { 
+                    await vm.getConstraintTypeAction();
+                })();
+            });
+        }
 
         created() {
             this.inventorySelectListsWorker = this.$worker.create(

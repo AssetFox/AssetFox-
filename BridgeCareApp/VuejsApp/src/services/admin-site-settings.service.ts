@@ -8,6 +8,16 @@ export default class AdminSiteSettingsService {
     static getProductLogo(): AxiosPromise {
         return coreAxiosInstance.get(`${API.AdminSettings}/GetImplementationLogo`);
     }
+    static getImplementationName(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AdminSettings}/GetImplementationName`);
+    }
+    static importImplementationName(input: String): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.AdminSettings}/SetImplementationName`,
+            input,
+            {headers: {'Content-Type': 'multipart/form-data'}},
+        );
+    }
     static importAgencyLogo(file: File): AxiosPromise {
         var reader = new FileReader();
         reader.readAsDataURL(file);

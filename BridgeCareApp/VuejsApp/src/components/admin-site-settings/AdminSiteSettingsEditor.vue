@@ -26,7 +26,7 @@
                  <v-subheader class="ghd-control-label ghd-md-gray Montserrat-font-family">Agency Logo </v-subheader>
              </v-layout>
              </v-flex>
-             <input id="agencyImageUpload" type="file" accept="image/*" hidden>
+             <input id="agencyImageUpload" type="file" accept="image/*" ref="agencyFileInput" @change="handleAgencyLogoUpload" hidden>
              <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-right: 40%;" @click="onUploadAgencyLogo" outline>Upload</v-btn>
          </v-layout>
 
@@ -65,7 +65,7 @@ export default class AdminSiteSettingsEditor extends Vue{
      @Action('setAgencyLogo') setAgencyLogoAction: any;
      @Action('setImplementationLogo') setImplementationLogoAction: any;
 
-     ImplementationID: string | null = '';
+     ImplementationID: String = '';
      PerformanceCurvesFile: File | null;
 
 
@@ -76,23 +76,19 @@ export default class AdminSiteSettingsEditor extends Vue{
            
 
  onSaveImplementationName(){
-     this.setImplemetnationNameAction(({implementationName: this.implementationID}));
+        AdminSiteSettingsService.importImplementationName(this.ImplementationID);
  }
-
- onUploadAgencyLogo(){
-    document.getElementById("agencyImageUpload")?.click();
-    //Post method will be handled once backend API is available for this feature
- }
-
+ 
  handleImplementationLogoUpload(event: { target: { files: any[]; }; }){
     const file = event.target.files[0];
     AdminSiteSettingsService.importProductLogo(file);
  }
 
- onUploadImplementationLogo(){
-    document.getElementById("implementationImageUpload")?.click()
-    //Post method will be handled once backend API is available for this feature
+ handleAgencyLogoUpload(event: { target: { files: any[]; }; }){
+    const file = event.target.files[0];
+    AdminSiteSettingsService.importAgencyLogo(file);
  }
+
 }
 </script>
 

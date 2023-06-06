@@ -7,6 +7,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public Guid CommittedProjectId { get; set; }
 
+        public float PerformanceFactor { get; set; }
+
         public virtual CommittedProjectEntity CommittedProject { get; set; }
     }
 }

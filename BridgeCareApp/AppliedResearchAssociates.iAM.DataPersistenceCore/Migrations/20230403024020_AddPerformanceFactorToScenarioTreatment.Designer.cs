@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,44 +12,17 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    partial class IAMContextModelSnapshot : ModelSnapshot
+    [Migration("20230403024020_AddPerformanceFactorToScenarioTreatment")]
+    partial class AddPerformanceFactorToScenarioTreatment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("ProductVersion", "6.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AdminSettingEntity", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
-
-                    b.Property<string>("ImplementationName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("InventoryReportNames")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KeyFields")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PrimaryNetwork")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SimulationReportNames")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("AdminSettings");
-                });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AggregatedResultEntity", b =>
                 {
@@ -753,9 +727,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<float>("PerformanceFactor")
-                        .HasColumnType("real");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AttributeId");
@@ -798,6 +769,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("PerformanceFactor")
+                        .HasColumnType("float");
 
                     b.Property<Guid?>("ScenarioBudgetId")
                         .HasColumnType("uniqueidentifier");
@@ -1329,17 +1303,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PriorityLevel")
                         .HasColumnType("int");
@@ -2609,6 +2577,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double>("PerformanceFactor")
+                        .HasColumnType("float");
+
                     b.Property<int>("ShadowForAnyTreatment")
                         .HasColumnType("int");
 
@@ -2715,40 +2686,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TreatmentLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentPerformanceFactorEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Attribute")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<float>("PerformanceFactor")
-                        .HasColumnType("real");
-
-                    b.Property<Guid>("TreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TreatmentId");
-
-                    b.ToTable("TreatmentPerformanceFactor");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSchedulingEntity", b =>
@@ -3140,17 +3077,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3208,17 +3139,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PriorityLevel")
                         .HasColumnType("int");
@@ -3254,17 +3179,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SimulationId")
                         .HasColumnType("uniqueidentifier");
@@ -3448,17 +3367,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3525,17 +3438,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<double>("DeficientLimit")
                         .HasColumnType("float");
 
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3598,17 +3505,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3705,17 +3606,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SimulationId")
                         .HasColumnType("uniqueidentifier");
@@ -3777,17 +3672,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -4025,21 +3914,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LibraryId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("PerformanceFactor")
+                        .HasColumnType("float");
 
                     b.Property<int>("ShadowForAnyTreatment")
                         .HasColumnType("int");
@@ -4114,40 +4000,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsUnique();
 
                     b.ToTable("ScenarioTreatmentCost_Equation", (string)null);
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentPerformanceFactorEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Attribute")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<float>("PerformanceFactor")
-                        .HasColumnType("real");
-
-                    b.Property<Guid>("ScenarioSelectableTreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ScenarioSelectableTreatmentId");
-
-                    b.ToTable("ScenarioTreatmentPerformanceFactor");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSchedulingEntity", b =>
@@ -5880,17 +5732,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("TreatmentCost");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentPerformanceFactorEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithMany("TreatmentPerformanceFactors")
-                        .HasForeignKey("TreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SelectableTreatment");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSchedulingEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", "SelectableTreatment")
@@ -6498,17 +6339,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("ScenarioTreatmentCost");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentPerformanceFactorEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
-                        .WithMany("ScenarioTreatmentPerformanceFactors")
-                        .HasForeignKey("ScenarioSelectableTreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ScenarioSelectableTreatment");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSchedulingEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
@@ -7064,8 +6894,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("TreatmentCosts");
 
-                    b.Navigation("TreatmentPerformanceFactors");
-
                     b.Navigation("TreatmentSchedulings");
 
                     b.Navigation("TreatmentSupersessions");
@@ -7197,8 +7025,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("ScenarioTreatmentConsequences");
 
                     b.Navigation("ScenarioTreatmentCosts");
-
-                    b.Navigation("ScenarioTreatmentPerformanceFactors");
 
                     b.Navigation("ScenarioTreatmentSchedulings");
 

@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         {
             TreatmentConsequences = new HashSet<ConditionalTreatmentConsequenceEntity>();
             TreatmentCosts = new HashSet<TreatmentCostEntity>();
+            TreatmentPerformanceFactors = new HashSet<TreatmentPerformanceFactorEntity>();
             TreatmentSchedulings = new HashSet<TreatmentSchedulingEntity>();
             TreatmentSupersessions = new HashSet<TreatmentSupersessionEntity>();
         }
@@ -30,6 +31,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<ConditionalTreatmentConsequenceEntity> TreatmentConsequences { get; set; }
 
         public virtual ICollection<TreatmentCostEntity> TreatmentCosts { get; set; }
+
+        public virtual ICollection<TreatmentPerformanceFactorEntity> TreatmentPerformanceFactors { get; set; }
 
         public virtual ICollection<TreatmentSchedulingEntity> TreatmentSchedulings { get; set; }
 

@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = domain.ShadowForSameTreatment,
                 Cost = domain.Cost,
                 Year = domain.Year,
-                treatmentCategory = domain.treatmentCategory
+                treatmentCategory = domain.treatmentCategory,
             };
 
             entity.CommittedProjectLocation = maintainableAsset.MaintainableAssetLocation.ToCommittedProjectLocation(entity);
@@ -222,10 +222,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             committedProject.Cost = entity.Cost; 
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
             committedProject.LastModifiedDate = entity.LastModifiedDate;
-
             if (entity.CommittedProjectConsequences.Any())
             {
-                entity.CommittedProjectConsequences.ForEach(_ => _.CreateCommittedProjectConsequence(committedProject));
+                entity.CommittedProjectConsequences.ForEach(_ =>
+                {
+                    _.CreateCommittedProjectConsequence(committedProject);
+                    var numberAttributes = simulation.Network.Explorer.NumberAttributes;
+                    foreach (var attribute in numberAttributes)
+                    {
+                        if (attribute.Name == _.Attribute.Name)
+                        {
+                            committedProject.PerformanceCurveAdjustmentFactors.Add(attribute, _.PerformanceFactor);
+                        }
+                    }
+                });
             }
             if (noTreatmentForCommittedProjects)
             {

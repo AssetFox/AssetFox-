@@ -20,10 +20,20 @@ export enum AssetType {
     culvert,
 }
 
+export interface TreatmentAttributeFactor {
+    attribute: string;
+    factor: number;
+}
 export interface TreatmentCost {
     id: string;
     equation: Equation;
     criterionLibrary: CriterionLibrary;
+}
+
+export interface TreatmentPerformanceFactor {
+    id: string;
+    attribute: string;
+    performanceFactor: number;
 }
 
 export interface TreatmentConsequence {
@@ -43,6 +53,7 @@ export interface Treatment {
     criterionLibrary: CriterionLibrary;
     costs: TreatmentCost[];
     consequences: TreatmentConsequence[];
+    performanceFactors: TreatmentPerformanceFactor[];
     budgetIds: string[];
     addTreatment: boolean;
     category: TreatmentCategory;
@@ -92,6 +103,7 @@ export const emptyCost: TreatmentCost = {
     criterionLibrary: clone(emptyCriterionLibrary),
 };
 
+
 export const emptyConsequence: TreatmentConsequence = {
     id: getBlankGuid(),
     attribute: '',
@@ -113,8 +125,9 @@ export const emptyTreatment: Treatment = {
     addTreatment: false,
     category: TreatmentCategory.preservation,
     assetType: AssetType.bridge,
+    performanceFactors: [],
     isModified: false,
-    libraryId: ''
+    libraryId:  getBlankGuid(),
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {

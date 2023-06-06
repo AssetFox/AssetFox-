@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             ScenarioSelectableTreatmentScenarioBudgetJoins = new HashSet<ScenarioSelectableTreatmentScenarioBudgetEntity>();
             ScenarioTreatmentConsequences = new HashSet<ScenarioConditionalTreatmentConsequenceEntity>();
             ScenarioTreatmentCosts = new HashSet<ScenarioTreatmentCostEntity>();
+            ScenarioTreatmentPerformanceFactors = new HashSet<ScenarioTreatmentPerformanceFactorEntity>();
             ScenarioTreatmentSchedulings = new HashSet<ScenarioTreatmentSchedulingEntity>();
             ScenarioTreatmentSupersessions = new HashSet<ScenarioTreatmentSupersessionEntity>();
         }
@@ -33,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<ScenarioSelectableTreatmentScenarioBudgetEntity> ScenarioSelectableTreatmentScenarioBudgetJoins { get; set; }
         public virtual ICollection<ScenarioConditionalTreatmentConsequenceEntity> ScenarioTreatmentConsequences { get; set; }
         public virtual ICollection<ScenarioTreatmentCostEntity> ScenarioTreatmentCosts { get; set; }
+        public virtual ICollection<ScenarioTreatmentPerformanceFactorEntity> ScenarioTreatmentPerformanceFactors { get; set; }
         public virtual ICollection<ScenarioTreatmentSchedulingEntity> ScenarioTreatmentSchedulings { get; set; }
         public virtual ICollection<ScenarioTreatmentSupersessionEntity> ScenarioTreatmentSupersessions { get; set; }
     }

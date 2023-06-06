@@ -3,9 +3,6 @@ import {axiosInstance, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import { InventoryItem } from '@/shared/models/iAM/inventory';
 
 export default class InventoryService {
-    static getPennDOTInventory(): AxiosPromise {
-        return coreAxiosInstance.get('/api/Inventory/GetPennDOTInventory');
-    }
     static getInventory(keyProperties: string[]) {
         return coreAxiosInstance.get('/api/Inventory/GetInventory',
         {   

@@ -42,6 +42,7 @@
                                 </v-layout>
                             </v-flex>
                                 <v-btn
+                                    id="CriteriaEditor-addSubCriteria-btn"
                                     @click="onAddSubCriteria"
                                     class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"    
                                     depressed                                
@@ -102,6 +103,7 @@
                             <v-layout>
                                 <div class="validation-check-btn-container">
                                     <v-btn
+                                        id="CriteriaEditor-checkOutput-btn"
                                         :disabled="onDisableCheckOutputButton()"
                                         @click="onCheckCriteria"
                                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
@@ -120,6 +122,7 @@
                                         }}</strong>
                                     </p>
                                     <p
+                                        id="CriteriaEditor-validOutput-p"
                                         class="valid-message"
                                         v-if="validCriteriaMessage !== null"
                                     >
@@ -158,10 +161,10 @@
                             <v-tabs class="ghd-control-text" style="margin-left:4px;margin-right:4px;"
                                 v-if="selectedSubCriteriaClauseIndex !== -1"
                             >
-                                <v-tab @click="onParseRawSubCriteria" ripple>
+                                <v-tab @click="onParseRawSubCriteria" ripple  id="CriteriaEditor-treeView-tab">
                                     Tree View
                                 </v-tab>
-                                <v-tab @click="onParseSubCriteriaJson" ripple>
+                                <v-tab @click="onParseSubCriteriaJson" ripple id="CriteriaEditor-rawView-tab">
                                     Raw Criteria
                                 </v-tab>
                                 <v-tab-item>
@@ -177,6 +180,7 @@
                                 </v-tab-item>
                                 <v-tab-item>
                                     <v-textarea
+                                        id="CriteriaEditor-rawText-vtextarea"
                                         no-resize
                                         outline
                                         rows="23"
@@ -213,6 +217,7 @@
                                 </div>        
                                 <div class="validation-check-btn-container" style="height:64px;margin-top:4px;">
                                     <v-btn 
+                                        id="CriteriaEditor-updateSubcriteria-btn"
                                         :disabled="
                                             onDisableCheckCriteriaButton()
                                         "
@@ -236,6 +241,7 @@
             >
                 <v-layout justify-center wrap>
                     <v-btn
+                        id="CriteriaEditor-save-btn"
                         :disabled="cannotSubmit"
                         @click="onSubmitCriteriaEditorResult(true)"
                         class="ara-blue-bg white--text"
@@ -243,6 +249,7 @@
                         Save
                     </v-btn>
                     <v-btn
+                        id="CriteriaEditor-cancel-btn"
                         @click="onSubmitCriteriaEditorResult(false)"
                         class="ara-orange-bg white--text"
                         >Cancel</v-btn

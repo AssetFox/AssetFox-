@@ -49,6 +49,7 @@
                             Create New Library
                         </v-btn>
                         <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
+                            id="CashFlowEditor-addCashFlowRule-btn"
                             outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Add Cash Flow Rule
                         </v-btn>
@@ -130,6 +131,7 @@
                             </v-menu>
                             <v-btn
                                 @click="onEditCashFlowRuleCriterionLibrary(props.item)"
+                                id="CashFlowEditor-editCashFlowRule-btn"
                                 class="ghd-blue"
                                 icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
@@ -141,12 +143,14 @@
                             <v-layout style='flex-wrap:nowrap'>
                                 <v-btn
                                 @click="onDeleteCashFlowRule(props.item.id)"
+                                id="CashFlowEditor-deleteCashFlowRule-btn"
                                 class="ghd-blue"
                                 icon>
                                 <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>
                             <v-btn
                                 @click="onSelectCashFlowRule(props.item.id)"
+                                id="CashFlowEditor-editCashFlowRuleDistribution-btn"
                                 class="ghd-blue"
                                 icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit-cash.svg')"/>
@@ -202,6 +206,7 @@
                     Create as New Library
                 </v-btn>
                 <v-btn
+                    id="CashFlowEditor-save-btn"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onUpsertScenarioCashFlowRules"
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'

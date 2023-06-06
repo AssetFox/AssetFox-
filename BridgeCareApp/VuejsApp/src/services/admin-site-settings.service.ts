@@ -14,7 +14,7 @@ export default class AdminSiteSettingsService {
         let formData = new FormData();
         formData.append('file', file);
         return coreAxiosInstance.post(
-            `${API.RawData}/SetAgencyLogo`,
+            `${API.AdminSettings}/SetAgencyLogo`,
             formData,
             {headers: {'Content-Type': 'multipart/form-data'}},
         );
@@ -25,7 +25,7 @@ export default class AdminSiteSettingsService {
         let formData = new FormData();
         formData.append('file', file);
         return coreAxiosInstance.post(
-            `${API.RawData}/SetImplementationLogo`,
+            `${API.AdminSettings}/SetImplementationLogo`,
             formData,
             {headers: {'Content-Type': 'multipart/form-data'}},
         );

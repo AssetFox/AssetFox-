@@ -104,15 +104,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public string GetPrimaryNetwork()
         {
             var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == primaryNetworkKey);
-            var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
-            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
-
             if (existingPrimaryNetwork == null)
             {
                 return null;
             }
             else
-            {                
+            {
+                var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
+                var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
                 return existingNetwork.Name;
             }
         }

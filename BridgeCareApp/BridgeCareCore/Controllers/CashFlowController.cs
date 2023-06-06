@@ -160,7 +160,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    var libraryAccess = UnitOfWork.BudgetRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
+                    var libraryAccess = UnitOfWork.CashFlowRuleRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
                     if (libraryAccess.LibraryExists == upsertRequest.IsNewLibrary)
                     {
                         var errorMessage = libraryAccess.LibraryExists ? RequestedToCreateExistingLibraryErrorMessage : RequestedToModifyNonexistentLibraryErrorMessage;

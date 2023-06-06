@@ -28,6 +28,9 @@ namespace BridgeCareCore.Controllers
         private readonly IClaimHelper _claimHelper;
         private readonly IDeficientConditionGoalPagingService _deficientConditionGoalService;
 
+        public const string RequestedToModifyNonexistentLibraryErrorMessage = "The request says to modify a library, but the library does not exist.";
+        public const string RequestedToCreateExistingLibraryErrorMessage = "The request says to create a new library, but the library already exists.";
+
         public DeficientConditionGoalController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
             IDeficientConditionGoalPagingService deficientConditionGoalService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
@@ -49,7 +52,11 @@ namespace BridgeCareCore.Controllers
                     result = UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesNoChildren();
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
+                        result = UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesNoChildrenAccessibleToUser(UserId);
+                    }
+                    else
+                    {
+                        result = UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesNoChildren();
                     }
                 });
 
@@ -158,11 +165,17 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
+                    var libraryAccess = UnitOfWork.DeficientConditionGoalRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
+                    if (libraryAccess.LibraryExists == upsertRequest.IsNewLibrary)
+                    {
+                        var errorMessage = libraryAccess.LibraryExists ? RequestedToCreateExistingLibraryErrorMessage : RequestedToModifyNonexistentLibraryErrorMessage;
+                        throw new InvalidOperationException(errorMessage);
+                    }
                     var items = _deficientConditionGoalService.GetSyncedLibraryDataset(upsertRequest);
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
-                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(libraryAccess, UserId);
                         dto.DeficientConditionGoals = items;
                     }
                     UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibraryAndGoals(dto);
@@ -229,7 +242,9 @@ namespace BridgeCareCore.Controllers
                         var dto = UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()
                         .FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
+
+                        var access = UnitOfWork.DeficientConditionGoalRepo.GetLibraryAccess(libraryId, UserId);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(access, UserId);
                     }
                     UnitOfWork.DeficientConditionGoalRepo.DeleteDeficientConditionGoalLibrary(libraryId);
                 });
@@ -287,7 +302,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     var accessModel = UnitOfWork.DeficientConditionGoalRepo.GetLibraryAccess(libraryId, UserId);
-                    _claimHelper.RequirePermittedCheck();
+                    _claimHelper.CheckGetLibraryUsersValidity(accessModel, UserId);
                     users = UnitOfWork.DeficientConditionGoalRepo.GetLibraryUsers(libraryId);
                 });
                 return Ok(users);

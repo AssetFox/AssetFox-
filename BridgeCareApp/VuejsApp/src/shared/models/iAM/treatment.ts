@@ -127,7 +127,7 @@ export const emptyTreatment: Treatment = {
     assetType: AssetType.bridge,
     performanceFactors: [],
     isModified: false,
-    libraryId: '',
+    libraryId:  getBlankGuid(),
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {

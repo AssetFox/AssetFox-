@@ -9,7 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ITreatmentPerformanceFactorRepository
     {
-       void UpsertOrDeleteScenarioTreatmentPerformanceFactors(Dictionary<Guid, List<TreatmentPerformanceFactorDTO>> scenarioTreatmentPerformanceFactorPerTreatmentId,
+       void UpsertScenarioTreatmentPerformanceFactors(Dictionary<Guid, List<TreatmentPerformanceFactorDTO>> scenarioTreatmentPerformanceFactorPerTreatmentId,
            Guid SimulationId);
+
+       void DeleteScenarioTreatmentPerformanceFactors(Dictionary<Guid, List<TreatmentPerformanceFactorDTO>> scenarioTreatmentPerformanceFactorPerTreatmentId, Guid SimulationId);
     }
 }

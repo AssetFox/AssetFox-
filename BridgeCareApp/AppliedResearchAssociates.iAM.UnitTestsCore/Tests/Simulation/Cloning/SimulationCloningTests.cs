@@ -119,6 +119,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public void SimulationInDbWithScenarioBudgetWithCriterionLibrary_Clone_Clones()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.New(budgetId);
+            budget.CriterionLibrary = CriterionLibraryDtos.Dto();
+            var budgets = new List<BudgetDTO> { budget };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
+            var clonedBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(cloningResult.Simulation.Id);
+            var clonedBudget = clonedBudgets.Single();
+            var originalLibrary = budget.CriterionLibrary;
+            var clonedLibrary = clonedBudget.CriterionLibrary;
+            Assert.NotEqual(originalLibrary.Id, clonedLibrary.Id);
+            Assert.True(clonedLibrary.IsSingleUse);
+            
+            ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.CriterionLibrary, b => b.BudgetAmounts[0].Id);
+        }
+
+
+        [Fact]
         public void SimulationInDbWithBudgetPriority_Clone_Clones()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();

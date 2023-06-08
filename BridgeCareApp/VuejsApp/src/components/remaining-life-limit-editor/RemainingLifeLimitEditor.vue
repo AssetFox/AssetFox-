@@ -727,7 +727,6 @@ export default class RemainingLifeLimitEditor extends Vue {
                 this.clearChanges()
                 this.resetPage();
                 this.addedOrUpdatedRemainingLifeLimitLibraryMutator(this.selectedRemainingLifeLimitLibrary);
-                this.selectedRemainingLifeLimitLibraryMutator(this.selectedRemainingLifeLimitLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated remaining life limit library",});
             }
         });

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -28,11 +28,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        private const string inventoryReportKey = "InventoryReportNames";
-        private const string simulationReportKey = "SimulationReportNames";
-        private const string keyFieldKey = "KeyFields";
-        private const string primaryNetworkKey = "PrimaryNetwork";
-        private const string constraintTypeKey = "ConstraintType";
+        public const string inventoryReportKey = "InventoryReportNames";
+        public const string simulationReportKey = "SimulationReportNames";
+        public const string keyFieldKey = "KeyFields";
+        public const string primaryNetworkKey = "PrimaryNetwork";
+        public const string constraintTypeKey = "ConstraintType";
 
         //Reads in KeyFields record as a string but places values in a list to return.
         public IList<string> GetKeyFields()
@@ -104,17 +104,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public string GetPrimaryNetwork()
         {
             var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == primaryNetworkKey);
-            var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
-            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
-
             if (existingPrimaryNetwork == null)
             {
                 return null;
             }
-            else
-            {                
-                return existingNetwork.Name;
-            }
+            var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
+            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
+
+            return existingNetwork.Name;
+            
         }
 
         public void SetPrimaryNetwork(string name)
@@ -346,5 +344,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             _unitOfWork.Context.SaveChanges();
         }
+        public void DeleteAdminSetting(string settingKey)
+        {
+            _unitOfWork.Context.DeleteEntity<AdminSettingsEntity>(_ => _.Key == settingKey);
+        }
     }
+
+    
 }

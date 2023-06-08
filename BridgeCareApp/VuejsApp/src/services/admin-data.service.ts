@@ -14,6 +14,9 @@ export default class AdminDataService {
     static setPrimaryNetwork(name: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.AdminData}/SetPrimaryNetwork/${name}`);
     }
+    static getAvailableReportNames(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AdminData}/GetAvailableReports`);
+    }
     static getSimulationReportNames(): AxiosPromise {
         return coreAxiosInstance.get(`${API.AdminData}/GetSimulationReportNames`);
     }

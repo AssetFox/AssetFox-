@@ -125,6 +125,27 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetAvailableReports")]
+        [Authorize]
+        public async Task<IActionResult> GetAvailableReports()
+        {
+            try
+            {
+                List<string> AvailableReportNames = new List<string>();
+                foreach (IReportFactory report in _factory.ReportList)
+                {
+                    AvailableReportNames.Add(report.Name);
+                }
+                return Ok(AvailableReportNames);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetSimulationReportNames - {e.Message}");
+                throw;
+            }
+        }
+
         [HttpPost]
         [Route("SetInventoryReports/{InventoryReports}")]
         [ClaimAuthorize("AdminAccess")]
@@ -141,6 +162,7 @@ namespace BridgeCareCore.Controllers
                     try
                     {
                         var reportObject = await _generator.Generate(inventoryReport);
+                        
                         //If cannot be created in lookup library (Existence Check)
                         if (!_factory.CanGenerateReport(inventoryReport))
                         {

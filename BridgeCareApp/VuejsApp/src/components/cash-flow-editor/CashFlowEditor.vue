@@ -60,6 +60,7 @@
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="cash-flow-library-tables">
                 <v-data-table
+                    id="CashFlowEditor-cashFlowRules-table"
                     :headers="cashFlowRuleGridHeaders"
                     :items="currentPage"  
                     :pagination.sync="pagination"
@@ -83,6 +84,7 @@
                                 @save="onEditSelectedLibraryListData(props.item,'description')"
                                 >
                                 <v-text-field
+                                    id="CashFlowEditor-ruleName-text"
                                     readonly
                                     single-line
                                     class="sm-txt"
@@ -107,6 +109,7 @@
                                 min-width="500px">
                                 <template slot="activator">
                                     <v-text-field
+                                        id="CashFlowEditor-criteria-text"
                                         readonly
                                         single-line
                                         class="sm-txt"

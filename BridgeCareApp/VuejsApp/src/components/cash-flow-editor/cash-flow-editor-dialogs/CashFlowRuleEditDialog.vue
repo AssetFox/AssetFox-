@@ -172,7 +172,7 @@
                             
       <v-card-actions>
         <v-layout justify-center row>
-            <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+            <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline id="CashFlowRuleEditDialog-cancel-btn">
             Cancel
           </v-btn>
           <v-btn @click="onSubmit(true)"

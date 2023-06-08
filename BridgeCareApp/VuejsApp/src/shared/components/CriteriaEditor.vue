@@ -169,6 +169,7 @@
                                 </v-tab>
                                 <v-tab-item>
                                     <vue-query-builder 
+                                        id="CriteriaEditor-criteria-vuequerybuilder"
                                         :labels="queryBuilderLabels"
                                         :maxDepth="25"
                                         :rules="queryBuilderRules"

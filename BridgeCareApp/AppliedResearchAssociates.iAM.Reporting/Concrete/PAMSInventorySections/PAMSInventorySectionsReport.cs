@@ -12,9 +12,13 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.CountySummary;
 using Humanizer;
+using Microsoft.Extensions.Primitives;
+using NetTopologySuite.Algorithm;
 using Newtonsoft.Json;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using static System.Collections.Specialized.BitVector32;
 
 namespace AppliedResearchAssociates.iAM.Reporting
@@ -79,11 +83,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE_NAME", "SURFACEID", "L_S_TYPE","R_S_TYPE", "YR_BUILT", "YEAR_LAST_OVERLAY", "LAST_STRUCTURAL_OVERLAY" }));
             resultsString.Append(CreateHTMLSection("Survey Information", new List<string>() { "Survey Date" }));
             resultsString.Append(CreateHTMLSection("Measured Conditions", new List<string>() { "OPI", "ROUGHNESS" }));
-            resultsString.Append(CreateHTMLSection("Surface Defects", new List<string>() { "BEDGDTR1","BEDGDTR2","BEDGDTR3","BFATICR1","BFATICR2","BFATICR3",
-                "BLRUTDP1","BLRUTDP2","BLRUTDP3","BLTEDGE1","BLTEDGE2","BLTEDGE3","BMISCCK1","BMISCCK2","BMISCCK3","BPATCHCT","BPATCHSF","BRAVLWT2","BRAVLWT3",
-                "BRRUTDP1","BRRUTDP2","BRRUTDP3","BTRNSCT1","BTRNSCT2","BTRNSCT3","BTRNSFT1","BTRNSFT2","BTRNSFT3","CBPATCCT","CBPATCSF",
-                "CBRKSLB1","CBRKSLB2","CBRKSLB3","CFLTJNT2","CFLTJNT3","CJOINTCT","CLJCPRU1","CLJCPRU2","CLJCPRU3","CLNGCRK1","CLNGCRK2","CLNGCRK3",
-                "CLNGJNT1","CLNGJNT2","CLNGJNT3","CNSLABCT","CPCCPACT","CPCCPASF","CRJCPRU1","CRJCPRU2","CRJCPRU3","CTRNCRK1","CTRNCRK2", "CTRNCRK3","CTRNJNT1", "CTRNJNT2", "CTRNJNT3" }));
+            resultsString.Append(CreateHTMLDistressSection("Surface Defects", new List<string>() { }));
 
             resultsString.Append("</table>");
             Results = resultsString.ToString();
@@ -150,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private string CreateHTMLSection(string sectionName, List<string> attributes, int numberColumns = DEFAULT_COLUMNS, bool previous = false)
         {
-            var sectionString = new StringBuilder($"<tr><th colspan=\"4\" class=\"report-header report-cell\">{sectionName}</th></tr>");
+            var sectionString = new StringBuilder($"<tr><th colspan=\"4\" class=\"report-header report-cell\" style=\"text-align:left;vertical-align:middle;background-color:lightblue;\">{sectionName}</th></tr>");
             int remainingColumns = numberColumns;
             foreach (var attribute in attributes)
             {
@@ -171,6 +171,170 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     sectionString.Append($"</tr>");
                 }
             }
+
+            return sectionString.ToString();
+        }
+
+
+        private string CreateHTMLDistressSection(string sectionName, List<string> attributes, int numberColumns = 4, bool previous = false)
+        {
+            var sectionString = new StringBuilder($"<tr><th colspan=\"4\" class=\"report-header report-cell\" style=\"text-align:left;vertical-align:middle;background-color:lightgreen;\">{sectionName}</th></tr>");
+            sectionString.Append($"<tr><td colspan=\"4\" class=\"report-description report-cell\" style=\"text-align:left;font-style: italic;vertical-align:middle;background-color:lightred;\">Asphalt</td></tr>");
+           // sectionString.Append($"<tr><td class=\"report-data report-cell\" style=\"text-align:left;text-decoration: underline;vertical-align:middle;background-color:pink;\">Type</td>");
+            sectionString.Append($"<tr><td class=\"report-data report-cell\" style=\"text-align:left;text-decoration: underline;vertical-align:middle;background-color:transparent;\">Type</td>" +
+                                      "<td class=\"report-data report-cell\" style=\"text-align:center;text-decoration: underline;vertical-align:middle;background-color:transparent;\">L</td>" +
+                                      "<td class=\"report-data report-cell\" style=\"text-align:center;text-decoration: underline;vertical-align:middle;background-color:transparent;\">M</td>" +
+                                      "<td class=\"report-data report-cell\" style=\"text-align:center;text-decoration: underline;vertical-align:middle;background-color:transparent;\">H</td></tr>");
+
+
+            //"BEDGDTR1","BEDGDTR2","BEDGDTR3","BFATICR1","BFATICR2","BFATICR3",
+            //    "BLRUTDP1","BLRUTDP2","BLRUTDP3","BLTEDGE1","BLTEDGE2","BLTEDGE3","BMISCCK1","BMISCCK2","BMISCCK3","BPATCHCT","BPATCHSF","BRAVLWT2","BRAVLWT3",
+            //    "BRRUTDP1","BRRUTDP2","BRRUTDP3","BTRNSCT1","BTRNSCT2","BTRNSCT3","BTRNSFT1","BTRNSFT2","BTRNSFT3","CBPATCCT","CBPATCSF",
+            //    "CBRKSLB1","CBRKSLB2","CBRKSLB3","CFLTJNT2","CFLTJNT3","CJOINTCT","CLJCPRU1","CLJCPRU2","CLJCPRU3","CLNGCRK1","CLNGCRK2","CLNGCRK3",
+            //    "CLNGJNT1","CLNGJNT2","CLNGJNT3","CNSLABCT","CPCCPACT","CPCCPASF","CRJCPRU1","CRJCPRU2","CRJCPRU3","CTRNCRK1","CTRNCRK2", "CTRNCRK3","CTRNJNT1", "CTRNJNT2", "CTRNJNT3"
+
+
+            string[] types = new string[9];
+            types[0] = "Edge Deterioration";
+            types[1] = "Fatigue Cracking";
+            types[2] = "Left Rut Depth";
+            types[3] = "Right Rut Depth";
+            types[4] = "Left Edge Joint";
+            types[5] = "Misc.Cracking";
+            types[6] = "Raveling / Weathering";
+            types[7] = "Trans.Cracking(Ct.)";
+            types[8] = "Trans.Cracking(Length)";
+
+            //// Declare the array of two elements.
+            //int[][] arr = new int[2][];
+
+            //// Initialize the elements.
+            //arr[0] = new int[5] { 1, 3, 5, 7, 9 };
+            //arr[1] = new int[4] { 2, 4, 6, 8 };
+//            int[,] A = new int[2, 3]
+//{
+//                        {2, 5, 9},{6, 9, 15}
+//};
+
+            //Rows (j),cols (i)
+            string[,] distressArray = new string[9, 4]
+                {
+                    { "Edge Deterioration","BEDGDTR1", "BEDGDTR2", "BEDGDTR3" },
+                    { "Fatigue Cracking","BFATICR1", "BFATICR2", "BFATICR3" },
+                    { "Left Rut Depth","BLRUTDP1", "BLRUTDP2", "BLRUTDP3" },
+                    { "Right Rut Depth","BRRUTDP1", "BRRUTDP2", "BRRUTDP3" },
+                    { "Left Edge Joint","BLTEDGE1", "BLTEDGE2", "BLTEDGE3" },
+                    { "Misc.Cracking", "BMISCCK1", "BMISCCK2", "BMISCCK3" },
+                    { "Raveling / Weathering","BRAVLWT1", "BRAVLWT2", "BRAVLWT3" },
+                    { "Trans.Cracking(Ct.)","BTRNSCT1", "BTRNSCT2", "BTRNSCT3" },
+                    { "Trans.Cracking(Length)","BTRNSFT1", "BTRNSFT2", "BTRNSFT3" }
+                };
+
+
+
+
+
+            //new string[] { "Edge Deterioration", "Fatigue Cracking", "Left Rut Depth", "Right Rut Depth", "Left Edge Joint", "Misc.Cracking", "Raveling / Weathering", "Trans.Cracking(Ct.)","Trans.Cracking(Length)"},
+            //new string[] { "Edge Deterioration","BEDGDTR1", "BEDGDTR2", "BEDGDTR3" }, //"Edge Deterioration"
+            //new string[] { "Fatigue Cracking","BFATICR1", "BFATICR2", "BFATICR3" }, //"Fatigue Cracking";
+            //new string[] { "Left Rut Depth","BLRUTDP1", "BLRUTDP2", "BLRUTDP3" }, //"Left Rut Depth";
+            //new string[] { "Right Rut Depth","BRRUTDP1", "BRRUTDP2", "BRRUTDP3" }, //"Right Rut Depth";
+            //new string[] { "Left Edge Joint","BLTEDGE1", "BLTEDGE2", "BLTEDGE3" }, //"Left Edge Joint";
+            //new string[] { "Misc.Cracking", "BMISCCK1", "BMISCCK2", "BMISCCK3" }, //"Misc.Cracking";
+            //new string[] { "Raveling / Weathering","BRAVLWT1", "BRAVLWT2", "BRAVLWT3" }, //"Raveling/Weathering";
+            //new string[] { "Trans.Cracking(Ct.)","BTRNSCT1", "BTRNSCT2", "BTRNSCT3" }, //"Trans.Cracking(Ct.)";
+            //new string[] { "Trans.Cracking(Length)","BTRNSFT1", "BTRNSFT2", "BTRNSFT3" }  //"Trans.Cracking(Length)";
+            //};
+
+            // descriptions.Add("BPATCHCT", new AttributeDescription() { Description = "BITUMINIOUS PATCHING COUNT" });
+            // descriptions.Add("BPATCHSF", new AttributeDescription() { Description = "BITUMINIOUS PATCHING AREA (SF)" });
+
+
+            //string[] types = new string[3];
+            //types[0] = "BEDGDTR1";
+            //types[1] = "BFATICR1";
+            //types[2] = "BLRUTDP1";
+            //types[3] = "BLTEDGE1";
+            //types[4] = "BMISCCK1";
+            //types[5] = "BPATCHCT";
+            //types[6] = "BPATCHSF";
+            //types[7] = "BRAVLWT2";
+            // types[2] = "";
+
+            //for (int row = 0; row < 9; row++) //accessing rows
+            //{
+            //    for (int col = 0; col < 4; col++) //accessing columns
+            //    {
+            //        Console.WriteLine(distressArray[row, col]);
+            //        //if (rating[row][col] > num) //accessing elements
+            //        //    count++;
+            //    }
+            //}
+
+
+            int remainingColumns = numberColumns;
+            //foreach (var attribute in attributes)
+            for (int tmprow = 0; tmprow < distressArray.GetLength(0); tmprow++)
+            {
+
+                //distressArray.GetLength(1)
+
+                for (int tmpcol = 0; tmpcol < 1; tmpcol++)
+                {
+                    sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\" >{GetDescription(distressArray[tmprow, tmpcol])}</td>");
+                    sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{ GetAttribute(distressArray[tmprow, tmpcol + 1], previous)}</td>");
+                    sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(distressArray[tmprow, tmpcol+2], previous)}</td>");
+                    sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(distressArray[tmprow, tmpcol+3], previous)}</td>" );
+                 }
+                sectionString.Append($"</tr>");
+            }
+
+
+            sectionString.Append($"<tr><td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\"></td>" +
+                          "<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;text-decoration: underline;background-color:transparent;\">Count</td>" +
+                          "<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;text-decoration: underline;background-color:transparent;\">Area</td>" +
+                          "<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\"></td></tr>");
+
+            sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\" >Patching</td>");
+            sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPACT", previous)}</td>");
+            sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPASF", previous)}</td>");
+            sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td></tr>");
+
+
+            sectionString.Append($"<tr><td colspan=\"4\" class=\"report-description report-cell\" style=\"text-align:left;font-style: italic;vertical-align:middle;background-color:lightred;\">Jointed Concrete</td></tr>");
+
+            sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\">Number of Slabs</td>");
+            sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CNSLABCT", previous)}</td>");
+            sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td>");
+            sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td></tr>");
+
+
+            sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\">Joint Count</td>");
+            sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CJOINTCT", previous)}</td>");
+            sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td>");
+            sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td></tr>");
+
+
+            sectionString.Append($"<tr><td class=\"report-data report-cell\" style=\"text-align:left;text-decoration: underline;vertical-align:middle;background-color:transparent;\">Type</td>" +
+                                      "<td class=\"report-data report-cell\" style=\"text-align:center;text-decoration: underline;vertical-align:middle;background-color:transparent;\">L</td>" +
+                                      "<td class=\"report-data report-cell\" style=\"text-align:center;text-decoration: underline;vertical-align:middle;background-color:transparent;\">M</td>" +
+                                      "<td class=\"report-data report-cell\" style=\"text-align:center;text-decoration: underline;vertical-align:middle;background-color:transparent;\">H</td></tr>");
+
+
+
+
+
+            //sectionString.Append($"<tr><td colspan=\"4\" class=\"report-description report-cell\" style=\"text-align:left;font-style: italic;vertical-align:middle;background-color:lightred;\">Asphalt</td></tr>");
+            //// sectionString.Append($"<tr><td class=\"report-data report-cell\" style=\"text-align:left;text-decoration: underline;vertical-align:middle;background-color:pink;\">Type</td>");
+            //sectionString.Append($"<tr><td class=\"report-data report-cell\" style=\"text-align:left;text-decoration: underline;vertical-align:middle;background-color:transparent;\">Type</td>" +
+            //                          "<td class=\"report-data report-cell\" style=\"text-align:center;text-decoration: underline;vertical-align:middle;background-color:transparent;\">L</td>" +
+            //                          "<td class=\"report-data report-cell\" style=\"text-align:center;text-decoration: underline;vertical-align:middle;background-color:transparent;\">M</td>" +
+            //                          "<td class=\"report-data report-cell\" style=\"text-align:center;text-decoration: underline;vertical-align:middle;background-color:transparent;\">H</td></tr>");
+
+
+
+
+
 
             return sectionString.ToString();
         }

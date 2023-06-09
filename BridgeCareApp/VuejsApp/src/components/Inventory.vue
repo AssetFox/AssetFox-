@@ -22,7 +22,7 @@
                     </div>
                 </v-layout>
                 <v-spacer></v-spacer>
-                    <div v-if="stateInventoryReportNames.length > 0" class="flex xs2 justify-content: end">
+                    <div v-if="stateInventoryReportNames.length > 1" class="flex xs2 justify-content: end">
                         <v-select 
                             v-model="inventoryReportName" 
                             :items="stateInventoryReportNames">

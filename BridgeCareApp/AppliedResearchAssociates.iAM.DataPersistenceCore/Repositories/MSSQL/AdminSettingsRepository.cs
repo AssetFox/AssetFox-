@@ -38,6 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public IList<string> GetKeyFields()
         {
             var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").FirstOrDefault();
+
             if (existingKeyFields == null)
             {
                 return null;

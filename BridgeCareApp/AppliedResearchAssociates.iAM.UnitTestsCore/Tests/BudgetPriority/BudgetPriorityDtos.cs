@@ -22,6 +22,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return dto;
         }
 
+        public static BudgetPriorityDTO WithCriterionLibrary(Guid? id = null, int priorityLevel = 0, int? year = null)
+        {
+            var dto = New(id, priorityLevel, year);
+            dto.CriterionLibrary = CriterionLibraryDtos.Dto();
+            return dto;
+        }
+
         public static BudgetPriorityDTO WithPercentagePair(string budgetName, Guid budgetId, Guid? id = null, int priorityLevel = 0, int? year = null)
         {
             var dto = New(id, priorityLevel, year);

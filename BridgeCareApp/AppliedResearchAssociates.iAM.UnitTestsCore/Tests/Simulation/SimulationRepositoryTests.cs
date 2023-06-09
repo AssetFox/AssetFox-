@@ -606,7 +606,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.Equivalent(dtoBefore, dtoAfter);
             Assert.NotEqual(updateDto.Name, dtoAfter.Name);
         }
-        [Fact]
+        [Fact(Skip ="causing false positives in code coverage")]
         public void SimulationInDb_Clone_Clones()
         {
             // Arrange

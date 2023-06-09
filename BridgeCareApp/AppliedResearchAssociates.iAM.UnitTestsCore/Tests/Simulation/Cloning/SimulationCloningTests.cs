@@ -158,6 +158,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
             var budgetPriority = BudgetPriorityTestSetup.SetupSingleBudgetPriorityForSimulationInDb(simulationId);
 
+            //MDMD work here
             var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
 
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
@@ -165,8 +166,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var clonedPriority = clonedPriorities.Single();
             ObjectAssertions.EquivalentExcluding(budgetPriority, clonedPriority, bp => bp.Id, bp => bp.CriterionLibrary);
         }
-        
-        
+
+
+        [Fact]
+        public void SimulationInDbWithBudgetPriorityWithCriterionLibrary_Clone_Clones()
+        {
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var budgetPriority = BudgetPriorityTestSetup.SetupSingleBudgetPriorityWithCriterionLibraryForSimulationInDb(simulationId);
+
+            //MDMD work here
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
+            var clonedPriorities = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(clonedSimulation.Id);
+            var clonedPriority = clonedPriorities.Single();
+            ObjectAssertions.EquivalentExcluding(budgetPriority, clonedPriority, bp => bp.Id, bp => bp.CriterionLibrary);
+            var clonedLibrary = clonedPriority.CriterionLibrary;
+            Assert.True(clonedLibrary.IsSingleUse);
+            Assert.Equal("mergedCriteriaExpression", clonedLibrary.MergedCriteriaExpression);
+            Assert.Empty(clonedLibrary.AppliedScenarioIds);
+        }
+
+
         [Fact]
         public void SimulationInDbWithCashFlowRule_Clone_Clones()
         {

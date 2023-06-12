@@ -227,7 +227,7 @@
                 <v-flex xs2>
                     <div class="dev-and-ver-div">
                         <div class="font-weight-light">iAM</div>
-                        <div>BridgeCare &copy; 2021</div>
+                        <div>{{implementationName}}</div>
                         <div>{{ packageVersion }}</div>
                     </div>
                 </v-flex>
@@ -261,7 +261,7 @@ import {
 } from '@/shared/utils/http-utils';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import { clone } from 'ramda';
+import { bind, clone } from 'ramda';
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { newsAccessDateComparison, getDateOnly, getCurrentDateOnly } from '@/shared/utils/date-utils';
@@ -305,6 +305,7 @@ export default class AppComponent extends Vue {
     securityType: string;
     @State(state => state.announcementModule.announcements) announcements: Announcement[];
     @State(state => state.userModule.currentUser) currentUser: User;
+    @State(state => state.adminSiteSettingsModule.implementationName) stateImplementationName: string;
     @State(state => state.adminSiteSettingsModule.agencyLogo) agencyLogoBase64: string;
     @State(state => state.adminSiteSettingsModule.productLogo) productLogoBase64: string;
     
@@ -328,6 +329,7 @@ export default class AppComponent extends Vue {
     @Action('azureB2CLogout') azureB2CLogoutAction: any;
     @Action('getCurrentUserByUserName') getCurrentUserByUserNameAction: any;
     @Action('updateUserLastNewsAccessDate') updateUserLastNewsAccessDateAction: any;
+    @Action('getImplementationName') getImplementationNameAction: any;
     @Action('getAgencyLogo') getAgencyLogoAction: any;
     @Action('getProductLogo') getProductLogoAction: any;
 
@@ -353,6 +355,7 @@ export default class AppComponent extends Vue {
     hasUnreadNewsItem: boolean = false;
     currentURL: any = '';
     unauthorizedError: string = '';
+    implementationName: string = '';
     agencyLogo: string = '';
     productLogo: string = '';
 
@@ -410,7 +413,10 @@ export default class AppComponent extends Vue {
         this.currentUserLastNewsAccessDate = getDateOnly(this.currentUser.lastNewsAccessDate);
         this.checkLastNewsAccessDate();
     }
-
+    @Watch('stateImplementationName')
+    onimplementationNameChange() {
+        this.implementationName = this.stateImplementationName;
+    }
     @Watch('agencyLogoBase64')
     onAgencyLogoBase64Change() {
         this.agencyLogo = this.agencyLogoBase64;
@@ -549,6 +555,11 @@ export default class AppComponent extends Vue {
             this.productLogo = require(`@/assets/images/BridgeCareLogo.svg`)
         else
             this.productLogo = this.$config.productLogo
+
+        if(this.implementationName === "")
+            this.implementationName = "BridgeCare"
+        else
+            this.implementationName = this.$config.implementationName
     }
 
     beforeDestroy() {
@@ -632,6 +643,7 @@ export default class AppComponent extends Vue {
         }
 
         //If these gets are placed before authorization, GetUserInformation() in EsecSecurity.cs will throw an error, as its HttpRequest will have no Authorization header!
+        this.getImplementationNameAction();
         this.getAgencyLogoAction();
         this.getProductLogoAction();
     }

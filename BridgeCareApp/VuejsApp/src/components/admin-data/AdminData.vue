@@ -164,7 +164,6 @@ export default class Data extends Vue {
     simulationReportsDelimited: string = '';
     inventoryReportsDelimited: string = '';
 
-    reports: string[] = [];
     keyFieldsName: string  = 'KeyFields';
     simulationReportsName: string = 'SimulationReports';
     inventoryReportsName: string = 'InventoryReports';
@@ -195,17 +194,6 @@ export default class Data extends Vue {
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }
-
-    beforeMount()
-    {
-        this.getAvailableReportsAction();
-        
-    }
-    mounted() {
-        this.reports =  this.selectedAvailableReports;
-        this.simulationReports = clone(this.reports);
-        this.inventoryReports = clone(this.reports);
-    }
     //Watches
     @Watch('stateNetworks')
     onStateNetworksChanged(){
@@ -225,6 +213,9 @@ export default class Data extends Vue {
     onStateAvailableReportNamesChanged(){
         this.selectedAvailableReports = clone(this.stateAvailableReportNames);
         console.log("test")
+        const reports: string[] = this.stateAvailableReportNames;
+        this.simulationReports = clone(reports);
+        this.inventoryReports = clone(reports);
     }
 
     @Watch('stateInventoryReportNames')

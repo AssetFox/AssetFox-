@@ -38,7 +38,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public IList<string> GetKeyFields()
         {
             var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").FirstOrDefault();
-
             if (existingKeyFields == null)
             {
                 return null;
@@ -117,9 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return null;
             }
             else
-            {
-                var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
-                var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
+            {               
                 return existingNetwork.Name;
             }
         }

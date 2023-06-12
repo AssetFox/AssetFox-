@@ -26,7 +26,7 @@
                  <v-subheader class="ghd-control-label ghd-md-gray Montserrat-font-family">Agency Logo </v-subheader>
              </v-layout>
              </v-flex>
-             <input id="agencyImageUpload" type="file" accept="image/*" hidden>
+             <input id="agencyImageUpload" type="file" accept="image/*" ref="agencyFileInput" @change="handleAgencyLogoUpload" hidden>
              <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-right: 40%;" @click="onUploadAgencyLogo" outline>Upload</v-btn>
          </v-layout>
 
@@ -36,7 +36,7 @@
                  <v-subheader class="ghd-control-label ghd-md-gray Montserrat-font-family">Implementation Logo </v-subheader>
              </v-layout>
              </v-flex>
-             <input id="implementationImageUpload" type="file" accept="image/*" hidden>
+             <input id="implementationImageUpload" type="file" ref="implementationFileInput" accept="image/*" @change="handleImplementationLogoUpload" hidden>
              <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-right: 40%;" @click="onUploadImplementationLogo" outline>Upload</v-btn>
          </v-layout>
          
@@ -48,8 +48,10 @@ import axios from 'axios';
 import Vue from 'vue';
 import { Component, Watch} from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
-import {find, groupBy, propEq, uniq} from 'ramda';
+import {clone, find, groupBy, propEq, uniq} from 'ramda';
 import Vuex from 'vuex'
+import AdminSiteSettingsService from '@/services/admin-site-settings.service';
+import { hasValue } from '@/shared/utils/has-value-util';
 
 @Component
 export default class AdminSiteSettingsEditor extends Vue{
@@ -63,7 +65,8 @@ export default class AdminSiteSettingsEditor extends Vue{
      @Action('setAgencyLogo') setAgencyLogoAction: any;
      @Action('setImplementationLogo') setImplementationLogoAction: any;
 
-     ImplementationID: string | null = '';
+     ImplementationID: String = '';
+     PerformanceCurvesFile: File | null;
 
 
      @Watch('implementationName')
@@ -73,18 +76,19 @@ export default class AdminSiteSettingsEditor extends Vue{
            
 
  onSaveImplementationName(){
-     this.setImplemetnationNameAction(({implementationName: this.implementationID}));
+        AdminSiteSettingsService.importImplementationName(this.ImplementationID);
+ }
+ 
+ handleImplementationLogoUpload(event: { target: { files: any[]; }; }){
+    const file = event.target.files[0];
+    AdminSiteSettingsService.importProductLogo(file);
  }
 
- onUploadAgencyLogo(){
-    document.getElementById("agencyImageUpload")?.click()
-    //Post method will be handled once backend API is available for this feature
+ handleAgencyLogoUpload(event: { target: { files: any[]; }; }){
+    const file = event.target.files[0];
+    AdminSiteSettingsService.importAgencyLogo(file);
  }
 
- onUploadImplementationLogo(){
-    document.getElementById("implementationImageUpload")?.click()
-    //Post method will be handled once backend API is available for this feature
- }
 }
 </script>
 

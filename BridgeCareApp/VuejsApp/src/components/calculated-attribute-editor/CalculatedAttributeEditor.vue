@@ -226,7 +226,7 @@
                     :disabled="disableCrudButton() || !hasUnsavedChanges">
                     Save
                 </v-btn>
-                <v-btn
+                <v-btn outline
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
                     flat

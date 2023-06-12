@@ -391,7 +391,7 @@
                 >
                     Cancel
                 </v-btn>
-                <v-btn
+                <v-btn outline
                     id="PerformanceCurveEditor-deleteLibrary-button"
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue ghd-button-text"
@@ -405,9 +405,9 @@
                     id="PerformanceCurveEditor-createAsNewLibrary-button"
                     :disabled="disableCrudButtons()"
                     @click="onShowCreatePerformanceCurveLibraryDialog(true)"
-                    class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
+                    class="ghd-blue ghd-white-bg ghd-button-text ghd-outline-button-padding"
                     depressed                    
-                    outlined
+                    outline
                 >
                     Create as New Library
                 </v-btn>

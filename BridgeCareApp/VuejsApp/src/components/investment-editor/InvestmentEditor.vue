@@ -218,7 +218,7 @@
                        v-show='hasScenario'>
                     Cancel
                 </v-btn>
-                <v-btn id="InvestmentEditor-deleteLibrary-btn"
+                <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
                        @click='onShowConfirmDeleteAlert' flat class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
                        :disabled='!hasLibraryEditPermission'>
                     Delete Library

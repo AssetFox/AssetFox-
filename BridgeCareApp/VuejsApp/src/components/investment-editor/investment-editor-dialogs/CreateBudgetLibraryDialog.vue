@@ -24,7 +24,7 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row>
-          <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' flat>Cancel</v-btn>
+          <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' outline>Cancel</v-btn>
           <v-btn :disabled="canDisableSave()" @click="onSubmit(true)"
                  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
             Save

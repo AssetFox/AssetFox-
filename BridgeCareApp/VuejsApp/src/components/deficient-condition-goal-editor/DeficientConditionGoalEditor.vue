@@ -225,7 +225,7 @@
                     class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
-                    flat>
+                    outline>
                     Delete Library
                 </v-btn>    
                 <v-btn

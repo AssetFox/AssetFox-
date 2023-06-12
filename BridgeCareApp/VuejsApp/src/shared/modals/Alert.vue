@@ -13,7 +13,7 @@
             </v-card-text>
             <v-card-actions>
                 <v-layout justify-center row v-if="dialogData.choice">
-                    <v-btn @click="onSubmit(false)" class="ghd-blue ghd-button" flat>
+                    <v-btn @click="onSubmit(false)" class="ghd-blue ghd-button" outline>
                         Cancel
                     </v-btn>
                     <v-btn @click="onSubmit(true)" class="ghd-blue-bg ghd-white ghd-button">

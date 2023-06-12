@@ -543,7 +543,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     var performancePerTreatmentId = scenarioSelectableTreatments.Where(_ => _.PerformanceFactors.Any()).ToList()
                     .ToDictionary(_ => _.Id, _ => _.PerformanceFactors);
-                    _unitOfWork.TreatmentPerformanceFactorRepo.UpsertOrDeleteScenarioTreatmentPerformanceFactors(performancePerTreatmentId, simulationId);
+                    _unitOfWork.TreatmentPerformanceFactorRepo.UpsertScenarioTreatmentPerformanceFactors(performancePerTreatmentId, simulationId);
                 }
                 if (scenarioSelectableTreatments.Any(_ => _.BudgetIds.Any()))
                 {

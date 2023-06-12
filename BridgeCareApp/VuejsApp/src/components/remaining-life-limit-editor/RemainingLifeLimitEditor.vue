@@ -1,22 +1,22 @@
 <template>
     <v-layout column>
-        <v-flex xs12>
-            <v-layout justify-space-between>
-                <v-flex xs3 class="ghd-constant-header">
-                    <v-layout column>
-                        <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
-                        <v-select
-                          class="ghd-select ghd-text-field ghd-text-field-border vs-style"
-                          :items="selectListItems"
-                          append-icon=$vuetify.icons.ghd-down
-                           v-model="librarySelectItemValue"
-                          outline
-                        >
-                        </v-select>
-                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
-                    </v-layout>
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">
+      <v-flex xs12>
+        <v-layout justify-space-between>
+          <v-flex xs3 class="ghd-constant-header">
+              <v-layout column>
+                  <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
+                  <v-select 
+                            class="ghd-select ghd-text-field ghd-text-field-border vs-style"
+                            :items="selectListItems"
+                            append-icon=$vuetify.icons.ghd-down
+                            v-model="librarySelectItemValue"
+                            outline
+                            >
+                  </v-select>
+                  <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>
+              </v-layout>
+          </v-flex>
+          <v-flex xs4 class="ghd-constant-header">
                     <v-layout v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 18px; padding-left: 5px" align-center>
                         <div class="header-text-content owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
@@ -175,7 +175,7 @@
                 </v-flex>
                 <v-layout justify-center row>
                     <v-btn class="ghd-blue" flat v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
-                    <v-btn class="ghd-blue" flat v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
+                    <v-btn class="ghd-blue" outline v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
                     <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" outline>Create as New Library</v-btn>
                     <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
                     <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
@@ -969,6 +969,6 @@ export default class RemainingLifeLimitEditor extends Vue {
 </script>
 <style scoped>
 .vs-style {
-    width: 50%;
+    width: 100%;
 }
 </style>

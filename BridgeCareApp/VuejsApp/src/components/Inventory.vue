@@ -196,7 +196,7 @@
                 }
                 this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  
             }
-            else if(this.constraintDetails = 'AND') {
+            else if(this.constraintDetails == 'AND') {
                 //Check if any dropdowns are empty
                 for(let i = 0; i < this.inventoryDetails.length; i++) {
                     if(this.selectedKeys[i] !== '') {

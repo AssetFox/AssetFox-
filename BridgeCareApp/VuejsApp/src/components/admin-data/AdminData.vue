@@ -11,11 +11,6 @@
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
                     </v-layout>
-                    <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                        @click="onSaveClick" :disabled='disableCrudButtons() || !hasUnsavedChanges'>
-                        Save
-                    </v-btn>
                 </v-layout>
             </v-flex>
             <v-flex xs8 class="ghd-constant-header">
@@ -76,6 +71,17 @@
                     </v-flex>                     
                 </v-layout>
             </v-flex>     
+        </v-flex>  
+        <v-flex xs12>
+            <v-layout justify-center>
+                <v-flex xs7>
+                    <v-btn style="margin-top: 5px !important;" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        @click="onSaveClick" :disabled='disableCrudButtons() || !hasUnsavedChanges'>
+                        Save
+                    </v-btn>
+                </v-flex>
+            </v-layout>
         </v-flex>
         <EditAdminDataDialog :DialogData='editAdminDataDialogData'
                                      @submit='onSubmitEditAdminDataDialogResult' />

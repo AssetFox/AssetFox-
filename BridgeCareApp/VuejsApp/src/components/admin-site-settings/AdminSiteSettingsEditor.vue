@@ -5,7 +5,13 @@
              <v-flex xs12>
              <v-layout column>
                  <v-subheader class="ghd-control-label ghd-md-gray Montserrat-font-family">Implementation Name</v-subheader>
-               <v-text-field
+              
+             </v-layout>
+             </v-flex>
+
+             <v-flex xs12>
+                <v-layout column style="padding-right: 100px;">
+                    <v-text-field
                  class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family search-icon-general"
                  v-model="implementationID"
                  type="text"
@@ -13,11 +19,18 @@
                  clearable
                  single-line
                  outline      
+                 style="padding-left: 10px; width: 250%;"
                 >
                 </v-text-field>
-             </v-layout>
+                </v-layout>
              </v-flex>
-             <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-top: 6%;" @click="onSaveImplementationName" outline>Save</v-btn>
+
+             <v-flex xs12>
+                <v-layout column>
+                    <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="padding-left: 10px;" @click="onSaveImplementationName" outline>Save</v-btn>
+                </v-layout>
+             </v-flex>
+             
          </v-layout>
 
          <v-layout align-center class="vl-style" style="margin-top: 5%;">

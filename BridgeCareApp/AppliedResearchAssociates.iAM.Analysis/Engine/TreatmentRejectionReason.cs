@@ -1,7 +1,7 @@
 ﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     /// <summary>
-    /// .
+    /// Represents the reasons why a treatment was not selected for a specific asset
     /// </summary>
     public enum TreatmentRejectionReason
     {

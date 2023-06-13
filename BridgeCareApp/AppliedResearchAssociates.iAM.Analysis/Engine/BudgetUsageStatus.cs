@@ -3,7 +3,7 @@
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     /// <summary>
-    /// .
+    /// Represents the reason a budget was or was not used
     /// </summary>
     public enum BudgetUsageStatus
     {

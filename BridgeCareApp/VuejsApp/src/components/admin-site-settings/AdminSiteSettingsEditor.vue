@@ -91,6 +91,14 @@ export default class AdminSiteSettingsEditor extends Vue{
  onSaveImplementationName(){
         AdminSiteSettingsService.importImplementationName(this.ImplementationID);
  }
+
+ onUploadImplementationLogo(){
+    document.getElementById("implementationImageUpload")?.click();
+ }
+
+ onUploadAgencyLogo(){
+    document.getElementById("agencyImageUpload")?.click();
+ }
  
  handleImplementationLogoUpload(event: { target: { files: any[]; }; }){
     const file = event.target.files[0];

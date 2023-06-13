@@ -28,7 +28,11 @@
                                 </v-list-item>
                             </template>
                         </v-select>
-                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Based on: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>
+                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Based on: {{parentLibraryName}} 
+                            
+                            <span v-if="scenarioLibraryIsModified">&nbsp;&nbsp;{{modifiedStatus}}</span>
+                        
+                        </div>
 
                     </v-flex>
                     <v-flex xs2 v-show="hasScenario"></v-flex>
@@ -701,6 +705,7 @@ export default class PerformanceCurveEditor extends Vue {
     loadedParentName: string = "";
     loadedParentId: string = "";
     newLibrarySelection: boolean = false;
+    modifiedStatus : string = "";
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -798,6 +803,7 @@ export default class PerformanceCurveEditor extends Vue {
         this.deletionIds = this.deletionIds.concat(this.selectedPerformanceEquationIds);
         this.selectedPerformanceEquations = [];
         this.onPaginationChanged();
+        this.modifiedStatus = " (Modified)";
     }    
 
     @Watch('statePerformanceCurveLibraries')

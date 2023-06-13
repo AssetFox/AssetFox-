@@ -582,10 +582,19 @@ export default class AppComponent extends Vue {
     }
 
     onAddWarningNotification(data: any) {
-        this.addWarningNotificationAction({
-            message: 'Server Warning',
-            longMessage: data.info,
-        });
+        let warningNotification:string = data.warning.toString();
+        let spl = warningNotification.split('::');
+        if (spl.length > 0) {
+            this.addWarningNotificationAction({
+                message: spl[0],
+                longMessage: spl.length > 1 ? spl[1] : ''
+            });
+        } else {
+            this.addWarningNotificationAction({
+                message: 'Server Warning',
+                longMessage: data.warning,
+            });
+        }
     }
 
     onAddTaskCompletedNotification(data: any) {

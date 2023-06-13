@@ -26,6 +26,7 @@ namespace BridgeCareCore.Controllers
     public class AdminDataController : BridgeCareCoreBaseController
     {
         public const string SiteError = "Site Error";
+        public const string ServerWarning = "Server Warning:";
         private readonly IReportGenerator _generator;
         private readonly IReportLookupLibrary _factory;
         public AdminDataController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor, IReportGenerator generator, IReportLookupLibrary factory) :
@@ -78,7 +79,9 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var name = UnitOfWork.AdminSettingsRepo.GetPrimaryNetwork();
+                string? name = UnitOfWork.AdminSettingsRepo.GetPrimaryNetwork();
+                if (name == null)
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"{ServerWarning} Primary Network not set::A primary network key must be set in the administration settings");
                 return Ok(name);
             }
             catch (Exception e)

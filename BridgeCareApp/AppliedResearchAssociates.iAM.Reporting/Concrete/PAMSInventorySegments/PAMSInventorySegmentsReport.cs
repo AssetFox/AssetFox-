@@ -353,7 +353,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("F_CLASS_NAME", new AttributeDescription() { Description = "F_CLASS_NAME" });
             descriptions.Add("FAMILY", new AttributeDescription() { Description = "Family" });
             descriptions.Add("FED_AID", new AttributeDescription() { Description = "Federal Aid?" });
-            descriptions.Add("FEDAID", new AttributeDescription() { Description = "Federal Aid???" });
+            descriptions.Add("FEDAID", new AttributeDescription() { Description = "Federal Aid?" });
             descriptions.Add("FROMSEGMENT", new AttributeDescription() { Description = "From Segment" });
             descriptions.Add("HPMS", new AttributeDescription() { Description = "HPMS?" });
             descriptions.Add("ID", new AttributeDescription() { Description = "ID" });

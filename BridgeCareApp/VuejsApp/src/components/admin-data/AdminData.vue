@@ -212,7 +212,6 @@ export default class Data extends Vue {
     @Watch('stateAvailableReportNames')
     onStateAvailableReportNamesChanged(){
         this.selectedAvailableReports = clone(this.stateAvailableReportNames);
-        console.log("test")
         const reports: string[] = this.stateAvailableReportNames;
         this.simulationReports = clone(reports);
         this.inventoryReports = clone(reports);

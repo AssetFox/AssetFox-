@@ -892,6 +892,9 @@ export default class PerformanceCurveEditor extends Vue {
             if (library.value === this.parentLibraryId) {
                 this.parentLibraryName = library.text;
             }
+            if(this.parentLibraryName == ""){
+                this.parentLibraryName = "None";
+            }
         });
     }
     @Watch('isSharedLibrary')

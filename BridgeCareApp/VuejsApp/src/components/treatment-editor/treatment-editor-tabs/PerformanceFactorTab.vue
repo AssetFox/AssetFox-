@@ -99,9 +99,29 @@ export default class PerformanceFactorTab extends Vue {
     onStateAttributesChanged() {
         this.setAttributeSelectItems();
     }
+    @Watch('selectedTreatment')
+    onSelectedTreatmentChanged() {
+        if (this.selectedTreatmentPerformanceFactors.length <= 0) {
+           this.buildDataFromCurves(); 
+        }
+    }
     @Watch('stateScenarioPerformanceCurves')
     onStatePerformanceCurvesChanged() {
- 
+        this.buildDataFromCurves();
+    }
+    setAttributeSelectItems() {
+        if (hasValue(this.stateAttributes)) {
+            this.attributeSelectItems = this.stateAttributes.map((attribute: Attribute) => ({
+                text: attribute.name,
+                value: attribute.name,
+            }));
+        }
+    }
+    onEditPerformanceFactorProperty(performancefactor: TreatmentPerformanceFactor, property: string, value: any) {
+        performancefactor.performanceFactor = value;
+        this.$emit('onModifyPerformanceFactor', setItemPropertyValue(property, value, performancefactor));
+    }
+    buildDataFromCurves() {
         let testStateAttributes:Attribute[] = [];
         this.stateScenarioPerformanceCurves.forEach(curve => {
             this.stateAttributes.forEach(state => {
@@ -118,18 +138,6 @@ export default class PerformanceFactorTab extends Vue {
             attribute: _.name,
             factor: 1.0
         }));
-    }
-    setAttributeSelectItems() {
-        if (hasValue(this.stateAttributes)) {
-            this.attributeSelectItems = this.stateAttributes.map((attribute: Attribute) => ({
-                text: attribute.name,
-                value: attribute.name,
-            }));
-        }
-    }
-    onEditPerformanceFactorProperty(performancefactor: TreatmentPerformanceFactor, property: string, value: any) {
-        performancefactor.performanceFactor = value;
-        this.$emit('onModifyPerformanceFactor', setItemPropertyValue(property, value, performancefactor));
     }
 }
 </script>

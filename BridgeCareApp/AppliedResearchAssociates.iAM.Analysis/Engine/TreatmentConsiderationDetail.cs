@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         public int? BudgetPriorityLevel { get; set; }
 
         /// <summary>
-        /// The amounts in each budget prior when analyizing this decision.
+        /// The amounts in each budget prior when analyzing this decision.
         /// </summary>
         public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
 

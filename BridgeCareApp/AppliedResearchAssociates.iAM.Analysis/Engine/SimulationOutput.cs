@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         public DateTime LastModifiedDate { get; set; }
 
         /// <summary>
-        /// List of assets and the categories of thier committed projects.
+        /// List of assets and the categories of their committed projects.
         /// Only used for committed projects.
         /// </summary>
         public List<AssetTreatmentCategoryDetail> AssetTreatmentCategories;

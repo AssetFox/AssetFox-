@@ -3,7 +3,7 @@
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     /// <summary>
-    /// Results of applying a specific treatment.  Note that is does NOT mean that this specific treatment was applied.
+    /// Results of applying a specific treatment.  Note that is does NOT mean that the treatment was applied.
     /// The applied treatment is part of the AssetDetail object.
     /// </summary>
     public sealed class TreatmentOptionDetail
@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         public double Benefit { get; }
 
         /// <summary>
-        /// The change in condition immedatley after the treatment is applied.
+        /// The change in condition immediately after the treatment is applied.
         /// </summary>
         public double ConditionChange { get; }
 

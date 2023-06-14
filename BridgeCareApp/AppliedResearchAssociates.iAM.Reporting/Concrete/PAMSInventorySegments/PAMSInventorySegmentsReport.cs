@@ -231,10 +231,50 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     for (int tmpcol = 0; tmpcol < 1; tmpcol++)
                     {
                         sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\" >{GetDescription(distressArray[tmprow, tmpcol])}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(distressArray[tmprow, tmpcol + 1], previous)}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(distressArray[tmprow, tmpcol + 2], previous)}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(distressArray[tmprow, tmpcol + 3], previous)}</td>");
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        Decimal tmpnum;
+                        var returnVal = GetAttribute(distressArray[tmprow, tmpcol + 1], previous);
+                        string tmpstring = returnVal;
+
+                        if (Decimal.TryParse(tmpstring, out tmpnum))
+                        {
+                            //tmpstring = Math.Round(tmpnum, 2, MidpointRounding.AwayFromZero).ToString();
+                            tmpstring = tmpnum.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring);
+                        sectionString.Append("</td>");
+
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        returnVal = GetAttribute(distressArray[tmprow, tmpcol + 2], previous);
+                        tmpstring = returnVal;
+
+                        if (Decimal.TryParse(tmpstring, out tmpnum))
+                        {
+                            //tmpstring = Math.Round(tmpnum, 2, MidpointRounding.AwayFromZero).ToString();
+                            tmpstring = tmpnum.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring);
+                        sectionString.Append("</td>");
+
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        returnVal = GetAttribute(distressArray[tmprow, tmpcol + 3], previous);
+                        tmpstring = returnVal;
+
+                        if (Decimal.TryParse(tmpstring, out tmpnum))
+                        {
+                            tmpstring = tmpnum.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring);
+                        sectionString.Append("</td>");
+
                     }
+
                     sectionString.Append($"</tr>");
                 }
 
@@ -246,7 +286,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
                 sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\" >Patching</td>");
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPACT", previous)}</td>");
-                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPASF", previous)}</td>");
+                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                Decimal tmpnum1;
+                var returnVal1 = GetAttribute("CPCCPASF", previous);
+                string tmpstring1 = returnVal1;
+
+                if (Decimal.TryParse(tmpstring1, out tmpnum1))
+                {
+                    tmpstring1 = tmpnum1.ToString("0.00");
+                }
+
+                sectionString.Append(tmpstring1);
+                sectionString.Append("</td>");
+
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td></tr>");
                 sectionString.Append($"<tr><td colspan=\"4\" class=\"report-description report-cell\"></td></tr>");
             }
@@ -289,9 +342,48 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     for (int tmpcol = 0; tmpcol < 1; tmpcol++)
                     {
                         sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\" >{GetDescription(patchingArray[tmprow, tmpcol])}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(patchingArray[tmprow, tmpcol + 1], previous)}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(patchingArray[tmprow, tmpcol + 2], previous)}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(patchingArray[tmprow, tmpcol + 3], previous)}</td>");
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        Decimal tmpnum2;
+                        var returnVal2 = GetAttribute(patchingArray[tmprow, tmpcol + 1], previous);
+                        string tmpstring2 = returnVal2;
+
+                        if (Decimal.TryParse(tmpstring2, out tmpnum2))
+                        {
+                            tmpstring2 = tmpnum2.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring2);
+                        sectionString.Append("</td>");
+
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        Decimal tmpnum3;
+                        var returnVal3 = GetAttribute(patchingArray[tmprow, tmpcol + 2], previous);
+                        var tmpstring3 = returnVal3;
+
+                        if (Decimal.TryParse(tmpstring3, out tmpnum3))
+                        {
+                            tmpstring3 = tmpnum3.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring3);
+                        sectionString.Append("</td>");
+
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        Decimal tmpnum4;
+                        var returnVal4 = GetAttribute(patchingArray[tmprow, tmpcol + 3], previous);
+                        var tmpstring4 = returnVal4;
+
+                        if (Decimal.TryParse(tmpstring4, out tmpnum4))
+                        {
+                            tmpstring4 = tmpnum4.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring4);
+                        sectionString.Append("</td>");
+
                     }
                     sectionString.Append($"</tr>");
                 }
@@ -304,12 +396,36 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
                 sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\" >Bituminous Patching</td>");
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CBPATCCT", previous)}</td>");
-                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CBPATCSF", previous)}</td>");
-                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td></tr>");
+                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
 
+                Decimal tmpnum5;
+                var returnVal5 = GetAttribute("CBPATCSF", previous);
+                string tmpstring5 = returnVal5;
+
+                if (Decimal.TryParse(tmpstring5, out tmpnum5))
+                {
+                    tmpstring5 = tmpnum5.ToString("0.00");
+                }
+
+                sectionString.Append(tmpstring5);
+                sectionString.Append("</td>");
+
+                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td></tr>");
                 sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\">Concrete Patching</td>");
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPACT", previous)}</td>");
-                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPASF", previous)}</td>");
+                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                Decimal tmpnum6;
+                var returnVal6 = GetAttribute("CPCCPASF", previous);
+                string tmpstring6 = returnVal6;
+
+                if (Decimal.TryParse(tmpstring6, out tmpnum6))
+                {
+                    tmpstring6 = tmpnum6.ToString("0.00");
+                }
+
+                sectionString.Append(tmpstring6);
+                sectionString.Append("</td>");
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td></tr>");
 
             }

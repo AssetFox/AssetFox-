@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.BudgetPriority;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -97,7 +98,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void SimulationInDb_Clone_Clones2()
         {
-            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var networkId = Guid.NewGuid();
+            var keyAttributeId = TestAttributeIds.BrKeyId;
+            
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, new List<Data.Networking.MaintainableAsset>(), networkId, keyAttributeId);
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
@@ -122,7 +127,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
             Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(network.Name, clonedSimulation.NetworkName);
+
+            var clonedProjects = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(clonedSimulationId);
+            var clonedProject = clonedProjects.Single();
+            ObjectAssertions.EquivalentExcluding(sectionCommittedProject, clonedProject, x => x.SimulationId, cp => cp.ScenarioBudgetId, cp => cp.Consequences, cp => cp.Id, cp => cp.LocationKeys);
+            Assert.NotEqual(sectionCommittedProjectId, clonedProject.Id);
+            var clonedBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(cloningResult.Simulation.Id);
+            var clonedBudget = clonedBudgets.Single();
+            Assert.Equal(clonedBudget.Id, clonedProject.ScenarioBudgetId);
+            //Finish this
         }
 
 

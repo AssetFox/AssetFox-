@@ -79,7 +79,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                string? name = UnitOfWork.AdminSettingsRepo.GetPrimaryNetwork();
+                var name = UnitOfWork.AdminSettingsRepo.GetPrimaryNetwork();
                 if (name == null)
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"{ServerWarning} Primary Network not set::A primary network key must be set in the administration settings");
                 return Ok(name);

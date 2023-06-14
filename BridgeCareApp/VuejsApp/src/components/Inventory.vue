@@ -208,7 +208,7 @@
                     }
                     const inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: string | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
                     const otherKeyValue = inventoryItem.keyProperties[i]; 
-/*                     this.selectedKeys[i] = otherKeyValue; */
+                    this.selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
                 }
                 this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  

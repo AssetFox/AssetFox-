@@ -2,7 +2,7 @@
     <v-layout column>
         <v-flex style="margin-top: -20px;">
             <v-layout>
-                <v-flex xs3>
+                <v-flex xs6>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
                         :items='librarySelectItems'
@@ -27,23 +27,7 @@
                     >
                     </v-select>
                 </v-flex>
-                <v-flex xs6>
-                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 20px !important">
-                        <div class="ghd-control-label" style="padding-top: 12px !important">
-                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |    
-                        <v-badge v-show="isShared">
-                            <template v-slot: badge>
-                                <span>Shared</span>
-                            </template>
-                        </v-badge>
-                        <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                               v-show='!hasScenario'>
-                            Share Library
-                        </v-btn>
 
-                        </div>  
-                    </v-layout>
-                </v-flex>
                 <v-flex style="padding-right: 5px">
                     <v-btn
                         @click='onShowConfirmDeleteTreatmentAlert'
@@ -65,6 +49,24 @@
                     </v-btn>                                                          
                 </v-flex>
             </v-layout>
+
+            <v-flex xs6>
+                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-bottom: 50px !important">
+                        <div class="ghd-control-label">
+                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |    
+                        <v-badge v-show="isShared">
+                            <template v-slot: badge>
+                                <span>Shared</span>
+                            </template>
+                        </v-badge>
+                        <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                               v-show='!hasScenario'>
+                            Share Library
+                        </v-btn>
+
+                        </div>  
+                    </v-layout>
+            </v-flex>
 
 
         </v-flex>

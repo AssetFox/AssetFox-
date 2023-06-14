@@ -42,4 +42,6 @@ public interface IAdminSettingsRepository
     string GetImplementationLogo();
 
     void SetImplementationLogo(Image productLogo);
+
+    void DeleteAdminSetting(string settingKey);
 }

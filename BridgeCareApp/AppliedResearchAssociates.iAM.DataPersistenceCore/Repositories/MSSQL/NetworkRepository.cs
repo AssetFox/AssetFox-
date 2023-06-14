@@ -193,15 +193,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 queueLog.UpdateWorkQueueStatus("Deleting Simulations");
 
                 _unitOfWork.SimulationRepo.DeleteSimulationsByNetworkId(networkId);
-                                
+
                 if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 {
                     _unitOfWork.Rollback();
                     return;
                 }
+
+                var primaryNetwork = _unitOfWork.AdminSettingsRepo.GetPrimaryNetwork();
+                if(primaryNetwork != null && primaryNetwork == GetNetworkName(networkId))
+                {
+                    _unitOfWork.AdminSettingsRepo.DeleteAdminSetting(AdminSettingsRepository.primaryNetworkKey);
+                }
+
                 queueLog.UpdateWorkQueueStatus("Deleting Maintainable Assets");
 
                 _unitOfWork.Context.DeleteEntity<NetworkEntity>(_ => _.Id == networkId);
+                
 
                 if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 {

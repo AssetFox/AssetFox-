@@ -44,6 +44,7 @@
                         Administration
                     </v-btn>
                     <v-btn
+                    v-if="stateInventoryReportNames.length > 0"
                         id="App-inventory-btn"
                         @click="onNavigate('/Inventory/')"
                         class="ara-blue-pantone-281"
@@ -308,6 +309,7 @@ export default class AppComponent extends Vue {
     @State(state => state.adminSiteSettingsModule.implementationName) stateImplementationName: string;
     @State(state => state.adminSiteSettingsModule.agencyLogo) agencyLogoBase64: string;
     @State(state => state.adminSiteSettingsModule.productLogo) productLogoBase64: string;
+    @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
     
     @Action('logOut') logOutAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
@@ -332,6 +334,7 @@ export default class AppComponent extends Vue {
     @Action('getImplementationName') getImplementationNameAction: any;
     @Action('getAgencyLogo') getAgencyLogoAction: any;
     @Action('getProductLogo') getProductLogoAction: any;
+    @Action('getInventoryReports') getInventoryReportsAction: any;
 
     drawer: boolean = false;
     latestNewsDate: string = '0001-01-01';
@@ -358,6 +361,7 @@ export default class AppComponent extends Vue {
     implementationName: string = '';
     agencyLogo: string = '';
     productLogo: string = '';
+    inventoryReportName: string = '';
 
     get container() {
         const container: any = {};
@@ -426,6 +430,12 @@ export default class AppComponent extends Vue {
     onProductLogoBase64Change() {
         this.productLogo = this.productLogoBase64;
     }
+
+    @Watch('stateInventoryReportNames')
+        onStateInventoryReportNamesChanged(){
+            if(this.stateInventoryReportNames.length > 0)
+                this.inventoryReportName = this.stateInventoryReportNames[0]
+        }
 
     created() {
         // create a request handler

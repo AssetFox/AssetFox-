@@ -29,6 +29,7 @@
                             lazy
                             persistent>
                             <v-text-field
+                                id="CashFlowRuleEditDialog-yearReadOnly-vtextfield"
                                 readonly
                                 single-line
                                 class="sm-txt"
@@ -40,6 +41,7 @@
                                     ].isDurationGreaterThanPreviousDuration(props.item,selectedCashFlowRule)]"/>
                             <template slot="input">
                                 <v-text-field
+                                    id="CashFlowRuleEditDialog-yearEdit-vtextfield"
                                     label="Edit"
                                     single-line
                                     v-model.number="props.item.durationInYears"
@@ -67,6 +69,7 @@
                             @save="onEditSelectedLibraryListData(props.item,'costCeiling')"
                             @open="onOpenCostCeilingEditDialog(props.item.id)">
                             <v-text-field
+                                id="CashFlowRuleEditDialog-dollarReadOnly-vtextfield"
                                 readonly
                                 single-line
                                 class="sm-txt"
@@ -84,6 +87,7 @@
                                 ]"/>
                             <template slot="input">
                                 <v-text-field
+                                    name="CashFlowRuleEditDialog-dollarEdit-vtextfield"
                                     label="Edit"
                                     single-line
                                     :id="props.item.id"
@@ -119,6 +123,7 @@
                             lazy
                             persistent>
                             <v-text-field
+                                id="CashFlowRuleEditDialog-distributionReadOnly-vtextfield"
                                 readonly
                                 single-line
                                 class="sm-txt"
@@ -131,6 +136,7 @@
                                 ]"/>
                             <template slot="input">
                                 <v-text-field
+                                    id="CashFlowRuleEditDialog-distributionEdit-vtextfield"
                                     label="Edit"
                                     single-line
                                     v-model="props.item.yearlyPercentages"
@@ -157,7 +163,7 @@
                 </template>
             </v-data-table>
                 </div>
-                <v-btn @click="onAddCashFlowDistributionRule" class='ghd-blue ghd-button' flat>
+                <v-btn @click="onAddCashFlowDistributionRule" class='ghd-blue ghd-button' flat id="CashFlowRuleEditDialog-addDistributionRule-btn">
                     Add Distribution Rule
                 </v-btn>
             </div>
@@ -166,11 +172,12 @@
                             
       <v-card-actions>
         <v-layout justify-center row>
-            <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+            <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline id="CashFlowRuleEditDialog-cancel-btn">
             Cancel
           </v-btn>
           <v-btn @click="onSubmit(true)"
                  :disabled="!hasUnsavedChanges || !isDataValid"
+                 id="CashFlowRuleEditDialog-submit-btn"
                  class='ghd-blue hd-button-text ghd-button' flat>
             Submit
           </v-btn>         

@@ -13,6 +13,7 @@
         <v-layout column>
           <v-subheader class="ghd-md-gray ghd-control-label">Rule Name</v-subheader>
           <v-text-field outline v-model="newCashRule.name"
+                        id="AddCashFlowRuleDialog-ruleName-vtextfield"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>
         </v-layout>
@@ -23,6 +24,7 @@
             Cancel
           </v-btn>
           <v-btn :disabled="newCashRule.name === ''" @click="onSubmit(true)"
+                  id="AddCashFlowRuleDialog-submit-btn"
                  outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Submit
           </v-btn>        

@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var resultsString = new StringBuilder();
             resultsString.Append("<table class=\"report-cell\">");
             resultsString.Append(CreateHTMLSection("ID", new List<string>() { "COUNTY", "SR", "TOSEGMENT", "CRS_DATA" }));
-            resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DIST", "MPO/RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PCNT", "SURFACE", "", "FEDAID", "HPMS", "LANES", "", "LENGTH", "WIDTH", "AGE","" }));
+            resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DIST", "MPO/RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PCNT", "SURDATA", "", "FEDAID", "HPMS", "LANES", "", "LENGTH", "WIDTH", "AGE","" }));
             resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE NAME", "SURFACE", "L_S_TYPE", "R_S_TYPE", "YR_BUILT","", "YR_LST_RESURFACE", "YR_LST_STRUCT_OVER" }));
             resultsString.Append(CreateHTMLSection("Survey Information", new List<string>() { "Survey Date" }));
             resultsString.Append(CreateHTMLSection("Measured Conditions", new List<string>() { "OPI", "ROUGAVE" }));
@@ -370,6 +370,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("SECTION", new AttributeDescription() { Description = "SEC" });
             descriptions.Add("SEG", new AttributeDescription() { Description = "SEG" });
             descriptions.Add("SR", new AttributeDescription() { Description = "Route" });
+            descriptions.Add("SURDATA", new AttributeDescription() { Description = "Surface" });
             descriptions.Add("SURFACE", new AttributeDescription() { Description = "Surface ID" });
             descriptions.Add("SURFACE NAME", new AttributeDescription() { Description = "Surface" });
             descriptions.Add("TOSEGMENT", new AttributeDescription() { Description = "Segment" });

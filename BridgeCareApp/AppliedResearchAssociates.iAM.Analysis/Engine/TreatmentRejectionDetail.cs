@@ -3,7 +3,7 @@
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     /// <summary>
-    /// The reason a specific treatment is rejected
+    /// The reason a specific treatment was rejected
     /// </summary>
     public sealed class TreatmentRejectionDetail
     {

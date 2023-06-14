@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string Description { get; set; }
 
         /// <summary>
-        /// Optimization strategry used for the selection of treatments
+        /// Optimization strategy used for the selection of treatments
         /// </summary>
         public OptimizationStrategy OptimizationStrategy { get; set; }
 

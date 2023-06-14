@@ -70,7 +70,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string ReportStatus { get; set; }
 
         /// <summary>
-        /// The amount of time it takes for the simulation to run.
+        /// The amount of time it took for the simulation to run.
         /// </summary>
         public string RunTime { get; set; }
     }

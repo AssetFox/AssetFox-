@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public int FirstYearOfAnalysisPeriod { get; set; }
 
         /// <summary>
-        /// Inflation to be used for the simulation, as a percentage.
+        /// Inflation rate to be used for the simulation, as a percentage.
         /// Valid range 0 - 100.
         /// </summary>
         public double InflationRatePercentage { get; set; }

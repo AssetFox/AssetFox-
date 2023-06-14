@@ -4,7 +4,7 @@ using AppliedResearchAssociates.iAM.DTOs.Abstract;
 namespace AppliedResearchAssociates.iAM.DTOs
 {
     /// <summary>
-    /// Represents the reports that have been generated for a specific simulation
+    /// Represents information about a report that has been generated for a specific simulation
     /// </summary>
     public class ReportIndexDTO : BaseDTO
     {
@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string Result { get; set; }
 
         /// <summary>
-        /// Date when the report data expires
+        /// Date when the result expires
         /// </summary>
         public DateTime? ExpirationDate { get; set; }
 

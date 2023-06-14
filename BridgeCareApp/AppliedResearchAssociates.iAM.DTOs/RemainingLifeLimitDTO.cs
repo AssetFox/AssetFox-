@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public bool IsModified { get; set; }
 
         /// <summary>
-        /// Defines the assets that can use this remaining life
+        /// Defines the assets that can use this limit
         /// </summary>
         public CriterionLibraryDTO CriterionLibrary { get; set; }
     }

@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
     /// <summary>
     /// Describes a specific performance model which must be related to a
     /// specific condition attribute.  This determines the future value of a
-    /// condition without any intervining maintenance.
+    /// condition without any intervening maintenance.
     /// </summary>
     public class PerformanceCurveDTO : BaseDTO
     {
@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public bool IsModified { get; set; }
 
         /// <summary>
-        /// Should the model be shifted to accodomiate existing data?
+        /// Should the model be shifted to accommodate existing data?
         /// </summary>
         public bool Shift { get; set; }
 

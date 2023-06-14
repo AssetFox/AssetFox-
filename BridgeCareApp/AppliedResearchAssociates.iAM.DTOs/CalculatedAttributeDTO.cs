@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.DTOs.Abstract;
 namespace AppliedResearchAssociates.iAM.DTOs
 {
     /// <summary>
-    /// Describes whose value is calculated (as opposed to an attribute
+    /// Describes an attribute whose value is calculated (as opposed to an attribute
     /// whose value is provided by the user)
     /// </summary>
     public class CalculatedAttributeDTO : BaseDTO

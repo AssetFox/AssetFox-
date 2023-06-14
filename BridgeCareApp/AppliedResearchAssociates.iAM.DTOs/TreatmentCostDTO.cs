@@ -3,7 +3,7 @@
 namespace AppliedResearchAssociates.iAM.DTOs
 {
     /// <summary>
-    /// Represents the costs of applying a specific treatment to an asset.
+    /// Represents a cost of applying a specific treatment to an asset.
     /// A treatment may have multiple costs as the cost may depend on a
     /// factor defined by an asset's attributes.  For example, the cost of
     /// replacing an asset on an interstate may be higher than the cost of

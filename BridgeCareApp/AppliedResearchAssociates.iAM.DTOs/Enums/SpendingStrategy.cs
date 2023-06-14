@@ -1,7 +1,7 @@
 ﻿namespace AppliedResearchAssociates.iAM.DTOs.Enums
 {
     /// <summary>
-    /// Defines spending stratigies used by simulatiuon options
+    /// Defines spending stratigies used by simulation options
     /// </summary>
     public enum SpendingStrategy
     {
@@ -22,14 +22,14 @@
         UntilTargetAndDeficientConditionGoalsMet,
 
         /// <summary>
-        /// Spend funding until condition goals are met.
-        /// Provided budget levels are ignored.
+        /// Spend funding until condition goals are met,
+        /// provided budget levels are ignored.
         /// </summary>
         UntilTargetConditionGoalsMet,
 
         /// <summary>
-        /// Spend funding until condition goals are met.
-        /// Provided budget levels are ignored.
+        /// Spend funding until deficiency goals are met,
+        /// provided budget levels are ignored.
         /// </summary>
         UntilDeficientConditionGoalsMet,
 

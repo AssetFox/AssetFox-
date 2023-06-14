@@ -28,5 +28,12 @@ export default class AdminDataService {
     }
     static GetAttributeName(): AxiosPromise {
         return coreAxiosInstance.get(`${API.AdminData}/GetAttributeName`);
-    }    
+    }
+    
+    static getConstraintType(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AdminData}/GetConstraintType`);
+    }
+    static setConstraintType(constraintType: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.AdminData}/SetConstraintType/${constraintType}`);
+    }
 }

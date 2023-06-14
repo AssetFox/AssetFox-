@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -31,11 +32,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private const string simulationReportKey = "SimulationReportNames";
         private const string keyFieldKey = "KeyFields";
         private const string primaryNetworkKey = "PrimaryNetwork";
+        private const string constraintTypeKey = "ConstraintType";
 
         //Reads in KeyFields record as a string but places values in a list to return.
         public IList<string> GetKeyFields()
         {
             var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").FirstOrDefault();
+
             if (existingKeyFields == null)
             {
                 return null;
@@ -102,15 +105,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public string GetPrimaryNetwork()
         {
             var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == primaryNetworkKey);
-            var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
-            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
-
             if (existingPrimaryNetwork == null)
             {
                 return null;
             }
             else
-            {                
+            {
+                var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
+                var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
                 return existingNetwork.Name;
             }
         }
@@ -312,6 +314,37 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (implementationLogo == null) return "";
             if (!implementationLogo.Value.StartsWith("data:image/jpg;base64,")) return "";
             return _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "ImplementationLogo").FirstOrDefault().Value;
+        }
+
+        public string GetConstraintType()
+        {
+            var existingConstraintType = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == constraintTypeKey).FirstOrDefault();
+            if (existingConstraintType == null)
+            {
+                return null;
+            }
+            else
+            {
+                return existingConstraintType.Value;
+            }
+        }
+        public void SetConstraintType(string constraintType)
+        {
+            var existingConstraintType = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == constraintTypeKey).FirstOrDefault();
+            if (existingConstraintType == null)
+            {
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                {
+                    Key = constraintTypeKey,
+                    Value = constraintType
+                });
+            }
+            else
+            {
+                existingConstraintType.Value = constraintType;
+                _unitOfWork.Context.AdminSettings.Update(existingConstraintType);
+            }
+            _unitOfWork.Context.SaveChanges();
         }
     }
 }

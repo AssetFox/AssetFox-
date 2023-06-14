@@ -6,6 +6,12 @@
     <UserSecretsId>7bf892ee-3d69-4247-9888-2f7660ebee57</UserSecretsId>
   </PropertyGroup>
 
+	<!--https://chillicream.com/docs/hotchocolate/v13/defining-a-schema/documentation#xml-documentation-->
+	<PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+    </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>

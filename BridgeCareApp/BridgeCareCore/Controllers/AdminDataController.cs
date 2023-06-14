@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
 using System.Linq;
+using static BridgeCareCore.Security.SecurityConstants;
+using System.Data;
 
 namespace BridgeCareCore.Controllers
 {
@@ -263,6 +265,39 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetSimulationReports - {e.Message}");
                 return BadRequest($"{SiteError}::SetSimulationReports - {e.Message}");
+            }
+        }
+
+        [HttpGet]
+        [Route("GetConstraintType")]
+        public async Task<IActionResult> GetConstraintType()
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.GetConstraintType());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetConstraintType - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("SetConstraintType/{constraintType}")]
+        [ClaimAuthorize("AdminAccess")]
+        public async Task<IActionResult> SetConstraintType(string constraintType)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.SetConstraintType(constraintType));
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetConstraintType - {e.Message}");
+                throw;
             }
         }
 

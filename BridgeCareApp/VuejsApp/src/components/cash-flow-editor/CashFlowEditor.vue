@@ -43,15 +43,15 @@
                 <v-flex xs4 class="ghd-constant-header">                   
                     <v-layout row align-end style="padding-top: 22px !important">
                         <v-spacer></v-spacer>
+                        <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
+                            id="CashFlowEditor-addCashFlowRule-btn" 
+                            outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                            Add Cash Flow Rule
+                        </v-btn>
                         <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
                             outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario">
                             Create New Library
-                        </v-btn>
-                        <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
-                            id="CashFlowEditor-addCashFlowRule-btn"
-                            outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
-                            Add Cash Flow Rule
                         </v-btn>
                     </v-layout>
                 </v-flex>

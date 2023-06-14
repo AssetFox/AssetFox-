@@ -174,6 +174,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             LocationKeys = new Dictionary<string, string>()
                 {
                     { "ID", "46f5da89-5e65-4b8a-9b36-03d9af0302f7" },
+                    { "CULV_DURATION_N", "Y" },
                     { "BRKEY_", "2" },
                     { "BMSID", "9876543" }
                 },
@@ -206,6 +207,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             LocationKeys = new Dictionary<string, string>()
                 {
                     { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
+                    { "CULV_DURATION_N", "Y" },
                     { "BRKEY_", "1" },
                     { "BMSID", "12345678" }
                 },

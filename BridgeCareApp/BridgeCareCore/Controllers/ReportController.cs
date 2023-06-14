@@ -134,11 +134,6 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-
-
-
-
-
         [HttpPost]
         [Route("GetFile/{reportName}")]
         [Authorize]
@@ -345,7 +340,7 @@ namespace BridgeCareCore.Controllers
 
             var returnValue = Content(errorHtml.ToString());
             returnValue.ContentType = "text/html";
-            returnValue.StatusCode = (int?)HttpStatusCode.BadRequest;
+            returnValue.StatusCode = (int?)HttpStatusCode.OK;
             return returnValue;
         }
 

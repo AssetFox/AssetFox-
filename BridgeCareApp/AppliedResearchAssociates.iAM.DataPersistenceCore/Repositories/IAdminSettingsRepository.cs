@@ -11,6 +11,8 @@ using System.Drawing;
 
 public interface IAdminSettingsRepository
 {
+    string GetConstraintType();
+    void SetConstraintType(string constraintType);
     IList<string> GetKeyFields();
 
     void SetKeyFields(string keyFields);

@@ -64,7 +64,7 @@
         selectedKeys: string[] = [];
 
         inventoryDetails: string[] = [];
-        constraintDetails: string;
+        constraintDetails: string = '';
                        
         inventorySelectListsWorker: any = null;
 
@@ -111,16 +111,9 @@
             (async () => { 
                 await this.getConstraintTypeAction();
                 await this.getInventoryReportsAction();
-                await this.getKeyFieldsAction();
+                await this.getKeyFieldsAction(); 
+                this.onStateConstraintTypeChanged();
             })();
-        }
-
-        beforeRouteEnter(to: any, from: any, next: any) {
-            next((vm: any) => {
-                (async () => { 
-                    await vm.getConstraintTypeAction();
-                })();
-            });
         }
 
         created() {

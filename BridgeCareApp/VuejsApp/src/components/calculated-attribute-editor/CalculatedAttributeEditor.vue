@@ -35,7 +35,7 @@
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
-                    <v-layout align-end>
+                    <v-layout justify-end align-end style="padding-top: 18px !important;">
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
                                     prepend-inner-icon=$vuetify.icons.ghd-search
@@ -219,13 +219,7 @@
                     v-show="hasSelectedLibrary || hasScenario">
                     Cancel
                 </v-btn>
-                <v-btn
-                    @click="onUpsertScenarioCalculatedAttribute"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
-                    v-show="hasScenario && hasAdminAccess"
-                    :disabled="disableCrudButton() || !hasUnsavedChanges">
-                    Save
-                </v-btn>
+                
                 <v-btn
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
@@ -248,6 +242,13 @@
                     class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario">
                     Update Library
+                </v-btn>
+                <v-btn
+                    @click="onUpsertScenarioCalculatedAttribute"
+                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                    v-show="hasScenario && hasAdminAccess"
+                    :disabled="disableCrudButton() || !hasUnsavedChanges">
+                    Save
                 </v-btn> 
             </v-layout>
         </v-flex>

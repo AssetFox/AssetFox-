@@ -60,7 +60,7 @@ const actions = {
             }
         });
     },
-    async importImplementationName({commit, dispatch}: any, payload: String) {
+    async importImplementationName({commit, dispatch}: any, payload: string) {
         await AdminSiteSettingsService.importImplementationName(payload)
         .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {

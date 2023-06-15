@@ -79,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public NetworkEntity GetMainNetwork()
         {
-            var mainNetworkId = new Guid(_unitOfWork.Config["InventoryData:PrimaryNetwork"]);
+            var mainNetworkId =new Guid(_unitOfWork.Context.AdminSettings.Where(_ => _.Key == "PrimaryNetwork").SingleOrDefault().Value);
 
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == mainNetworkId))
             {

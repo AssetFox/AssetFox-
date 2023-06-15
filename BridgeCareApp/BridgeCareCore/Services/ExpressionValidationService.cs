@@ -315,13 +315,16 @@ namespace BridgeCareCore.Services
             flattenedDataTable.Columns.Add("MaintainableAssetId", typeof(Guid));
             attributeNames.ForEach(attributeName =>
             {
-                if(attributeName.dataType.Equals("NUMBER", StringComparison.OrdinalIgnoreCase))
+                if (!flattenedDataTable.Columns.Contains(attributeName.name))
                 {
-                    flattenedDataTable.Columns.Add(attributeName.name, typeof(double));
-                }
-                else
-                {
-                    flattenedDataTable.Columns.Add(attributeName.name, typeof(string));
+                    if (attributeName.dataType.Equals("NUMBER", StringComparison.OrdinalIgnoreCase))
+                    {
+                        flattenedDataTable.Columns.Add(attributeName.name, typeof(double));
+                    }
+                    else
+                    {
+                        flattenedDataTable.Columns.Add(attributeName.name, typeof(string));
+                    }
                 }
             });
             return flattenedDataTable;

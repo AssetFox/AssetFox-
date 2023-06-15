@@ -695,7 +695,7 @@ export default class AppComponent extends Vue {
      */
     onNavigate(route: any) {
         if (this.$router.currentRoute.path !== route.path) {
-            this.$router.push(route);
+            this.$router.push(route).catch(() => {});
         }
     }
 

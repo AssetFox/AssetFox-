@@ -19,14 +19,5 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
         {
             mock.Setup(r => r.GetSyncedLibraryDataset(upsertRequest)).Returns(new List<BudgetPriorityDTO>());
         }
-        //public static Mock<IBudgetPriortyPagingService> DefaultServiceMock(Mock<IUnitOfWork> mockUnitOfWork = null)
-        //{
-        //    var mockBudgetPriorityService = new Mock<IBudgetPriortyPagingService>();
-        //    if (mockUnitOfWork != null)
-        //    {
-        //        mockUnitOfWork.Setup(u => u.).Returns(() => mockBudgetPriorityService.Object);
-        //    }
-        //    return mockBudgetPriorityService;
-        //}
     }
 }

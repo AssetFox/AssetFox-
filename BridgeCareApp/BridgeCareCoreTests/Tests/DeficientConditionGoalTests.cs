@@ -125,6 +125,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var repo = DeficientConditionGoalRepositoryMocks.DefaultMock(unitOfWork);
+            var user = UserDtos.Admin();
             var controller = CreateController(unitOfWork);
             var libraryDto = DeficientConditionGoalLibraryDtos.Empty();
             var libraryId = libraryDto.Id;
@@ -146,13 +147,8 @@ namespace BridgeCareCoreTests.Tests
                 Library = libraryDto,
                 SyncModel = sync
             };
-            var libraryUser = new LibraryUserDTO()
-            {
-                UserId = Guid.NewGuid(),
-                AccessLevel = LibraryAccessLevel.Modify,
-                UserName = "testLibraryUser"
-            };
-            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             repo.SetupGetLibraryAccess(libraryId, libraryExists);
 
             // Act

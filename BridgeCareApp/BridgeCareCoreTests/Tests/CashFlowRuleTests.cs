@@ -249,13 +249,9 @@ namespace BridgeCareCoreTests.Tests
                 Library = dto,
                 SyncModel = sync
             };
-            var libraryUser = new LibraryUserDTO()
-            {
-                UserId = Guid.NewGuid(),
-                UserName = "testLibraryUser",
-                AccessLevel = LibraryAccessLevel.Modify
-            };
-            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
+            var user = UserDtos.Admin();
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             repo.SetupGetLibraryAccess(dto.Id, libraryExists);
 
             // Act

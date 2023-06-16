@@ -111,15 +111,10 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var repo = PerformanceCurveRepositoryMocks.New(unitOfWork);
+            var user = UserDtos.Admin();
             var libraryId = Guid.NewGuid();
-            var libraryUser = new LibraryUserDTO()
-            {
-                UserId = libraryId,
-                AccessLevel = LibraryAccessLevel.Modify,
-                UserName = "testLibraryUser"
-            };
-
-            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             repo.SetupGetLibraryAccess(libraryId, libraryExists);
             var dto = PerformanceCurveLibraryDtos.Empty(libraryId);
             var dto2 = PerformanceCurveLibraryDtos.Empty(libraryId);
@@ -241,14 +236,8 @@ namespace BridgeCareCoreTests.Tests
             var service = new Mock<IPerformanceCurvesService>();
             var performanceCurves = new List<PerformanceCurveDTO>();
             var libraryId = Guid.NewGuid();
-            var libraryUser = new LibraryUserDTO()
-            {
-                UserId = libraryId,
-                AccessLevel = LibraryAccessLevel.Modify,
-                UserName = "testLibraryUser"
-            };
-
-            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             repositoryMock.SetupGetLibraryAccess(libraryId, libraryExists);
 
             var pagingSync = new PagingSyncModel<PerformanceCurveDTO>

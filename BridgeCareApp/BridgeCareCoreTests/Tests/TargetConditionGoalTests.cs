@@ -13,6 +13,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
 using Humanizer;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
 using Xunit;
 
@@ -66,13 +67,9 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>();
             request.Library = libraryDto;
 
-            var libraryUser = new LibraryUserDTO()
-            {
-                UserId = Guid.NewGuid(),
-                UserName = "testLibraryUser",
-                AccessLevel = LibraryAccessLevel.Modify
-            };
-            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryDto.Id, libraryUser);
+            var user = UserDtos.Admin();
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             repo.SetupGetLibraryAccess(libraryDto.Id, libraryExists);
 
             // Act
@@ -124,13 +121,9 @@ namespace BridgeCareCoreTests.Tests
                 Library = libraryDto,
                 SyncModel = sync
             };
-            var libraryUser = new LibraryUserDTO()
-            {
-                UserId = Guid.NewGuid(),
-                UserName = "testLibraryUser",
-                AccessLevel = LibraryAccessLevel.Modify
-            };
-            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
+            var user = UserDtos.Admin();
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             repo.SetupGetLibraryAccess(libraryId, libraryExists);
             // Act
             var result = await controller.UpsertTargetConditionGoalLibrary(libraryRequest);

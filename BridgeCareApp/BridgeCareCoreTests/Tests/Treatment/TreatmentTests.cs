@@ -11,6 +11,7 @@ using BridgeCareCore.Models;
 using BridgeCareCoreTests.Helpers;
 using BridgeCareCoreTests.Tests.Treatment;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using Xunit;
@@ -276,13 +277,9 @@ namespace BridgeCareCoreTests.Tests
                 SyncModel = sync
             };
             pagingService.Setup(ts => ts.GetSyncedLibraryDataset(libraryRequest)).Returns(treatmentsAfter);
-            var libraryUser = new LibraryUserDTO()
-            {
-                UserId = Guid.NewGuid(),
-                UserName = "testLibraryUser",
-                AccessLevel = LibraryAccessLevel.Modify
-            };
-            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
+            var user = UserDtos.Admin();
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             treatmentLibraryRepo.SetupGetLibraryAccess(libraryId, libraryExists);
 
             // Act

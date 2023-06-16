@@ -13,6 +13,7 @@ using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
 using BridgeCareCoreTests.Tests.BudgetPriority;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
 using Xunit;
 
@@ -94,12 +95,8 @@ namespace BridgeCareCoreTests.Tests
                 Library = dto,
                 IsNewLibrary = false
             };
-            var userId = new LibraryUserDTO()
-            {
-                UserId = request.Library.Id,
-                AccessLevel = LibraryAccessLevel.Modify,
-                UserName = "budgetPriorityUser"
-            };
+            var user = UserDtos.Admin();
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
             service.SetupGetSyncedLibraryDataset(request);
             var controller = new BudgetPriorityController(
                 security.Object,
@@ -110,7 +107,7 @@ namespace BridgeCareCoreTests.Tests
                 service.Object
                 );
             
-            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(request.Library.Id, userId);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             budgetPriorityRepo.SetupGetLibraryAccess(request.Library.Id, libraryExists);
                         
             // Act

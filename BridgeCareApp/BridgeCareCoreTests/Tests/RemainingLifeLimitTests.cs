@@ -14,6 +14,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
 using Xunit;
 
@@ -115,6 +116,7 @@ namespace BridgeCareCoreTests.Tests
             var repo = RemainingLifeLimitRepositoryMocks.New(unitOfWork);
             var controller = CreateController(unitOfWork);
             var libraryId = Guid.NewGuid();
+            var user = UserDtos.Admin();
             var dto = RemainingLifeLimitLibraryDtos.Empty(libraryId);
             var remainingLifeLimitId = Guid.NewGuid();
             var remainingLifeLimit = RemainingLifeLimitDtos.Dto("attribute", remainingLifeLimitId);
@@ -136,14 +138,9 @@ namespace BridgeCareCoreTests.Tests
                 Library = dto,
                 SyncModel = sync
             };
-            var libraryUser = new LibraryUserDTO()
-            {
-                UserId = Guid.NewGuid(),
-                UserName = "testLibraryUser",
-                AccessLevel = LibraryAccessLevel.Modify
-            };
-            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
-            repo.SetupGetLibraryAccess(dto.Id, libraryExists);
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
+            repo.SetupGetLibraryAccess(libraryId, libraryExists);
 
             // Act
             await controller.UpsertRemainingLifeLimitLibrary(libraryRequest);

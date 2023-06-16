@@ -1,6 +1,8 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -15,6 +17,7 @@ using BridgeCareCoreTests.Tests.General_Work_Queue;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using MoreLinq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using Xunit;
 using Assert = Xunit.Assert;
 
@@ -75,6 +78,10 @@ namespace BridgeCareCoreTests.Tests
             var libraryId = Guid.NewGuid();
             var dto = PerformanceCurveLibraryDtos.Empty(libraryId);
             var dto2 = PerformanceCurveLibraryDtos.Empty(libraryId);
+
+            var libraryDoesNotExist = LibraryAccessModels.LibraryDoesNotExist();
+            repo.SetupGetLibraryAccess(libraryId, libraryDoesNotExist);
+
             var controller = CreateController(unitOfWork);
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
@@ -105,6 +112,15 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var repo = PerformanceCurveRepositoryMocks.New(unitOfWork);
             var libraryId = Guid.NewGuid();
+            var libraryUser = new LibraryUserDTO()
+            {
+                UserId = libraryId,
+                AccessLevel = LibraryAccessLevel.Modify,
+                UserName = "testLibraryUser"
+            };
+
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
+            repo.SetupGetLibraryAccess(libraryId, libraryExists);
             var dto = PerformanceCurveLibraryDtos.Empty(libraryId);
             var dto2 = PerformanceCurveLibraryDtos.Empty(libraryId);
             var dto3 = PerformanceCurveLibraryDtos.Empty(libraryId);
@@ -223,9 +239,18 @@ namespace BridgeCareCoreTests.Tests
             var esecSecurity = EsecSecurityMocks.Admin;
             var pagingService = new Mock<IPerformanceCurvesPagingService>();
             var service = new Mock<IPerformanceCurvesService>();
-
             var performanceCurves = new List<PerformanceCurveDTO>();
             var libraryId = Guid.NewGuid();
+            var libraryUser = new LibraryUserDTO()
+            {
+                UserId = libraryId,
+                AccessLevel = LibraryAccessLevel.Modify,
+                UserName = "testLibraryUser"
+            };
+
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
+            repositoryMock.SetupGetLibraryAccess(libraryId, libraryExists);
+
             var pagingSync = new PagingSyncModel<PerformanceCurveDTO>
             {
                 LibraryId = libraryId,

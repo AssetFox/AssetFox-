@@ -1,7 +1,9 @@
 using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -10,6 +12,7 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
+using Humanizer;
 using Moq;
 using Xunit;
 
@@ -62,6 +65,16 @@ namespace BridgeCareCoreTests.Tests
             var controller = CreateController(unitOfWork);
             var request = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>();
             request.Library = libraryDto;
+
+            var libraryUser = new LibraryUserDTO()
+            {
+                UserId = Guid.NewGuid(),
+                UserName = "testLibraryUser",
+                AccessLevel = LibraryAccessLevel.Modify
+            };
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryDto.Id, libraryUser);
+            repo.SetupGetLibraryAccess(libraryDto.Id, libraryExists);
+
             // Act
             var result = await controller
                 .UpsertTargetConditionGoalLibrary(request);
@@ -111,7 +124,14 @@ namespace BridgeCareCoreTests.Tests
                 Library = libraryDto,
                 SyncModel = sync
             };
-
+            var libraryUser = new LibraryUserDTO()
+            {
+                UserId = Guid.NewGuid(),
+                UserName = "testLibraryUser",
+                AccessLevel = LibraryAccessLevel.Modify
+            };
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
+            repo.SetupGetLibraryAccess(libraryId, libraryExists);
             // Act
             var result = await controller.UpsertTargetConditionGoalLibrary(libraryRequest);
 

@@ -1,6 +1,8 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -52,6 +54,10 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<RemainingLifeLimitLibraryDTO, RemainingLifeLimitDTO>();
             request.IsNewLibrary = true;
             request.Library = dto;
+
+            var libraryDoesNotExist = LibraryAccessModels.LibraryDoesNotExist();
+            repo.SetupGetLibraryAccess(dto.Id, libraryDoesNotExist);
+
             // Act
             var result = await controller
                 .UpsertRemainingLifeLimitLibrary(request);
@@ -130,6 +136,15 @@ namespace BridgeCareCoreTests.Tests
                 Library = dto,
                 SyncModel = sync
             };
+            var libraryUser = new LibraryUserDTO()
+            {
+                UserId = Guid.NewGuid(),
+                UserName = "testLibraryUser",
+                AccessLevel = LibraryAccessLevel.Modify
+            };
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(libraryId, libraryUser);
+            repo.SetupGetLibraryAccess(dto.Id, libraryExists);
+
             // Act
             await controller.UpsertRemainingLifeLimitLibrary(libraryRequest);
 

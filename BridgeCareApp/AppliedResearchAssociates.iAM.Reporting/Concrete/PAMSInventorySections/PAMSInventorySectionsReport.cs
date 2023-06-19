@@ -11,7 +11,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using Microsoft.AspNetCore.Html;
 using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Information;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace AppliedResearchAssociates.iAM.Reporting
@@ -70,10 +72,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var resultsString = new StringBuilder();
             resultsString.Append("<table class=\"report-cell\">");
-            resultsString.Append(CreateHTMLSection("ID", new List<string>() { "CRS", "COUNTY", "SR", "FROMSEGMENT", "TOSEGMENT", "Member Segments" }));
-            resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DISTRICT", "MPO_RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PERCENT", "SURFACE", "FED_AID", "IS_HPMS", "LANES", "SEGMENT_LENGTH", "WIDTH", "AGE" }));
-            resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE_NAME", "SURFACEID", "L_S_TYPE", "R_S_TYPE", "YR_BUILT", "YEAR_LAST_OVERLAY", "LAST_STRUCTURAL_OVERLAY" }));
-            resultsString.Append(CreateHTMLSection("Survey Information", new List<string>() { "Survey Date" }));
+            resultsString.Append(CreateHTMLSection("ID", new List<string>() { "CRS", "", "COUNTY", "SR", "FROMSEGMENT", "TOSEGMENT", "Member Segments" }));
+            resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DISTRICT", "MPO_RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PERCENT", "SURFACE", "", "FED_AID", "IS_HPMS", "LANES", "", "SEGMENT_LENGTH", "WIDTH", "AGE", ""}));
+            resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE_NAME", "SURFACEID", "L_S_TYPE","R_S_TYPE", "YR_BUILT", "", "YEAR_LAST_OVERLAY", "LAST_STRUCTURAL_OVERLAY" }));
+            resultsString.Append(CreateHTMLSection("Survey Information", new List<string>() { "Survey Date", ""}));
             resultsString.Append(CreateHTMLSection("Measured Conditions", new List<string>() { "OPI", "ROUGHNESS" }));
             resultsString.Append(CreateHTMLDistressSection("Surface Defects"));
 
@@ -150,8 +152,25 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private string GetAttribute(string attributeName, bool previous=false)
         {
-            var returnVal = _sectionData.FirstOrDefault(_ => _.Name == attributeName.ToUpper());
-            return (returnVal == null) ? DEFAULT_VALUE : returnVal.Value;
+            var returnVal = _sectionData.FirstOrDefault(_ => _.Name.ToUpper() == attributeName.ToUpper());
+
+            var returnstr = string.Empty;
+
+            if (attributeName is "")
+            {
+                returnstr = "";
+            }
+            else if (returnVal == null || returnVal.Value == null)
+            {
+                returnstr = DEFAULT_VALUE;
+            }
+            else
+            {
+                returnstr = returnVal.Value;
+            }
+
+            return returnstr;
+           // return (returnVal == null) ? DEFAULT_VALUE : returnVal.Value;
         }
         private string GetDescription(string attributeName)
         {
@@ -235,9 +254,47 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     for (int tmpcol = 0; tmpcol < 1; tmpcol++)
                     {
                         sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\" >{GetDescription(distressArray[tmprow, tmpcol])}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(distressArray[tmprow, tmpcol + 1], previous)}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(distressArray[tmprow, tmpcol + 2], previous)}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(distressArray[tmprow, tmpcol + 3], previous)}</td>");
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        Decimal tmpnum;
+                        var returnVal = GetAttribute(distressArray[tmprow, tmpcol + 1], previous);
+                        string tmpstring = returnVal;
+
+                        if (Decimal.TryParse(tmpstring, out tmpnum))
+                        {
+                            //tmpstring = Round(tmpnum, 2, MidpointRounding.AwayFromZero);
+                            tmpstring = tmpnum.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring);
+                        sectionString.Append("</td>");
+
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        returnVal = GetAttribute(distressArray[tmprow, tmpcol + 2], previous);
+                        tmpstring = returnVal;
+
+                        if (Decimal.TryParse(tmpstring, out tmpnum))
+                        {
+                            tmpstring = tmpnum.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring);
+                        sectionString.Append("</td>");
+
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        returnVal = GetAttribute(distressArray[tmprow, tmpcol + 3], previous);
+                        tmpstring = returnVal;
+
+                        if (Decimal.TryParse(tmpstring, out tmpnum))
+                        {
+                            tmpstring = tmpnum.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring);
+                        sectionString.Append("</td>");
+
                     }
                     sectionString.Append($"</tr>");
                 }
@@ -250,7 +307,23 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
                 sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\" >Patching</td>");
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPACT", previous)}</td>");
-                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPASF", previous)}</td>");
+
+
+                //sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPASF", previous)}</td>");
+                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                Decimal tmpnum1;
+                var returnVal1 = GetAttribute("CPCCPASF", previous);
+                string tmpstring1 = returnVal1;
+
+                if (Decimal.TryParse(tmpstring1, out tmpnum1))
+                {
+                    tmpstring1 = tmpnum1.ToString("0.00");
+                }
+
+                sectionString.Append(tmpstring1);
+                sectionString.Append("</td>");
+
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td></tr>");
                 sectionString.Append($"<tr><td colspan=\"4\" class=\"report-description report-cell\"></td></tr>");
             }
@@ -297,9 +370,48 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     for (int tmpcol = 0; tmpcol < 1; tmpcol++)
                     {
                         sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\" >{GetDescription(patchingArray[tmprow, tmpcol])}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(patchingArray[tmprow, tmpcol + 1], previous)}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(patchingArray[tmprow, tmpcol + 2], previous)}</td>");
-                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute(patchingArray[tmprow, tmpcol + 3], previous)}</td>");
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        Decimal tmpnum2;
+                        var returnVal2 = GetAttribute(patchingArray[tmprow, tmpcol + 1], previous);
+                        string tmpstring2 = returnVal2;
+
+                        if (Decimal.TryParse(tmpstring2, out tmpnum2))
+                        {
+                            tmpstring2 = tmpnum2.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring2);
+                        sectionString.Append("</td>");
+
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        Decimal tmpnum3;
+                        var returnVal3 = GetAttribute(patchingArray[tmprow, tmpcol + 2], previous);
+                        var tmpstring3 = returnVal3;
+
+                        if (Decimal.TryParse(tmpstring3, out tmpnum3))
+                        {
+                            tmpstring3 = tmpnum3.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring3);
+                        sectionString.Append("</td>");
+
+                        sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                        Decimal tmpnum4;
+                        var returnVal4 = GetAttribute(patchingArray[tmprow, tmpcol + 3], previous);
+                        var tmpstring4 = returnVal4;
+
+                        if (Decimal.TryParse(tmpstring4, out tmpnum4))
+                        {
+                            tmpstring4 = tmpnum4.ToString("0.00");
+                        }
+
+                        sectionString.Append(tmpstring4);
+                        sectionString.Append("</td>");
+
                     }
                     sectionString.Append($"</tr>");
                 }
@@ -312,12 +424,50 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
                 sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\" >Bituminous Patching</td>");
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CBPATCCT", previous)}</td>");
-                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CBPATCSF", previous)}</td>");
+               // sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CBPATCSF", previous)}</td>");
+
+                /////
+                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                Decimal tmpnum5;
+                var returnVal5 = GetAttribute("CBPATCSF", previous);
+                string tmpstring5 = returnVal5;
+
+                if (Decimal.TryParse(tmpstring5, out tmpnum5))
+                {
+                    tmpstring5 = tmpnum5.ToString("0.00");
+                }
+
+                sectionString.Append(tmpstring5);
+                sectionString.Append("</td>");
+
+                //////
+
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td></tr>");
 
                 sectionString.Append($"<tr><td class=\"report-description report-cell\" style=\"text-align:left;width:25%;vertical-align:middle;background-color:transparent;\">Concrete Patching</td>");
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPACT", previous)}</td>");
-                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPASF", previous)}</td>");
+                //sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >{GetAttribute("CPCCPASF", previous)}</td>");
+
+                /////
+                sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" >");
+
+                Decimal tmpnum6;
+                var returnVal6 = GetAttribute("CPCCPASF", previous);
+                string tmpstring6 = returnVal6;
+
+                if (Decimal.TryParse(tmpstring6, out tmpnum6))
+                {
+                    tmpstring6 = tmpnum6.ToString("0.00");
+                }
+
+                sectionString.Append(tmpstring6);
+                sectionString.Append("</td>");
+
+                //////
+
+
+
                 sectionString.Append($"<td class=\"report-data report-cell\" style=\"text-align:center;width:25%;vertical-align:middle;background-color:transparent;\" ></td></tr>");
 
             }
@@ -344,64 +494,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             var descriptions = new Dictionary<string, AttributeDescription>();
 
-            descriptions.Add("BEDGDTR1", new AttributeDescription() { Description = "BITUMINIOUS EDGE DETER. LENGTH - L" });
-            descriptions.Add("BEDGDTR2", new AttributeDescription() { Description = "BITUMINIOUS EDGE DETER. LENGTH - M" });
-            descriptions.Add("BEDGDTR3", new AttributeDescription() { Description = "BITUMINIOUS EDGE DETER. LENGTH - H" });
-            descriptions.Add("BFATICR1", new AttributeDescription() { Description = "BITUMINIOUS FATIGUE CRACK - L" });
-            descriptions.Add("BFATICR2", new AttributeDescription() { Description = "BITUMINIOUS FATIGUE CRACK - M" });
-            descriptions.Add("BFATICR3", new AttributeDescription() { Description = "BITUMINIOUS FATIGUE CRACK - H" });
-            descriptions.Add("BLRUTDP1", new AttributeDescription() { Description = "BITUMINIOUS RUTTING LEFT - L" });
-            descriptions.Add("BLRUTDP2", new AttributeDescription() { Description = "BITUMINIOUS RUTTING LEFT - M" });
-            descriptions.Add("BLRUTDP3", new AttributeDescription() { Description = "BITUMINIOUS RUTTING LEFT - H" });
-            descriptions.Add("BLTEDGE1", new AttributeDescription() { Description = "BITUMINIOUS LEFT EDGE JOINT - L" });
-            descriptions.Add("BLTEDGE2", new AttributeDescription() { Description = "BITUMINIOUS LEFT EDGE JOINT - M" });
-            descriptions.Add("BLTEDGE3", new AttributeDescription() { Description = "BITUMINIOUS LEFT EDGE JOINT - H" });
-            descriptions.Add("BMISCCK1", new AttributeDescription() { Description = "BITUMINIOUS MISCELLANEOUS CRACK - L" });
-            descriptions.Add("BMISCCK2", new AttributeDescription() { Description = "BITUMINIOUS MISCELLANEOUS CRACK - M" });
-            descriptions.Add("BMISCCK3", new AttributeDescription() { Description = "BITUMINIOUS MISCELLANEOUS CRACK - H" });
-            descriptions.Add("BPATCHCT", new AttributeDescription() { Description = "BITUMINIOUS PATCHING COUNT" });
-            descriptions.Add("BPATCHSF", new AttributeDescription() { Description = "BITUMINIOUS PATCHING AREA (SF)" });
-            descriptions.Add("BRAVLWT2", new AttributeDescription() { Description = "BITUMINIOUS RAVEL./WEATHER. AREA - M" });
-            descriptions.Add("BRAVLWT3", new AttributeDescription() { Description = "BITUMINIOUS RAVEL./WEATHER. AREA - H" });
-            descriptions.Add("BRRUTDP1", new AttributeDescription() { Description = "BITUMINIOUS RUTTING RIGHT - L" });
-            descriptions.Add("BRRUTDP2", new AttributeDescription() { Description = "BITUMINIOUS RUTTING RIGHT - M" });
-            descriptions.Add("BRRUTDP3", new AttributeDescription() { Description = "BITUMINIOUS RUTTING RIGHT - H" });
-            descriptions.Add("BTRNSCT1", new AttributeDescription() { Description = "BITUMINIOUS TRANS. CRACK COUNT - L" });
-            descriptions.Add("BTRNSCT2", new AttributeDescription() { Description = "BITUMINIOUS TRANS. CRACK COUNT - M" });
-            descriptions.Add("BTRNSCT3", new AttributeDescription() { Description = "BITUMINIOUS TRANS. CRACK COUNT - H" });
-            descriptions.Add("BTRNSFT1", new AttributeDescription() { Description = "BITUMINIOUS TRANS. CRACK LENGTH - L" });
-            descriptions.Add("BTRNSFT2", new AttributeDescription() { Description = "BITUMINIOUS TRANS. CRACK LENGTH - M" });
-            descriptions.Add("BTRNSFT3", new AttributeDescription() { Description = "BITUMINIOUS TRANS. CRACK LENGTH - H" });
-            descriptions.Add("CBPATCCT", new AttributeDescription() { Description = "CONCRETE BITUMINIOUS PATCH COUNT" });
-            descriptions.Add("CBPATCSF", new AttributeDescription() { Description = "CONCRETE BITUMINIOUS PATCH AREA (SF)" });
-            descriptions.Add("CBRKSLB1", new AttributeDescription() { Description = "CONCRETE BROKEN SLAB COUNT - L" });
-            descriptions.Add("CBRKSLB2", new AttributeDescription() { Description = "CONCRETE BROKEN SLAB COUNT - M" });
-            descriptions.Add("CBRKSLB3", new AttributeDescription() { Description = "CONCRETE BROKEN SLAB COUNT - H" });
-            descriptions.Add("CFLTJNT2", new AttributeDescription() { Description = "CONCRETE FAULTED JOINT COUNT - M" });
-            descriptions.Add("CFLTJNT3", new AttributeDescription() { Description = "CONCRETE FAULTED JOINT COUNT - H" });
-            descriptions.Add("CJOINTCT", new AttributeDescription() { Description = "CONCRETE JOINT COUNT" });
-            descriptions.Add("CLJCPRU1", new AttributeDescription() { Description = "CONCRETE LEFT JCP RUTTING - L" });
-            descriptions.Add("CLJCPRU2", new AttributeDescription() { Description = "CONCRETE LEFT JCP RUTTING - M" });
-            descriptions.Add("CLJCPRU3", new AttributeDescription() { Description = "CONCRETE LEFT JCP RUTTING - H" });
-            descriptions.Add("CLNGCRK1", new AttributeDescription() { Description = "CONCRETE LONG. CRACK COUNT - L" });
-            descriptions.Add("CLNGCRK2", new AttributeDescription() { Description = "CONCRETE LONG. CRACK COUNT - M" });
-            descriptions.Add("CLNGCRK3", new AttributeDescription() { Description = "CONCRETE LONG. CRACK COUNT - H" });
-            descriptions.Add("CLNGJNT1", new AttributeDescription() { Description = "CONCRETE LONG. JOINT SPALL LENGTH - L" });
-            descriptions.Add("CLNGJNT2", new AttributeDescription() { Description = "CONCRETE LONG. JOINT SPALL LENGTH - M" });
-            descriptions.Add("CLNGJNT3", new AttributeDescription() { Description = "CONCRETE LONG. JOINT SPALL LENGTH - H" });
-            descriptions.Add("CNSLABCT", new AttributeDescription() { Description = "CONCRETE SLAB COUNT" });
-            descriptions.Add("CPCCPACT", new AttributeDescription() { Description = "CONCRETE PCC PATCH COUNT" });
-            descriptions.Add("CPCCPASF", new AttributeDescription() { Description = "CONCRETE PCC PATCH AREA (SF)" });
-            descriptions.Add("CRJCPRU1", new AttributeDescription() { Description = "CONCRETE RIGHT JCP RUTTING - L" });
-            descriptions.Add("CRJCPRU2", new AttributeDescription() { Description = "CONCRETE RIGHT JCP RUTTING - M" });
-            descriptions.Add("CRJCPRU3", new AttributeDescription() { Description = "CONCRETE RIGHT JCP RUTTING - H" });
-            descriptions.Add("CTRNCRK1", new AttributeDescription() { Description = "CONCRETE TRANS. CRACK COUNT - L" });
-            descriptions.Add("CTRNCRK2", new AttributeDescription() { Description = "CONCRETE TRANS. CRACK COUNT - M" });
-            descriptions.Add("CTRNCRK3", new AttributeDescription() { Description = "CONCRETE TRANS. CRACK COUNT - H" });
-            descriptions.Add("CTRNJNT1", new AttributeDescription() { Description = "CONCRETE TRANS. JOINT SPALL COUNT - L" });
-            descriptions.Add("CTRNJNT2", new AttributeDescription() { Description = "CONCRETE TRANS. JOINT SPALL COUNT - M" });
-            descriptions.Add("CTRNJNT3", new AttributeDescription() { Description = "CONCRETE TRANS. JOINT SPALL COUNT - H" });
-
 
             descriptions.Add("AADT", new AttributeDescription() { Description = "ADT" });
             descriptions.Add("AGE", new AttributeDescription() { Description = "Age" });
@@ -410,7 +502,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("CNTY", new AttributeDescription() { Description = "County ID" });
             descriptions.Add("COUNTY", new AttributeDescription() { Description = "County" });
             descriptions.Add("CRS", new AttributeDescription() { Description = "Section" });
-            descriptions.Add("CRS_Data", new AttributeDescription() { Description = "Section" });
+            descriptions.Add("CRS_DATA", new AttributeDescription() { Description = "Section" });
             descriptions.Add("DIR", new AttributeDescription() { Description = "Direction" });
             descriptions.Add("DIRECTION", new AttributeDescription() { Description = "Direction" });
             descriptions.Add("DIS_IND", new AttributeDescription() { Description = "" });
@@ -420,15 +512,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("EXP_IND", new AttributeDescription() { Description = "" });
             descriptions.Add("F_CLASS", new AttributeDescription() { Description = "" });
             descriptions.Add("F_CLASS_NAME", new AttributeDescription() { Description = "" });
-            descriptions.Add("Family", new AttributeDescription() { Description = "" });
+            descriptions.Add("FAMILY", new AttributeDescription() { Description = "" });
             descriptions.Add("FED AID NAME", new AttributeDescription() { Description = "" });
             descriptions.Add("FED_AID", new AttributeDescription() { Description = "Federal Aid?" });
             descriptions.Add("FEDAID", new AttributeDescription() { Description = "Federal Aid" });
-            descriptions.Add("FROMSEGMENT", new AttributeDescription() { Description = "From Segment" });
+            descriptions.Add("FROMSEGMENT", new AttributeDescription() { Description = "From Section" });
             descriptions.Add("ID", new AttributeDescription() { Description = "ID" });
             descriptions.Add("INSPECT DATE", new AttributeDescription() { Description = "Inspection Date" });
             descriptions.Add("INSPECTYEAR", new AttributeDescription() { Description = "" });
-            descriptions.Add("Interstate", new AttributeDescription() { Description = "" });
+            descriptions.Add("INTERSTATE", new AttributeDescription() { Description = "" });
             descriptions.Add("IS_HPMS", new AttributeDescription() { Description = "HPMS?" });
             descriptions.Add("L_S_TYPE", new AttributeDescription() { Description = "Left Shoulder Type" });
             descriptions.Add("LANES", new AttributeDescription() { Description = "Lanes" });
@@ -451,7 +543,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("SURFACE_NAME", new AttributeDescription() { Description = "Surface" });
             descriptions.Add("SURFACEID", new AttributeDescription() { Description = "Surface ID" });
             descriptions.Add("THICKNESS", new AttributeDescription() { Description = "" });
-            descriptions.Add("TOSEGMENT", new AttributeDescription() { Description = "To Segment" });
+            descriptions.Add("TOSEGMENT", new AttributeDescription() { Description = "To Section" });
             descriptions.Add("TRK_PCNT", new AttributeDescription() { Description = "Truck %" });
             descriptions.Add("TRK_PERCENT", new AttributeDescription() { Description = "Truck %" });
             descriptions.Add("TRUEDATE", new AttributeDescription() { Description = "" });

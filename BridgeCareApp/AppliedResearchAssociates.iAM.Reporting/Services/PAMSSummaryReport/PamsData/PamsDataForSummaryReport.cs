@@ -37,6 +37,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             return new List<string>
             {
                 "Section",
+                "Start Segment",
+                "End Segment",
                 "District",
                 "County",
                 "Co No",
@@ -69,8 +71,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             {
                 "OPI",
                 "IRI",
-                "Rutting",
-                "Faulting",
+                "Rut",
+                "Fault",
                 "Project Source",
                 "Budget",
                 "Recommended Treatment",
@@ -221,8 +223,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             foreach (var sectionSummary in reportOutputData.InitialAssetSummaries)
             {
                 rowNo++; columnNo = 1;
+                var crs = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CRS");
+                worksheet.Cells[rowNo, columnNo++].Value = crs;
 
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CRS");
+                var lastUnderScoreIndex = crs.LastIndexOf('_');
+                var hyphenIndex = crs.IndexOf('-');
+                var startSeg = crs.Substring(lastUnderScoreIndex + 1, hyphenIndex - lastUnderScoreIndex - 1);
+                var endSeg = crs.Substring(hyphenIndex + 1);
+
+                worksheet.Cells[rowNo, columnNo++].Value = startSeg;
+                worksheet.Cells[rowNo, columnNo++].Value = endSeg;
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CNTY");

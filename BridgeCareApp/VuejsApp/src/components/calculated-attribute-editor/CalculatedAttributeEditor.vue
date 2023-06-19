@@ -3,38 +3,21 @@
         <!-- top row -->
         <v-flex xs12>
             <v-layout justify-space-between>
-                <v-flex xs4 class="ghd-constant-header">
+                <v-flex xs5 class="ghd-constant-header" style="margin-right: 10px">
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Calculated Attribute</v-subheader>
                         <v-select
-                            id="CalculatedAttribute-CalculatedAttribute-select"
-                            :items="librarySelectItems"
-                            append-icon=$vuetify.icons.ghd-down
-                            outline
-                            v-model="librarySelectItemValue"
-                            class="ghd-select ghd-text-field ghd-text-field-border">
-                        </v-select>     
-                        <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario">Based on: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>                  
+                                  id="CalculatedAttribute-CalculatedAttribute-select"
+                                  :items="librarySelectItems"
+                                  append-icon=$vuetify.icons.ghd-down
+                                  outline
+                                  v-model="librarySelectItemValue"
+                                  class="ghd-select ghd-text-field ghd-text-field-border">
+                        </v-select>
+                        <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario">Based on: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>
                     </v-layout>
                 </v-flex>
-                <v-flex xs4 class="ghd-constant-header">
-                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 18px !important" class="shared-owner-flex-padding">
-                        <div class="header-text-content owner-padding" style="padding-top: 7px !important">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                        </div>
-                        <v-divider class="owner-shared-divider" inset vertical></v-divider>
-                        <v-badge v-show="isShared" style="padding: 10px">
-                            <template v-slot: badge>
-                                <span>Shared</span>
-                            </template>
-                        </v-badge>
-                        <v-btn @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                            v-show='!hasScenario'>
-                            Share Library
-                        </v-btn>
-                    </v-layout>
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">
+                <v-flex xs7 class="ghd-constant-header" style="margin-right: 10px">
                     <v-layout align-end>
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
@@ -50,8 +33,7 @@
                                     class="ghd-text-field-border ghd-text-field search-icon-general"
                                     style="margin-top:20px !important">
                         </v-text-field>
-                        <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
-
+                        <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px; margin-right: 1px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
                         <v-btn
                             @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
@@ -63,6 +45,23 @@
                     </v-layout>
                 </v-flex>
             </v-layout>
+        </v-flex>
+        <v-flex xs6 class="ghd-constant-header" style="margin-bottom: 15px">
+            <v-layout v-if='hasSelectedLibrary && !hasScenario' align-center>
+                <div class="header-text-content owner-padding">
+                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                </div>
+                <v-divider class="owner-shared-divider" inset vertical></v-divider>
+                <v-badge v-show="isShared" style="padding: 10px">
+                    <template v-slot:badge>
+                        <span>Shared</span>
+                    </template>
+                    </v-badge>
+                    <v-btn @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                v-show='!hasScenario'>
+                Share Library
+            </v-btn>
+        </v-layout>
         </v-flex>
         <!-- attributes and timing -->
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
@@ -219,13 +218,7 @@
                     v-show="hasSelectedLibrary || hasScenario">
                     Cancel
                 </v-btn>
-                <v-btn
-                    @click="onUpsertScenarioCalculatedAttribute"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
-                    v-show="hasScenario && hasAdminAccess"
-                    :disabled="disableCrudButton() || !hasUnsavedChanges">
-                    Save
-                </v-btn>
+                
                 <v-btn
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
@@ -248,6 +241,13 @@
                     class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario">
                     Update Library
+                </v-btn>
+                <v-btn
+                    @click="onUpsertScenarioCalculatedAttribute"
+                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                    v-show="hasScenario && hasAdminAccess"
+                    :disabled="disableCrudButton() || !hasUnsavedChanges">
+                    Save
                 </v-btn> 
             </v-layout>
         </v-flex>

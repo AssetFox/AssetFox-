@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
 
-        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", Route = 0, Segment = 0 };
+        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", Routenum = 0, Segment = 0 };
 
         private Dictionary<string, string> _sectionData;
         private InventoryParameters sectionIds;
@@ -112,10 +112,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //var attributeList = new List<string>() {"County","SR"};
 
             var allAttributes = _unitofwork.AttributeRepo.GetAttributes();
-            allAttributes.Add(new AttributeDTO() { Name = "Segment", Command = "SEG", DataSource = allAttributes.Single(_ => _.Name == "COUNTY").DataSource });
+            //allAttributes.Add(new AttributeDTO() { Name = "Segment", Command = "SEG", DataSource = allAttributes.Single(_ => _.Name == "COUNTY").DataSource });
             var queryDictionary = new Dictionary<AttributeDTO, string>();
             queryDictionary.Add(allAttributes.Single(_ => _.Name == "COUNTY"), keyProperties.County);
-            queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.Route.ToString());
+            queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.Routenum.ToString());
             queryDictionary.Add(allAttributes.Single(_ => _.Name == "Segment"), keyProperties.Segment.ToString());
 
             var tmpsectionData = _unitofwork.DataSourceRepo.GetRawData(queryDictionary);

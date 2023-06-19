@@ -4,8 +4,11 @@ export interface KeyProperty{
     prettify: string;
 }
 export interface InventoryItem {
-    keyProperties: string[];
+    keyProperties: any[];
+}
+export interface InventoryParam {
+    keyProperties: Record<string, string>;
 }
 export interface MappedInventoryItem {
-    keyProperties: string[];
+    keyProperties: any[];
 }

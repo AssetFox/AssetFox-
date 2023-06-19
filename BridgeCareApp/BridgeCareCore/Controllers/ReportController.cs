@@ -330,7 +330,7 @@ namespace BridgeCareCore.Controllers
 
         private IActionResult CreateErrorListing(List<string> errors)
         {
-            var errorHtml = new StringBuilder("<h2>Error Listing</h2><list>");
+            var errorHtml = new StringBuilder("<h2>Report Errors</h2><list>");
             foreach (var item in errors)
             {
                 errorHtml.Append($"<li>{item}</li>");

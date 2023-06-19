@@ -39,8 +39,9 @@
     import Vue from 'vue';
     import {Component, Watch} from 'vue-property-decorator';
     import {Action, State} from 'vuex-class';
-    import {InventoryItem, KeyProperty} from '@/shared/models/iAM/inventory';
+    import {InventoryParam, InventoryItem, KeyProperty} from '@/shared/models/iAM/inventory';
     import {clone, find, propEq} from 'ramda';
+    import InventoryService from '@/services/inventory.service'
 
     @Component
     export default class Inventory extends Vue {
@@ -72,6 +73,7 @@
         sanitizedHTML: any = null;
   
         inventoryReportName: string = '';
+        DictionaryString : any = [];
 
         /**
          * Calls the setInventorySelectLists function to set both inventory type select lists
@@ -175,7 +177,7 @@
             if(this.constraintDetails == 'OR')
             {
                 const key = this.selectedKeys[index];
-                let data: InventoryItem = {keyProperties: []};
+                let data: InventoryParam = {keyProperties: {}};
 
                 for(let i = 0; i < this.inventoryDetails.length; i++){
                     if(i === index){
@@ -187,6 +189,18 @@
                     this.selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
                 }
+
+                const dictionary: Record<string, string> = {};
+
+                for(let i = 0; i < this.inventoryDetails.length; i++) {
+                    const DictNames: any = this.inventoryDetails[i];
+                    const Dictvalues: any = this.selectedKeys[i];
+                    dictionary[DictNames] = Dictvalues;                     
+                }
+    
+                data.keyProperties = dictionary;
+                console.log(data.keyProperties)
+
                 this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  
             }
             else if(this.constraintDetails == 'AND') {
@@ -199,20 +213,32 @@
 
                 if(SelectedCounter === this.inventoryDetails.length){
                     const key = this.selectedKeys[index];
-                    let data: InventoryItem = {keyProperties: []};
+                    let data: InventoryParam = {keyProperties: {}};
 
                 for(let i = 0; i < this.inventoryDetails.length; i++){
                     if(i === index){
                         data.keyProperties[i] = key;
                         continue;
                     }
-                    const inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: string | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
+                    const inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: any | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
                     const otherKeyValue = inventoryItem.keyProperties[i]; 
                     this.selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
                 }
-                this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  
+
+                const dictionary: Record<string, string> = {};
+
+                for(let i = 0; i < this.inventoryDetails.length; i++) {
+                    const DictNames: any = this.inventoryDetails[i];
+                    const Dictvalues: any = this.selectedKeys[i];
+                    dictionary[DictNames] = Dictvalues;                     
                 }
+                    
+                    data.keyProperties = dictionary;
+                    console.log(data.keyProperties)
+
+                this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});
+                 }
             }       
         }    }
 </script>

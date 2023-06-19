@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -34,11 +35,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
 
-        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown",Route=0,Segment=0};
+        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", Routenum = 0, Segment = 0 };
 
         private List<SegmentAttributeDatum> _sectionData;
         private InventoryParameters sectionIds;
-      
+
         public PAMSInventorySectionsReport(IUnitOfWork uow, string name, ReportIndexDTO results)
         {
             _unitofwork = uow;
@@ -55,11 +56,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         }
 
-         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
-            
+
             var sectionIds = Parse(parameters);
             _sectionData = GetAsset(sectionIds);
+            if (Errors.Count > 0) return; // Errors occured in the GetAsset method
+
             var crspieces = _sectionData.FirstOrDefault(_ => _.Name == "CRS").Value.Split(new[] { '_' }, 4);
             var routeArray = crspieces[3].Split(new[] { '-' }, 2);
             _sectionData.Add(new SegmentAttributeDatum("FROMSEGMENT", routeArray[0]));
@@ -69,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             resultsString.Append("<table class=\"report-cell\">");
             resultsString.Append(CreateHTMLSection("ID", new List<string>() { "CRS", "COUNTY", "SR", "FROMSEGMENT", "TOSEGMENT", "Member Segments" }));
             resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DISTRICT", "MPO_RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PERCENT", "SURFACE", "FED_AID", "IS_HPMS", "LANES", "SEGMENT_LENGTH", "WIDTH", "AGE" }));
-            resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE_NAME", "SURFACEID", "L_S_TYPE","R_S_TYPE", "YR_BUILT", "YEAR_LAST_OVERLAY", "LAST_STRUCTURAL_OVERLAY" }));
+            resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE_NAME", "SURFACEID", "L_S_TYPE", "R_S_TYPE", "YR_BUILT", "YEAR_LAST_OVERLAY", "LAST_STRUCTURAL_OVERLAY" }));
             resultsString.Append(CreateHTMLSection("Survey Information", new List<string>() { "Survey Date" }));
             resultsString.Append(CreateHTMLSection("Measured Conditions", new List<string>() { "OPI", "ROUGHNESS" }));
             resultsString.Append(CreateHTMLDistressSection("Surface Defects"));
@@ -81,17 +84,22 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         }
 
+        private class IncomingParameters {
+            public PAMSParameters KeyProperties { get; set; }
+        }
+
         private PAMSParameters Parse(string parameters)
         {
             try
             {
-                PAMSParameters query = JsonConvert.DeserializeObject<PAMSParameters>(parameters);
-                if (query == null)
+                IncomingParameters incoming = JsonConvert.DeserializeObject<IncomingParameters>(parameters);
+                if (incoming.KeyProperties == null)
                 {
                     Errors.Add($"Unable to run.  No query parameters provided in request body.");
                     return _failedQuery;
                 }
-                return query;
+                return incoming.KeyProperties;
+                //return new PAMSParameters();
             }
             catch (Exception e)
             {
@@ -102,19 +110,40 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private List<SegmentAttributeDatum> GetAsset(PAMSParameters keyProperties)
         {
-
+            List<SegmentAttributeDatum> result = new List<SegmentAttributeDatum>();
             //var attributeList = new List<string>() {"County","SR"};
 
             var allAttributes = _unitofwork.AttributeRepo.GetAttributes();
             allAttributes.Add(new AttributeDTO() { Name = "Segment", Command = "SEG", DataSource = allAttributes.Single(_ => _.Name == "COUNTY").DataSource});
             var queryDictionary= new Dictionary<AttributeDTO, string>();
-            queryDictionary.Add(allAttributes.Single(_ => _.Name == "COUNTY"), keyProperties.County);
-            queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.Route.ToString());
-            queryDictionary.Add(allAttributes.Single(_ => _.Name == "Segment"), keyProperties.Segment.ToString());
+            try
+            {
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "COUNTY"), keyProperties.County);
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.Routenum.ToString());
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "Segment"), keyProperties.Segment.ToString());
+            }
+            catch
+            {
+                var errorMessage = $"Unable to find the segment in the database (County: {keyProperties.County}, Route: {keyProperties.Routenum}, Segment: {keyProperties.Segment}";
+                Errors.Add(errorMessage);
+                return new List<SegmentAttributeDatum>();
+                //throw new RowNotInTableException(errorMessage);
+            }
 
-            var tmpsectionData = _unitofwork.DataSourceRepo.GetRawData(queryDictionary);
-            var sectionId = tmpsectionData["CRS_Data"];
-            var result = _unitofwork.AssetDataRepository.GetAssetAttributes("CRS", sectionId);
+            
+            try
+            {
+                var tmpsectionData = _unitofwork.DataSourceRepo.GetRawData(queryDictionary);
+                var sectionId = tmpsectionData["CRS_Data"];
+                result = _unitofwork.AssetDataRepository.GetAssetAttributes("CRS", sectionId);
+            }
+            catch (Exception)
+            {
+                var errorMessage = "Unable to access raw data";
+                Errors.Add(errorMessage);
+                //throw new InvalidOperationException(errorMessage);
+            }
+
             return result;
         }
 

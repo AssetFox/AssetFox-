@@ -1,4 +1,4 @@
-import {InventoryItem, MappedInventoryItem} from '@/shared/models/iAM/inventory';
+import {InventoryParam, InventoryItem, MappedInventoryItem} from '@/shared/models/iAM/inventory';
 import InventoryService from '@/services/inventory.service';
 import {append, clone, contains} from 'ramda';
 import {AxiosResponse} from 'axios';

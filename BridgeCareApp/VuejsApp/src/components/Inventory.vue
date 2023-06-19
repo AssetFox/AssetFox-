@@ -190,6 +190,7 @@
                     data.keyProperties[i] = otherKeyValue;
                 }
 
+                 //Create a dictionary of the selected key fields
                 const dictionary: Record<string, string> = {};
 
                 for(let i = 0; i < this.inventoryDetails.length; i++) {
@@ -198,8 +199,8 @@
                     dictionary[DictNames] = Dictvalues;                     
                 }
     
+                //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
-                console.log(data.keyProperties)
 
                 this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  
             }
@@ -211,6 +212,7 @@
                     }
                 }
 
+                
                 if(SelectedCounter === this.inventoryDetails.length){
                     const key = this.selectedKeys[index];
                     let data: InventoryParam = {keyProperties: {}};
@@ -225,7 +227,8 @@
                     this.selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
                 }
-
+                
+                //Create a dictionary of the selected key fields
                 const dictionary: Record<string, string> = {};
 
                 for(let i = 0; i < this.inventoryDetails.length; i++) {
@@ -234,9 +237,8 @@
                     dictionary[DictNames] = Dictvalues;                     
                 }
                     
+                    //Set the data equal to the dictionary
                     data.keyProperties = dictionary;
-                    console.log(data.keyProperties)
-
                 this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});
                  }
             }       

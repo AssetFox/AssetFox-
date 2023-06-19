@@ -104,6 +104,7 @@ import { Action, Getter, Mutation, State } from 'vuex-class';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import { VMenu } from 'vuetify/lib';
 
 
 @Component({
@@ -112,6 +113,8 @@ import { InputValidationRules, rules } from '@/shared/utils/input-validation-rul
     }  
 })
 export default class Data extends Vue {
+    @State(state => state.adminDataModule.availableReportNames)
+    stateAvailableReportNames: string[];
     @State(state => state.adminDataModule.simulationReportNames)
     stateSimulationReportNames: string[];
     @State(state => state.adminDataModule.inventoryReportNames)
@@ -126,6 +129,7 @@ export default class Data extends Vue {
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
 
+    @Action('getAvailableReports') getAvailableReportsAction: any;
     @Action('getSimulationReports') getSimulationReportsAction: any;
     @Action('getInventoryReports') getInventoryReportsAction: any;
     @Action('getPrimaryNetwork') getPrimaryNetworkAction: any;
@@ -151,6 +155,7 @@ export default class Data extends Vue {
     networks: Network[] = [];
 
     selectedKeyFields: string[] = [];
+    selectedAvailableReports: string[] = [];
     selectedSimulationReports: string[] = [];
     selectedInventoryReports: string[] = [];
     primaryNetwork: string = '';
@@ -172,6 +177,7 @@ export default class Data extends Vue {
             (async () => { 
                 await vm.getAttributes();
                 await vm.getNetworks();
+                await vm.getAvailableReportsAction();                
                 await vm.getSimulationReportsAction();
                 await vm.getInventoryReportsAction();
                 await vm.getPrimaryNetworkAction();
@@ -181,17 +187,12 @@ export default class Data extends Vue {
                 await vm.getConstraintTypeAction();
                 vm.onStateConstraintTypeChanged();
             })();
+            
         });
     }
 
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
-    }
-
-    mounted() {
-        const reports: string[] =  this.$config.reportType;
-        this.simulationReports = clone(reports);
-        this.inventoryReports = clone(reports);
     }
     //Watches
     @Watch('stateNetworks')
@@ -207,6 +208,13 @@ export default class Data extends Vue {
     @Watch('stateSimulationReportNames')
     onStateSimulationReportNamesChanged(){
         this.selectedSimulationReports = clone(this.stateSimulationReportNames);
+    }
+    @Watch('stateAvailableReportNames')
+    onStateAvailableReportNamesChanged(){
+        this.selectedAvailableReports = clone(this.stateAvailableReportNames);
+        const reports: string[] = this.stateAvailableReportNames;
+        this.simulationReports = clone(reports);
+        this.inventoryReports = clone(reports);
     }
 
     @Watch('stateInventoryReportNames')
@@ -277,12 +285,12 @@ export default class Data extends Vue {
     }
     //Buttons
     onSaveClick(){
-        (async () => { 
+        (async () => {
+            await this.setPrimaryNetworkAction(this.primaryNetwork); 
             await this.setConstraintTypeAction(this.constraintTypeRadioGroup);
             await this.setSimulationReportsAction(this.convertToDelimited(this.selectedSimulationReports, ','));
             await this.setInventoryReportsAction(this.convertToDelimited(this.selectedInventoryReports, ','));
-            await this.setKeyFieldsAction(this.convertToDelimited(this.selectedKeyFields, ','));
-            await this.setPrimaryNetworkAction(this.primaryNetwork);          
+            await this.setKeyFieldsAction(this.convertToDelimited(this.selectedKeyFields, ','));                      
         })();
     }
 

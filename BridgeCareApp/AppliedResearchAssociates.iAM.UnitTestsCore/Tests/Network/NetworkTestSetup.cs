@@ -15,10 +15,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     {
         public static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
 
-        public static TNetwork ModelForEntityInDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, Guid? networkId = null)
+        public static TNetwork ModelForEntityInDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, Guid? networkId = null, Guid? keyAttributeId = null)
         {
             var resolvedNetworkId = networkId ?? Guid.NewGuid();
             var network = new TNetwork(maintainableAssets, resolvedNetworkId);
+            if (keyAttributeId != null)
+            {
+                network.KeyAttributeId = (Guid)keyAttributeId;
+            }
+
             unitOfWork.NetworkRepo.CreateNetwork(network);
             return network;
         }

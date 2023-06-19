@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Errors = new List<string>();
             Status = "Report definition created.";
             Results = string.Empty;
-            IsComplete = false;
+            IsComplete = false;         
             _networkId = _unitofwork.NetworkRepo.GetMainNetwork().Id;
         }
 

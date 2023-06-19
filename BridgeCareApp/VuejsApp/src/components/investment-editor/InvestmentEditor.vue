@@ -28,10 +28,11 @@
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
-                    <v-layout row align-end class="header-alignment-padding-right">
+                    <v-layout row align-end justify-end class="header-alignment-padding-right">
                         <v-spacer></v-spacer>
-                        <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                               v-show='!hasScenario'>
+                        <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        v-show="!hasScenario"
+                        outline>
                             Create New Library
                         </v-btn>
                     </v-layout>

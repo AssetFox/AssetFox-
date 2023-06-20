@@ -1,6 +1,8 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
@@ -10,7 +12,9 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
@@ -149,6 +153,8 @@ namespace BridgeCareCoreTests.Tests
                 IsNewLibrary = true,
                 Library = dto,
             };
+            var libraryDoesNotExist = LibraryAccessModels.LibraryDoesNotExist();
+            repo.SetupGetLibraryAccess(dto.Id, libraryDoesNotExist);
 
             // Act
             var result = await controller.UpsertCashFlowRuleLibrary(libraryRequest);
@@ -243,6 +249,10 @@ namespace BridgeCareCoreTests.Tests
                 Library = dto,
                 SyncModel = sync
             };
+            var user = UserDtos.Admin();
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
+            repo.SetupGetLibraryAccess(dto.Id, libraryExists);
 
             // Act
             await controller.UpsertCashFlowRuleLibrary(libraryRequest);

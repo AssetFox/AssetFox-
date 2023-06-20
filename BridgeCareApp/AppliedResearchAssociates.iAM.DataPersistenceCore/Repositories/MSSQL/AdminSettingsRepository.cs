@@ -263,11 +263,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SetAgencyLogo(Image agencyLogo)
         {
+            //https://www.andrewhoefling.com/Blog/Post/basic-image-manipulation-in-c-sharp
+            int h = 50;
+            float ratio = (float)agencyLogo.Width / (float)agencyLogo.Height;
+            int w = (int)(ratio * h);
+            if (agencyLogo.Width > w || agencyLogo.Height > h)
+                agencyLogo = agencyLogo.GetThumbnailImage(w, h, null, IntPtr.Zero);
             //https://stackoverflow.com/questions/21325661/convert-an-image-selected-by-path-to-base64-string
             byte[] imageBytes;
             using (MemoryStream m = new MemoryStream())
             {
-                agencyLogo.Save(m, agencyLogo.RawFormat);
+                //https://stackoverflow.com/questions/51509449/convert-any-image-format-to-jpg
+                agencyLogo.Save(m, System.Drawing.Imaging.ImageFormat.Jpeg);
                 imageBytes = m.ToArray();
             }
 
@@ -296,10 +303,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SetImplementationLogo(Image productLogo)
         {
+            int h = 50;
+            float ratio = (float)productLogo.Width / (float)productLogo.Height;
+            int w = (int)(ratio * h);
+            if (productLogo.Width > w || productLogo.Height > h)
+                productLogo = productLogo.GetThumbnailImage(w, h, null, IntPtr.Zero);
+
             byte[] imageBytes;
             using (MemoryStream m = new MemoryStream())
             {
-                productLogo.Save(m, productLogo.RawFormat);
+                productLogo.Save(m, System.Drawing.Imaging.ImageFormat.Jpeg);
                 imageBytes = m.ToArray();
             }
             var implementationLogo = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "ImplementationLogo").FirstOrDefault();

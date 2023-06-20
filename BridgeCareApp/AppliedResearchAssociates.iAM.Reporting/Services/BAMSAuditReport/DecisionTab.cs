@@ -113,6 +113,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 decisionsTreatment.CIImprovement = treatmentOption?.ConditionChange;
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
+                decisionsTreatment.Benefit = treatmentOption != null ? decisionsTreatment.BCRatio * decisionsTreatment.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? BAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);
                 var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.BudgetUsages.Sum(_ => _.CoveredCost) : 0;
@@ -180,6 +181,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Cost;
                 SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BCRatio;
+                SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Benefit;               
                 ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Selected;
                 SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
@@ -324,12 +327,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         {
             return new List<string>
             {
-                "Feasiable?",
+                "Feasible?",
                 "CI\r\nImprovement",
                 "Cost",
                 "B/C\r\nRatio",
+                "Benefit",
                 "Selected?",
-                "Amount\r\nSpent",
+                "Amount\r\nAvailable",
                 "Budget(s)\r\nUsed",
                 "Rejection Reason"
             };

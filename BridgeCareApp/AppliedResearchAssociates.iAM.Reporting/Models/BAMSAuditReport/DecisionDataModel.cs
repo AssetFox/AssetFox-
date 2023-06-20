@@ -22,9 +22,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
         public double? CIImprovement { get; set; }
 
         public double Cost { get; set; }
-
         public double BCRatio { get; set; }
-
+        public double Benefit { get; set; }
         public string Selected { get; set; }
 
         public decimal? AmountSpent { get; set; }

@@ -92,10 +92,7 @@ namespace BridgeCareCore.Controllers
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         result = UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibrariesNoChildrenAccessibleToUser(UserId);
-                    } else
-                    {
-                        result = UnitOfWork.BudgetPriorityRepo.GetBudgetPriortyLibrariesNoChildren();
-                    }
+                    } 
                 });
 
                 return Ok(result);

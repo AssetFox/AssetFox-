@@ -136,6 +136,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             {
                 costAndLengthPerTreatmentPerYear[yearsData.Year].Add(yearsData.TreatmentName, ((decimal)yearsData.Amount, (int)segmentLength));
             }
+            else
+            {
+                var values = costAndLengthPerTreatmentPerYear[yearsData.Year][yearsData.TreatmentName];
+                values.treatmentCost += (decimal)yearsData.Amount;
+                costAndLengthPerTreatmentPerYear[yearsData.Year][yearsData.TreatmentName] = values;
+            }
         }
 
         private void PopulateTreatmentGroupCostAndLength(

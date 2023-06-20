@@ -14,8 +14,8 @@ namespace BridgeCareCore.GraphQL
                 .Name("GetSimulations")
                 .Authorize(Policy.UseGraphQL);
 
-            descriptor.Field(x => x.GetSimulationOutputs(default!, default!))
-                .Name("GetSimulationOutputs")
+            descriptor.Field(x => x.GetSimulationOutput(default!, default!))
+                .Name("GetSimulationOutput")
                 .Authorize(Policy.UseGraphQL);
 
             descriptor.Field(x => x.GetSimulation(default!, default!))

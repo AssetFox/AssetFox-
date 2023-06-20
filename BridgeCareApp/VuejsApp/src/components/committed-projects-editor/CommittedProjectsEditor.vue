@@ -124,7 +124,7 @@
                                             <v-text-field v-if="header.value === 'year'"
                                                 :value="props.item[header.value]"
                                                 :mask="'##########'"
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                                :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"
                                                 :error-messages="props.item.yearErrors"/>
 
                                             <v-text-field v-if="header.value === 'cost'"
@@ -161,7 +161,7 @@
                                                     single-line
                                                     v-model="props.item[header.value]"
                                                     :mask="'##########'"
-                                                    :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                                    :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"/>
 
                                                 <v-text-field v-if="header.value === 'cost'"
                                                     label="Edit"
@@ -1039,7 +1039,10 @@ export default class CommittedProjectsEditor extends Vue  {
                     ) === true &&
                     this.rules['generalRules'].valueIsNotEmpty(
                         consequence.performanceFactor,
-                    ) === true )
+                    ) === true ) &&
+                    this.rules['generalRules'].valueIsWithinRange(
+                        scp.year, [this.firstYear, this.lastYear],
+                    ) === true
                 );
             },
         );

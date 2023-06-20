@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -28,17 +28,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        private const string inventoryReportKey = "InventoryReportNames";
-        private const string simulationReportKey = "SimulationReportNames";
-        private const string keyFieldKey = "KeyFields";
-        private const string primaryNetworkKey = "PrimaryNetwork";
-        private const string constraintTypeKey = "ConstraintType";
+        public const string inventoryReportKey = "InventoryReportNames";
+        public const string simulationReportKey = "SimulationReportNames";
+        public const string keyFieldKey = "KeyFields";
+        public const string primaryNetworkKey = "PrimaryNetwork";
+        public const string constraintTypeKey = "ConstraintType";
 
         //Reads in KeyFields record as a string but places values in a list to return.
         public IList<string> GetKeyFields()
         {
             var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").FirstOrDefault();
-
             if (existingKeyFields == null)
             {
                 return null;
@@ -109,10 +108,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 return null;
             }
-            else
+            var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
+            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
+
+            if (existingNetwork == null)
             {
-                var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
-                var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
+                return null;
+            }
+            else
+            {               
                 return existingNetwork.Name;
             }
         }
@@ -131,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
                 {
                     Key = primaryNetworkKey,
-                    Value = Guid.NewGuid().ToString()
+                    Value = existingNetwork.Id.ToString()
                 });
             }
             else
@@ -142,7 +146,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             _unitOfWork.Context.SaveChanges();
         }
+        public IList<string> GetAvailableReports()
+        {
 
+            return null;
+
+        }
         public IList<string> GetSimulationReportNames()
         {
             var existingSimulationReports = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == simulationReportKey);
@@ -254,11 +263,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SetAgencyLogo(Image agencyLogo)
         {
+            //https://www.andrewhoefling.com/Blog/Post/basic-image-manipulation-in-c-sharp
+            int h = 50;
+            float ratio = (float)agencyLogo.Width / (float)agencyLogo.Height;
+            int w = (int)(ratio * h);
+            if (agencyLogo.Width > w || agencyLogo.Height > h)
+                agencyLogo = agencyLogo.GetThumbnailImage(w, h, null, IntPtr.Zero);
             //https://stackoverflow.com/questions/21325661/convert-an-image-selected-by-path-to-base64-string
             byte[] imageBytes;
             using (MemoryStream m = new MemoryStream())
             {
-                agencyLogo.Save(m, agencyLogo.RawFormat);
+                //https://stackoverflow.com/questions/51509449/convert-any-image-format-to-jpg
+                agencyLogo.Save(m, System.Drawing.Imaging.ImageFormat.Jpeg);
                 imageBytes = m.ToArray();
             }
 
@@ -287,10 +303,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SetImplementationLogo(Image productLogo)
         {
+            int h = 50;
+            float ratio = (float)productLogo.Width / (float)productLogo.Height;
+            int w = (int)(ratio * h);
+            if (productLogo.Width > w || productLogo.Height > h)
+                productLogo = productLogo.GetThumbnailImage(w, h, null, IntPtr.Zero);
+
             byte[] imageBytes;
             using (MemoryStream m = new MemoryStream())
             {
-                productLogo.Save(m, productLogo.RawFormat);
+                productLogo.Save(m, System.Drawing.Imaging.ImageFormat.Jpeg);
                 imageBytes = m.ToArray();
             }
             var implementationLogo = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "ImplementationLogo").FirstOrDefault();
@@ -346,5 +368,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             _unitOfWork.Context.SaveChanges();
         }
+        public void DeleteAdminSetting(string settingKey)
+        {
+            _unitOfWork.Context.DeleteEntity<AdminSettingsEntity>(_ => _.Key == settingKey);
+        }
     }
+
+    
 }

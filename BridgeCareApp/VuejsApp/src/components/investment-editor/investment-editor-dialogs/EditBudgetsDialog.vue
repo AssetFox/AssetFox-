@@ -12,7 +12,8 @@
                 </v-card-title>
                 <div style='height: 500px; max-width:800px' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
-                    <v-data-table :headers='editBudgetsDialogGridHeaders'
+                    <v-data-table id="EditBudgetsDialog-budgets-dataTable"
+                                  :headers='editBudgetsDialogGridHeaders'
                                   :items='editBudgetsDialogGridData'
                                   sort-icon=$vuetify.icons.ghd-table-sort
                                   hide-actions
@@ -63,7 +64,7 @@
                     </v-data-table>
                     </div>
                     <v-layout row align-end style="margin:0 !important">
-                        <v-btn @click='onAddBudget' class='ghd-blue ghd-button' flat>
+                        <v-btn id="EditBudgetsDialog-add-btn" @click='onAddBudget' class='ghd-blue ghd-button' flat>
                             Add
                         </v-btn>
                     </v-layout>
@@ -71,8 +72,8 @@
                 
                 <v-card-actions class="ghd-dialog-box-padding-bottom">
                     <v-layout justify-center>
-                        <v-btn @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>Cancel</v-btn>
-                        <v-btn @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' flat
+                        <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>Cancel</v-btn>
+                        <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' flat
                                :disabled='disableSubmitButton()'>
                             Save
                         </v-btn>                        

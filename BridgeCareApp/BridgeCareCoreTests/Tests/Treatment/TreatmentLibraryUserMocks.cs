@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using Moq;
 
 namespace BridgeCareCoreTests.Tests.Treatment
 {
-    public class TreatmentLibraryUserMocks
+    public static class TreatmentLibraryUserMocks
     {
         public static Mock<ITreatmentLibraryUserRepository> New(Mock<IUnitOfWork> unitOfWork = null)
         {
@@ -19,6 +20,10 @@ namespace BridgeCareCoreTests.Tests.Treatment
                 unitOfWork.Setup(u => u.TreatmentLibraryUserRepo).Returns(mock.Object);
             }
             return mock;
+        }
+        public static void SetupGetLibraryAccess(this Mock<ITreatmentLibraryUserRepository> mock, Guid libraryId, LibraryUserAccessModel accessModel)
+        {
+            mock.Setup(r => r.GetLibraryAccess(libraryId, It.IsAny<Guid>())).Returns(accessModel);
         }
     }
 }

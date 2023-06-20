@@ -26,6 +26,7 @@ namespace BridgeCareCore.Controllers
     public class AdminDataController : BridgeCareCoreBaseController
     {
         public const string SiteError = "Site Error";
+        public const string ServerWarning = "Server Warning:";
         private readonly IReportGenerator _generator;
         private readonly IReportLookupLibrary _factory;
         public AdminDataController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor, IReportGenerator generator, IReportLookupLibrary factory) :
@@ -79,6 +80,8 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var name = UnitOfWork.AdminSettingsRepo.GetPrimaryNetwork();
+                if (name == null)
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"{ServerWarning} Primary Network not set::A primary network key must be set in the administration settings");
                 return Ok(name);
             }
             catch (Exception e)
@@ -125,6 +128,27 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetAvailableReports")]
+        [Authorize]
+        public async Task<IActionResult> GetAvailableReports()
+        {
+            try
+            {
+                List<string> AvailableReportNames = new List<string>();
+                foreach (IReportFactory report in _factory.ReportList)
+                {
+                    AvailableReportNames.Add(report.Name);
+                }
+                return Ok(AvailableReportNames);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetSimulationReportNames - {e.Message}");
+                throw;
+            }
+        }
+
         [HttpPost]
         [Route("SetInventoryReports/{InventoryReports}")]
         [ClaimAuthorize("AdminAccess")]
@@ -141,6 +165,7 @@ namespace BridgeCareCore.Controllers
                     try
                     {
                         var reportObject = await _generator.Generate(inventoryReport);
+                        
                         //If cannot be created in lookup library (Existence Check)
                         if (!_factory.CanGenerateReport(inventoryReport))
                         {

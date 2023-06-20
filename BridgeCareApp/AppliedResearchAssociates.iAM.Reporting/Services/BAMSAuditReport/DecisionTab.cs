@@ -181,7 +181,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Cost;
                 SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BCRatio;
-                SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
+                SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Benefit;               
                 ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Selected;

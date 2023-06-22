@@ -42,6 +42,7 @@
                     <v-layout align-end style="padding-top: 18px !important;">
                         <v-spacer></v-spacer>
                         <v-btn outline
+                            id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
                             @click="showCreateTargetConditionGoalDialog = true"
                             class="ghd-control-border ghd-blue"
                             v-show="hasSelectedLibrary || hasScenario" 
@@ -61,6 +62,7 @@
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="targets-data-table">
                 <v-data-table
+                    id="TargetConditionGoalEditor-targetConditionGoals-vdatatable"
                     :headers="targetConditionGoalGridHeaders"
                     :items="currentPage"  
                     :pagination.sync="pagination"
@@ -76,6 +78,7 @@
                     <template slot="items" slot-scope="props">
                         <td>
                             <v-checkbox
+                                id="TargetConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
                                 primary
                                 v-model="props.selected"
@@ -206,6 +209,7 @@
 
                                     <template slot="input">
                                         <v-select
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalAttribute-vselect"
                                             v-if="header.value === 'attribute'"
                                             :items="numericAttributeNames"
                                             append-icon=$vuetify.icons.ghd-down
@@ -215,12 +219,14 @@
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
                                         <v-text-field
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalYear-vtextfield"
                                             v-if="header.value === 'year'"
                                             label="Edit"
                                             single-line
                                             :mask="'####'"
                                             v-model.number="props.item[header.value]"/>
                                         <v-text-field
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalTarget-vtextfield"
                                             v-if="header.value === 'target'"
                                             label="Edit"
                                             single-line
@@ -230,6 +236,7 @@
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
                                         <v-text-field
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalName-vtextfield"
                                             v-if="header.value === 'name'"
                                             label="Edit"
                                             single-line
@@ -267,6 +274,7 @@
                                         </v-card>
                                     </v-menu>
                                     <v-btn
+                                        id="TargetConditionGoalEditor-editTargetConditionGoalCriteria-vbtn"
                                         @click="onShowCriterionLibraryEditorDialog(props.item)"
                                         class="ghd-blue"
                                         icon>
@@ -274,7 +282,7 @@
                                     </v-btn>
                                 </v-layout>
                                 <div v-if="header.value === 'actions'">
-                                    <v-btn @click="onRemoveTargetConditionGoalsIcon(props.item)"  class="ghd-blue" icon>
+                                    <v-btn id="TargetConditionGoalEditor-deleteTargetConditionGoal-vbtn" @click="onRemoveTargetConditionGoalsIcon(props.item)"  class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div> 
@@ -287,6 +295,7 @@
 
         <v-layout justify-start align-center v-show="hasSelectedLibrary || hasScenario">
             <v-btn flat right
+                id="TargetConditionGoalEditor-deleteSelected-vbtn"
                 class="ghd-control-label ghd-blue"
                 @click="onRemoveTargetConditionGoals"> 
                 Delete Selected 

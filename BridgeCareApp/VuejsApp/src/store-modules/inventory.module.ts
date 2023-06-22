@@ -1,4 +1,4 @@
-import {InventoryParam, InventoryItem, MappedInventoryItem} from '@/shared/models/iAM/inventory';
+import {inventoryParam, emptyInventoryParam, InventoryItem, MappedInventoryItem} from '@/shared/models/iAM/inventory';
 import InventoryService from '@/services/inventory.service';
 import {append, clone, contains} from 'ramda';
 import {AxiosResponse} from 'axios';
@@ -6,7 +6,8 @@ import {hasValue} from '@/shared/utils/has-value-util';
 
 const state = {
     inventoryItems: [] as InventoryItem[],
-    staticHTMLForInventory: '' as any
+    staticHTMLForInventory: '' as any,
+    querySet: clone(emptyInventoryParam),
 };
 
 const mutations = {
@@ -16,6 +17,9 @@ const mutations = {
     inventoryStaticHTMLMutator(state: any, staticHTMLPage: any){
         state.staticHTMLForInventory = clone(staticHTMLPage);
     },
+    inventoryQueryMutator(state: any, queries: inventoryParam) {
+        state.querySet = clone(queries);
+    }
 };
 
 const actions = {
@@ -40,6 +44,15 @@ const actions = {
         .then((response: AxiosResponse<any>) => {
             if(hasValue(response, 'data')){
                 commit('inventoryStaticHTMLMutator', response.data);
+            }
+        });
+    },
+
+        async getQuery({commit}: any, payload: any){
+        await InventoryService.getQuery(payload.querySet)
+        .then((response: AxiosResponse<any>) => {
+            if(hasValue(response, 'data')){
+                commit('inventoryQueryMutator', response.data);
             }
         });
     }

@@ -86,5 +86,13 @@ namespace BridgeCareCore.Controllers
 
             return Ok(inventoryItems);
         }
+        [HttpGet]
+        [Route("GetQuery")]
+        [Authorize]
+        public async Task<IActionResult> GetQuery(string QuerySet)
+        {
+            var KeyQuery = JsonConvert.DeserializeObject<List<string>>(QuerySet);
+            return (IActionResult)KeyQuery;
+        }
     }
 }

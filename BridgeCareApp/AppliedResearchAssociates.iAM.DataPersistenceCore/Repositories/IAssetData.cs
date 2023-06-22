@@ -35,5 +35,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         /// <param name="attribute">Name of attribute</param>
         /// <returns>All values for a specific attribute on a specific asset in the database with a primary key of year</returns>
         Dictionary<int, SegmentAttributeDatum> GetAttributeValueHistory(string keyName, string keyValue, string attribute);
+
+        /// <summary>
+        /// Provides an ordered table of tuples to the user for use in lookups
+        /// </summary>
+        /// <param name="keyFieldNames">List of desired key fields</param>
+        /// <returns></returns>
+        List<List<string>> GetKeyPropertiesTable(List<string> keyFieldNames);
     }
 }

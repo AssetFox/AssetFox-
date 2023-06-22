@@ -6,9 +6,12 @@ export interface KeyProperty{
 export interface InventoryItem {
     keyProperties: any[];
 }
-export interface InventoryParam {
+export interface inventoryParam {
     keyProperties: Record<string, string>;
 }
+export const emptyInventoryParam: inventoryParam = {
+    keyProperties: {}
+};
 export interface MappedInventoryItem {
     keyProperties: any[];
 }

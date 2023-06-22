@@ -2,6 +2,12 @@
     <v-layout>
         <v-flex xs12>
             <v-layout justify-space-between row>
+                <div class="flex xs2 justify-content: end">
+                        <button class="ghd-outline-button-padding ghd-button"  
+                        style="border: 1px solid black; 
+                        border-radius: 4px;
+                        padding: 2px" @click="setupSelectLists()">Reset Key Fields</button>
+                </div>
                 <v-spacer></v-spacer>
                 <v-layout>
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
@@ -28,7 +34,7 @@
                             :items="stateInventoryReportNames">
                         </v-select>
                     </div>
-            </v-layout>
+           </v-layout>
             <v-divider></v-divider>
             <div class="container" v-html="sanitizedHTML"></div>
         </v-flex>
@@ -39,17 +45,19 @@
     import Vue from 'vue';
     import {Component, Watch} from 'vue-property-decorator';
     import {Action, State} from 'vuex-class';
-    import {InventoryParam, InventoryItem, KeyProperty} from '@/shared/models/iAM/inventory';
-    import {clone, find, propEq} from 'ramda';
+    import {inventoryParam, emptyInventoryParam, InventoryItem, KeyProperty} from '@/shared/models/iAM/inventory';
+    import {clone, empty, find, propEq} from 'ramda';
     import InventoryService from '@/services/inventory.service'
 
     @Component
     export default class Inventory extends Vue {
         @State(state => state.inventoryModule.inventoryItems) inventoryItems: InventoryItem[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
+        @State(state => state.inventoryModule.querySet) querySet: inventoryParam[];
         @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
         @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
         @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
+
 
         @Action('getInventory') getInventoryAction: any;
         @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
@@ -57,6 +65,7 @@
         @Action('getInventoryReports') getInventoryReportsAction: any;
         @Action('getKeyFields') getKeyFieldsAction: any;
         @Action('getConstraintType') getConstraintTypeAction: any;
+        @Action('getQuery') getQueryAction: any;
 
         keyAttirbuteValues: string[][] = [];
 
@@ -114,7 +123,8 @@
                 await this.getConstraintTypeAction();
                 await this.getInventoryReportsAction();
                 await this.getKeyFieldsAction(); 
-                this.onStateConstraintTypeChanged();
+                await this.getQueryAction();
+                this.onStateConstraintTypeChanged();                
             })();
         }
 
@@ -173,30 +183,30 @@
         }
 
         onSelectInventoryItem(index: number){
-            let SelectedCounter = 0;
+            let selectedCounter = 0;
             if(this.constraintDetails == 'OR')
             {
-                const key = this.selectedKeys[index];
-                let data: InventoryParam = {keyProperties: {}};
+                let key = this.selectedKeys[index];
+                let data: inventoryParam = {keyProperties: {}};
 
                 for(let i = 0; i < this.inventoryDetails.length; i++){
                     if(i === index){
                         data.keyProperties[i] = key;
                         continue;
                     }
-                    const inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: string | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
-                    const otherKeyValue = inventoryItem.keyProperties[i]; 
+                    let inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: string | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
+                    let otherKeyValue = inventoryItem.keyProperties[i]; 
                     this.selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
                 }
 
                  //Create a dictionary of the selected key fields
-                const dictionary: Record<string, string> = {};
+                let dictionary: Record<string, string> = {};
 
                 for(let i = 0; i < this.inventoryDetails.length; i++) {
-                    const DictNames: any = this.inventoryDetails[i];
-                    const Dictvalues: any = this.selectedKeys[i];
-                    dictionary[DictNames] = Dictvalues;                     
+                    let dictNames: any = this.inventoryDetails[i];
+                    let dictValues: any = this.selectedKeys[i];
+                    dictionary[dictNames] = dictValues;                     
                 }
     
                 //Set the data equal to the dictionary
@@ -205,36 +215,55 @@
                 this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  
             }
             else if(this.constraintDetails == 'AND') {
+                console.log("here");
+
+                //Get the first use selected key field and it's selection and put it in a dictionary
+                let queryDict: Record<string, string> = {};
+                let queryData: inventoryParam = clone(emptyInventoryParam);
+
+                for(let i = 0; i < this.inventoryDetails.length; i++) {
+                    if(this.selectedKeys[i] !== '') {
+                    let dictNames: any = this.inventoryDetails[i];
+                    let dictValues: any = this.selectedKeys[i];
+                    queryDict[dictNames] = dictValues;                     
+
+                    console.log(queryDict);
+                    }   
+                }                
+                queryData.keyProperties = queryDict;
+                console.log(queryData);
+
+                this.getQueryAction({querySet: queryData});  
+
                 //Check if any dropdowns are empty
                 for(let i = 0; i < this.inventoryDetails.length; i++) {
                     if(this.selectedKeys[i] !== '') {
-                        SelectedCounter++;
+                        selectedCounter++;
                     }
                 }
-
                 
-                if(SelectedCounter === this.inventoryDetails.length){
-                    const key = this.selectedKeys[index];
-                    let data: InventoryParam = {keyProperties: {}};
+                if(selectedCounter === this.inventoryDetails.length){
+                    let key = this.selectedKeys[index];
+                    let data: inventoryParam = {keyProperties: {}};
 
                 for(let i = 0; i < this.inventoryDetails.length; i++){
                     if(i === index){
                         data.keyProperties[i] = key;
                         continue;
                     }
-                    const inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: any | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
-                    const otherKeyValue = inventoryItem.keyProperties[i]; 
+                    let inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: any | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
+                    let otherKeyValue = inventoryItem.keyProperties[i]; 
                     this.selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
                 }
                 
                 //Create a dictionary of the selected key fields
-                const dictionary: Record<string, string> = {};
+                let dictionary: Record<string, string> = {};
 
                 for(let i = 0; i < this.inventoryDetails.length; i++) {
-                    const DictNames: any = this.inventoryDetails[i];
-                    const Dictvalues: any = this.selectedKeys[i];
-                    dictionary[DictNames] = Dictvalues;                     
+                    let dictNames: any = this.inventoryDetails[i];
+                    let dictValues: any = this.selectedKeys[i];
+                    dictionary[dictNames] = dictValues;                     
                 }
                     
                     //Set the data equal to the dictionary

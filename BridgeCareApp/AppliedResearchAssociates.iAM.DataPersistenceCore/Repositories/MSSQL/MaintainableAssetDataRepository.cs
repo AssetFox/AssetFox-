@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -98,6 +99,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return returnValueList;
+        }
+
+        public List<List<string>> GetKeyPropertiesTable(List<string> keyFieldNames)
+        {
+            var network = _unitOfWork.NetworkRepo.GetMainNetwork();
+            var result = new List<List<string>>();
+            var keyDatumFields = _unitOfWork.Context.Attribute
+                .Where(_ => keyFieldNames.Contains(_.Name))
+                .Select(_ => new { _.Id, _.Name, Type = _.DataType })
+                .ToList();
+            var assets = _unitOfWork.Context.MaintainableAsset.Where(_ => _.NetworkId == network.Id).ToList();
+            var aggregatedData = _unitOfWork.Context.AggregatedResult
+                    .Include(_ => _.MaintainableAsset)
+                    .Include(_ => _.Attribute)
+                    .Where(_ => keyFieldNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == network.Id)
+                    .ToList();
+            foreach (var asset in assets)
+            {
+                var assetTuple = new List<string>();
+                foreach (var attributeName in keyFieldNames)
+                {
+                    var attribute = keyDatumFields.Where(_ => _.Name == attributeName).FirstOrDefault();
+                    if (attribute.Type == "NUMBER")
+                    {
+                        assetTuple.Add(aggregatedData.FirstOrDefault(_ => _.MaintainableAssetId == asset.Id && _.AttributeId == attribute.Id).NumericValue.ToString());
+                    }
+                    else
+                    {
+                        assetTuple.Add(aggregatedData.FirstOrDefault(_ => _.MaintainableAssetId == asset.Id && _.AttributeId == attribute.Id).TextValue);
+                    }
+                }
+                result.Add(assetTuple);
+            }
+
+            return result;
         }
 
         public Dictionary<int, SegmentAttributeDatum> GetAttributeValueHistory(string keyName, string keyValue, string attribute)

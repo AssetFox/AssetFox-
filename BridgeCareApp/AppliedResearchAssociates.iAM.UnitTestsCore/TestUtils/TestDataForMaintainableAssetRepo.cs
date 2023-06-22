@@ -29,12 +29,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             var entities = new List<AdminSettingsEntity>();
             // entities will need to be added here.
-            var FirstASection = new AdminSettingsEntity()
+            var KeyFields = new AdminSettingsEntity()
             {
                 Key = "KeyFields",
                 Value = "BRKEY_,BMSID"
             };
-            entities.Add(FirstASection);
+            entities.Add(KeyFields);
             return entities;
         }
 

@@ -32,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public const string simulationReportKey = "SimulationReportNames";
         public const string keyFieldKey = "KeyFields";
         public const string primaryNetworkKey = "PrimaryNetwork";
+        public const string rawDataNetworkKey = "RawDataNetwork";
         public const string constraintTypeKey = "ConstraintType";
 
         //Reads in KeyFields record as a string but places values in a list to return.
@@ -121,6 +122,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        public string GetRawDataNetwork()
+        {
+            var existingRawDataNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == rawDataNetworkKey);
+            if (existingRawDataNetwork == null)
+            {
+                return null;
+            }
+            var rawDataNetworkGuid = new Guid(existingRawDataNetwork.Value);
+            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == rawDataNetworkGuid);
+
+            if (existingNetwork == null)
+            {
+                return null;
+            }
+            else
+            {
+                return existingNetwork.Name;
+            }
+        }
+
         public void SetPrimaryNetwork(string name)
         {
             var existingNetworkAdminSetting = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == primaryNetworkKey).FirstOrDefault();
@@ -146,6 +167,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             _unitOfWork.Context.SaveChanges();
         }
+
+        public void SetRawDataNetwork(string name)
+        {
+            var existingNetworkAdminSetting = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == rawDataNetworkKey).FirstOrDefault();
+            var existingNetwork = _unitOfWork.Context.Network.FirstOrDefault(_ => _.Name == name);
+            if (existingNetwork == null) {
+                throw new RowNotInTableException("The specified network was not found.");
+            }
+            if (existingNetworkAdminSetting == null)
+            {
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity { Key = rawDataNetworkKey, Value = existingNetwork.Id.ToString() });
+            }
+            else
+            {
+                existingNetworkAdminSetting.Value = existingNetwork.Id.ToString();
+                _unitOfWork.Context.AdminSettings.Update(existingNetworkAdminSetting);
+            }
+            _unitOfWork.Context.SaveChanges();
+        }
+
         public IList<string> GetAvailableReports()
         {
 

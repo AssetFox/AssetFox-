@@ -31,6 +31,21 @@
             <v-flex xs8 class="ghd-constant-header">
                 <v-layout>
                     <v-flex xs2>
+                        <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Key Field(s): </v-subheader> 
+                    </v-flex>
+                    <v-flex xs5>
+                        <div class="ghd-md-gray ghd-control-label elipsisList">{{rawDataKeyFieldsDelimited}}</div>  
+                    </v-flex>                        
+                    <v-btn style="margin-left: 20px !important" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        @click="onEditRawDataKeyFieldsClick">
+                        Edit
+                    </v-btn>
+                </v-layout>
+            </v-flex>
+            <v-flex xs8 class="ghd-constant-header">
+                <v-layout>
+                    <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Inventory Report(s): </v-subheader> 
                     </v-flex>
                     <v-flex xs5>
@@ -113,19 +128,14 @@ import { VMenu } from 'vuetify/lib';
     }  
 })
 export default class Data extends Vue {
-    @State(state => state.adminDataModule.availableReportNames)
-    stateAvailableReportNames: string[];
-    @State(state => state.adminDataModule.simulationReportNames)
-    stateSimulationReportNames: string[];
-    @State(state => state.adminDataModule.inventoryReportNames)
-    stateInventoryReportNames: string[];
-    @State(state => state.adminDataModule.primaryNetwork)
-    statePrimaryNetwork: string;   
-    @State(state => state.adminDataModule.keyFields)
-    stateKeyFields: string[];
+    @State(state => state.adminDataModule.availableReportNames) stateAvailableReportNames: string[];
+    @State(state => state.adminDataModule.simulationReportNames) stateSimulationReportNames: string[];
+    @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
+    @State(state => state.adminDataModule.primaryNetwork) statePrimaryNetwork: string;   
+    @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
+    @State(state => state.adminDataModule.rawDataKeyFields) stateRawDataKeyFields: string[];
     @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
-    hasUnsavedChanges: boolean;
+    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
 
@@ -134,11 +144,13 @@ export default class Data extends Vue {
     @Action('getInventoryReports') getInventoryReportsAction: any;
     @Action('getPrimaryNetwork') getPrimaryNetworkAction: any;
     @Action('getKeyFields') getKeyFieldsAction: any;
+    @Action('getRawDataKeyFields') getRawDataKeyFieldsAction: any;
     @Action('getConstraintType') getConstraintTypeAction: any;
     @Action('setSimulationReports') setSimulationReportsAction: any;
     @Action('setInventoryReports') setInventoryReportsAction: any;
     @Action('setPrimaryNetwork') setPrimaryNetworkAction: any;
     @Action('setKeyFields') setKeyFieldsAction: any;
+    @Action('setRawDataKeyFields') setRawDataKeyFieldsAction: any;
     @Action('setConstraintType') setConstraintTypeAction: any;
     @Action('getNetworks') getNetworks: any;
     @Action('getAttributes') getAttributes: any;
@@ -155,16 +167,19 @@ export default class Data extends Vue {
     networks: Network[] = [];
 
     selectedKeyFields: string[] = [];
+    selectedRawDataKeyFields: string[] = []
     selectedAvailableReports: string[] = [];
     selectedSimulationReports: string[] = [];
     selectedInventoryReports: string[] = [];
     primaryNetwork: string = '';
 
     keyFieldsDelimited: string = '';
+    rawDataKeyFieldsDelimited: string = '';
     simulationReportsDelimited: string = '';
     inventoryReportsDelimited: string = '';
 
     keyFieldsName: string  = 'KeyFields';
+    rawDataKeyFieldsName: string = 'RawDataKeyFields';
     simulationReportsName: string = 'SimulationReports';
     inventoryReportsName: string = 'InventoryReports';
 
@@ -184,6 +199,7 @@ export default class Data extends Vue {
                 if(vm.selectPrimaryNetworkItemValue === null)
                     vm.onStatePrimaryNetworkChanged();
                 await vm.getKeyFieldsAction();
+                await vm.getRawDataKeyFields();
                 await vm.getConstraintTypeAction();
                 vm.onStateConstraintTypeChanged();
             })();
@@ -232,6 +248,11 @@ export default class Data extends Vue {
         this.selectedKeyFields = clone(this.stateKeyFields);
     }
 
+    @Watch('stateRawDataKeyFields')
+    onStateRawDataKeyFieldsChanged(){
+        this.selectedRawDataKeyFields = clone(this.stateRawDataKeyFields);
+    }
+
     @Watch('stateConstraintType')
     onStateConstraintTypeChanged(){
         this.constraintTypeRadioGroup = this.stateConstraintType
@@ -248,6 +269,13 @@ export default class Data extends Vue {
     onSelectedKeyFieldsChanged(){
         this.keyFieldsDelimited = '';
         this.keyFieldsDelimited = this.convertToDelimited(this.selectedKeyFields, ', ')
+        this.checkHasUnsaved();       
+    }
+
+    @Watch('selectedRawDataKeyFields')
+    onSelectedRawDataKeyFieldsChanged(){
+        this.rawDataKeyFieldsDelimited = '';
+        this.rawDataKeyFieldsDelimited = this.convertToDelimited(this.selectedRawDataKeyFields, ', ')
         this.checkHasUnsaved();       
     }
 
@@ -290,7 +318,8 @@ export default class Data extends Vue {
             await this.setConstraintTypeAction(this.constraintTypeRadioGroup);
             await this.setSimulationReportsAction(this.convertToDelimited(this.selectedSimulationReports, ','));
             await this.setInventoryReportsAction(this.convertToDelimited(this.selectedInventoryReports, ','));
-            await this.setKeyFieldsAction(this.convertToDelimited(this.selectedKeyFields, ','));                      
+            await this.setKeyFieldsAction(this.convertToDelimited(this.selectedKeyFields, ','));
+            await this.setRawDataKeyFieldsAction(this.convertToDelimited(this.selectedRawDataKeyFields, ','));                      
         })();
     }
 
@@ -298,6 +327,12 @@ export default class Data extends Vue {
         this.editAdminDataDialogData.showDialog = true;
         this.editAdminDataDialogData.selectedSettings = clone(this.selectedKeyFields);
         this.editAdminDataDialogData.settingName = this.keyFieldsName;
+        this.editAdminDataDialogData.settingsList = clone(this.keyFields);
+    }
+    onEditRawDataKeyFieldsClick(){
+        this.editAdminDataDialogData.showDialog = true;
+        this.editAdminDataDialogData.selectedSettings = clone(this.selectedRawDataKeyFields);
+        this.editAdminDataDialogData.settingName = this.rawDataKeyFieldsName;
         this.editAdminDataDialogData.settingsList = clone(this.keyFields);
     }
     onEditInventoryReportsClick(){
@@ -318,6 +353,9 @@ export default class Data extends Vue {
                 case this.keyFieldsName:
                     this.selectedKeyFields = clone(selectedSettings);
                     break;
+                case this.rawDataKeyFieldsName:
+                    this.selectedRawDataKeyFields = clone(selectedSettings);
+                    break;
                 case this.inventoryReportsName:
                     this.selectedInventoryReports = clone(selectedSettings);
                     break;
@@ -333,6 +371,7 @@ export default class Data extends Vue {
         const hasChanged = hasUnsavedChangesCore('', this.selectedInventoryReports, this.stateInventoryReportNames) ||
             hasUnsavedChangesCore('', this.selectedSimulationReports, this.stateSimulationReportNames) ||
             hasUnsavedChangesCore('', this.selectedKeyFields, this.stateKeyFields) ||
+            hasUnsavedChangesCore('', this.selectedRawDataKeyFields, this.stateRawDataKeyFields) ||
             this.primaryNetwork != this.statePrimaryNetwork ||
             this.constraintTypeRadioGroup != this.stateConstraintType
         this.setHasUnsavedChangesAction({ value: hasChanged });

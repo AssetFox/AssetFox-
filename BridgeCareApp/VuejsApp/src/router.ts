@@ -121,10 +121,6 @@ const AdminData = () =>
 import(
     /*webpackChunkName: "AdminData" */ '@/components/admin-data/AdminData.vue'
 );
-const AdminRawData = () => 
-import(
-    '@/components/admin-rawdata/AdminRawData.vue'
-)
 
 const onHandlingUnsavedChanges = (to: any, next: any): void => {
     // @ts-ignore
@@ -367,10 +363,6 @@ const router = new VueRouter({
                     path: '/Site/',
                     component: Site,
                 },
-                {
-                    path: '/AdminRawData/',
-                    component: AdminRawData,
-                }
             ],
         },
         {

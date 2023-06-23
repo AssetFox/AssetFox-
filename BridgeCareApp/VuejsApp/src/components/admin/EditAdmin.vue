@@ -82,13 +82,6 @@ export default class EditAdmin extends Vue {
                 path: '/AdminData/',
             },
         },
-        {
-            tabName: 'RawData',
-            tabIcon: "",
-            navigation: {
-                path: '/AdminRawData/',
-            },
-        },
     ];
     
     beforeRouteEnter(to: any, from: any, next: any) {

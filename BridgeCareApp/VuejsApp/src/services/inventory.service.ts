@@ -24,6 +24,6 @@ export default class InventoryService {
     }
 
     static getQuery(querySet: inventoryParam): AxiosPromise{
-        return coreAxiosInstance.post(`/api/Inventory/GetQuery/`, querySet);
+        return coreAxiosInstance.post(`/api/Inventory/GetQuery`, querySet);
     }
 }

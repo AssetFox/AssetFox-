@@ -45,7 +45,7 @@
     import Vue from 'vue';
     import {Component, Watch} from 'vue-property-decorator';
     import {Action, State} from 'vuex-class';
-    import {inventoryParam, emptyInventoryParam, InventoryItem, KeyProperty} from '@/shared/models/iAM/inventory';
+    import {QueryResponse, inventoryParam, emptyInventoryParam, InventoryItem, KeyProperty} from '@/shared/models/iAM/inventory';
     import {clone, empty, find, propEq} from 'ramda';
     import InventoryService from '@/services/inventory.service'
 
@@ -53,7 +53,7 @@
     export default class Inventory extends Vue {
         @State(state => state.inventoryModule.inventoryItems) inventoryItems: InventoryItem[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
-        @State(state => state.inventoryModule.querySet) querySet: inventoryParam[];
+        @State(state => state.inventoryModule.querySet) querySet: QueryResponse[];
         @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
         @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
         @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
@@ -75,6 +75,7 @@
 
         inventoryDetails: string[] = [];
         constraintDetails: string = '';
+        queryLists: QueryResponse[];
                        
         inventorySelectListsWorker: any = null;
 
@@ -115,6 +116,14 @@
             this.constraintDetails = this.stateConstraintType;
         }
 
+        @Watch('querySet')
+        onQuerySetChanged(){
+            this.querySet[0].attribute
+            console.log(this.querySet[0].attribute);
+            this.queryLists = this.querySet;
+            console.log(this.queryLists);
+        }
+
         /**
          * Vue component has been mounted
          */
@@ -124,7 +133,7 @@
                 await this.getInventoryReportsAction();
                 await this.getKeyFieldsAction(); 
                 await this.getQueryAction();
-                this.onStateConstraintTypeChanged();                
+                this.onStateConstraintTypeChanged();
             })();
         }
 
@@ -178,8 +187,45 @@
                         for(let i = 0; i < this.inventoryDetails.length; i++){
                             this.keyAttirbuteValues[i] = result.keys[i];
                         }
-                    }                   
+                    }  
                 });
+        }
+
+        onFirstSelectedLists() {
+            this.FirstSelectedItemWorker = this.$worker.create(
+                [
+                    {
+                        message: 'setInventorySelectLists', func: (data: any) => {
+                            if (data) {
+                                
+                                const inventoryItems = data.inventoryItems;
+
+                                const keys: any[][] = []
+
+                                inventoryItems.forEach((item: InventoryItem, index: number) => {
+                                    if (index === 0) { 
+                                        for(let i = 0; i < data.inventoryDetails.length; i++){
+                                            keys.push([])
+                                            keys[i].push({header: `${data.inventoryDetails[i]}'s`})
+                                        }
+                                    }                              
+                                    
+                                    for(let i = 0; i < data.inventoryDetails.length; i++){
+                                        keys[i].push({
+                                            identifier: item.keyProperties[i],
+                                            group: data.inventoryDetails[i]
+                                        })
+                                    }
+                                });
+                           
+                                return {keys: keys};
+                            }
+
+                            return  {keys: []};
+                        }
+                    }
+                ]
+            );
         }
 
         onSelectInventoryItem(index: number){
@@ -215,24 +261,19 @@
                 this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  
             }
             else if(this.constraintDetails == 'AND') {
-                console.log("here");
-
                 //Get the first use selected key field and it's selection and put it in a dictionary
-                let queryDict: Record<string, string> = {};
-                let queryData: inventoryParam = clone(emptyInventoryParam);
+                var queryDict: string[] = [];
+                let queryData: string[] = [];
 
-                for(let i = 0; i < this.inventoryDetails.length; i++) {
+                for(let i = 0; Object.keys(queryDict).length === 0; i++) {
                     if(this.selectedKeys[i] !== '') {
-                    let dictNames: any = this.inventoryDetails[i];
-                    let dictValues: any = this.selectedKeys[i];
+                    var dictNames: any = this.inventoryDetails[i];
+                    var dictValues: any = this.selectedKeys[i];
                     queryDict[dictNames] = dictValues;                     
-
-                    console.log(queryDict);
+                    i++;
                     }   
                 }                
-                queryData.keyProperties = queryDict;
-                console.log(queryData);
-
+                queryData = queryDict;
                 this.getQueryAction({querySet: queryData});  
 
                 //Check if any dropdowns are empty

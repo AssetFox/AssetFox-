@@ -12,6 +12,15 @@ export interface inventoryParam {
 export const emptyInventoryParam: inventoryParam = {
     keyProperties: {}
 };
+export interface QueryResponse {
+    attribute: string;
+    values: string[];
+}
+export const emptyQueryResponse: QueryResponse = {
+    attribute: '',
+    values: [],
+}
+
 export interface MappedInventoryItem {
     keyProperties: any[];
 }

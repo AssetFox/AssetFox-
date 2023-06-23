@@ -12,6 +12,16 @@
                         </v-select>                           
                     </v-layout>
                 </v-layout>
+                <v-layout>
+                    <v-layout column>
+                        <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Network</v-subheader>
+                        <v-select :items="selectRawDataNetworkItems"
+                            outline
+                            v-model="selectRawdataNetworkItemValue"
+                            class="ghd-select ghd-text-field ghd-text-field-border">
+                        </v-select>
+                    </v-layout>
+                </v-layout>
             </v-flex>
             <v-flex xs8 class="ghd-constant-header">
                 <v-layout>
@@ -96,15 +106,12 @@ import Component from 'vue-class-component';
 import EditAdminDataDialog from './EditAdminDataDialog.vue';
 import {EditAdminDataDialogData, emptyEditAdminDataDialogData} from '@/shared/models/modals/edit-data-dialog-data';
 import { clone } from 'ramda';
-import { watch } from 'fs';
 import { Watch } from 'vue-property-decorator';
-import { emptyNetwork, Network } from '@/shared/models/iAM/network';
-import { getNewGuid } from '@/shared/utils/uuid-utils';
-import { Action, Getter, Mutation, State } from 'vuex-class';
+import { Network } from '@/shared/models/iAM/network';
+import { Action, State } from 'vuex-class';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
-import { VMenu } from 'vuetify/lib';
 
 
 @Component({
@@ -121,6 +128,8 @@ export default class Data extends Vue {
     stateInventoryReportNames: string[];
     @State(state => state.adminDataModule.primaryNetwork)
     statePrimaryNetwork: string;   
+    @State(state => state.adminDataModule.rawdataNetwork)
+    stateRawdataNetwork: string;
     @State(state => state.adminDataModule.keyFields)
     stateKeyFields: string[];
     @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
@@ -133,11 +142,13 @@ export default class Data extends Vue {
     @Action('getSimulationReports') getSimulationReportsAction: any;
     @Action('getInventoryReports') getInventoryReportsAction: any;
     @Action('getPrimaryNetwork') getPrimaryNetworkAction: any;
+    @Action('getRawdataNetwork') getRawdataNetworkAction: any;
     @Action('getKeyFields') getKeyFieldsAction: any;
     @Action('getConstraintType') getConstraintTypeAction: any;
     @Action('setSimulationReports') setSimulationReportsAction: any;
     @Action('setInventoryReports') setInventoryReportsAction: any;
     @Action('setPrimaryNetwork') setPrimaryNetworkAction: any;
+    @Action('setRawdataNetwork') setRawdataNetworkAction: any;
     @Action('setKeyFields') setKeyFieldsAction: any;
     @Action('setConstraintType') setConstraintTypeAction: any;
     @Action('getNetworks') getNetworks: any;
@@ -145,7 +156,9 @@ export default class Data extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
     selectPrimaryNetworkItems: SelectItem[] = [];
+    selectRawDataNetworkItems: SelectItem[] = [];
     selectPrimaryNetworkItemValue: string | null = null;
+    selectRawdataNetworkItemValue: string | null = null;
 
     editAdminDataDialogData: EditAdminDataDialogData = clone(emptyEditAdminDataDialogData)
 
@@ -159,6 +172,7 @@ export default class Data extends Vue {
     selectedSimulationReports: string[] = [];
     selectedInventoryReports: string[] = [];
     primaryNetwork: string = '';
+    rawdataNetwork: string = '';
 
     keyFieldsDelimited: string = '';
     simulationReportsDelimited: string = '';
@@ -181,8 +195,11 @@ export default class Data extends Vue {
                 await vm.getSimulationReportsAction();
                 await vm.getInventoryReportsAction();
                 await vm.getPrimaryNetworkAction();
+                await vm.getRawdataNetworkAction();
                 if(vm.selectPrimaryNetworkItemValue === null)
                     vm.onStatePrimaryNetworkChanged();
+                if(vm.selectRawdataNetworkItemValue === null)
+                    vm.onStateRawdataNetworkChanged();
                 await vm.getKeyFieldsAction();
                 await vm.getConstraintTypeAction();
                 vm.onStateConstraintTypeChanged();
@@ -224,9 +241,12 @@ export default class Data extends Vue {
 
     @Watch('statePrimaryNetwork')
     onStatePrimaryNetworkChanged(){
-        this.selectPrimaryNetworkItemValue = this.statePrimaryNetwork
+        this.selectPrimaryNetworkItemValue = this.statePrimaryNetwork;
     }
-
+    @Watch('stateRawdataNetwork')
+    onStateRawdataNetworkChanged() {
+        this.selectRawdataNetworkItemValue = this.stateRawdataNetwork;
+    }
     @Watch('stateKeyFields')
     onStateKeyFieldsChanged(){
         this.selectedKeyFields = clone(this.stateKeyFields);
@@ -240,6 +260,9 @@ export default class Data extends Vue {
     @Watch('networks')
     onNetworksChanged(){
         this.selectPrimaryNetworkItems = this.networks.map(_ => {
+            return {text: _.name, value: _.name}
+        });
+        this.selectRawDataNetworkItems = this.networks.map(_ => {
             return {text: _.name, value: _.name}
         });
     }
@@ -274,6 +297,15 @@ export default class Data extends Vue {
         this.checkHasUnsaved();       
     }
 
+    @Watch('selectRawdataNetworkItemValue')
+    onSelectRawdataNetworkItemValueChanged() {
+        if (this.selectRawdataNetworkItemValue === null) 
+            this.rawdataNetwork = '';
+        else 
+            this.rawdataNetwork = this.selectRawdataNetworkItemValue;
+        this.checkHasUnsaved();
+    }
+
     @Watch('primaryNetwork')
     onPrimaryNetworkChanged(){
         this.checkHasUnsaved();       
@@ -287,6 +319,7 @@ export default class Data extends Vue {
     onSaveClick(){
         (async () => {
             await this.setPrimaryNetworkAction(this.primaryNetwork); 
+            await this.setRawdataNetworkAction(this.rawdataNetwork);
             await this.setConstraintTypeAction(this.constraintTypeRadioGroup);
             await this.setSimulationReportsAction(this.convertToDelimited(this.selectedSimulationReports, ','));
             await this.setInventoryReportsAction(this.convertToDelimited(this.selectedInventoryReports, ','));
@@ -333,7 +366,7 @@ export default class Data extends Vue {
         const hasChanged = hasUnsavedChangesCore('', this.selectedInventoryReports, this.stateInventoryReportNames) ||
             hasUnsavedChangesCore('', this.selectedSimulationReports, this.stateSimulationReportNames) ||
             hasUnsavedChangesCore('', this.selectedKeyFields, this.stateKeyFields) ||
-            this.primaryNetwork != this.statePrimaryNetwork ||
+            this.primaryNetwork != this.statePrimaryNetwork || this.rawdataNetwork != this.stateRawdataNetwork ||
             this.constraintTypeRadioGroup != this.stateConstraintType
         this.setHasUnsavedChangesAction({ value: hasChanged });
     }

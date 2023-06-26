@@ -8,18 +8,34 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     public class TestDataForMaintainableAssetRepo
     {
         private List<AttributeEntity> _attributeLibrary;
+        private List<AdminSettingsEntity> _adminSettingsLibrary;
         private List<MaintainableAssetLocationEntity> _maintainableAssetLocationLibrary;
 
         public NetworkEntity TestNetwork { get; private set; }
         public IQueryable<AttributeEntity> AttributeLibrary => _attributeLibrary.AsQueryable();
         public IQueryable<MaintainableAssetEntity> MaintainableAssetsLibrary => TestNetwork.MaintainableAssets.AsQueryable();
         public IQueryable<AggregatedResultEntity> AggregatedResultsLibrary => TestNetwork.MaintainableAssets.SelectMany(_ => _.AggregatedResults).AsQueryable();
+        public IQueryable<AdminSettingsEntity> AdminSettingsLibrary => _adminSettingsLibrary.AsQueryable();
         public IQueryable<MaintainableAssetLocationEntity> MaintainableAssetLocationLibrary => _maintainableAssetLocationLibrary.AsQueryable();
 
         public TestDataForMaintainableAssetRepo()
         {
-            _attributeLibrary = CreateTestAttributes();      
+            _attributeLibrary = CreateTestAttributes();
+            _adminSettingsLibrary = CreateAdminSettingsLibrary();
             TestNetwork = CreateTestNetwork();
+        }
+
+        private List<AdminSettingsEntity> CreateAdminSettingsLibrary()
+        {
+            var entities = new List<AdminSettingsEntity>();
+            // entities will need to be added here.
+            var KeyFields = new AdminSettingsEntity()
+            {
+                Key = "KeyFields",
+                Value = "BRKEY_,BMSID"
+            };
+            entities.Add(KeyFields);
+            return entities;
         }
 
         private NetworkEntity CreateTestNetwork()
@@ -84,7 +100,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             AssignName(SecondBSection, "Second B");
 
             _maintainableAssetLocationLibrary = CreateTestMaintainableAssetLocations(testNetwork.MaintainableAssets.ToList());
-
             return testNetwork;
         }
 

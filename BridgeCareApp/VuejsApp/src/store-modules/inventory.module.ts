@@ -53,7 +53,6 @@ const actions = {
         .then((response: AxiosResponse<any>) => {
             if(hasValue(response, 'data')){
                 commit('inventoryQueryMutator', response.data);
-                console.log(response.data);
             }
         });
     }

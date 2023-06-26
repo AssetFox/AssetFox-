@@ -75,8 +75,7 @@
 
         inventoryDetails: string[] = [];
         constraintDetails: string = '';
-        queryLists: QueryResponse[];
-                       
+
         inventorySelectListsWorker: any = null;
 
         inventoryData: any  = null;
@@ -118,10 +117,9 @@
 
         @Watch('querySet')
         onQuerySetChanged(){
-            this.querySet[0].attribute
-            console.log(this.querySet[0].attribute);
-            this.queryLists = this.querySet;
-            console.log(this.queryLists);
+            console.log(this.querySet[0].values[0]);
+            this.querySet.forEach(data => {
+            })
         }
 
         /**
@@ -191,43 +189,6 @@
                 });
         }
 
-        onFirstSelectedLists() {
-            this.FirstSelectedItemWorker = this.$worker.create(
-                [
-                    {
-                        message: 'setInventorySelectLists', func: (data: any) => {
-                            if (data) {
-                                
-                                const inventoryItems = data.inventoryItems;
-
-                                const keys: any[][] = []
-
-                                inventoryItems.forEach((item: InventoryItem, index: number) => {
-                                    if (index === 0) { 
-                                        for(let i = 0; i < data.inventoryDetails.length; i++){
-                                            keys.push([])
-                                            keys[i].push({header: `${data.inventoryDetails[i]}'s`})
-                                        }
-                                    }                              
-                                    
-                                    for(let i = 0; i < data.inventoryDetails.length; i++){
-                                        keys[i].push({
-                                            identifier: item.keyProperties[i],
-                                            group: data.inventoryDetails[i]
-                                        })
-                                    }
-                                });
-                           
-                                return {keys: keys};
-                            }
-
-                            return  {keys: []};
-                        }
-                    }
-                ]
-            );
-        }
-
         onSelectInventoryItem(index: number){
             let selectedCounter = 0;
             if(this.constraintDetails == 'OR')
@@ -266,13 +227,15 @@
                 let queryData: string[] = [];
 
                 for(let i = 0; Object.keys(queryDict).length === 0; i++) {
-                    if(this.selectedKeys[i] !== '') {
-                    var dictNames: any = this.inventoryDetails[i];
-                    var dictValues: any = this.selectedKeys[i];
-                    queryDict[dictNames] = dictValues;                     
-                    i++;
-                    }   
-                }                
+                        if(this.querySet.length === 0) {
+                        if(this.selectedKeys[i] !== '') {
+                        var dictNames: any = this.inventoryDetails[i];
+                        var dictValues: any = this.selectedKeys[i];
+                        queryDict[dictNames] = dictValues;                     
+                        i++;
+                        }   
+                    }  
+                }              
                 queryData = queryDict;
                 this.getQueryAction({querySet: queryData});  
 

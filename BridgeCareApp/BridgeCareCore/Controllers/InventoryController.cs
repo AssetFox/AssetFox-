@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
@@ -86,13 +88,48 @@ namespace BridgeCareCore.Controllers
 
             return Ok(inventoryItems);
         }
-        [HttpGet]
+        [HttpPost]
         [Route("GetQuery")]
         [Authorize]
-        public async Task<IActionResult> GetQuery(string QuerySet)
+        public async Task<IActionResult> GetQuery()
         {
-            var KeyQuery = JsonConvert.DeserializeObject<List<string>>(QuerySet);
-            return (IActionResult)KeyQuery;
+            var parameters = await GetParameters();
+            try {
+                var keyQuery = JsonConvert.DeserializeObject<List<string>>(parameters);
+            }
+            catch
+            {
+                return BadRequest("Unable to parse content");
+            }
+
+            var result = new List<QueryResponse>()
+            {
+                new QueryResponse() {Attribute = "COUNTY", Values = new List<string> {"ADAMS"} },
+                new QueryResponse() {Attribute = "SR", Values = new List<string> {"1", "2", "3"} },
+                new QueryResponse() {Attribute = "CRS", Values = new List<string> {"Sec_1", "Sec_2", "Sec_3"} },
+            };
+
+            return Ok(result);
         }
+
+        private class QueryResponse
+        {
+            public string Attribute { get; set; }
+            public List<string> Values { get; set; }
+        }
+
+        private async Task<string> GetParameters()
+        {
+            // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
+            var parameters = string.Empty;
+            if (Request.ContentLength > 0)
+            {
+                using var reader = new StreamReader(Request.Body, Encoding.UTF8);
+                parameters = await reader.ReadToEndAsync();
+            }
+
+            return parameters;
+        }
+
     }
 }

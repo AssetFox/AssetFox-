@@ -39,7 +39,7 @@
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
-                    <v-layout align-end style="padding-top: 18px !important;">
+                    <v-layout justify-end align-end style="padding-top: 18px !important;">
                         <v-spacer></v-spacer>
                         <v-btn outline
                             id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
@@ -47,10 +47,11 @@
                             class="ghd-control-border ghd-blue"
                             v-show="hasSelectedLibrary || hasScenario" 
                         >Add Target Condition Goal</v-btn>
-                        <v-btn outline
+                        <v-btn 
                             @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
-                            class="ghd-control-border ghd-blue"
+                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario"
+                            outline
                         >
                         Create New Library
                         </v-btn>
@@ -330,7 +331,7 @@
                 </v-btn>
                 <v-btn outline
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
-                    class="ghd-control-border ghd-blue"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     :disabled="disableCrudButtons()"
                 >
                     Create as New Library

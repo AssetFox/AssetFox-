@@ -62,14 +62,12 @@
                     </v-flex>                    
                     <v-flex xs2 v-show='!hasScenario'>
                         <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
-                        <v-layout row align-end>
+                        <v-layout row align-end justify-end>
                             <v-btn
                                 id="PerformanceCurveEditor-createNewLibrary-button"
                                 @click='onShowCreatePerformanceCurveLibraryDialog(false)'
                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                                style="margin-top:0px;"
-                                outline                               
-                            >
+                                outline>
                                 Create New Library
                             </v-btn>
                         </v-layout>
@@ -409,9 +407,8 @@
                     id="PerformanceCurveEditor-createAsNewLibrary-button"
                     :disabled="disableCrudButtons()"
                     @click="onShowCreatePerformanceCurveLibraryDialog(true)"
-                    class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
-                    depressed                    
-                    outlined
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    outline                  
                 >
                     Create as New Library
                 </v-btn>
@@ -527,7 +524,7 @@ import {
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { LibraryUser } from '@/shared/models/iAM/user';
-import { PerformanceCurveLibraryUser } from '@/shared/models/iAM/performance.ts';
+import { PerformanceCurveLibraryUser } from '@/shared/models/iAM/performance';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';

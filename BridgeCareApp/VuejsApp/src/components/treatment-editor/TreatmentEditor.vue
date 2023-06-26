@@ -38,12 +38,13 @@
                         Delete Treatment
                     </v-btn>
                 </v-flex>
-                <v-flex style="padding-left: 5px">
+                <v-flex justify-right align-end style="padding-top: 38px !important;" >
                     <v-btn
                         @click='onShowCreateTreatmentLibraryDialog(false)'
-                        depressed
-                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'
-                        v-show='!hasScenario'
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        v-show="!hasScenario"
+                        outline
+
                     >
                         Create New Library
                     </v-btn>                                                          
@@ -258,7 +259,8 @@
                 </v-btn>
                 <v-btn
                     @click='onShowCreateTreatmentLibraryDialog(true)'
-                    class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    outline
                     :disabled='disableCrudButtons()'
                 >
                     Create as New Library

@@ -8,6 +8,7 @@ import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import AdminDataService from '@/services/admin-data.service';
 
 const state = {
+    availableReportNames: [] as string[],
     simulationReportNames: [] as string[],
     inventoryReportNames: [] as string[],
     primaryNetwork: '' as string,
@@ -16,6 +17,9 @@ const state = {
 };
 
 const mutations = {
+    availableReportsMutator(state: any, availableReports: string[]) {
+        state.availableReportNames = availableReports !== null ? clone(availableReports) : [];
+    },
     simulationReportsMutator(state: any, simulationReports: string[]) {
         state.simulationReportNames = simulationReports !== null ? clone(simulationReports) : [];
     },
@@ -34,6 +38,14 @@ const mutations = {
 };
 
 const actions = {
+    async getAvailableReports({commit}: any) {
+        await AdminDataService.getAvailableReportNames()
+            .then((response: AxiosResponse<string[]>) => {
+                if (hasValue(response, 'data')) {
+                    commit('availableReportsMutator', response.data);
+                }
+            });
+    },
     async getSimulationReports({commit}: any) {
         await AdminDataService.getSimulationReportNames()
             .then((response: AxiosResponse<string[]>) => {

@@ -124,7 +124,7 @@
                                             <v-text-field v-if="header.value === 'year'"
                                                 :value="props.item[header.value]"
                                                 :mask="'##########'"
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                                :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"
                                                 :error-messages="props.item.yearErrors"/>
 
                                             <v-text-field v-if="header.value === 'cost'"
@@ -161,7 +161,7 @@
                                                     single-line
                                                     v-model="props.item[header.value]"
                                                     :mask="'##########'"
-                                                    :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                                    :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"/>
 
                                                 <v-text-field v-if="header.value === 'cost'"
                                                     label="Edit"
@@ -487,14 +487,6 @@ export default class CommittedProjectsEditor extends Vue  {
             class: '',
             width: '10%',
         },
-        // {
-        //     text: 'Factor',
-        //     value: 'factor',
-        //     align: 'left',
-        //     sortable: true,
-        //     class: '',
-        //     width: '10%'
-        // },
         {
             text: 'Category',
             value: 'category',
@@ -739,7 +731,17 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.sectionCommittedProjects = data.items;
                     this.rowCache = clone(this.sectionCommittedProjects)
                     this.totalItems = data.totalItems;
-                    const row = data.items.find(scp => scp.id == this.selectedCommittedProject)
+                    const row = data.items.find(scp => scp.id == this.selectedCommittedProject);
+
+                    // Updated existing data with no factor set to 1.2
+                    this.sectionCommittedProjects.forEach(element => {
+                        element.consequences.forEach(consequence => {
+                            if (consequence.performanceFactor === 0) {
+                                consequence.performanceFactor = 1.2;
+                                this.updateCommittedProject(row ? row : emptySectionCommittedProject, "1.2", "performanceFactor");
+                            }
+                        });
+                    });
                     if(isNil(row)) {
                         this.selectedCommittedProject = '';
                     }
@@ -1039,7 +1041,10 @@ export default class CommittedProjectsEditor extends Vue  {
                     ) === true &&
                     this.rules['generalRules'].valueIsNotEmpty(
                         consequence.performanceFactor,
-                    ) === true )
+                    ) === true ) &&
+                    this.rules['generalRules'].valueIsWithinRange(
+                        scp.year, [this.firstYear, this.lastYear],
+                    ) === true
                 );
             },
         );

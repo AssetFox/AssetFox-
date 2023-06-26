@@ -106,10 +106,6 @@ namespace BridgeCareCore.Controllers
                     {
                         result = UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibrariesNoChildrenAccessibleToUser(UserId);
                     }
-                    else
-                    {
-                        result = UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibrariesNoChildren();
-                    }
                 });
 
                 return Ok(result);

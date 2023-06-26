@@ -205,7 +205,7 @@
                 <v-btn
                     :disabled="disableCrudButtons()"
                     @click="onShowCreateCashFlowRuleLibraryDialog(true)"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline> 
                     Create as New Library
                 </v-btn>
                 <v-btn

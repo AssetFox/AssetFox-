@@ -891,15 +891,15 @@ export default class TreatmentEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges();
                 this.treatmentCache.push(this.selectedTreatment);
-                this.librarySelectItemValue = "";
                 this.addSuccessNotificationAction({message: "Modified scenario's treatments"});
                 if(this.hasSelectedLibrary)
                     this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId).then(() =>{
-                        this.treatmentSelectItemValue = "";
-                    })
+                       this.treatmentSelectItemValue = "";
+                   })
                 this.checkHasUnsavedChanges();
             }           
         });
+        
     }
 
     onUpsertTreatmentLibrary() {

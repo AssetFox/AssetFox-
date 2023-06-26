@@ -37,7 +37,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         //Reads in KeyFields record as a string but places values in a list to return.
         public IList<string> GetKeyFields()
         {
-            var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").FirstOrDefault();
+            var adminSettings = _unitOfWork.Context.AdminSettings;
+            var existingKeyFields = adminSettings.Where(_ => _.Key == "KeyFields").FirstOrDefault();
             if (existingKeyFields == null)
             {
                 return null;

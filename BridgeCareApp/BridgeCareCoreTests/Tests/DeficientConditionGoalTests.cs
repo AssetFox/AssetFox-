@@ -1,6 +1,8 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -12,6 +14,7 @@ using BridgeCareCore.Services;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
 using Xunit;
 
@@ -68,6 +71,8 @@ namespace BridgeCareCoreTests.Tests
                 Library = library,
                 IsNewLibrary = true,
             };
+            var libraryDoesNotExist = LibraryAccessModels.LibraryDoesNotExist();
+            repo.SetupGetLibraryAccess(library.Id, libraryDoesNotExist);
             // Act
             var result = await controller
                 .UpsertDeficientConditionGoalLibrary(request);
@@ -120,6 +125,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
             var repo = DeficientConditionGoalRepositoryMocks.DefaultMock(unitOfWork);
+            var user = UserDtos.Admin();
             var controller = CreateController(unitOfWork);
             var libraryDto = DeficientConditionGoalLibraryDtos.Empty();
             var libraryId = libraryDto.Id;
@@ -141,6 +147,9 @@ namespace BridgeCareCoreTests.Tests
                 Library = libraryDto,
                 SyncModel = sync
             };
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
+            repo.SetupGetLibraryAccess(libraryId, libraryExists);
 
             // Act
             var result = await controller.UpsertDeficientConditionGoalLibrary(libraryRequest);

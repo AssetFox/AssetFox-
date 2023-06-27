@@ -886,16 +886,13 @@ export default class TreatmentEditor extends Vue {
             rowsForDeletion: [],
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
             addedRows: this.addedRows,
-            isModified: this.scenarioLibraryIsModified
+            isModified: this.scenarioLibraryIsModified,
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges();
+                //this.clearChanges();
                 this.treatmentCache.push(this.selectedTreatment);
-                this.addSuccessNotificationAction({message: "Modified scenario's treatments"});
-                if(this.hasSelectedLibrary)
-                    this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId).then(() =>{
-                       this.treatmentSelectItemValue = "";
-                   })
+                this.librarySelectItemValue = this.parentLibraryId;
+                this.addSuccessNotificationAction({message: "Modified scenario's treatments"});             
                 this.checkHasUnsavedChanges();
             }           
         });

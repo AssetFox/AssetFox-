@@ -7,7 +7,7 @@ import {hasValue} from '@/shared/utils/has-value-util';
 const state = {
     inventoryItems: [] as InventoryItem[],
     staticHTMLForInventory: '' as any,
-    querySet: [] as InventoryParam[],
+    querySet: [] as string[],
 };
 
 const mutations = {
@@ -17,7 +17,7 @@ const mutations = {
     inventoryStaticHTMLMutator(state: any, staticHTMLPage: any){
         state.staticHTMLForInventory = clone(staticHTMLPage);
     },
-    inventoryQueryMutator(state: any, queries: InventoryParam[]) {
+    inventoryQueryMutator(state: any, queries: string[]) {
         state.querySet = clone(queries);
     }
 };

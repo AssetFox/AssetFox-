@@ -53,7 +53,7 @@
     export default class Inventory extends Vue {
         @State(state => state.inventoryModule.inventoryItems) inventoryItems: InventoryItem[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
-        @State(state => state.inventoryModule.querySet) querySet: InventoryParam[];
+        @State(state => state.inventoryModule.querySet) querySet: string[];
         @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
         @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
         @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
@@ -233,8 +233,9 @@
             else if(this.constraintDetails == 'AND') {
                 //Get the first use selected key field and it's selection and put it in a dictionary
 
-                let queryDict: Record<string, string> = {}
-                let queryData: InventoryParam = {keyProperties: {}};
+                let queryDict: string[] = [];
+                let queryData: string[] = [];
+                let queryFirst: string[] = [];
 
                 for(let i = 0; i < this.inventoryDetails.length && Object.keys(queryDict).length < 1; i++) 
                 {
@@ -242,11 +243,13 @@
                     {
                         let dictNames: any = this.inventoryDetails[i];
                         let dictValues: any = this.selectedKeys[i];
+
+                        queryFirst = [this.inventoryDetails[i], this.selectedKeys[i]];
                         queryDict[dictNames] = dictValues;                     
                         i++;
                     }  
                 }              
-                queryData.keyProperties = queryDict;
+                queryData = queryFirst;
                 this.getQueryAction({querySet: queryData});  
 
                 //Check if any dropdowns are empty
@@ -256,33 +259,33 @@
                     }
                 }
                 
-                if(selectedCounter === this.inventoryDetails.length){
+                if(selectedCounter === this.inventoryDetails.length)
+                {
                     let key = this.selectedKeys[index];
                     let data: InventoryParam = {keyProperties: {}};
 
-                for(let i = 0; i < this.inventoryDetails.length; i++){
-                    if(i === index){
-                        data.keyProperties[i] = key;
-                        continue;
+                    for(let i = 0; i < this.inventoryDetails.length; i++){
+                        if(i === index){
+                            data.keyProperties[i] = key;
+                            continue;
+                        }
+                        let inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: any | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
+                        let otherKeyValue = inventoryItem.keyProperties[i]; 
+                        this.selectedKeys[i] = otherKeyValue;
+                        data.keyProperties[i] = otherKeyValue;
                     }
-                    let inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: any | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
-                    let otherKeyValue = inventoryItem.keyProperties[i]; 
-                    this.selectedKeys[i] = otherKeyValue;
-                    data.keyProperties[i] = otherKeyValue;
-                }
-                
-                //Create a dictionary of the selected key fields
-                let dictionary: Record<string, string> = {};
-
-                for(let i = 0; i < this.inventoryDetails.length; i++) {
-                    let dictNames: any = this.inventoryDetails[i];
-                    let dictValues: any = this.selectedKeys[i];
-                    dictionary[dictNames] = dictValues;                     
-                }
                     
-                    //Set the data equal to the dictionary
-                    data.keyProperties = dictionary;
-                this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});
+                    //Create a dictionary of the selected key fields
+                    let dictionary: Record<string, string> = {};
+
+                    for(let i = 0; i < this.inventoryDetails.length; i++) {
+                        let dictNames: any = this.inventoryDetails[i];
+                        let dictValues: any = this.selectedKeys[i];
+                        dictionary[dictNames] = dictValues;                     
+                    }
+                        //Set the data equal to the dictionary
+                        data.keyProperties = dictionary;
+                    this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});
                  }
             }       
         }    }

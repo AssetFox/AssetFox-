@@ -53,7 +53,7 @@
     export default class Inventory extends Vue {
         @State(state => state.inventoryModule.inventoryItems) inventoryItems: InventoryItem[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
-        @State(state => state.inventoryModule.querySet) querySet: QueryResponse[];
+        @State(state => state.inventoryModule.querySet) querySet: InventoryParam[];
         @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
         @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
         @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
@@ -75,10 +75,6 @@
 
         inventoryDetails: string[] = [];
         constraintDetails: string = '';
-        queryDict: string[] = [];
-        queryData: string[] = [];
-        dictNames: any;
-        dictValues: any;
 
         resetCounter = 0;
 
@@ -136,7 +132,7 @@
                 await this.getConstraintTypeAction();
                 await this.getInventoryReportsAction();
                 await this.getKeyFieldsAction(); 
-                await this.getQueryAction();
+                //await this.getQueryAction();
                 this.onStateConstraintTypeChanged();
             })();
         }
@@ -237,18 +233,21 @@
             else if(this.constraintDetails == 'AND') {
                 //Get the first use selected key field and it's selection and put it in a dictionary
 
-                for(let i = 0; i < this.inventoryDetails.length && Object.keys(this.queryDict).length < 1; i++) 
+                let queryDict: Record<string, string> = {}
+                let queryData: InventoryParam = {keyProperties: {}};
+
+                for(let i = 0; i < this.inventoryDetails.length && Object.keys(queryDict).length < 1; i++) 
                 {
-                    if(this.selectedKeys[i] !== '' && Object.keys(this.queryDict).length < 1) 
+                    if(this.selectedKeys[i] !== '' && Object.keys(queryDict).length < 1) 
                     {
-                        this.dictNames = this.inventoryDetails[i];
-                        this.dictValues = this.selectedKeys[i];
-                        this.queryDict[this.dictNames] = this.dictValues;                     
+                        let dictNames: any = this.inventoryDetails[i];
+                        let dictValues: any = this.selectedKeys[i];
+                        queryDict[dictNames] = dictValues;                     
                         i++;
                     }  
                 }              
-                this.queryData = this.queryDict;
-                this.getQueryAction({querySet: this.queryData});  
+                queryData.keyProperties = queryDict;
+                this.getQueryAction({querySet: queryData});  
 
                 //Check if any dropdowns are empty
                 for(let i = 0; i < this.inventoryDetails.length; i++) {

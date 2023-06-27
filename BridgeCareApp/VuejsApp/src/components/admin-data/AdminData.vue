@@ -215,7 +215,6 @@ export default class Data extends Vue {
         const reports: string[] = this.stateAvailableReportNames;
         this.simulationReports = clone(reports);
         this.inventoryReports = clone(reports);
-
     }
 
     @Watch('stateInventoryReportNames')

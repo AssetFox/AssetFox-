@@ -6,7 +6,7 @@
                         <button class="ghd-outline-button-padding ghd-button"  
                         style="border: 1px solid black; 
                         border-radius: 4px;
-                        padding: 2px" @click="setupSelectLists()">Reset Key Fields</button>
+                        padding: 2px" @click="resetVals()">Reset Key Fields</button>
                 </div>
                 <v-spacer></v-spacer>
                 <v-layout>
@@ -45,8 +45,8 @@
     import Vue from 'vue';
     import {Component, Watch} from 'vue-property-decorator';
     import {Action, State} from 'vuex-class';
-    import {QueryResponse, inventoryParam, emptyInventoryParam, InventoryItem, KeyProperty} from '@/shared/models/iAM/inventory';
-    import {clone, empty, find, propEq} from 'ramda';
+    import {QueryResponse, InventoryParam, emptyInventoryParam, InventoryItem, KeyProperty} from '@/shared/models/iAM/inventory';
+    import {clone, empty, find, forEach, propEq} from 'ramda';
     import InventoryService from '@/services/inventory.service'
 
     @Component
@@ -75,6 +75,12 @@
 
         inventoryDetails: string[] = [];
         constraintDetails: string = '';
+        queryDict: string[] = [];
+        queryData: string[] = [];
+        dictNames: any;
+        dictValues: any;
+
+        resetCounter = 0;
 
         inventorySelectListsWorker: any = null;
 
@@ -117,9 +123,9 @@
 
         @Watch('querySet')
         onQuerySetChanged(){
-            console.log(this.querySet[0].values[0]);
-            this.querySet.forEach(data => {
-            })
+            //console.log(this.querySet[0].values[0]);
+            //this.querySet.forEach(data => {
+            //})
         }
 
         /**
@@ -189,12 +195,19 @@
                 });
         }
 
+        resetVals() {
+            this.selectedKeys.forEach(item => {
+                item = '';
+                console.log(item);
+            })
+        }
+
         onSelectInventoryItem(index: number){
             let selectedCounter = 0;
             if(this.constraintDetails == 'OR')
             {
                 let key = this.selectedKeys[index];
-                let data: inventoryParam = {keyProperties: {}};
+                let data: InventoryParam = {keyProperties: {}};
 
                 for(let i = 0; i < this.inventoryDetails.length; i++){
                     if(i === index){
@@ -223,21 +236,19 @@
             }
             else if(this.constraintDetails == 'AND') {
                 //Get the first use selected key field and it's selection and put it in a dictionary
-                var queryDict: string[] = [];
-                let queryData: string[] = [];
 
-                for(let i = 0; Object.keys(queryDict).length === 0; i++) {
-                        if(this.querySet.length === 0) {
-                        if(this.selectedKeys[i] !== '') {
-                        var dictNames: any = this.inventoryDetails[i];
-                        var dictValues: any = this.selectedKeys[i];
-                        queryDict[dictNames] = dictValues;                     
+                for(let i = 0; i < this.inventoryDetails.length && Object.keys(this.queryDict).length < 1; i++) 
+                {
+                    if(this.selectedKeys[i] !== '' && Object.keys(this.queryDict).length < 1) 
+                    {
+                        this.dictNames = this.inventoryDetails[i];
+                        this.dictValues = this.selectedKeys[i];
+                        this.queryDict[this.dictNames] = this.dictValues;                     
                         i++;
-                        }   
                     }  
                 }              
-                queryData = queryDict;
-                this.getQueryAction({querySet: queryData});  
+                this.queryData = this.queryDict;
+                this.getQueryAction({querySet: this.queryData});  
 
                 //Check if any dropdowns are empty
                 for(let i = 0; i < this.inventoryDetails.length; i++) {
@@ -248,7 +259,7 @@
                 
                 if(selectedCounter === this.inventoryDetails.length){
                     let key = this.selectedKeys[index];
-                    let data: inventoryParam = {keyProperties: {}};
+                    let data: InventoryParam = {keyProperties: {}};
 
                 for(let i = 0; i < this.inventoryDetails.length; i++){
                     if(i === index){

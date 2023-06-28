@@ -516,10 +516,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 worksheet.Cells[row, column].Value = mpmsBudgetTotal;
 
                 // SAP - to be ignored for now
-                worksheet.Cells[row + 1, column].Value = 0.0;
+                worksheet.Cells[++row, column].Value = 0.0;
 
                 // PAMS based on treatments
-                worksheet.Cells[pamsRow, column].Value = (double)worksheet.Cells[totalSpendingRow, column].Value - mpmsBudgetTotal;
+                worksheet.Cells[pamsRow, column].Value = (decimal)worksheet.Cells[totalSpendingRow, column].Value - (decimal)mpmsBudgetTotal;
 
                 column++;
             }

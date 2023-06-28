@@ -4,7 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -17,6 +21,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = uow;
             var network = _unitOfWork.NetworkRepo.GetMainNetwork();
             var keyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
+            var rawNetwork = _unitOfWork.NetworkRepo.GetRawNetwork();
+            var keyRawDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetRawKeyFields();
+            
             var keyDatumFields = _unitOfWork.Context.Attribute
                 .Where(_ => keyDatumFieldNames.Contains(_.Name))
                 .Select(_ => new {_.Id, _.Name, Type = _.DataType})
@@ -25,30 +32,93 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.Id == network.KeyAttributeId )
                 .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                 .ToList();
-            foreach(var keyDatumField in keyDatumFieldsNetwork)
+            // Ensure the network's key datum field is in the list of key properties
+            foreach (var keyDatumField in keyDatumFieldsNetwork)
             {
                 if (!keyDatumFields.Contains(keyDatumField))
                 {
                     keyDatumFields.Add(keyDatumField);
                 }
             }
+
+            // Populate key properties
+            // TODO: Replace key properties with main data table
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
             foreach (var attribute in keyDatumFields)
             {
                 var keyFieldValue = new List<KeySegmentDatum>();
-                var filteredAggregatedData = _unitOfWork.Context.AggregatedResult
+                var filteredAggregatedKeyData = _unitOfWork.Context.AggregatedResult
                     .Include(_ => _.MaintainableAsset)
                     .Where(_ => _.MaintainableAsset.NetworkId == network.Id && _.AttributeId == attribute.Id);
-                foreach (var datum in filteredAggregatedData)
+                foreach (var datum in filteredAggregatedKeyData)
                 {
                     var dataValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
                     keyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, dataValue) });
                 }
                 KeyProperties.Add(attribute.Name, keyFieldValue);
             }
+
+            // Populate main key data table
+            MainNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
+            var keyDatumFieldIds = keyDatumFields.Select(_ => _.Id).ToList();
+            var filteredAggregatedData = _unitOfWork.Context.AggregatedResult
+                .Include(_ => _.MaintainableAsset)
+                .Include(_ => _.Attribute)
+                .Where(_ => _.MaintainableAsset.NetworkId == network.Id && keyDatumFieldIds.Contains(_.AttributeId))
+                .AsEnumerable()
+                .GroupBy(_ => _.AttributeId);
+            foreach (var asset in filteredAggregatedData)
+            {
+                var queryData = new MaintainableAssetQueryDTO() { AssetId = asset.Key };
+                queryData.AssetProperties = new Dictionary<AttributeDTO, string>();
+                foreach (var attribute in asset)
+                {
+                    var convertedAttribute = attribute.Attribute.ToDto(null);
+                    var dataValue = convertedAttribute.Type == "NUMBER" ? attribute.NumericValue.ToString() : attribute.TextValue;
+                    queryData.AssetProperties.Add(convertedAttribute, dataValue);
+                }
+                MainNetworkKeyTable.Add(queryData);
+            }
+
+            // Populate raw key data table
+            RawNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
+            var keyRawDatumFields = _unitOfWork.Context.Attribute
+                .Where(_ => keyDatumFieldNames.Contains(_.Name))
+                .Select(_ => new { _.Id, _.Name, Type = _.DataType })
+                .ToList();
+            // Ensure the network's key datum field is in the list of key properties
+            foreach (var keyDatumField in keyDatumFieldsNetwork)
+            {
+                if (!keyRawDatumFields.Contains(keyDatumField))
+                {
+                    keyRawDatumFields.Add(keyDatumField);
+                }
+            }
+            var keyRawDatumFieldIds = keyRawDatumFields.Select(_ => _.Id).ToList();
+            var filteredRawAggregatedData = _unitOfWork.Context.AggregatedResult
+                .Include(_ => _.MaintainableAsset)
+                .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && keyRawDatumFieldIds.Contains(_.AttributeId))
+                .AsEnumerable()
+                .GroupBy (_ => _.AttributeId);
+            foreach (var asset in filteredRawAggregatedData)
+            {
+                var queryData = new MaintainableAssetQueryDTO() { AssetId = asset.Key };
+                queryData.AssetProperties = new Dictionary<AttributeDTO, string>();
+                foreach (var attribute in asset)
+                {
+                    var convertedAttribute = attribute.Attribute.ToDto(null);
+                    var dataValue = convertedAttribute.Type == "NUMBER" ? attribute.NumericValue.ToString() : attribute.TextValue;
+                    queryData.AssetProperties.Add(convertedAttribute, dataValue);
+                }
+                RawNetworkKeyTable.Add(queryData);
+            }
         }
 
         public Dictionary<string, List<KeySegmentDatum>> KeyProperties { get; private set; }
+
+        public List<MaintainableAssetQueryDTO> MainNetworkKeyTable { get; private set; }
+
+        public List<MaintainableAssetQueryDTO> RawNetworkKeyTable { get; private set; }
 
         public List<SegmentAttributeDatum> GetAssetAttributes(string keyName, string keyValue)
         {
@@ -166,6 +236,55 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return result;
+        }
+
+        public List<MaintainableAssetQueryDTO> QueryKeyAttributes(Dictionary<AttributeDTO, string> queryParameters,
+            NetworkTypes networkType = NetworkTypes.Main, List<MaintainableAssetQueryDTO> previousQuery = null)
+        {
+            // Populate the previous query with the entire network if it does not already exist
+            if (previousQuery == null)
+            {
+                previousQuery = networkType == NetworkTypes.Main ? MainNetworkKeyTable : RawNetworkKeyTable;
+            }
+
+            // Ensure that each attribute is in the previousQuery
+            var listOfAttributes = previousQuery.SelectMany(_ => _.AssetProperties.Keys).Select(_ => _.Id).Distinct();
+            var missingAttributes = queryParameters.Keys.Where(_ => !listOfAttributes.Contains(_.Id));
+            if (missingAttributes.Count() > 0)
+            {
+                var message = $"Unable to find attribute {missingAttributes.First().Name} in key properties";
+                if (missingAttributes.Count() > 1) message = message + $" or {missingAttributes.Count()} other attributes";
+                throw new RowNotInTableException(message);
+            }
+
+            // Remove assets without any of the queried IDs
+            var queryAttributeIds = queryParameters.Keys.Select(_ => _.Id);
+            foreach (var attribute in queryAttributeIds)
+            {
+                previousQuery = previousQuery.Where(q => q.AssetProperties.Keys.Any(a => a.Id == attribute)).ToList();
+            }
+
+            // Reduce the list of maintainable IDs by the query parameters one by one
+            foreach (var parameter in queryParameters)
+            {
+                var valueTable = new Dictionary<Guid, string>();
+                foreach (var asset in previousQuery)
+                {
+                    try
+                    {
+                        var value = asset.AssetProperties.SingleOrDefault(_ => _.Key.Id == parameter.Key.Id).Value;
+                        valueTable.Add(asset.AssetId, value);
+                    }
+                    catch
+                    {
+                        throw new RowNotInTableException($"Found multiple values for attribute {parameter.Key.Name} in attribute {asset.AssetId.ToString()}");
+                    }
+                }
+                var newIdList = valueTable.Where(_ => _.Value == parameter.Value).Select(_ => _.Key);
+                previousQuery = previousQuery.Where(_ => newIdList.Contains(_.AssetId)).ToList();
+            }
+
+            return previousQuery;
         }
     }
 }

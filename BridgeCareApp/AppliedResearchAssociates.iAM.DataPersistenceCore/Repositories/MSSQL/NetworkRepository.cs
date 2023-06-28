@@ -90,6 +90,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.Id == mainNetworkId);
         }
 
+        public NetworkEntity GetRawNetwork()
+        {
+            // TODO: Change to get raw network once raw network properties are available
+            return GetMainNetwork();
+        }
+
         public Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))

@@ -8,8 +8,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Controllers.BaseController;
+using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -23,12 +25,18 @@ namespace BridgeCareCore.Controllers
     public class InventoryController : BridgeCareCoreBaseController
     {
         private readonly IAssetData _assetData;
+        private readonly IAttributeRepository _attributeRepository;
+        private readonly IAssetData _maintainableAssetRepository;
+        private readonly IAdminSettingsRepository _adminSettingsRepository;
 
         public InventoryController(IEsecSecurity esecSecurity,
             UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) :
             base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _assetData = unitOfWork.AssetDataRepository;
+            _attributeRepository = unitOfWork.AttributeRepo;
+            _maintainableAssetRepository = unitOfWork.AssetDataRepository;
+            _adminSettingsRepository = unitOfWork.AdminSettingsRepo;
         }
 
         [HttpGet]
@@ -94,28 +102,39 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetQuery()
         {
             var parameters = await GetParameters();
+            string[] keyQuery;
+
+            // Deseralize & validate the provided parameters
             try {
-                var keyQuery = JsonConvert.DeserializeObject<string[]>(parameters);
+                keyQuery = JsonConvert.DeserializeObject<string[]>(parameters);
             }
             catch
             {
                 return BadRequest("Unable to parse content");
             }
+            if (keyQuery.Length % 2 != 0) return BadRequest("Provided parameters had an odd number of parameters");
 
-            var result = new List<QueryResponse>()
+            // Ensure the attributes are real and get their objects
+            var attributeList = new Dictionary<AttributeDTO, string>();
+            for (int index = 0; index < keyQuery.Length; index += 2)
             {
-                new QueryResponse() {Attribute = "COUNTY", Values = new List<string> {"ADAMS"} },
-                new QueryResponse() {Attribute = "SR", Values = new List<string> {"1", "2", "3"} },
-                new QueryResponse() {Attribute = "CRS", Values = new List<string> {"Sec_1", "Sec_2", "Sec_3"} },
-            };
+                var attribute = _attributeRepository.GetSingleByName(keyQuery[index]);
+                if (attribute == null) return BadRequest($"Unable to find attribute {keyQuery[index]}");
+                attributeList.Add(attribute, keyQuery[index+1]);
+            }
+
+            // Get the data from the repo
+            var queryData = _maintainableAssetRepository.QueryKeyAttributes(attributeList, NetworkTypes.Raw);
+
+            // Flatten out data
+
+            var result = new List<QueryResponse>();
+            foreach (var field in _adminSettingsRepository.GetRawKeyFields())
+            {
+                result.Add(GetUniqueForAttribute(field, queryData));
+            }
 
             return Ok(result);
-        }
-
-        private class QueryResponse
-        {
-            public string Attribute { get; set; }
-            public List<string> Values { get; set; }
         }
 
         private async Task<string> GetParameters()
@@ -131,5 +150,14 @@ namespace BridgeCareCore.Controllers
             return parameters;
         }
 
+        private QueryResponse GetUniqueForAttribute(string attribute, List<MaintainableAssetQueryDTO> data)
+        {
+            var assetsValues = data.SelectMany(_ => _.AssetProperties)
+                .Where(_ => _.Key.Name == attribute)
+                .Select(_ => _.Value)
+                .Distinct()
+                .ToList();
+            return new QueryResponse() { Attribute = attribute, Values = assetsValues };
+        }
     }
 }

@@ -13,7 +13,7 @@
                         v-model='librarySelectItemValue' 
                     >
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
+                    <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                 </v-flex>
                 <v-flex xs6>                       
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>

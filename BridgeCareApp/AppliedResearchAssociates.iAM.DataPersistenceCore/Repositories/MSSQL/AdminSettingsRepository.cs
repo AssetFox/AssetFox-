@@ -51,6 +51,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        public IList<string> GetRawKeyFields()
+        {
+            // TODO:  Replace with raw key fields
+            return GetKeyFields();
+        }
+
         //String is to be passed in as parameter. Sets the KeyFields in the AdminSettings table. 
         public void SetKeyFields(string keyFields)
         {

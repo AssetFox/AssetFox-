@@ -14,6 +14,7 @@ public interface IAdminSettingsRepository
     string GetConstraintType();
     void SetConstraintType(string constraintType);
     IList<string> GetKeyFields();
+    IList<string> GetRawKeyFields();
 
     void SetKeyFields(string keyFields);
 

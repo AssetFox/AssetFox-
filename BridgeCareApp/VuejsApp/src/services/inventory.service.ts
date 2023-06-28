@@ -23,7 +23,7 @@ export default class InventoryService {
         return coreAxiosInstance.post(`/api/Report/GetHTML/${reportType}`, filterData);
     }
 
-    static getQuery(querySet: string[]): AxiosPromise{
+    static getQuery(querySet: InventoryParam[]): AxiosPromise{
         return coreAxiosInstance.post(`/api/Inventory/GetQuery`, querySet);
     }
 }

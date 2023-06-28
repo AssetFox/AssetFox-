@@ -3,10 +3,8 @@
         <v-flex xs12>
             <v-layout justify-space-between row>
                 <div class="flex xs2 justify-content: end">
-                        <button class="ghd-outline-button-padding ghd-button"  
-                        style="border: 1px solid black; 
-                        border-radius: 4px;
-                        padding: 2px" @click="resetVals()">Reset Key Fields</button>
+                        <button class="ghd-outline-button-padding ghd-button" style="border: 1px solid black;border-radius: 4px; padding: 2px" 
+                        @click="resetDropdowns()">Reset Key Fields</button>
                 </div>
                 <v-spacer></v-spacer>
                 <v-layout>
@@ -53,7 +51,7 @@
     export default class Inventory extends Vue {
         @State(state => state.inventoryModule.inventoryItems) inventoryItems: InventoryItem[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
-        @State(state => state.inventoryModule.querySet) querySet: string[];
+        @State(state => state.inventoryModule.querySet) querySet: InventoryParam[];
         @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
         @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
         @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
@@ -75,6 +73,9 @@
 
         inventoryDetails: string[] = [];
         constraintDetails: string = '';
+        test: any;
+
+        querySelectedData: string[] = [];
 
         resetCounter = 0;
 
@@ -119,9 +120,11 @@
 
         @Watch('querySet')
         onQuerySetChanged(){
-            //console.log(this.querySet[0].values[0]);
-            //this.querySet.forEach(data => {
-            //})
+                this.keyAttirbuteValues = [];
+                for(let i = 0; i < this.inventoryDetails.length; i++) {
+                    this.test = this.querySet[i].values;
+                    this.keyAttirbuteValues[i] = this.test;
+                }
         }
 
         /**
@@ -132,7 +135,6 @@
                 await this.getConstraintTypeAction();
                 await this.getInventoryReportsAction();
                 await this.getKeyFieldsAction(); 
-                //await this.getQueryAction();
                 this.onStateConstraintTypeChanged();
             })();
         }
@@ -191,11 +193,10 @@
                 });
         }
 
-        resetVals() {
-            this.selectedKeys.forEach(item => {
-                item = '';
-                console.log(item);
-            })
+        resetDropdowns() {
+            this.mounted();
+            this.created();
+            this.setupSelectLists();
         }
 
         onSelectInventoryItem(index: number){
@@ -203,7 +204,12 @@
             if(this.constraintDetails == 'OR')
             {
                 let key = this.selectedKeys[index];
-                let data: InventoryParam = {keyProperties: {}};
+                let data: InventoryParam = {
+                keyProperties: {},
+                values: function (values: any): unknown {
+                throw new Error('Function not implemented.');
+                }
+                };
 
                 for(let i = 0; i < this.inventoryDetails.length; i++){
                     if(i === index){
@@ -232,25 +238,7 @@
             }
             else if(this.constraintDetails == 'AND') {
                 //Get the first use selected key field and it's selection and put it in a dictionary
-
-                let queryDict: string[] = [];
-                let queryData: string[] = [];
-                let queryFirst: string[] = [];
-
-                for(let i = 0; i < this.inventoryDetails.length && Object.keys(queryDict).length < 1; i++) 
-                {
-                    if(this.selectedKeys[i] !== '' && Object.keys(queryDict).length < 1) 
-                    {
-                        let dictNames: any = this.inventoryDetails[i];
-                        let dictValues: any = this.selectedKeys[i];
-
-                        queryFirst = [this.inventoryDetails[i], this.selectedKeys[i]];
-                        queryDict[dictNames] = dictValues;                     
-                        i++;
-                    }  
-                }              
-                queryData = queryFirst;
-                this.getQueryAction({querySet: queryData});  
+                this.QueryAccess();
 
                 //Check if any dropdowns are empty
                 for(let i = 0; i < this.inventoryDetails.length; i++) {
@@ -262,7 +250,12 @@
                 if(selectedCounter === this.inventoryDetails.length)
                 {
                     let key = this.selectedKeys[index];
-                    let data: InventoryParam = {keyProperties: {}};
+                    let data: InventoryParam = {
+                    keyProperties: {},
+                    values: function (values: any): unknown {
+                    throw new Error('Function not implemented.');
+                    }
+                    };
 
                     for(let i = 0; i < this.inventoryDetails.length; i++){
                         if(i === index){
@@ -288,7 +281,29 @@
                     this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});
                  }
             }       
-        }    }
+        }
+
+        QueryAccess() {
+             //Get the first use selected key field and it's selection and put it in a dictionary
+
+            if(this.querySelectedData.length === 0 || this.querySelectedData.length === 2) 
+            {
+                for(let i = 0; i < this.inventoryDetails.length - 1; i++) 
+                    {
+                        if(this.selectedKeys[i] !== '') 
+                        {
+                            if(!this.querySelectedData.includes(this.inventoryDetails[i]) && !this.querySelectedData.includes(this.selectedKeys[i]))
+                            {
+                                this.querySelectedData.push(this.inventoryDetails[i]);
+                                this.querySelectedData.push(this.selectedKeys[i]);
+                            }
+                        }
+                    }                     
+                    this.getQueryAction({querySet: this.querySelectedData});           
+            }
+    }
+    }
+
 </script>
 
 <style>

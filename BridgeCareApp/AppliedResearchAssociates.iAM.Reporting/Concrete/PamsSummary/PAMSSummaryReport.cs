@@ -201,7 +201,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+            _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             foreach (var budget in simulation.InvestmentPlan.Budgets)
@@ -243,7 +244,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pamsWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
-            var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
+            var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments, simulation.CommittedProjects);
 
             checkCancelled(cancellationToken);
             //// Pavement Work Summary By Budget TAB
@@ -251,7 +252,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pavementWorkSummaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummaryByBudget_Tab);
-            _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
+            _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, simulation.CommittedProjects);
 
             checkCancelled(cancellationToken);
             // Unfunded Pavement Projects TAB

@@ -36,14 +36,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
             List<(string TreatmentName, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments,
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals
-            )
+             , ICollection<CommittedProject> committedProjects)
         {
             FillCostOfFullDepthAsphaltWorkSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
             FillCostOfCompositeWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
             FillCostOfConcreteWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
             FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
             FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, workTypeTotals, yearlyBudgetAmount, out var totalSpendingRow);
-            FillBudgetTotalSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount);
+            FillBudgetTotalSection(worksheet, currentCell, simulationYears, committedProjects, totalSpendingRow);
             FillBudgetAnalysisSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount, totalSpendingRow);
 
             var chartRowsModel = new ChartRowsModel();
@@ -491,15 +491,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 2, column);
         }
 
-        private void FillBudgetTotalSection(ExcelWorksheet worksheet, CurrentCell currentCell,
-            List<int> simulationYears,
-            Dictionary<string, Budget> yearlyBudgetAmount
-            )
+        private void FillBudgetTotalSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, ICollection<CommittedProject> committedProjects, int totalSpendingRow)
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "Budget Total");
 
-            int startRow, startColumn, row, column;
+            int startRow, startColumn, pamsRow, row, column;
             _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
             var rowTitles = new List<string> { "PAMS", "MPMS", "SAP" };
@@ -508,20 +505,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             column++;
             var fromColumn = column + 1;
 
-            row = startRow;
-            // TODO: Fill with actual values
-            foreach (var rowTitle in rowTitles) // TODO: Iteration for spacing only; must change for actual values
+            pamsRow = startRow;
+            row = pamsRow + 1;            
+            column = fromColumn;
+
+            foreach (var year in simulationYears)
             {
-                column = fromColumn;
-                foreach (var year in simulationYears)
-                {
-                    // TODO: Use correct values
-                    worksheet.Cells[row, column].Value = 0.0;
-                    column++;
-                }
-                row++;
+                // MPMS based on committed projects
+                var mpmsBudgetTotal = committedProjects.Where(_ => _.Year == year).Select(_ => _.Cost).Sum();
+                worksheet.Cells[row, column].Value = mpmsBudgetTotal;
+
+                // SAP - to be ignored for now
+                worksheet.Cells[row + 1, column].Value = 0.0;
+
+                // PAMS based on treatments
+                worksheet.Cells[pamsRow, column].Value = (double)worksheet.Cells[totalSpendingRow, column].Value - mpmsBudgetTotal;
+
+                column++;
             }
 
+            row++;
 
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row - 1, column - 1]);
             ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row - 1, column - 1], ExcelHelperCellFormat.NegativeCurrency);

@@ -95,7 +95,7 @@ namespace BridgeCareCore.Controllers
         {
             var parameters = await GetParameters();
             try {
-                var keyQuery = JsonConvert.DeserializeObject<List<string>>(parameters);
+                var keyQuery = JsonConvert.DeserializeObject<string[]>(parameters);
             }
             catch
             {

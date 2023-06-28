@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Attribute)
                 .Where(_ => _.MaintainableAsset.NetworkId == network.Id && keyDatumFieldIds.Contains(_.AttributeId))
                 .AsEnumerable()
-                .GroupBy(_ => _.AttributeId);
+                .GroupBy(_ => _.MaintainableAssetId);
             foreach (var asset in filteredAggregatedData)
             {
                 var queryData = new MaintainableAssetQueryDTO() { AssetId = asset.Key };
@@ -99,7 +99,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.MaintainableAsset)
                 .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && keyRawDatumFieldIds.Contains(_.AttributeId))
                 .AsEnumerable()
-                .GroupBy (_ => _.AttributeId);
+                .GroupBy (_ => _.MaintainableAssetId);
             foreach (var asset in filteredRawAggregatedData)
             {
                 var queryData = new MaintainableAssetQueryDTO() { AssetId = asset.Key };

@@ -91,8 +91,8 @@
          * Calls the setInventorySelectLists function to set both inventory type select lists
          */
         @Watch('inventoryItems')
-        onInventoryItemsChanged() {
-            this.setupSelectLists();
+        async onInventoryItemsChanged() {
+            this.keyAttirbuteValues = await this.setupSelectLists();
         }
 
         @Watch('staticHTMLForInventory')
@@ -143,21 +143,34 @@
             this.initializeLists();
         }
 
-        setupSelectLists() {
+        async setupSelectLists() {
             const data: any = {
                 inventoryItems: this.inventoryItems,
                 inventoryDetails: this.inventoryDetails
             };
-            this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])
-                .then((result: any) => {
-                    if(result.keys.length > 0){
-                        this.bmsIdsSelectList = result.keys[0];
-                        this.brKeysSelectList = result.keys[1];
-                        for(let i = 0; i < this.inventoryDetails.length; i++){
-                            this.keyAttirbuteValues[i] = result.keys[i];
-                        }
-                    }  
-                });
+            let toReturn: string[][] = [];
+            let result = await this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])    
+            if(result.keys.length > 0){
+                for(let i = 0; i < this.inventoryDetails.length; i++){
+                    toReturn[i] = clone(result.keys[i]);
+                }
+            }
+            return toReturn;                  
+        }
+
+        async testSetup(){
+            const data: any = {
+                inventoryItems: this.inventoryItems,
+                inventoryDetails: this.inventoryDetails
+            };
+            let toReturn: string[][] = [];
+            let result = await this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])    
+            if(result.keys.length > 0){
+                for(let i = 0; i < this.inventoryDetails.length; i++){
+                    toReturn[i] = clone(result.keys[i]);
+                }
+            }
+            return toReturn; 
         }
 
         initializeLists() {
@@ -197,9 +210,9 @@
             );
         }
 
-        resetDropdowns() {
-            this.keyAttirbuteValues= [];
-            this.setupSelectLists();
+        async resetDropdowns() {
+            this.keyAttirbuteValues = [];
+            this.keyAttirbuteValues = await this.setupSelectLists();
         }
 
         onSelectInventoryItem(index: number){

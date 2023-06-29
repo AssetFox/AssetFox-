@@ -13,7 +13,7 @@
                         v-model='librarySelectItemValue' 
                     >
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
+                    <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                 </v-flex>
                 <v-flex xs6>                       
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
@@ -886,20 +886,17 @@ export default class TreatmentEditor extends Vue {
             rowsForDeletion: [],
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
             addedRows: this.addedRows,
-            isModified: this.scenarioLibraryIsModified
+            isModified: this.scenarioLibraryIsModified,
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges();
+                //this.clearChanges();
                 this.treatmentCache.push(this.selectedTreatment);
-                this.librarySelectItemValue = "";
-                this.addSuccessNotificationAction({message: "Modified scenario's treatments"});
-                if(this.hasSelectedLibrary)
-                    this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId).then(() =>{
-                        this.treatmentSelectItemValue = "";
-                    })
+                this.librarySelectItemValue = this.parentLibraryId;
+                this.addSuccessNotificationAction({message: "Modified scenario's treatments"});             
                 this.checkHasUnsavedChanges();
             }           
         });
+        
     }
 
     onUpsertTreatmentLibrary() {

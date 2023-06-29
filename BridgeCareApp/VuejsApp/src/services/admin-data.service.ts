@@ -17,6 +17,12 @@ export default class AdminDataService {
     static getPrimaryNetwork(): AxiosPromise {
         return coreAxiosInstance.get(`${API.AdminData}/GetPrimaryNetwork`);
     }
+    static getRawdataNetwork(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AdminData}/GetRawDataNetwork`);
+    }
+    static setRawdataNetwork(name: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.AdminData}/SetRawDataNetwork/${name}`);
+    }
     static setPrimaryNetwork(name: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.AdminData}/SetPrimaryNetwork/${name}`);
     }

@@ -12,6 +12,7 @@ const state = {
     simulationReportNames: [] as string[],
     inventoryReportNames: [] as string[],
     primaryNetwork: '' as string,
+    rawdataNetwork: '' as string,
     keyFields: [] as string[],
     rawDataKeyFields: [] as string[],
     constraintType: '' as string,
@@ -35,6 +36,9 @@ const mutations = {
     },
     primaryNetworkMutator(state: any, network: string) {
         state.primaryNetwork = network !== null ? network : '';
+    },
+    rawdataNetworkMutator(state: any, network: string) {
+        state.rawdataNetwork = network !== null ? network : '';
     },
     constraintTypeMutator(state: any, constraintType: string) {
         state.constraintType = constraintType !== null ? constraintType : '';
@@ -71,6 +75,14 @@ const actions = {
             .then((response: AxiosResponse<string>) => {
                 if (hasValue(response, 'data')) {
                     commit('primaryNetworkMutator', response.data);
+                }
+            });
+    },
+    async getRawdataNetwork({commit}: any) {
+        await AdminDataService.getRawdataNetwork()
+            .then((response: AxiosResponse<string>) => {
+                if (hasValue(response, 'data')) {
+                    commit('rawdataNetworkMutator', response.data);
                 }
             });
     },
@@ -131,6 +143,19 @@ const actions = {
         await AdminDataService.setPrimaryNetwork(network).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                 commit('primaryNetworkMutator', network);
+                dispatch('addSuccessNotification', {
+                    message: 'Modified primary network',
+                });
+            }
+        });
+    },
+    async setRawdataNetwork(
+        { dispatch, commit }: any,
+        network: string,
+    ) {
+        await AdminDataService.setRawdataNetwork(network).then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                commit('rawdataNetworkMutator', network);
                 dispatch('addSuccessNotification', {
                     message: 'Modified primary network',
                 });

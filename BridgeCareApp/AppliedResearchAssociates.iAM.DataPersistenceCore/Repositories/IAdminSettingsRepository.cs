@@ -22,7 +22,11 @@ public interface IAdminSettingsRepository
 
     void SetPrimaryNetwork(string name);
 
+    void SetRawDataNetwork(string name);
+
     string GetPrimaryNetwork();
+
+    string GetRawDataNetwork();
 
     IList<string> GetSimulationReportNames();
 

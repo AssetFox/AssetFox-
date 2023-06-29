@@ -21,6 +21,7 @@
                                     <AttributesSvg style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Security'"/>    
                                     <DataSourceSvg style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'Site'"/>
                                     <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Data'"/>                            
+                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'RawData'"/>                            
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-content>

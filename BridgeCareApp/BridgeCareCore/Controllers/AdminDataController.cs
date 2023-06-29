@@ -91,6 +91,25 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetRawDataNetwork")]
+        [Authorize]
+        public async Task<IActionResult> GetRawDataNetwork()
+        {
+            try
+            {
+                var name = UnitOfWork.AdminSettingsRepo.GetRawDataNetwork();
+                if (name == null)
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"{ServerWarning} Raw Data Network not set::A Raw Data network key must be set in the administration settings");
+                return Ok(name);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetRawDataNetwork - {e.Message}");
+                throw;
+            }
+        }
+
         [HttpPost]
         [Route("SetPrimaryNetwork/{name}")]
         [ClaimAuthorize("AdminAccess")]
@@ -108,6 +127,26 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetPrimaryNetwork - {e.Message}");
                 return BadRequest($"{SiteError}::SetPrimaryNetwork - {e.Message}");
+            }
+        }
+
+        [HttpPost]
+        [Route("SetRawDataNetwork/{name}")]
+        [ClaimAuthorize("AdminAccess")]
+        public async Task<IActionResult> SetRawDataNetwork(string name)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.AdminSettingsRepo.SetRawDataNetwork(name);
+                });
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetRawDataNetwork - {e.Message}");
+                return BadRequest($"{SiteError}::SetRawDataNetwork - {e.Message}");
             }
         }
 

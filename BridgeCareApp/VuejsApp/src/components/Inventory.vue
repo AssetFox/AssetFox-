@@ -140,6 +140,27 @@
         }
 
         created() {
+            this.initializeLists();
+        }
+
+        setupSelectLists() {
+            const data: any = {
+                inventoryItems: this.inventoryItems,
+                inventoryDetails: this.inventoryDetails
+            };
+            this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])
+                .then((result: any) => {
+                    if(result.keys.length > 0){
+                        this.bmsIdsSelectList = result.keys[0];
+                        this.brKeysSelectList = result.keys[1];
+                        for(let i = 0; i < this.inventoryDetails.length; i++){
+                            this.keyAttirbuteValues[i] = result.keys[i];
+                        }
+                    }  
+                });
+        }
+
+        initializeLists() {
             this.inventorySelectListsWorker = this.$worker.create(
                 [
                     {
@@ -176,26 +197,8 @@
             );
         }
 
-        setupSelectLists() {
-            const data: any = {
-                inventoryItems: this.inventoryItems,
-                inventoryDetails: this.inventoryDetails
-            };
-            this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])
-                .then((result: any) => {
-                    if(result.keys.length > 0){
-                        this.bmsIdsSelectList = result.keys[0];
-                        this.brKeysSelectList = result.keys[1];
-                        for(let i = 0; i < this.inventoryDetails.length; i++){
-                            this.keyAttirbuteValues[i] = result.keys[i];
-                        }
-                    }  
-                });
-        }
-
         resetDropdowns() {
-            this.mounted();
-            this.created();
+            this.keyAttirbuteValues= [];
             this.setupSelectLists();
         }
 

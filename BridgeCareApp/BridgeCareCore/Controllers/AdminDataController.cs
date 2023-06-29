@@ -98,7 +98,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.AdminSettingsRepo.SetKeyFields(KeyFields);
+                    UnitOfWork.AdminSettingsRepo.SetRawDataKeyFields(KeyFields);
                 });
                 return Ok();
             }
@@ -142,7 +142,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetRawDataNetwork - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetRawDataNetwork - {e.Message}");
                 throw;
             }
         }
@@ -182,8 +182,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetRawDataNetwork - {e.Message}");
-                return BadRequest($"{SiteError}::SetRawDataNetwork - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetRawDataNetwork - {e.Message}");
+                return BadRequest($"{AdminSettingError}::SetRawDataNetwork - {e.Message}");
             }
         }
 

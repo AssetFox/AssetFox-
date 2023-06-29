@@ -215,7 +215,7 @@ export default class Data extends Vue {
                 if(vm.selectRawdataNetworkItemValue === null)
                     vm.onStateRawdataNetworkChanged();
                 await vm.getKeyFieldsAction();
-                await vm.getRawDataKeyFields();
+                await vm.getRawDataKeyFieldsAction();
                 await vm.getConstraintTypeAction();
                 vm.onStateConstraintTypeChanged();
             })();

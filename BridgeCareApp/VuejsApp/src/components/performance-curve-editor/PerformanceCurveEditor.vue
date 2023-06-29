@@ -28,9 +28,9 @@
                                 </v-list-item>
                             </template>
                         </v-select>
-                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Based on: {{parentLibraryName}} 
+                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} 
                             
-                            <span v-if="scenarioLibraryIsModified">&nbsp;&nbsp;{{modifiedStatus}}</span>
+                            <span v-if="scenarioLibraryIsModified">&nbsp;&nbsp;{{modifiedStatus}}</span></b>
                         
                         </div>
 

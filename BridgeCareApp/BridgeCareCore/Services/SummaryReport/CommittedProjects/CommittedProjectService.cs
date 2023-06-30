@@ -7,7 +7,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Common.Logging;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -192,7 +194,7 @@ namespace BridgeCareCore.Services
             };
         }
 
-        public FileInfoDTO CreateCommittedProjectTemplate()
+        public FileInfoDTO CreateCommittedProjectTemplate(Guid networkId)
         {
             var fileName = $"CommittedProjectsTemplate.xlsx";
 
@@ -201,6 +203,8 @@ namespace BridgeCareCore.Services
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
+            _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(networkId);
+
             AddHeaderCells(worksheet, new List<string> { "Add Consequences Here and in columns to the right" });
 
             return new FileInfoDTO

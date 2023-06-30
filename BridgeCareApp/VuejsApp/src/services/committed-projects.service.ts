@@ -5,9 +5,9 @@ import { Network } from '@/shared/models/iAM/network';
 import { PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class CommittedProjectsService { 
-    static getCommittedProjectTemplate(): AxiosPromise {
+    static getCommittedProjectTemplate(networkId: string): AxiosPromise {
         return coreAxiosInstance.get(
-            `${API.CommittedProject}/CommittedProjectTemplate`,
+            `${API.CommittedProject}/CommittedProjectTemplate/${networkId}`,
         );
     }
     static exportCommittedProjects(scenarioId: string): AxiosPromise {

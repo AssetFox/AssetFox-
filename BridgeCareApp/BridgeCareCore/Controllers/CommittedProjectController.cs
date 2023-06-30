@@ -210,11 +210,11 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("CommittedProjectTemplate")]
+        [Route("CommittedProjectTemplate/{networkId}")]
         [Authorize]
-        public async Task<IActionResult> GetCommittedProjectTemplate()
+        public async Task<IActionResult> GetCommittedProjectTemplate(Guid networkId)
         {
-            var result = await Task.Factory.StartNew(() => _committedProjectService.CreateCommittedProjectTemplate());
+            var result = await Task.Factory.StartNew(() => _committedProjectService.CreateCommittedProjectTemplate(networkId));
             return Ok(result);
         }
 

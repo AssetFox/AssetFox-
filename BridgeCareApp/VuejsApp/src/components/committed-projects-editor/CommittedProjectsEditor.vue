@@ -646,9 +646,9 @@ export default class CommittedProjectsEditor extends Vue  {
                 value: attribute.name
             }),
         );
-        let foo = this.stateAttributes.find(_ => _.id == this.network.keyAttribute)
-        if(!isNil(foo)){
-            this.keyattr = foo.name;
+        let keyAttr = this.stateAttributes.find(_ => _.id == this.network.keyAttribute)
+        if(!isNil(keyAttr)){
+            this.keyattr = keyAttr.name;
             this.cpGridHeaders[0].text = this.keyattr;
         }
             
@@ -783,7 +783,7 @@ export default class CommittedProjectsEditor extends Vue  {
      }
 
      OnGetTemplateClick(){
-        CommittedProjectsService.getCommittedProjectTemplate()
+        CommittedProjectsService.getCommittedProjectTemplate(this.networkId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;  

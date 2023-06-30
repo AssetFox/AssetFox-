@@ -14,6 +14,7 @@ const state = {
     primaryNetwork: '' as string,
     rawdataNetwork: '' as string,
     keyFields: [] as string[],
+    rawDataKeyFields: [] as string[],
     constraintType: '' as string,
 };
 
@@ -29,6 +30,9 @@ const mutations = {
     },
     keyFieldsMutator(state: any, keyFields: string[]) {
         state.keyFields = keyFields !== null ? clone(keyFields) : [];
+    },
+    rawDataKeyFieldsMutator(state: any, keyFields: string[]) {
+        state.rawDataKeyFields = keyFields !== null ? clone(keyFields) : [];
     },
     primaryNetworkMutator(state: any, network: string) {
         state.primaryNetwork = network !== null ? network : '';
@@ -87,6 +91,14 @@ const actions = {
             .then((response: AxiosResponse<string[]>) => {
                 if (hasValue(response, 'data')) {
                     commit('keyFieldsMutator', response.data);
+                }
+            });
+    },
+    async getRawDataKeyFields({commit}: any) {
+        await AdminDataService.getRawDataKeyFields()
+            .then((response: AxiosResponse<string[]>) => {
+                if (hasValue(response, 'data')) {
+                    commit('rawDataKeyFieldsMutator', response.data);
                 }
             });
     },
@@ -159,6 +171,19 @@ const actions = {
                 commit('keyFieldsMutator', keyFields.split(','));
                 dispatch('addSuccessNotification', {
                     message: 'Modified key fields',
+                });
+            }
+        });
+    },
+    async setRawDataKeyFields(
+        { dispatch, commit }: any,
+        keyFields: string,
+    ) {
+        await AdminDataService.setRawDataKeyFields(keyFields).then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                commit('rawDataKeyFieldsMutator', keyFields.split(','));
+                dispatch('addSuccessNotification', {
+                    message: 'Modified raw data key fields',
                 });
             }
         });

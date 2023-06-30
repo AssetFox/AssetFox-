@@ -725,9 +725,9 @@ export default class RemainingLifeLimitEditor extends Vue {
         RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
-                this.resetPage();
                 this.addedOrUpdatedRemainingLifeLimitLibraryMutator(this.selectedRemainingLifeLimitLibrary);
-                this.addSuccessNotificationAction({message: "Updated remaining life limit library",});
+                this.selectedRemainingLifeLimitLibraryMutator(this.selectedRemainingLifeLimitLibrary.id)
+                this.addSuccessNotificationAction({message: "Updated remaining life limit library",});               
             }
         });
     }

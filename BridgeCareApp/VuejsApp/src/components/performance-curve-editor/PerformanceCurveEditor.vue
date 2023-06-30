@@ -393,7 +393,7 @@
                 >
                     Cancel
                 </v-btn>
-                <v-btn
+                <v-btn outline
                     id="PerformanceCurveEditor-deleteLibrary-button"
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue ghd-button-text"

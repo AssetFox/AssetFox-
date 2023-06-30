@@ -166,7 +166,7 @@
                        v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
-                <v-btn @click='onShowConfirmDeleteAlert' flat
+                <v-btn @click='onShowConfirmDeleteAlert' outline
                        v-show='!hasScenario' :disabled='!hasSelectedLibrary' class='ghd-blue ghd-button-text ghd-button'>
                     Delete Library
                 </v-btn>             

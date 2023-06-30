@@ -189,7 +189,7 @@
                 justify-center
                 row
                 v-show="hasSelectedLibrary || hasScenario">
-                <v-btn
+                <v-btn outline
                     @click="onDeleteCashFlowRuleLibrary"
                     flat class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"

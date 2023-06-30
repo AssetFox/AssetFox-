@@ -1,12 +1,12 @@
 <template>
     
     <v-layout>
-        <div v-if="stateInventoryReportNames.length > 0" class="flex xs2 justify-content: end">
-                        <v-select 
-                            v-model="inventoryReportName" 
-                            :items="stateInventoryReportNames">
-                        </v-select>
-            </div>
+        <div v-if="stateInventoryReportNames.length > 1" class="flex xs2 justify-content: end">
+            <v-select 
+            v-model="inventoryReportName" 
+            :items="stateInventoryReportNames">
+            </v-select>
+        </div>
         <v-flex xs12>
             <v-layout justify-space-between row>
                 <v-spacer></v-spacer>

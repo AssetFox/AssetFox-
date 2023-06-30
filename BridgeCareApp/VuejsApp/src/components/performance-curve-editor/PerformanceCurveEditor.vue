@@ -1125,7 +1125,6 @@ export default class PerformanceCurveEditor extends Vue {
         PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
-                this.resetPage();
                 this.performanceCurveLibraryMutator(this.selectedPerformanceCurveLibrary);
                 this.selectedPerformanceCurveLibraryMutator(this.selectedPerformanceCurveLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated deterioration model library",});

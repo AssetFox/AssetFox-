@@ -1235,7 +1235,6 @@ export default class InvestmentEditor extends Vue {
         InvestmentService.upsertBudgetLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
-                this.resetPage();
                 this.budgetLibraryMutator(this.selectedBudgetLibrary);
                 this.selectedBudgetLibraryMutator(this.selectedBudgetLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated budget library",});

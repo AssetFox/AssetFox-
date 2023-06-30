@@ -908,8 +908,7 @@ export default class CashFlowEditor extends Vue {
         }
         CashFlowService.upsertCashFlowRuleLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
-                this.resetPage();
+                this.clearChanges();
                 this.cashFlowRuleLibraryMutator(this.selectedCashFlowRuleLibrary);
                 this.selectedCashFlowRuleLibraryMutator(this.selectedCashFlowRuleLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated cash flow rule library",});

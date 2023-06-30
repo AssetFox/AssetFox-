@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         private Mock<DbSet<AggregatedResultEntity>> _mockedAggregatedResultsEntitySet;
         private Mock<DbSet<MaintainableAssetLocationEntity>> _mockedMaintainableAssetLocationEntitySet;
         private Mock<DbSet<AttributeEntity>> _mockedAttributeSet;
+        private Mock<DbSet<AdminSettingsEntity>> _mockedAdminSettings;
 
         private void Setup()
         {
@@ -29,11 +30,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 
             _mockedMaintainableAssetEntitySet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.MaintainableAsset, _testData.MaintainableAssetsLibrary);
             _mockedAggregatedResultsEntitySet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.AggregatedResult, _testData.AggregatedResultsLibrary);
+            _mockedAdminSettings = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.AdminSettings, _testData.AdminSettingsLibrary);
             _mockedMaintainableAssetLocationEntitySet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.MaintainableAssetLocation, _testData.MaintainableAssetLocationLibrary);
             _mockedAttributeSet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, _testData.AttributeLibrary);
-
             var mockedConfiguration = new Mock<IConfiguration>();
-            MockedContextBuilder.AddConfigurationKeys(mockedConfiguration, _testRepo.AdminSettingsRepo.GetKeyFields(), new List<string> { "BRKEY_", "BMSID" });
 
             var mockedRepo = new Mock<UnitOfDataPersistenceWork>(mockedConfiguration.Object, _mockedContext.Object);
             mockedRepo.Setup(_ => _.NetworkRepo.GetMainNetwork()).Returns(_testData.TestNetwork);

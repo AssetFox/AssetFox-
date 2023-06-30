@@ -119,10 +119,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentDataModel.AssetName = locationIdentifier;
             var fromSection = string.Empty;
             var toSection = string.Empty;
+            var direction = string.Empty;
             if (!string.IsNullOrEmpty(locationIdentifier))
             {
-                var parts = locationIdentifier.Split(new char[] { '_' }).Last();
-                var fromTo = parts.Split('-');
+                var parts = locationIdentifier.Split(new char[] { '_' });
+                direction = parts[2];
+                var fromTo = parts.Last()?.Split('-');
                 fromSection = fromTo?.First();
                 toSection = fromTo?.Last();
             }
@@ -133,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentDataModel.District = CheckGetTextValue(valuePerTextAttribute, "DISTRICT");
             treatmentDataModel.Cnty = CheckGetTextValue(valuePerTextAttribute, "CNTY");
             treatmentDataModel.Route = CheckGetTextValue(valuePerTextAttribute, "SR");
-            treatmentDataModel.Direction = CheckGetTextValue(valuePerTextAttribute, "DIRECTION");
+            treatmentDataModel.Direction = direction; //CheckGetTextValue(valuePerTextAttribute, "DIRECTION");
             treatmentDataModel.RiskScore = CheckGetNumericValue(section.ValuePerNumericAttribute, "RISKSCORE");
             treatmentDataModel.Interstate = CheckGetTextValue(valuePerTextAttribute, "INTERSTATE");
 

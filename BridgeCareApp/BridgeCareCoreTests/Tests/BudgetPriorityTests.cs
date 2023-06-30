@@ -1,6 +1,8 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -11,6 +13,7 @@ using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
 using BridgeCareCoreTests.Tests.BudgetPriority;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
 using Xunit;
 
@@ -20,7 +23,7 @@ namespace BridgeCareCoreTests.Tests
     {
         private BudgetPriorityController CreateController(Mock<IUnitOfWork> unitOfWork)
         {
-            var service = new BudgetPriorityPagingService(unitOfWork.Object);
+            var service = BudgetPriorityPagingServiceMocks.DefaultMock();
             var security = EsecSecurityMocks.AdminMock;
             var hubService = HubServiceMocks.DefaultMock();
             var accessor = HttpContextAccessorMocks.DefaultMock();
@@ -31,7 +34,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService.Object,
                 accessor.Object,
                 claimHelper.Object,
-                service
+                service.Object
                 );
             return controller;
         }
@@ -44,6 +47,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
             var controller = CreateController(unitOfWork);
 
+            budgetPriorityRepo.Setup(r => r.GetBudgetPriortyLibrariesNoChildren()).Returns(new List<BudgetPriorityLibraryDTO>());
             var result = await controller.GetBudgetPriorityLibraries();
 
             ActionResultAssertions.OkObject(result);
@@ -72,20 +76,40 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.New();
             var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
-            var controller = CreateController(unitOfWork);
+
+            // Create controller manually to modify the service
+            var service = BudgetPriorityPagingServiceMocks.DefaultMock();
+            var security = EsecSecurityMocks.AdminMock;
+            var hubService = HubServiceMocks.DefaultMock();
+            var accessor = HttpContextAccessorMocks.DefaultMock();
+            var claimHelper = ClaimHelperMocks.New();
+
             var dto = new BudgetPriorityLibraryDTO
             {
                 Id = Guid.NewGuid(),
                 Name = "",
                 BudgetPriorities = new List<BudgetPriorityDTO>()
             };
-
             var request = new LibraryUpsertPagingRequestModel<BudgetPriorityLibraryDTO, BudgetPriorityDTO>()
             {
                 Library = dto,
-                IsNewLibrary = true
+                IsNewLibrary = false
             };
-
+            var user = UserDtos.Admin();
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            service.SetupGetSyncedLibraryDataset(request);
+            var controller = new BudgetPriorityController(
+                security.Object,
+                unitOfWork.Object,
+                hubService.Object,
+                accessor.Object,
+                claimHelper.Object,
+                service.Object
+                );
+            
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
+            budgetPriorityRepo.SetupGetLibraryAccess(request.Library.Id, libraryExists);
+                        
             // Act
             var result = await controller
                 .UpsertBudgetPriorityLibrary(request);
@@ -196,8 +220,27 @@ namespace BridgeCareCoreTests.Tests
             var dto = BudgetPriorityDtos.New();
             var dtos = new List<BudgetPriorityDTO> { dto };
             var request = new PagingRequestModel<BudgetPriorityDTO>();
+            var response = new PagingPageModel<BudgetPriorityDTO>()
+            {
+                Items = dtos,
+            };
             budgetPriorityRepo.Setup(br => br.GetScenarioBudgetPriorities(simulationId)).Returns(dtos);
-            var controller = CreateController(unitOfWork);
+
+            // Create controller manually to modify the service
+            var service = BudgetPriorityPagingServiceMocks.DefaultMock();
+            var security = EsecSecurityMocks.AdminMock;
+            var hubService = HubServiceMocks.DefaultMock();
+            var accessor = HttpContextAccessorMocks.DefaultMock();
+            var claimHelper = ClaimHelperMocks.New();
+            service.Setup(s => s.GetScenarioPage(simulationId, request)).Returns(response);
+            var controller = new BudgetPriorityController(
+                security.Object,
+                unitOfWork.Object,
+                hubService.Object,
+                accessor.Object,
+                claimHelper.Object,
+                service.Object
+                );
 
             // Act
             var result = await controller.GetScenarioBudgetPriorityPage(simulationId, request);
@@ -224,8 +267,27 @@ namespace BridgeCareCoreTests.Tests
             var dtos = new List<BudgetPriorityDTO> { dto };
             budgetPriorityRepo.Setup(b => b.GetBudgetPrioritiesByLibraryId(libraryId)).Returns(dtos);
             var request = new PagingRequestModel<BudgetPriorityDTO>();
-            var controller = CreateController(unitOfWork);
-            
+            var response = new PagingPageModel<BudgetPriorityDTO>()
+            {
+                Items = dtos,
+            };
+
+            // Create controller manually to modify the service
+            var service = BudgetPriorityPagingServiceMocks.DefaultMock();
+            var security = EsecSecurityMocks.AdminMock;
+            var hubService = HubServiceMocks.DefaultMock();
+            var accessor = HttpContextAccessorMocks.DefaultMock();
+            var claimHelper = ClaimHelperMocks.New();
+            service.Setup(s => s.GetLibraryPage(libraryId, request)).Returns(response);
+            var controller = new BudgetPriorityController(
+                security.Object,
+                unitOfWork.Object,
+                hubService.Object,
+                accessor.Object,
+                claimHelper.Object,
+                service.Object
+                );
+
             // Act
             var result = await controller.GetLibraryBudgetPriortyPage(libraryId, request);
 

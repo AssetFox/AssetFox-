@@ -487,14 +487,6 @@ export default class CommittedProjectsEditor extends Vue  {
             class: '',
             width: '10%',
         },
-        // {
-        //     text: 'Factor',
-        //     value: 'factor',
-        //     align: 'left',
-        //     sortable: true,
-        //     class: '',
-        //     width: '10%'
-        // },
         {
             text: 'Category',
             value: 'category',
@@ -739,7 +731,17 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.sectionCommittedProjects = data.items;
                     this.rowCache = clone(this.sectionCommittedProjects)
                     this.totalItems = data.totalItems;
-                    const row = data.items.find(scp => scp.id == this.selectedCommittedProject)
+                    const row = data.items.find(scp => scp.id == this.selectedCommittedProject);
+
+                    // Updated existing data with no factor set to 1.2
+                    this.sectionCommittedProjects.forEach(element => {
+                        element.consequences.forEach(consequence => {
+                            if (consequence.performanceFactor === 0) {
+                                consequence.performanceFactor = 1.2;
+                                this.updateCommittedProject(row ? row : emptySectionCommittedProject, "1.2", "performanceFactor");
+                            }
+                        });
+                    });
                     if(isNil(row)) {
                         this.selectedCommittedProject = '';
                     }

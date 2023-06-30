@@ -12,7 +12,7 @@
                         v-model='librarySelectItemValue'
                         class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario">Based on: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>
+                    <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
                 </v-flex>
 
                 <!-- these are only in library -->
@@ -1235,7 +1235,6 @@ export default class InvestmentEditor extends Vue {
         InvestmentService.upsertBudgetLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
-                this.resetPage();
                 this.budgetLibraryMutator(this.selectedBudgetLibrary);
                 this.selectedBudgetLibraryMutator(this.selectedBudgetLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated budget library",});

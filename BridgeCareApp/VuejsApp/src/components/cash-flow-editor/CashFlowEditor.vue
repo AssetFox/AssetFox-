@@ -11,7 +11,7 @@
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">    
                     <div v-if="hasScenario" style="padding-top: 18px !important">
@@ -908,8 +908,7 @@ export default class CashFlowEditor extends Vue {
         }
         CashFlowService.upsertCashFlowRuleLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
-                this.resetPage();
+                this.clearChanges();
                 this.cashFlowRuleLibraryMutator(this.selectedCashFlowRuleLibrary);
                 this.selectedCashFlowRuleLibraryMutator(this.selectedCashFlowRuleLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated cash flow rule library",});

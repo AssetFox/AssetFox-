@@ -101,7 +101,7 @@
                                             >
                                             <v-text-field v-if="header.value !== 'budget' 
                                                 && header.value !== 'year' 
-                                                && header.value !== 'brkey' 
+                                                && header.value !== 'keyAttr' 
                                                 && header.value !== 'treatment'
                                                 && header.value !== 'performanceFactor'
                                                 && header.value !== 'cost'"
@@ -114,7 +114,7 @@
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"/>
 
-                                            <v-text-field v-if="header.value === 'brkey'"
+                                            <v-text-field v-if="header.value === 'keyAttr'"
                                                 readonly
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"
@@ -136,7 +136,7 @@
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template slot="input">
-                                                <v-text-field v-if="header.value === 'brkey'"
+                                                <v-text-field v-if="header.value === 'keyAttr'"
                                                     label="Edit"
                                                     single-line
                                                     v-model="props.item[header.value]"
@@ -454,6 +454,7 @@ export default class CommittedProjectsEditor extends Vue  {
     catMap = clone(treatmentCategoryMap);
     
     brkey_: string = 'BRKEY_'
+    keyattr: string = '';
 
     investmentYears: number[] = [];
     lastYear: number = 0;
@@ -464,8 +465,8 @@ export default class CommittedProjectsEditor extends Vue  {
     
     cpGridHeaders: DataTableHeader[] = [
         {
-            text: 'BRKEY',
-            value: 'brkey',
+            text: '',
+            value: 'keyAttr',
             align: 'left',
             sortable: true,
             class: '',
@@ -575,30 +576,25 @@ export default class CommittedProjectsEditor extends Vue  {
                 });
                 vm.$router.push('/Scenarios/');
             }
-     
-            vm.getNetworksAction().then(() => {
-                InvestmentService.getScenarioBudgetYears(vm.scenarioId).then(response => {  
+            (async () => { 
+                await vm.getNetworksAction();
+                await InvestmentService.getScenarioBudgetYears(vm.scenarioId).then(response => {  
                     if(response.data)
                         vm.investmentYears = response.data;
-                    ScenarioService.getNoTreatmentBeforeCommitted(vm.scenarioId).then(response => {
+                });
+                await ScenarioService.getNoTreatmentBeforeCommitted(vm.scenarioId).then(response => {
                         if(!isNil(response.data)){
                             vm.isNoTreatmentBeforeCache = response.data;
                             vm.isNoTreatmentBefore = response.data;
                         }
-                            
-                        vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId}).then(() =>{
-                            vm.getAttributesAction().then(() => {                       
-                                vm.getTreatmentLibrariesAction().then(() => {
-                                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.scenarioId}).then(() => {         
-                                        vm.selectScenarioAction({ scenarioId: vm.scenarioId });        
-                                        vm.initializePages();
-                                    });                                                                
-                                });   
-                            });
-                        }) 
-                    })                                                           
-                })
-            });                     
+                });
+                await vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId});
+                await vm.getAttributesAction();
+                await vm.getTreatmentLibrariesAction();
+                await vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.scenarioId});
+                await vm.selectScenarioAction({ scenarioId: vm.scenarioId });
+                vm.initializePages();
+            })();                    
         });
     }
 
@@ -650,6 +646,12 @@ export default class CommittedProjectsEditor extends Vue  {
                 value: attribute.name
             }),
         );
+        let foo = this.stateAttributes.find(_ => _.id == this.network.keyAttribute)
+        if(!isNil(foo)){
+            this.keyattr = foo.name;
+            this.cpGridHeaders[0].text = this.keyattr;
+        }
+            
     }
 
     @Watch('stateScenarioSimpleBudgetDetails')
@@ -794,7 +796,7 @@ export default class CommittedProjectsEditor extends Vue  {
         const newRow: SectionCommittedProject = clone(emptySectionCommittedProject)
         newRow.id = getNewGuid();
         newRow.name = '';
-        newRow.locationKeys[this.brkey_] = '';
+        newRow.locationKeys[this.keyattr] = '';
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = this.scenarioId;
         this.addedRows.push(newRow)
@@ -899,8 +901,8 @@ export default class CommittedProjectsEditor extends Vue  {
             if(property === 'treatment'){
                 this.handleTreatmentChange(scp, value, row)             
             }
-            else if(property === 'brkey'){
-                this.handleBrkeyChange(row, scp, value);               
+            else if(property === 'keyAttr'){
+                this.handleKeyAttrChange(row, scp, value);               
             }
             else if(property === 'performanceFactor') {
                 this.handleFactorChange(row, scp, value);
@@ -1033,7 +1035,7 @@ export default class CommittedProjectsEditor extends Vue  {
                         scp.treatment
                     ) == true &&
                     this.rules['generalRules'].valueIsNotEmpty(
-                        scp.locationKeys[this.brkey_]
+                        scp.locationKeys[this.keyattr]
                     ) == true &&
                     scp.consequences.every(consequence => 
                         this.rules['generalRules'].valueIsNotEmpty(
@@ -1069,7 +1071,7 @@ export default class CommittedProjectsEditor extends Vue  {
             const row: SectionCommittedProjectTableData = this.cpItemFactory(o);
             return row
         })
-        this.checkBrkeys();
+        this.checkExistenceOfAssets();
         this.checkYears();
     }
 
@@ -1082,7 +1084,7 @@ export default class CommittedProjectsEditor extends Vue  {
         if(!isNil(cat))
             value = cat;
         const row: SectionCommittedProjectTableData = {
-            brkey: scp.locationKeys[this.brkey_],
+            keyAttr: scp.locationKeys[this.keyattr],
             year: scp.year,
             cost: scp.cost,
             scenarioBudgetId: scp.scenarioBudgetId? scp.scenarioBudgetId : '',
@@ -1104,7 +1106,7 @@ export default class CommittedProjectsEditor extends Vue  {
             committedProjectId: row.id,
             treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : getBlankGuid(),
             treatmentName: treatmentName,
-            brkey_Value: row.locationKeys[this.brkey_],
+            KeyAttributeValue: row.locationKeys[this.keyattr],
             networkId: this.networkId
         })
         .then((response: AxiosResponse) => {
@@ -1138,9 +1140,9 @@ export default class CommittedProjectsEditor extends Vue  {
         this.onPaginationChanged();       
     }
 
-    handleBrkeyChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, brkey: string){
-        row.locationKeys[this.brkey_] = brkey;
-        this.updateCommittedProject(row, brkey, 'brkey');
+    handleKeyAttrChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, keyAttr: string){
+        row.locationKeys[this.keyattr] = keyAttr;
+        this.updateCommittedProject(row, keyAttr, 'keyAttr');
         this.onPaginationChanged();
     }
 
@@ -1149,32 +1151,32 @@ export default class CommittedProjectsEditor extends Vue  {
         this.onPaginationChanged();
     }
 
-    checkBrkey(scp: SectionCommittedProjectTableData, brkey: string){
-        CommittedProjectsService.ValidateBRKEY(this.network, brkey).then((response: AxiosResponse) => {
+    checkAssetExistence(scp: SectionCommittedProjectTableData, keyAttr: string){
+        CommittedProjectsService.validateAssetExistence(this.network, keyAttr).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
                 if(!response.data)
-                    scp.errors = ['BRKEY does not exist'];
+                    scp.errors = [this.keyattr + ' does not exist'];
                 else
                     scp.errors = [];
             }
         });
     }
 
-    checkBrkeys(){//todo: refine this
-        const uncheckKeys = this.currentPage.map(scp => scp.brkey).filter(key => isNil(this.isKeyAttributeValidMap.get(key)))
+    checkExistenceOfAssets(){//todo: refine this
+        const uncheckKeys = this.currentPage.map(scp => scp.keyAttr).filter(key => isNil(this.isKeyAttributeValidMap.get(key)))
         if(uncheckKeys.length > 0){
-            CommittedProjectsService.ValidateBRKEYs(uncheckKeys, this.network.id).then((response: AxiosResponse) => {
+            CommittedProjectsService.validateExistenceOfAssets(uncheckKeys, this.network.id).then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     for(let i = 0; i < this.currentPage.length; i++)
                     {
-                        const check = response.data[this.currentPage[i].brkey]
+                        const check = response.data[this.currentPage[i].keyAttr]
                         if(!isNil(check)){
-                            if(!response.data[this.currentPage[i].brkey])
-                                this.currentPage[i].errors = ['BRKEY does not exist'];
+                            if(!response.data[this.currentPage[i].keyAttr])
+                                this.currentPage[i].errors = [this.keyattr + ' does not exist'];
                             else
                                 this.currentPage[i].errors = [];
 
-                            this.isKeyAttributeValidMap.set(this.currentPage[i].brkey,response.data[this.currentPage[i].brkey] )
+                            this.isKeyAttributeValidMap.set(this.currentPage[i].keyAttr,response.data[this.currentPage[i].keyAttr] )
                         }
                     }                  
                 }
@@ -1182,8 +1184,8 @@ export default class CommittedProjectsEditor extends Vue  {
         }
         for(let i = 0; i < this.currentPage.length; i++)
         {
-            if(!this.isKeyAttributeValidMap.get(this.currentPage[i].brkey))
-                this.currentPage[i].errors = ['BRKEY does not exist'];
+            if(!this.isKeyAttributeValidMap.get(this.currentPage[i].keyAttr))
+                this.currentPage[i].errors = [this.keyattr + ' does not exist'];
             else
                 this.currentPage[i].errors = [];
         }

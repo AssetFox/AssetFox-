@@ -26,7 +26,7 @@ namespace BridgeCareCore.Services
         public const string UnknownBudgetName = "Unknown";
 
         // TODO: Determine based on associated network
-        private readonly string _networkKeyField = "BRKEY_";
+        private string _networkKeyField ;
         private Dictionary<string, List<KeySegmentDatum>> _keyProperties;
         private List<string> _keyFields;
         private bool newImportFile = false;
@@ -146,11 +146,10 @@ namespace BridgeCareCore.Services
 
         public FileInfoDTO ExportCommittedProjectsFile(Guid simulationId)
         {
-            var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
-            if (simulationName == null)
-            {
-                throw new ArgumentException($"Unable to find simulation with ID of {simulationId}");
-            }
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var simulationName = simulation.Name;
+            
+            _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
 
             var committedProjectDTOs = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
                         
@@ -473,6 +472,8 @@ namespace BridgeCareCore.Services
             queueLog ??= new DoNothingWorkQueueLog();
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
+            _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
             queueLog.UpdateWorkQueueStatus("Creating Committed Projects");

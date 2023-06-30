@@ -1,15 +1,18 @@
 <template>
+    
     <v-layout>
+        <div v-if="stateInventoryReportNames.length > 0" class="flex xs2 justify-content: end">
+                        <v-select 
+                            v-model="inventoryReportName" 
+                            :items="stateInventoryReportNames">
+                        </v-select>
+            </div>
         <v-flex xs12>
             <v-layout justify-space-between row>
-                <div class="flex xs2 justify-content: end">
-                        <button class="ghd-outline-button-padding ghd-button" style="border: 1px solid black;border-radius: 4px; padding: 2px" 
-                        @click="resetDropdowns()">Reset Key Fields</button>
-                </div>
                 <v-spacer></v-spacer>
                 <v-layout>
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
-                        <v-autocomplete :items="keyAttirbuteValues[index]" @change="onSelectInventoryItem(index)" item-text="identifier" item-value="identifier"
+                        <v-autocomplete :items="keyAttributeValues[index]" @change="onSelectInventoryItem(index)" item-text="identifier" item-value="identifier"
                                         :label="`Select by ${key} Key`" outline
                                         v-model="selectedKeys[index]">
                             <template slot="item" slot-scope="data">
@@ -26,12 +29,11 @@
                     </div>
                 </v-layout>
                 <v-spacer></v-spacer>
-                    <div v-if="stateInventoryReportNames.length > 1" class="flex xs2 justify-content: end">
-                        <v-select 
-                            v-model="inventoryReportName" 
-                            :items="stateInventoryReportNames">
-                        </v-select>
-                    </div>
+                <div class="flex xs2 justify-content: end">
+                        <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline 
+                        @click="resetDropdowns()">
+                        Reset Key Fields</v-btn>
+                </div>
            </v-layout>
             <v-divider></v-divider>
             <div class="container" v-html="sanitizedHTML"></div>
@@ -65,7 +67,7 @@
         @Action('getConstraintType') getConstraintTypeAction: any;
         @Action('getQuery') getQueryAction: any;
 
-        keyAttirbuteValues: string[][] = [];
+        keyAttributeValues: string[][] = [];
 
         inventoryItem: any[][] = [];
 
@@ -73,11 +75,9 @@
 
         inventoryDetails: string[] = [];
         constraintDetails: string = '';
-        test: any;
 
+        queryValue: any;
         querySelectedData: string[] = [];
-
-        resetCounter = 0;
 
         inventorySelectListsWorker: any = null;
 
@@ -85,14 +85,13 @@
         sanitizedHTML: any = null;
   
         inventoryReportName: string = '';
-        DictionaryString : any = [];
 
         /**
          * Calls the setInventorySelectLists function to set both inventory type select lists
          */
         @Watch('inventoryItems')
         async onInventoryItemsChanged() {
-            this.keyAttirbuteValues = await this.setupSelectLists();
+            this.keyAttributeValues = await this.setupSelectLists();
         }
 
         @Watch('staticHTMLForInventory')
@@ -120,10 +119,21 @@
 
         @Watch('querySet')
         onQuerySetChanged(){
-                this.keyAttirbuteValues = [];
-                for(let i = 0; i < this.inventoryDetails.length; i++) {
-                    this.test = this.querySet[i].values;
-                    this.keyAttirbuteValues[i] = this.test;
+                this.keyAttributeValues = [];
+                for(let i = 0; i < this.inventoryDetails.length; i++) 
+                {
+                    this.queryValue = this.querySet[i].values;
+                    this.queryValue.sort((a: string | number, b: string | number) => 
+                    {
+                        if (typeof a === "number" && typeof b === "number") {
+                            return a - b; // Sort numbers in descending order
+                        } else if (typeof a === "string" && typeof b === "string") {
+                            return a.localeCompare(b); // Sort strings in alphabetical order
+                        } else {
+                            return 0; // Preserve the original order if the data types are different
+                        }
+                    });
+                    this.keyAttributeValues[i] = this.queryValue;
                 }
         }
 
@@ -144,6 +154,7 @@
         }
 
         async setupSelectLists() {
+            this.querySelectedData = [];
             const data: any = {
                 inventoryItems: this.inventoryItems,
                 inventoryDetails: this.inventoryDetails
@@ -156,21 +167,6 @@
                 }
             }
             return toReturn;                  
-        }
-
-        async testSetup(){
-            const data: any = {
-                inventoryItems: this.inventoryItems,
-                inventoryDetails: this.inventoryDetails
-            };
-            let toReturn: string[][] = [];
-            let result = await this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])    
-            if(result.keys.length > 0){
-                for(let i = 0; i < this.inventoryDetails.length; i++){
-                    toReturn[i] = clone(result.keys[i]);
-                }
-            }
-            return toReturn; 
         }
 
         initializeLists() {
@@ -211,15 +207,41 @@
         }
 
         async resetDropdowns() {
-            this.keyAttirbuteValues = [];
-            this.keyAttirbuteValues = await this.setupSelectLists();
+            this.keyAttributeValues = [];
+            //Reset selected key fields
+            this.selectedKeys.forEach((value: string, index: number, array: string[]) => {
+                this.selectedKeys[index] = '';
+            })
+            this.selectedKeys[0] = "";
+            this.keyAttributeValues = await this.setupSelectLists();
         }
 
         onSelectInventoryItem(index: number){
-            let selectedCounter = 0;
             if(this.constraintDetails == 'OR')
             {
-                let key = this.selectedKeys[index];
+                this.HandleSelectedItems(index);
+            }
+            else if(this.constraintDetails == 'AND') {
+                let selectedCounter = 0;
+                //Get the first use selected key field and it's selection and put it in a dictionary
+                this.QueryAccess();
+
+                //Check if any dropdowns are empty
+                for(let i = 0; i < this.inventoryDetails.length; i++) {
+                    if(this.selectedKeys[i] !== '') {
+                        selectedCounter++;
+                    }
+                }
+                
+                if(selectedCounter === this.inventoryDetails.length)
+                {
+                    this.HandleSelectedItems(index);
+                 }
+            }       
+        }
+
+        HandleSelectedItems(index: number) {
+            let key = this.selectedKeys[index];
                 let data: InventoryParam = {
                 keyProperties: {},
                 values: function (values: any): unknown {
@@ -251,56 +273,12 @@
                 data.keyProperties = dictionary;
 
                 this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  
-            }
-            else if(this.constraintDetails == 'AND') {
-                //Get the first use selected key field and it's selection and put it in a dictionary
-                this.QueryAccess();
 
-                //Check if any dropdowns are empty
-                for(let i = 0; i < this.inventoryDetails.length; i++) {
-                    if(this.selectedKeys[i] !== '') {
-                        selectedCounter++;
-                    }
-                }
-                
-                if(selectedCounter === this.inventoryDetails.length)
-                {
-                    let key = this.selectedKeys[index];
-                    let data: InventoryParam = {
-                    keyProperties: {},
-                    values: function (values: any): unknown {
-                    throw new Error('Function not implemented.');
-                    }
-                    };
-
-                    for(let i = 0; i < this.inventoryDetails.length; i++){
-                        if(i === index){
-                            data.keyProperties[i] = key;
-                            continue;
-                        }
-                        let inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: any | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
-                        let otherKeyValue = inventoryItem.keyProperties[i]; 
-                        this.selectedKeys[i] = otherKeyValue;
-                        data.keyProperties[i] = otherKeyValue;
-                    }
-                    
-                    //Create a dictionary of the selected key fields
-                    let dictionary: Record<string, string> = {};
-
-                    for(let i = 0; i < this.inventoryDetails.length; i++) {
-                        let dictNames: any = this.inventoryDetails[i];
-                        let dictValues: any = this.selectedKeys[i];
-                        dictionary[dictNames] = dictValues;                     
-                    }
-                        //Set the data equal to the dictionary
-                        data.keyProperties = dictionary;
-                    this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});
-                 }
-            }       
+            
         }
 
         QueryAccess() {
-             //Get the first use selected key field and it's selection and put it in a dictionary
+             //Get the first user selected key field and it's selection and put it in a dictionary
 
             if(this.querySelectedData.length === 0 || this.querySelectedData.length === 2) 
             {
@@ -314,7 +292,8 @@
                                 this.querySelectedData.push(this.selectedKeys[i]);
                             }
                         }
-                    }                     
+                    }
+                    //Send to back end to recieve dropdown lists for the other key fields                     
                     this.getQueryAction({querySet: this.querySelectedData});           
             }
     }

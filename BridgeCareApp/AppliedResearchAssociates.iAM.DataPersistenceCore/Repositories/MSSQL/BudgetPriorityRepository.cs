@@ -179,15 +179,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            return _unitOfWork.Context.ScenarioBudgetPriority.AsNoTracking()
+            var entities = _unitOfWork.Context.ScenarioBudgetPriority.AsNoTracking()
                 .Include(_ => _.BudgetPercentagePairs)
                 .ThenInclude(_ => _.ScenarioBudget)
                 .Include(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Where(_ => _.SimulationId == simulationId)
-                .OrderBy(_ => _.PriorityLevel)
+                .OrderBy(_ => _.PriorityLevel);
+            var models = entities
                 .Select(_ => _.ToDto())
                 .ToList();
+            return models;
         }
         public void UpsertOrDeleteScenarioBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid simulationId)
         {

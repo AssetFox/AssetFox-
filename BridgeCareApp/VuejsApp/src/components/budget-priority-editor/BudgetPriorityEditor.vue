@@ -55,6 +55,7 @@
                               :must-sort='true'
                               :total-items="totalItems"
                               :rows-per-page-items=[5,10,25]
+                              id = "BudgetPriority-priorities-vdatatable"
                               class='v-table__overflow ghd-table' item-key='id' select-all
                               sort-icon=$vuetify.icons.ghd-table-sort                              
                               v-model='selectedBudgetPriorityGridRows' >

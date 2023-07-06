@@ -90,7 +90,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Analysis.Engine.SimulationOutput simulationOutput;
             try
             {
-                checkCancelled(cancellationToken);
+                checkCancelled(cancellationToken, simulationGuid);
                 simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationGuid);
             }
             catch (Exception e)
@@ -106,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(Status);
             try
             {
-                checkCancelled(cancellationToken);
+                checkCancelled(cancellationToken, simulationGuid);
                 using var reportFileWriter = File.CreateText(reportFileName);
                 JsonSerializer serializer = new();
                 serializer.Serialize(reportFileWriter, simulationOutput);
@@ -133,12 +133,21 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = true;
         }
 
-        private void checkCancelled(CancellationToken? cancellationToken)
+        private void UpsertSimulationReportDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
+
+
+        private void checkCancelled(CancellationToken? cancellationToken, Guid simulationId)
         {
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
             {
                 throw new Exception("Report was cancelled");
             }
+            var reportDetailDto = new SimulationReportDetailDTO
+            {
+                SimulationId = simulationId,
+                Status = $""
+            };
+            UpsertSimulationReportDetail(reportDetailDto);
         }
     }
 }

@@ -63,8 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         };
                         criterionJoins.Add(new CriterionLibraryScenarioBudgetPriorityEntity
                         {
-                            CriterionLibraryId = criterion.Id,
-                            ScenarioBudgetPriorityId = priority.Id
+                            CriterionLibraryId = criterion.Id, ScenarioBudgetPriorityId = priority.Id
                         });
                         return criterion;
                     }).ToList();
@@ -153,8 +152,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         };
                         criterionJoins.Add(new CriterionLibraryBudgetPriorityEntity
                         {
-                            CriterionLibraryId = criterion.Id,
-                            BudgetPriorityId = priority.Id
+                            CriterionLibraryId = criterion.Id, BudgetPriorityId = priority.Id
                         });
                         return criterion;
                     }).ToList();

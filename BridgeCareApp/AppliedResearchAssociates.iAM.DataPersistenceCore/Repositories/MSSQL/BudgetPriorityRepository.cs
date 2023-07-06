@@ -63,7 +63,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         };
                         criterionJoins.Add(new CriterionLibraryScenarioBudgetPriorityEntity
                         {
-                            CriterionLibraryId = criterion.Id, ScenarioBudgetPriorityId = priority.Id
+                            CriterionLibraryId = criterion.Id,
+                            ScenarioBudgetPriorityId = priority.Id
                         });
                         return criterion;
                     }).ToList();
@@ -152,7 +153,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         };
                         criterionJoins.Add(new CriterionLibraryBudgetPriorityEntity
                         {
-                            CriterionLibraryId = criterion.Id, BudgetPriorityId = priority.Id
+                            CriterionLibraryId = criterion.Id,
+                            BudgetPriorityId = priority.Id
                         });
                         return criterion;
                     }).ToList();
@@ -179,17 +181,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            var entities = _unitOfWork.Context.ScenarioBudgetPriority.AsNoTracking()
+            return _unitOfWork.Context.ScenarioBudgetPriority.AsNoTracking()
                 .Include(_ => _.BudgetPercentagePairs)
                 .ThenInclude(_ => _.ScenarioBudget)
                 .Include(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Where(_ => _.SimulationId == simulationId)
-                .OrderBy(_ => _.PriorityLevel);
-            var models = entities
+                .OrderBy(_ => _.PriorityLevel)
                 .Select(_ => _.ToDto())
                 .ToList();
-            return models;
         }
         public void UpsertOrDeleteScenarioBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid simulationId)
         {

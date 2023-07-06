@@ -5,9 +5,9 @@ import { Network } from '@/shared/models/iAM/network';
 import { PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class CommittedProjectsService { 
-    static getCommittedProjectTemplate(): AxiosPromise {
+    static getCommittedProjectTemplate(networkId: string): AxiosPromise {
         return coreAxiosInstance.get(
-            `${API.CommittedProject}/CommittedProjectTemplate`,
+            `${API.CommittedProject}/CommittedProjectTemplate/${networkId}`,
         );
     }
     static exportCommittedProjects(scenarioId: string): AxiosPromise {
@@ -59,13 +59,13 @@ export default class CommittedProjectsService {
         );
     }
 
-    static ValidateBRKEY(data: Network, brkey: string){
+    static validateAssetExistence(data: Network, brkey: string){
         return coreAxiosInstance.post(
             `${API.CommittedProject}/ValidateAssetExistence/${brkey}`, data
         );
     }
 
-    static ValidateBRKEYs(data: string[], networkId: string){
+    static validateExistenceOfAssets(data: string[], networkId: string){
         return coreAxiosInstance.post(
             `${API.CommittedProject}/ValidateExistenceOfAssets/${networkId}`, data
         );

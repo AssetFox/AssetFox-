@@ -170,7 +170,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private string GenerateSummaryReport(Guid networkId, Guid simulationId, IWorkQueueLog workQueueLog, CancellationToken? cancellationToken = null)
         {
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             var functionReturnValue = "";
 
             var logger = new CallbackLogger((string message) =>
@@ -218,14 +218,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             // Parameters TAB
             reportDetailDto.Status = $"Creating Parameters TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Parameters_Tab);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             // PAMS Data TAB
             reportDetailDto.Status = $"Creating Pams Data TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
@@ -233,11 +233,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PAMSData_Tab);
             var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             //Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             //// Pavement Work Summary TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
@@ -245,7 +245,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var pamsWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
             var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             //// Pavement Work Summary By Budget TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary By Budget TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
@@ -253,38 +253,38 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var pavementWorkSummaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummaryByBudget_Tab);
             _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             // Unfunded Pavement Projects TAB
             reportDetailDto.Status = $"Unfunded Pavement Projects TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
             _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             // County Summary TAB
             reportDetailDto.Status = $"County Summary TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var _countySummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.CountySummary_Tab);
             _countySummary.Fill(_countySummaryWorksheet, reportOutputData, simulationYears, simulation);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             //Graph TABs
             reportDetailDto.Status = $"Creating Graph TABs";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _addGraphsInTabs.Add(excelPackage, worksheet, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             // Legend TAB
             reportDetailDto.Status = $"Creating Legends TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Legend_Tab);
             _summaryReportGlossary.Fill(shortNameWorksheet);
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";
             if (Directory.Exists(folderPathForSimulation) == false) { Directory.CreateDirectory(folderPathForSimulation); }
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             var filePath = Path.Combine(folderPathForSimulation, "SummaryReport.xlsx");
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);
@@ -308,13 +308,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Summary output report completed with errors";
             IsComplete = true;
         }
+        private void UpsertSimulationReportDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 
-        private void checkCancelled(CancellationToken? cancellationToken)
+        private void checkCancelled(CancellationToken? cancellationToken, Guid simulationId)
         {
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
             {
                 throw new Exception("Report was cancelled");
             }
+            var reportDetailDto = new SimulationReportDetailDTO
+            {
+                SimulationId = simulationId,
+                Status = $""
+            };
+            UpsertSimulationReportDetail(reportDetailDto);
         }
     }
 }

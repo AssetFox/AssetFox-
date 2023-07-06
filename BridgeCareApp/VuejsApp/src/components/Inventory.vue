@@ -1,13 +1,14 @@
-<template>
-    
+<template>  
     <v-layout>
-        <div v-if="stateInventoryReportNames.length > 1" class="flex xs2 justify-content: end">
+        <v-flex xs12>
+            <v-layout justify-space-between row>
+                <div v-if="stateInventoryReportNames.length > 1" class="flex xs2 justify-content: end">
             <v-select 
             v-model="inventoryReportName" 
             :items="stateInventoryReportNames">
             </v-select>
         </div>
-        <v-flex xs12>
+           </v-layout>
             <v-layout justify-space-between row>
                 <v-spacer></v-spacer>
                 <v-layout>
@@ -29,11 +30,11 @@
                     </div>
                 </v-layout>
                 <v-spacer></v-spacer>
-                <div class="flex xs2 justify-content: end">
-                        <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline 
-                        @click="resetDropdowns()">
-                        Reset Key Fields</v-btn>
-                </div>
+                    <v-btn style="padding-top: 15px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                    outline 
+                    @click="resetDropdowns()">
+                    Reset Key Fields
+                    </v-btn>
            </v-layout>
             <v-divider></v-divider>
             <div class="container" v-html="sanitizedHTML"></div>
@@ -272,9 +273,7 @@
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 
-                this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  
-
-            
+                this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});              
         }
 
         QueryAccess() {
@@ -296,7 +295,7 @@
                     //Send to back end to recieve dropdown lists for the other key fields                     
                     this.getQueryAction({querySet: this.querySelectedData});           
             }
-    }
+        }
     }
 
 </script>

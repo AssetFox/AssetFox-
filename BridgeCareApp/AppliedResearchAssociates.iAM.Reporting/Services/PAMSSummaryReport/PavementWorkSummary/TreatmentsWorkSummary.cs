@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
             Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments,
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> lengthPerTreatmentPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
 
         private void AddFullDepthAsphaltTreatmentSegmentMiles(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> lengthPerTreatmentPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
@@ -100,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         ExcelWorksheet worksheet,
         CurrentCell currentCell,
         List<int> simulationYears,
-        Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
+        Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> lengthPerTreatmentPerYear,
         List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
         )
     {
@@ -117,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
 
     private void AddCompositeTreatmentSegmentMiles(ExcelWorksheet worksheet, CurrentCell currentCell,
-        Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
+        Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> lengthPerTreatmentPerYear,
         List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
         )
     {
@@ -154,7 +154,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> lengthPerTreatmentPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
@@ -169,7 +169,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
 
         private void AddConcreteTreatmentSegmentMiles(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> lengthPerTreatmentPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {

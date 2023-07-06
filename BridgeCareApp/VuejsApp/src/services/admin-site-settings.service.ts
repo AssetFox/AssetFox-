@@ -11,11 +11,11 @@ export default class AdminSiteSettingsService {
     static getImplementationName(): AxiosPromise {
         return coreAxiosInstance.get(`${API.AdminSettings}/GetImplementationName`);
     }
-    static importImplementationName(input: String): AxiosPromise {
+    static importImplementationName(input: string): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.AdminSettings}/SetImplementationName`,
+            `${API.AdminSettings}/SetImplementationName/` + input,
             input,
-            {headers: {'Content-Type': 'multipart/form-data'}},
+            {headers: {'Content-Type': 'text/plain'}},
         );
     }
     static importAgencyLogo(file: File): AxiosPromise {

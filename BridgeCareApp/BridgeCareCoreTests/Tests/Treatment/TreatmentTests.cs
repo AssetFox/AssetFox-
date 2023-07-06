@@ -1,5 +1,7 @@
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
@@ -9,7 +11,9 @@ using BridgeCareCore.Models;
 using BridgeCareCoreTests.Helpers;
 using BridgeCareCoreTests.Tests.Treatment;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
@@ -232,6 +236,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.New();
             var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var treatmentLibraryRepo = TreatmentLibraryUserMocks.New(unitOfWork);
             var treatmentService = TreatmentServiceMocks.EmptyMock;
             var pagingService = TreatmentPagingServiceMocks.EmptyMock;
             var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
@@ -272,6 +277,10 @@ namespace BridgeCareCoreTests.Tests
                 SyncModel = sync
             };
             pagingService.Setup(ts => ts.GetSyncedLibraryDataset(libraryRequest)).Returns(treatmentsAfter);
+            var user = UserDtos.Admin();
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
+            treatmentLibraryRepo.SetupGetLibraryAccess(libraryId, libraryExists);
 
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);

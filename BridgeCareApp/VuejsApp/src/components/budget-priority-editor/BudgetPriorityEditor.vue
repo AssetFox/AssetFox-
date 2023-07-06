@@ -10,7 +10,7 @@
                                 outline                           
                                 v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                             </v-select>    
-                             <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>                       
+                             <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -39,7 +39,7 @@
                         v-show='hasSelectedLibrary || hasScenario'>Add Budget Priority</v-btn>
                         
                         <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(false)' outline
-                            v-show='!hasScenario' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                            v-show='!hasScenario' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' > 
                             Create New Library
                         </v-btn>
                     </v-layout>
@@ -157,19 +157,19 @@
                        v-show='hasScenario' :disabled='!hasUnsavedChanges' class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
+                <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                       :disabled='disableCrudButtons()'>
+                    Create as New Library
+                </v-btn>
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
                        class='ghd-blue-bg white--text ghd-button-text ghd-button'
                        v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
-                <v-btn @click='onShowConfirmDeleteAlert' flat
+                <v-btn @click='onShowConfirmDeleteAlert' outline
                        v-show='!hasScenario' :disabled='!hasSelectedLibrary' class='ghd-blue ghd-button-text ghd-button'>
                     Delete Library
                 </v-btn>             
-                <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                       :disabled='disableCrudButtons()'>
-                    Create as New Library
-                </v-btn>
                 <v-btn @click='onUpsertBudgetPriorityLibrary'
                        class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                        v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
@@ -771,8 +771,7 @@ export default class BudgetPriorityEditor extends Vue {
         }
         BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
-                
+                this.clearChanges()               
                 this.budgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary);
                 this.selectedBudgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated budget priority library",});

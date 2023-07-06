@@ -11,7 +11,7 @@
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">    
                     <div v-if="hasScenario" style="padding-top: 18px !important">
@@ -44,6 +44,7 @@
                     <v-layout row align-end style="padding-top: 22px !important">
                         <v-spacer></v-spacer>
                         <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
+                            id="CashFlowEditor-addCashFlowRule-btn" 
                             outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Add Cash Flow Rule
                         </v-btn>
@@ -59,6 +60,7 @@
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="cash-flow-library-tables">
                 <v-data-table
+                    id="CashFlowEditor-cashFlowRules-table"
                     :headers="cashFlowRuleGridHeaders"
                     :items="currentPage"  
                     :pagination.sync="pagination"
@@ -82,6 +84,7 @@
                                 @save="onEditSelectedLibraryListData(props.item,'description')"
                                 >
                                 <v-text-field
+                                    id="CashFlowEditor-ruleName-text"
                                     readonly
                                     single-line
                                     class="sm-txt"
@@ -106,6 +109,7 @@
                                 min-width="500px">
                                 <template slot="activator">
                                     <v-text-field
+                                        id="CashFlowEditor-criteria-text"
                                         readonly
                                         single-line
                                         class="sm-txt"
@@ -130,6 +134,7 @@
                             </v-menu>
                             <v-btn
                                 @click="onEditCashFlowRuleCriterionLibrary(props.item)"
+                                id="CashFlowEditor-editCashFlowRule-btn"
                                 class="ghd-blue"
                                 icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
@@ -141,12 +146,14 @@
                             <v-layout style='flex-wrap:nowrap'>
                                 <v-btn
                                 @click="onDeleteCashFlowRule(props.item.id)"
+                                id="CashFlowEditor-deleteCashFlowRule-btn"
                                 class="ghd-blue"
                                 icon>
                                 <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>
                             <v-btn
                                 @click="onSelectCashFlowRule(props.item.id)"
+                                id="CashFlowEditor-editCashFlowRuleDistribution-btn"
                                 class="ghd-blue"
                                 icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit-cash.svg')"/>
@@ -182,7 +189,7 @@
                 justify-center
                 row
                 v-show="hasSelectedLibrary || hasScenario">
-                <v-btn
+                <v-btn outline
                     @click="onDeleteCashFlowRuleLibrary"
                     flat class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
@@ -198,10 +205,11 @@
                 <v-btn
                     :disabled="disableCrudButtons()"
                     @click="onShowCreateCashFlowRuleLibraryDialog(true)"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline> 
                     Create as New Library
                 </v-btn>
                 <v-btn
+                    id="CashFlowEditor-save-btn"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onUpsertScenarioCashFlowRules"
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'
@@ -900,8 +908,7 @@ export default class CashFlowEditor extends Vue {
         }
         CashFlowService.upsertCashFlowRuleLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
-                this.resetPage();
+                this.clearChanges();
                 this.cashFlowRuleLibraryMutator(this.selectedCashFlowRuleLibrary);
                 this.selectedCashFlowRuleLibraryMutator(this.selectedCashFlowRuleLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated cash flow rule library",});

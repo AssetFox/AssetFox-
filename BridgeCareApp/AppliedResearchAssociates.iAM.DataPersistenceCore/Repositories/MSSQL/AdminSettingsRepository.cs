@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -28,17 +28,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        private const string inventoryReportKey = "InventoryReportNames";
-        private const string simulationReportKey = "SimulationReportNames";
-        private const string keyFieldKey = "KeyFields";
-        private const string primaryNetworkKey = "PrimaryNetwork";
-        private const string constraintTypeKey = "ConstraintType";
+        public const string inventoryReportKey = "InventoryReportNames";
+        public const string simulationReportKey = "SimulationReportNames";
+        public const string keyFieldKey = "KeyFields";
+        public const string rawDataFieldKey = "RawDataKeyFields";
+        public const string primaryNetworkKey = "PrimaryNetwork";
+        public const string rawDataNetworkKey = "RawDataNetwork";
+        public const string constraintTypeKey = "ConstraintType";
 
         //Reads in KeyFields record as a string but places values in a list to return.
         public IList<string> GetKeyFields()
         {
-            var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").FirstOrDefault();
-
+            var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == keyFieldKey).FirstOrDefault();
             if (existingKeyFields == null)
             {
                 return null;
@@ -80,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             //If each attribute is unique and exists in the attribute table
             if (boolAttributeExistence && !boolDuplicateExistence)
             {
-                var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "KeyFields").SingleOrDefault();
+                var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == keyFieldKey).SingleOrDefault();
                 var KeyFieldsString = string.Join(",", keyFields);
                 //If the entry doesn't exist in the AdminSettings table
                 if (existingKeyFields == null)
@@ -102,6 +103,73 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         }
 
+        //Reads in KeyFields record as a string but places values in a list to return.
+        public IList<string> GetRawDataKeyFields()
+        {
+            var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == rawDataFieldKey).FirstOrDefault();
+            if (existingKeyFields == null)
+            {
+                return null;
+            }
+            else
+            {
+                var keyFields = existingKeyFields.Value;
+                IList<string> KeyFieldsList = keyFields.Split(',').ToList();
+                return KeyFieldsList;
+            }
+        }
+
+        //String is to be passed in as parameter. Sets the KeyFields in the AdminSettings table. 
+        public void SetRawDataKeyFields(string keyFields)
+        {
+            var boolAttributeExistence = false;
+            var boolDuplicateExistence = false;
+            IList<string> KeyFieldsList = keyFields.Split(',').ToList();
+            var duplicateCount = KeyFieldsList.GroupBy(x => x).Where(y => y.Count() > 1).Select(z => z.Key).ToList();
+
+            //This if statement checks if there are duplicates
+            if (duplicateCount.Count > 0)
+            {
+                boolDuplicateExistence = true;
+                throw new RowNotInTableException("A duplicate attribute is selected.");
+
+            }
+            //This checks that each attribute exists in the attribute table
+            foreach (string KeyField in KeyFieldsList)
+            {
+                if (!_unitOfWork.Context.Attribute.Any(_ => _.Name == KeyField))
+                {
+                    boolAttributeExistence = false;
+                    throw new RowNotInTableException("The specified attribute was not found.");
+                }
+                else
+                    boolAttributeExistence = true;
+            }
+            //If each attribute is unique and exists in the attribute table
+            if (boolAttributeExistence && !boolDuplicateExistence)
+            {
+                var existingKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == rawDataFieldKey).SingleOrDefault();
+                var KeyFieldsString = string.Join(",", keyFields);
+                //If the entry doesn't exist in the AdminSettings table
+                if (existingKeyFields == null)
+                {
+                    _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                    {
+                        Key = rawDataFieldKey,
+                        Value = KeyFieldsString
+                    });
+                }
+                //Updates existing KeyFields entry in the AdminSettings table
+                else
+                {
+                    existingKeyFields.Value = KeyFieldsString;
+                    _unitOfWork.Context.AdminSettings.Update(existingKeyFields);
+                }
+                _unitOfWork.Context.SaveChanges();
+            }
+
+        }
+
         public string GetPrimaryNetwork()
         {
             var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == primaryNetworkKey);
@@ -109,10 +177,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 return null;
             }
+            var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
+            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
+
+            if (existingNetwork == null)
+            {
+                return null;
+            }
+            else
+            {               
+                return existingNetwork.Name;
+            }
+        }
+
+        public string GetRawDataNetwork()
+        {
+            var existingRawDataNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == rawDataNetworkKey);
+            if (existingRawDataNetwork == null)
+            {
+                return null;
+            }
+            var rawDataNetworkGuid = new Guid(existingRawDataNetwork.Value);
+            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == rawDataNetworkGuid);
+
+            if (existingNetwork == null)
+            {
+                return null;
+            }
             else
             {
-                var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
-                var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
                 return existingNetwork.Name;
             }
         }
@@ -131,7 +224,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
                 {
                     Key = primaryNetworkKey,
-                    Value = Guid.NewGuid().ToString()
+                    Value = existingNetwork.Id.ToString()
                 });
             }
             else
@@ -143,6 +236,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.SaveChanges();
         }
 
+        public void SetRawDataNetwork(string name)
+        {
+            var existingNetworkAdminSetting = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == rawDataNetworkKey).FirstOrDefault();
+            var existingNetwork = _unitOfWork.Context.Network.FirstOrDefault(_ => _.Name == name);
+            if (existingNetwork == null) {
+                throw new RowNotInTableException("The specified network was not found.");
+            }
+            if (existingNetworkAdminSetting == null)
+            {
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity { Key = rawDataNetworkKey, Value = existingNetwork.Id.ToString() });
+            }
+            else
+            {
+                existingNetworkAdminSetting.Value = existingNetwork.Id.ToString();
+                _unitOfWork.Context.AdminSettings.Update(existingNetworkAdminSetting);
+            }
+            _unitOfWork.Context.SaveChanges();
+        }
+
+        public IList<string> GetAvailableReports()
+        {
+
+            return null;
+
+        }
         public IList<string> GetSimulationReportNames()
         {
             var existingSimulationReports = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == simulationReportKey);
@@ -254,11 +372,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SetAgencyLogo(Image agencyLogo)
         {
+            //https://www.andrewhoefling.com/Blog/Post/basic-image-manipulation-in-c-sharp
+            int h = 50;
+            float ratio = (float)agencyLogo.Width / (float)agencyLogo.Height;
+            int w = (int)(ratio * h);
+            if (agencyLogo.Width > w || agencyLogo.Height > h)
+                agencyLogo = agencyLogo.GetThumbnailImage(w, h, null, IntPtr.Zero);
             //https://stackoverflow.com/questions/21325661/convert-an-image-selected-by-path-to-base64-string
             byte[] imageBytes;
             using (MemoryStream m = new MemoryStream())
             {
-                agencyLogo.Save(m, agencyLogo.RawFormat);
+                //https://stackoverflow.com/questions/51509449/convert-any-image-format-to-jpg
+                agencyLogo.Save(m, System.Drawing.Imaging.ImageFormat.Jpeg);
                 imageBytes = m.ToArray();
             }
 
@@ -287,10 +412,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SetImplementationLogo(Image productLogo)
         {
+            int h = 50;
+            float ratio = (float)productLogo.Width / (float)productLogo.Height;
+            int w = (int)(ratio * h);
+            if (productLogo.Width > w || productLogo.Height > h)
+                productLogo = productLogo.GetThumbnailImage(w, h, null, IntPtr.Zero);
+
             byte[] imageBytes;
             using (MemoryStream m = new MemoryStream())
             {
-                productLogo.Save(m, productLogo.RawFormat);
+                productLogo.Save(m, System.Drawing.Imaging.ImageFormat.Jpeg);
                 imageBytes = m.ToArray();
             }
             var implementationLogo = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "ImplementationLogo").FirstOrDefault();
@@ -346,5 +477,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             _unitOfWork.Context.SaveChanges();
         }
+        public void DeleteAdminSetting(string settingKey)
+        {
+            _unitOfWork.Context.DeleteEntity<AdminSettingsEntity>(_ => _.Key == settingKey);
+        }
     }
+
+    
 }

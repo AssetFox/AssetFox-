@@ -22,6 +22,12 @@
                     </div>
                 </v-layout>
                 <v-spacer></v-spacer>
+                    <div v-if="stateInventoryReportNames.length > 1" class="flex xs2 justify-content: end">
+                        <v-select 
+                            v-model="inventoryReportName" 
+                            :items="stateInventoryReportNames">
+                        </v-select>
+                    </div>
             </v-layout>
             <v-divider></v-divider>
             <div class="container" v-html="sanitizedHTML"></div>
@@ -42,12 +48,14 @@
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
         @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
         @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
+        @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
 
         @Action('getInventory') getInventoryAction: any;
         @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
         @Action('setIsBusy') setIsBusyAction: any;
         @Action('getInventoryReports') getInventoryReportsAction: any;
         @Action('getKeyFields') getKeyFieldsAction: any;
+        @Action('getConstraintType') getConstraintTypeAction: any;
 
         keyAttirbuteValues: string[][] = [];
 
@@ -56,6 +64,7 @@
         selectedKeys: string[] = [];
 
         inventoryDetails: string[] = [];
+        constraintDetails: string = '';
                        
         inventorySelectListsWorker: any = null;
 
@@ -90,16 +99,21 @@
                 this.inventoryReportName = this.stateInventoryReportNames[0]
         }
 
+        @Watch('stateConstraintType')
+        onStateConstraintTypeChanged(){
+            this.constraintDetails = this.stateConstraintType;
+        }
+
         /**
          * Vue component has been mounted
          */
         mounted() {
             (async () => { 
+                await this.getConstraintTypeAction();
                 await this.getInventoryReportsAction();
-                await this.getKeyFieldsAction();
+                await this.getKeyFieldsAction(); 
+                this.onStateConstraintTypeChanged();
             })();
-            
-
         }
 
         created() {
@@ -157,22 +171,50 @@
         }
 
         onSelectInventoryItem(index: number){
-            const key = this.selectedKeys[index];
-            let data: InventoryItem = {keyProperties: []};
+            let SelectedCounter = 0;
+            if(this.constraintDetails == 'OR')
+            {
+                const key = this.selectedKeys[index];
+                let data: InventoryItem = {keyProperties: []};
 
-            for(let i = 0; i < this.inventoryDetails.length; i++){
-                if(i === index){
-                    data.keyProperties[i] = key;
-                    continue;
+                for(let i = 0; i < this.inventoryDetails.length; i++){
+                    if(i === index){
+                        data.keyProperties[i] = key;
+                        continue;
+                    }
+                    const inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: string | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
+                    const otherKeyValue = inventoryItem.keyProperties[i]; 
+                    this.selectedKeys[i] = otherKeyValue;
+                    data.keyProperties[i] = otherKeyValue;
                 }
-                const inventoryItem = this.inventoryItems.filter(function(item){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
-                const otherKeyValue = inventoryItem.keyProperties[i]; 
-                this.selectedKeys[i] = otherKeyValue;
-                data.keyProperties[i] = otherKeyValue;
+                this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  
             }
-            this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});           
-        }
-    }
+            else if(this.constraintDetails == 'AND') {
+                //Check if any dropdowns are empty
+                for(let i = 0; i < this.inventoryDetails.length; i++) {
+                    if(this.selectedKeys[i] !== '') {
+                        SelectedCounter++;
+                    }
+                }
+
+                if(SelectedCounter === this.inventoryDetails.length){
+                    const key = this.selectedKeys[index];
+                    let data: InventoryItem = {keyProperties: []};
+
+                for(let i = 0; i < this.inventoryDetails.length; i++){
+                    if(i === index){
+                        data.keyProperties[i] = key;
+                        continue;
+                    }
+                    const inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: string | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
+                    const otherKeyValue = inventoryItem.keyProperties[i]; 
+                    this.selectedKeys[i] = otherKeyValue;
+                    data.keyProperties[i] = otherKeyValue;
+                }
+                this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});  
+                }
+            }       
+        }    }
 </script>
 
 <style>

@@ -12,29 +12,31 @@
       <v-card-text class="ghd-dialog-text-field-padding">
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
-          <v-text-field outline v-model="newTargetConditionGoal.name"
+          <v-text-field id="CreateTargetConditionGoalDialog-name-vtextfield"
+                        outline v-model="newTargetConditionGoal.name"
                         class="ghd-control-text ghd-control-border"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>
-          <v-select :items="numericAttributeNames"
+          <v-select id="CreateTargetConditionGoalDialog-attribute-vselect"
+                    :items="numericAttributeNames"
                     append-icon=$vuetify.icons.ghd-down
                     class="ghd-select ghd-control-text ghd-text-field ghd-text-field-border"
                     outline v-model="newTargetConditionGoal.attribute"
                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Year</v-subheader>
-          <v-text-field :mask="'####'" class="ghd-control-text ghd-control-border" outline v-model.number="newTargetConditionGoal.year"/>
+          <v-text-field id="CreateTargetConditionGoalDialog-year-vtextfield" :mask="'####'" class="ghd-control-text ghd-control-border" outline v-model.number="newTargetConditionGoal.year"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Target</v-subheader>
-          <v-text-field outline :mask="'##########'" v-model.number="newTargetConditionGoal.target"
+          <v-text-field id="CreateTargetConditionGoalDialog-target-vtextfield" outline :mask="'##########'" v-model.number="newTargetConditionGoal.target"
                         class="ghd-control-text ghd-control-border"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
         </v-layout>
       </v-card-text>
       <v-card-actions class="py-0">
         <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
-          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue" flat>
+          <v-btn id="CreateTargetConditionGoalDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue" outline>
             Cancel
           </v-btn>
-          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue" outline>
+          <v-btn id="CreateTargetConditionGoalDialog-save-vbtn" :disabled="disableSubmitButton()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue" outline>
             Save
           </v-btn>
         </v-layout>

@@ -88,10 +88,18 @@ const treatmentRules = {
         return hasValue(changeValue) || hasValue(expression) || 'Must have an equation to be blank';
     }
 };
+/*******************************************COMMITTED PROJECT RULES****************************************************/
+const committedProjectRules = {
+    'hasInvestmentYears': (range: number[]) => {
+        //https://stackoverflow.com/questions/14832603/check-if-all-values-of-array-are-equal
+        return (range.length > 1 && !range.every(x => x === 0)) || `There are no years in the investment settings`;
+    },
+};
 /**************************************************ALL RULES***********************************************************/
 export const rules: InputValidationRules = {
     'generalRules': generalRules,
     'cashFlowRules': cashFlowRules,
     'investmentRules': investmentRules,
-    'treatmentRules': treatmentRules
+    'treatmentRules': treatmentRules,
+    'committedProjectRules': committedProjectRules
 };

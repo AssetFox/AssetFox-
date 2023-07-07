@@ -479,11 +479,6 @@ export default class BudgetPriorityEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                     this.populateEmptyBudgetPercentagePairs(this.currentPage);
-                    // this.currentPage.forEach(item => {
-                    //     if (item.budgetPercentagePairs.length === 0) {
-                    //         item.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
-                    //     }
-                    // });
                 }
             });
         else if(this.hasSelectedLibrary)
@@ -1015,11 +1010,6 @@ export default class BudgetPriorityEditor extends Vue {
                     this.totalItems = data.totalItems;
 
                     this.populateEmptyBudgetPercentagePairs(this.currentPage);
-                    // this.currentPage.forEach(item => {
-                    //     if (item.budgetPercentagePairs.length === 0) {
-                    //         item.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
-                    //     }
-                    // });
                 }
                 this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
                 this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";

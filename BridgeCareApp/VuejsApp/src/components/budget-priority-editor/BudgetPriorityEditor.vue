@@ -396,14 +396,11 @@ export default class BudgetPriorityEditor extends Vue {
     onSelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue;
         this.selectBudgetPriorityLibraryAction({ libraryId: this.librarySelectItemValue });
-        console.log("changed");
-        
     }
 
     @Watch('stateSelectedBudgetPriorityLibrary')
     onStateSelectedPriorityLibraryChanged() {
         this.selectedBudgetPriorityLibrary = clone(this.stateSelectedBudgetPriorityLibrary);
-        console.log("selected library changed: " + this.stateSelectedBudgetPriorityLibrary.budgetPriorities.length);
     }
 
     @Watch('selectedBudgetPriorityLibrary')
@@ -414,7 +411,6 @@ export default class BudgetPriorityEditor extends Vue {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
         }
-        console.log("here in sl");
         this.updatedRowsMap.clear();
         this.deletionIds = [];
         this.addedRows = [];

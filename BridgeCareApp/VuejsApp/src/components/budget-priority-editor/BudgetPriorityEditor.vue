@@ -480,15 +480,14 @@ export default class BudgetPriorityEditor extends Vue {
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
                     this.currentPage = data.items;
-
-                    this.currentPage.forEach(item => {
-                        if (item.budgetPercentagePairs.length === 0) {
-                            item.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
-                        }
-                    });
-
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    this.populateEmptyBudgetPercentagePairs(this.currentPage);
+                    // this.currentPage.forEach(item => {
+                    //     if (item.budgetPercentagePairs.length === 0) {
+                    //         item.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
+                    //     }
+                    // });
                 }
             });
         else if(this.hasSelectedLibrary)
@@ -987,7 +986,13 @@ export default class BudgetPriorityEditor extends Vue {
         this.parentLibraryId = foundLibrary.id;
         this.parentLibraryName = foundLibrary.name;
     }
-
+    populateEmptyBudgetPercentagePairs(budgetPriorites: BudgetPriority[]) {
+        budgetPriorites.forEach(item => {
+            if (item.budgetPercentagePairs.length === 0) {
+                item.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
+            }
+        });
+    }
     initializePages(){
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
         const request: PagingRequest<BudgetPriority>= {
@@ -1012,6 +1017,13 @@ export default class BudgetPriorityEditor extends Vue {
                     this.currentPage = sortByProperty("priorityLevel", data.items);
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+
+                    this.populateEmptyBudgetPercentagePairs(this.currentPage);
+                    // this.currentPage.forEach(item => {
+                    //     if (item.budgetPercentagePairs.length === 0) {
+                    //         item.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
+                    //     }
+                    // });
                 }
                 this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
                 this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";

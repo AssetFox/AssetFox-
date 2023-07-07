@@ -117,6 +117,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "BRKEY_"); //BRKey
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LOCATION"); // Location / Structure Name
+
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: City/Town/Place data here
+
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_INTERSECTED"); // Feature Intersected
+
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_CARRIED"); // Feature Intersected
+
                 //--------------------- Ownership ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT"); //District
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
@@ -130,13 +138,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SUBM_AGENCY"); //Submitting Agency
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Leaking Joints data here
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CUSTODIAN"); // Maintenance Responsibility
 
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_NAME"); // Planning Partner
 
 
-                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LOCATION"); // Location / Structure Name
 
 
                 //--------------------- Structure ---------------------
@@ -165,6 +171,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PARALLEL") > 0 ? "Y" : "N"; //Parallel Structure
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Leaking Joints data here
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Scour Critical data here
 
                 //--------------------- Network ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.FullFunctionalClassDescription(_reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FUNC_CLASS")); //Functional Class
@@ -726,18 +735,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Bridge (B/C)",
                 "BridgeID\r\n(5A01)",
                 "BRKey\r\n(5A03)",
+                "Location / Structure Name\r\n(5A02)",
+                "City/Town/Place\r\n(5A06)",
+                "Feature Intersected\r\n(5A07)",
+                "Feature Carried\r\n(5A08)",
+
+
 
                 //--------------------- Ownership ---------------------
                 "District\r\n(5A04)",
                 "County\r\n(5A05)",
                 "Owner Code\r\n(5A21)",
                 "Submitting Agency\r\n(6A06)",
-                "Leaking Joints\r\n",
                 "Maintenance Responsibility\r\n(5A20)",
                 "Planning Partner\r\n(5A13)",
 
 
-                "Location / Structure Name\r\n(5A02)",
 
 
                 //--------------------- Structure ---------------------
@@ -749,6 +762,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Struct Type\r\n(6A26-29)",
                 "Fractural Critical",
                 "Parallel Structure\r\n(5E02)",
+                "Leaking Joints\r\n",
+                "Scour Critical \r\n",
+
 
                 //--------------------- Network ---------------------
 
@@ -808,17 +824,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 switch(headerNameFormatted)
                 {
                     case "ASSET_ID":
-                        totalNumOfColumns = 4; cellBGColor = ColorTranslator.FromHtml("#BDD7EE");
+                        totalNumOfColumns = 8; cellBGColor = ColorTranslator.FromHtml("#BDD7EE");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);                        
                         break;
 
                     case "OWNERSHIP":
-                        totalNumOfColumns = 8; cellBGColor = ColorTranslator.FromHtml("#C6E0B4");
+                        totalNumOfColumns = 6; cellBGColor = ColorTranslator.FromHtml("#C6E0B4");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
                         break;
 
                     case "STRUCTURE":
-                        totalNumOfColumns = 8; cellBGColor = ColorTranslator.FromHtml("#F8CBAD");
+                        totalNumOfColumns = 10; cellBGColor = ColorTranslator.FromHtml("#F8CBAD");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
                         break;
 

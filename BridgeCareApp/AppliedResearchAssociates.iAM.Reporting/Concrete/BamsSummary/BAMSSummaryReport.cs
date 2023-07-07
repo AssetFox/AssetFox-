@@ -343,7 +343,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var workSummaryModel = _bridgeDataForSummaryReport.Fill(bridgeDataWorksheet, reportOutputData, treatmentCategoryLookup, allowFundingFromMultipleBudgets);
             checkCancelled(cancellationToken);
             // Fill Simulation parameters TAB
-            reportDetailDto.Status = $"Creating Parameters TAB";
+            reportDetailDto.Status = $"Creating Parameters TAB";
+
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);

@@ -56,7 +56,9 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                return StatusCode(500, e.Message);
+                //return StatusCode(500, e.Message);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, e.Message);
+                throw;
             }
         }
 

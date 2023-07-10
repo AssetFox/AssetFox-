@@ -7,7 +7,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Common.Logging;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -26,7 +28,7 @@ namespace BridgeCareCore.Services
         public const string UnknownBudgetName = "Unknown";
 
         // TODO: Determine based on associated network
-        private readonly string _networkKeyField = "BRKEY_";
+        private string _networkKeyField ;
         private Dictionary<string, List<KeySegmentDatum>> _keyProperties;
         private List<string> _keyFields;
         private bool newImportFile = false;
@@ -146,11 +148,10 @@ namespace BridgeCareCore.Services
 
         public FileInfoDTO ExportCommittedProjectsFile(Guid simulationId)
         {
-            var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
-            if (simulationName == null)
-            {
-                throw new ArgumentException($"Unable to find simulation with ID of {simulationId}");
-            }
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var simulationName = simulation.Name;
+            
+            _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
 
             var committedProjectDTOs = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
                         
@@ -193,7 +194,7 @@ namespace BridgeCareCore.Services
             };
         }
 
-        public FileInfoDTO CreateCommittedProjectTemplate()
+        public FileInfoDTO CreateCommittedProjectTemplate(Guid networkId)
         {
             var fileName = $"CommittedProjectsTemplate.xlsx";
 
@@ -202,6 +203,8 @@ namespace BridgeCareCore.Services
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
+            _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(networkId);
+
             AddHeaderCells(worksheet, new List<string> { "Add Consequences Here and in columns to the right" });
 
             return new FileInfoDTO
@@ -473,6 +476,8 @@ namespace BridgeCareCore.Services
             queueLog ??= new DoNothingWorkQueueLog();
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
+            _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
             queueLog.UpdateWorkQueueStatus("Creating Committed Projects");

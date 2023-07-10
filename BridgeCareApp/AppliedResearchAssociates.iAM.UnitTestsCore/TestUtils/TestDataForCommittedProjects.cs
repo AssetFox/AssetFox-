@@ -66,6 +66,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return dto;
         }
 
+        public static SimulationDTO TestSimulationDTONoCommittedProjects()
+        {
+            var date = new DateTime(2023, 2, 9);
+            var dto = new SimulationDTO
+            {
+                Id = NoCommitSimulationId,
+                CreatedDate = date,
+                NetworkId = NetworkId,
+                NetworkName = NetworkName,
+                Creator = Username,
+                LastModifiedDate = date,
+                Users = new List<SimulationUserDTO>
+                {
+                    SimulationUserDto(),
+                },
+                Name = "Test"
+            };
+            return dto;
+        }
+
         public static SimulationDTO TestSimulationDTO()
         {
             var date = new DateTime(2023, 2, 9);
@@ -80,7 +100,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Users = new List<SimulationUserDTO>
                 {
                     SimulationUserDto(),
-                }
+                },
+                Name = "Test"
             };
             return dto;
         }

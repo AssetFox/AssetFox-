@@ -96,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void SimulationInDb_Clone_Clones2()
+        public void SimulationInDbWithBudgetWithAmount_Clone_Clones()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var networkId = Guid.NewGuid();
@@ -110,6 +110,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var budgetId = Guid.NewGuid();
             var budget = BudgetDtos.WithSingleAmount(budgetId, "budget", 2023, 4321);
             var budgets = new List<BudgetDTO> { budget };
+            var amount = budget.BudgetAmounts.Single();
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
             var scenarioBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
             var scenarioBudgetsId = scenarioBudgets[0].Id;
@@ -135,7 +136,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotEqual(sectionCommittedProjectId, clonedProject.Id);
             var clonedBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(cloningResult.Simulation.Id);
             var clonedBudget = clonedBudgets.Single();
+            var clonedAmount = clonedBudget.BudgetAmounts.Single();
             Assert.Equal(clonedBudget.Id, clonedProject.ScenarioBudgetId);
+            ObjectAssertions.EquivalentExcluding(amount, clonedAmount, x => x.Id);
+            Assert.NotEqual(amount.Id, clonedAmount.Id);
+            ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.BudgetAmounts, b => b.CriterionLibrary);
+            var expectedCriterionLibrary = new CriterionLibraryDTO();
+            ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedBudget.CriterionLibrary);
+
             //Finish this
         }
 

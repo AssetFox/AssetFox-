@@ -25,7 +25,7 @@
       </v-card-text>
       <v-card-actions>
           <v-layout justify-center row>
-            <v-btn
+            <v-btn outline
                    class="ghd-white-bg ghd-blue ghd-button-text"
                    depressed
                    @click="onSubmit(false)">

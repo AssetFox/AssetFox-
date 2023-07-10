@@ -306,7 +306,7 @@ export default class CashFlowRuleEditDialog extends Vue {
                 ) + 1;
             const costCeiling: number = getLastPropertyValue(
                 'costCeiling',
-                this.cashFlowDistributionRuleGridData,
+                this.processedGridData,
             );
             const yearlyPercentages = this.getNewCashFlowDistributionRuleYearlyPercentages(
                 durationInYears,

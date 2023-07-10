@@ -29,7 +29,7 @@
             <v-card-actions class="ghd-dialog-box-padding-bottom">
                 <v-layout justify-center>
                     <v-btn
-                        flat 
+                        outline 
                         class='ghd-blue ghd-button-text ghd-button'
                         @click="onSubmit(false)">
                         Cancel

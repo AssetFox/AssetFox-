@@ -28,9 +28,9 @@
                                 </v-list-item>
                             </template>
                         </v-select>
-                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Based on: {{parentLibraryName}} 
+                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} 
                             
-                            <span v-if="scenarioLibraryIsModified">&nbsp;&nbsp;{{modifiedStatus}}</span>
+                            <span v-if="scenarioLibraryIsModified">&nbsp;&nbsp;{{modifiedStatus}}</span></b>
                         
                         </div>
 
@@ -393,7 +393,7 @@
                 >
                     Cancel
                 </v-btn>
-                <v-btn
+                <v-btn outline
                     id="PerformanceCurveEditor-deleteLibrary-button"
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue ghd-button-text"
@@ -1125,7 +1125,6 @@ export default class PerformanceCurveEditor extends Vue {
         PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
-                this.resetPage();
                 this.performanceCurveLibraryMutator(this.selectedPerformanceCurveLibrary);
                 this.selectedPerformanceCurveLibraryMutator(this.selectedPerformanceCurveLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated deterioration model library",});

@@ -230,7 +230,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = true;
         }
 
-        private void checkCancelled(CancellationToken? cancellationToken)
+        private void checkCancelled(CancellationToken? cancellationToken, Guid simulationId)
         {
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
             {

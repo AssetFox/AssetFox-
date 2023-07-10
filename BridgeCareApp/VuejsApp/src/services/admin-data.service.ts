@@ -8,8 +8,20 @@ export default class AdminDataService {
     static setKeyFields(keyFields: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.AdminData}/SetKeyFields/${keyFields}`);
     }
+    static getRawDataKeyFields(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AdminData}/GetRawDataKeyFields`);
+    }
+    static setRawDataKeyFields(keyFields: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.AdminData}/SetRawDataKeyFields/${keyFields}`);
+    }
     static getPrimaryNetwork(): AxiosPromise {
         return coreAxiosInstance.get(`${API.AdminData}/GetPrimaryNetwork`);
+    }
+    static getRawdataNetwork(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AdminData}/GetRawDataNetwork`);
+    }
+    static setRawdataNetwork(name: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.AdminData}/SetRawDataNetwork/${name}`);
     }
     static setPrimaryNetwork(name: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.AdminData}/SetPrimaryNetwork/${name}`);

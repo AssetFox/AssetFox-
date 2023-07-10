@@ -5,20 +5,22 @@
         <v-layout justify-start>
           <div class="dialog-header"><h5>Create New Target Condition Goal Library</h5></div>
         </v-layout>
-        <v-btn @click="onSubmit(false)" icon>
+        <v-btn id="CreateRemainingLifeLimitDialog-x-btn" @click="onSubmit(false)" icon>
                     <i class="fas fa-times fa-2x"></i>
         </v-btn>
       </v-card-title>
       <v-card-text class="ghd-dialog-text-field-padding">
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Select an Attribute</v-subheader>
-          <v-select :items="dialogData.numericAttributeSelectItems"
+          <v-select id="CreateRemainingLifeLimitDialog-selectAnAttribute-select"
+                    :items="dialogData.numericAttributeSelectItems"
                     append-icon=$vuetify.icons.ghd-down
                     outline v-model="newRemainingLifeLimit.attribute"
                     :rules="[rules['generalRules'].valueIsNotEmpty]"
                     class="ghd-select ghd-control-text ghd-text-field ghd-text-field-border"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Limit</v-subheader>
-          <v-text-field outline :mask="'##########'"
+          <v-text-field id="CreateRemainingLifeLimitDialog-limit-textField"
+                        outline :mask="'##########'"
                         v-model.number="newRemainingLifeLimit.value"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-control-text ghd-control-border"/>

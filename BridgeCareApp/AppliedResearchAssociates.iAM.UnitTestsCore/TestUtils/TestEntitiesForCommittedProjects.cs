@@ -298,7 +298,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 InvestmentPlan = new InvestmentPlanEntity()
                 {
                     Id = Guid.Parse("dab41545-f70b-4747-9112-6790599ff583"),
-                    SimulationId = Guid.Parse("dae1c62c-adba-4510-bfe5-61260c49ec99"),
+                    SimulationId = TestDataForCommittedProjects.NoCommitSimulationId,
                     FirstYearOfAnalysisPeriod = 2022,
                     InflationRatePercentage = 3,
                     MinimumProjectCostLimit = 1000,

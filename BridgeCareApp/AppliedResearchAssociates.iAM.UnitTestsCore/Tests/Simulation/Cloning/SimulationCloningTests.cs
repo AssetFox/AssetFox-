@@ -142,9 +142,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotEqual(amount.Id, clonedAmount.Id);
             ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.BudgetAmounts, b => b.CriterionLibrary);
             var expectedCriterionLibrary = new CriterionLibraryDTO();
-            ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedBudget.CriterionLibrary);
-
-            //Finish this
+            ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedBudget.CriterionLibrary);        
         }
 
 
@@ -211,7 +209,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
             var budgetPriority = BudgetPriorityTestSetup.SetupSingleBudgetPriorityForSimulationInDb(simulationId);
 
-            //MDMD work here
             var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
 
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);

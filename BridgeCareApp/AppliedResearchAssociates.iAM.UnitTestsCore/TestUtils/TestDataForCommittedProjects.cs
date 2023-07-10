@@ -154,14 +154,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public static List<MaintainableAsset> MaintainableAssets => CompleteMaintainableAssets;
 
 
-        public static List<SectionCommittedProjectDTO> ValidCommittedProjects => new List<SectionCommittedProjectDTO>()
+        public static List<SectionCommittedProjectDTO> ValidCommittedProjects
         {
-            SomethingSectionCommittedProjectDTO(),
-            SimpleSectionCommittedProjectDTO(Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"), SimulationId, 2023),
-            SimpleSectionCommittedProjectDTO(Guid.Parse("491001e2-c1f0-4af6-90e7-e998bbea5d00"), FourYearSimulationId, 2025),
-        };
+            get
+            {
+                var id = ScenarioBudgetDTOs().Single(_ => _.Name == "Interstate").Id;
 
-        private static SectionCommittedProjectDTO SimpleSectionCommittedProjectDTO(Guid id, Guid simulationId, int year) => new SectionCommittedProjectDTO()
+                return new List<SectionCommittedProjectDTO>()
+              {
+              SomethingSectionCommittedProjectDTO(),
+              SimpleSectionCommittedProjectDTO(Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"), SimulationId, 2023, id),
+              SimpleSectionCommittedProjectDTO(Guid.Parse("491001e2-c1f0-4af6-90e7-e998bbea5d00"), FourYearSimulationId, 2025, id),
+          };
+            }
+        }
+
+        public static SectionCommittedProjectDTO SimpleSectionCommittedProjectDTO(Guid id, Guid simulationId, int year, Guid scenarioBudgetId) => new SectionCommittedProjectDTO()
         {
             Id = id,
             Year = year,
@@ -170,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             ShadowForSameTreatment = 3,
             Cost = 200000,
             SimulationId = simulationId,
-            ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Interstate").Id,
+            ScenarioBudgetId = scenarioBudgetId,
             LocationKeys = new Dictionary<string, string>()
                 {
                     { "ID", "46f5da89-5e65-4b8a-9b36-03d9af0302f7" },
@@ -344,7 +352,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                         Value = TenMillion,
                     }
                 }
-           
+
             };
             var local = new BudgetDTO
             {

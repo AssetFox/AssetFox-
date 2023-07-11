@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils;
+using static OfficeOpenXml.ExcelErrorValue;
 
 namespace BridgeCareCore.Services
 {
@@ -19,7 +20,7 @@ namespace BridgeCareCore.Services
         public AttributeService(IUnitOfWork unitOfWork) => _unitOfWork =
             unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
+        /*public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
         {
             var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributeNames);
             if (!aggregatedResults.Any())
@@ -47,7 +48,7 @@ namespace BridgeCareCore.Services
                             .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue).ToList();
                         dtypes = keyValuePair.Value.Where(_ => _.Attribute.Type == "NUMBER").DistinctBy(_ => _.Attribute.Type).Select(_ => _.Attribute.Type).ToList();
                     }
-                    return new AttributeSelectValuesResult
+                    var result = new AttributeSelectValuesResult
                     {
                         Attribute = keyValuePair.Key,
                         //Values = values.Count > 100
@@ -62,8 +63,27 @@ namespace BridgeCareCore.Services
                                 : "Success",
                         ResultType = !values.Any() ? "warning" : "success"
                     };
+                    return result;
                 }).ToList();
+        }*/
+
+        public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
+        {
+            var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributeNames);
+            return new List<AttributeSelectValuesResult>()
+            {
+                new AttributeSelectValuesResult
+                {
+                    // Item1 = Attribute name, Item2 = Result type, Item3 = All values associated with attribute, Item4 = Has type "NUMBER"?
+                    Attribute = aggregatedResults.Item1,
+                    Values = aggregatedResults.Item4 ? new List<string>() : aggregatedResults.Item3.ToSortedSet(new AlphanumericComparator()).ToList(),
+                    ResultMessage = !aggregatedResults.Item3.Any() ? $"No values found for attribute {aggregatedResults.Item1}; use text input"
+                                                                   : aggregatedResults.Item4 ? $"{ValuesForAttribute} {aggregatedResults.Item1} {IsANumberUseTextInput}" : "Success",
+                    ResultType = aggregatedResults.Item2
+                }
+            };
         }
+
         public static AttributeDTO ConvertAllAttribute(AllAttributeDTO allAttribute)
         {
             var result = new AttributeDTO

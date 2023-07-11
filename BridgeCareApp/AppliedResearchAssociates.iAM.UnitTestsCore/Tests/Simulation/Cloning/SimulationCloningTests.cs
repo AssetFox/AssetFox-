@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
@@ -101,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var networkId = Guid.NewGuid();
             var keyAttributeId = TestAttributeIds.BrKeyId;
-            
+
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, new List<Data.Networking.MaintainableAsset>(), networkId, keyAttributeId);
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
@@ -142,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotEqual(amount.Id, clonedAmount.Id);
             ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.BudgetAmounts, b => b.CriterionLibrary);
             var expectedCriterionLibrary = new CriterionLibraryDTO();
-            ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedBudget.CriterionLibrary);        
+            ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedBudget.CriterionLibrary);
         }
 
 
@@ -311,6 +312,52 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.EquivalentExcluding(performanceCurve, clonedPerformanceCurve,
                 x => x.Id, x => x.Equation.Id, x => x.CriterionLibrary.Id, x => x.CriterionLibrary.Name,
                 x => x.CriterionLibrary.Owner);
+        }
+
+        [Fact]
+        public void SimulationInDbWithBadData_Clone_HitsErrorCatchingCode()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var networkId = Guid.NewGuid();
+            var keyAttributeId = TestAttributeIds.BrKeyId;
+
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, new List<Data.Networking.MaintainableAsset>(), networkId, keyAttributeId);
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationEntity2 = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.WithSingleAmount(budgetId, "budget", 2023, 4321);
+            var budgets = new List<BudgetDTO> { budget };
+            var amount = budget.BudgetAmounts.Single();
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
+            var scenarioBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            var scenarioBudgetsId = scenarioBudgets[0].Id;
+            var sectionCommittedProjectId = Guid.NewGuid();
+            var sectionCommittedProject = TestDataForCommittedProjects.SimpleSectionCommittedProjectDTO(sectionCommittedProjectId, simulationId, 2023, scenarioBudgetsId);
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO>
+            {
+                sectionCommittedProject
+            };
+            TestHelper.UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(sectionCommittedProjects);
+            var rogueBudgetId = Guid.NewGuid();
+            var rogueBudget = new ScenarioBudgetEntity
+            {
+                Id = rogueBudgetId,
+                SimulationId = simulationEntity2.Id,
+                Name = "Budget in the wrong simulation",
+            };
+            TestHelper.UnitOfWork.Context.Add(rogueBudget);
+            var committedProject = TestHelper.UnitOfWork.Context.CommittedProject.Single(cp => cp.SimulationId == simulation.Id);
+            committedProject.ScenarioBudgetId = rogueBudgetId;
+            TestHelper.UnitOfWork.Context.Update(committedProject);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var warningMessage = cloningResult.WarningMessage;
+            Assert.Contains("Budget in the wrong simulation", warningMessage);
         }
     }
 }

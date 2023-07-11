@@ -58,7 +58,7 @@ namespace BridgeCareCore.Controllers.BaseController
             }
             catch(SecurityTokenExpiredException)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, "The token is expired, please login.");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, "The token is expired. Please re-login by pressing the button \"Go to login page\".");
                 throw;
             }
             catch (Exception exception)

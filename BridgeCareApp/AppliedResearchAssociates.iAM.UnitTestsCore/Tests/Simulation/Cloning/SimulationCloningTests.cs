@@ -128,6 +128,37 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotEqual(calculatedAttribute.Equations[0].Equation.Id, clonedAttribute.Equations[0].Equation.Id);
         }
 
+        [Fact]
+        public void SimulationInDbWithCalculatedAttributeWithCriterionLibrary_Clone_Clones()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var calculatedAttributeId = Guid.NewGuid();
+            var calculatedAttribute = CalculatedAttributeTestSetup.TestCalculatedAttributeDtoWithEquationCriterionLibrary(calculatedAttributeId, TestAttributeNames.Age, "");
+            var calculatedAttributes = new List<CalculatedAttributeDTO> { calculatedAttribute };
+            TestHelper.UnitOfWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributes(calculatedAttributes, simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
+            Assert.Equal(newSimulationName, clonedSimulation.Name);
+            Assert.Equal(networkId, clonedSimulation.NetworkId);
+            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            var allAttributes = TestHelper.UnitOfWork.AttributeRepo.GetAttributes();
+            var ageAttribute = allAttributes.Single(a => a.Name == TestAttributeNames.Age);
+            var clonedAttribute = TestHelper.UnitOfWork.CalculatedAttributeRepo.GetScenarioCalulatedAttributesByScenarioAndAttributeId(clonedSimulationId, ageAttribute.Id);
+            ObjectAssertions.EquivalentExcluding(calculatedAttribute, clonedAttribute, c => c.Id, c => c.Equations[0].Id, c => c.Equations[0].Equation.Id, c => c.Equations[0].CriteriaLibrary.Id);
+            Assert.NotEqual(calculatedAttribute.Id, clonedAttribute.Id);
+            Assert.NotEqual(calculatedAttribute.Equations[0].Id, clonedAttribute.Equations[0].Id);
+            Assert.NotEqual(calculatedAttribute.Equations[0].Equation.Id, clonedAttribute.Equations[0].Equation.Id);
+            Assert.NotEqual(calculatedAttribute.Equations[0].CriteriaLibrary.Id, clonedAttribute.Equations[0].CriteriaLibrary.Id);
+        }
 
         [Fact]
         public void SimulationInDbWithBudgetWithAmount_Clone_Clones()

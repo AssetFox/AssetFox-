@@ -19,6 +19,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
     public class AggregatedResultRepositoryTests
     {
         [Fact]
+        public void GetAggregatedResultsForAttributeNames_NumericAggregatedResultInDb_Empty()
+        {
+            var dataSource = AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var attributeNames = new List<string>
+            {
+                "ALANE"
+            };
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var attribute = AttributeDtos.DeckDurationN;
+            var networkId = NetworkTestSetup.NetworkId;
+            var assetName = "AssetName";
+            var location = new SectionLocation(Guid.NewGuid(), assetName);
+            var maintainableAssetId = Guid.NewGuid();
+            var spatialWeightingValue = "[Deck_Area]";
+            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
+            var assetList = new List<MaintainableAsset> { newAsset };
+            TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
+            var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
+            var attributeList = new List<IamAttribute> { numericAttribute };
+            AggregatedResultTestSetup.AddNumericAggregatedResultsToDb(TestHelper.UnitOfWork, assetList, attributeList);
+
+            var aggregatedResults = TestHelper.UnitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributeNames);
+            Assert.Null(aggregatedResults.Attribute);
+            Assert.Null(aggregatedResults.ResultType);
+            Assert.Null(aggregatedResults.Values);
+            Assert.False(aggregatedResults.IsNumber);
+        }
+
+        [Fact]
         public void GetAggregatedResultsForAttributeNames_NumericAggregatedResultInDb_Gets()
         {
             var dataSource = AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -41,19 +70,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             AggregatedResultTestSetup.AddNumericAggregatedResultsToDb(TestHelper.UnitOfWork, assetList, attributeList);
 
             var aggregatedResults = TestHelper.UnitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributeNames);
-
-            var aggregatedResult = aggregatedResults.Single();
-            var expected = new AggregatedResultDTO
+            var expected = new AggregatedSelectValuesResultDTO()
             {
-                MaintainableAssetId = maintainableAssetId,
                 Attribute = attribute,
-                Discriminator = "NumericAggregatedResult",
-                NumericValue = 1.23,
-                TextValue = null,
-                Year = 2022,
+                Values = new List<string>() { "1.23" },
+                ResultType = "success",
+                IsNumber = true
             };
-            ObjectAssertions.EquivalentExcluding(expected, aggregatedResult, x => x.Attribute);
-            Assert.Equal(expected.Attribute.Id, aggregatedResult.Attribute.Id);
+            ObjectAssertions.EquivalentExcluding(expected, aggregatedResults, x => x.Attribute);
+            Assert.Equal(expected.Values[0], aggregatedResults.Values[0]);
+            Assert.Equal(expected.Attribute.Id, aggregatedResults.Attribute.Id);
         }
 
         [Fact]
@@ -79,19 +105,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork, assetList, attributeList, "Result");
 
             var aggregatedResults = TestHelper.UnitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributeNames);
-
-            var aggregatedResult = aggregatedResults.Single();
-            var expected = new AggregatedResultDTO
+            var expected = new AggregatedSelectValuesResultDTO()
             {
-                MaintainableAssetId = maintainableAssetId,
                 Attribute = attribute,
-                Discriminator = "TextAggregatedResult",
-                NumericValue = null,
-                TextValue = "Result",
-                Year = 2022,
+                Values = new List<string>() { "Result" },
+                ResultType = "success",
+                IsNumber = false
             };
-            ObjectAssertions.EquivalentExcluding(expected, aggregatedResult, x => x.Attribute);
-            Assert.Equal(expected.Attribute.Id, aggregatedResult.Attribute.Id);
+
+            ObjectAssertions.EquivalentExcluding(expected, aggregatedResults, x => x.Attribute);
+            Assert.Equal(expected.Values[0], aggregatedResults.Values[0]);
+            Assert.Equal(expected.Attribute.Name, aggregatedResults.Attribute.Name);
         }
     }
 }

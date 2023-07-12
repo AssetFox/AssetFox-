@@ -86,24 +86,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .AsNoTracking().AsSplitQuery().ToList();
         }
 
-        /*public List<AggregatedResultDTO> GetAggregatedResultsForAttributeNames(List<string> attributeNames)
-        {
-            return _unitOfWork.Context.AggregatedResult
-                .Include(_ => _.MaintainableAsset)
-                .Include(_ => _.Attribute)
-                .Where(_ => attributeNames.Contains(_.Attribute.Name))
-                .Select(e => AggregatedResultMapper.ToDto(e))
-                .AsNoTracking().AsSplitQuery().ToList();
-        }*/
-
-        public (string, string, List<string>, bool) GetAggregatedResultsForAttributeNames(List<string> attributeNames)
+        public AggregatedSelectValuesResultDTO GetAggregatedResultsForAttributeNames(List<string> attributeNames)
         {
             var allOfAttributeDTOs = _unitOfWork.Context.AggregatedResult
                 .Include(_ => _.Attribute)
                 .Where(_ => attributeNames.Contains(_.Attribute.Name))
-                //.Where(_ => _.Attribute.Name == attributeNames[0])
                 .Select(e => AggregatedResultMapper.ToDto(e))
                 .AsNoTracking().AsSplitQuery().ToList();
+
+            if (!allOfAttributeDTOs.Any())
+                return new();
 
             var values = new List<string>();
             bool isNumber = false;
@@ -117,10 +109,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 values = allOfAttributeDTOs.Where(_ => _.TextValue != null).Select(_ => _.TextValue).Distinct().ToList();
                 isNumber = allOfAttributeDTOs.Any(_ => _.Attribute.Type == "NUMBER");
             }
+            else
+                return new();
 
-            string name = allOfAttributeDTOs.Select(_ => _.Attribute.Name).FirstOrDefault();
-            string resultType = !values.Any() ? "warning" : "success";
-            return new (name, resultType, values, isNumber);
+            AttributeDTO attr = allOfAttributeDTOs.Select(_ => _.Attribute).FirstOrDefault();
+            string resultType = values.Any() ? "success" : "warning";
+            return new AggregatedSelectValuesResultDTO() {
+                Attribute = attr,
+                Values = values,
+                ResultType = resultType,
+                IsNumber = isNumber
+            };
         }
 
         public List<AggregatedResultDTO> GetAggregatedResultsForMaintainableAsset(Guid assetId, List<Guid> attributeIds)

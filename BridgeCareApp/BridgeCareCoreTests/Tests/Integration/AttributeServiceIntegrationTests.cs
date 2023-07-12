@@ -31,10 +31,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var service = CreateAttributeService(TestHelper.UnitOfWork);
-            var attributeNames = new List<string>
-            {
-                AttributeNameConstants.DeckArea,
-            };
+            List<string> attributeNames = new() { "BAFTICR_SUM" };
             var values = service.GetAttributeSelectValues(attributeNames);
             Assert.Empty(values);
         }

@@ -112,6 +112,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Update last modified date
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
+        public DateTime GetLibraryModifiedDate(Guid performanceLibraryId)
+        {
+            var dtos = _unitOfWork.Context.PerformanceCurveLibrary.Where(_ => _.Id == performanceLibraryId).FirstOrDefault().LastModifiedDate;
+            return dtos;
+        }
 
         public void GetScenarioPerformanceCurves(Simulation simulation, Dictionary<Guid, string> attributeNameLookupDictionary)
         {

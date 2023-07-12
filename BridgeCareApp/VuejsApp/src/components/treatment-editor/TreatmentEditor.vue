@@ -54,7 +54,7 @@
             <v-flex xs6>
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-bottom: 50px !important">
                         <div class="ghd-control-label">
-                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |    
+                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> | Date Modified: {{ modifiedDate }}   
                         <v-badge v-show="isShared">
                             <template v-slot: badge>
                                 <span>Shared</span>
@@ -516,6 +516,7 @@ export default class TreatmentEditor extends Vue {
     loadedParentName: string = "";
     loadedParentId: string  = this.uuidNIL;
     newLibrarySelection: boolean = false;
+    modifiedDate: string;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -590,16 +591,26 @@ export default class TreatmentEditor extends Vue {
         this.setParentLibraryName(this.librarySelectItemValue ? this.librarySelectItemValue : this.parentLibraryId);
         this.scenarioLibraryIsModified = false;
         this.newLibrarySelection = true;
+
     }
     onSelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue;
         this.selectTreatmentLibraryAction({
             libraryId: this.librarySelectItemValue,
+            
         });
     
         if(!isNil(this.librarySelectItemValue)){
             this.getSimpleSelectableTreatmentsAction(this.librarySelectItemValue);
         }           
+
+        TreatmentService.getTreatmentLibraryModifiedDate(this.librarySelectItemValue).then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.modifiedDate = data.slice(0, 10);
+                   }
+             });
     }  
 
     @Watch('stateSimpleSelectableTreatments')

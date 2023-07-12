@@ -21,6 +21,9 @@
                         <div class="header-text-content invest-owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                         </div>
+                        <div class="header-text-content invest-owner-padding">
+                            Date Modified: {{ modifiedDate }}
+                        </div>
                         <v-btn @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                                v-show='!hasScenario'>
                             Share Library
@@ -375,6 +378,7 @@ export default class InvestmentEditor extends Vue {
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
+    @Getter('getLibraryDateModified') getModifiedDate: any;
 
     @Mutation('budgetLibraryMutator') budgetLibraryMutator: any;
     @Mutation('selectedBudgetLibraryMutator') selectedBudgetLibraryMutator: any;
@@ -398,6 +402,7 @@ export default class InvestmentEditor extends Vue {
     lastYear: number = 0;
     firstYear: number = 0;
     initializing: boolean = true;
+    modifiedDate: string;
 
     selectedBudgetLibrary: BudgetLibrary = clone(emptyBudgetLibrary);
     investmentPlan: InvestmentPlan = clone(emptyInvestmentPlan);
@@ -533,6 +538,7 @@ export default class InvestmentEditor extends Vue {
                     this.lastYear = data.lastYear;
                     
                     this.syncInvestmentPlanWithBudgets();
+                
                     
                 }
             });
@@ -540,6 +546,14 @@ export default class InvestmentEditor extends Vue {
         else if(this.hasSelectedLibrary){
             if(this.librarySelectItemValue === null)
                 return;
+                await InvestmentService.getBudgetLibraryModifiedDate(this.selectedBudgetLibrary.id).then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.modifiedDate = data.slice(0, 10);
+                   }
+             });
+
             await InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
@@ -553,6 +567,7 @@ export default class InvestmentEditor extends Vue {
             }); 
         }                
     }
+   
 
     @Watch('deletionBudgetIds')
     onDeletionBudgetIdsChanged() {
@@ -606,6 +621,7 @@ export default class InvestmentEditor extends Vue {
         this.scenarioLibraryIsModified = false;
         this.librarySelectItemValueAllowedChanged = true;
     }
+
     onSelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue
         this.selectBudgetLibraryAction(this.librarySelectItemValue);
@@ -926,9 +942,9 @@ export default class InvestmentEditor extends Vue {
     }
 
     getOwnerUserName(): string {
-
-        if (!this.hasCreatedLibrary) {
-            return this.getUserNameByIdGetter(this.selectedBudgetLibrary.owner);
+        
+        if (!this.hasCreatedLibrary) {  
+             return this.getUserNameByIdGetter(this.selectedBudgetLibrary.owner);
         }
 
         return getUserName();

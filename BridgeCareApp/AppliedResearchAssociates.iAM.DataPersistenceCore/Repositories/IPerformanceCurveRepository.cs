@@ -38,6 +38,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         public List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibrariesNoChildrenAccessibleToUser(Guid guid);
 
+        DateTime GetLibraryModifiedDate(Guid performanceLibraryId);
+
         public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
 
         void UpsertOrDeleteUsers(Guid performanceCurveLibraryId, IList<LibraryUserDTO> libraryUsers);

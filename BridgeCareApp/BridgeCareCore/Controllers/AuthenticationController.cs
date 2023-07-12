@@ -45,8 +45,9 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var response = GetUserInfoString(token);
-                ValidateResponse(response);
-                var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(response);
+                var responseResult = response.Result;
+                ValidateResponse(responseResult);
+                var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(responseResult);
                 userInfo.HasAdminAccess = UserInfo.HasAdminAccess;
                 userInfo.HasSimulationAccess = UserInfo.HasSimulationAccess;
                 userInfo.InternalRoles = UserInfo.InternalRoles;
@@ -67,7 +68,7 @@ namespace BridgeCareCore.Controllers
         /// </summary>
         /// <param name="token">Access token</param>
         /// <returns>JSON-formatted user info</returns>
-        private static string GetUserInfoString(string token)
+        private static async Task<string> GetUserInfoString(string token)
         {
             // These two lines should be removed as soon as the ESEC site's certificates start working
             var handler = new HttpClientHandler
@@ -85,10 +86,9 @@ namespace BridgeCareCore.Controllers
             };
             HttpContent content = new FormUrlEncodedContent(formData);
 
-            var responseTask = client.PostAsync("userinfo", content);
-            responseTask.Wait();
+            var responseTask =  await client.PostAsync("userinfo", content);
 
-            return responseTask.Result.Content.ReadAsStringAsync().Result;
+            return responseTask.Content.ReadAsStringAsync().Result;
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace BridgeCareCore.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("RefreshToken/{refreshToken}")]
-        public IActionResult GetRefreshToken(string refreshToken)
+        public async Task<IActionResult> GetRefreshToken(string refreshToken)
         {
             try
             {
@@ -171,10 +171,11 @@ namespace BridgeCareCore.Controllers
 
                 var query = $"?grant_type=refresh_token&refresh_token={WebUtility.UrlDecode(refreshToken)}";
 
-                var responseTask = client.PostAsync("token" + query, content);
-                responseTask.Wait();
+                var responseTask = await client.PostAsync("token" + query, content);
+                //responseTask.Wait();
 
-                var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+                //var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+                var response = responseTask.Content.ReadAsStringAsync().Result;
 
                 ValidateResponse(response);
 

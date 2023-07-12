@@ -7,7 +7,7 @@ import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 const isAuthenticatedEsecUser = () => {
     return store
         .dispatch('checkBrowserTokens')
-        .then(() =>
+        .then(() => 
             store.dispatch('getUserInfo').then(() =>
                 store.dispatch('getUserCriteriaFilter').then(() => {
                     // @ts-ignore
@@ -17,7 +17,7 @@ const isAuthenticatedEsecUser = () => {
                         throw new Error('Failed to authenticate');
                     }
                 })
-               ),
+            ),
         )
         .catch((error: any) => {
             if(error.message != 'errorHandledAtAPI')

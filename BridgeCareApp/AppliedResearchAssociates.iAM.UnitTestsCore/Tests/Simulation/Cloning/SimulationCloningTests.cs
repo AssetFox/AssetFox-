@@ -10,16 +10,68 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.BudgetPriority;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
 {
+
+    
     public class SimulationCloningTests
     {
+
+        [Fact]
+        public void SimulationInDb_Clone_Clones()
+        {
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
+            Assert.Equal(newSimulationName, clonedSimulation.Name);
+            Assert.Equal(networkId, clonedSimulation.NetworkId);
+            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+        }
+
+        [Fact]
+        public void SimulationInDbWithRemainingLifeLimit_Clone_Clones()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var limitId = Guid.NewGuid();
+            var limit = RemainingLifeLimitDtos.Dto(TestAttributeNames.CulvDurationN, limitId, 1);
+            var limits = new List<RemainingLifeLimitDTO> { limit };
+
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+
+            TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(limits, simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
+            var clonedLifeLimits = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(clonedSimulationId);
+            var clonedLifeLimit = clonedLifeLimits.Single();
+            ObjectAssertions.EquivalentExcluding(limit, clonedLifeLimit, c => c.CriterionLibrary, c => c.Id);
+            Assert.Equal(newSimulationName, clonedSimulation.Name);
+            Assert.Equal(networkId, clonedSimulation.NetworkId);
+            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            var expectedCriterionLibrary = new CriterionLibraryDTO();
+            ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedLifeLimit.CriterionLibrary);
+            Assert.NotEqual(limit.Id, clonedLifeLimit.Id);
+
+        }
 
         [Fact]
         public void SimulationInDbWithAnalysisMethodInCriterionLibrary_Clone_Clones()
@@ -79,29 +131,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(user.Username, clonedSimulationUser.Username);
         }
 
-        [Fact]
-        public void SimulationInDb_Clone_Clones()
-        {
-            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
-            var simulationId = simulationEntity.Id;
-            var newSimulationName = RandomStrings.WithPrefix("cloned");
-            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
-
-            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
-
-            var clonedSimulationId = cloningResult.Simulation.Id;
-            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
-            Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
-        }
-
+       
         [Fact]
         public void SimulationInDbWithCalculatedAttribute_Clone_Clones()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-           
+            
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
@@ -129,10 +164,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void SimulationInDbWithCalculatedAttributeWithCriterionLibrary_Clone_Clones()
+        public async Task SimulationInDbWithCalculatedAttributeWithCriterionLibrary_Clone_Clones()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, false);
+            TestHelper.UnitOfWork.SetUser(user.Username);
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
@@ -153,11 +189,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var allAttributes = TestHelper.UnitOfWork.AttributeRepo.GetAttributes();
             var ageAttribute = allAttributes.Single(a => a.Name == TestAttributeNames.Age);
             var clonedAttribute = TestHelper.UnitOfWork.CalculatedAttributeRepo.GetScenarioCalulatedAttributesByScenarioAndAttributeId(clonedSimulationId, ageAttribute.Id);
-            ObjectAssertions.EquivalentExcluding(calculatedAttribute, clonedAttribute, c => c.Id, c => c.Equations[0].Id, c => c.Equations[0].Equation.Id, c => c.Equations[0].CriteriaLibrary.Id);
+            ObjectAssertions.EquivalentExcluding(calculatedAttribute, clonedAttribute, c => c.Id, c => c.Equations[0].Id, c => c.Equations[0].Equation.Id, c => c.Equations[0].CriteriaLibrary.Id, c => c.Equations[0].CriteriaLibrary.Owner);
             Assert.NotEqual(calculatedAttribute.Id, clonedAttribute.Id);
             Assert.NotEqual(calculatedAttribute.Equations[0].Id, clonedAttribute.Equations[0].Id);
             Assert.NotEqual(calculatedAttribute.Equations[0].Equation.Id, clonedAttribute.Equations[0].Equation.Id);
             Assert.NotEqual(calculatedAttribute.Equations[0].CriteriaLibrary.Id, clonedAttribute.Equations[0].CriteriaLibrary.Id);
+            Assert.Equal(user.Id, clonedAttribute.Equations[0].CriteriaLibrary.Owner);
         }
 
         [Fact]

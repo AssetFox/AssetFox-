@@ -168,7 +168,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, TestAttributeIds.CulvDurationNId);
 
             // Setup a simulation based on network
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dae1c62c-adba-4510-bfe5-61260c49ec99"), "Test Simulation", new Guid(), networkId);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, TestDataForCommittedProjects.NoCommitSimulationId, "Test Simulation", new Guid(), networkId);
             simulation.NetworkId = network.Id;
 
             // Set up a selectable treatment for the test with sample budgets

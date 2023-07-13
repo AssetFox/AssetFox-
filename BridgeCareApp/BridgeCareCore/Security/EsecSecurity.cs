@@ -10,7 +10,6 @@ using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using NuGet.Protocol;
 using static BridgeCareCore.Security.SecurityConstants;
 
 namespace BridgeCareCore.Security
@@ -162,6 +161,7 @@ namespace BridgeCareCore.Security
             if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
                 validationParameters.IssuerSigningKey = _esecPublicKey;
+
                 handler.ValidateToken(idToken, validationParameters, out var validatedToken);
                 return validatedToken as JwtSecurityToken;
             }

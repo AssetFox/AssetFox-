@@ -10,6 +10,7 @@ using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.Extensions.DependencyModel;
 using MathNet.Numerics.Statistics.Mcmc;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -86,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             selectableTreatment.ShadowForSameTreatment = entity.ShadowForSameTreatment;
             selectableTreatment.Description = entity.Description;
             selectableTreatment.Category = (TreatmentCategory)entity.Category;
-            selectableTreatment.AssetCategory = (AssetCategory)entity.AssetType;
+            selectableTreatment.AssetCategory = (Analysis.AssetCategory)(DTOs.Enums.AssetCategory)entity.AssetType;
             if (entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
             {
                 var budgetIds = entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Select(_ => _.ScenarioBudget.Id).ToList();
@@ -151,8 +152,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CriterionLibrary = entity.CriterionLibrarySelectableTreatmentJoin != null
                     ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),
-                Category = (TreatmentDTOEnum.TreatmentType)entity.Category,
-                AssetType = (TreatmentDTOEnum.AssetType)entity.AssetType
+                Category = (TreatmentCategory)entity.Category,
+                AssetType = (DTOs.Enums.AssetCategory)entity.AssetType
             };
 
         public static TreatmentDTOWithSimulationId ToDtoWithSimulationId(this ScenarioSelectableTreatmentEntity entity)
@@ -229,12 +230,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         : new CriterionLibraryDTO(),
                 ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                 ShadowForSameTreatment = entity.ShadowForSameTreatment,
-                Category = (TreatmentDTOEnum.TreatmentType)entity.Category,
+                Category = (TreatmentCategory)entity.Category,
 
                 IsModified = entity.IsModified,
                 LibraryId = entity.LibraryId,
 
-                AssetType = (TreatmentDTOEnum.AssetType)entity.AssetType
+                AssetType = (DTOs.Enums.AssetCategory)entity.AssetType
             };
     }
 }

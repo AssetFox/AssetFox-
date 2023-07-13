@@ -36,10 +36,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             SetupBudgetModelsAndCommittedTreatments(reportOutputData, selectableTreatments, workSummaryByBudgetModels, committedTreatments);
 
-            var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
+            var simulationTreatments = new List<(string Name, DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)>();
             foreach (var item in selectableTreatments)
             {
-                simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
+                simulationTreatments.Add((item.Name, (DTOs.Enums.AssetCategory)item.AssetCategory, item.Category));
             }
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
 
@@ -166,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                 Amount = budgetAmount,
                                 //costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
                                 TreatmentCategory = treatmentData.Category,
-                                AssetType = treatmentData.AssetCategory,
+                                AssetType = (DTOs.Enums.AssetCategory)treatmentData.AssetCategory,
                                 SurfaceId = (int)section.ValuePerNumericAttribute["SURFACEID"]
                             });
                         }

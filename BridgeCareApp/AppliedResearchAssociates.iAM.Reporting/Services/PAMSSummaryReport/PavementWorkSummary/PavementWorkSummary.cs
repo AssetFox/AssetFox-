@@ -39,11 +39,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
-            var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
+            var simulationTreatments = new List<(string Name, DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)>();
 
             foreach (var item in selectableTreatments)
             {
-                simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
+                simulationTreatments.Add((item.Name, (DTOs.Enums.AssetCategory)item.AssetCategory, item.Category));
             }
 
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));

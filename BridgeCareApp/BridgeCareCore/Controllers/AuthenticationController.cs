@@ -171,9 +171,6 @@ namespace BridgeCareCore.Controllers
                 var query = $"?grant_type=refresh_token&refresh_token={WebUtility.UrlDecode(refreshToken)}";
 
                 var responseTask = await client.PostAsync("token" + query, content);
-                //responseTask.Wait();
-
-                //var response = responseTask.Result.Content.ReadAsStringAsync().Result;
                 var response = responseTask.Content.ReadAsStringAsync().Result;
 
                 ValidateResponse(response);

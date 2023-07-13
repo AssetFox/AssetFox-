@@ -770,6 +770,7 @@ export default class CommittedProjectsEditor extends Vue  {
         this.selectedCommittedProject = '';
         this.selectedCpItems = [];
         this.isNoTreatmentBefore = this.isNoTreatmentBeforeCache
+        this.resetPage();
     }
 
     OnExportProjectsClick(){

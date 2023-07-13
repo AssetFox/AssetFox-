@@ -359,6 +359,7 @@ import {
     propEq,
     reject,
     update,
+    isEmpty,
 } from 'ramda';
 import TreatmentDetailsTab from '@/components/treatment-editor/treatment-editor-tabs/TreatmentDetailsTab.vue';
 import CostsTab from '@/components/treatment-editor/treatment-editor-tabs/CostsTab.vue';
@@ -598,7 +599,9 @@ export default class TreatmentEditor extends Vue {
         });
     
         if(!isNil(this.librarySelectItemValue)){
-            this.getSimpleSelectableTreatmentsAction(this.librarySelectItemValue);
+            if (!isEmpty(this.librarySelectItemValue)){
+                this.getSimpleSelectableTreatmentsAction(this.librarySelectItemValue);
+            }
         }           
     }  
 
@@ -1184,7 +1187,6 @@ export default class TreatmentEditor extends Vue {
         }
         else
             this.updatedRowsMap.delete(rowId)
-
         this.checkHasUnsavedChanges();
     }
 

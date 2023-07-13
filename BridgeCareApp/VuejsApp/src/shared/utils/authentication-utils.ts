@@ -20,17 +20,14 @@ const isAuthenticatedEsecUser = () => {
             ),
         )
         .catch((error: any) => {
-            if(error.message != 'errorHandledAtAPI')
-            {
-                store
-                .dispatch('addErrorNotification', {
-                    message: 'Authentication Error.',
-                    longMessage: error,
-                })
-                .then(() => {
-                    return false;
-                });
-            }
+            store
+            .dispatch('addErrorNotification', {
+                message: 'Authentication Error.',
+                longMessage: error,
+            })
+            .then(() => {
+                return false;
+            });
         });
 };
 

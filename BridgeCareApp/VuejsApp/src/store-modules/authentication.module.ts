@@ -172,10 +172,9 @@ const actions = {
                     if (state.authenticated) {
                         commit('authenticatedMutator', false);
                     }
-                    if(response == undefined)
-                    {
-                        throw new Error('errorHandledAtAPI');
-                    }
+                    throw new Error(
+                        'Cannot determine user authentication status',
+                    );
                 }
             });
         }

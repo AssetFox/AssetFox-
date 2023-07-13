@@ -23,6 +23,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AuthenticationController : BridgeCareCoreBaseController
     {
+        public const string AuthenticationError = "Authentication Error";
         private static IConfigurationSection _esecConfig;
         private readonly ILog _log;
 
@@ -57,8 +58,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                //return StatusCode(500, e.Message);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, e.Message);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AuthenticationError}::GetUserInfo - {e.Message}");
                 throw;
             }
         }
@@ -123,7 +123,6 @@ namespace BridgeCareCore.Controllers
                 HttpContent content = new FormUrlEncodedContent(formData);
 
                 var responseTask = await client.PostAsync("token", content);
-                 //responseTask.Wait();
 
                 var response = responseTask.Content.ReadAsStringAsync().Result;
 
@@ -136,7 +135,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"The authorization system is not available at the moment: " + e.Message);
+                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"{AuthenticationError}::GetUserTokens - The authorization system is not available at the moment: {e.Message}");
                 throw;
             }
         }
@@ -184,7 +183,8 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                return StatusCode(500, e.Message);
+                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"{AuthenticationError}::GetRefreshToken - {e.Message}");
+                throw;
             }
 
         }
@@ -236,7 +236,8 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                return StatusCode(500, e.Message);
+                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"{AuthenticationError}::RevokeToken - {e.Message}");
+                throw;
             }
         }
 
@@ -259,7 +260,8 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                return StatusCode(500, e.Message);
+                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"{AuthenticationError}::RevokeToken - {e.Message}");
+                throw;
             }
         }
 

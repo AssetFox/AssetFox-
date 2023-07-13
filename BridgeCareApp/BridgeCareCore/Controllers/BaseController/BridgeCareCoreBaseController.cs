@@ -14,6 +14,8 @@ namespace BridgeCareCore.Controllers.BaseController
 {
     public class BridgeCareCoreBaseController : ControllerBase
     {
+        public const string BridgeCareCoreBaseError = "BridgeCareCoreBase Error";
+
         protected readonly IEsecSecurity EsecSecurity;
 
         protected readonly IUnitOfWork UnitOfWork;
@@ -58,12 +60,12 @@ namespace BridgeCareCore.Controllers.BaseController
             }
             catch(SecurityTokenExpiredException)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, "The token is expired. Please re-login by pressing the button \"Go to login page\".");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"{BridgeCareCoreBaseError}::The token is expired. Please re-login by pressing the button \"Go to login page\".");
                 throw;
             }
             catch (Exception exception)
-            {                
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, exception.Message);
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BridgeCareCoreBaseError}::SetUserInfo - {exception.Message}");
                 throw;
             }
         }

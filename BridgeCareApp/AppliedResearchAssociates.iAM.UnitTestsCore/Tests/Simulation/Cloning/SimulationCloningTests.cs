@@ -72,6 +72,40 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             Assert.NotEqual(limit.Id, clonedLifeLimit.Id);
         }
 
+
+        [Fact]
+        public void SimulationInDbWithScenarioDeficientConditionGoals_Clone_Clones()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var deficientconditiongoalsId = Guid.NewGuid();
+            var deficientconditiongoal = DeficientConditionGoalDtos.Dto(deficientconditiongoalsId, TestAttributeNames.CulvDurationN);
+            var deficientconditiongoals = new List<DeficientConditionGoalDTO> { deficientconditiongoal };
+
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(deficientconditiongoals, simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
+            var clonedDeficientConditionGoals = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(clonedSimulationId);
+            var clonedDeficientConditionGoal = clonedDeficientConditionGoals.Single();
+            ObjectAssertions.EquivalentExcluding(deficientconditiongoal, clonedDeficientConditionGoal, c => c.CriterionLibrary, c => c.Id);
+            Assert.Equal(newSimulationName, clonedSimulation.Name);
+            Assert.Equal(networkId, clonedSimulation.NetworkId);
+            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(deficientconditiongoal.DeficientLimit, clonedDeficientConditionGoal.DeficientLimit);
+            Assert.Equal(deficientconditiongoal.Name, clonedDeficientConditionGoal.Name);
+            var expectedCriterionLibrary = new CriterionLibraryDTO();
+            ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedDeficientConditionGoal.CriterionLibrary);           
+            Assert.NotEqual(deficientconditiongoal.Id, clonedDeficientConditionGoal.Id);
+        }
+
         [Fact]
         public void SimulationInDbWithRemainingLifeLimitWithCriterionLibrary_Clone_Clones()
         {

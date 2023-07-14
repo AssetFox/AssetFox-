@@ -504,9 +504,9 @@ export default class TreatmentEditor extends Vue {
     treatmentCache: Treatment[] = [];
 
     unsavedDialogAllowed: boolean = true;
-    trueLibrarySelectItemValue: string = ''
+    trueLibrarySelectItemValue: string | null = '';
     librarySelectItemValueAllowedChanged: boolean = true;
-    librarySelectItemValue: string = "";
+    librarySelectItemValue: string | null = '';
 
     shareTreatmentLibraryDialogData: ShareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
     loadedScenarioId: string = '';
@@ -894,8 +894,8 @@ export default class TreatmentEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 //this.clearChanges();
                 this.treatmentCache.push(this.selectedTreatment);
-                this.librarySelectItemValue = this.parentLibraryId;
-                this.addSuccessNotificationAction({message: "Modified scenario's treatments"});             
+                this.librarySelectItemValue = null;
+                this.addSuccessNotificationAction({message: "Modified scenario's treatments"});   
                 this.checkHasUnsavedChanges();
             }           
         });

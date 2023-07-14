@@ -54,6 +54,7 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.AdminSettingsRepo.SetImplementationName(name);
                 });
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, "Successfully Updated Implementation Name");
                 return Ok();
             }
             catch (Exception e)
@@ -93,6 +94,7 @@ namespace BridgeCareCore.Controllers
                 //https://stackoverflow.com/questions/8848725/asp-net-c-sharp-convert-filestream-to-image
                 Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
                 await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.SetAgencyLogo(logo));
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, "Successfully Updated Agency Logo");
                 return Ok();
             }
             catch (Exception e)
@@ -131,6 +133,7 @@ namespace BridgeCareCore.Controllers
                     throw new ConstraintException("Attributes file not found.");
                 Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
                 await Task.Factory.StartNew( () => UnitOfWork.AdminSettingsRepo.SetImplementationLogo(logo) );
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, "Successfully Updated Implementation Logo");
                 return Ok();
             }
             catch (Exception e)

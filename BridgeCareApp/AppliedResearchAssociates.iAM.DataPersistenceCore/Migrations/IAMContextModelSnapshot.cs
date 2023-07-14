@@ -753,6 +753,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<float>("PerformanceFactor")
+                        .HasColumnType("real");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AttributeId");
@@ -2714,6 +2717,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("TreatmentLibrary");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentPerformanceFactorEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Attribute")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<float>("PerformanceFactor")
+                        .HasColumnType("real");
+
+                    b.Property<Guid>("TreatmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TreatmentId");
+
+                    b.ToTable("TreatmentPerformanceFactor");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSchedulingEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4077,6 +4114,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsUnique();
 
                     b.ToTable("ScenarioTreatmentCost_Equation", (string)null);
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentPerformanceFactorEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Attribute")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<float>("PerformanceFactor")
+                        .HasColumnType("real");
+
+                    b.Property<Guid>("ScenarioSelectableTreatmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScenarioSelectableTreatmentId");
+
+                    b.ToTable("ScenarioTreatmentPerformanceFactor");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSchedulingEntity", b =>
@@ -5809,6 +5880,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("TreatmentCost");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentPerformanceFactorEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", "SelectableTreatment")
+                        .WithMany("TreatmentPerformanceFactors")
+                        .HasForeignKey("TreatmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SelectableTreatment");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSchedulingEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", "SelectableTreatment")
@@ -6416,6 +6498,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("ScenarioTreatmentCost");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentPerformanceFactorEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
+                        .WithMany("ScenarioTreatmentPerformanceFactors")
+                        .HasForeignKey("ScenarioSelectableTreatmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ScenarioSelectableTreatment");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSchedulingEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
@@ -6971,6 +7064,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("TreatmentCosts");
 
+                    b.Navigation("TreatmentPerformanceFactors");
+
                     b.Navigation("TreatmentSchedulings");
 
                     b.Navigation("TreatmentSupersessions");
@@ -7102,6 +7197,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("ScenarioTreatmentConsequences");
 
                     b.Navigation("ScenarioTreatmentCosts");
+
+                    b.Navigation("ScenarioTreatmentPerformanceFactors");
 
                     b.Navigation("ScenarioTreatmentSchedulings");
 

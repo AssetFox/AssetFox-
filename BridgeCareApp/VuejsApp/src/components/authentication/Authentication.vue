@@ -35,6 +35,7 @@
         @Action('getUserInfo') getUserInfoAction: any;
         @Action('getAzureAccountDetails') getAzureAccountDetailsAction: any;
         @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
+        @Action('addErrorNotification') addErrorNotificationAction: any;
 
         mounted() {
             const code: string = this.$route.query.code as string;

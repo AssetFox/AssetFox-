@@ -4,6 +4,9 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 {
+    /// <summary>
+    /// A base project DTO class that all projects derive from.
+    /// </summary>
     public abstract class BaseCommittedProjectDTO : BaseDTO
     {
         /// <summary>

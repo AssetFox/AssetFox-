@@ -23,7 +23,7 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-space-between row>
-          <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
+          <v-btn @click="onSubmit(false)" outline class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn>
           <v-btn :disabled="newCashFlowRuleLibrary.name === ''" @click="onSubmit(true)"

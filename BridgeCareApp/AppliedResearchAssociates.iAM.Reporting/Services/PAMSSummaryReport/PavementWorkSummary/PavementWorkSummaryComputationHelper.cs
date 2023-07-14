@@ -82,13 +82,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         internal void FillDataToUseInExcel(
             SimulationOutput reportOutputData,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
             Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
             )
         {
             foreach (var yearData in reportOutputData.Years)
             {
-                costAndLengthPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int length)>());
+                costAndLengthPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>());
                 costAndLengthPerTreatmentGroupPerYear.Add(yearData.Year, new Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>());
 
                 foreach (var section in yearData.Assets)
@@ -103,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         internal void FillDataToUseInExcel(
             WorkSummaryByBudgetModel budgetSummaryModel,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
             Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
             )
         {
@@ -111,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             {
                 if (!costAndLengthPerTreatmentPerYear.ContainsKey(yearsData.Year))
                 {
-                    costAndLengthPerTreatmentPerYear.Add(yearsData.Year, new Dictionary<string, (decimal treatmentCost, int length)>());
+                    costAndLengthPerTreatmentPerYear.Add(yearsData.Year, new Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>());
                 }
                 var treatmentData = costAndLengthPerTreatmentPerYear[yearsData.Year];
 
@@ -127,14 +127,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
         private void PopulateTreatmentCostAndLength(
             YearsData yearsData,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear
             )
         {
             int segmentLength = 0;
 
             if (!costAndLengthPerTreatmentPerYear[yearsData.Year].ContainsKey(yearsData.TreatmentName))
             {
-                costAndLengthPerTreatmentPerYear[yearsData.Year].Add(yearsData.TreatmentName, ((decimal)yearsData.Amount, (int)segmentLength));
+                costAndLengthPerTreatmentPerYear[yearsData.Year].Add(yearsData.TreatmentName, ((decimal)yearsData.Amount, yearsData.SurfaceId == 62 ? (decimal)yearsData.Amount : 0, (int)segmentLength));
+            }
+            else
+            {
+                var values = costAndLengthPerTreatmentPerYear[yearsData.Year][yearsData.TreatmentName];
+                values.treatmentCost += (decimal)yearsData.Amount;
+                values.compositeTreatmentCost += yearsData.SurfaceId == 62 ? (decimal)yearsData.Amount : 0;
+                costAndLengthPerTreatmentPerYear[yearsData.Year][yearsData.TreatmentName] = values;
             }
         }
 
@@ -165,18 +172,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             int year,
             AssetDetail section,
             decimal cost,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> costAndLengthPerTreatmentPerYear
             )
         {
             var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
+            var surfaceId = section.ValuePerNumericAttribute["SURFACEID"];
             if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
             {
-                costAndLengthPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, (int)segmentLength));
+                costAndLengthPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, surfaceId == 62 ? cost : 0, (int)segmentLength));
             }
             else
             {
                 var values = costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment];
                 values.treatmentCost += cost;
+                if (surfaceId == 62)
+                    values.compositeTreatmentCost += cost;
                 values.length += (int)segmentLength;
                 costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment] = values;
             }
@@ -207,7 +217,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
         internal Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> CalculateWorkTypeTotals(
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {

@@ -137,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private string GeneratePAMSPBExportReport(Guid networkId, Guid simulationId, IWorkQueueLog workQueueLog, CancellationToken? cancellationToken = null)
         {
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             var reportPath = string.Empty;
             var reportDetailDto = new SimulationReportDetailDTO
             {
@@ -178,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.TreatmentTab);
             _treatmentTab.Fill(treatmentsWorksheet, simulationOutput, simulationId, simulation.Network.Id, simulation.Treatments, networkMaintainableAssets);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
@@ -187,7 +187,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
             reportPath = Path.Combine(folderPathForSimulation, "PAMSPBExportReport.xlsx");
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(reportPath, bin);
 
@@ -222,12 +222,18 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = true;
         }
 
-        private void checkCancelled(CancellationToken? cancellationToken)
+        private void checkCancelled(CancellationToken? cancellationToken, Guid simulationId)
         {
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
             {
                 throw new Exception("Report was cancelled");
             }
+            var reportDetailDto = new SimulationReportDetailDTO
+            {
+                SimulationId = simulationId,
+                Status = $""
+            };
+            UpsertSimulationReportDetail(reportDetailDto);
         }
     }
 }

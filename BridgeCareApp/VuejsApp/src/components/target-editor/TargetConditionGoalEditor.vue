@@ -14,7 +14,7 @@
                             outlined
                         >
                         </v-select>
-                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario">Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
+                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -39,17 +39,19 @@
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
-                    <v-layout align-end style="padding-top: 18px !important;">
+                    <v-layout justify-end align-end style="padding-top: 18px !important;">
                         <v-spacer></v-spacer>
                         <v-btn outline
+                            id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
                             @click="showCreateTargetConditionGoalDialog = true"
                             class="ghd-control-border ghd-blue"
                             v-show="hasSelectedLibrary || hasScenario" 
                         >Add Target Condition Goal</v-btn>
-                        <v-btn outline
+                        <v-btn 
                             @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
-                            class="ghd-control-border ghd-blue"
+                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario"
+                            outline
                         >
                         Create New Library
                         </v-btn>
@@ -61,6 +63,7 @@
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="targets-data-table">
                 <v-data-table
+                    id="TargetConditionGoalEditor-targetConditionGoals-vdatatable"
                     :headers="targetConditionGoalGridHeaders"
                     :items="currentPage"  
                     :pagination.sync="pagination"
@@ -76,6 +79,7 @@
                     <template slot="items" slot-scope="props">
                         <td>
                             <v-checkbox
+                                id="TargetConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
                                 primary
                                 v-model="props.selected"
@@ -83,28 +87,22 @@
                         </td>
                         <td v-for="header in targetConditionGoalGridHeaders">
                             <div>
-                                <v-edit-dialog
+                                <!-- <v-edit-dialog
                                     v-if="header.value !== 'criterionLibrary'"
-                                    :return-value.sync="
-                                        props.item[header.value]
-                                    "
+                                    :return-value.sync="props.item[header.value]"
                                     @save="
                                         onEditTargetConditionGoalProperty(
                                             props.item,
                                             header.value,
-                                            props.item[header.value],
-                                        )
-                                    "
+                                            props.item[header.value])"
                                     large
-                                    lazy
-                                >
+                                    lazy>
                                     <v-text-field
                                         v-if="header.value === 'year'"
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value="props.item[header.value]"
-                                    />
+                                        :value="props.item[header.value]"/>
                                     <v-text-field
                                         v-else
                                         readonly
@@ -113,28 +111,8 @@
                                         :value="props.item[header.value]"
                                         :rules="[
                                             rules['generalRules']
-                                                .valueIsNotEmpty,
-                                        ]"
-                                    />
-                                    <v-card-actions
-                                        v-if="header.value === 'actions'"
-                                        label="Actions"
-                                    >
-                                        <v-btn                                       
-                                            @click="onShowCriterionLibraryEditorDialog(props.item)"
-                                            class="ghd-blue"
-                                            icon
-                                        >
-                                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
-                                        </v-btn>
-                                        <v-btn
-                                            @click="onRemoveTargetConditionGoalsIcon(props.item)"
-                                            class="ghd-blue"
-                                            icon
-                                        >
-                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                                        </v-btn>
-                                    </v-card-actions>
+                                                .valueIsNotEmpty]"/>
+                                    
 
                                     <template slot="input">
                                         <v-select
@@ -145,31 +123,22 @@
                                             v-model="props.item.attribute"
                                             :rules="[
                                                 rules['generalRules']
-                                                    .valueIsNotEmpty,
-                                            ]"
-                                        />
+                                                    .valueIsNotEmpty]"/>
                                         <v-text-field
                                             v-if="header.value === 'year'"
                                             label="Edit"
                                             single-line
                                             :mask="'####'"
-                                            v-model.number="
-                                                props.item[header.value]
-                                            "
-                                        />
+                                            v-model.number="props.item[header.value]"/>
                                         <v-text-field
                                             v-if="header.value === 'target'"
                                             label="Edit"
                                             single-line
                                             :mask="'##########'"
-                                            v-model.number="
-                                                props.item[header.value]
-                                            "
+                                            v-model.number="props.item[header.value]"
                                             :rules="[
                                                 rules['generalRules']
-                                                    .valueIsNotEmpty,
-                                            ]"
-                                        />
+                                                    .valueIsNotEmpty]"/>
                                         <v-text-field
                                             v-if="header.value === 'name'"
                                             label="Edit"
@@ -177,31 +146,25 @@
                                             v-model="props.item[header.value]"
                                             :rules="[
                                                 rules['generalRules']
-                                                    .valueIsNotEmpty,
-                                            ]"
-                                        />
+                                                    .valueIsNotEmpty]"/>
                                     </template>
-                                </v-edit-dialog>
-                                <v-layout
+                                </v-edit-dialog> -->
+                                <!-- <v-layout
                                     v-else
                                     align-center
                                     row
-                                    style="flex-wrap:nowrap"
-                                >
+                                    style="flex-wrap:nowrap">
                                     <v-menu
                                         bottom
                                         min-height="500px"
-                                        min-width="500px"
-                                    >
+                                        min-width="500px">
                                         <template slot="activator">
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"
                                                 :value="
                                                     props.item.criterionLibrary
-                                                        .mergedCriteriaExpression
-                                                "
-                                            />
+                                                        .mergedCriteriaExpression"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
@@ -209,18 +172,121 @@
                                                     :value="
                                                         props.item
                                                             .criterionLibrary
-                                                            .mergedCriteriaExpression
-                                                    "
+                                                            .mergedCriteriaExpression"
                                                     full-width
                                                     no-resize
                                                     outline
                                                     readonly
-                                                    rows="5"
-                                                />
+                                                    rows="5"/>
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
+                                </v-layout>  -->
+                                <v-edit-dialog
+                                    v-if="header.value !== 'criterionLibrary' && header.value !== 'actions'"
+                                    :return-value.sync="props.item[header.value]"
+                                    @save="
+                                        onEditTargetConditionGoalProperty(
+                                            props.item,
+                                            header.value,
+                                            props.item[header.value])"
+                                    large
+                                    lazy>
+                                    <v-text-field
+                                        v-if="header.value === 'year'"
+                                        readonly
+                                        single-line
+                                        class="sm-txt"
+                                        :value="props.item[header.value]"/>
+                                    <v-text-field
+                                        v-else
+                                        readonly
+                                        single-line
+                                        class="sm-txt"
+                                        :value="props.item[header.value]"
+                                        :rules="[
+                                            rules['generalRules']
+                                                .valueIsNotEmpty]"/>
+
+                                    <template slot="input">
+                                        <v-select
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalAttribute-vselect"
+                                            v-if="header.value === 'attribute'"
+                                            :items="numericAttributeNames"
+                                            append-icon=$vuetify.icons.ghd-down
+                                            label="Select an Attribute"
+                                            v-model="props.item.attribute"
+                                            :rules="[
+                                                rules['generalRules']
+                                                    .valueIsNotEmpty]"/>
+                                        <v-text-field
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalYear-vtextfield"
+                                            v-if="header.value === 'year'"
+                                            label="Edit"
+                                            single-line
+                                            :mask="'####'"
+                                            v-model.number="props.item[header.value]"/>
+                                        <v-text-field
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalTarget-vtextfield"
+                                            v-if="header.value === 'target'"
+                                            label="Edit"
+                                            single-line
+                                            :mask="'##########'"
+                                            v-model.number="props.item[header.value]"
+                                            :rules="[
+                                                rules['generalRules']
+                                                    .valueIsNotEmpty]"/>
+                                        <v-text-field
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalName-vtextfield"
+                                            v-if="header.value === 'name'"
+                                            label="Edit"
+                                            single-line
+                                            v-model="props.item[header.value]"
+                                            :rules="[
+                                                rules['generalRules']
+                                                    .valueIsNotEmpty]"/>
+                                    </template>
+                                </v-edit-dialog>
+                                
+                                <v-layout
+                                    v-if="header.value === 'criterionLibrary'"
+                                    align-center
+                                    style="flex-wrap:nowrap">
+                                    <v-menu
+                                        bottom
+                                        min-height="500px"
+                                        min-width="500px">
+                                        <template slot="activator">
+                                            <v-text-field
+                                                readonly
+                                                class="sm-txt"
+                                                :value="props.item.criterionLibrary.mergedCriteriaExpression"/>
+                                        </template>
+                                        <v-card>
+                                            <v-card-text>
+                                                <v-textarea
+                                                    :value="props.item.criterionLibrary.mergedCriteriaExpression"
+                                                    full-width
+                                                    no-resize
+                                                    outline
+                                                    readonly
+                                                    rows="5"/>
+                                            </v-card-text>
+                                        </v-card>
+                                    </v-menu>
+                                    <v-btn
+                                        id="TargetConditionGoalEditor-editTargetConditionGoalCriteria-vbtn"
+                                        @click="onShowCriterionLibraryEditorDialog(props.item)"
+                                        class="ghd-blue"
+                                        icon>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                    </v-btn>
                                 </v-layout>
+                                <div v-if="header.value === 'actions'">
+                                    <v-btn id="TargetConditionGoalEditor-deleteTargetConditionGoal-vbtn" @click="onRemoveTargetConditionGoalsIcon(props.item)"  class="ghd-blue" icon>
+                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                    </v-btn>
+                                </div> 
                             </div>
                         </td>
                     </template>
@@ -230,9 +296,10 @@
 
         <v-layout justify-start align-center v-show="hasSelectedLibrary || hasScenario">
             <v-btn flat right
+                id="TargetConditionGoalEditor-deleteSelected-vbtn"
                 class="ghd-control-label ghd-blue"
-                @click="onRemoveTargetConditionGoals"
-            > Delete Selected 
+                @click="onRemoveTargetConditionGoals"> 
+                Delete Selected 
             </v-btn>
         </v-layout>
 
@@ -242,13 +309,12 @@
                 class="ghd-control-text ghd-control-border"
                 outline
                 v-model="selectedTargetConditionGoalLibrary.description"
-                @input='checkHasUnsavedChanges()'
-            >
+                @input='checkHasUnsavedChanges()'>
             </v-textarea>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-layout justify-center row>
-                <v-btn flat
+                <v-btn outline
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue"
                     v-show="!hasScenario"
@@ -265,7 +331,7 @@
                 </v-btn>
                 <v-btn outline
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
-                    class="ghd-control-border ghd-blue"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     :disabled="disableCrudButtons()"
                 >
                     Create as New Library

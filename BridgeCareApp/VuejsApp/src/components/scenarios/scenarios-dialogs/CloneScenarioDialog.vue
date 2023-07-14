@@ -24,6 +24,7 @@
                     outline
                 ></v-select>
                 <v-text-field
+                    id="CloneScenarioDialog-scenarioName-textField"
                     label="Scenario name"
                     outline
                     v-model="dialogData.scenario.name"
@@ -33,6 +34,7 @@
             <v-card-actions>
                 <v-layout justify-space-between row>
                     <v-btn
+                        id="CloneScenarioDialog-save-btn"
                         :disabled="dialogData.scenario.name === '' || !isNetworkSelected"
                         @click="onSubmit(true)"
                         class="ara-blue-bg white--text"
@@ -40,6 +42,7 @@
                         Save
                     </v-btn>
                     <v-btn
+                        id="CloneScenarioDialog-cancel-btn"
                         @click="onSubmit(false)"
                         class="ara-orange-bg white--text"
                         >Cancel</v-btn

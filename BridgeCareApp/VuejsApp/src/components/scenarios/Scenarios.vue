@@ -48,7 +48,7 @@
                                         </v-layout>
                                     </v-flex>
                                     <v-flex xs4></v-flex>
-                                    <v-flex class="justify-end xs2">
+                                    <v-layout class="flex-end xs2" style="justify-content: end; padding-right: 70px">
                                         <v-btn
                                            id="Scenarios-createScenario-btn"
                                             @click="
@@ -58,7 +58,7 @@
                                         >
                                             Create new scenario
                                         </v-btn>
-                                    </v-flex>
+                                    </v-layout>
                                 </v-card-title>
                                 <v-data-table
                                     id="Scenarios-scenarios-datatable"
@@ -206,6 +206,7 @@
                                     <v-flex xs6>
                                         <v-layout>
                                             <v-text-field
+                                                id="Scenarios-shared-searchScenarios-textField"
                                                 label="Search"
                                                 placeholder="Search in scenarios"
                                                 outline
@@ -219,6 +220,7 @@
                                             >
                                             </v-text-field>
                                             <v-btn style="margin-top: 2px;" 
+                                                id="Scenarios-shared-performSearch-button"
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 outline 
                                                 @click="onSharedSearchClick()">
@@ -320,6 +322,7 @@
                                                     }"
                                                 >
                                                     <v-btn
+                                                        id="Scenarios-shared-actionMenu-vbtn"
                                                         color="green--text darken-1"
                                                         icon
                                                         v-bind="attrs"

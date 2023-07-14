@@ -28,6 +28,9 @@ namespace BridgeCareCore.Controllers
         public const string BudgetPriorityError = "Budget Priority Error";
         private readonly IClaimHelper _claimHelper;
 
+        public const string RequestedToModifyNonexistentLibraryErrorMessage = "The request says to modify a library, but the library does not exist.";
+        public const string RequestedToCreateExistingLibraryErrorMessage = "The request says to create a new library, but the library already exists.";
+
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         private IBudgetPriortyPagingService _budgetPriortyService;
@@ -88,8 +91,8 @@ namespace BridgeCareCore.Controllers
                     result = UnitOfWork.BudgetPriorityRepo.GetBudgetPriortyLibrariesNoChildren();
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
-                    }
+                        result = UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibrariesNoChildrenAccessibleToUser(UserId);
+                    } 
                 });
 
                 return Ok(result);
@@ -110,11 +113,17 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
+                    var libraryAccess = UnitOfWork.BudgetPriorityRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
+                    if (libraryAccess.LibraryExists == upsertRequest.IsNewLibrary)
+                    {
+                        var errorMessage = libraryAccess.LibraryExists ? RequestedToCreateExistingLibraryErrorMessage : RequestedToModifyNonexistentLibraryErrorMessage;
+                        throw new InvalidOperationException(errorMessage);
+                    }
                     var items = _budgetPriortyService.GetSyncedLibraryDataset(upsertRequest);
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
-                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(libraryAccess, UserId);
                         dto.BudgetPriorities = items;
                     }
                     UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorityLibraryAndPriorities(dto, upsertRequest.IsNewLibrary, UserId);
@@ -147,7 +156,9 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllBudgetPriorityLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
+
+                        var access = UnitOfWork.BudgetPriorityRepo.GetLibraryAccess(libraryId, UserId);
+                        _claimHelper.CheckUserLibraryDeleteAuthorization(access, UserId);
                     }
                     UnitOfWork.BudgetPriorityRepo.DeleteBudgetPriorityLibrary(libraryId);
                 });

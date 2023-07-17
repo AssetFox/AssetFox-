@@ -27,7 +27,7 @@
                 
                 <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 11px; padding-left: 10px">
                     <div class="header-text-content owner-padding" style="padding-top: 7px;">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                     </div>
                     <v-divider class="owner-shared-divider" vertical
                         v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
@@ -404,6 +404,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     @Getter('getNumericAttributes') getNumericAttributesGetter: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
+    dateModified: string;
     selectedScenarioId: string = getBlankGuid();
     librarySelectItems: SelectItem[] = [];
     selectedDeficientConditionGoalLibrary: DeficientConditionGoalLibrary = clone(
@@ -643,7 +644,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     @Watch('pagination')
-    onPaginationChanged() {
+    async onPaginationChanged() {
         if(this.initializing)
             return;
         this.checkHasUnsavedChanges();
@@ -663,7 +664,7 @@ export default class DeficientConditionGoalEditor extends Vue {
             search: this.currentSearch
         };
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(this.selectedScenarioId, request).then(response => {
+            await DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<DeficientConditionGoal>;
                     this.currentPage = data.items;
@@ -672,7 +673,14 @@ export default class DeficientConditionGoalEditor extends Vue {
                 }
             });
         else if(this.hasSelectedLibrary)
-             DeficientConditionGoalService.getLibraryDeficientConditionGoalPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+            await DeficientConditionGoalService.getDeficientLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.dateModified = data.slice(0, 10);
+                   }
+             }),    
+             await DeficientConditionGoalService.getLibraryDeficientConditionGoalPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<DeficientConditionGoal>;
                     this.currentPage = data.items;

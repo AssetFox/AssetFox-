@@ -20,7 +20,7 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout v-if="hasSelectedLibrary && ! hasScenario" style="padding-top: 10px; padding-left: 10px">
                         <div v-if="hasSelectedLibrary && !hasScenario" class="header-text-content owner-padding" style="padding-top: 7px;">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
                         <v-divider vertical 
                             class="owner-shared-divider"
@@ -502,6 +502,7 @@ export default class TargetConditionGoalEditor extends Vue {
     totalItems = 0;
     currentPage: TargetConditionGoal[] = [];
     initializing: boolean = true;
+    dateModified: string;
 
     unsavedDialogAllowed: boolean = true;
     trueLibrarySelectItemValue: string | null = ''
@@ -720,7 +721,7 @@ export default class TargetConditionGoalEditor extends Vue {
     }
     
     @Watch('pagination')
-    onPaginationChanged() {
+    async onPaginationChanged() {
         if(this.initializing)
             return;
         this.checkHasUnsavedChanges();
@@ -740,7 +741,7 @@ export default class TargetConditionGoalEditor extends Vue {
             search: this.currentSearch
         };
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            TargetConditionGoalService.getScenarioTargetConditionGoalPage(this.selectedScenarioId, request).then(response => {
+            await TargetConditionGoalService.getScenarioTargetConditionGoalPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     this.currentPage = data.items;
@@ -749,7 +750,14 @@ export default class TargetConditionGoalEditor extends Vue {
                 }
             });
         else if(this.hasSelectedLibrary)
-             TargetConditionGoalService.getLibraryTargetConditionGoalPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+             await TargetConditionGoalService.getTargetLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.dateModified = data.slice(0, 10);
+                   }
+             }),
+             await TargetConditionGoalService.getLibraryTargetConditionGoalPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     this.currentPage = data.items;

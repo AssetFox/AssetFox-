@@ -19,7 +19,7 @@
           <v-flex xs4 class="ghd-constant-header">
                     <v-layout v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 18px; padding-left: 5px" align-center>
                         <div class="header-text-content owner-padding">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
                         <v-divider  vertical 
                             v-if="hasSelectedLibrary && !hasScenario">
@@ -367,6 +367,7 @@ export default class RemainingLifeLimitEditor extends Vue {
     totalItems = 0;
     currentPage: RemainingLifeLimit[] = [];
     initializing: boolean = true;
+    dateModified: string;
 
     unsavedDialogAllowed: boolean = true;
     trueLibrarySelectItemValue: string | null = ''
@@ -513,7 +514,7 @@ export default class RemainingLifeLimitEditor extends Vue {
     }
 
     @Watch('pagination')
-    onPaginationChanged() {
+    async onPaginationChanged() {
         if(this.initializing)
             return;
         this.checkHasUnsavedChanges();
@@ -533,7 +534,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             search: this.currentSearch
         };
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            RemainingLifeLimitService.getScenarioRemainingLifeLimitPage(this.selectedScenarioId, request).then(response => {
+            await RemainingLifeLimitService.getScenarioRemainingLifeLimitPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<RemainingLifeLimit>;
                     this.currentPage = data.items;
@@ -542,7 +543,14 @@ export default class RemainingLifeLimitEditor extends Vue {
                 }
             });
         else if(this.hasSelectedLibrary)
-             RemainingLifeLimitService.getLibraryRemainingLifeLimitPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+            await RemainingLifeLimitService.getRemainingLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.dateModified = data.slice(0, 10);
+                   }
+             }),     
+             await RemainingLifeLimitService.getLibraryRemainingLifeLimitPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<RemainingLifeLimit>;
                     this.currentPage = data.items;

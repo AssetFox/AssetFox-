@@ -13,6 +13,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<CashFlowRuleLibraryDTO> GetCashFlowRuleLibrariesNoChildren();
 
+        DateTime GetLibraryModifiedDate(Guid cashLibraryId);
+
         void UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto);
 
         void UpsertOrDeleteCashFlowRules(List<CashFlowRuleDTO> cashFlowRules, Guid libraryId);

@@ -78,17 +78,18 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+     
         [HttpGet]
         [Route("GetBudgetPriorityLibraryModifiedDate/{libraryId}")]
         [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
-        public async Task<IActionResult> GetTreatmentLibraryDate(Guid libraryId)
+        public async Task<IActionResult> GetBudgetPriorityLibraryDate(Guid libraryId)
         {
             try
             {
                 var users = new DateTime();
                 await Task.Factory.StartNew(() =>
                 {
-                    users = UnitOfWork.SelectableTreatmentRepo.GetLibraryModifiedDate(libraryId);
+                    users = UnitOfWork.BudgetPriorityRepo.GetLibraryModifiedDate(libraryId);
                 });
                 return Ok(users);
             }

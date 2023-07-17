@@ -22,20 +22,23 @@ namespace BridgeCareCore.Services
         public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
         {
             var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributeNames);
-            if (aggregatedResults.Attribute == null || aggregatedResults.ResultType == null)
+            if (aggregatedResults.Count == 0)
                 return new();
 
-            return new List<AttributeSelectValuesResult>()
+            List<AttributeSelectValuesResult> returnList = new();
+            foreach (var result in aggregatedResults)
             {
-                new AttributeSelectValuesResult
+                var returnValue = new AttributeSelectValuesResult
                 {
-                    Attribute = aggregatedResults.Attribute.Name,
-                    Values = aggregatedResults.IsNumber ? new List<string>() : aggregatedResults.Values.ToSortedSet(new AlphanumericComparator()).ToList(),
-                    ResultMessage = !aggregatedResults.Values.Any() ? $"No values found for attribute {aggregatedResults.Attribute.Name}; use text input"
-                                                                   : aggregatedResults.IsNumber ? $"{ValuesForAttribute} {aggregatedResults.Attribute.Name} {IsANumberUseTextInput}" : "Success",
-                    ResultType = aggregatedResults.ResultType
-                }
-            };
+                    Attribute = result.Attribute.Name,
+                    Values = result.IsNumber ? new List<string>() : result.Values.ToSortedSet(new AlphanumericComparator()).ToList(),
+                    ResultMessage = !result.Values.Any() ? $"No values found for attribute {result.Attribute.Name}; use text input"
+                                                                   : result.IsNumber ? $"{ValuesForAttribute} {result.Attribute.Name} {IsANumberUseTextInput}" : "Success",
+                    ResultType = result.ResultType
+                };
+                returnList.Add(returnValue);
+            }
+            return returnList;
         }
 
         public static AttributeDTO ConvertAllAttribute(AllAttributeDTO allAttribute)

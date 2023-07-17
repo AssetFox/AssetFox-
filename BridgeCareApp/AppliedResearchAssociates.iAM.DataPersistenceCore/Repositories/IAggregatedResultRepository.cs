@@ -18,6 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<AggregatedResultDTO> GetAggregatedResultsForAttributeNames(Guid networkId, List<string> attributeNames);
         List<AggregatedResultDTO> GetAggregatedResultsForMaintainableAsset(Guid assetId, List<Guid> attributeIds);
-        AggregatedSelectValuesResultDTO GetAggregatedResultsForAttributeNames(List<string> attributeNames);
+        List<AggregatedSelectValuesResultDTO> GetAggregatedResultsForAttributeNames(List<string> attributeNames);
     }
 }

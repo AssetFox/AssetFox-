@@ -47,5 +47,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             return dto;
         }
+
+        public static DeficientConditionGoalDTO DtoWithCriterionLibrary(Guid? id = null, string attribute = "Attribute", Guid? criterionLibraryId = null)
+        {
+            var resolveCriterionLibraryId = criterionLibraryId ?? Guid.NewGuid();
+            var criterionLibrary = CriterionLibraryDtos.Dto(resolveCriterionLibraryId);
+            var resolveId = id ?? Guid.NewGuid();           
+            var dto = new DeficientConditionGoalDTO
+            {
+                Id = resolveId,               
+                
+                Name = "Deficient Condition Goal",
+                AllowedDeficientPercentage = 1,
+                DeficientLimit = 2,
+                Attribute = attribute,
+                CriterionLibrary = criterionLibrary
+            };
+            return dto;
+        }
     }
 }

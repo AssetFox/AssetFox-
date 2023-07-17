@@ -372,6 +372,7 @@ import InvestmentService from '@/services/investment.service';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { isNullOrUndefined } from 'util';
 import { max } from 'moment';
+import { stat } from 'fs';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -436,6 +437,7 @@ export default class CommittedProjectsEditor extends Vue  {
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
     @Action('selectScenario') selectScenarioAction: any;
+    @Action('setAlertMessage') setAlertMessageAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
@@ -916,8 +918,8 @@ export default class CommittedProjectsEditor extends Vue  {
                     value = this.catMap.get(value);
                 this.updateCommittedProject(row, value, property)
                 this.onPaginationChanged()
-            }    
-        }       
+            }
+        }
     }
 
     //Consequence Funtions
@@ -950,34 +952,22 @@ export default class CommittedProjectsEditor extends Vue  {
     ) {
         this.showImportExportCommittedProjectsDialog = false;
 
-        if (hasValue(result)) {
-            
+        if (hasValue(result)) {         
             if (hasValue(result.file)) {
                 CommittedProjectsService.importCommittedProjects(
                     result.file,
                     result.applyNoTreatment,
                     this.scenarioId,
-                ).then((response: AxiosResponse) => {
-                    if (
-                        hasValue(response, 'status') &&
-                        http2XX.test(response.status.toString())
-                    ) {
-                        this.addSuccessNotificationAction({
-                            message: 'Successful upload.',
-                            longMessage:
-                                'Successfully uploaded committed projects.',
-                        });
-                        this.onCancelClick() ;
-                    }
-                });
+                ).then((response: any) =>{
+                    this.setAlertMessageAction("Committed project import has been added to the work queue. Please refresh page when import is done")
+                })
             } else {
                 this.addErrorNotificationAction({
                     message: 'No file selected.',
                     longMessage:
                         'No file selected to upload the committed projects.',
                 });
-            }
-            
+            }          
         }
     }
 

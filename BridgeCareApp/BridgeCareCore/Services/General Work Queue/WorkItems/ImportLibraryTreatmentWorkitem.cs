@@ -14,7 +14,7 @@ using BridgeCareCore.Controllers;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportLibraryTreatmentWorkitem(Guid TreatmentLibraryId, ExcelPackage ExcelPackage, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportLibraryTreatmentWorkitem(Guid TreatmentLibraryId, ExcelPackage ExcelPackage, string UserId, string treatmentName) : IWorkSpecification<WorkQueueMetadata>
 
     {
         public string WorkId => TreatmentLibraryId.ToString();
@@ -26,7 +26,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
         public WorkQueueMetadata Metadata =>
             new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryTreatment, DomainType = DomainType.Treatment };
 
-        public string WorkName => NetworkName;
+        public string WorkName => treatmentName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -49,6 +49,13 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{TreatmentController.TreatmentError}::ImportLibraryTreatmentsFile - {errorMessage}");
+        }
+
+        public void OnCompletion(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"successfully imported treatment library: {WorkName}");
         }
     }
 }

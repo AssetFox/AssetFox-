@@ -145,5 +145,12 @@ namespace BridgeCareCore.Services
 
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{ReportController.ReportError}::GetFile - {errorMessage}");
         }
+
+        public void OnCompletion(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully generated {reportName} report for scenario: {scenarioName}");
+        }
     }
 }

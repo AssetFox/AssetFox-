@@ -14,4 +14,5 @@ public interface IWorkSpecification<T>
 
     void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken);
     void OnFault(IServiceProvider serviceProvider, string errorMessage);
+    void OnCompletion(IServiceProvider serviceProvider);
 }

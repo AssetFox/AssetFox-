@@ -137,6 +137,7 @@ public class SequentialWorkQueue<T>
                 if (!WorkCompletion.IsFaulted)
                 {
                     WorkCompletionSource.SetResult();
+                    WorkSpec.OnCompletion(serviceProvider);
                 }
                 else
                 {

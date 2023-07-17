@@ -44,5 +44,12 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{SimulationController.SimulationError}::DeleteSimulation - {errorMessage}");
         }
+
+        public void OnCompletion(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"The simulation {WorkName} has been successfully deleted");
+        }
     }
 }

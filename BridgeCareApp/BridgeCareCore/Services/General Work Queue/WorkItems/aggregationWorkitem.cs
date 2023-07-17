@@ -150,6 +150,14 @@ namespace BridgeCareCore.Services
 
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{AggregationError}::NetworkAggregateAccess - {errorMessage}");
         }
+
+        public void OnCompletion(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Network aggregation on {NetworkName} has completed");
+        }
     }
 }
 

@@ -318,6 +318,13 @@ namespace BridgeCareCore.Services
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, message);
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(message);
         }
+
+        public void OnCompletion(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Analysis on {ScenarioName} has completed");
+        }
         private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status, DateTime lastRun) => new()
         {
             SimulationId = SimulationId,

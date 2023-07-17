@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         /// Therefore, you can only call something like it once per test.</summary> 
         public static void SetTextAggregatedResultsInDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultAttributes, string text = "AggregatedResult")
         {
-            var results = new List<IAggregatedResult>();
+            var results = new List<IAggregatedResult>();            
             foreach (var asset in maintainableAssets)
             {
                 var resultId = Guid.NewGuid();
@@ -94,6 +94,43 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     );
 
                 results.Add(result);
+            }
+            unitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
+        }
+
+        public static void SetBothAggregatedResultsInDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultNumericAttributes, List<IamAttribute> resultTextAttributes, string text = "AggregatedResult")
+        {
+            var results = new List<IAggregatedResult>();
+            foreach (var asset in maintainableAssets)
+            {
+                var resultId = Guid.NewGuid();
+                var resultNumericData = new List<(IamAttribute, (int, double))>();
+                var resultTextData = new List<(IamAttribute, (int, string))>();
+
+                foreach (var attribute in resultNumericAttributes)
+                {
+                    var resultDatum = (
+                        attribute, (2022, 1.23));
+                    resultNumericData.Add(resultDatum);
+                }
+                foreach (var attribute in resultTextAttributes)
+                {
+                    var resultDatum = (
+                        attribute, (2022, text));
+                    resultTextData.Add(resultDatum);
+                }
+                var resultNumeric = new AggregatedResult<double>(
+                    resultId,
+                    asset,
+                    resultNumericData
+                    );
+                results.Add(resultNumeric);
+                var resultText = new AggregatedResult<string>(
+                    resultId,
+                    asset,
+                    resultTextData
+                    );
+                results.Add(resultText);
             }
             unitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
         }

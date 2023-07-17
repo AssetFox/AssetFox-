@@ -92,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var uniqueAttributes = attributeNames.Distinct().ToList();
             var allOfAttributeDTOs = _unitOfWork.Context.AggregatedResult
                 .Include(_ => _.Attribute)
-                .Where(_ => attributeNames.Contains(_.Attribute.Name))
+                .Where(_ => uniqueAttributes.Contains(_.Attribute.Name))
                 .Select(e => AggregatedResultMapper.ToDto(e))
                 .AsNoTracking().AsSplitQuery().ToList();
 

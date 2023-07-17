@@ -19,7 +19,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class TargetConditionGoalTests
+    public class TargetConditionGoalControllerTests
     {
         private TargetConditionGoalController CreateController(Mock<IUnitOfWork> unitOfWork)
         {

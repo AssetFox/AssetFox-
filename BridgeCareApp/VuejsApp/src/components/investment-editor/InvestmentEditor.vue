@@ -1,6 +1,9 @@
 <template>
     <v-layout column>
         <v-flex xs12>
+            <v-alert border="top" color="green" dismissible dark v-model="alert">
+          Dismissable alert
+        </v-alert>
             <v-layout row style="margin-top:-40px;">
                 <v-flex xs4 class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
@@ -336,6 +339,7 @@ import {
     mapToIndexSignature
 } from '../../shared/utils/conversion-utils';
 import { isNullOrUndefined } from 'util';
+import { watch } from 'fs';
 
 @Component({
     components: {
@@ -638,6 +642,7 @@ export default class InvestmentEditor extends Vue {
 
     @Watch('currentPage')
     onScenarioBudgetsChanged() {
+        
         this.setGridHeaders();
         this.setGridData();
         
@@ -1111,14 +1116,11 @@ export default class InvestmentEditor extends Vue {
 
         if (hasValue(result)) {
             if (result.isExport) {
-
-
             } else if (hasValue(result.file)) {
                 const data: InvestmentBudgetFileImport = {
                     file: result.file,
                     overwriteBudgets: result.overwriteBudgets,
                 };
-
             if (this.hasScenario) {
                 this.importScenarioInvestmentBudgetsFileAction({
                     ...data,
@@ -1126,15 +1128,19 @@ export default class InvestmentEditor extends Vue {
                     currentUserCriteriaFilter: this.currentUserCriteriaFilter
                 })
                 .then((response: any) => {
-                        this.getCriterionLibrariesAction();
-                        this.firstYearOfAnalysisPeriodShift = 0;
-                                    
-                        this.clearChanges();               
-                        this.pagination.page = 1;
-                        this.initializePages();
-                            
-                        this.librarySelectItemValue = null
+                    
+                    this.getCriterionLibrariesAction();
+                    this.firstYearOfAnalysisPeriodShift = 0;
+                    this.clearChanges();
+                    this.pagination.page = 1;
+                    this.initializePages();
+                    this.librarySelectItemValue = null;
+                    this.addSuccessNotificationAction({message: "Successful Added to Work Queue"});
+                    alert:true;
                 });
+                
+                
+                
             } else {
                 this.importLibraryInvestmentBudgetsFileAction({
                     ...data,
@@ -1148,7 +1154,6 @@ export default class InvestmentEditor extends Vue {
                         this.resetPage();
                 });
             }
-
             }
         }
     }
@@ -1384,6 +1389,7 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
         this.deletionYears = [];
         if (this.hasScenario)
             this.investmentPlan = clone(this.stateInvestmentPlan);
+
     }
 
     resetPage() {

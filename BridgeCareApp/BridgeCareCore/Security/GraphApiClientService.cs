@@ -1,11 +1,8 @@
 ﻿using Azure.Identity;
-using GreenDonut;
+using BridgeCareCore.Security.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
-using Microsoft.Identity.Client;
-using NuGet.Protocol;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BridgeCareCore.Security
 {
-    public class GraphApiClientService
+    public class GraphApiClientService: IGraphApiClientService
     {
         private readonly GraphServiceClient _graphServiceClient;
 
@@ -49,11 +46,11 @@ namespace BridgeCareCore.Security
             var groupNames = new List<string>();
             var groups = _graphServiceClient.Groups.GetAsync();
 
-            var objectCollectionResponse = _graphServiceClient.Users[userId].MemberOf.GetAsync();
-            var result = objectCollectionResponse.Result;
+            var objectCollectionResponse = await _graphServiceClient.Users[userId].MemberOf.GetAsync();
+            var result = objectCollectionResponse;
 
 
-            foreach (Group group in result.Value)
+            foreach (var group in result.Value.Cast<Group>())
             {
                 groupNames.Add(group.DisplayName);
             }

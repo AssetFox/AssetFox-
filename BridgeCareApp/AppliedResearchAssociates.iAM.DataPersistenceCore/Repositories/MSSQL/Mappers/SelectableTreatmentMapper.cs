@@ -87,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             selectableTreatment.ShadowForSameTreatment = entity.ShadowForSameTreatment;
             selectableTreatment.Description = entity.Description;
             selectableTreatment.Category = (TreatmentCategory)entity.Category;
-            selectableTreatment.AssetCategory = (Analysis.AssetCategory)(DTOs.Enums.AssetCategory)entity.AssetType;
+            selectableTreatment.AssetCategory = (AssetCategory)(AssetCategories)entity.AssetType;
             if (entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
             {
                 var budgetIds = entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Select(_ => _.ScenarioBudget.Id).ToList();
@@ -153,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),
                 Category = (TreatmentCategory)entity.Category,
-                AssetType = (DTOs.Enums.AssetCategory)entity.AssetType
+                AssetType = (AssetCategories)entity.AssetType
             };
 
         public static TreatmentDTOWithSimulationId ToDtoWithSimulationId(this ScenarioSelectableTreatmentEntity entity)
@@ -235,7 +235,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsModified = entity.IsModified,
                 LibraryId = entity.LibraryId,
 
-                AssetType = (DTOs.Enums.AssetCategory)entity.AssetType
+                AssetType = (AssetCategories)entity.AssetType
             };
     }
 }

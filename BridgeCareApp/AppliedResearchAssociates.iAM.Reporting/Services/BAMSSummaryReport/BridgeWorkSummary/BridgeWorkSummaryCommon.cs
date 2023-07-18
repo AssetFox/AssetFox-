@@ -147,11 +147,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         internal void SetNonCulvertSectionExcelString(ExcelWorksheet worksheet,
-            List<(string Name, DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
+            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
         {
             foreach (var item in simulationTreatments)
             {
-                if (item.AssetType == DTOs.Enums.AssetCategory.Bridge || item.Name == BAMSConstants.NonCulvertNoTreatment)
+                if (item.AssetType == AssetCategories.Bridge || item.Name == BAMSConstants.NonCulvertNoTreatment)
                 {
                     if (item.Name == BAMSConstants.NonCulvertNoTreatment)
                     {
@@ -166,11 +166,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         internal void SetCulvertSectionExcelString(ExcelWorksheet worksheet,
-            List<(string Name, AppliedResearchAssociates.iAM.DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
+            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
         {
             foreach (var item in simulationTreatments)
             {
-                if (item.AssetType == AppliedResearchAssociates.iAM.DTOs.Enums.AssetCategory.Culvert || item.Name == BAMSConstants.CulvertNoTreatment)
+                if (item.AssetType == AssetCategories.Culvert || item.Name == BAMSConstants.CulvertNoTreatment)
                 {
                     if (item.Name == BAMSConstants.CulvertNoTreatment)
                     {

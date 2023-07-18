@@ -39,20 +39,4 @@
         /// </summary>
         Other
     }
-
-    /// <summary>
-    /// The types of assets to report.
-    /// </summary>
-    public enum AssetCategory
-    {
-        /// <summary>
-        /// A bridge asset.
-        /// </summary>
-        Bridge,
-
-        /// <summary>
-        /// A culvert asset.
-        /// </summary>
-        Culvert
-    }
 }

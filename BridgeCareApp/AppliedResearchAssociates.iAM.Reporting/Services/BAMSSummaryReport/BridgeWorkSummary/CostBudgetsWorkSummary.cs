@@ -35,11 +35,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount,
             Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear,
-            List<(string Name, DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
         {
-            var localSimulationTreatments = new List<(string Name, DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)>(simulationTreatments);
-            localSimulationTreatments.Remove((BAMSConstants.CulvertNoTreatment, DTOs.Enums.AssetCategory.Culvert, TreatmentCategory.Other));
-            localSimulationTreatments.Remove((BAMSConstants.NonCulvertNoTreatment, DTOs.Enums.AssetCategory.Bridge, TreatmentCategory.Other));
+            var localSimulationTreatments = new List<(string Name, AssetCategories AssetType, TreatmentCategory Category)>(simulationTreatments);
+            localSimulationTreatments.Remove((BAMSConstants.CulvertNoTreatment, AssetCategories.Culvert, TreatmentCategory.Other));
+            localSimulationTreatments.Remove((BAMSConstants.NonCulvertNoTreatment, AssetCategories.Bridge, TreatmentCategory.Other));
 
             var workTypeTotalMPMS = FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
 
@@ -77,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfCulvertWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-            List<(string Name, DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Culvert Work", "BAMS Culvert Work Type");
@@ -89,7 +89,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfBridgeWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-            List<(string Name, DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Bridge Work", "BAMS Bridge Work Type");
@@ -388,7 +388,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostsOfCulvertWork(ExcelWorksheet worksheet,
             List<int> simulationYears, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-            List<(string Name, DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var workTypeTotalCulvert = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
             if (simulationYears.Count <= 0)
@@ -415,7 +415,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 foreach (var treatment in simulationTreatments)
                 {
                     decimal cost = 0;
-                    if (treatment.AssetType == DTOs.Enums.AssetCategory.Culvert &&
+                    if (treatment.AssetType == AssetCategories.Culvert &&
                         !treatment.Name.Contains(BAMSConstants.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var culvertCostAndCount);
@@ -459,7 +459,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostsOfBridgeWork(ExcelWorksheet worksheet,
             List<int> simulationYears, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-            List<(string Name, DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var workTypeTotalBridge = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
             if (simulationYears.Count <= 0)
@@ -484,7 +484,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 foreach (var treatment in simulationTreatments)
                 {
                     decimal cost = 0;
-                    if (treatment.AssetType == DTOs.Enums.AssetCategory.Bridge &&
+                    if (treatment.AssetType == AssetCategories.Bridge &&
                     !treatment.Name.Contains(BAMSConstants.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCostAndCount);

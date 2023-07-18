@@ -218,7 +218,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         internal Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> CalculateWorkTypeTotals(
             Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
-            List<(string Name, DTOs.Enums.AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
+            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
             var workTypeTotals = new Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>>();

@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             Amount = budgetAmount,
                             costPerBPN = (bpnName, budgetAmount),
                             TreatmentCategory = treatmentData.Category,
-                            AssetType = (DTOs.Enums.AssetCategory)treatmentData.AssetCategory
+                            AssetType = (AssetCategories)treatmentData.AssetCategory
                         });
                     }
                 }
@@ -112,10 +112,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 //Filtering treatments for the given budget             
                 var costForCulvertBudget = summaryData.YearlyData
-                                            .Where(_ => _.AssetType == DTOs.Enums.AssetCategory.Culvert && !_.isCommitted);
+                                            .Where(_ => _.AssetType == AssetCategories.Culvert && !_.isCommitted);
 
                 var costForBridgeBudgets = summaryData.YearlyData
-                                                .Where(_ => _.AssetType == DTOs.Enums.AssetCategory.Bridge && !_.isCommitted);
+                                                .Where(_ => _.AssetType == AssetCategories.Bridge && !_.isCommitted);
 
                 var costForCommittedBudgets = summaryData.YearlyData
                                                     .Where(_ => _.isCommitted && _.Treatment.ToLower() != BAMSConstants.NoTreatment);

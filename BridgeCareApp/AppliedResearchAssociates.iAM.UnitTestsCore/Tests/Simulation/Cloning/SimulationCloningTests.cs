@@ -42,6 +42,40 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
         }
 
         [Fact]
+        public void SimulationInDbWithSelectableTreatment_Clone_Clones()
+        {
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var treatmentbudget = TreatmentBudgetDtos.Dto();
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(treatmentId);
+            treatment.Budgets = new List<TreatmentBudgetDTO>() { treatmentbudget };
+            treatment.BudgetIds = new List<Guid> {treatmentbudget.Id };
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulation.Id);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
+            var clonedTreatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(clonedSimulationId);
+            var clonedTreatment = clonedTreatments.Single();
+            var expectedCriterionLibrary = new CriterionLibraryDTO();
+            ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment, t => t.Id, t => t.CriterionLibrary, t => t.Budgets, t => t.BudgetIds);
+            Assert.Equal(newSimulationName, clonedSimulation.Name);
+            Assert.Equal(networkId, clonedSimulation.NetworkId);
+            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.NotEqual(treatment.Id, clonedTreatment.Id);
+            Assert.Empty(clonedTreatment.Budgets);
+            Assert.Empty(clonedTreatment.BudgetIds);
+            ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedTreatment.CriterionLibrary);
+            
+        }
+
+        [Fact]
         public void SimulationInDbWithRemainingLifeLimit_Clone_Clones()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -109,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var deficientconditiongoalId = Guid.NewGuid();
-            var deficientconditiongoal = DeficientConditionGoalDtos.Dto(deficientconditiongoalId, TestAttributeNames.CulvDurationN);
+            var deficientconditiongoal = DeficientConditionGoalDtos.DtoWithIdOnlyCriterionLibrary(deficientconditiongoalId, TestAttributeNames.CulvDurationN);
             var deficientconditiongoals = new List<DeficientConditionGoalDTO> { deficientconditiongoal };
 
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
@@ -203,6 +237,37 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             Assert.NotEqual(analysisMethodDto.Id, clonedAnalysisMethod.Id);
             Assert.NotEqual(analysisMethodDto.CriterionLibrary.Id, clonedAnalysisMethod.CriterionLibrary.Id);
             Assert.Equal("mergedCriteriaExpression", clonedAnalysisMethod.CriterionLibrary.MergedCriteriaExpression);
+        }
+
+        [Fact]
+        public void ScenarioTargetConditionalGoals_Clone_Clones()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var targetconditionalgoalId = Guid.NewGuid();
+            var targetconditionalgoal = TargetConditionGoalDtos.DtoWithCriterionLibrary(TestAttributeNames.CulvDurationN, targetconditionalgoalId);
+            var targetconditionalgoals = new List<TargetConditionGoalDTO> { targetconditionalgoal };
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(targetconditionalgoals, simulationId);
+            var targetconditionalgoalsBefore = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
+            var targetconditionalgoalBefore = targetconditionalgoalsBefore.Single();
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
+            var clonedTargetConditionalGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(clonedSimulationId);
+            var clonedTargetConditionalGoal = clonedTargetConditionalGoals.Single();
+            ObjectAssertions.EquivalentExcluding(targetconditionalgoal, clonedTargetConditionalGoal, c => c.CriterionLibrary, c => c.Id);
+            Assert.Equal(newSimulationName, clonedSimulation.Name);
+            Assert.Equal(networkId, clonedSimulation.NetworkId);
+            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            ObjectAssertions.EquivalentExcluding(targetconditionalgoalBefore.CriterionLibrary, clonedTargetConditionalGoal.CriterionLibrary, c => c.Id);
+            Assert.NotEqual(targetconditionalgoalBefore.Id, clonedTargetConditionalGoal.Id);
+            Assert.NotEqual(targetconditionalgoalBefore.CriterionLibrary.Id, clonedTargetConditionalGoal.CriterionLibrary.Id);
         }
 
         [Fact]

@@ -36,5 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertNetworkRollupDetail(Guid networkId, string status);
 
         string GetNetworkName(Guid networkId);
+
+        string GetNetworkKeyAttribute(Guid networkId);
     }
 }

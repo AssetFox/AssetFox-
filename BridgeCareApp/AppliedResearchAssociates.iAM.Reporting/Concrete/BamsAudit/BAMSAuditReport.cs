@@ -180,8 +180,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("BAMSAuditReportData.xlsx"));
-            
-            checkCancelled(cancellationToken);
+
+            checkCancelled(cancellationToken, simulationId);
             // Bridge Data TAB
             reportDetailDto.Status = $"Creating Data TAB";
             UpsertSimulationReportDetail(reportDetailDto);
@@ -192,7 +192,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             ValidateSections(simulationOutput, reportDetailDto, simulationId, dataTabRequiredAttributes);
             _dataTab.Fill(bridgesWorksheet, simulationOutput);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             // Fill Decisions TAB
             reportDetailDto.Status = $"Creating Decision TAB";
             UpsertSimulationReportDetail(reportDetailDto);
@@ -203,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             ValidateSections(simulationOutput, reportDetailDto, simulationId, new HashSet<string>(performanceCurvesAttributes.Except(dataTabRequiredAttributes)));
             _decisionTab.Fill(decisionsWorksheet, simulationOutput, simulation, performanceCurvesAttributes);
 
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";
             UpsertSimulationReportDetail(reportDetailDto);
@@ -216,7 +216,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(reportPath, bin);                       
             
-            checkCancelled(cancellationToken);
+            checkCancelled(cancellationToken, simulationId);
             reportDetailDto.Status = $"Report generation completed";          
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
@@ -266,12 +266,18 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = true;
         }
 
-        private void checkCancelled(CancellationToken? cancellationToken)
+        private void checkCancelled(CancellationToken? cancellationToken, Guid simulationId)
         {
             if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
             {
                 throw new Exception("Report was cancelled");
             }
+            var reportDetailDto = new SimulationReportDetailDTO
+            {
+                SimulationId = simulationId,
+                Status = $""
+            };
+            UpsertSimulationReportDetail(reportDetailDto);
         }
     }
 }

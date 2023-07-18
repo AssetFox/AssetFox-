@@ -18,9 +18,16 @@ public interface IAdminSettingsRepository
 
     void SetKeyFields(string keyFields);
 
+    public IList<string> GetRawDataKeyFields();
+    public void SetRawDataKeyFields(string keyFields);
+
     void SetPrimaryNetwork(string name);
 
+    void SetRawDataNetwork(string name);
+
     string GetPrimaryNetwork();
+
+    string GetRawDataNetwork();
 
     IList<string> GetSimulationReportNames();
 

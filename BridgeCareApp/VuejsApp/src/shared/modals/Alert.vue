@@ -16,7 +16,7 @@
                     <v-btn 
                     id="Alert-Cancel-vbtn"
                     @click="onSubmit(false)" 
-                    class="ghd-blue ghd-button" flat>
+                    class="ghd-blue ghd-button" outline>
                         Cancel
                     </v-btn>
                     <v-btn 

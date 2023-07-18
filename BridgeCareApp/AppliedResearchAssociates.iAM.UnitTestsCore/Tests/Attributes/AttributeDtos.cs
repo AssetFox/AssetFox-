@@ -151,10 +151,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             IsAscending = true
         };
 
+        public static AttributeDTO BrKey
+           => new()
+           {
+               Id = TestAttributeIds.BrKeyId,
+               Name = TestAttributeNames.BrKey,
+               DefaultValue = "0",
+               Type = "NUMBER",
+               Command = "BRKEY",
+               AggregationRuleType = "AVERAGE",
+               IsCalculated = false,
+               IsAscending = true,
+               Minimum = 0,
+               Maximum = 999999
+
+           };
+
+
         public static AttributeDTO CulvDurationN
             => new()
             {
-                Id = Guid.Parse("efca598b-9fca-4e3c-ac48-0d95a9eaa867"),
+                Id = TestAttributeIds.CulvDurationNId,
                 Name = TestAttributeNames.CulvDurationN,
                 DefaultValue = "1",
                 Type = "NUMBER",

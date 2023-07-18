@@ -87,7 +87,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                 TreatmentLibraryId = treatmentLibraryId,
                 TreatmentName = treatmentName,
                 NetworkId = networkId,
-                Brkey_Value = assetKeyData,
+                KeyAttributeValue = assetKeyData,
             };
 
             var result = await controller.FillTreatmentValues(fillModel);

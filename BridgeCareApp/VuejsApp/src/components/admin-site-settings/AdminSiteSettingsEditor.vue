@@ -101,46 +101,39 @@
     </v-layout>
   </template>
   <script lang="ts">
-  import axios from 'axios';
-  import Vue from 'vue';
+    import Vue from 'vue';
   import { Component, Watch} from 'vue-property-decorator';
   import { Action, State } from 'vuex-class';
-  import {clone, find, groupBy, propEq, uniq} from 'ramda';
-  import Vuex from 'vuex'
-  import AdminSiteSettingsService from '@/services/admin-site-settings.service';
-  import { hasValue } from '@/shared/utils/has-value-util';
+  
   @Component
   export default class AdminSiteSettingsEditor extends Vue{
       @State(state => state.siteAdminModule.implementationName) implementationName: string;
       @State(state => state.siteAdminModule.agencyLogo) agencyLogo: string;
       @State(state => state.siteAdminModule.implementationLogo) implementationLogo: string;
-       @Action('getImplementationName') getImplemetnationNameAction: string;
-       @Action('setImplementationName') setImplemetnationNameAction: any;
-       @Action('setAgencyLogo') setAgencyLogoAction: any;
-       @Action('setImplementationLogo') setImplementationLogoAction: any;
+       @Action('getImplementationName') getImplementationNameAction: string;
+       @Action('importImplementationName') importImplementationNameAction:(implementationName: string) => void;
+       @Action('importAgencyLogo') importAgencyLogoAction: any;
+       @Action('importProductLogo') importProductLogoAction: any;
        ImplementationID: string = '';
-       PerformanceCurvesFile: File | null;
-       @Watch('ImplementationID')
-          onImplementationLoad() {
-              this.ImplementationID = this.implementationName
-          }
-   onSaveImplementationName(){
-          AdminSiteSettingsService.importImplementationName(this.ImplementationID);
-   }
-   onUploadImplementationLogo(){
+          
+ onSaveImplementationName(){
+    this.importImplementationNameAction(this.ImplementationID);
+  }
+  onUploadImplementationLogo(){
       document.getElementById("implementationImageUpload")?.click();
    }
+
    onUploadAgencyLogo(){
       document.getElementById("agencyImageUpload")?.click();
    }
    handleImplementationLogoUpload(event: { target: { files: any[]; }; }){
-      const file = event.target.files[0];
-      AdminSiteSettingsService.importProductLogo(file);
-   }
-   handleAgencyLogoUpload(event: { target: { files: any[]; }; }){
-      const file = event.target.files[0];
-      AdminSiteSettingsService.importAgencyLogo(file);
-   }
+    const file = event.target.files[0];
+    this.importProductLogoAction(file);   
+  }
+  handleAgencyLogoUpload(event: { target: { files: any[]; }; }){
+    const file = event.target.files[0];
+    this.importAgencyLogoAction(file);
+  }
   }
   </script>
   

@@ -19,7 +19,9 @@ namespace BridgeCareCoreTests.Tests
         private Mock<IAMContext> _mockedContext;
         private Mock<ISimulationRepository> _mockedSimulationRepo;
         private Mock<ICommittedProjectRepository> _mockCommittedProjectRepo;
+        private Mock<INetworkRepository> _mockNetworkRepo;
         private Guid _badScenario = Guid.Parse("0c66674c-8fcb-462b-8765-69d6815e0958");
+
         private ExcelPackage _excelData;
 
         public CommittedProjectServiceTests(ExcelAccess excelData)
@@ -43,9 +45,15 @@ namespace BridgeCareCoreTests.Tests
 
             _mockedSimulationRepo = new Mock<ISimulationRepository>();
             _mockedSimulationRepo.Setup(s => s.GetSimulation(TestDataForCommittedProjects.SimulationId)).Returns(TestDataForCommittedProjects.TestSimulationDTO);
+            _mockedSimulationRepo.Setup(s => s.GetSimulation(TestDataForCommittedProjects.NoCommitSimulationId)).Returns(TestDataForCommittedProjects.TestSimulationDTONoCommittedProjects);
             _mockedSimulationRepo.Setup(_ => _.GetSimulationName(It.Is<Guid>(_ => _ != _badScenario))).Returns("Test");
             _mockedSimulationRepo.Setup(_ => _.GetSimulationName(It.Is<Guid>(_ => _ == _badScenario))).Returns<string>(null);
+            _mockedSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => _ == _badScenario))).Throws<RowNotInTableException>();
             mockedTestUOW.Setup(_ => _.SimulationRepo).Returns(_mockedSimulationRepo.Object);
+
+            _mockNetworkRepo = new Mock<INetworkRepository>();
+            _mockNetworkRepo.Setup(n => n.GetNetworkKeyAttribute(TestDataForCommittedProjects.NetworkId)).Returns("BRKEY_");
+            mockedTestUOW.Setup(_ => _.NetworkRepo).Returns(_mockNetworkRepo.Object);
 
             var mockAttributeRepository = new Mock<IAttributeRepository>();
             mockAttributeRepository.Setup(_ => _.GetAttributes()).Returns(TestDataForCommittedProjects.Attributes);
@@ -94,7 +102,7 @@ namespace BridgeCareCoreTests.Tests
             var service = new CommittedProjectService(_testUOW);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => service.ExportCommittedProjectsFile(_badScenario));
+            Assert.Throws<RowNotInTableException>(() => service.ExportCommittedProjectsFile(_badScenario));
         }
 
         [Fact]
@@ -104,7 +112,7 @@ namespace BridgeCareCoreTests.Tests
             var service = new CommittedProjectService(_testUOW);
 
             // Act
-            var result = service.ExportCommittedProjectsFile(Guid.Parse("dae1c62c-adba-4510-bfe5-61260c49ec99"));
+            var result = service.ExportCommittedProjectsFile(TestDataForCommittedProjects.NoCommitSimulationId);
 
             // Assert
             Assert.False(string.IsNullOrEmpty(result.FileName));
@@ -123,7 +131,7 @@ namespace BridgeCareCoreTests.Tests
             var service = new CommittedProjectService(_testUOW);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => service.ImportCommittedProjectFiles(_badScenario, new ExcelPackage(), "Bad File", false));
+            Assert.Throws<RowNotInTableException>(() => service.ImportCommittedProjectFiles(_badScenario, new ExcelPackage(), "Bad File", false));
         }
 
         [Fact]

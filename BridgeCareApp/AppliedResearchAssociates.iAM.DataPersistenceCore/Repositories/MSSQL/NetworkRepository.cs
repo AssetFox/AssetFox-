@@ -17,6 +17,7 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Hubs.Services;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Common.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -249,6 +250,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var entity = _unitOfWork.Context.Network.SingleOrDefault(n => n.Id == networkId);
             return entity.Name;
+        }
+
+        public string GetNetworkKeyAttribute(Guid networkId)
+        {
+            var entity = _unitOfWork.Context.Network.Where(_ => _.Id == networkId).Select(_ => _.KeyAttributeId).FirstOrDefault();
+            if (entity == default)
+            {
+                throw new RowNotInTableException("The specified network was not found.");
+            }
+
+            return _unitOfWork.AttributeRepo.GetAttributeName(entity);
         }
     }
 }

@@ -770,6 +770,7 @@ export default class CommittedProjectsEditor extends Vue  {
         this.selectedCommittedProject = '';
         this.selectedCpItems = [];
         this.isNoTreatmentBefore = this.isNoTreatmentBeforeCache
+        this.resetPage();
     }
 
     OnExportProjectsClick(){
@@ -997,7 +998,6 @@ export default class CommittedProjectsEditor extends Vue  {
             this.deleteSimulationCommittedProjectsAction(this.scenarioId);
             CommittedProjectsService.deleteSimulationCommittedProjects(this.scenarioId).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.addSuccessNotificationAction({message:'Added deterioration model library'})   
                     this.onCancelClick();
                 }
             })

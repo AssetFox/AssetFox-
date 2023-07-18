@@ -1,6 +1,7 @@
 ﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
@@ -50,15 +51,25 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulation = SimulationDtos.Dto(simulationId);
+            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulation);
+            var networkRepo = NetworkRepositoryMocks.New(unitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var networkKeyAttributeName = "NetworkKeyAttribute";
+            networkRepo.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
+
             var service = CreatePagingService(unitOfWork);
             var sectionCommittedProjectId1 = Guid.NewGuid();
             var sectionCommittedProjectId2 = Guid.NewGuid();
             var sectionCommittedProjectId3 = Guid.NewGuid();
             var scenarioBudgetId1 = Guid.NewGuid();
             var scenarioBudgetId2 = Guid.NewGuid();
-            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1);
-            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2);
-            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1);
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1, simulationId);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2, simulationId);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1, simulationId);
             sectionCommittedProject1.Treatment = "Treatmentz";
             sectionCommittedProject2.Treatment = "Treatmentx";
             sectionCommittedProject3.Treatment = "Treatmenty";
@@ -85,7 +96,6 @@ namespace BridgeCareCoreTests.Tests
                 sortColumn = "treatment"
             };
 
-
             var page = service.GetCommittedProjectPage(sectionCommittedProjects, request);
             Assert.Equal(3, page.TotalItems);
             Assert.Equal(page.Items.Count, request.RowsPerPage);
@@ -98,15 +108,25 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulation = SimulationDtos.Dto(simulationId);
+            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulation);
+            var networkRepo = NetworkRepositoryMocks.New(unitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var networkKeyAttributeName = "NetworkKeyAttribute";
+            networkRepo.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
+
             var service = CreatePagingService(unitOfWork);
             var sectionCommittedProjectId1 = Guid.NewGuid();
             var sectionCommittedProjectId2 = Guid.NewGuid();
             var sectionCommittedProjectId3 = Guid.NewGuid();
             var scenarioBudgetId1 = Guid.NewGuid();
             var scenarioBudgetId2 = Guid.NewGuid();
-            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1);
-            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2);
-            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1);
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1, simulationId);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2, simulationId);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1, simulationId);
             sectionCommittedProject1.Treatment = null;
             sectionCommittedProject2.Treatment = "";
             sectionCommittedProject3.Treatment = "Treatmenty";
@@ -143,15 +163,25 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulation = SimulationDtos.Dto(simulationId);
+            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulation);
+            var networkRepo = NetworkRepositoryMocks.New(unitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var networkKeyAttributeName = "NetworkKeyAttribute";
+            networkRepo.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
+
             var service = CreatePagingService(unitOfWork);
             var sectionCommittedProjectId1 = Guid.NewGuid();
             var sectionCommittedProjectId2 = Guid.NewGuid();
             var sectionCommittedProjectId3 = Guid.NewGuid();
             var scenarioBudgetId1 = Guid.NewGuid();
             var scenarioBudgetId2 = Guid.NewGuid();
-            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1);
-            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2);
-            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1);
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioBudgetId1, simulationId);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioBudgetId2, simulationId);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioBudgetId1, simulationId);
             sectionCommittedProject1.Treatment = null;
             sectionCommittedProject2.Consequences = null;
             sectionCommittedProject3.LocationKeys = null;
@@ -184,14 +214,24 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulation = SimulationDtos.Dto(simulationId);
+            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulation);
+            var networkRepo = NetworkRepositoryMocks.New(unitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var networkKeyAttributeName = "NetworkKeyAttribute";
+            networkRepo.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
+
             var sectionCommittedProjectId1 = Guid.NewGuid();
             var sectionCommittedProjectId2 = Guid.NewGuid();
             var sectionCommittedProjectId3 = Guid.NewGuid();
             var scenarioTreatmentId1 = Guid.NewGuid();
             var scenarioTreatmentId2 = Guid.NewGuid();
-            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioTreatmentId1);
-            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioTreatmentId2);
-            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioTreatmentId1);
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioTreatmentId1, simulationId);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioTreatmentId2, simulationId);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioTreatmentId1, simulationId);
             sectionCommittedProject1.Treatment = "Simple";
             sectionCommittedProject2.Treatment = "Complicated";
             sectionCommittedProject3.Treatment = "Simple";
@@ -296,16 +336,26 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulation = SimulationDtos.Dto(simulationId);
+            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulation);
+            var networkRepo = NetworkRepositoryMocks.New(unitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var networkKeyAttributeName = "NetworkKeyAttribute";
+            networkRepo.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
+
             var service = CreatePagingService(unitOfWork);
             var sectionCommittedProjectId1 = Guid.NewGuid();
             var sectionCommittedProjectId2 = Guid.NewGuid();
             var sectionCommittedProjectId3 = Guid.NewGuid();
             var scenarioTreatmentId1 = Guid.NewGuid();
             var scenarioTreatmentId2 = Guid.NewGuid();
-            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioTreatmentId1);
-            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioTreatmentId2);
-            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioTreatmentId1);
-            var updateRow = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioTreatmentId1);
+            var sectionCommittedProject1 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioTreatmentId1, simulationId);
+            var sectionCommittedProject2 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId2, scenarioTreatmentId2, simulationId);
+            var sectionCommittedProject3 = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId3, scenarioTreatmentId1, simulationId);
+            var updateRow = SectionCommittedProjectDtos.Dto(sectionCommittedProjectId1, scenarioTreatmentId1, simulationId);
             updateRow.Treatment = "updated treatment";
             sectionCommittedProject1.Treatment = "Simple";
             sectionCommittedProject2.Treatment = "Z Complicated";

@@ -371,7 +371,7 @@ export default class InvestmentEditor extends Vue {
     @Action('importScenarioInvestmentBudgetsFile') importScenarioInvestmentBudgetsFileAction: any;
     @Action('importLibraryInvestmentBudgetsFile') importLibraryInvestmentBudgetsFileAction: any;
     @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-
+    @Action('setAlertMessage') setAlertMessageAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
@@ -1132,8 +1132,8 @@ export default class InvestmentEditor extends Vue {
                         this.clearChanges();               
                         this.pagination.page = 1;
                         this.initializePages();
-                            
-                        this.librarySelectItemValue = null
+                        this.setAlertMessageAction("Investment Budgets import has been added to the work queue. Please refresh page when import is done");
+                        this.librarySelectItemValue = null;
                 });
             } else {
                 this.importLibraryInvestmentBudgetsFileAction({
@@ -1146,6 +1146,7 @@ export default class InvestmentEditor extends Vue {
                         this.librarySelectItemValue = null;
                         this.clearChanges();
                         this.resetPage();
+                        
                 });
             }
 

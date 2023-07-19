@@ -10,9 +10,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class CriterionLibraryDtos
     {
-        public static CriterionLibraryDTO Dto(Guid? id = null, string mergedCriteriaExpression = "mergedCriteriaExpression")
+        public static CriterionLibraryDTO Dto(Guid? id = null, string mergedCriteriaExpression = "mergedCriteriaExpression", string name = null)
         {
-            var name = RandomStrings.WithPrefix("criterionlibrary");
+            name ??= RandomStrings.WithPrefix("criterionlibrary");
             var resolveId = id ?? Guid.NewGuid();
             var dto = new CriterionLibraryDTO
             {

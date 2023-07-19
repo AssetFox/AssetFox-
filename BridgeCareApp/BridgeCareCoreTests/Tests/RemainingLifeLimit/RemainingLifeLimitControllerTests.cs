@@ -20,7 +20,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class RemainingLifeLimitTests
+    public class RemainingLifeLimitControllerTests
     {
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 

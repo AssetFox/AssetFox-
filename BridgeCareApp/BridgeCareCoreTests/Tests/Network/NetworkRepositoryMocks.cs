@@ -20,5 +20,11 @@ namespace BridgeCareCoreTests.Tests
             }
             return mock;
         }
+
+        public static void SetupGetNetworkKeyAttribute(this Mock<INetworkRepository> mock, Guid networkId)
+        {
+            var networkKeyAttributeName = "NetworkKeyAttribute";
+            mock.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
+        }
     }
 }

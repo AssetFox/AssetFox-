@@ -44,9 +44,7 @@ namespace BridgeCareCore.Services
             }
             if(committedProjects.Count > 0 && (request.search.Trim() != "" || request.sortColumn.Trim() != ""))
             {
-                var simulationRepo = _unitOfWork.SimulationRepo;
-                var simulationId = committedProjects.First().SimulationId;
-                var networkId = simulationRepo.GetSimulation(simulationId).NetworkId;
+                var networkId = _unitOfWork.SimulationRepo.GetSimulation(committedProjects.First().SimulationId).NetworkId;
                 _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(networkId);
             }
 

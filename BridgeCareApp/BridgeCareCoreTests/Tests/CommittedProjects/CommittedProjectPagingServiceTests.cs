@@ -51,16 +51,13 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
-
             var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
             var simulationId = Guid.NewGuid();
             var simulation = SimulationDtos.Dto(simulationId);
-            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulation);
+            simulationRepo.SetupGetSimulation(simulation);
             var networkRepo = NetworkRepositoryMocks.New(unitOfWork);
             var networkId = NetworkTestSetup.NetworkId;
-            var networkKeyAttributeName = "NetworkKeyAttribute";
-            networkRepo.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
-
+            networkRepo.SetupGetNetworkKeyAttribute(networkId);
             var service = CreatePagingService(unitOfWork);
             var sectionCommittedProjectId1 = Guid.NewGuid();
             var sectionCommittedProjectId2 = Guid.NewGuid();
@@ -108,16 +105,13 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
-
             var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
             var simulationId = Guid.NewGuid();
             var simulation = SimulationDtos.Dto(simulationId);
-            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulation);
+            simulationRepo.SetupGetSimulation(simulation);
             var networkRepo = NetworkRepositoryMocks.New(unitOfWork);
             var networkId = NetworkTestSetup.NetworkId;
-            var networkKeyAttributeName = "NetworkKeyAttribute";
-            networkRepo.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
-
+            networkRepo.SetupGetNetworkKeyAttribute(networkId);
             var service = CreatePagingService(unitOfWork);
             var sectionCommittedProjectId1 = Guid.NewGuid();
             var sectionCommittedProjectId2 = Guid.NewGuid();
@@ -163,16 +157,13 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
-
             var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
             var simulationId = Guid.NewGuid();
             var simulation = SimulationDtos.Dto(simulationId);
-            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulation);
+            simulationRepo.SetupGetSimulation(simulation);
             var networkRepo = NetworkRepositoryMocks.New(unitOfWork);
             var networkId = NetworkTestSetup.NetworkId;
-            var networkKeyAttributeName = "NetworkKeyAttribute";
-            networkRepo.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
-
+            networkRepo.SetupGetNetworkKeyAttribute(networkId);
             var service = CreatePagingService(unitOfWork);
             var sectionCommittedProjectId1 = Guid.NewGuid();
             var sectionCommittedProjectId2 = Guid.NewGuid();
@@ -214,16 +205,13 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
-
             var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
             var simulationId = Guid.NewGuid();
             var simulation = SimulationDtos.Dto(simulationId);
-            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulation);
+            simulationRepo.SetupGetSimulation(simulation);
             var networkRepo = NetworkRepositoryMocks.New(unitOfWork);
             var networkId = NetworkTestSetup.NetworkId;
-            var networkKeyAttributeName = "NetworkKeyAttribute";
-            networkRepo.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
-
+            networkRepo.SetupGetNetworkKeyAttribute(networkId);
             var sectionCommittedProjectId1 = Guid.NewGuid();
             var sectionCommittedProjectId2 = Guid.NewGuid();
             var sectionCommittedProjectId3 = Guid.NewGuid();
@@ -336,16 +324,13 @@ namespace BridgeCareCoreTests.Tests
         {
             var unitOfWork = UnitOfWorkMocks.New();
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
-
             var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
             var simulationId = Guid.NewGuid();
             var simulation = SimulationDtos.Dto(simulationId);
-            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulation);
+            simulationRepo.SetupGetSimulation(simulation);
             var networkRepo = NetworkRepositoryMocks.New(unitOfWork);
             var networkId = NetworkTestSetup.NetworkId;
-            var networkKeyAttributeName = "NetworkKeyAttribute";
-            networkRepo.Setup(s => s.GetNetworkKeyAttribute(networkId)).Returns(networkKeyAttributeName);
-
+            networkRepo.SetupGetNetworkKeyAttribute(networkId);
             var service = CreatePagingService(unitOfWork);
             var sectionCommittedProjectId1 = Guid.NewGuid();
             var sectionCommittedProjectId2 = Guid.NewGuid();

@@ -42,6 +42,47 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
         }
 
         [Fact]
+        public void SimulationInDbWithScenarioTreatmentCost_Clone_Clones()
+        {
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var treatmentbudget = TreatmentBudgetDtos.Dto();
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(treatmentId);
+            treatment.Budgets = new List<TreatmentBudgetDTO>() { treatmentbudget };
+            treatment.BudgetIds = new List<Guid> { treatmentbudget.Id };
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulation.Id);
+            var scenarioTreatmentCostId = Guid.NewGuid();
+            var scenarioTreatmentCost = TreatmentCostDtos.WithEquationAndCriterionLibrary(scenarioTreatmentCostId);
+            var scenarioTreatmentCosts = new List<TreatmentCostDTO>() { scenarioTreatmentCost };
+            var scenarioTreatmentCostPerTreatmentId = new Dictionary<Guid, List<TreatmentCostDTO>>();
+            scenarioTreatmentCostPerTreatmentId[treatmentId] = scenarioTreatmentCosts;
+
+            TestHelper.UnitOfWork.TreatmentCostRepo.UpsertOrDeleteScenarioTreatmentCosts(scenarioTreatmentCostPerTreatmentId, simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
+            var clonedTreatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(clonedSimulationId);
+            var clonedTreatment = clonedTreatments.Single();
+            Assert.Equal(networkId, clonedSimulation.NetworkId);
+            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.NotEqual(treatment.Id, clonedTreatment.Id);
+            Assert.Empty(clonedTreatment.Budgets);
+            Assert.Empty(clonedTreatment.BudgetIds);
+            Assert.NotEqual(treatment, clonedTreatment);
+            var expectedScenarioTreatmentCost = new TreatmentCostDTO();
+            Assert.NotEqual(expectedScenarioTreatmentCost.Id, scenarioTreatmentCost.Id);
+            Assert.NotEqual(expectedScenarioTreatmentCost.CriterionLibrary, scenarioTreatmentCost.CriterionLibrary);
+            Assert.NotEqual(expectedScenarioTreatmentCost.Equation, scenarioTreatmentCost.Equation);            
+        }
+
+        [Fact]
         public void SimulationInDbWithSelectableTreatment_Clone_Clones()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
@@ -144,14 +185,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             treatment.BudgetIds = new List<Guid> { treatmentbudget.Id };
             var treatments = new List<TreatmentDTO> { treatment };
             TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulation.Id);
-            var treatmentsBefore = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
-            var treatmentBefore = treatmentsBefore.Single();
-
-            var treatmentconsequenceId = Guid.NewGuid();
-            var treatmentconsequence = TreatmentConsequenceDtos.Dto(treatmentconsequenceId, TestAttributeNames.CulvDurationN);
-            var treatmentconsequences = new List<TreatmentConsequenceDTO>() { treatmentconsequence };
+          
+            var treatmentConsequenceId = Guid.NewGuid();
+            var treatmentConsequence = TreatmentConsequenceDtos.WithEquationAndCriterionLibrary(treatmentConsequenceId, TestAttributeNames.CulvDurationN);
+            var treatmentConsequences = new List<TreatmentConsequenceDTO>() { treatmentConsequence };
             var treatmentConsequencesPerTreatmentId = new Dictionary<Guid,List<TreatmentConsequenceDTO>>();
-            treatmentConsequencesPerTreatmentId[treatmentId] = treatmentconsequences;
+            treatmentConsequencesPerTreatmentId[treatmentId] = treatmentConsequences;
 
             TestHelper.UnitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteScenarioTreatmentConsequences(treatmentConsequencesPerTreatmentId, simulationId);
 
@@ -160,26 +199,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
             var clonedTreatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(clonedSimulationId);
-            var clonedTreatment = clonedTreatments.Single();
-            
-            ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment, t => t.Id, t => t.CriterionLibrary, t => t.Budgets, t => t.BudgetIds);
+            var clonedTreatment = clonedTreatments.Single();   
+          
             Assert.Equal(newSimulationName, clonedSimulation.Name);
             Assert.Equal(networkId, clonedSimulation.NetworkId);
             Assert.Equal("Test Network", clonedSimulation.NetworkName);
             Assert.NotEqual(treatment.Id, clonedTreatment.Id);
             Assert.Empty(clonedTreatment.Budgets);
-            Assert.Empty(clonedTreatment.BudgetIds);
-            var expectedCriterionLibrary = new CriterionLibraryDTO();
-            ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment, t => t.Id, t => t.CriterionLibrary, t => t.Budgets, t => t.BudgetIds);
-            Assert.NotEqual(treatmentBefore.Id, clonedTreatment.Id);
-            Assert.NotEqual(treatmentBefore.CriterionLibrary.Id, clonedTreatment.CriterionLibrary.Id);
+            Assert.Empty(clonedTreatment.BudgetIds);            
+            Assert.NotEqual(treatment, clonedTreatment);          
             var expectedTreatmentConsequence = new TreatmentConsequenceDTO();
-            ObjectAssertions.EquivalentExcluding(expectedTreatmentConsequence, treatmentconsequence, c => c.Id, c => c.Attribute, c => c.Equation, c => c.ChangeValue);
-            
-            Assert.NotEqual(expectedTreatmentConsequence.Id, treatmentconsequence.Id);
-            Assert.NotEqual(expectedTreatmentConsequence.Attribute, treatmentconsequence.Attribute);
-            Assert.NotEqual(expectedTreatmentConsequence.ChangeValue, treatmentconsequence.ChangeValue);
-          
+            Assert.NotEqual(expectedTreatmentConsequence.Id, treatmentConsequence.Id);
+            Assert.NotEqual(expectedTreatmentConsequence.Attribute, treatmentConsequence.Attribute);
+            Assert.NotEqual(expectedTreatmentConsequence.ChangeValue, treatmentConsequence.ChangeValue);
+            Assert.NotEqual(expectedTreatmentConsequence.CriterionLibrary, treatmentConsequence.CriterionLibrary);
         }
 
         [Fact]

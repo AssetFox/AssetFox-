@@ -216,19 +216,24 @@
         <v-flex xs8 style="border:1px solid #999999 !important;" v-if="selectedCommittedProject !== ''">
             <v-layout column>
                 <v-flex xs12>
-                    <v-btn @click="selectedCommittedProject = ''" flat class="ghd-close-button">
+                    <v-btn 
+                       id="CommittedProjectsEditor-closeSelectedCommitedProject-vbtn"
+                       @click="selectedCommittedProject = ''" flat class="ghd-close-button">
                         X
                     </v-btn>
                 </v-flex>
                 <v-flex xs12>
                     <v-layout justify-center>
-                        <v-btn @click="showCreateCommittedProjectConsequenceDialog = true" 
+                        <v-btn 
+                            id="CommittedProjectsEditor-addConsequence-vbtn"
+                            @click="showCreateCommittedProjectConsequenceDialog = true" 
                             class="ghd-white-bg ghd-blue ghd-button btn-style" outline>Add Conseqence
                         </v-btn> 
                     </v-layout>
                 </v-flex>
                 <v-flex xs12>
                     <v-data-table
+                    id="CommittedProjectsEditor-consequences-vDataTable"
                     :headers="consequenceHeaders"
                     :items="selectedConsequences"
                     item-key='id'
@@ -313,7 +318,9 @@
                                 </v-edit-dialog>
                             </td>
                             <td>
-                                <v-btn @click="OnDeleteConsequence(props.item.id)"  class="ghd-blue" icon>
+                                <v-btn 
+                                    id="CommittedProjectsEditor-deleteConsequence-vbtn"
+                                    @click="OnDeleteConsequence(props.item.id)"  class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </td>

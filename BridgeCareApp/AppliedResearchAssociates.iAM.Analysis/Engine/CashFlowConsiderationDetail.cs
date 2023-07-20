@@ -1,27 +1,26 @@
 ﻿using System;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public sealed class CashFlowConsiderationDetail
 {
-    public sealed class CashFlowConsiderationDetail
+    public CashFlowConsiderationDetail(string cashFlowRuleName)
     {
-        public CashFlowConsiderationDetail(string cashFlowRuleName)
+        if (string.IsNullOrWhiteSpace(cashFlowRuleName))
         {
-            if (string.IsNullOrWhiteSpace(cashFlowRuleName))
-            {
-                throw new ArgumentException("Cash flow rule name is blank.", nameof(cashFlowRuleName));
-            }
-
-            CashFlowRuleName = cashFlowRuleName;
+            throw new ArgumentException("Cash flow rule name is blank.", nameof(cashFlowRuleName));
         }
 
-        public string CashFlowRuleName { get; }
+        CashFlowRuleName = cashFlowRuleName;
+    }
 
-        public ReasonAgainstCashFlow ReasonAgainstCashFlow { get; set; }
+    public string CashFlowRuleName { get; }
 
-        internal CashFlowConsiderationDetail(CashFlowConsiderationDetail original)
-        {
-            CashFlowRuleName = original.CashFlowRuleName;
-            ReasonAgainstCashFlow = original.ReasonAgainstCashFlow;
-        }
+    public ReasonAgainstCashFlow ReasonAgainstCashFlow { get; set; }
+
+    internal CashFlowConsiderationDetail(CashFlowConsiderationDetail original)
+    {
+        CashFlowRuleName = original.CashFlowRuleName;
+        ReasonAgainstCashFlow = original.ReasonAgainstCashFlow;
     }
 }

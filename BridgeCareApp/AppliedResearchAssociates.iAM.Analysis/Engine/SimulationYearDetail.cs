@@ -1,21 +1,20 @@
 ﻿using System.Collections.Generic;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public sealed class SimulationYearDetail
 {
-    public sealed class SimulationYearDetail
-    {
-        public SimulationYearDetail(int year) => Year = year;
+    public SimulationYearDetail(int year) => Year = year;
 
-        public List<BudgetDetail> Budgets { get; } = new List<BudgetDetail>();
+    public List<AssetDetail> Assets { get; } = new List<AssetDetail>();
 
-        public double ConditionOfNetwork { get; set; }
+    public List<BudgetDetail> Budgets { get; } = new List<BudgetDetail>();
 
-        public List<DeficientConditionGoalDetail> DeficientConditionGoals { get; } = new List<DeficientConditionGoalDetail>();
+    public double ConditionOfNetwork { get; set; }
 
-        public List<AssetDetail> Assets { get; } = new List<AssetDetail>();
+    public List<DeficientConditionGoalDetail> DeficientConditionGoals { get; } = new List<DeficientConditionGoalDetail>();
 
-        public List<TargetConditionGoalDetail> TargetConditionGoals { get; } = new List<TargetConditionGoalDetail>();
+    public List<TargetConditionGoalDetail> TargetConditionGoals { get; } = new List<TargetConditionGoalDetail>();
 
-        public int Year { get; }
-    }
+    public int Year { get; }
 }

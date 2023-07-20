@@ -4,579 +4,578 @@ using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+internal sealed class AssetContext : CalculateEvaluateScope
 {
-    internal sealed class AssetContext : CalculateEvaluateScope
+    public AssetContext(AnalysisMaintainableAsset asset, SimulationRunner simulationRunner)
     {
-        public AssetContext(AnalysisMaintainableAsset asset, SimulationRunner simulationRunner)
+        Asset = asset ?? throw new ArgumentNullException(nameof(asset));
+        SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
+
+        ResetDetail();
+
+        Initialize();
+    }
+
+    public AssetContext(AssetContext original) : base(original)
+    {
+        Asset = original.Asset;
+        SimulationRunner = original.SimulationRunner;
+
+        ResetDetail();
+
+        EventSchedule.CopyFrom(original.EventSchedule);
+        FirstUnshadowedYearForAnyTreatment = original.FirstUnshadowedYearForAnyTreatment;
+        FirstUnshadowedYearForSameTreatment.CopyFrom(original.FirstUnshadowedYearForSameTreatment);
+        NumberCache.CopyFrom(original.NumberCache);
+
+        InitializeCalculatedFields();
+    }
+
+    public AnalysisMaintainableAsset Asset { get; }
+
+    public AssetDetail Detail { get; private set; }
+
+    public IDictionary<int, Choice<Treatment, TreatmentProgress>> EventSchedule { get; } = new Dictionary<int, Choice<Treatment, TreatmentProgress>>();
+
+    public SimulationRunner SimulationRunner { get; }
+
+    public AssetSummaryDetail SummaryDetail
+    {
+        get
         {
-            Asset = asset ?? throw new ArgumentNullException(nameof(asset));
-            SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
-
-            ResetDetail();
-
-            Initialize();
+            var detail = new AssetSummaryDetail(Asset);
+            CopyAttributeValuesToDetail(detail);
+            return detail;
         }
+    }
 
-        public AssetContext(AssetContext original) : base(original)
+    public void ApplyPassiveTreatment(int year)
+    {
+        CheckPassiveTreatmentCostIsZero();
+        ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
+    }
+
+    public void ApplyPerformanceCurves() => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute());
+
+    public void ApplyTreatment(Treatment treatment, int year)
+    {
+        ApplyTreatmentButNotMetadata(treatment);
+        ApplyTreatmentMetadata(year);
+    }
+
+    public void ApplyTreatmentConsequences(Treatment treatment)
+    {
+        var consequenceActions = treatment.GetConsequenceActions(this);
+        foreach (var consequenceAction in consequenceActions)
         {
-            Asset = original.Asset;
-            SimulationRunner = original.SimulationRunner;
-
-            ResetDetail();
-
-            EventSchedule.CopyFrom(original.EventSchedule);
-            FirstUnshadowedYearForAnyTreatment = original.FirstUnshadowedYearForAnyTreatment;
-            FirstUnshadowedYearForSameTreatment.CopyFrom(original.FirstUnshadowedYearForSameTreatment);
-            NumberCache.CopyFrom(original.NumberCache);
-
-            InitializeCalculatedFields();
+            consequenceAction();
         }
+    }
 
-        public AnalysisMaintainableAsset Asset { get; }
-
-        public AssetDetail Detail { get; private set; }
-
-        public IDictionary<int, Choice<Treatment, TreatmentProgress>> EventSchedule { get; } = new Dictionary<int, Choice<Treatment, TreatmentProgress>>();
-
-        public SimulationRunner SimulationRunner { get; }
-
-        public AssetSummaryDetail SummaryDetail
+    public void ApplyTreatmentMetadataIfPending(int year)
+    {
+        if (AppliedTreatmentWithPendingMetadata is not null)
         {
-            get
-            {
-                var detail = new AssetSummaryDetail(Asset);
-                CopyAttributeValuesToDetail(detail);
-                return detail;
-            }
-        }
-
-        public void ApplyPassiveTreatment(int year)
-        {
-            CheckPassiveTreatmentCostIsZero();
-            ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
-        }
-
-        public void ApplyPerformanceCurves() => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute());
-
-        public void ApplyTreatment(Treatment treatment, int year)
-        {
-            ApplyTreatmentButNotMetadata(treatment);
             ApplyTreatmentMetadata(year);
         }
+    }
 
-        public void ApplyTreatmentConsequences(Treatment treatment)
+    public void CopyAttributeValuesToDetail() => CopyAttributeValuesToDetail(Detail);
+
+    public void CopyDetailFrom(AssetContext other) => Detail = new AssetDetail(other.Detail);
+
+    public bool? Evaluate(Criterion criterion)
+    {
+        if (!EvaluationCache.TryGetValue(criterion.Expression, out var result))
         {
-            var consequenceActions = treatment.GetConsequenceActions(this);
-            foreach (var consequenceAction in consequenceActions)
-            {
-                consequenceAction();
-            }
+            result = criterion.Evaluate(this);
+            EvaluationCache.Add(criterion.Expression, result);
         }
 
-        public void ApplyTreatmentMetadataIfPending(int year)
+        return result;
+    }
+
+    public double GetBenefit() => GetBenefit(true);
+
+    public double GetBenefit(bool withWeighting)
+    {
+        var rawBenefit = GetNumber(AnalysisMethod.Benefit.Attribute.Name);
+        var benefit = AnalysisMethod.Benefit.GetValueRelativeToLimit(rawBenefit);
+
+        if (withWeighting && AnalysisMethod.Weighting != null)
         {
-            if (AppliedTreatmentWithPendingMetadata is not null)
-            {
-                ApplyTreatmentMetadata(year);
-            }
+            var weight = GetNumber(AnalysisMethod.Weighting.Name);
+            benefit *= weight;
         }
 
-        public void CopyAttributeValuesToDetail() => CopyAttributeValuesToDetail(Detail);
+        return benefit;
+    }
 
-        public void CopyDetailFrom(AssetContext other) => Detail = new AssetDetail(other.Detail);
+    public double GetCostOfTreatment(Treatment treatment) => treatment.GetCost(this, AnalysisMethod.ShouldApplyMultipleFeasibleCosts);
 
-        public bool? Evaluate(Criterion criterion)
+    public override double GetNumber(string key)
+    {
+        if (GetNumber_ActiveKeysOfCurrentInvocation.Contains(key, StringComparer.OrdinalIgnoreCase))
         {
-            if (!EvaluationCache.TryGetValue(criterion.Expression, out var result))
-            {
-                result = criterion.Evaluate(this);
-                EvaluationCache.Add(criterion.Expression, result);
-            }
+            var loop = GetNumber_ActiveKeysOfCurrentInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
+            var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));
 
-            return result;
+            var messageBuilder = new SimulationMessageBuilder("Loop encountered during number calculation: " + loopText)
+            {
+                AssetName = Asset.AssetName,
+                AssetId = Asset.Id,
+            };
+            var logBuilder = SimulationLogMessageBuilders.CalculationFatal(messageBuilder.ToString(), SimulationRunner.Simulation.Id);
+            SimulationRunner.Send(logBuilder);
         }
 
-        public double GetBenefit() => GetBenefit(true);
+        GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
 
-        public double GetBenefit(bool withWeighting)
+        if (!NumberCache_Override.TryGetValue(key, out var number) && !NumberCache.TryGetValue(key, out number))
         {
-            var rawBenefit = GetNumber(AnalysisMethod.Benefit.Attribute.Name);
-            var benefit = AnalysisMethod.Benefit.GetValueRelativeToLimit(rawBenefit);
+            number = base.GetNumber(key);
 
-            if (withWeighting && AnalysisMethod.Weighting != null)
+            if (SimulationRunner.NumberAttributeByName.TryGetValue(key, out var attribute))
             {
-                var weight = GetNumber(AnalysisMethod.Weighting.Name);
-                benefit *= weight;
-            }
-
-            return benefit;
-        }
-
-        public double GetCostOfTreatment(Treatment treatment) => treatment.GetCost(this, AnalysisMethod.ShouldApplyMultipleFeasibleCosts);
-
-        public override double GetNumber(string key)
-        {
-            if (GetNumber_ActiveKeysOfCurrentInvocation.Contains(key, StringComparer.OrdinalIgnoreCase))
-            {
-                var loop = GetNumber_ActiveKeysOfCurrentInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
-                var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));
-
-                var messageBuilder = new SimulationMessageBuilder("Loop encountered during number calculation: " + loopText)
+                if (attribute.Minimum.HasValue)
                 {
-                    AssetName = Asset.AssetName,
-                    AssetId = Asset.Id,
-                };
-                var logBuilder = SimulationLogMessageBuilders.CalculationFatal(messageBuilder.ToString(), SimulationRunner.Simulation.Id);
-                SimulationRunner.Send(logBuilder);
-            }
-
-            GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
-
-            if (!NumberCache_Override.TryGetValue(key, out var number) && !NumberCache.TryGetValue(key, out number))
-            {
-                number = base.GetNumber(key);
-
-                if (SimulationRunner.NumberAttributeByName.TryGetValue(key, out var attribute))
-                {
-                    if (attribute.Minimum.HasValue)
-                    {
-                        number = Math.Max(number, attribute.Minimum.Value);
-                    }
-
-                    if (attribute.Maximum.HasValue)
-                    {
-                        number = Math.Min(number, attribute.Maximum.Value);
-                    }
+                    number = Math.Max(number, attribute.Minimum.Value);
                 }
 
-                NumberCache[key] = number;
+                if (attribute.Maximum.HasValue)
+                {
+                    number = Math.Min(number, attribute.Maximum.Value);
+                }
             }
 
-            _ = GetNumber_ActiveKeysOfCurrentInvocation.Pop();
-
-            return number;
+            NumberCache[key] = number;
         }
 
-        public double GetSpatialWeight()
+        _ = GetNumber_ActiveKeysOfCurrentInvocation.Pop();
+
+        return number;
+    }
+
+    public double GetSpatialWeight()
+    {
+        var returnValue = Asset.SpatialWeighting.Compute(this);
+        if (double.IsNaN(returnValue) || double.IsInfinity(returnValue))
         {
-            var returnValue = Asset.SpatialWeighting.Compute(this);
-            if (double.IsNaN(returnValue) || double.IsInfinity(returnValue))
+            var errorMessage = SimulationLogMessages.SpatialWeightCalculationReturned(Asset, Asset.SpatialWeighting, returnValue);
+            var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
+            SimulationRunner.Send(messageBuilder);
+        }
+        return returnValue;
+    }
+
+    public void MarkTreatmentProgress(Treatment treatment)
+    {
+        AppliedTreatmentWithPendingMetadata = null;
+
+        Detail.AppliedTreatment = treatment.Name;
+        Detail.TreatmentStatus = TreatmentStatus.Progressed;
+    }
+
+    public void PrepareForTreatment()
+    {
+        FixCalculatedFieldValuesWithPreDeteriorationTiming();
+
+        if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+        {
+            FixCalculatedFieldValuesWithoutPreDeteriorationTiming();
+        }
+
+        ApplyPerformanceCurves();
+
+        if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+        {
+            PreapplyPassiveTreatment();
+            UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming();
+        }
+
+        FixCalculatedFieldValuesWithPostDeteriorationTiming();
+    }
+
+    public void ResetDetail() => Detail = new AssetDetail(Asset);
+
+    public void RollForward()
+    {
+        // Per email on 2020-05-06 from Gregg to Jake, Chad, and William: "We roll forward
+        // attributes with performance curves. To do so we need to know which performance curve
+        // to use. When evaluating which performance curve to use it is necessary to evaluate
+        // the criteria. Ideally, the attribute in the criteria will have a value for the year
+        // in question. If it does not, use the Most Recent Value (from the rollup). If it does
+        // not have a Most Recent Value, use the default. Currently, I don't believe the Roll
+        // Forward uses the No Treatment consequences. It should in the new code."
+
+        IEnumerable<int?> getMostRecentYearPerAttribute<T>(IEnumerable<Attribute<T>> attributes) =>
+            attributes.Select(attribute => Asset.GetHistory(attribute).MostRecentYear);
+
+        var earliestYearOfMostRecentValue = Enumerable.Concat(
+            getMostRecentYearPerAttribute(SimulationRunner.Simulation.Network.Explorer.NumberAttributes),
+            getMostRecentYearPerAttribute(SimulationRunner.Simulation.Network.Explorer.TextAttributes)
+            ).Min();
+
+        var earliestYearOfSchedule = EventSchedule.Keys.AsNullables().Min();
+
+        var firstYearOfRollForward = (earliestYearOfMostRecentValue.HasValue, earliestYearOfSchedule.HasValue) switch
+        {
+            (true, true) => Math.Min(earliestYearOfMostRecentValue.Value, earliestYearOfSchedule.Value),
+            (true, false) => earliestYearOfMostRecentValue.Value,
+            (false, true) => earliestYearOfSchedule.Value,
+            (false, false) => (int?)null
+        };
+
+        if (firstYearOfRollForward < SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
+        {
+            SetHistoricalValues(firstYearOfRollForward.Value, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+            SetHistoricalValues(firstYearOfRollForward.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+
+            HandleTreatmentDuringRollForward(firstYearOfRollForward.Value);
+
+            foreach (var year in Static.RangeFromBounds(firstYearOfRollForward.Value + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1))
             {
-                var errorMessage = SimulationLogMessages.SpatialWeightCalculationReturned(Asset, Asset.SpatialWeighting, returnValue);
-                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
-                SimulationRunner.Send(messageBuilder);
+                SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+                SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+
+                HandleTreatmentDuringRollForward(year);
             }
-            return returnValue;
         }
 
-        public void MarkTreatmentProgress(Treatment treatment)
-        {
-            AppliedTreatmentWithPendingMetadata = null;
+        SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+        SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+    }
 
-            Detail.AppliedTreatment = treatment.Name;
-            Detail.TreatmentStatus = TreatmentStatus.Progressed;
+    public override void SetNumber(string key, double value)
+    {
+        ClearCache();
+        base.SetNumber(key, value);
+    }
+
+    public override void SetNumber(string key, Func<double> getValue)
+    {
+        ClearCache();
+        base.SetNumber(key, getValue);
+    }
+
+    public override void SetText(string key, string value)
+    {
+        ClearCache();
+        base.SetText(key, value);
+    }
+
+    public void UnfixCalculatedFieldValues() => NumberCache_Override.Clear();
+
+    public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
+
+    public bool YearIsWithinShadowForSameTreatment(int year, Treatment treatment) => FirstUnshadowedYearForSameTreatment.TryGetValue(treatment.Name, out var firstUnshadowedYear) && year < firstUnshadowedYear;
+
+    private static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
+
+    private readonly Dictionary<string, bool?> EvaluationCache = new();
+
+    private readonly Dictionary<string, int> FirstUnshadowedYearForSameTreatment = new();
+
+    private readonly Stack<string> GetNumber_ActiveKeysOfCurrentInvocation = new();
+
+    private readonly Dictionary<Attribute, double> MostRecentAdjustmentFactorsForPerformanceCurves = new();
+
+    private readonly Dictionary<string, double> NumberCache = new(KeyComparer);
+
+    private readonly Dictionary<string, double> NumberCache_Override = new(KeyComparer);
+
+    private Treatment AppliedTreatmentWithPendingMetadata;
+
+    private int? FirstUnshadowedYearForAnyTreatment;
+
+    private IEnumerable<CalculatedField> AllCalculatedFields => SimulationRunner.Simulation.Network.Explorer.CalculatedFields;
+
+    private AnalysisMethod AnalysisMethod => SimulationRunner.Simulation.AnalysisMethod;
+
+    private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
+    {
+        var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
+
+        foreach (var (key, value) in dataUpdates)
+        {
+            SetNumber(key, value);
         }
+    }
 
-        public void PrepareForTreatment()
+    private void ApplyTreatmentButNotMetadata(Treatment treatment)
+    {
+        ApplyTreatmentConsequences(treatment);
+        AppliedTreatmentWithPendingMetadata = treatment;
+    }
+
+    private void ApplyTreatmentMetadata(int year)
+    {
+        var treatment = AppliedTreatmentWithPendingMetadata;
+        AppliedTreatmentWithPendingMetadata = null;
+
+        foreach (var scheduling in treatment.GetSchedulings())
         {
-            FixCalculatedFieldValuesWithPreDeteriorationTiming();
+            var schedulingYear = year + scheduling.OffsetToFutureYear;
 
-            if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+            if (EventSchedule.ContainsKey(schedulingYear))
             {
-                FixCalculatedFieldValuesWithoutPreDeteriorationTiming();
+                Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.Treatment.Name));
             }
-
-            ApplyPerformanceCurves();
-
-            if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+            else
             {
-                PreapplyPassiveTreatment();
-                UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming();
+                EventSchedule.Add(schedulingYear, scheduling.Treatment);
             }
-
-            FixCalculatedFieldValuesWithPostDeteriorationTiming();
         }
 
-        public void ResetDetail() => Detail = new AssetDetail(Asset);
-
-        public void RollForward()
+        if (treatment != SimulationRunner.Simulation.DesignatedPassiveTreatment)
         {
-            // Per email on 2020-05-06 from Gregg to Jake, Chad, and William: "We roll forward
-            // attributes with performance curves. To do so we need to know which performance curve
-            // to use. When evaluating which performance curve to use it is necessary to evaluate
-            // the criteria. Ideally, the attribute in the criteria will have a value for the year
-            // in question. If it does not, use the Most Recent Value (from the rollup). If it does
-            // not have a Most Recent Value, use the default. Currently, I don't believe the Roll
-            // Forward uses the No Treatment consequences. It should in the new code."
+            FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
+            FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+        }
 
-            IEnumerable<int?> getMostRecentYearPerAttribute<T>(IEnumerable<Attribute<T>> attributes) =>
-                attributes.Select(attribute => Asset.GetHistory(attribute).MostRecentYear);
+        Detail.AppliedTreatment = treatment.Name;
+        Detail.TreatmentStatus = TreatmentStatus.Applied;
 
-            var earliestYearOfMostRecentValue = Enumerable.Concat(
-                getMostRecentYearPerAttribute(SimulationRunner.Simulation.Network.Explorer.NumberAttributes),
-                getMostRecentYearPerAttribute(SimulationRunner.Simulation.Network.Explorer.TextAttributes)
-                ).Min();
+        foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
+        {
+            MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
+        }
+    }
 
-            var earliestYearOfSchedule = EventSchedule.Keys.AsNullables().Min();
+    private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve, MostRecentAdjustmentFactorsForPerformanceCurves);
 
-            var firstYearOfRollForward = (earliestYearOfMostRecentValue.HasValue, earliestYearOfSchedule.HasValue) switch
+    private double CalculateValueOnCurve(PerformanceCurve curve, Action<double> handle)
+    {
+        var value = CalculateValueOnCurve(curve);
+        handle(value);
+        return value;
+    }
+
+    private void CheckPassiveTreatmentCostIsZero()
+    {
+        var cost = GetCostOfTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment);
+        if (cost != 0)
+        {
+            var messageBuilder = new SimulationMessageBuilder(MessageStrings.CostOfPassiveTreatmentIsNonZero)
             {
-                (true, true) => Math.Min(earliestYearOfMostRecentValue.Value, earliestYearOfSchedule.Value),
-                (true, false) => earliestYearOfMostRecentValue.Value,
-                (false, true) => earliestYearOfSchedule.Value,
-                (false, false) => (int?)null
+                ItemName = SimulationRunner.Simulation.DesignatedPassiveTreatment.Name,
+                ItemId = SimulationRunner.Simulation.DesignatedPassiveTreatment.Id,
+                AssetName = Asset.AssetName,
+                AssetId = Asset.Id,
             };
 
-            if (firstYearOfRollForward < SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
+            var builder = new SimulationLogMessageBuilder
             {
-                SetHistoricalValues(firstYearOfRollForward.Value, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-                SetHistoricalValues(firstYearOfRollForward.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+                SimulationId = SimulationRunner.Simulation.Id,
+                Message = messageBuilder.ToString(),
+                Status = SimulationLogStatus.Fatal,
+                Subject = SimulationLogSubject.Runtime,
+            };
 
-                HandleTreatmentDuringRollForward(firstYearOfRollForward.Value);
+            SimulationRunner.Send(builder);
+        }
+    }
 
-                foreach (var year in Static.RangeFromBounds(firstYearOfRollForward.Value + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1))
+    private void ClearCache()
+    {
+        NumberCache.Clear();
+        EvaluationCache.Clear();
+    }
+
+    private void CopyAttributeValuesToDetail(AssetSummaryDetail detail)
+    {
+        detail.ValuePerNumericAttribute.Add(Network.SpatialWeightIdentifier, GetNumber(Network.SpatialWeightIdentifier));
+
+        foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.NumericAttributes)
+        {
+            detail.ValuePerNumericAttribute.Add(attribute.Name, GetNumber(attribute.Name));
+        }
+
+        foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.TextAttributes)
+        {
+            detail.ValuePerTextAttribute.Add(attribute.Name, GetText(attribute.Name));
+        }
+    }
+
+    private void FixCalculatedFieldValues(IEnumerable<CalculatedField> calculatedFields)
+    {
+        foreach (var calculatedField in calculatedFields)
+        {
+            NumberCache_Override[calculatedField.Name] = GetNumber(calculatedField.Name);
+        }
+    }
+
+    private void FixCalculatedFieldValuesWithoutPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration));
+
+    private void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PostDeterioration));
+
+    private void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PreDeterioration));
+
+    private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
+    {
+        curves.Channel(
+            curve => Evaluate(curve.Criterion),
+            result => result ?? false,
+            result => !result.HasValue,
+            out var applicableCurves,
+            out var defaultCurves);
+
+        var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
+
+        if (operativeCurves.Count == 0)
+        {
+            var messageBuilder = new SimulationMessageBuilder("No performance curves are operative for a deteriorating attribute.")
+            {
+                ItemName = curves.Key.Name,
+                AssetName = Asset.AssetName,
+                AssetId = Asset.Id,
+            };
+
+            var logBuilder = SimulationLogMessageBuilders.RuntimeFatal(messageBuilder, SimulationRunner.Simulation.Id);
+            SimulationRunner.Send(logBuilder);
+        }
+
+        if (operativeCurves.Count > 1)
+        {
+            var messageBuilder = new SimulationMessageBuilder("Two or more performance curves are simultaneously operative for a single deteriorating attribute.")
+            {
+                ItemName = curves.Key.Name,
+                AssetName = Asset.AssetName,
+                AssetId = Asset.Id,
+            };
+
+            var logMessage = SimulationLogMessageBuilders.RuntimeWarning(messageBuilder, SimulationRunner.Simulation.Id);
+            SimulationRunner.Send(logMessage);
+        }
+
+        Func<double>
+            calculateMinimum = () => operativeCurves.Min(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value))),
+            calculateMaximum = () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));
+
+        return curves.Key.IsDecreasingWithDeterioration ? calculateMinimum : calculateMaximum;
+    }
+
+    private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
+
+    private void HandleTreatmentDuringRollForward(int year)
+    {
+        PrepareForTreatment();
+
+        if (EventSchedule.TryGetValue(year, out var scheduledEvent) &&
+            scheduledEvent.IsT1(out var treatment) &&
+            treatment is CommittedProject project)
+        {
+            ApplyTreatment(project, year);
+        }
+        else if (!SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+        {
+            ApplyPassiveTreatment(year);
+        }
+
+        ApplyTreatmentMetadataIfPending(year);
+        UnfixCalculatedFieldValues();
+    }
+
+    private void Initialize()
+    {
+        var initialReferenceYear = SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
+
+        SetInitialValues(SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+        SetInitialValues(SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+
+        foreach (var committedProject in SimulationRunner.CommittedProjectsPerAsset[Asset])
+        {
+            EventSchedule.Add(committedProject.Year, committedProject);
+        }
+
+        InitializeCalculatedFields();
+    }
+
+    private void InitializeCalculatedFields()
+    {
+        // This initialization is separate from the rest because it needs to be called again in
+        // the copy constructor. Otherwise, the copy's calculated fields will use the original's
+        // scope values. (Note that "this" is captured on each invocation of SetNumber.)
+
+        foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
+        {
+            double calculate()
+            {
+                try
                 {
-                    SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-                    SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
-
-                    HandleTreatmentDuringRollForward(year);
+                    return calculatedField.Calculate(this);
+                }
+                catch (SimulationException e)
+                {
+                    var logBuilder = SimulationLogMessageBuilders.Exception(e, SimulationRunner.Simulation.Id);
+                    SimulationRunner.Send(logBuilder, false);
+                    throw;
                 }
             }
 
-            SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-            SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+            SetNumber(calculatedField.Name, calculate);
         }
 
-        public override void SetNumber(string key, double value)
+        base.SetNumber(Network.SpatialWeightIdentifier, GetSpatialWeight);
+    }
+
+    private void PreapplyPassiveTreatment()
+    {
+        CheckPassiveTreatmentCostIsZero();
+        ApplyTreatmentButNotMetadata(SimulationRunner.Simulation.DesignatedPassiveTreatment);
+    }
+
+    private void SendToSimulationLogIfNeeded(PerformanceCurve curve, double value)
+    {
+        if (double.IsNaN(value) || double.IsInfinity(value))
         {
-            ClearCache();
-            base.SetNumber(key, value);
+            var key = curve.Attribute.Name;
+            var errorMessage = SimulationLogMessages.AssetCalculationReturned(Asset, curve, key, value);
+            var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
+            SimulationRunner.Send(messageBuilder);
         }
+    }
 
-        public override void SetNumber(string key, Func<double> getValue)
+    private void SetHistoricalValues<T>(int referenceYear, bool fallForward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
+    {
+        foreach (var attribute in attributes)
         {
-            ClearCache();
-            base.SetNumber(key, getValue);
-        }
-
-        public override void SetText(string key, string value)
-        {
-            ClearCache();
-            base.SetText(key, value);
-        }
-
-        public void UnfixCalculatedFieldValues() => NumberCache_Override.Clear();
-
-        public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
-
-        public bool YearIsWithinShadowForSameTreatment(int year, Treatment treatment) => FirstUnshadowedYearForSameTreatment.TryGetValue(treatment.Name, out var firstUnshadowedYear) && year < firstUnshadowedYear;
-
-        private static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
-
-        private readonly Dictionary<string, bool?> EvaluationCache = new();
-
-        private readonly Dictionary<string, int> FirstUnshadowedYearForSameTreatment = new();
-
-        private readonly Stack<string> GetNumber_ActiveKeysOfCurrentInvocation = new();
-
-        private readonly Dictionary<Attribute, double> MostRecentAdjustmentFactorsForPerformanceCurves = new();
-
-        private readonly Dictionary<string, double> NumberCache = new(KeyComparer);
-
-        private readonly Dictionary<string, double> NumberCache_Override = new(KeyComparer);
-
-        private Treatment AppliedTreatmentWithPendingMetadata;
-
-        private int? FirstUnshadowedYearForAnyTreatment;
-
-        private IEnumerable<CalculatedField> AllCalculatedFields => SimulationRunner.Simulation.Network.Explorer.CalculatedFields;
-
-        private AnalysisMethod AnalysisMethod => SimulationRunner.Simulation.AnalysisMethod;
-
-        private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
-        {
-            var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
-
-            foreach (var (key, value) in dataUpdates)
+            var attributeHistory = Asset.GetHistory(attribute);
+            if (attributeHistory.TryGetValue(referenceYear, out var value))
             {
-                SetNumber(key, value);
+                setValue(attribute.Name, value);
             }
-        }
-
-        private void ApplyTreatmentButNotMetadata(Treatment treatment)
-        {
-            ApplyTreatmentConsequences(treatment);
-            AppliedTreatmentWithPendingMetadata = treatment;
-        }
-
-        private void ApplyTreatmentMetadata(int year)
-        {
-            var treatment = AppliedTreatmentWithPendingMetadata;
-            AppliedTreatmentWithPendingMetadata = null;
-
-            foreach (var scheduling in treatment.GetSchedulings())
+            else if (fallForward)
             {
-                var schedulingYear = year + scheduling.OffsetToFutureYear;
-
-                if (EventSchedule.ContainsKey(schedulingYear))
+                var earliestFutureYear = attributeHistory.Years.Where(year => year > referenceYear).AsNullables().Min();
+                if (earliestFutureYear.HasValue)
                 {
-                    Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.Treatment.Name));
+                    setValue(attribute.Name, attributeHistory[earliestFutureYear.Value]);
                 }
                 else
                 {
-                    EventSchedule.Add(schedulingYear, scheduling.Treatment);
-                }
-            }
-
-            if (treatment != SimulationRunner.Simulation.DesignatedPassiveTreatment)
-            {
-                FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
-                FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
-            }
-
-            Detail.AppliedTreatment = treatment.Name;
-            Detail.TreatmentStatus = TreatmentStatus.Applied;
-
-            foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
-            {
-                MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
-            }
-        }
-
-        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve, MostRecentAdjustmentFactorsForPerformanceCurves);
-
-        private double CalculateValueOnCurve(PerformanceCurve curve, Action<double> handle)
-        {
-            var value = CalculateValueOnCurve(curve);
-            handle(value);
-            return value;
-        }
-
-        private void CheckPassiveTreatmentCostIsZero()
-        {
-            var cost = GetCostOfTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment);
-            if (cost != 0)
-            {
-                var messageBuilder = new SimulationMessageBuilder(MessageStrings.CostOfPassiveTreatmentIsNonZero)
-                {
-                    ItemName = SimulationRunner.Simulation.DesignatedPassiveTreatment.Name,
-                    ItemId = SimulationRunner.Simulation.DesignatedPassiveTreatment.Id,
-                    AssetName = Asset.AssetName,
-                    AssetId = Asset.Id,
-                };
-
-                var builder = new SimulationLogMessageBuilder
-                {
-                    SimulationId = SimulationRunner.Simulation.Id,
-                    Message = messageBuilder.ToString(),
-                    Status = SimulationLogStatus.Fatal,
-                    Subject = SimulationLogSubject.Runtime,
-                };
-
-                SimulationRunner.Send(builder);
-            }
-        }
-
-        private void ClearCache()
-        {
-            NumberCache.Clear();
-            EvaluationCache.Clear();
-        }
-
-        private void CopyAttributeValuesToDetail(AssetSummaryDetail detail)
-        {
-            detail.ValuePerNumericAttribute.Add(Network.SpatialWeightIdentifier, GetNumber(Network.SpatialWeightIdentifier));
-
-            foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.NumericAttributes)
-            {
-                detail.ValuePerNumericAttribute.Add(attribute.Name, GetNumber(attribute.Name));
-            }
-
-            foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.TextAttributes)
-            {
-                detail.ValuePerTextAttribute.Add(attribute.Name, GetText(attribute.Name));
-            }
-        }
-
-        private void FixCalculatedFieldValues(IEnumerable<CalculatedField> calculatedFields)
-        {
-            foreach (var calculatedField in calculatedFields)
-            {
-                NumberCache_Override[calculatedField.Name] = GetNumber(calculatedField.Name);
-            }
-        }
-
-        private void FixCalculatedFieldValuesWithoutPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration));
-
-        private void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PostDeterioration));
-
-        private void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PreDeterioration));
-
-        private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
-        {
-            curves.Channel(
-                curve => Evaluate(curve.Criterion),
-                result => result ?? false,
-                result => !result.HasValue,
-                out var applicableCurves,
-                out var defaultCurves);
-
-            var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
-
-            if (operativeCurves.Count == 0)
-            {
-                var messageBuilder = new SimulationMessageBuilder("No performance curves are operative for a deteriorating attribute.")
-                {
-                    ItemName = curves.Key.Name,
-                    AssetName = Asset.AssetName,
-                    AssetId = Asset.Id,
-                };
-
-                var logBuilder = SimulationLogMessageBuilders.RuntimeFatal(messageBuilder, SimulationRunner.Simulation.Id);
-                SimulationRunner.Send(logBuilder);
-            }
-
-            if (operativeCurves.Count > 1)
-            {
-                var messageBuilder = new SimulationMessageBuilder("Two or more performance curves are simultaneously operative for a single deteriorating attribute.")
-                {
-                    ItemName = curves.Key.Name,
-                    AssetName = Asset.AssetName,
-                    AssetId = Asset.Id,
-                };
-
-                var logMessage = SimulationLogMessageBuilders.RuntimeWarning(messageBuilder, SimulationRunner.Simulation.Id);
-                SimulationRunner.Send(logMessage);
-            }
-
-            Func<double>
-                calculateMinimum = () => operativeCurves.Min(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value))),
-                calculateMaximum = () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));
-
-            return curves.Key.IsDecreasingWithDeterioration ? calculateMinimum : calculateMaximum;
-        }
-
-        private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
-
-        private void HandleTreatmentDuringRollForward(int year)
-        {
-            PrepareForTreatment();
-
-            if (EventSchedule.TryGetValue(year, out var scheduledEvent) &&
-                scheduledEvent.IsT1(out var treatment) &&
-                treatment is CommittedProject project)
-            {
-                ApplyTreatment(project, year);
-            }
-            else if (!SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
-            {
-                ApplyPassiveTreatment(year);
-            }
-
-            ApplyTreatmentMetadataIfPending(year);
-            UnfixCalculatedFieldValues();
-        }
-
-        private void Initialize()
-        {
-            var initialReferenceYear = SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
-
-            SetInitialValues(SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-            SetInitialValues(SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
-
-            foreach (var committedProject in SimulationRunner.CommittedProjectsPerAsset[Asset])
-            {
-                EventSchedule.Add(committedProject.Year, committedProject);
-            }
-
-            InitializeCalculatedFields();
-        }
-
-        private void InitializeCalculatedFields()
-        {
-            // This initialization is separate from the rest because it needs to be called again in
-            // the copy constructor. Otherwise, the copy's calculated fields will use the original's
-            // scope values. (Note that "this" is captured on each invocation of SetNumber.)
-
-            foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
-            {
-                double calculate()
-                {
-                    try
-                    {
-                        return calculatedField.Calculate(this);
-                    }
-                    catch (SimulationException e)
-                    {
-                        var logBuilder = SimulationLogMessageBuilders.Exception(e, SimulationRunner.Simulation.Id);
-                        SimulationRunner.Send(logBuilder, false);
-                        throw;
-                    }
-                }
-
-                SetNumber(calculatedField.Name, calculate);
-            }
-
-            base.SetNumber(Network.SpatialWeightIdentifier, GetSpatialWeight);
-        }
-
-        private void PreapplyPassiveTreatment()
-        {
-            CheckPassiveTreatmentCostIsZero();
-            ApplyTreatmentButNotMetadata(SimulationRunner.Simulation.DesignatedPassiveTreatment);
-        }
-
-        private void SendToSimulationLogIfNeeded(PerformanceCurve curve, double value)
-        {
-            if (double.IsNaN(value) || double.IsInfinity(value))
-            {
-                var key = curve.Attribute.Name;
-                var errorMessage = SimulationLogMessages.AssetCalculationReturned(Asset, curve, key, value);
-                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
-                SimulationRunner.Send(messageBuilder);
-            }
-        }
-
-        private void SetHistoricalValues<T>(int referenceYear, bool fallForward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
-        {
-            foreach (var attribute in attributes)
-            {
-                var attributeHistory = Asset.GetHistory(attribute);
-                if (attributeHistory.TryGetValue(referenceYear, out var value))
-                {
-                    setValue(attribute.Name, value);
-                }
-                else if (fallForward)
-                {
-                    var earliestFutureYear = attributeHistory.Years.Where(year => year > referenceYear).AsNullables().Min();
-                    if (earliestFutureYear.HasValue)
-                    {
-                        setValue(attribute.Name, attributeHistory[earliestFutureYear.Value]);
-                    }
-                    else
-                    {
-                        setValue(attribute.Name, attributeHistory.MostRecentValue);
-                    }
+                    setValue(attribute.Name, attributeHistory.MostRecentValue);
                 }
             }
         }
+    }
 
-        private void SetInitialValues<T>(IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
+    private void SetInitialValues<T>(IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
+    {
+        foreach (var attribute in attributes)
         {
-            foreach (var attribute in attributes)
-            {
-                var initialValue = Asset.GetHistory(attribute).MostRecentValue;
-                setValue(attribute.Name, initialValue);
-            }
+            var initialValue = Asset.GetHistory(attribute).MostRecentValue;
+            setValue(attribute.Name, initialValue);
         }
+    }
 
-        private void UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming()
+    private void UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming()
+    {
+        foreach (var calculatedField in AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration))
         {
-            foreach (var calculatedField in AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration))
-            {
-                _ = NumberCache_Override.Remove(calculatedField.Name);
-            }
+            _ = NumberCache_Override.Remove(calculatedField.Name);
         }
     }
 }

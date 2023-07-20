@@ -1,11 +1,10 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public abstract class ConditionGoalDetail
 {
-    public abstract class ConditionGoalDetail
-    {
-        public string AttributeName { get; set; }
+    public string AttributeName { get; set; }
 
-        public bool GoalIsMet { get; set; }
+    public bool GoalIsMet { get; set; }
 
-        public string GoalName { get; set; }
-    }
+    public string GoalName { get; set; }
 }

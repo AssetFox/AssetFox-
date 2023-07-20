@@ -2,41 +2,40 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public sealed class TreatmentConsiderationDetail
 {
-    public sealed class TreatmentConsiderationDetail
+    public TreatmentConsiderationDetail(string treatmentName)
     {
-        public TreatmentConsiderationDetail(string treatmentName)
+        if (string.IsNullOrWhiteSpace(treatmentName))
         {
-            if (string.IsNullOrWhiteSpace(treatmentName))
-            {
-                throw new ArgumentException("Treatment name is blank.", nameof(treatmentName));
-            }
-
-            TreatmentName = treatmentName;
+            throw new ArgumentException("Treatment name is blank.", nameof(treatmentName));
         }
 
-        public int? BudgetPriorityLevel { get; set; }
+        TreatmentName = treatmentName;
+    }
 
-        /// <summary>
-        ///     These are the amounts in each budget prior to this consideration being decided.
-        /// </summary>
-        public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
+    public int? BudgetPriorityLevel { get; set; }
 
-        public List<BudgetUsageDetail> BudgetUsages { get; } = new List<BudgetUsageDetail>();
+    /// <summary>
+    ///     These are the amounts in each budget prior to this consideration being decided.
+    /// </summary>
+    public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
 
-        public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new List<CashFlowConsiderationDetail>();
+    public List<BudgetUsageDetail> BudgetUsages { get; } = new List<BudgetUsageDetail>();
 
-        public string TreatmentName { get; }
+    public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new List<CashFlowConsiderationDetail>();
 
-        internal TreatmentConsiderationDetail(TreatmentConsiderationDetail original)
-        {
-            TreatmentName = original.TreatmentName;
-            BudgetUsages.AddRange(original.BudgetUsages.Select(_ => new BudgetUsageDetail(_)));
-            CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
-            BudgetsAtDecisionTime.AddRange(original.BudgetsAtDecisionTime.Select(_ => new BudgetDetail(_)));
+    public string TreatmentName { get; }
 
-            BudgetPriorityLevel = original.BudgetPriorityLevel;
-        }
+    internal TreatmentConsiderationDetail(TreatmentConsiderationDetail original)
+    {
+        TreatmentName = original.TreatmentName;
+        BudgetUsages.AddRange(original.BudgetUsages.Select(_ => new BudgetUsageDetail(_)));
+        CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
+        BudgetsAtDecisionTime.AddRange(original.BudgetsAtDecisionTime.Select(_ => new BudgetDetail(_)));
+
+        BudgetPriorityLevel = original.BudgetPriorityLevel;
     }
 }

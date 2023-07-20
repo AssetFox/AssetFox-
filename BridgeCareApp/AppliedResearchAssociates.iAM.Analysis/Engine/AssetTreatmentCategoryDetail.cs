@@ -1,22 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using Newtonsoft.Json;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public sealed class AssetTreatmentCategoryDetail
 {
-    public class AssetTreatmentCategoryDetail
+    [JsonConstructor]
+    public AssetTreatmentCategoryDetail(Guid assetId, string assetName, TreatmentCategory treatmentCategory)
     {
-        public AssetTreatmentCategoryDetail(Guid assetId, string assetName, TreatmentCategory treatmentCategory) {
-            AssetId = assetId;
-            AssetName = assetName;
-            TreatmentCategory = treatmentCategory;
-        }
-
-        public Guid AssetId;
-        public string AssetName;
-        public TreatmentCategory TreatmentCategory;
+        AssetId = assetId;
+        AssetName = assetName;
+        TreatmentCategory = treatmentCategory;
     }
+
+    public Guid AssetId { get; }
+
+    public string AssetName { get; }
+
+    public TreatmentCategory TreatmentCategory { get; }
 }

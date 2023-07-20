@@ -203,7 +203,6 @@ public sealed class SimulationRunner
         output.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
         output.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
 
-        output.AssetTreatmentCategories = new();
         foreach (var assetContext in AssetContexts)
         {
             var committedProject = Simulation.CommittedProjects.FirstOrDefault(c => c.Asset.Id == assetContext.Asset.Id);

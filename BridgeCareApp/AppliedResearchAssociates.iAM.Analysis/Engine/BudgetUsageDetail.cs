@@ -1,30 +1,29 @@
 ﻿using System;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public sealed class BudgetUsageDetail
 {
-    public sealed class BudgetUsageDetail
+    public BudgetUsageDetail(string budgetName)
     {
-        public BudgetUsageDetail(string budgetName)
+        if (string.IsNullOrWhiteSpace(budgetName))
         {
-            if (string.IsNullOrWhiteSpace(budgetName))
-            {
-                throw new ArgumentException("Budget name is blank.", nameof(budgetName));
-            }
-
-            BudgetName = budgetName;
+            throw new ArgumentException("Budget name is blank.", nameof(budgetName));
         }
 
-        public string BudgetName { get; } 
+        BudgetName = budgetName;
+    }
 
-        public decimal CoveredCost { get; set; }
+    public string BudgetName { get; } 
 
-        public BudgetUsageStatus Status { get; set; }
+    public decimal CoveredCost { get; set; }
 
-        internal BudgetUsageDetail(BudgetUsageDetail original)
-        {
-            BudgetName = original.BudgetName;
-            Status = original.Status;
-            CoveredCost = original.CoveredCost;
-        }
+    public BudgetUsageStatus Status { get; set; }
+
+    internal BudgetUsageDetail(BudgetUsageDetail original)
+    {
+        BudgetName = original.BudgetName;
+        Status = original.Status;
+        CoveredCost = original.CoveredCost;
     }
 }

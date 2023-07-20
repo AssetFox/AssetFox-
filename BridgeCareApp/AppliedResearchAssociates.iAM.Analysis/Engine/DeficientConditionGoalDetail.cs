@@ -1,11 +1,10 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public sealed class DeficientConditionGoalDetail : ConditionGoalDetail
 {
-    public sealed class DeficientConditionGoalDetail : ConditionGoalDetail
-    {
-        public double ActualDeficientPercentage { get; set; }
+    public double ActualDeficientPercentage { get; set; }
 
-        public double AllowedDeficientPercentage { get; set; }
+    public double AllowedDeficientPercentage { get; set; }
 
-        public double DeficientLimit { get; set; }
-    }
+    public double DeficientLimit { get; set; }
 }

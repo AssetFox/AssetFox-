@@ -1,45 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public class AssetSummaryDetail
 {
-    public class AssetSummaryDetail
+    public AssetSummaryDetail(AnalysisMaintainableAsset asset)
     {
-        public AssetSummaryDetail(AnalysisMaintainableAsset asset)
+        if (asset is null)
         {
-            if (asset is null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-
-            AssetName = asset.AssetName;
-            AssetId = asset.Id;
+            throw new ArgumentNullException(nameof(asset));
         }
 
-        [JsonConstructor]
-        public AssetSummaryDetail(string assetName, Guid assetId)
-        {
-            AssetName = assetName ?? "";
-            AssetId = assetId;
-        }
+        AssetName = asset.AssetName;
+        AssetId = asset.Id;
+    }
 
-        public string AssetName { get; }
+    [JsonConstructor]
+    public AssetSummaryDetail(string assetName, Guid assetId)
+    {
+        AssetName = assetName ?? "";
+        AssetId = assetId;
+    }
 
-        public Guid AssetId { get; }
+    public Guid AssetId { get; }
 
-        public Dictionary<string, double> ValuePerNumericAttribute { get; } = new Dictionary<string, double>();
+    public string AssetName { get; }
 
-        public Dictionary<string, string> ValuePerTextAttribute { get; } = new Dictionary<string, string>();
+    public Dictionary<string, double> ValuePerNumericAttribute { get; } = new();
 
-        internal AssetSummaryDetail(AssetSummaryDetail original)
-        {
-            AssetName = original.AssetName;
-            AssetId = original.AssetId;
+    public Dictionary<string, string> ValuePerTextAttribute { get; } = new();
 
-            ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute); 
-            ValuePerTextAttribute.CopyFrom(original.ValuePerTextAttribute);
-        }
+    internal AssetSummaryDetail(AssetSummaryDetail original)
+    {
+        AssetName = original.AssetName;
+        AssetId = original.AssetId;
+
+        ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute);
+        ValuePerTextAttribute.CopyFrom(original.ValuePerTextAttribute);
     }
 }

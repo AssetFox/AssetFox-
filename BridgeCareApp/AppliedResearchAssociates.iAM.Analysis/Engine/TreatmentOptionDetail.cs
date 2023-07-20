@@ -1,40 +1,39 @@
 ﻿using System;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public sealed class TreatmentOptionDetail
 {
-    public sealed class TreatmentOptionDetail
+    public TreatmentOptionDetail(string treatmentName, double cost, double benefit, double? remainingLife, double conditionChange)
     {
-        public TreatmentOptionDetail(string treatmentName, double cost, double benefit, double? remainingLife, double conditionChange)
+        if (string.IsNullOrWhiteSpace(treatmentName))
         {
-            if (string.IsNullOrWhiteSpace(treatmentName))
-            {
-                throw new ArgumentException("Treatment name is blank.", nameof(treatmentName));
-            }
-
-            TreatmentName = treatmentName;
-            Cost = cost;
-            Benefit = benefit;
-            RemainingLife = remainingLife;
-            ConditionChange = conditionChange;
+            throw new ArgumentException("Treatment name is blank.", nameof(treatmentName));
         }
 
-        public double Benefit { get; }
+        TreatmentName = treatmentName;
+        Cost = cost;
+        Benefit = benefit;
+        RemainingLife = remainingLife;
+        ConditionChange = conditionChange;
+    }
 
-        public double ConditionChange { get; }
+    public double Benefit { get; }
 
-        public double Cost { get; }
+    public double ConditionChange { get; }
 
-        public double? RemainingLife { get; }
+    public double Cost { get; }
 
-        public string TreatmentName { get; }
+    public double? RemainingLife { get; }
 
-        internal TreatmentOptionDetail(TreatmentOptionDetail original)
-        {
-            TreatmentName = original.TreatmentName;
-            Cost = original.Cost;
-            Benefit = original.Benefit;
-            RemainingLife = original.RemainingLife;
-            ConditionChange = original.ConditionChange;
-        }
+    public string TreatmentName { get; }
+
+    internal TreatmentOptionDetail(TreatmentOptionDetail original)
+    {
+        TreatmentName = original.TreatmentName;
+        Cost = original.Cost;
+        Benefit = original.Benefit;
+        RemainingLife = original.RemainingLife;
+        ConditionChange = original.ConditionChange;
     }
 }

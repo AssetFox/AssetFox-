@@ -1,31 +1,30 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public sealed class BudgetDetail
 {
-    public sealed class BudgetDetail
+    public BudgetDetail(Budget budget, decimal availableFunding)
     {
-        public BudgetDetail(Budget budget, decimal availableFunding)
-        {
-            BudgetName = budget?.Name ?? throw new ArgumentNullException(nameof(budget));
-            AvailableFunding = availableFunding;
-        }
+        BudgetName = budget?.Name ?? throw new ArgumentNullException(nameof(budget));
+        AvailableFunding = availableFunding;
+    }
 
-        [JsonConstructor]
-        public BudgetDetail(decimal availableFunding, string budgetName)
-        {
-            AvailableFunding = availableFunding;
-            BudgetName = budgetName ?? throw new ArgumentNullException(nameof(budgetName));
-        }
+    [JsonConstructor]
+    public BudgetDetail(decimal availableFunding, string budgetName)
+    {
+        AvailableFunding = availableFunding;
+        BudgetName = budgetName ?? throw new ArgumentNullException(nameof(budgetName));
+    }
 
-        public decimal AvailableFunding { get; }
+    public decimal AvailableFunding { get; }
 
-        public string BudgetName { get; }
+    public string BudgetName { get; }
 
-        internal BudgetDetail(BudgetDetail original)
-        {
-            AvailableFunding = original.AvailableFunding;
-            BudgetName = original.BudgetName;
-        }
+    internal BudgetDetail(BudgetDetail original)
+    {
+        AvailableFunding = original.AvailableFunding;
+        BudgetName = original.BudgetName;
     }
 }

@@ -348,6 +348,50 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
         }
 
         [Fact]
+        public void SimulationInDbWithSelectableTreatmentWithBudget_Clone_Clones()
+        {
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(treatmentId);
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.WithSingleAmount(budgetId, "budget", 2023, 4321);
+            var budgets = new List<BudgetDTO> { budget };
+            var amount = budget.BudgetAmounts.Single();
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
+            var scenarioBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            var scenarioBudgetId = scenarioBudgets[0].Id;
+            treatment.BudgetIds = new List<Guid> { scenarioBudgetId };
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulation.Id);
+            var treatmentsBefore = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            var treatmentBefore = treatmentsBefore.Single();
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
+            var clonedTreatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(clonedSimulationId);
+            var clonedTreatment = clonedTreatments.Single();
+            var expectedCriterionLibrary = new CriterionLibraryDTO();
+            ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment, t => t.Id, t => t.CriterionLibrary, t => t.Budgets, t => t.BudgetIds);
+            Assert.Equal(newSimulationName, clonedSimulation.Name);
+            Assert.Equal(networkId, clonedSimulation.NetworkId);
+            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.NotEqual(treatment.Id, clonedTreatment.Id);
+            var budgetBefore = treatmentBefore.Budgets.Single();
+            var clonedBudget = clonedTreatment.Budgets.Single();
+            ObjectAssertions.EquivalentExcluding(budgetBefore, clonedBudget, b => b.Id);
+            Assert.NotEqual(budgetBefore.Id, clonedBudget.Id);
+            var clonedBudgetId = clonedTreatment.BudgetIds.Single();
+            Assert.Equal(clonedBudgetId, clonedBudget.Id);
+            ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedTreatment.CriterionLibrary);
+        }
+
+        [Fact]
         public void ScenarioTargetConditionalGoals_Clone_Clones()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);

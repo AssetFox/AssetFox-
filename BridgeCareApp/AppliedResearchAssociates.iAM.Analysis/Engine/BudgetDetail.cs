@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 /// <summary>
-/// Represents a specific budget available to the scenario in a given time period
+///     Represents a specific budget available to the scenario in a given time period.
 /// </summary>
 public sealed class BudgetDetail
 {
@@ -22,12 +22,12 @@ public sealed class BudgetDetail
     }
 
     /// <summary>
-    /// Amount of funding available
+    ///     Amount of funding available.
     /// </summary>
     public decimal AvailableFunding { get; }
 
     /// <summary>
-    /// Name of the budget
+    ///     Name of the budget.
     /// </summary>
     public string BudgetName { get; }
 

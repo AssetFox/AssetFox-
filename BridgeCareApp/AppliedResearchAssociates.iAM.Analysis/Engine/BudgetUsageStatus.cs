@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 /// <summary>
-/// Represents the manner in which a budget was or was not used.
+///     Represents the manner in which a budget was or was not used.
 /// </summary>
 public enum BudgetUsageStatus
 {
@@ -28,8 +26,8 @@ public enum BudgetUsageStatus
     ConditionNotMet,
 
     /// <summary>
-    ///     Indicates a budget that was usable, but other budgets before this one in the
-    ///     scenario's budget order were sufficient to pay for the treatment.
+    ///     Indicates a budget that was usable, but other budgets before this one in the scenario's
+    ///     budget order were sufficient to pay for the treatment.
     /// </summary>
     NotNeeded,
 

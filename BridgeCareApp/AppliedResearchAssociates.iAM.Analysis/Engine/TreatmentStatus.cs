@@ -1,8 +1,8 @@
 ﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 /// <summary>
-/// Represents the status of the application of a treatment.  Most often used to describe
-/// treatments that are applied over multiple years (i.e., cash flowed)
+///     Represents the status of the application of a treatment. Most often used to describe
+///     treatments that are applied over multiple years (i.e., cash-flowed).
 /// </summary>
 public enum TreatmentStatus
 {

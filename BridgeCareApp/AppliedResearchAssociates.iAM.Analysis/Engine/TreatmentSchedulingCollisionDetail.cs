@@ -3,7 +3,7 @@
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 /// <summary>
-/// Describes a specific scheduling collision for this treatment
+///     Describes a specific scheduling collision for this treatment.
 /// </summary>
 public sealed class TreatmentSchedulingCollisionDetail
 {
@@ -14,12 +14,12 @@ public sealed class TreatmentSchedulingCollisionDetail
     }
 
     /// <summary>
-    /// Name of the treatment that was not able to be entered into an asset's event schedule.
+    ///     Name of the treatment that was not able to be entered into an asset's event schedule.
     /// </summary>
     public string NameOfUnscheduledTreatment { get; set; }
 
     /// <summary>
-    /// Year where the conflict occured
+    ///     Year where the conflict occured.
     /// </summary>
     public int Year { get; set; }
 

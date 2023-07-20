@@ -1,7 +1,7 @@
 ﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 /// <summary>
-/// Represents the reasons why a treatment was not selected for a specific asset
+///     Represents the reasons why a treatment was not selected for a specific asset.
 /// </summary>
 public enum TreatmentRejectionReason
 {
@@ -33,8 +33,8 @@ public enum TreatmentRejectionReason
     Superseded,
 
     /// <summary>
-    ///     Indicates a treatment whose cost was negative, zero, or an astronomically large
-    ///     positive amount (larger than <see cref="decimal.MaxValue"/>).
+    ///     Indicates a treatment whose cost was negative, zero, or an astronomically large positive
+    ///     amount (larger than <see cref="decimal.MaxValue"/>).
     /// </summary>
     InvalidCost,
 

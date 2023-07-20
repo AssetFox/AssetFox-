@@ -3,6 +3,8 @@ import {getBlankGuid} from '@/shared/utils/uuid-utils';
 export interface CriterionFilterEditorDialogData {
     showDialog: boolean;
     userId: string;
+    name: string;
+    description: string;
     criteriaId: string;
     criteria: string | null;
     userName: string;
@@ -15,6 +17,8 @@ export const emptyCriterionFilterEditorDialogData: CriterionFilterEditorDialogDa
     userId: getBlankGuid(),
     criteriaId: getBlankGuid(),
     criteria: '',
+    name: '',
+    description: '',
     userName: '',
     hasCriteria: false,
     hasAccess: false,

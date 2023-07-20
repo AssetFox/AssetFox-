@@ -32,6 +32,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string Username { get; set; }
 
+        public string Name { get; set; }
+
+        public string Description { get; set; }
+
         public bool HasInventoryAccess { get; set; }
 
         public DateTime LastNewsAccessDate { get; set; }

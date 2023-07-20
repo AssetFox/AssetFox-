@@ -49,11 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Attribute)
                 .Where(_ => _.SimulationId == simulation.Id).ToList();
 
-            var keyPropertyNames = _unitOfWork.Config
-                .GetSection("InventoryData:KeyProperties")
-                .GetChildren()
-                .Select(_ => _.Value)
-                .ToList();
+            var keyPropertyNames = (List<string>)_unitOfWork.AdminSettingsRepo.GetKeyFields();
 
             foreach (var project in projects)
             {
@@ -244,13 +240,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Select(_ => _.Id);
                 allExistingCommittedProjectIds.AddRange(simulationProjects);
             }
-
             _unitOfWork.BeginTransaction();
             try
             {
                 // Upsert(update/insert) all
-                _unitOfWork.Context.UpsertAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.UpsertAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
+                
                 _unitOfWork.Commit();
             }
             catch (Exception e)

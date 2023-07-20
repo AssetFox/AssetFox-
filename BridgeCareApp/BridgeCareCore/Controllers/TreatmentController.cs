@@ -20,6 +20,7 @@ using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Controllers
 {
@@ -90,8 +91,7 @@ namespace BridgeCareCore.Controllers
                     var library = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(libraryId);
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        if (library.Owner == UserId || library.IsShared == true)
-                            result = UnitOfWork.SelectableTreatmentRepo.GetSimpleTreatmentsByLibraryId(libraryId);
+                        result = UnitOfWork.SelectableTreatmentRepo.GetSimpleTreatmentsByLibraryId(libraryId);
                     }
                     else
                         result = UnitOfWork.SelectableTreatmentRepo.GetSimpleTreatmentsByLibraryId(libraryId);
@@ -153,8 +153,9 @@ namespace BridgeCareCore.Controllers
                     var library = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraryWithSingleTreatmentByTreatmentId(id);
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        if (library.Owner == UserId || library.IsShared == true)
-                            result = library.Treatments[0];
+                        var accessModel = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(library.Id, UserId);
+                        _claimHelper.CheckGetLibraryUsersValidity(accessModel, UserId);
+                        result = library.Treatments[0];
                     }
                     else
                         result = library.Treatments[0];
@@ -337,7 +338,8 @@ namespace BridgeCareCore.Controllers
                     dto.Treatments = treatments;
                     if (dto != null)
                     {
-                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
+                        var accessModel = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(dto.Id, UserId);
+                        _claimHelper.CheckGetLibraryUsersValidity(accessModel, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(dto, upsertRequest.IsNewLibrary, UserId);
                 });
@@ -424,7 +426,8 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
+                        var access = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(libraryId, UserId);
+                        _claimHelper.CheckUserLibraryDeleteAuthorization(access, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
                 });
@@ -480,20 +483,17 @@ namespace BridgeCareCore.Controllers
                         
                         if (existingTreatmentLibrary != null)
                         {
-                            _claimHelper.CheckIfAdminOrOwner(existingTreatmentLibrary.Owner, UserId);
+                            var accessModel = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(treatmentLibraryId, UserId);
+                            _claimHelper.CheckUserLibraryRecreateAuthorization(accessModel, UserId);
                         }
                     }
                 });
 
                 ImportLibraryTreatmentWorkitem workItem = new ImportLibraryTreatmentWorkitem(treatmentLibraryId, excelPackage, UserInfo.Name, libraryName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = treatmentLibraryId, Status = analysisHandle.MostRecentStatusMessage });
-                }
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, libraryId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)
@@ -522,7 +522,9 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null || treatment == null) return;
-                        _claimHelper.CheckIfAdminOrOwner(dto.Owner, UserId);
+
+                        var access = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(libraryId, UserId);
+                        _claimHelper.CheckUserLibraryDeleteAuthorization(access, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatment, libraryId);
                 });
@@ -603,13 +605,9 @@ namespace BridgeCareCore.Controllers
 
                 ImportScenarioTreatmentWorkitem workItem = new ImportScenarioTreatmentWorkitem(simulationId, excelPackage, UserInfo.Name, simulationName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = analysisHandle.MostRecentStatusMessage });
-                }
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)

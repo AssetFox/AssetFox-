@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.BudgetPriority;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -94,6 +95,56 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal("Test Network", clonedSimulation.NetworkName);
         }
 
+        [Fact]
+        public void SimulationInDbWithBudgetWithAmount_Clone_Clones()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var networkId = Guid.NewGuid();
+            var keyAttributeId = TestAttributeIds.BrKeyId;
+            
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, new List<Data.Networking.MaintainableAsset>(), networkId, keyAttributeId);
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.WithSingleAmount(budgetId, "budget", 2023, 4321);
+            var budgets = new List<BudgetDTO> { budget };
+            var amount = budget.BudgetAmounts.Single();
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
+            var scenarioBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            var scenarioBudgetsId = scenarioBudgets[0].Id;
+            var sectionCommittedProjectId = Guid.NewGuid();
+            var sectionCommittedProject = TestDataForCommittedProjects.SimpleSectionCommittedProjectDTO(sectionCommittedProjectId, simulationId, 2023, scenarioBudgetsId);
+            var sectionCommittedProjects = new List<SectionCommittedProjectDTO>
+            {
+                sectionCommittedProject
+            };
+            TestHelper.UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(sectionCommittedProjects);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
+            Assert.Equal(newSimulationName, clonedSimulation.Name);
+            Assert.Equal(networkId, clonedSimulation.NetworkId);
+            Assert.Equal(network.Name, clonedSimulation.NetworkName);
+
+            var clonedProjects = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(clonedSimulationId);
+            var clonedProject = clonedProjects.Single();
+            ObjectAssertions.EquivalentExcluding(sectionCommittedProject, clonedProject, x => x.SimulationId, cp => cp.ScenarioBudgetId, cp => cp.Consequences, cp => cp.Id, cp => cp.LocationKeys);
+            Assert.NotEqual(sectionCommittedProjectId, clonedProject.Id);
+            var clonedBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(cloningResult.Simulation.Id);
+            var clonedBudget = clonedBudgets.Single();
+            var clonedAmount = clonedBudget.BudgetAmounts.Single();
+            Assert.Equal(clonedBudget.Id, clonedProject.ScenarioBudgetId);
+            ObjectAssertions.EquivalentExcluding(amount, clonedAmount, x => x.Id);
+            Assert.NotEqual(amount.Id, clonedAmount.Id);
+            ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.BudgetAmounts, b => b.CriterionLibrary);
+            var expectedCriterionLibrary = new CriterionLibraryDTO();
+            ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedBudget.CriterionLibrary);        
+        }
+
 
         [Fact]
         public void SimulationInDbWithScenarioBudgetWithAmount_Clone_Clones()
@@ -119,6 +170,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public void SimulationInDbWithScenarioBudgetWithCriterionLibrary_Clone_Clones()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.New(budgetId);
+            budget.CriterionLibrary = CriterionLibraryDtos.Dto();
+            var budgets = new List<BudgetDTO> { budget };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
+            var clonedBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(cloningResult.Simulation.Id);
+            var clonedBudget = clonedBudgets.Single();
+            var originalLibrary = budget.CriterionLibrary;
+            var clonedLibrary = clonedBudget.CriterionLibrary;
+            Assert.NotEqual(originalLibrary.Id, clonedLibrary.Id);
+            Assert.True(clonedLibrary.IsSingleUse);
+
+            ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.CriterionLibrary, b => b.BudgetAmounts[0].Id);
+        }
+
+
+        [Fact]
         public void SimulationInDbWithBudgetPriority_Clone_Clones()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
@@ -135,6 +216,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var clonedPriority = clonedPriorities.Single();
             ObjectAssertions.EquivalentExcluding(budgetPriority, clonedPriority, bp => bp.Id, bp => bp.CriterionLibrary);
         }
+
+
+        [Fact]
+        public void SimulationInDbWithBudgetPriorityWithCriterionLibrary_Clone_Clones()
+        {
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var budgetPriority = BudgetPriorityTestSetup.SetupSingleBudgetPriorityWithCriterionLibraryForSimulationInDb(simulationId);
+
+            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
+            var clonedPriorities = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(clonedSimulation.Id);
+            var clonedPriority = clonedPriorities.Single();
+            ObjectAssertions.EquivalentExcluding(budgetPriority, clonedPriority, bp => bp.Id, bp => bp.CriterionLibrary);
+            var clonedLibrary = clonedPriority.CriterionLibrary;
+            Assert.True(clonedLibrary.IsSingleUse);
+            Assert.Equal("mergedCriteriaExpression", clonedLibrary.MergedCriteriaExpression);
+            Assert.Empty(clonedLibrary.AppliedScenarioIds);
+        }
+
 
         [Fact]
         public void SimulationInDbWithCashFlowRule_Clone_Clones()

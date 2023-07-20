@@ -179,7 +179,7 @@ public sealed class Scenario
         Name = source.Name,
     };
 
-    private static PerformanceCurveAdjustmentFactor Convert(KeyValuePair<Analysis.Attribute, double> source) => new()
+    private static PerformanceCurveAdjustmentFactor Convert(KeyValuePair<Analysis.NumberAttribute, double> source) => new()
     {
         AttributeName = source.Key.Name,
         Value = source.Value,
@@ -367,7 +367,7 @@ public sealed class Scenario
 
             foreach (var item in source.PerformanceCurveAdjustmentFactors)
             {
-                var attribute = AttributeByName[item.AttributeName];
+                var attribute = NumberAttributeByName[item.AttributeName];
                 result.PerformanceCurveAdjustmentFactors[attribute] = item.Value;
             }
 

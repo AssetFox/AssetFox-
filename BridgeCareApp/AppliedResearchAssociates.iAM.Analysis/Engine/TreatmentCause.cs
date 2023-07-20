@@ -1,5 +1,8 @@
 ﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
+/// <summary>
+/// Represents the reason a treatment was or was not selected by the analysis engine.
+/// </summary>
 public enum TreatmentCause
 {
     /// <summary>

@@ -7,13 +7,16 @@
                 elevation="0"
                 style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #999999;"
             >
-                <v-list class="ghd-navigation-list">
+                <v-list 
+                    id = "EditScenario-navigation-vList"
+                    class="ghd-navigation-list">
                     <v-list-item-group
+                        id = "EditScenario-navigation-vlistItemGroup"
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
-                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                        <v-list-tile id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
                             <v-list-tile-action>
                                 <v-list-tile-icon>
                                     <TreatmentSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
@@ -175,7 +178,7 @@ export default class EditScenario extends Vue {
         },
         {
             tabName: 'Budget Priority',
-            tabIcon: 'fas fa-copy',
+            tabIcon: 'fas fa-balance-scale',
             navigation: {
                 path: '/BudgetPriorityEditor/Scenario/',
             },

@@ -12,7 +12,7 @@
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>Based on: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>  
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                 </v-layout>
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
@@ -47,6 +47,7 @@
                 <v-layout align-end style="padding-top: 18px !important;">
                     <v-spacer></v-spacer>
                     <v-btn
+                        id="DeficientConditionGoalEditor-addDeficientConditionGoal-vbtn"
                         @click="showCreateDeficientConditionGoalDialog = true"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="hasSelectedLibrary || hasScenario"
@@ -67,6 +68,7 @@
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
             <div class="deficients-data-table">
                 <v-data-table
+                    id="DeficientConditionGoalEditor-deficientConditionGoals-vdatatable"
                     :headers="deficientConditionGoalGridHeaders"
                     :items="currentPage"  
                     :pagination.sync="pagination"
@@ -82,6 +84,7 @@
                     <template slot="items" slot-scope="props">
                         <td>
                             <v-checkbox
+                                id="DeficientConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
                                 primary
                                 v-model="props.selected"
@@ -109,12 +112,14 @@
 
                                     <template slot="input">
                                         <v-text-field v-if="header.value === 'name'"
+                                            id="DeficientConditionGoalEditor-editDeficientConditionGoalName-vtextfield"
                                             label="Edit"
                                             single-line
                                             v-model="props.item[header.value]"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                         <v-select v-if="header.value === 'attribute'"
+                                            id="DeficientConditionGoalEditor-editDeficientConditionGoalAttribute-vselect"
                                             :items="numericAttributeNames"
                                             append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
@@ -124,6 +129,7 @@
                                         </v-select>
 
                                         <v-text-field v-if="header.value === 'deficientLimit'"
+                                            id="DeficientConditionGoalEditor-editDeficientConditionGoalLimit-vtextfield"
                                             label="Edit"
                                             single-line
                                             v-model="props.item[header.value]"
@@ -131,6 +137,7 @@
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                         <v-text-field v-if="header.value === 'allowedDeficientPercentage'"
+                                            id="DeficientConditionGoalEditor-editDeficientConditionGoalPercentage-vtextfield"
                                             label="Edit"
                                             single-line
                                             v-model.number="props.item[header.value]"
@@ -169,6 +176,7 @@
                                         </v-card>
                                     </v-menu>
                                     <v-btn
+                                        id="DeficientConditionGoalEditor-editDeficientConditionGoalCriteria-vbtn"
                                         @click="onShowCriterionLibraryEditorDialog(props.item)"
                                         class="ghd-blue"
                                         icon>
@@ -176,7 +184,7 @@
                                     </v-btn>
                                 </v-layout>
                                 <div v-if="header.value === 'action'">
-                                    <v-btn @click="onRemoveSelectedDeficientConditionGoal(props.item.id)"  class="ghd-blue" icon>
+                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(props.item.id)"  class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>                               
@@ -184,7 +192,9 @@
                         </td>
                     </template>
                 </v-data-table> 
-                <v-btn :disabled="selectedDeficientConditionGoalIds.length === 0"
+                <v-btn 
+                    id="DeficientConditionGoalEditor-deleteSelected-vbtn"
+                    :disabled="selectedDeficientConditionGoalIds.length === 0"
                     @click="onRemoveSelectedDeficientConditionGoals"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     flat>
@@ -225,7 +235,7 @@
                     class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
-                    flat>
+                    outline>
                     Delete Library
                 </v-btn>    
                 <v-btn
@@ -809,7 +819,6 @@ export default class DeficientConditionGoalEditor extends Vue {
         DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
-                this.resetPage();
                 this.addedOrUpdatedDeficientConditionGoalLibraryMutator(this.selectedDeficientConditionGoalLibrary);
                 this.selectedDeficientConditionGoalLibraryMutator(this.selectedDeficientConditionGoalLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated deficient condition goal library",});

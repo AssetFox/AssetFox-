@@ -1,5 +1,8 @@
 ﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
+/// <summary>
+/// Represents the reason that cash flow was not used to fund a specific treatment
+/// </summary>
 public enum ReasonAgainstCashFlow
 {
     /// <summary>

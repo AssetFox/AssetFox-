@@ -9,7 +9,7 @@ public abstract class Treatment : WeakEntity, IValidator
 {
     public string Name { get; set; }
 
-    public Dictionary<Attribute, double> PerformanceCurveAdjustmentFactors { get; } = new();
+    public Dictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors { get; } = new();
 
     public int ShadowForAnyTreatment
     {

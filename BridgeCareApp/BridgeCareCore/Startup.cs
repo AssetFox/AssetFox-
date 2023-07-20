@@ -103,7 +103,7 @@ namespace BridgeCareCore
         private void SetupReporting(IServiceCollection services)
         {
             var reportFactoryList = new List<IReportFactory>();
-            reportFactoryList.Add(new HelloWorldReportFactory());
+            //reportFactoryList.Add(new HelloWorldReportFactory());
             reportFactoryList.Add(new BAMSInventoryReportFactory());
             reportFactoryList.Add(new BAMSSummaryReportFactory());
             reportFactoryList.Add(new ScenarioOutputReportFactory());

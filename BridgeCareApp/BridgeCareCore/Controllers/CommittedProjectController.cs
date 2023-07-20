@@ -88,13 +88,9 @@ namespace BridgeCareCore.Controllers
                 });
                 ImportCommittedProjectWorkItem workItem = new ImportCommittedProjectWorkItem(simulationId, excelPackage, filename,applyNoTreatment, UserInfo.Name, siulationName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
-                // Before sending a "queued" message that may overwrite early messages from the run,
-                // allow a brief moment for an empty queue to start running the submission.
-                await Task.Delay(500);
-                if (!analysisHandle.WorkHasStarted)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() {Id = simulationId, Status = analysisHandle.MostRecentStatusMessage });
-                }
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)
@@ -139,16 +135,16 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("ValidateAssetExistence/{brkeyValue}")]
+        [Route("ValidateAssetExistence/{keyAttrValue}")]
         [Authorize]
-        public async Task<IActionResult> ValidateAssetExistence(NetworkDTO network, string brkeyValue)
+        public async Task<IActionResult> ValidateAssetExistence(NetworkDTO network, string keyAttrValue)
         {
             try
             {
                 var isValid = false;
                 await Task.Factory.StartNew(() =>
                 {
-                    isValid = UnitOfWork.MaintainableAssetRepo.CheckIfKeyAttributeValueExists(network.Id, brkeyValue);
+                    isValid = UnitOfWork.MaintainableAssetRepo.CheckIfKeyAttributeValueExists(network.Id, keyAttrValue);
                 });
                 return Ok(isValid);
             }
@@ -163,14 +159,14 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("ValidateExistenceOfAssets/{networkId}")]
         [Authorize]
-        public async Task<IActionResult> ValidateExistenceOfAssets(Guid networkId, List<string> brkeys)
+        public async Task<IActionResult> ValidateExistenceOfAssets(Guid networkId, List<string> keyattrValues)
         {
             try
             {
                 var result = new Dictionary<string, bool>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = UnitOfWork.MaintainableAssetRepo.CheckIfKeyAttributeValuesExists(networkId, brkeys);
+                    result = UnitOfWork.MaintainableAssetRepo.CheckIfKeyAttributeValuesExists(networkId, keyattrValues);
                 });
                 return Ok(result);
             }
@@ -197,9 +193,9 @@ namespace BridgeCareCore.Controllers
                     if (treatment == null)
                         return returnValues;
                     returnValues.ValidTreatmentConsequences =  _committedProjectService.GetValidConsequences(treatmentValues.CommittedProjectId, treatmentValues.TreatmentLibraryId,
-                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.NetworkId);
+                        treatmentValues.KeyAttributeValue, treatmentValues.TreatmentName, treatmentValues.NetworkId);
                     returnValues.TreatmentCost = _committedProjectService.GetTreatmentCost(treatmentValues.TreatmentLibraryId,
-                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.NetworkId);
+                        treatmentValues.KeyAttributeValue, treatmentValues.TreatmentName, treatmentValues.NetworkId);
                     
                     returnValues.TreatmentCategory = (TreatmentCategory)treatment.Category;
                     return returnValues;
@@ -214,11 +210,11 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("CommittedProjectTemplate")]
+        [Route("CommittedProjectTemplate/{networkId}")]
         [Authorize]
-        public async Task<IActionResult> GetCommittedProjectTemplate()
+        public async Task<IActionResult> GetCommittedProjectTemplate(Guid networkId)
         {
-            var result = await Task.Factory.StartNew(() => _committedProjectService.CreateCommittedProjectTemplate());
+            var result = await Task.Factory.StartNew(() => _committedProjectService.CreateCommittedProjectTemplate(networkId));
             return Ok(result);
         }
 

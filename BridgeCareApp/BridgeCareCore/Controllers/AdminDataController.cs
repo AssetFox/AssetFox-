@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
 using System.Linq;
+using static BridgeCareCore.Security.SecurityConstants;
+using System.Data;
 
 namespace BridgeCareCore.Controllers
 {
@@ -23,7 +25,8 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AdminDataController : BridgeCareCoreBaseController
     {
-        public const string SiteError = "Site Error";
+        public const string AdminSettingError = "Admin Data Settings Error";
+        public const string ServerWarning = "Server Warning:";
         private readonly IReportGenerator _generator;
         private readonly IReportLookupLibrary _factory;
         public AdminDataController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor, IReportGenerator generator, IReportLookupLibrary factory) :
@@ -39,12 +42,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var KeyFields = UnitOfWork.AdminDataRepo.GetKeyFields();
+                var KeyFields = UnitOfWork.AdminSettingsRepo.GetKeyFields();
                 return Ok(KeyFields);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetKeyFields - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetKeyFields - {e.Message}");
                 throw;
             }
         }
@@ -57,14 +60,51 @@ namespace BridgeCareCore.Controllers
             try
             {
                 await Task.Factory.StartNew(() =>
-                {                    
-                    UnitOfWork.AdminDataRepo.SetKeyFields(KeyFields);
+                {
+                    UnitOfWork.AdminSettingsRepo.SetKeyFields(KeyFields);
                 });
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetPrimaryNetwork - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetKeyFields - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetRawDataKeyFields")]
+        [Authorize]
+        public async Task<IActionResult> GetRawDataKeyFields()
+        {
+            try
+            {
+                var KeyFields = UnitOfWork.AdminSettingsRepo.GetRawDataKeyFields();
+                return Ok(KeyFields);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetRawDataKeyFields - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("SetRawDataKeyFields/{KeyFields}")]
+        [ClaimAuthorize("AdminAccess")]
+        public async Task<IActionResult> SetRawDataKeyFields(string KeyFields)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.AdminSettingsRepo.SetRawDataKeyFields(KeyFields);
+                });
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetRawDataKeyFields - {e.Message}");
                 throw;
             }
         }
@@ -76,12 +116,33 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var name = UnitOfWork.AdminDataRepo.GetPrimaryNetwork();
+                var name = UnitOfWork.AdminSettingsRepo.GetPrimaryNetwork();
+                if (name == null)
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"{ServerWarning} Primary Network not set::A primary network key must be set in the administration settings");
                 return Ok(name);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetPrimaryNetwork - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetPrimaryNetwork - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetRawDataNetwork")]
+        [Authorize]
+        public async Task<IActionResult> GetRawDataNetwork()
+        {
+            try
+            {
+                var name = UnitOfWork.AdminSettingsRepo.GetRawDataNetwork();
+                if (name == null)
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"{ServerWarning} Raw Data Network not set::A Raw Data network key must be set in the administration settings");
+                return Ok(name);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetRawDataNetwork - {e.Message}");
                 throw;
             }
         }
@@ -95,14 +156,34 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.AdminDataRepo.SetPrimaryNetwork(name);
+                    UnitOfWork.AdminSettingsRepo.SetPrimaryNetwork(name);
                 });
                     return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetPrimaryNetwork - {e.Message}");
-                return BadRequest($"{SiteError}::SetPrimaryNetwork - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetPrimaryNetwork - {e.Message}");
+                return BadRequest($"{AdminSettingError}::SetPrimaryNetwork - {e.Message}");
+            }
+        }
+
+        [HttpPost]
+        [Route("SetRawDataNetwork/{name}")]
+        [ClaimAuthorize("AdminAccess")]
+        public async Task<IActionResult> SetRawDataNetwork(string name)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.AdminSettingsRepo.SetRawDataNetwork(name);
+                });
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetRawDataNetwork - {e.Message}");
+                return BadRequest($"{AdminSettingError}::SetRawDataNetwork - {e.Message}");
             }
         }
 
@@ -113,12 +194,33 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var SimulationReportNames = UnitOfWork.AdminDataRepo.GetSimulationReportNames();
+                var SimulationReportNames = UnitOfWork.AdminSettingsRepo.GetSimulationReportNames();
                 return Ok(SimulationReportNames);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetSimulationReportNames - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetSimulationReportNames - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetAvailableReports")]
+        [Authorize]
+        public async Task<IActionResult> GetAvailableReports()
+        {
+            try
+            {
+                List<string> AvailableReportNames = new List<string>();
+                foreach (IReportFactory report in _factory.ReportList)
+                {
+                    AvailableReportNames.Add(report.Name);
+                }
+                return Ok(AvailableReportNames);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetAvailableReports - {e.Message}");
                 throw;
             }
         }
@@ -138,38 +240,40 @@ namespace BridgeCareCore.Controllers
                 {
                     try
                     {
-                        var reportObject = await _generator.Generate(inventoryReport);
+                        var unTypedReport = inventoryReport.Substring(0, inventoryReport.Length - 3);
+                        var reportObject = await _generator.Generate(unTypedReport);
+                        
                         //If cannot be created in lookup library (Existence Check)
-                        if (!_factory.CanGenerateReport(inventoryReport))
+                        if (!_factory.CanGenerateReport(unTypedReport))
                         {
                             reportCriteriaCheck = false;
-                            throw new InvalidOperationException($"You can't use {inventoryReport} for an inventory report.");
+                            throw new InvalidOperationException($"You can't use {unTypedReport} for an inventory report.");
                         }
                         //Report type isn't HTML
                         else if (reportObject.Type != ReportType.HTML)
                         {
                             reportCriteriaCheck = false;
-                            throw new InvalidOperationException($"You can't use {inventoryReport} for an inventory report.");
+                            throw new InvalidOperationException($"You can't use {unTypedReport} for an inventory report.");
                         }                       
                     }
                     catch (Exception e)
                     {
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetInventoryReports - {e.Message}");
-                        return BadRequest($"{SiteError}::SetInventoryReports - {e.Message}");
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetInventoryReports - {e.Message}");
+                        return BadRequest($"{AdminSettingError}::SetInventoryReports - {e.Message}");
                     }
                     
                 };
                 //If all reports in list exist and use the right type, save to database.
                 if (reportCriteriaCheck)
                 {
-                    UnitOfWork.AdminDataRepo.SetInventoryReports(inventoryReports);
+                    UnitOfWork.AdminSettingsRepo.SetInventoryReports(inventoryReports);
                 }
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetInventoryReports - {e.Message}");
-                return BadRequest($"{SiteError}::SetInventoryReports - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetInventoryReports - {e.Message}");
+                return BadRequest($"{AdminSettingError}::SetInventoryReports - {e.Message}");
             }
         }
 
@@ -181,12 +285,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var SimulationReportNames = UnitOfWork.AdminDataRepo.GetInventoryReports();
+                var SimulationReportNames = UnitOfWork.AdminSettingsRepo.GetInventoryReports();
                 return Ok(SimulationReportNames);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetInventoryReportNames - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetInventoryReportNames - {e.Message}");
                 return BadRequest();
             }
         }
@@ -211,7 +315,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::GetAttributeName - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetAttributeName - {e.Message}");
                 throw;
             }
         }
@@ -247,22 +351,55 @@ namespace BridgeCareCore.Controllers
                     }
                     catch (Exception e)
                     {
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetSimulationReports - {e.Message}");
-                        return BadRequest($"{SiteError}::SetSimulationReports - {e.Message}");
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetSimulationReports - {e.Message}");
+                        return BadRequest($"{AdminSettingError}::SetSimulationReports - {e.Message}");
                     }
 
                 };
                 //If all reports in list exist and use the right type, save to database.
                 if (reportCriteriaCheck)
                 {
-                    UnitOfWork.AdminDataRepo.SetSimulationReports(simulationReports);
+                    UnitOfWork.AdminSettingsRepo.SetSimulationReports(simulationReports);
                 }
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SiteError}::SetSimulationReports - {e.Message}");
-                return BadRequest($"{SiteError}::SetSimulationReports - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetSimulationReports - {e.Message}");
+                return BadRequest($"{AdminSettingError}::SetSimulationReports - {e.Message}");
+            }
+        }
+
+        [HttpGet]
+        [Route("GetConstraintType")]
+        public async Task<IActionResult> GetConstraintType()
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.GetConstraintType());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetConstraintType - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("SetConstraintType/{constraintType}")]
+        [ClaimAuthorize("AdminAccess")]
+        public async Task<IActionResult> SetConstraintType(string constraintType)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.SetConstraintType(constraintType));
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetConstraintType - {e.Message}");
+                throw;
             }
         }
 

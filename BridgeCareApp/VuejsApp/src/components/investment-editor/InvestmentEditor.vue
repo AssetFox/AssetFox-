@@ -12,7 +12,7 @@
                         v-model='librarySelectItemValue'
                         class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario">Based on: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></div>
+                    <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
                 </v-flex>
 
                 <!-- these are only in library -->
@@ -28,10 +28,11 @@
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
-                    <v-layout row align-end class="header-alignment-padding-right">
+                    <v-layout row align-end justify-end class="header-alignment-padding-right">
                         <v-spacer></v-spacer>
-                        <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                               v-show='!hasScenario'>
+                        <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        v-show="!hasScenario"
+                        outline>
                             Create New Library
                         </v-btn>
                     </v-layout>
@@ -110,6 +111,11 @@
                                class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' outline>
                             Add Year(s)
                         </v-btn>
+                    </v-layout>
+                    <v-layout row>
+                        <div class = "ghd-md-gray ghd-control-subheader" style="margin-left:2% !important;"> 
+                            Number of Budgets: {{ currentPage.length }}
+                        </div>
                     </v-layout>
                 </v-flex>
                 <v-spacer></v-spacer>
@@ -213,7 +219,7 @@
                        v-show='hasScenario'>
                     Cancel
                 </v-btn>
-                <v-btn id="InvestmentEditor-deleteLibrary-btn"
+                <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
                        @click='onShowConfirmDeleteAlert' flat class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
                        :disabled='!hasLibraryEditPermission'>
                     Delete Library
@@ -1229,7 +1235,6 @@ export default class InvestmentEditor extends Vue {
         InvestmentService.upsertBudgetLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
-                this.resetPage();
                 this.budgetLibraryMutator(this.selectedBudgetLibrary);
                 this.selectedBudgetLibraryMutator(this.selectedBudgetLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated budget library",});

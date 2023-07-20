@@ -1,6 +1,8 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -12,12 +14,13 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class RemainingLifeLimitTests
+    public class RemainingLifeLimitControllerTests
     {
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
@@ -52,6 +55,10 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<RemainingLifeLimitLibraryDTO, RemainingLifeLimitDTO>();
             request.IsNewLibrary = true;
             request.Library = dto;
+
+            var libraryDoesNotExist = LibraryAccessModels.LibraryDoesNotExist();
+            repo.SetupGetLibraryAccess(dto.Id, libraryDoesNotExist);
+
             // Act
             var result = await controller
                 .UpsertRemainingLifeLimitLibrary(request);
@@ -109,6 +116,7 @@ namespace BridgeCareCoreTests.Tests
             var repo = RemainingLifeLimitRepositoryMocks.New(unitOfWork);
             var controller = CreateController(unitOfWork);
             var libraryId = Guid.NewGuid();
+            var user = UserDtos.Admin();
             var dto = RemainingLifeLimitLibraryDtos.Empty(libraryId);
             var remainingLifeLimitId = Guid.NewGuid();
             var remainingLifeLimit = RemainingLifeLimitDtos.Dto("attribute", remainingLifeLimitId);
@@ -130,6 +138,10 @@ namespace BridgeCareCoreTests.Tests
                 Library = dto,
                 SyncModel = sync
             };
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
+            repo.SetupGetLibraryAccess(libraryId, libraryExists);
+
             // Act
             await controller.UpsertRemainingLifeLimitLibrary(libraryRequest);
 

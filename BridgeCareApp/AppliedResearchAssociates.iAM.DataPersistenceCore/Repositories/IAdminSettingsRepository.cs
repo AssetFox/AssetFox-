@@ -7,24 +7,48 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
+using System.Drawing;
 
-public interface IAdminDataRepository
+public interface IAdminSettingsRepository
 {
+    string GetConstraintType();
+    void SetConstraintType(string constraintType);
     IList<string> GetKeyFields();
+
     void SetKeyFields(string keyFields);
 
+    public IList<string> GetRawDataKeyFields();
+    public void SetRawDataKeyFields(string keyFields);
+
     void SetPrimaryNetwork(string name);
+
+    void SetRawDataNetwork(string name);
+
     string GetPrimaryNetwork();
+
+    string GetRawDataNetwork();
 
     IList<string> GetSimulationReportNames();
 
     void SetInventoryReports(string inventoryReports);
 
+    IList<string> GetInventoryReports();
+
     string GetAttributeName(Guid attributeId);
 
     void SetSimulationReports(string simulationReports);
 
-    IList<string> GetInventoryReports();
+    string GetImplementationName();
+
+    void SetImplementationName(string name);
+
+    string GetAgencyLogo();
+
+    void SetAgencyLogo(Image agencyLogo);
+
+    string GetImplementationLogo();
+
+    void SetImplementationLogo(Image productLogo);
+
+    void DeleteAdminSetting(string settingKey);
 }
-
-

@@ -18,5 +18,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.BudgetPriority
             TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(budgetPriorities, simulationId);
             return budgetPriority;
         }
+
+        public static BudgetPriorityDTO SetupSingleBudgetPriorityWithCriterionLibraryForSimulationInDb(Guid simulationId)
+        {
+            var budgetPriority = BudgetPriorityDtos.WithCriterionLibrary();
+            var budgetPriorities = new List<BudgetPriorityDTO> { budgetPriority };
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(budgetPriorities, simulationId);
+            return budgetPriority;
+        }
     }
 }

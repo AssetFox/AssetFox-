@@ -176,9 +176,10 @@ public sealed class SimulationRunner
             Send(logMessage);
         }
 
+        var rollForwardEvents = new ConcurrentBag<RollForwardEventDetail>();
         InParallel(AssetContexts, context =>
         {
-            context.RollForward();
+            context.RollForward(rollForwardEvents);
             context.Asset.HistoryProvider.ClearHistory();
         });
 
@@ -200,18 +201,10 @@ public sealed class SimulationRunner
         Simulation.ClearResults();
 
         SimulationOutput output = new();
+        output.RollForwardEvents.AddRange(rollForwardEvents.OrderBy(e => e.Year).ThenBy(e => e.AssetId));
+
         output.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
         output.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
-
-        foreach (var assetContext in AssetContexts)
-        {
-            var committedProject = Simulation.CommittedProjects.FirstOrDefault(c => c.Asset.Id == assetContext.Asset.Id);
-            if (committedProject != null)
-            {
-                var assetTreatmentCategoryDetail = new AssetTreatmentCategoryDetail(committedProject.Asset.Id, committedProject.Asset.AssetName, committedProject.treatmentCategory);
-                output.AssetTreatmentCategories.Add(assetTreatmentCategoryDetail);
-            }
-        }
 
         Simulation.ResultsOnDisk.Initialize(output);
         output = null;

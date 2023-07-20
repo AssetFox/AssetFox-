@@ -1,9 +1,8 @@
 ﻿{
-  "InitialConditionOfNetwork": 99,
   "InitialAssetSummaries": [
     {
-      "AssetName": "LA 1",
       "AssetId": "00000000-0000-0000-0000-000000000000",
+      "AssetName": "LA 1",
       "ValuePerNumericAttribute": {
         "AREA": 1,
         "AGE": 24,
@@ -12,16 +11,18 @@
       "ValuePerTextAttribute": {}
     }
   ],
+  "InitialConditionOfNetwork": 99,
+  "LastModifiedDate": "0001-01-01T00:00:00",
+  "RollForwardEvents": [
+    {
+      "Year": 2018,
+      "AssetId": "00000000-0000-0000-0000-000000000000",
+      "AssetName": "LA 1",
+      "CommittedProject": "Lovecraftian Horror"
+    }
+  ],
   "Years": [
     {
-      "Budgets": [
-        {
-          "AvailableFunding": 1000000.0,
-          "BudgetName": "Bag of money"
-        }
-      ],
-      "ConditionOfNetwork": 98,
-      "DeficientConditionGoals": [],
       "Assets": [
         {
           "AppliedTreatment": "Forget about it",
@@ -38,8 +39,8 @@
           ],
           "TreatmentSchedulingCollisions": [],
           "TreatmentStatus": "Applied",
-          "AssetName": "LA 1",
           "AssetId": "00000000-0000-0000-0000-000000000000",
+          "AssetName": "LA 1",
           "ValuePerNumericAttribute": {
             "AREA": 1,
             "AGE": 25,
@@ -48,9 +49,16 @@
           "ValuePerTextAttribute": {}
         }
       ],
+      "Budgets": [
+        {
+          "AvailableFunding": 1000000.0,
+          "BudgetName": "Bag of money"
+        }
+      ],
+      "ConditionOfNetwork": 98,
+      "DeficientConditionGoals": [],
       "TargetConditionGoals": [],
       "Year": 2020
     }
-  ],
-  "LastModifiedDate": "0001-01-01T00:00:00"
+  ]
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
@@ -200,7 +201,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     public void ResetDetail() => Detail = new AssetDetail(Asset);
 
-    public void RollForward()
+    public void RollForward(ConcurrentBag<RollForwardEventDetail> rollForwardEvents)
     {
         // Per email on 2020-05-06 from Gregg to Jake, Chad, and William: "We roll forward
         // attributes with performance curves. To do so we need to know which performance curve
@@ -233,14 +234,14 @@ internal sealed class AssetContext : CalculateEvaluateScope
             SetHistoricalValues(firstYearOfRollForward.Value, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
             SetHistoricalValues(firstYearOfRollForward.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-            HandleTreatmentDuringRollForward(firstYearOfRollForward.Value);
+            HandleTreatmentDuringRollForward(rollForwardEvents, firstYearOfRollForward.Value);
 
             foreach (var year in Static.RangeFromBounds(firstYearOfRollForward.Value + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1))
             {
                 SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
                 SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-                HandleTreatmentDuringRollForward(year);
+                HandleTreatmentDuringRollForward(rollForwardEvents, year);
             }
         }
 
@@ -459,7 +460,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
 
-    private void HandleTreatmentDuringRollForward(int year)
+    private void HandleTreatmentDuringRollForward(ConcurrentBag<RollForwardEventDetail> rollForwardEvents, int year)
     {
         PrepareForTreatment();
 
@@ -468,6 +469,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
             treatment is CommittedProject project)
         {
             ApplyTreatment(project, year);
+            rollForwardEvents.Add(new(year, Asset.Id, Asset.AssetName, project.Name));
         }
         else if (!SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
         {

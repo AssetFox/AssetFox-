@@ -8,13 +8,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 /// </summary>
 public sealed class SimulationOutput
 {
-    public List<AssetTreatmentCategoryDetail> AssetTreatmentCategories { get; } = new();
-
     public List<AssetSummaryDetail> InitialAssetSummaries { get; } = new();
 
     public double InitialConditionOfNetwork { get; set; }
 
     public DateTime LastModifiedDate { get; set; }
+
+    public List<RollForwardEventDetail> RollForwardEvents { get; } = new();
 
     public List<SimulationYearDetail> Years { get; } = new();
 }

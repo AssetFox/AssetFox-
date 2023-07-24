@@ -14,7 +14,7 @@ public sealed class Explorer : IValidator
     {
         if (string.IsNullOrWhiteSpace(ageAttributeName))
         {
-            ageAttributeName = DefaultAgeAttributeName;
+            throw new ArgumentException("Age attribute name is blank.", nameof(ageAttributeName));
         }
 
         _ = AddNumberAttribute(AgeAttributeName = ageAttributeName);

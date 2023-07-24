@@ -4,11 +4,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
 public sealed class InvestmentPlan
 {
-    public List<Budget> Budgets { get; set; } = new();
+    public List<Budget> Budgets { get; init; } = new();
 
-    public List<BudgetCondition> BudgetConditions { get; set; } = new();
+    public List<BudgetCondition> BudgetConditions { get; init; } = new();
 
-    public List<CashFlowRule> CashFlowRules { get; set; } = new();
+    public List<CashFlowRule> CashFlowRules { get; init; } = new();
 
     public int FirstYearOfAnalysisPeriod { get; set; }
 

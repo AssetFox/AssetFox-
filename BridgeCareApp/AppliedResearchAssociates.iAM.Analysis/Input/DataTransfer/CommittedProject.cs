@@ -7,7 +7,7 @@ public sealed class CommittedProject : Treatment
 {
     public Guid AssetID { get; set; }
 
-    public List<TreatmentConsequence> Consequences { get; set; } = new();
+    public List<TreatmentConsequence> Consequences { get; init; } = new();
 
     public double Cost { get; set; }
 

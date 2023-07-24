@@ -9,9 +9,9 @@ public sealed class MaintainableAsset
 
     public string Name { get; set; }
 
-    public List<AttributeValueHistory<double>> NumberAttributeHistories { get; set; } = new();
+    public List<AttributeValueHistory<double>> NumberAttributeHistories { get; init; } = new();
 
     public string SpatialWeightExpression { get; set; }
 
-    public List<AttributeValueHistory<string>> TextAttributeHistories { get; set; } = new();
+    public List<AttributeValueHistory<string>> TextAttributeHistories { get; init; } = new();
 }

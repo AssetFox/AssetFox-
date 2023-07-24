@@ -6,23 +6,23 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
 public sealed class Scenario
 {
-    public AnalysisMethod AnalysisMethod { get; set; } = new();
+    public AnalysisMethod AnalysisMethod { get; init; } = new();
 
-    public List<CommittedProject> CommittedProjects { get; set; } = new();
+    public List<CommittedProject> CommittedProjects { get; init; } = new();
 
-    public InvestmentPlan InvestmentPlan { get; set; } = new();
+    public InvestmentPlan InvestmentPlan { get; init; } = new();
 
     public string Name { get; set; }
 
     public string NameOfPassiveTreatment { get; set; }
 
-    public Network Network { get; set; } = new();
+    public Network Network { get; init; } = new();
 
     public int NumberOfYearsOfTreatmentOutlook { get; set; }
 
-    public List<PerformanceCurve> PerformanceCurves { get; set; } = new();
+    public List<PerformanceCurve> PerformanceCurves { get; init; } = new();
 
-    public List<SelectableTreatment> SelectableTreatments { get; set; } = new();
+    public List<SelectableTreatment> SelectableTreatments { get; init; } = new();
 
     public bool ShouldPreapplyPassiveTreatment { get; set; }
 
@@ -660,7 +660,9 @@ public sealed class Scenario
 
         private Explorer Convert(AttributeSystem source)
         {
-            var result = new Explorer(source.AgeAttributeName);
+            var result = source.AgeAttributeName is null
+                ? new Explorer()
+                : new Explorer(source.AgeAttributeName);
 
             foreach (var item in source.CalculatedFields)
             {

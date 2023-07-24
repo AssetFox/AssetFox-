@@ -6,5 +6,5 @@ public sealed class Budget
 {
     public string Name { get; set; }
 
-    public List<decimal> YearlyAmounts { get; set; } = new();
+    public List<decimal> YearlyAmounts { get; init; } = new();
 }

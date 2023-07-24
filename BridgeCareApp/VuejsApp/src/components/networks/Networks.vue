@@ -4,7 +4,7 @@
             <v-flex xs8 class="ghd-constant-header">
                 <v-layout>
                     <v-layout column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Network</v-subheader>
+                        <v-subheader id="Networks-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Network</v-subheader>
                         <v-select :items='selectNetworkItems'
                             outline  
                             v-model='selectNetworkItemValue'                         

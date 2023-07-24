@@ -3,56 +3,55 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.Validation;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public sealed class BudgetPriority : WeakEntity, IValidator
 {
-    public sealed class BudgetPriority : WeakEntity, IValidator
+    internal BudgetPriority(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+
+    public IReadOnlyCollection<BudgetPercentagePair> BudgetPercentagePairs => _BudgetPercentagePairs;
+
+    public string ShortDescription => $"{Year} Priority {PriorityLevel}";
+
+    public Criterion Criterion { get; }
+
+    public int PriorityLevel { get; set; }
+
+    public ValidatorBag Subvalidators => new ValidatorBag { BudgetPercentagePairs, Criterion };
+
+    public int? Year { get; set; }
+
+    public BudgetPercentagePair GetBudgetPercentagePair(Budget budget) => PairByBudget[budget];
+
+    public ValidationResultBag GetDirectValidationResults()
     {
-        internal BudgetPriority(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+        var results = new ValidationResultBag();
 
-        public IReadOnlyCollection<BudgetPercentagePair> BudgetPercentagePairs => _BudgetPercentagePairs;
-
-        public string ShortDescription => $"{Year} Priority {PriorityLevel}";
-
-        public Criterion Criterion { get; }
-
-        public int PriorityLevel { get; set; }
-
-        public ValidatorBag Subvalidators => new ValidatorBag { BudgetPercentagePairs, Criterion };
-
-        public int? Year { get; set; }
-
-        public BudgetPercentagePair GetBudgetPercentagePair(Budget budget) => PairByBudget[budget];
-
-        public ValidationResultBag GetDirectValidationResults()
+        if (BudgetPercentagePairs.All(budgetPercentage => budgetPercentage.Percentage == 0))
         {
-            var results = new ValidationResultBag();
-
-            if (BudgetPercentagePairs.All(budgetPercentage => budgetPercentage.Percentage == 0))
-            {
-                results.Add(ValidationStatus.Warning, "All percentages are zero.", this, nameof(BudgetPercentagePairs));
-            }
-
-            return results;
+            results.Add(ValidationStatus.Warning, "All percentages are zero.", this, nameof(BudgetPercentagePairs));
         }
 
-        internal void SynchronizeWithBudgets(IEnumerable<Budget> budgets)
-        {
-            _ = _BudgetPercentagePairs.RemoveAll(budgetPercentage => !budgets.Contains(budgetPercentage.Budget));
-
-            _BudgetPercentagePairs.AddRange(
-                from budget in budgets
-                where !BudgetPercentagePairs.Any(budgetPercentage => budgetPercentage.Budget == budget)
-                select new BudgetPercentagePair(budget));
-
-            PairByBudget.Clear();
-            foreach (var pair in BudgetPercentagePairs)
-            {
-                PairByBudget.Add(pair.Budget, pair);
-            }
-        }
-
-        private readonly List<BudgetPercentagePair> _BudgetPercentagePairs = new List<BudgetPercentagePair>();
-
-        private readonly Dictionary<Budget, BudgetPercentagePair> PairByBudget = new Dictionary<Budget, BudgetPercentagePair>();
+        return results;
     }
+
+    internal void SynchronizeWithBudgets(IEnumerable<Budget> budgets)
+    {
+        _ = _BudgetPercentagePairs.RemoveAll(budgetPercentage => !budgets.Contains(budgetPercentage.Budget));
+
+        _BudgetPercentagePairs.AddRange(
+            from budget in budgets
+            where !BudgetPercentagePairs.Any(budgetPercentage => budgetPercentage.Budget == budget)
+            select new BudgetPercentagePair(budget));
+
+        PairByBudget.Clear();
+        foreach (var pair in BudgetPercentagePairs)
+        {
+            PairByBudget.Add(pair.Budget, pair);
+        }
+    }
+
+    private readonly List<BudgetPercentagePair> _BudgetPercentagePairs = new List<BudgetPercentagePair>();
+
+    private readonly Dictionary<Budget, BudgetPercentagePair> PairByBudget = new Dictionary<Budget, BudgetPercentagePair>();
 }

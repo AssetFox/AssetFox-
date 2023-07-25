@@ -1,9 +1,8 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+internal enum SpendingLimit
 {
-    internal enum SpendingLimit
-    {
-        Zero,
-        Budget,
-        NoLimit,
-    }
+    Zero,
+    Budget,
+    NoLimit,
 }

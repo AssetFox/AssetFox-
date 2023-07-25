@@ -6,23 +6,23 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
 public sealed class Scenario
 {
-    public AnalysisMethod AnalysisMethod { get; set; }
+    public AnalysisMethod AnalysisMethod { get; init; } = new();
 
-    public List<CommittedProject> CommittedProjects { get; set; }
+    public List<CommittedProject> CommittedProjects { get; init; } = new();
 
-    public InvestmentPlan InvestmentPlan { get; set; }
+    public InvestmentPlan InvestmentPlan { get; init; } = new();
 
     public string Name { get; set; }
 
     public string NameOfPassiveTreatment { get; set; }
 
-    public Network Network { get; set; }
+    public Network Network { get; init; } = new();
 
     public int NumberOfYearsOfTreatmentOutlook { get; set; }
 
-    public List<PerformanceCurve> PerformanceCurves { get; set; }
+    public List<PerformanceCurve> PerformanceCurves { get; init; } = new();
 
-    public List<SelectableTreatment> SelectableTreatments { get; set; }
+    public List<SelectableTreatment> SelectableTreatments { get; init; } = new();
 
     public bool ShouldPreapplyPassiveTreatment { get; set; }
 
@@ -600,7 +600,11 @@ public sealed class Scenario
             target.ShouldDeteriorateDuringCashFlow = source.ShouldDeteriorateDuringCashFlow;
             target.ShouldRestrictCashFlowToFirstYearBudgets = source.ShouldRestrictCashFlowToFirstYearBudgets;
             target.SpendingStrategy = source.SpendingStrategy;
-            target.Weighting = NumericAttributeByName[source.BenefitWeightAttributeName];
+
+            if (source.BenefitWeightAttributeName != null)
+            {
+                target.Weighting = NumericAttributeByName[source.BenefitWeightAttributeName];
+            }
 
             foreach (var item in source.BudgetPriorities)
             {
@@ -656,7 +660,9 @@ public sealed class Scenario
 
         private Explorer Convert(AttributeSystem source)
         {
-            var result = new Explorer(source.AgeAttributeName);
+            var result = source.AgeAttributeName is null
+                ? new Explorer()
+                : new Explorer(source.AgeAttributeName);
 
             foreach (var item in source.CalculatedFields)
             {

@@ -5,156 +5,155 @@ using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
 using MathNet.Numerics.Interpolation;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public sealed class Equation : CompilableExpression
 {
-    public sealed class Equation : CompilableExpression
+    public EquationFormat Format =>
+        Calculator is object ? EquationFormat.CalculationExpression :
+        ValueVersusAge is object ? EquationFormat.PiecewiseExpression :
+        EquationFormat.Unknown;
+
+    public IReadOnlyCollection<string> ReferencedParameters
     {
-        public EquationFormat Format =>
-            Calculator is object ? EquationFormat.CalculationExpression :
-            ValueVersusAge is object ? EquationFormat.PiecewiseExpression :
-            EquationFormat.Unknown;
-
-        public IReadOnlyCollection<string> ReferencedParameters
+        get
         {
-            get
+            try
             {
-                try
-                {
-                    EnsureCompiled();
-                }
-                catch (MalformedInputException)
-                {
-                    return Array.Empty<string>();
-                }
-                return Calculator.ReferencedParameters;
+                EnsureCompiled();
             }
-        }
-
-        public static bool ParseIfPiecewise(string expression, out double[] xValues, out double[] yValues)
-        {
-            var match = PiecewisePattern.Match(expression);
-            if (match.Success)
+            catch (MalformedInputException)
             {
-                double parseValue(Capture capture) => double.TryParse(capture.Value, out var result) ? result : throw ExpressionCouldNotBeCompiled();
-                double[] parseGroup(int index) => match.Groups[index].Captures.Cast<Capture>().Select(parseValue).ToArray();
+                return Array.Empty<string>();
+            }
+            return Calculator.ReferencedParameters;
+        }
+    }
 
-                xValues = parseGroup(1);
-                yValues = parseGroup(2);
+    public static bool ParseIfPiecewise(string expression, out double[] xValues, out double[] yValues)
+    {
+        var match = PiecewisePattern.Match(expression);
+        if (match.Success)
+        {
+            double parseValue(Capture capture) => double.TryParse(capture.Value, out var result) ? result : throw ExpressionCouldNotBeCompiled();
+            double[] parseGroup(int index) => match.Groups[index].Captures.Cast<Capture>().Select(parseValue).ToArray();
 
-                if (xValues.Length < 2)
-                {
-                    throw ExpressionCouldNotBeCompiled("Piecewise expression has less than two points.");
-                }
+            xValues = parseGroup(1);
+            yValues = parseGroup(2);
 
-                if (xValues.Distinct().Count() != xValues.Length)
-                {
-                    throw ExpressionCouldNotBeCompiled("Piecewise expression has non-unique x values.");
-                }
+            if (xValues.Length < 2)
+            {
+                throw ExpressionCouldNotBeCompiled("Piecewise expression has less than two points.");
+            }
 
-                if (yValues.Distinct().Count() != yValues.Length)
-                {
-                    throw ExpressionCouldNotBeCompiled("Piecewise expression has non-unique y values.");
-                }
+            if (xValues.Distinct().Count() != xValues.Length)
+            {
+                throw ExpressionCouldNotBeCompiled("Piecewise expression has non-unique x values.");
+            }
 
-                Array.Sort(xValues, yValues);
+            if (yValues.Distinct().Count() != yValues.Length)
+            {
+                throw ExpressionCouldNotBeCompiled("Piecewise expression has non-unique y values.");
+            }
 
-                if (!yValues.IsSorted())
-                {
-                    throw ExpressionCouldNotBeCompiled("Piecewise function is not monotone.");
-                }
+            Array.Sort(xValues, yValues);
 
-                return true;
+            if (!yValues.IsSorted())
+            {
+                throw ExpressionCouldNotBeCompiled("Piecewise function is not monotone.");
+            }
+
+            return true;
+        }
+        else
+        {
+            xValues = null;
+            yValues = null;
+
+            return false;
+        }
+    }
+
+    internal Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
+
+    public double Compute(CalculateEvaluateScope scope) => Compute(scope, null, null);
+
+    public double Compute(CalculateEvaluateScope scope, PerformanceCurve curve, IReadOnlyDictionary<Attribute, double> curveAdjustmentFactors)
+    {
+        EnsureCompiled();
+
+        if (Format == EquationFormat.PiecewiseExpression)
+        {
+            var actualAge = scope.GetNumber(Explorer.AgeAttribute.Name);
+            if (curve is null)
+            {
+                return ValueVersusAge.Interpolate(actualAge);
             }
             else
             {
-                xValues = null;
-                yValues = null;
+                var adjustmentFactor =
+                    curveAdjustmentFactors is not null && curveAdjustmentFactors.TryGetValue(curve.Attribute, out var factor)
+                    ? factor
+                    : 1;
 
-                return false;
-            }
-        }
+                var previousValue = scope.GetNumber(curve.Attribute.Name);
+                var apparentPreviousAge = AgeVersusValue.Interpolate(previousValue);
 
-        internal Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
-
-        public double Compute(CalculateEvaluateScope scope) => Compute(scope, null, null);
-
-        public double Compute(CalculateEvaluateScope scope, PerformanceCurve curve, IReadOnlyDictionary<Attribute, double> curveAdjustmentFactors)
-        {
-            EnsureCompiled();
-
-            if (Format == EquationFormat.PiecewiseExpression)
-            {
-                var actualAge = scope.GetNumber(Explorer.AgeAttribute.Name);
-                if (curve is null)
+                var previousAge = actualAge - 1 / adjustmentFactor;
+                if (curve.Shift && previousAge > 0)
                 {
-                    return ValueVersusAge.Interpolate(actualAge);
+                    var shiftFactor = apparentPreviousAge / previousAge;
+                    var shiftedAge = actualAge * shiftFactor;
+                    return ValueVersusAge.Interpolate(shiftedAge);
                 }
                 else
                 {
-                    var adjustmentFactor =
-                        curveAdjustmentFactors is not null && curveAdjustmentFactors.TryGetValue(curve.Attribute, out var factor)
-                        ? factor
-                        : 1;
-
-                    var previousValue = scope.GetNumber(curve.Attribute.Name);
-                    var apparentPreviousAge = AgeVersusValue.Interpolate(previousValue);
-
-                    var previousAge = actualAge - 1 / adjustmentFactor;
-                    if (curve.Shift && previousAge > 0)
-                    {
-                        var shiftFactor = apparentPreviousAge / previousAge;
-                        var shiftedAge = actualAge * shiftFactor;
-                        return ValueVersusAge.Interpolate(shiftedAge);
-                    }
-                    else
-                    {
-                        var apparentAge = apparentPreviousAge + 1 / adjustmentFactor;
-                        return ValueVersusAge.Interpolate(apparentAge);
-                    }
+                    var apparentAge = apparentPreviousAge + 1 / adjustmentFactor;
+                    return ValueVersusAge.Interpolate(apparentAge);
                 }
             }
-
-            if (Format == EquationFormat.CalculationExpression)
-            {
-                return Calculator.Delegate(scope);
-            }
-
-            throw new InvalidOperationException("Expression has not been compiled.");
         }
 
-        protected override void Compile()
+        if (Format == EquationFormat.CalculationExpression)
         {
-            ValueVersusAge = null;
-            AgeVersusValue = null;
-            Calculator = null;
-
-            if (ExpressionIsBlank)
-            {
-                throw ExpressionCouldNotBeCompiled("Expression is blank.");
-            }
-
-            if (ParseIfPiecewise(Expression, out var xValues, out var yValues))
-            {
-                ValueVersusAge = LinearSpline.InterpolateSorted(xValues, yValues);
-                AgeVersusValue = LinearSpline.Interpolate(yValues, xValues);
-            }
-            else
-            {
-                try
-                {
-                    Calculator = Explorer.Compiler.GetCalculator(Expression);
-                }
-                catch (CalculateEvaluateException e)
-                {
-                    throw ExpressionCouldNotBeCompiled(e);
-                }
-            }
+            return Calculator.Delegate(scope);
         }
 
-        private static readonly Regex PiecewisePattern = new Regex($@"(?>\A\s*(?:\(\s*({PatternStrings.NaturalNumber})\s*,\s*({PatternStrings.Number})\s*\)\s*)*\z)", RegexOptions.Compiled);
-        private readonly Explorer Explorer;
-        private LinearSpline AgeVersusValue;
-        private Calculator Calculator;
-        private LinearSpline ValueVersusAge;
+        throw new InvalidOperationException("Expression has not been compiled.");
     }
+
+    protected override void Compile()
+    {
+        ValueVersusAge = null;
+        AgeVersusValue = null;
+        Calculator = null;
+
+        if (ExpressionIsBlank)
+        {
+            throw ExpressionCouldNotBeCompiled("Expression is blank.");
+        }
+
+        if (ParseIfPiecewise(Expression, out var xValues, out var yValues))
+        {
+            ValueVersusAge = LinearSpline.InterpolateSorted(xValues, yValues);
+            AgeVersusValue = LinearSpline.Interpolate(yValues, xValues);
+        }
+        else
+        {
+            try
+            {
+                Calculator = Explorer.Compiler.GetCalculator(Expression);
+            }
+            catch (CalculateEvaluateException e)
+            {
+                throw ExpressionCouldNotBeCompiled(e);
+            }
+        }
+    }
+
+    private static readonly Regex PiecewisePattern = new Regex($@"(?>\A\s*(?:\(\s*({PatternStrings.NaturalNumber})\s*,\s*({PatternStrings.Number})\s*\)\s*)*\z)", RegexOptions.Compiled);
+    private readonly Explorer Explorer;
+    private LinearSpline AgeVersusValue;
+    private Calculator Calculator;
+    private LinearSpline ValueVersusAge;
 }

@@ -2,12 +2,13 @@
     <v-layout>
         <v-flex xs12>
             <v-layout justify-space-between row>
-                <div v-if="stateInventoryReportNames.length > 1" class="flex xs2 justify-content: end">
-            <v-select 
+                <v-subheader v-if="stateInventoryReportNames.length > 1" class="ghd-md-gray ghd-control-subheader">
+            <v-select
             v-model="inventoryReportName" 
-            :items="stateInventoryReportNames">
+            :items="stateInventoryReportNames"
+            class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
             </v-select>
-        </div>
+                </v-subheader>
            </v-layout>
             <v-layout justify-space-between row>
                 <v-spacer></v-spacer>
@@ -55,7 +56,9 @@
         @State(state => state.inventoryModule.inventoryItems) inventoryItems: InventoryItem[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
         @State(state => state.inventoryModule.querySet) querySet: InventoryParam[];
+        @State(state => state.inventoryModule.reportTypeIdentifier) reportTypeIdentifier: string;
         @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
+        @State(state => state.adminDataModule.rawDataKeyFields) stateRawDataKeyFields: string[];
         @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
         @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
 
@@ -67,6 +70,8 @@
         @Action('getKeyFields') getKeyFieldsAction: any;
         @Action('getConstraintType') getConstraintTypeAction: any;
         @Action('getQuery') getQueryAction: any;
+        @Action('getRawDataKeyFields') getRawDataKeyFieldsAction: any;
+        @Action('getReportTypeIdentifier') getReportTypeIdentifierAction: any;
 
         keyAttributeValues: string[][] = [];
 
@@ -76,6 +81,8 @@
 
         inventoryDetails: string[] = [];
         constraintDetails: string = '';
+        lastThreeLetters: string = '';
+        reportType: string = '';
 
         queryValue: any;
         querySelectedData: string[] = [];
@@ -102,15 +109,34 @@
         
         @Watch('stateKeyFields')
         onStateKeyFieldsChanged(){
-            this.inventoryDetails = clone(this.stateKeyFields);
+            if(this.reportType === 'P') {
+                this.inventoryDetails = clone(this.stateKeyFields);
+            }
+            else if(this.reportType === 'R') {
+                this.inventoryDetails = clone(this.stateRawDataKeyFields);
+            }
             this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
             this.getInventoryAction(this.inventoryDetails);
+        }
+
+        @Watch('stateRawKeyFields')
+        onStateRawKeyFieldsChanged(){
+        }
+
+        @Watch('reportTypeIdentifier')
+        onStateReportTypeIdentifierChanged() {
         }
 
         @Watch('stateInventoryReportNames')
         onStateInventoryReportNamesChanged(){
             if(this.stateInventoryReportNames.length > 0)
                 this.inventoryReportName = this.stateInventoryReportNames[0]
+            
+            this.lastThreeLetters = this.inventoryReportName.slice(-3);
+            this.reportTypeIdentifier = this.lastThreeLetters[1];
+            this.reportType = this.lastThreeLetters[1];
+            console.log(this.reportTypeIdentifier);
+            this.onStateKeyFieldsChanged();
         }
 
         @Watch('stateConstraintType')
@@ -146,6 +172,7 @@
                 await this.getConstraintTypeAction();
                 await this.getInventoryReportsAction();
                 await this.getKeyFieldsAction(); 
+                await this.getRawDataKeyFieldsAction();
                 this.onStateConstraintTypeChanged();
             })();
         }
@@ -161,7 +188,7 @@
                 inventoryDetails: this.inventoryDetails
             };
             let toReturn: string[][] = [];
-            let result = await this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])    
+            let result = await this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])  
             if(result.keys.length > 0){
                 for(let i = 0; i < this.inventoryDetails.length; i++){
                     toReturn[i] = clone(result.keys[i]);
@@ -180,7 +207,6 @@
                                 const inventoryItems = data.inventoryItems;
 
                                 const keys: any[][] = []
-
                                 inventoryItems.forEach((item: InventoryItem, index: number) => {
                                     if (index === 0) { 
                                         for(let i = 0; i < data.inventoryDetails.length; i++){
@@ -199,7 +225,6 @@
                            
                                 return {keys: keys};
                             }
-
                             return  {keys: []};
                         }
                     }

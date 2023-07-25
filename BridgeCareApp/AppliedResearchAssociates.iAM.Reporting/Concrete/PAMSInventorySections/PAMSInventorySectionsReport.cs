@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using Microsoft.AspNetCore.Html;
 using Newtonsoft.Json;
@@ -21,9 +22,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class PAMSInventorySectionsReport : IReport
     {
 
+        public static string networkType { get; private set; }
         private const string DEFAULT_VALUE = "N";
         private const int DEFAULT_COLUMNS = 2;
-
         private IUnitOfWork _unitofwork;
         private Guid _networkId;
         private Dictionary<string, AttributeDescription> _fieldDescriptions;
@@ -110,10 +111,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
         }
 
+        public void NetworkStringType(string interimReportType)
+        {
+            networkType = interimReportType;
+        }
+
         private List<SegmentAttributeDatum> GetAsset(PAMSParameters keyProperties)
         {
             List<SegmentAttributeDatum> result = new List<SegmentAttributeDatum>();
-            //var attributeList = new List<string>() {"County","SR"};
+            //var attributeList = new List<string>() {"County", "SR"};
+            var networkTypeVariable = networkType;
 
             var allAttributes = _unitofwork.AttributeRepo.GetAttributes();
             allAttributes.Add(new AttributeDTO() { Name = "Segment", Command = "SEG", DataSource = allAttributes.Single(_ => _.Name == "COUNTY").DataSource});
@@ -132,19 +139,38 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 //throw new RowNotInTableException(errorMessage);
             }
 
-            
-            try
+            if (networkTypeVariable[1] == 'R')
             {
-                var tmpsectionData = _unitofwork.DataSourceRepo.GetRawData(queryDictionary);
-                var sectionId = tmpsectionData["CRS_Data"];
-                result = _unitofwork.AssetDataRepository.GetAssetAttributes("CRS", sectionId);
+                try
+                {
+                    var tmpsectionData = _unitofwork.DataSourceRepo.GetRawData(queryDictionary);
+                    var sectionId = tmpsectionData["CRS_Data"];
+                    result = _unitofwork.AssetDataRepository.GetAssetAttributes("CRS", sectionId);
+                }
+                catch (Exception)
+                {
+                    var errorMessage = $"Unable to access raw data";
+                    Errors.Add(errorMessage);
+                    //throw new InvalidOperationException(errorMessage);
+                }
             }
-            catch (Exception)
+            else if(networkTypeVariable[1] == 'P')
             {
-                var errorMessage = "Unable to access raw data";
-                Errors.Add(errorMessage);
-                //throw new InvalidOperationException(errorMessage);
+                try
+                {
+                    var tmpsectionData = _unitofwork.DataSourceRepo.GetRawData(queryDictionary);
+                    var sectionId = tmpsectionData["CRS_Data"];
+                    result = _unitofwork.AssetDataRepository.GetAssetAttributes("CRS", sectionId);
+                }
+                catch (Exception)
+                {
+                    var errorMessage = $"Unable to access primary data";
+                    Errors.Add(errorMessage);
+                    //throw new InvalidOperationException(errorMessage);
+                }
             }
+
+
 
             return result;
         }

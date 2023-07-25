@@ -5,11 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Common;
-using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -17,7 +14,6 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -55,6 +51,16 @@ namespace BridgeCareCore.Controllers
 
             //SendRealTimeMessage($"Starting to process {reportName}.");
             var parameters = await GetParameters();
+            string tempReportName = reportName;
+            string last3Characters = reportName.Substring(reportName.Length - 3, 3);
+
+            if (last3Characters == "(P)" || last3Characters == "(R)")
+            {
+                tempReportName = tempReportName.Substring(0, reportName.Length - 3);
+            }
+            var testing1 = new PAMSInventorySectionsReport(UnitOfWork, "", new ReportIndexDTO());
+            testing1.NetworkStringType(last3Characters);
+            //reportName = tempReportName;
 
             var report = await GenerateReport(reportName, ReportType.HTML, parameters);
 

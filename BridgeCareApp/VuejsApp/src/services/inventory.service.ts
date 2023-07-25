@@ -15,8 +15,12 @@ export default class InventoryService {
         return coreAxiosInstance.get('/api/Inventory/GetKeyProperties');
     }
 
-    static getValuesForKey(propertyName: string): AxiosPromise {
-        return coreAxiosInstance.get(`/api/Inventory/GetValuesForKey/${propertyName}`);
+    static getValuesForPrimaryKey(propertyName: string): AxiosPromise {
+        return coreAxiosInstance.get(`/api/Inventory/GetValuesForPrimaryKey/${propertyName}`);
+    }
+
+    static getValuesForRawKey(propertyName: string): AxiosPromise {
+        return coreAxiosInstance.get(`/api/Inventory/GetValuesForRawKey/${propertyName}`);
     }    
 
     static getStaticInventoryHTML(reportType: string, filterData: InventoryParam): AxiosPromise{

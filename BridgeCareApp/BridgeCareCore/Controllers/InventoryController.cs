@@ -10,12 +10,14 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 
 namespace BridgeCareCore.Controllers
@@ -28,6 +30,7 @@ namespace BridgeCareCore.Controllers
         private readonly IAttributeRepository _attributeRepository;
         private readonly IAssetData _maintainableAssetRepository;
         private readonly IAdminSettingsRepository _adminSettingsRepository;
+        private readonly IReportLookupLibrary _reportFactories;
 
         public InventoryController(IEsecSecurity esecSecurity,
             UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) :
@@ -46,14 +49,24 @@ namespace BridgeCareCore.Controllers
             Ok(_assetData.KeyProperties.Keys.ToList());
 
         [HttpGet]
-        [Route("GetValuesForKey/{propertyName}")]
+        [Route("GetValuesForPrimaryKey/{propertyName}")]
         [Authorize]
-        public async Task<IActionResult> GetValuesForKey(string propertyName)
+        public async Task<IActionResult> GetValuesForPrimaryKey(string propertyName)
         {
             if (!_assetData.KeyProperties.ContainsKey(propertyName)) return BadRequest($"Requested key property ({propertyName}) does not exist");
             return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
         }
-                
+
+        [HttpGet]
+        [Route("GetValuesForRawKey/{propertyName}")]
+        [Authorize]
+        public async Task<IActionResult> GetValuesForRawKey(string propertyName)
+        {
+            if (!_assetData.KeyProperties.ContainsKey(propertyName)) return BadRequest($"Requested key property ({propertyName}) does not exist");
+            return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
+        }
+
+
         [HttpGet]
         [Route("GetInventory")]
         [Authorize]
@@ -61,7 +74,10 @@ namespace BridgeCareCore.Controllers
         {
             var assetKeyData = new Dictionary<Guid, List<string>>();
             var keySegmentDatums = new List<List<KeySegmentDatum>>();
-                        
+            var dictionaryProperties = new Dictionary<Guid, List<string>>();
+
+            var result1 = _reportFactories;
+
             var keyPropertiesList = JsonConvert.DeserializeObject<List<string>>(keyProperties);
             foreach (var keyProperty in keyPropertiesList)
             {
@@ -70,7 +86,12 @@ namespace BridgeCareCore.Controllers
                     keySegmentDatums.Add(_assetData.KeyProperties[keyProperty]);
                 }
             }
-            
+
+            //if(result1 != null)
+            //{
+            //    if(_assetData.QueryKeyAttributes(dictionaryProperties)
+            //}
+
             foreach (var keySegmentDatum in keySegmentDatums)
             {
                 foreach (var keyDatum in keySegmentDatum.OrderBy(_ => _.KeyValue.TextValue))

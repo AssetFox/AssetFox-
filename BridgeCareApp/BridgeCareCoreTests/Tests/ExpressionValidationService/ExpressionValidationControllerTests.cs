@@ -15,7 +15,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class ExpressionValidationTests
+    public class ExpressionValidationControllerTests
     {
         private ExpressionValidationService CreateValidationService(Mock<IUnitOfWork> unitOfWork)
         {

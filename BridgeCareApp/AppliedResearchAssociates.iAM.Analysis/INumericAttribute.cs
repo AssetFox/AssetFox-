@@ -1,9 +1,8 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis
-{
-    public interface INumericAttribute
-    {
-        bool IsDecreasingWithDeterioration { get; }
+﻿namespace AppliedResearchAssociates.iAM.Analysis;
 
-        string Name { get; }
-    }
+public interface INumericAttribute
+{
+    bool IsDecreasingWithDeterioration { get; }
+
+    string Name { get; }
 }

@@ -16,7 +16,7 @@ export interface BaseCommittedProject {
 }
 export interface SectionCommittedProjectTableData {
     id: string;
-    brkey: string;
+    keyAttr: string;
     year: number;
     treatment: string;
     treatmentId: string;
@@ -73,7 +73,7 @@ export interface CommittedProjectFillTreatmentValues {
     committedProjectId: string;
     treatmentLibraryId: string;
     treatmentName: string;
-    brkey_Value: string; 
+    KeyAttributeValue: string; 
     networkId: string;
 }
 

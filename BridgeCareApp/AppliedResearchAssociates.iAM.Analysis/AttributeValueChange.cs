@@ -3,148 +3,147 @@ using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.Validation;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public sealed class AttributeValueChange : CompilableExpression
 {
-    public sealed class AttributeValueChange : CompilableExpression
+    internal AttributeValueChange()
     {
-        internal AttributeValueChange()
+    }
+
+    public Attribute Attribute { get; set; }
+
+    public override ValidationResultBag GetDirectValidationResults()
+    {
+        if (Attribute is null)
         {
+            return new ValidationResultBag();
         }
-
-        public Attribute Attribute { get; set; }
-
-        public override ValidationResultBag GetDirectValidationResults()
-        {
-            if (Attribute is null)
-            {
-                return new ValidationResultBag();
-            }
-            else
-            {
-                switch (Attribute)
-                {
-                case NumberAttribute _:
-                    return base.GetDirectValidationResults();
-                case TextAttribute _:
-                    return new ValidationResultBag();
-                default:
-                    throw new InvalidOperationException("Invalid attribute type.");
-                }
-            }
-        }
-
-        public ChangeApplicator GetApplicator(CalculateEvaluateScope scope)
+        else
         {
             switch (Attribute)
             {
             case NumberAttribute _:
-                EnsureCompiled();
-                if (NumberChanger is null)
-                {
-                    return null;
-                }
-                else
-                {
-                    var oldNumber = scope.GetNumber(Attribute.Name);
-                    var newNumber = NumberChanger.Invoke(oldNumber);
-                    return new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newNumber), newNumber);
-                }
-
+                return base.GetDirectValidationResults();
             case TextAttribute _:
-                var newText = Expression;
-                return new ChangeApplicator(() => scope.SetText(Attribute.Name, newText), null);
-
+                return new ValidationResultBag();
             default:
                 throw new InvalidOperationException("Invalid attribute type.");
             }
         }
+    }
 
-        protected override void Compile()
+    public ChangeApplicator GetApplicator(CalculateEvaluateScope scope)
+    {
+        switch (Attribute)
         {
-            if (ExpressionIsBlank)
+        case NumberAttribute _:
+            EnsureCompiled();
+            if (NumberChanger is null)
             {
-                NumberChanger = null;
-                return;
+                return null;
+            }
+            else
+            {
+                var oldNumber = scope.GetNumber(Attribute.Name);
+                var newNumber = NumberChanger.Invoke(oldNumber);
+                return new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newNumber), newNumber);
             }
 
-            var match = NumberChangePattern.Match(Expression);
-            if (!match.Success || !double.TryParse(match.Groups[2].Value, out var operand))
+        case TextAttribute _:
+            var newText = Expression;
+            return new ChangeApplicator(() => scope.SetText(Attribute.Name, newText), null);
+
+        default:
+            throw new InvalidOperationException("Invalid attribute type.");
+        }
+    }
+
+    protected override void Compile()
+    {
+        if (ExpressionIsBlank)
+        {
+            NumberChanger = null;
+            return;
+        }
+
+        var match = NumberChangePattern.Match(Expression);
+        if (!match.Success || !double.TryParse(match.Groups[2].Value, out var operand))
+        {
+            throw ExpressionCouldNotBeCompiled();
+        }
+
+        Operand = operand;
+        var operation = match.Groups[1].Value;
+        var operandType = match.Groups[3].Value;
+
+        switch (operandType)
+        {
+        case "%":
+            Operand /= 100;
+            switch (operation)
             {
-                throw ExpressionCouldNotBeCompiled();
-            }
+            case "+":
+                NumberChanger = AddPercentage;
+                break;
 
-            Operand = operand;
-            var operation = match.Groups[1].Value;
-            var operandType = match.Groups[3].Value;
-
-            switch (operandType)
-            {
-            case "%":
-                Operand /= 100;
-                switch (operation)
-                {
-                case "+":
-                    NumberChanger = AddPercentage;
-                    break;
-
-                case "-":
-                    NumberChanger = SubtractPercentage;
-                    break;
-
-                case "":
-                    NumberChanger = SetPercentage;
-                    break;
-
-                default:
-                    throw new InvalidOperationException("Invalid operation.");
-                }
+            case "-":
+                NumberChanger = SubtractPercentage;
                 break;
 
             case "":
-                switch (operation)
-                {
-                case "+":
-                    NumberChanger = Add;
-                    break;
-
-                case "-":
-                    NumberChanger = Subtract;
-                    break;
-
-                case "":
-                    NumberChanger = Set;
-                    break;
-
-                default:
-                    throw new InvalidOperationException("Invalid operation.");
-                }
+                NumberChanger = SetPercentage;
                 break;
 
             default:
-                throw new InvalidOperationException("Invalid operand type.");
+                throw new InvalidOperationException("Invalid operation.");
             }
+            break;
+
+        case "":
+            switch (operation)
+            {
+            case "+":
+                NumberChanger = Add;
+                break;
+
+            case "-":
+                NumberChanger = Subtract;
+                break;
+
+            case "":
+                NumberChanger = Set;
+                break;
+
+            default:
+                throw new InvalidOperationException("Invalid operation.");
+            }
+            break;
+
+        default:
+            throw new InvalidOperationException("Invalid operand type.");
         }
-
-        private static readonly Regex NumberChangePattern = new Regex(@"(?>\A\s*((?:\+|-)?)([^%]+)(%?)\s*\z)", RegexOptions.Compiled);
-
-        private Func<double, double> NumberChanger;
-
-        private double Operand;
-
-        #region Number-changing operations
-
-        private double Add(double value) => value + Operand;
-
-        private double AddPercentage(double value) => value * (1 + Operand);
-
-        private double Set(double value) => Operand;
-
-        private double SetPercentage(double value) => value * Operand;
-
-        private double Subtract(double value) => value - Operand;
-
-        private double SubtractPercentage(double value) => value * (1 - Operand);
-
-        #endregion Number-changing operations
     }
+
+    private static readonly Regex NumberChangePattern = new Regex(@"(?>\A\s*((?:\+|-)?)([^%]+)(%?)\s*\z)", RegexOptions.Compiled);
+
+    private Func<double, double> NumberChanger;
+
+    private double Operand;
+
+    #region Number-changing operations
+
+    private double Add(double value) => value + Operand;
+
+    private double AddPercentage(double value) => value * (1 + Operand);
+
+    private double Set(double value) => Operand;
+
+    private double SetPercentage(double value) => value * Operand;
+
+    private double Subtract(double value) => value - Operand;
+
+    private double SubtractPercentage(double value) => value * (1 - Operand);
+
+    #endregion Number-changing operations
 }

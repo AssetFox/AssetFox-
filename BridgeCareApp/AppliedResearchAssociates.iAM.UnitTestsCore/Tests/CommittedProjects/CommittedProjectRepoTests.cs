@@ -29,6 +29,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using System.Runtime.InteropServices;
 using MaintainableAsset = AppliedResearchAssociates.iAM.Data.Networking.MaintainableAsset;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -78,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             maintainableAssetEntity.MaintainableAssetLocation = maintainableAssetLocation;
             var testMaintainableAsset = maintainableAssetEntity.ToDomain(locationIdentifier);
             maintainableAssets.Add(testMaintainableAsset);
-            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, Guid.Parse("efca598b-9fca-4e3c-ac48-0d95a9eaa867"));
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, TestAttributeIds.CulvDurationNId);
 
             // Setup a simulation based on network
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", new Guid(), networkId);
@@ -164,10 +165,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             maintainableAssetEntity.MaintainableAssetLocation = maintainableAssetLocation;
             var testMaintainableAsset = maintainableAssetEntity.ToDomain(locationIdentifier);
             maintainableAssets.Add(testMaintainableAsset);
-            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, Guid.Parse("efca598b-9fca-4e3c-ac48-0d95a9eaa867"));
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, TestAttributeIds.CulvDurationNId);
 
             // Setup a simulation based on network
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dae1c62c-adba-4510-bfe5-61260c49ec99"), "Test Simulation", new Guid(), networkId);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, TestDataForCommittedProjects.NoCommitSimulationId, "Test Simulation", new Guid(), networkId);
             simulation.NetworkId = network.Id;
 
             // Set up a selectable treatment for the test with sample budgets

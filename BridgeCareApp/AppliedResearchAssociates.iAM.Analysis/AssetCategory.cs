@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public enum AssetCategory
 {
-    public enum AssetCategory
-    {
-        Bridge,
-        Culvert
-    }
+    Bridge,
+    Culvert
 }

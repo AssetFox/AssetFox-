@@ -7,7 +7,7 @@ import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 const isAuthenticatedEsecUser = () => {
     return store
         .dispatch('checkBrowserTokens')
-        .then(() =>
+        .then(() => 
             store.dispatch('getUserInfo').then(() =>
                 store.dispatch('getUserCriteriaFilter').then(() => {
                     // @ts-ignore
@@ -17,17 +17,17 @@ const isAuthenticatedEsecUser = () => {
                         throw new Error('Failed to authenticate');
                     }
                 })
-               ),
+            ),
         )
         .catch((error: any) => {
             store
-                .dispatch('addErrorNotification', {
-                    message: 'Authentication Error.',
-                    longMessage: error,
-                })
-                .then(() => {
-                    return false;
-                });
+            .dispatch('addErrorNotification', {
+                message: 'Authentication Error.',
+                longMessage: error,
+            })
+            .then(() => {
+                return false;
+            });
         });
 };
 

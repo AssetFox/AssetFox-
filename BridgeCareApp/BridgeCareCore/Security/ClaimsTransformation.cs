@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using BridgeCareCore.Utils.Interfaces;
 using System;
-using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Collections.Generic;
+using BridgeCareCore.Security.Interfaces;
 
 namespace BridgeCareCore.Security
 {
@@ -14,14 +14,15 @@ namespace BridgeCareCore.Security
     {
         private readonly IConfiguration _config;
         private readonly IRoleClaimsMapper _roleClaimsMapper;
+        private readonly IGraphApiClientService _graphApiClientService;
 
-        public ClaimsTransformation(IConfiguration config, IRoleClaimsMapper roleClaimsMapper, IHttpContextAccessor contextAccessor)
+        public ClaimsTransformation(IConfiguration config, IRoleClaimsMapper roleClaimsMapper, IGraphApiClientService graphApiClientService)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _roleClaimsMapper = roleClaimsMapper ?? throw new ArgumentNullException(nameof(roleClaimsMapper));
-            
+            _graphApiClientService = graphApiClientService;
         }
-        public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
+        public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.Esec)
             {
@@ -44,14 +45,26 @@ namespace BridgeCareCore.Security
 
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.B2C)
             {
-                var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, new List<string>
-                { SecurityConstants.Role.Administrator });
+                // Read group name(s) set in Azure B2C(that will be IP role name(s)
+                var groupNames = new List<string>();
+                var groupClaimType = "group";
+                if (!principal.HasClaim(claim => claim.Type == groupClaimType))
+                {
+                    var nameidentifierClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+                    var nameidentifier = principal.Claims.FirstOrDefault(t => t.Type == nameidentifierClaimType);
+                    groupNames = await _graphApiClientService.GetGraphApiUserMemberGroup(nameidentifier.Value);
+                }
+                if(groupNames.Count == 0)
+                {
+                    groupNames.Add(SecurityConstants.Role.Default);
+                }
+                var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, groupNames);                
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRolesFromMapper);
                 principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper));
 
             }
 
-            return Task.FromResult(principal);
+            return principal;
         }
     }
 }

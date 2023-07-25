@@ -248,9 +248,9 @@ namespace BridgeCareCore.Services.Treatment
             var yearsBeforeSame = dictionary.GetValueOrDefault(TreatmentExportStringConstants.YearsBeforeSame.ToLowerInvariant());
             var yearsBeforeAny = dictionary.GetValueOrDefault(TreatmentExportStringConstants.YearsBeforeAny.ToLowerInvariant());
             var categoryString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.Category.ToLowerInvariant());
-            var treatmentCategory = EnumDeserializer.Deserialize<TreatmentDTOEnum.TreatmentType>(categoryString);
+            var treatmentCategory = EnumDeserializer.Deserialize<TreatmentCategory>(categoryString);
             var assetTypeString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
-            var assetType = EnumDeserializer.Deserialize<TreatmentDTOEnum.AssetType>(assetTypeString);
+            var assetType = EnumDeserializer.Deserialize<AssetCategories>(assetTypeString);
             var criterion = dictionary.GetValueOrDefault(TreatmentExportStringConstants.Criterion.ToLowerInvariant());
             var loadCosts = LoadCosts(worksheet);
             var loadConsequences = LoadConsequences(worksheet);
@@ -259,8 +259,8 @@ namespace BridgeCareCore.Services.Treatment
                 Name = worksheetName,
                 Id = Guid.NewGuid(),
                 Description = description,
-                Category = treatmentCategory,
-                AssetType = assetType,
+                Category = (TreatmentCategory)treatmentCategory,
+                AssetType = (AssetCategories)assetType,
                 ShadowForAnyTreatment = ParseInt(yearsBeforeAny),
                 ShadowForSameTreatment = ParseInt(yearsBeforeSame),
                 Costs = loadCosts.Costs,

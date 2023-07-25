@@ -1,9 +1,8 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis
+﻿namespace AppliedResearchAssociates.iAM.Analysis;
+
+public sealed class TextAttribute : Attribute<string>
 {
-    public sealed class TextAttribute : Attribute<string>
+    internal TextAttribute(string name) : base(name)
     {
-        internal TextAttribute(string name) : base(name)
-        {
-        }
     }
 }

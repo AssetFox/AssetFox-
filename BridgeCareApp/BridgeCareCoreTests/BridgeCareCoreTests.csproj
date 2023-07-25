@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Folder Include="Tests\Equation\" />
-    <Folder Include="Tests\ExpressionValidationService\" />
   </ItemGroup>
 
 </Project>

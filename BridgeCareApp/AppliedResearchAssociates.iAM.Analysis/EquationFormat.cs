@@ -1,9 +1,8 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis
+﻿namespace AppliedResearchAssociates.iAM.Analysis;
+
+public enum EquationFormat
 {
-    public enum EquationFormat
-    {
-        Unknown,
-        CalculationExpression,
-        PiecewiseExpression,
-    }
+    Unknown,
+    CalculationExpression,
+    PiecewiseExpression,
 }

@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public class SimulationLogEventArgs: EventArgs
 {
-    public class SimulationLogEventArgs: EventArgs
+    public SimulationLogEventArgs(SimulationLogMessageBuilder messageBuilder)
     {
-        public SimulationLogEventArgs(SimulationLogMessageBuilder messageBuilder)
-        {
-            MessageBuilder = messageBuilder;
-        }
-        public SimulationLogMessageBuilder MessageBuilder { get; set; }
+        MessageBuilder = messageBuilder;
     }
+    public SimulationLogMessageBuilder MessageBuilder { get; set; }
 }

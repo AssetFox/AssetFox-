@@ -1,30 +1,29 @@
 ﻿using System;
 using AppliedResearchAssociates.Validation;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public sealed class TreatmentSupersession : WeakEntity, IValidator
 {
-    public sealed class TreatmentSupersession : WeakEntity, IValidator
+    internal TreatmentSupersession(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+
+    public Criterion Criterion { get; }
+
+    public ValidatorBag Subvalidators => new ValidatorBag { Criterion };
+
+    public SelectableTreatment Treatment { get; set; }
+
+    public ValidationResultBag GetDirectValidationResults()
     {
-        internal TreatmentSupersession(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+        var results = new ValidationResultBag();
 
-        public Criterion Criterion { get; }
-
-        public ValidatorBag Subvalidators => new ValidatorBag { Criterion };
-
-        public SelectableTreatment Treatment { get; set; }
-
-        public ValidationResultBag GetDirectValidationResults()
+        if (Treatment == null)
         {
-            var results = new ValidationResultBag();
-
-            if (Treatment == null)
-            {
-                results.Add(ValidationStatus.Error, "Treatment is unset.", this, nameof(Treatment));
-            }
-
-            return results;
+            results.Add(ValidationStatus.Error, "Treatment is unset.", this, nameof(Treatment));
         }
 
-        public string ShortDescription => nameof(TreatmentSupersession);
+        return results;
     }
+
+    public string ShortDescription => nameof(TreatmentSupersession);
 }

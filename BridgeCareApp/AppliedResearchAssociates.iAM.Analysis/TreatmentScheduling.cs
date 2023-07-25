@@ -1,32 +1,31 @@
 ﻿using AppliedResearchAssociates.Validation;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public sealed class TreatmentScheduling : WeakEntity, IValidator
 {
-    public sealed class TreatmentScheduling : WeakEntity, IValidator
+    public int OffsetToFutureYear { get; set; }
+
+    public ValidatorBag Subvalidators => new ValidatorBag();
+
+    public SelectableTreatment Treatment { get; set; }
+
+    public ValidationResultBag GetDirectValidationResults()
     {
-        public int OffsetToFutureYear { get; set; }
+        var results = new ValidationResultBag();
 
-        public ValidatorBag Subvalidators => new ValidatorBag();
-
-        public SelectableTreatment Treatment { get; set; }
-
-        public ValidationResultBag GetDirectValidationResults()
+        if (OffsetToFutureYear < 1)
         {
-            var results = new ValidationResultBag();
-
-            if (OffsetToFutureYear < 1)
-            {
-                results.Add(ValidationStatus.Error, "Offset to future year is less than one.", this, nameof(OffsetToFutureYear));
-            }
-
-            if (Treatment == null)
-            {
-                results.Add(ValidationStatus.Error, "Treatment is unset.", this, nameof(Treatment));
-            }
-
-            return results;
+            results.Add(ValidationStatus.Error, "Offset to future year is less than one.", this, nameof(OffsetToFutureYear));
         }
 
-        public string ShortDescription => nameof(TreatmentScheduling);
+        if (Treatment == null)
+        {
+            results.Add(ValidationStatus.Error, "Treatment is unset.", this, nameof(Treatment));
+        }
+
+        return results;
     }
+
+    public string ShortDescription => nameof(TreatmentScheduling);
 }

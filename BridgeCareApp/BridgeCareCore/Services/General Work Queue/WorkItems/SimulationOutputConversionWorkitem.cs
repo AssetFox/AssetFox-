@@ -45,6 +45,14 @@ namespace BridgeCareCore.Services
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"Error Converting Simulation Output from Json to Relationa::{errorMessage}");
         }
 
+        public void OnCompletion(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Output conversion on {WorkName} has completed");
+        }
+
         public void OnUpdate(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();

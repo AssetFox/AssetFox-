@@ -92,12 +92,12 @@ const actions = {
             currentDateTime,
             'minutes',
         );
-
+        
         if (differenceInMinutes > 2) {
             return;
         }
 
-        dispatch('refreshTokens');
+       await dispatch('refreshTokens');
     },
 
     async refreshTokens({ commit }: any) {
@@ -107,7 +107,7 @@ const actions = {
             commit('refreshingMutator', true);
             const userTokens: UserTokens = JSON.parse(
                 localStorage.getItem('UserTokens') as string,
-            ) as UserTokens;
+            ) as UserTokens;            
             await AuthenticationService.refreshTokens(
                 userTokens.refresh_token,
             ).then((response: AxiosResponse) => {

@@ -1,24 +1,23 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public class SimulationException : Exception
 {
-    public class SimulationException : Exception
+    public SimulationException()
     {
-        public SimulationException()
-        {
-        }
+    }
 
-        public SimulationException(string message) : base(message)
-        {
-        }
+    public SimulationException(string message) : base(message)
+    {
+    }
 
-        public SimulationException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+    public SimulationException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
 
-        protected SimulationException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+    protected SimulationException(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
     }
 }

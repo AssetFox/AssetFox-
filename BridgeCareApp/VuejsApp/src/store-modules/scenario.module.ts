@@ -9,16 +9,19 @@ import {SimulationReportDetail} from '@/shared/models/iAM/simulation-report-deta
 import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 
 const state = {
-    scenarios: [] as Scenario[],
-    queuedSimulations: [] as QueuedWork[],
+    scenarios: [] as Scenario[], 
     currentSharedScenariosPage: [] as Scenario[],
-    currentUserScenarioPage: [] as Scenario[],
-    currentWorkQueuePage: [] as QueuedWork[],
+    currentUserScenarioPage: [] as Scenario[],  
     totalSharedScenarios: 0 as number,
-    totalUserScenarios: 0 as number,
-    totalQueuedSimulations: 0 as number,
+    totalUserScenarios: 0 as number,   
     selectedScenario: clone(emptyScenario) as Scenario,
     currentUserOrSharedScenario: clone(emptyScenario) as Scenario,
+    queuedSimulations: [] as QueuedWork[],
+    currentWorkQueuePage: [] as QueuedWork[],
+    totalQueuedSimulations: 0 as number,
+    fastQueueitems: [] as QueuedWork[],
+    currentFastWorkQueuePage: [] as QueuedWork[],
+    totalFastQueuedItems: 0 as number,
 };
 
 const mutations = {
@@ -35,23 +38,7 @@ const mutations = {
     },
     UserUserOrSharedScenarioMutator(state: any, scenario: Scenario){
         state.currentUserOrSharedScenario = clone(scenario);        
-    },
-    workQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedWork>){
-        state.currentWorkQueuePage = clone(queuedSimulations.items);
-        state.totalQueuedSimulations = queuedSimulations.totalItems;
-    },
-    workQueStatusUpdateMutator(state: any, queuedWorkUpdated: QueuedWork) {
-        if (any(propEq('id', queuedWorkUpdated.id), state.currentWorkQueuePage)) {
-            const updatedQueuedWork: QueuedWork = find(propEq('id', queuedWorkUpdated.id), state.currentWorkQueuePage) as QueuedWork;
-            updatedQueuedWork.status = queuedWorkUpdated.status;
-
-            state.currentWorkQueuePage = update(
-                findIndex(propEq('id', updatedQueuedWork.id), state.currentWorkQueuePage),
-                updatedQueuedWork,
-                state.currentWorkQueuePage
-            );           
-        }
-    },
+    },   
     selectedScenarioMutator(state: any, id: string) {
         if (any(propEq('id', id), state.currentSharedScenariosPage)) {
             state.selectedScenario = find(propEq('id', id), state.currentSharedScenariosPage) as Scenario;
@@ -121,7 +108,39 @@ const mutations = {
                 state.currentUserScenarioPage
             );
         }
-    }
+    },
+    workQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedWork>){
+        state.currentWorkQueuePage = clone(queuedSimulations.items);
+        state.totalQueuedSimulations = queuedSimulations.totalItems;
+    },
+    workQueStatusUpdateMutator(state: any, queuedWorkUpdated: QueuedWork) {
+        if (any(propEq('id', queuedWorkUpdated.id), state.currentWorkQueuePage)) {
+            const updatedQueuedWork: QueuedWork = find(propEq('id', queuedWorkUpdated.id), state.currentWorkQueuePage) as QueuedWork;
+            updatedQueuedWork.status = queuedWorkUpdated.status;
+
+            state.currentWorkQueuePage = update(
+                findIndex(propEq('id', updatedQueuedWork.id), state.currentWorkQueuePage),
+                updatedQueuedWork,
+                state.currentWorkQueuePage
+            );           
+        }
+    },
+    fastWorkQueuePageMutator(state: any, queuedItems: PagingPage<QueuedWork>){
+        state.currentFastWorkQueuePage = clone(queuedItems.items);
+        state.totalFastQueuedItems = queuedItems.totalItems;
+    },
+    fastWorkQueStatusUpdateMutator(state: any, queuedWorkUpdated: QueuedWork) {
+        if (any(propEq('id', queuedWorkUpdated.id), state.currentFastWorkQueuePage)) {
+            const updatedQueuedWork: QueuedWork = find(propEq('id', queuedWorkUpdated.id), state.currentFastWorkQueuePage) as QueuedWork;
+            updatedQueuedWork.status = queuedWorkUpdated.status;
+
+            state.currentFastWorkQueuePage = update(
+                findIndex(propEq('id', updatedQueuedWork.id), state.currentFastWorkQueuePage),
+                updatedQueuedWork,
+                state.currentFastWorkQueuePage
+            );           
+        }
+    },
 };
 
 const actions = {
@@ -133,6 +152,9 @@ const actions = {
     },
     updateQueuedWorkStatus({commit}: any, payload: any) {
         commit('workQueStatusUpdateMutator', payload.workQueueStatusUpdate);
+    },
+    updateFastQueuedWorkStatus({commit}: any, payload: any) {
+        commit('fastWorkQueStatusUpdateMutator', payload.workQueueStatusUpdate);
     },
     updateSimulationReportDetail({commit}: any, payload: any) {
         commit('simulationReportDetailMutator', payload.simulationReportDetail);
@@ -161,6 +183,14 @@ const actions = {
                 }
             });
     },    
+    async getFastWorkQueuePage({commit}: any, payload: PagingRequest<QueuedWork>) {
+        await ScenarioService.getFastWorkQueuePage(payload)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('fastWorkQueuePageMutator', response.data as PagingPage<QueuedWork>);
+                }
+            });
+    },
     async getUserScenariosPage({commit}: any, payload: PagingRequest<Scenario>) {
         await ScenarioService.getUserScenariosPage(payload)
             .then((response: AxiosResponse) => {
@@ -238,6 +268,17 @@ const actions = {
     },
     async cancelSimulation({dispatch, state, commit}: any, payload: any) {
         return await ScenarioService.cancelSimulation(payload.simulationId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    dispatch('addSuccessNotification', {
+                        message: 'Canceling work queue operation',
+                    });
+                }
+            },
+        );
+    },
+    async cancelFastQueueItem({dispatch, state, commit}: any, workId:string) {
+        return await ScenarioService.cancelInFastQueue(workId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     dispatch('addSuccessNotification', {

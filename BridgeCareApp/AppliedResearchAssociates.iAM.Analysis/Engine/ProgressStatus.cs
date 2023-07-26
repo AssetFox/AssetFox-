@@ -1,10 +1,9 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+
+public enum ProgressStatus
 {
-    public enum ProgressStatus
-    {
-        Started,
-        Running,
-        Completed,
-        Canceled
-    }
+    Started,
+    Running,
+    Completed,
+    Canceled
 }

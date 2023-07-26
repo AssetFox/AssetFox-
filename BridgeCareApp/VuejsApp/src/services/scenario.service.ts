@@ -25,6 +25,10 @@ export default class ScenarioService {
         return coreAxiosInstance.post(`${API.Scenario}/GetWorkQueuePage/`, data);
     }    
 
+    static getFastWorkQueuePage(data:PagingRequest<QueuedWork>): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetFastWorkQueuePage/`, data);
+    }
+
     static createScenario(data: Scenario, networkId: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.Scenario}/CreateScenario/${networkId}`, data);
     }
@@ -47,7 +51,11 @@ export default class ScenarioService {
 
     static cancelSimulation(simulationId: string): AxiosPromise {
         return coreAxiosInstance.delete(`${API.Scenario}/CancelSimulation/${simulationId}`);
-    }    
+    }
+    
+    static cancelInFastQueue(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.delete(`${API.Scenario}/CancelInFastQueue/${simulationId}`);
+    }
 
     static migrateLegacySimulationData(simulationId: number): AxiosPromise {
         return coreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacySimulation/${simulationId}`);

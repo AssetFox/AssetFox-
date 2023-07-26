@@ -742,12 +742,15 @@ export default class CommittedProjectsEditor extends Vue  {
 
                     // Updated existing data with no factor set to 1.2
                     this.sectionCommittedProjects.forEach(element => {
-                        element.consequences.forEach(consequence => {
+                        if (element.consequences !=null){
+                            element.consequences.forEach(consequence => {
                             if (consequence.performanceFactor === 0) {
                                 consequence.performanceFactor = 1.2;
                                 this.updateCommittedProject(row ? row : emptySectionCommittedProject, "1.2", "performanceFactor");
                             }
                         });
+                        }
+                        
                     });
                     if(isNil(row)) {
                         this.selectedCommittedProject = '';

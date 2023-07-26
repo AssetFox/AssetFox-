@@ -25,7 +25,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class InvestmentTests
+    public class InvestmentControllerTests
     {
         private InvestmentBudgetsService CreateService(Mock<IUnitOfWork> mockUnitOfWork)
         {

@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
 public sealed class BudgetPriority
 {
-    public List<BudgetPercentagePair> BudgetPercentagePairs { get; set; }
+    public List<BudgetPercentagePair> BudgetPercentagePairs { get; init; } = new();
 
     public string CriterionExpression { get; set; }
 

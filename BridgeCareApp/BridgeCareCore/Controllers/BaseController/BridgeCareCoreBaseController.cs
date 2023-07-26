@@ -8,11 +8,14 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BridgeCareCore.Controllers.BaseController
 {
     public class BridgeCareCoreBaseController : ControllerBase
     {
+        public const string BridgeCareCoreBaseError = "BridgeCareCoreBase Error";
+
         protected readonly IEsecSecurity EsecSecurity;
 
         protected readonly IUnitOfWork UnitOfWork;
@@ -55,9 +58,14 @@ namespace BridgeCareCore.Controllers.BaseController
             {
                 UserInfo = EsecSecurity.GetUserInformation(request);
             }
+            catch(SecurityTokenExpiredException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"{BridgeCareCoreBaseError}::The token is expired. Please re-login by pressing the button \"Go to login page\".");
+                throw;
+            }
             catch (Exception exception)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, exception.Message);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BridgeCareCoreBaseError}::SetUserInfo - {exception.Message}");
                 throw;
             }
         }

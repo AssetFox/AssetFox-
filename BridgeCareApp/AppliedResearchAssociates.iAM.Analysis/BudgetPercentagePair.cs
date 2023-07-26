@@ -1,34 +1,33 @@
 ﻿using System;
 using AppliedResearchAssociates.Validation;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public sealed class BudgetPercentagePair : WeakEntity, IValidator
 {
-    public sealed class BudgetPercentagePair : WeakEntity, IValidator
+    internal BudgetPercentagePair(Budget budget) => Budget = budget ?? throw new ArgumentNullException(nameof(budget));
+
+    public string ShortDescription => $"Percentage {Percentage}";
+
+    public Budget Budget { get; }
+
+    public decimal Percentage { get; set; }
+
+    public ValidatorBag Subvalidators => new ValidatorBag();
+
+    public ValidationResultBag GetDirectValidationResults()
     {
-        internal BudgetPercentagePair(Budget budget) => Budget = budget ?? throw new ArgumentNullException(nameof(budget));
+        var results = new ValidationResultBag();
 
-        public string ShortDescription => $"Percentage {Percentage}";
-
-        public Budget Budget { get; }
-
-        public decimal Percentage { get; set; }
-
-        public ValidatorBag Subvalidators => new ValidatorBag();
-
-        public ValidationResultBag GetDirectValidationResults()
+        if (Percentage < 0)
         {
-            var results = new ValidationResultBag();
-
-            if (Percentage < 0)
-            {
-                results.Add(ValidationStatus.Error, "Percentage is less than zero.", this, nameof(Percentage));
-            }
-            else if (Percentage > 100)
-            {
-                results.Add(ValidationStatus.Error, "Percentage is greater than 100.", this, nameof(Percentage));
-            }
-
-            return results;
+            results.Add(ValidationStatus.Error, "Percentage is less than zero.", this, nameof(Percentage));
         }
+        else if (Percentage > 100)
+        {
+            results.Add(ValidationStatus.Error, "Percentage is greater than 100.", this, nameof(Percentage));
+        }
+
+        return results;
     }
 }

@@ -20,11 +20,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
         public string Feasiable { get; set; }
 
         public double? CIImprovement { get; set; }
+        public string BudgetPriorityLevel { get; set; }
 
         public double Cost { get; set; }
-
         public double BCRatio { get; set; }
-
+        public double Benefit { get; set; }
         public string Selected { get; set; }
 
         public decimal? AmountSpent { get; set; }

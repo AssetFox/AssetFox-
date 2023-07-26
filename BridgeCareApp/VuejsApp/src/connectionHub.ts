@@ -160,6 +160,7 @@ export const Hub = {
         BroadcastNetworkRollupDetail: 'BroadcastNetworkRollupDetail',
         BroadcastWorkQueueUpdate: 'BroadcastWorkQueueUpdate',
         BroadcastWorkQueueStatusUpdate: 'BroadcastWorkQueueStatusUpdate',
+        BroadcastImportCompletion: 'BroadcastImportCompletion',
         
     },
     BroadcastEventType: {
@@ -178,6 +179,7 @@ export const Hub = {
         BroadcastNetworkRollupDetailEvent: 'BroadcastNetworkRollupDetailEvent',
         BroadcastWorkQueueUpdateEvent: 'BroadcastWorkQueueUpdateEvent',
         BroadcastWorkQueueStatusUpdateEvent: 'BroadcastWorkQueueStatusUpdateEvent',
+        BroadcastImportCompletionEvent: 'BroadcastImportCompletionEvent',
         
     },
 };

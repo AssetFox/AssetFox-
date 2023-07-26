@@ -52,7 +52,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
         {
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfull imported committed projects into simulation {WorkName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported committed projects into simulation {WorkName}");
         }
     }
 }

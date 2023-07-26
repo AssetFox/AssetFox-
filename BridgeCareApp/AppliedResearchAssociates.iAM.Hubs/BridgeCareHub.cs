@@ -26,5 +26,6 @@ namespace AppliedResearchAssociates.iAM.Hubs
         public const string BroadcastWorkQueueStatusUpdate = "BroadcastWorkQueueStatusUpdate";
         public const string BroadcastWorkQueueUpdate = "BroadcastWorkQueueUpdate";
         public const string BroadcastDataMigration = "BroadcastDataMigration";
+        public const string BroadcastImportCompletion = "BroadcastImportCompletion";
     }
 }

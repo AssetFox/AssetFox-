@@ -4,6 +4,11 @@ namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class SectionCommittedProjectDTO : BaseCommittedProjectDTO
     {
+        public override TOutput Accept<TOutput>(Abstract.IBaseCommittedProjectDtoVisitor<TOutput> visitor)
+        {
+            return visitor.Visit(this);
+        } 
+
         public override bool VerifyLocation(string networkKeyAttribute)
         {
             const string IdKey = "ID";

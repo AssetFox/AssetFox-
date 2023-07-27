@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Services.SimulationCloning
@@ -20,5 +21,16 @@ namespace BridgeCareCore.Services.SimulationCloning
             return clone;
         }
 
+        internal static List<CashFlowRuleDTO> CloneList(IEnumerable<CashFlowRuleDTO> cashFlowRules)
+        {
+            var clone = new List<CashFlowRuleDTO>();
+            foreach (var cashFlowRule in cashFlowRules)
+            {
+                var childClone = Clone(cashFlowRule);
+                clone.Add(childClone);
+            }
+            return clone;
+
+        }
     }
 }

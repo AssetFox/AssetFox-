@@ -1,5 +1,6 @@
 ﻿using AppliedResearchAssociates.iAM.DTOs;
 using System;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Services.SimulationCloning
 {
@@ -19,7 +20,17 @@ namespace BridgeCareCore.Services.SimulationCloning
                Year = budgetPriority.Year,
             };
             return clone;
-        }
+        }      
+        internal static List<BudgetPriorityDTO> CloneList(IEnumerable<BudgetPriorityDTO> budgetPriorities)
+        {
+            var clone = new List<BudgetPriorityDTO>();
+            foreach (var budgetPrioritiy in budgetPriorities)
+            {
+                var childClone = Clone(budgetPrioritiy);
+                clone.Add(childClone);
+            }
+            return clone;
 
+        }
     }
 }

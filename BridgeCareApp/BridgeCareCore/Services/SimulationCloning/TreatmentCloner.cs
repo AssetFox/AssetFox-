@@ -1,5 +1,6 @@
 ﻿using AppliedResearchAssociates.iAM.DTOs;
 using System;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Services.SimulationCloning
 {
@@ -28,6 +29,16 @@ namespace BridgeCareCore.Services.SimulationCloning
             };
             return clone;
         }
+        internal static List<TreatmentDTO> CloneList(IEnumerable<TreatmentDTO> treatments)
+        {
+            var clone = new List<TreatmentDTO>();
+            foreach (var treatment in treatments)
+            {
+                var childClone = Clone(treatment);
+                clone.Add(childClone);
+            }
+            return clone;
 
+        }
     }
 }

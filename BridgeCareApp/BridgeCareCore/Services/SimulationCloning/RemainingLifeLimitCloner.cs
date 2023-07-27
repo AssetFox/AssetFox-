@@ -1,5 +1,6 @@
 ﻿using AppliedResearchAssociates.iAM.DTOs;
 using System;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Services.SimulationCloning
 {
@@ -19,5 +20,16 @@ namespace BridgeCareCore.Services.SimulationCloning
             return clone;
         }
 
+        internal static List<RemainingLifeLimitDTO> CloneList(IEnumerable<RemainingLifeLimitDTO> remainingLifeLimits)
+        {
+            var clone = new List<RemainingLifeLimitDTO>();
+            foreach (var remainingLifeLimit in remainingLifeLimits)
+            {
+                var childClone = Clone(remainingLifeLimit);
+                clone.Add(childClone);
+            }
+            return clone;
+
+        }
     }
 }

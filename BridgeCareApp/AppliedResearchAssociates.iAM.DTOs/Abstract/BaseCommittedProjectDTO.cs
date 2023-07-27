@@ -81,5 +81,8 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// An indication if the LocationKeys are valid
         /// </returns>
         public abstract bool VerifyLocation(string networkKeyAttribute);
+
+        public abstract TOutput Accept<TOutput>(IBaseCommittedProjectDtoVisitor<TOutput> visitor);
+
     }
 }

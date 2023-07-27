@@ -1,5 +1,6 @@
 ﻿using AppliedResearchAssociates.iAM.DTOs;
 using System;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Services.SimulationCloning
 {
@@ -20,6 +21,16 @@ namespace BridgeCareCore.Services.SimulationCloning
             };
             return clone;
         }
+        internal static List<DeficientConditionGoalDTO> CloneList(IEnumerable<DeficientConditionGoalDTO> deficientConditionGoals)
+        {
+            var clone = new List<DeficientConditionGoalDTO>();
+            foreach (var deficientConditionGoal in deficientConditionGoals)
+            {
+                var childClone = Clone(deficientConditionGoal);
+                clone.Add(childClone);
+            }
+            return clone;
 
+        }
     }
 }

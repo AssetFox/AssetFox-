@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Services.SimulationCloning;
 
@@ -19,5 +20,16 @@ namespace BridgeCareCore.Services.SimulationCloning
             return clone;
         }
 
+        internal static List<ReportIndexDTO> CloneList(IEnumerable<ReportIndexDTO> reportIndexes)
+        {
+            var clone = new List<ReportIndexDTO>();
+            foreach (var reportIndex in reportIndexes)
+            {
+                var childClone = Clone(reportIndex);
+                clone.Add(childClone);
+            }
+            return clone;
+
+        }
     }
 }

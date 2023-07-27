@@ -1,4 +1,6 @@
-﻿using AppliedResearchAssociates.iAM.DTOs;
+﻿using System;
+using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace BridgeCareCore.Services.SimulationCloning
@@ -18,6 +20,16 @@ namespace BridgeCareCore.Services.SimulationCloning
             };
             return clone;
         }
+        internal static List<CalculatedAttributeDTO> CloneList(IEnumerable<CalculatedAttributeDTO> calculatedAttributes)
+        {
+            var clone = new List<CalculatedAttributeDTO>();
+            foreach (var calculatedAttribute in calculatedAttributes)
+            {
+                var childClone = Clone(calculatedAttribute);
+                clone.Add(childClone);
+            }
+            return clone;
 
+        }
     }
 }

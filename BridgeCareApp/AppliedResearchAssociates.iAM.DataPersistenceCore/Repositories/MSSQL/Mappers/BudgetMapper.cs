@@ -61,6 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new CriterionLibraryDTO()
             };
 
+     
         public static BudgetLibraryDTO ToDto(this BudgetLibraryEntity entity) =>
             new BudgetLibraryDTO
             {

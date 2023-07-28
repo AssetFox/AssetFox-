@@ -8,6 +8,8 @@ using AppliedResearchAssociates.iAM.DTOs;
 using HotChocolate;
 using AppliedResearchAssociates.iAM.Data.SimulationCloning;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -57,12 +59,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var cloneSimulation = CompleteSimulationCloner.Clone(completeSimulation, dto);
 
             // save it
-            CreateNewSimulation(completeSimulation);
+            var network = _unitOfWork.Context.Network.First(n => n.Id == dto.networkId);
+            CreateNewSimulation(completeSimulation, network.KeyAttributeId);
         }
 
-        private void CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO)
+        private void CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO, Guid keyAttributeId)
         {
-            var entity = CompleteSimulationMapper.ToNewEntity(completeSimulationDTO);
+            var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
+            var keyAttribute = _unitOfWork.AttributeRepo.GetAttributeName(keyAttributeId);
+            var entity = CompleteSimulationMapper.ToNewEntity(completeSimulationDTO, attributes, keyAttribute);
         }
     }
 }

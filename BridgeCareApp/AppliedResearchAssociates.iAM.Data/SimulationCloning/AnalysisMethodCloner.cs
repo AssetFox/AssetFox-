@@ -1,8 +1,8 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Services.SimulationCloning;
+using AppliedResearchAssociates.iAM.Data.SimulationCloning;
 
-namespace BridgeCareCore.Services
+namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class AnalysisMethodCloner
     {

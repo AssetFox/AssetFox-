@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Services.SimulationCloning;
+using AppliedResearchAssociates.iAM.Data.SimulationCloning;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class ReportIndexCloner
     {

@@ -1,9 +1,7 @@
-﻿using System;
-using AppliedResearchAssociates.iAM.DTOs;
+﻿using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using Microsoft.CodeAnalysis.FlowAnalysis.DataFlow.CopyAnalysis;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     public class BaseCommittedProjectDtoClonerVisitor : IBaseCommittedProjectDtoVisitor<BaseCommittedProjectDTO>
     {

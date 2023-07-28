@@ -1,13 +1,10 @@
-﻿using System;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
-using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Services.SimulationCloning;
+﻿using AppliedResearchAssociates.iAM.DTOs;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
-    internal class CompleteSimulationCloner
+    public class CompleteSimulationCloner
     {
-        internal static CompleteSimulationDTO Clone(CompleteSimulationDTO completeSimulation, CloneSimulationDTO cloneRequest)
+        public static CompleteSimulationDTO Clone(CompleteSimulationDTO completeSimulation, CloneSimulationDTO cloneRequest)
         {
             var cloneAnalysisMethod = AnalysisMethodCloner.Clone(completeSimulation.AnalysisMethod);
             var cloneBudgetPriorities = BudgetPriorityCloner.CloneList(completeSimulation.BudgetPriorities);

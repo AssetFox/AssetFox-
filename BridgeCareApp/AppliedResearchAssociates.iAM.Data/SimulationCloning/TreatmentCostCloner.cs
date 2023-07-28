@@ -1,7 +1,7 @@
 ﻿using AppliedResearchAssociates.iAM.DTOs;
 using System;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class TreatmentCostCloner
     {

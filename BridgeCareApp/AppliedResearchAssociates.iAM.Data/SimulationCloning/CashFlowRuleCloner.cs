@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class CashFlowRuleCloner
     {

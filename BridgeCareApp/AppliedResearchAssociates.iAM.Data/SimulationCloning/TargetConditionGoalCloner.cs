@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class TargetConditionGoalCloner
     {

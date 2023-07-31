@@ -24,8 +24,9 @@ namespace BridgeCareCoreTests.Tests.Integration
         private GeneralWorkQueueService CreateService()
         {
             var queue = new SequentialWorkQueue<WorkQueueMetadata>();
+            var fastQueue = new FastSequentialworkQueue<WorkQueueMetadata>();
             var service = new GeneralWorkQueueService(
-                queue);
+                queue, fastQueue);
             return service;
         }
 

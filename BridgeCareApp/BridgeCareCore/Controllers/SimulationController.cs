@@ -31,6 +31,7 @@ namespace BridgeCareCore.Controllers
     public class SimulationController : BridgeCareCoreBaseController
     {
         public const string SimulationError = "Scenario Error";
+        public const string workQueueError = "Work Queue Error";
 
         private readonly ISimulationPagingService _simulationService;
         private readonly IWorkQueueService _workQueueService;
@@ -142,6 +143,23 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetWorkQueuePage - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetFastWorkQueuePage")]
+        [Authorize]
+        public async Task<IActionResult> GetFastWorkQueuePage([FromBody] PagingRequestModel<QueuedWorkDTO> request)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _workQueueService.GetFastWorkQueuePage(request));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetFastWorkQueuePage - {e.Message}");
                 throw;
             }
         }
@@ -371,7 +389,44 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpDelete]
+        [Route("CancelInFastQueue/{workId}")]
+        [Authorize]
+        public async Task<IActionResult> CancelInFastQueue(Guid workId)
+        {
+            try
+            {
+                var work = _workQueueService.GetFastQueuedWorkByWorkId(workId);
+                if (work == null)
+                    return Ok();
                 
+                
+                    var hasBeenRemovedFromQueue = _generalWorkQueueService.CancelInFastQueue(workId);
+                    if (hasBeenRemovedFromQueue)
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, workId);
+                    else
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = workId, Status = "Canceling" });
+                
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(workId);
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Current user role does not have permission to cancel work queue processes ::{e.Message}");
+                throw;
+            }
+            catch (Exception e)
+            {
+
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(workId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis for {simulationName}::{e.Message}");
+                throw;
+            }
+        }
+
         [HttpPost]
         [Route("SetNoTreatmentBeforeCommitted/{simulationId}")]
         [Authorize]

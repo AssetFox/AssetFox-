@@ -39,7 +39,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var goalId = Guid.NewGuid();
             var criterionLibraryId = Guid.NewGuid();
             var nonexistentAttributeName = "nonexistentAttribute";
-            var goal = DeficientConditionGoalDtos.Dto(goalId, nonexistentAttributeName);
+            var goal = DeficientConditionGoalDtos.DtoWithIdOnlyCriterionLibrary(goalId, nonexistentAttributeName);
             library.DeficientConditionGoals.Add(goal);
             library.Description = "Updated description";
             var syncModel = new PagingSyncModel<DeficientConditionGoalDTO>
@@ -74,8 +74,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var goalId = Guid.NewGuid();
             var goalId2 = Guid.NewGuid();
             var attributeName = TestAttributeNames.CulvDurationN;
-            var goal = DeficientConditionGoalDtos.Dto(goalId, attributeName);
-            var goal2 = DeficientConditionGoalDtos.Dto(goalId2, attributeName);
+            var goal = DeficientConditionGoalDtos.DtoWithIdOnlyCriterionLibrary(goalId, attributeName);
+            var goal2 = DeficientConditionGoalDtos.DtoWithIdOnlyCriterionLibrary(goalId2, attributeName);
             var goals = new List<DeficientConditionGoalDTO> { goal, goal2 };
             TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(
                 goals, simulationId);

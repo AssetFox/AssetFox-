@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
+using System.Xml.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
@@ -39,6 +41,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             worksheet.Row(row + 1).Height = 15;
             // Autofit before the merges
             worksheet.Cells.AutoFitColumns(0);
+            worksheet.Cells.AutoFitColumns(5);
 
             // Merge rows for columns
             for (int cellColumn = 1; cellColumn <= headersRow.Count; cellColumn++)
@@ -97,6 +100,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "COUNTY");
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "MPO_NAME");
 
+            worksheet.Cells[row, columnNo++].Value = "";
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FEATURE_INTERSECTED");
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FEATURE_CARRIED");
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "LOCATION");
+
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "###,###,###,###,##0";
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "LENGTH");
 
@@ -151,6 +159,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 "District",
                 "County",
                 "MPO/RPO",
+                "City/Town/Place",
+                "Feature\r\nintersected",
+                "Facility\r\nCarried",
+                "Location/StructureName",
                 "Bridge\r\nLength",
                 "Deck\r\nArea",
                 "Large\r\nBridge",

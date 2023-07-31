@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
         public void Fill(ExcelWorksheet fundedTreatmentWorksheet, SimulationOutput simulationOutput)
         {
             var currentCell = AddHeadersCells(fundedTreatmentWorksheet);
-
+            
             // Add row next to headers for filters and year numbers for dynamic data. Cover from
             // top, left to right, and bottom set of data.
             using (var autoFilterCells = fundedTreatmentWorksheet.Cells[3, 1, currentCell.Row, currentCell.Column - 1])

@@ -86,11 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             simulation.NetworkId = network.Id;
 
             // Set up a selectable treatment for the test with sample budgets
-            var testBudget = new TreatmentBudgetDTO
-            {
-                Id = Guid.NewGuid(),
-                Name = "Budget Test 1"
-            };
+            var treatmentbudget = TreatmentBudgetDtos.Dto();
             var libraryId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
             var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(treatmentId);
@@ -99,8 +95,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var insertCostEquationId = Guid.NewGuid();
             var cost = TreatmentCostDtos.WithEquationAndCriterionLibrary(costId, insertCostEquationId, costLibraryId, "equation", "mergedCriteriaExpression");
             treatment.Costs.Add(cost);
-            treatment.Budgets = new List<TreatmentBudgetDTO>() { testBudget };
-            treatment.BudgetIds = new List<Guid> { libraryId, treatmentId };
+            treatment.Budgets = new List<TreatmentBudgetDTO>() { treatmentbudget };
+            treatment.BudgetIds = new List<Guid> {  };
             var treatments = new List<TreatmentDTO> { treatment };
             TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulation.Id);
 

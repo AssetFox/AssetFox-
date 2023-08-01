@@ -150,7 +150,7 @@ public class SequentialWorkQueue<T>
                     var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
                     if (isCanceled)
                         _hubService.SendRealTimeMessage(WorkSpec.UserId, HubConstant.BroadcastTaskCompleted, $"Work queue operation '{WorkSpec.WorkDescription}' canceled");
-                    _hubService.SendRealTimeMessage(WorkSpec.UserId, HubConstant.BroadcastWorkQueueUpdate, WorkSpec.WorkId);
+                    WorkSpec.OnUpdate(serviceProvider);
                 }             
             }
             else

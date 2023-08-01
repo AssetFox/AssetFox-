@@ -20,5 +20,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.RemainingLifeLimit
             };
             return dto;
         }
+
+        public static RemainingLifeLimitDTO DtoWithCriterionLibrary(string attribute, Guid? id = null, double value = 0)
+        {
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            var resolveId = id ?? Guid.NewGuid();
+            var dto = new RemainingLifeLimitDTO
+            {
+                Attribute = attribute,
+                Id = resolveId,
+                Value = value,
+                CriterionLibrary = criterionLibrary
+            };
+            return dto;
+        }
     }
 }

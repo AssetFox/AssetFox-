@@ -390,6 +390,10 @@ import { LibraryUpsertPagingRequest } from '@/shared/models/iAM/paging';
 import { http2XX } from '@/shared/utils/http-utils';
 import { watch } from 'fs';
 import { isNullOrUndefined } from 'util';
+import { Hub } from '@/connectionHub';
+import ScenarioService from '@/services/scenario.service';
+import { WorkType } from '@/shared/models/iAM/scenario';
+import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 
 @Component({
     components: {
@@ -454,6 +458,7 @@ export default class TreatmentEditor extends Vue {
     @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
     @Action('selectScenario') selectScenarioAction: any;
     @Action('getScenarioPerformanceCurves') getScenarioPerformanceCurvesAction: any;
+    @Action('setAlertMessage') setAlertMessageAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
@@ -541,9 +546,20 @@ export default class TreatmentEditor extends Vue {
                         vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });   
                     });
                 });
+                ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.selectedScenarioId, workType: WorkType.ImportScenarioTreatment}).then(response => {
+                if(response.data){
+                    this.setAlertMessageAction("A treatment curve has been added to the work queue")
+                }
+            })
             }
         });
     }
+    mounted() {
+            this.$statusHub.$on(
+                Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+                this.importCompleted,
+            );
+        } 
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }  
@@ -633,6 +649,11 @@ export default class TreatmentEditor extends Vue {
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: this.selectedTreatmentLibrary.id, workType: WorkType.ImportLibraryTreatment}).then(response => {
+                if(response.data){
+                    this.setAlertMessageAction("A treatment import has been added to the work queue")
+                }
+            })
         }
 
         this.clearChanges();
@@ -1166,6 +1187,17 @@ export default class TreatmentEditor extends Vue {
                     FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
                 }
             });
+    }
+
+    importCompleted(data: any){
+        var importComp = data.importComp as importCompletion
+        if( importComp.worktype === WorkType.ImportScenarioTreatment && importComp.id === this.selectedScenarioId ||
+            this.hasSelectedLibrary && importComp.worktype === WorkType.ImportLibraryTreatment && importComp.id === this.selectedTreatmentLibrary.id){
+            this.clearChanges()
+            this.onPaginationChanged().then(() => {
+                this.setAlertMessageAction('');
+            })
+        }        
     }
 
     //paging

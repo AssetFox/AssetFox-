@@ -1,5 +1,5 @@
 const state = {
-    alertMessage: ''
+    alertMessage: '',
 };
 
 const mutations = {

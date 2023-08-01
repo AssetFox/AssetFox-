@@ -11,6 +11,7 @@ using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs;
 using BridgeCareCore.Controllers;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
@@ -24,7 +25,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
         public string WorkDescription => "Import Committed Project";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.ImportCommittedProject, DomainType = DomainType.CommittedProject };
+            new WorkQueueMetadata() { WorkType = WorkType.ImportCommittedProject, DomainType = DomainType.Simulation, DomainId = SimulationId };
 
         public string WorkName => SimulationName;
 
@@ -52,6 +53,11 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported committed projects into simulation {WorkName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
+            {
+                Id = Guid.Parse(WorkId),
+                WorkType = Metadata.WorkType
+            });
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

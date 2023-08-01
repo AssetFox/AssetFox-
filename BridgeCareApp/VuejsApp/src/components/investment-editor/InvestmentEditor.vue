@@ -336,6 +336,10 @@ import {
     mapToIndexSignature
 } from '../../shared/utils/conversion-utils';
 import { isNullOrUndefined } from 'util';
+import { Hub } from '@/connectionHub';
+import ScenarioService from '@/services/scenario.service';
+import { WorkType } from '@/shared/models/iAM/scenario';
+import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 
 @Component({
     components: {
@@ -460,28 +464,43 @@ export default class InvestmentEditor extends Vue {
 
         beforeRouteEnter(to: any, from: any, next: any) {
             next((vm: any) => {
-                vm.librarySelectItemValue = null;
-                vm.getHasPermittedAccessAction();
-                vm.getBudgetLibrariesAction().then(() => {
-                    if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
-                        vm.selectedScenarioId = to.query.scenarioId;
+                (async () => { 
+                    vm.librarySelectItemValue = null;
+                    await vm.getHasPermittedAccessAction();
+                    await vm.getBudgetLibrariesAction().then(async () => {
+                        if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
+                            vm.selectedScenarioId = to.query.scenarioId;
 
-                        if (vm.selectedScenarioId === vm.uuidNIL) {
-                            vm.addErrorNotificationAction({
-                                message: 'Found no selected scenario for edit',
-                            });
-                            vm.$router.push('/Scenarios/');
+                            if (vm.selectedScenarioId === vm.uuidNIL) {
+                                vm.addErrorNotificationAction({
+                                    message: 'Found no selected scenario for edit',
+                                });
+                                vm.$router.push('/Scenarios/');
+                            }
+
+                            vm.hasScenario = true;
+                            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.scenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+                                if(response.data){
+                                    vm.setAlertMessageAction("An investment import has been added to the work queue")
+                                }
+                            })
+                            await vm.initializePages();
                         }
+                        else
+                            vm.initializing = false;
 
-                        vm.hasScenario = true;
-                        vm.initializePages();
-                    }
-                    else
-                        vm.initializing = false;
-
-                });
+                    });
+                })
+                
             });
         }
+
+        mounted() {
+            this.$statusHub.$on(
+                Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+                this.importCompleted,
+            );
+        }  
 
         beforeDestroy() {
             this.setHasUnsavedChangesAction({ value: false });
@@ -623,6 +642,11 @@ export default class InvestmentEditor extends Vue {
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: this.selectedBudgetLibrary.id, workType: WorkType.ImportLibraryInvestment}).then(response => {
+                if(response.data){
+                    this.setAlertMessageAction("An investment import has been added to the work queue")
+                }
+            })
         }
 
         this.clearChanges()
@@ -1456,8 +1480,18 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
         this.parentLibraryName = foundLibrary.name;
     }
 
+    importCompleted(data: any){
+        var importComp = data.importComp as importCompletion
+        if( importComp.worktype === WorkType.ImportScenarioInvestment && importComp.id === this.scenarioId ||
+            this.hasSelectedLibrary && importComp.worktype === WorkType.ImportLibraryInvestment && importComp.id === this.selectedBudgetLibrary.id){
+            this.clearChanges()
+            this.onPaginationChanged().then(() => {
+                this.setAlertMessageAction('');
+            })
+        }        
+    }
 
-    initializePages(){
+    async initializePages(){
         const request: InvestmentPagingRequestModel= {
             page: 1,
             rowsPerPage: 5,
@@ -1479,7 +1513,7 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
         };
         
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
-            InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
+            await InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
@@ -1504,7 +1538,7 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
             });
         }            
         else if(this.hasSelectedLibrary)
-                InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+                await InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;

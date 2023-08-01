@@ -1,5 +1,5 @@
 import {AxiosPromise} from 'axios';
-import {CloneScenarioData, Scenario, QueuedWork} from '@/shared/models/iAM/scenario';
+import {CloneScenarioData, Scenario, QueuedWork, WorkQueueRequest} from '@/shared/models/iAM/scenario';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import { PagingRequest } from '@/shared/models/iAM/paging';
 import { BlobOptions } from 'buffer';
@@ -55,6 +55,14 @@ export default class ScenarioService {
     
     static cancelInFastQueue(simulationId: string): AxiosPromise {
         return coreAxiosInstance.delete(`${API.Scenario}/CancelInFastQueue/${simulationId}`);
+    }
+
+    static getQueuedWorkByDomainIdAndWorkType(data:WorkQueueRequest): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetQueuedWorkByDomainIdAndWorkType/`, data);
+    }
+    
+    static getFastQueuedWorkByDomainIdAndWorkType(data:WorkQueueRequest): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetFastQueuedWorkByDomainIdAndWorkType/`, data);
     }
 
     static migrateLegacySimulationData(simulationId: number): AxiosPromise {

@@ -31,7 +31,7 @@ namespace BridgeCareCore.Services
 
         public string WorkName => scenarioName;
 
-        public WorkQueueMetadata Metadata => new WorkQueueMetadata() {DomainType = DomainType.Simulation, WorkType = WorkType.ReportGeneration};
+        public WorkQueueMetadata Metadata => new WorkQueueMetadata() {DomainType = DomainType.Simulation, WorkType = WorkType.ReportGeneration, DomainId = scenarioId};
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -151,6 +151,11 @@ namespace BridgeCareCore.Services
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully generated {reportName} report for scenario: {scenarioName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
+            {
+                Id = Guid.Parse(WorkId),
+                WorkType = Metadata.WorkType
+            });
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

@@ -23,7 +23,7 @@ namespace BridgeCareCore.Services
 
         public string WorkDescription => "Convert scenario output to relational from json";
 
-        public WorkQueueMetadata Metadata => new WorkQueueMetadata() { DomainType = DomainType.Simulation, WorkType = WorkType.SimulationOutputConversion};
+        public WorkQueueMetadata Metadata => new WorkQueueMetadata() { DomainType = DomainType.Simulation, WorkType = WorkType.SimulationOutputConversion, DomainId = ScenarioId};
 
         public string WorkName => ScenarioName;
 
@@ -50,14 +50,6 @@ namespace BridgeCareCore.Services
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully converted output to relational on scenario: {WorkName}");
-        }
-
-        public void OnCompletion(IServiceProvider serviceProvider)
-        {
-            using var scope = serviceProvider.CreateScope();
-            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-
-            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Output conversion on {WorkName} has completed");
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

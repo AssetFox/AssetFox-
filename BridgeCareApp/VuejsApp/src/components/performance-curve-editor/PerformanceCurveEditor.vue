@@ -543,6 +543,10 @@ import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { isNullOrUndefined } from 'util';
+import { Hub } from '@/connectionHub';
+import ScenarioService from '@/services/scenario.service';
+import { WorkType } from '@/shared/models/iAM/scenario';
+import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 
 @Component({
     components: {
@@ -594,6 +598,7 @@ export default class PerformanceCurveEditor extends Vue {
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
     @Action('selectScenario') selectScenarioAction: any;
+    @Action('setAlertMessage') setAlertMessageAction: any;
     
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
@@ -720,6 +725,11 @@ export default class PerformanceCurveEditor extends Vue {
                         }
 
                         vm.hasScenario = true;
+                        ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.selectedScenarioId, workType: WorkType.ImportScenarioPerformanceCurve}).then(response => {
+                            if(response.data){
+                                vm.setAlertMessageAction("A performance curve import has been added to the work queue")
+                            }
+                        })
                         vm.initializePages();
 
                         vm.hasScenario = true;
@@ -736,6 +746,11 @@ export default class PerformanceCurveEditor extends Vue {
 
     mounted() {
         this.setAttributeSelectItems();
+        
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+            this.importCompleted,
+        );
     }
 
     beforeDestroy() {
@@ -743,7 +758,7 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     @Watch('performancePagination')
-    onPaginationChanged() {
+    async onPaginationChanged() {
         if(this.isRunning)
             return;
         this.checkHasUnsavedChanges();
@@ -764,7 +779,7 @@ export default class PerformanceCurveEditor extends Vue {
         };
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
             this.isRunning = true;
-            PerformanceCurveService.getPerformanceCurvePage(this.selectedScenarioId, request).then(response => {
+            await PerformanceCurveService.getPerformanceCurvePage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
                     this.currentPage = data.items;
@@ -776,7 +791,7 @@ export default class PerformanceCurveEditor extends Vue {
         }          
         else if(this.hasSelectedLibrary){
             this.isRunning = true;
-            PerformanceCurveService.GetLibraryPerformanceCurvePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+            await PerformanceCurveService.GetLibraryPerformanceCurvePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
                     this.currentPage = data.items;
@@ -850,6 +865,11 @@ export default class PerformanceCurveEditor extends Vue {
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: this.selectedPerformanceCurveLibrary.id, workType: WorkType.ImportLibraryPerformanceCurve}).then(response => {
+                if(response.data){
+                    this.setAlertMessageAction("A performance curve import has been added to the work queue")
+                }
+            })
         }
 
         this.updatedRowsMap.clear();
@@ -1367,7 +1387,18 @@ export default class PerformanceCurveEditor extends Vue {
         this.parentLibraryName = foundLibrary.name;
     }
 
-    initializePages(){
+    importCompleted(data: any){
+        var importComp = data.importComp as importCompletion
+        if( importComp.worktype === WorkType.ImportScenarioPerformanceCurve && importComp.id === this.selectedScenarioId ||
+            this.hasSelectedLibrary && importComp.worktype === WorkType.ImportLibraryPerformanceCurve && importComp.id === this.selectedPerformanceCurveLibrary.id){
+            this.clearChanges()
+            this.onPaginationChanged().then(() => {
+                this.setAlertMessageAction('');
+            })
+        }        
+    }
+
+    async initializePages(){
         const request: PagingRequest<PerformanceCurve>= {
             page: 1,
             rowsPerPage: 5,
@@ -1383,7 +1414,7 @@ export default class PerformanceCurveEditor extends Vue {
             search: ''
         };
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            PerformanceCurveService.getPerformanceCurvePage(this.selectedScenarioId, request).then(response => {
+            await PerformanceCurveService.getPerformanceCurvePage(this.selectedScenarioId, request).then(response => {
                 this.isRunning = false
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;

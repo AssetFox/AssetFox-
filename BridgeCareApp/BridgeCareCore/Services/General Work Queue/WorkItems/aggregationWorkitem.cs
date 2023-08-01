@@ -32,7 +32,7 @@ namespace BridgeCareCore.Services
 
         public string WorkName => NetworkName;
 
-        public WorkQueueMetadata Metadata => new WorkQueueMetadata() { DomainType = DomainType.Network, WorkType = WorkType.Aggregation };
+        public WorkQueueMetadata Metadata => new WorkQueueMetadata() { DomainType = DomainType.Network, WorkType = WorkType.Aggregation, DomainId = NetworkId };
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {

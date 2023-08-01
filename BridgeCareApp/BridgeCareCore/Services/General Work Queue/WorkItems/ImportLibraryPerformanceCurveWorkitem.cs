@@ -25,7 +25,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
         public string WorkDescription => "Import Library Performance Curve";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryPerformanceCurve, DomainType = DomainType.PerformanceCurve };
+            new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryPerformanceCurve, DomainType = DomainType.PerformanceCurve, DomainId = PerformanceCurveLibraryId};
 
         public string WorkName => PerformanceCurveName;
 
@@ -57,6 +57,11 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported performance curve library: {WorkName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
+            {
+                Id = Guid.Parse(WorkId),
+                WorkType = Metadata.WorkType
+            });
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

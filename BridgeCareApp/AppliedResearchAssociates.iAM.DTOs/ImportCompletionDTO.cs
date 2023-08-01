@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
     public class ImportCompletionDTO
     {
         public Guid Id { get; set; }
-        public WorkType DomainType { get; set; }
+        public WorkType WorkType { get; set; }
     }
 }

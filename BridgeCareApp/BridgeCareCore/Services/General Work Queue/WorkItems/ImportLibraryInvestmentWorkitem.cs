@@ -27,7 +27,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
         public string WorkDescription => "Import Library Investment";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryInvestment, DomainType = DomainType.Investment };
+            new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryInvestment, DomainType = DomainType.Investment, DomainId = BudgetLibraryId};
 
         public string WorkName => investmentName;
 
@@ -60,6 +60,11 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported investment library: {WorkName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
+            {
+                Id = Guid.Parse(WorkId),
+                WorkType = Metadata.WorkType
+            });
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

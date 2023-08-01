@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Controllers;
 using AppliedResearchAssociates.iAM.Hubs.Services;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
@@ -25,7 +26,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
         public string WorkDescription => "Import Scenario Treatment";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioTreatment, DomainType = DomainType.Treatment };
+            new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioTreatment, DomainType = DomainType.Simulation, DomainId = SimulationId };
 
         public string WorkName => treratmentName;
 
@@ -57,6 +58,11 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported treatment: {WorkName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
+            {
+                Id = Guid.Parse(WorkId),
+                WorkType = Metadata.WorkType
+            });
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

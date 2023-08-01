@@ -1,5 +1,6 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Interfaces
@@ -10,5 +11,7 @@ namespace BridgeCareCore.Interfaces
         PagingPageModel<QueuedWorkDTO> GetFastWorkQueuePage(PagingRequestModel<QueuedWorkDTO> request);
         QueuedWorkDTO GetQueuedWorkByWorkId(Guid workId);
         QueuedWorkDTO GetFastQueuedWorkByWorkId(Guid workId);
+        QueuedWorkDTO GetQueuedWorkByDomainIdAndWorkType(Guid domainId, WorkType workType);
+        QueuedWorkDTO GetFastQueuedWorkByDomainIdAndWorkType(Guid domainId, WorkType workType);
     }
 }

@@ -23,7 +23,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
         public string WorkDescription => "Delete Simulation";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.DeleteSimulation, DomainType = DomainType.Network };
+            new WorkQueueMetadata() { WorkType = WorkType.DeleteSimulation, DomainType = DomainType.Simulation, DomainId = SimulationId};
 
         public string WorkName => scenarioName;
 

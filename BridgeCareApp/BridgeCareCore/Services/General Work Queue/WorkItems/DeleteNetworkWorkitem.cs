@@ -33,7 +33,7 @@ namespace BridgeCareCore.Services
         public string WorkDescription => "Delete Network";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.DeleteNetwork, DomainType = DomainType.Network};
+            new WorkQueueMetadata() { WorkType = WorkType.DeleteNetwork, DomainType = DomainType.Network, DomainId = NetworkId};
 
         public string WorkName => NetworkName;
 

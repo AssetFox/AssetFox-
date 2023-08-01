@@ -1,4 +1,5 @@
-﻿using AppliedResearchAssociates.iAM.DTOs.Enums;
+﻿using System;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace BridgeCareCore.Models
 {
@@ -7,5 +8,6 @@ namespace BridgeCareCore.Models
         public WorkType WorkType { get; set; }
         public DomainType DomainType { get; set; }
         public string PreviousRunTime { get; set; }
+        public Guid DomainId { get; set; }
     }
 }

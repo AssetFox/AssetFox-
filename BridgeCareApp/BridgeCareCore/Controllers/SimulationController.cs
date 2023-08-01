@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
+using BridgeCareCore.Models.General_Work_Queue;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
@@ -160,6 +161,40 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetFastWorkQueuePage - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetQueuedWorkByDomainIdAndWorkType")]
+        [Authorize]
+        public async Task<IActionResult> GetQueuedWorkByDomainIdAndWorkType([FromBody] WorkQueueRequestModel request)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _workQueueService.GetFastQueuedWorkByDomainIdAndWorkType(request.DomainId, request.WorkType));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetQueuedWorkByDomainIdAndWorkType - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetFastQueuedWorkByDomainIdAndWorkType")]
+        [Authorize]
+        public async Task<IActionResult> GetFastQueuedWorkByDomainIdAndWorkType([FromBody] WorkQueueRequestModel request)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _workQueueService.GetFastQueuedWorkByDomainIdAndWorkType(request.DomainId, request.WorkType));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetFastQueuedWorkByDomainIdAndWorkType - {e.Message}");
                 throw;
             }
         }

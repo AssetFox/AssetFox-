@@ -84,6 +84,32 @@ namespace BridgeCareCore.Services
                 Items = items,
                 TotalItems = totalItemCount
             };
+        }      
+
+        public QueuedWorkDTO GetQueuedWorkByDomainIdAndWorkType(Guid domainId, WorkType workType)
+        {
+            var workQueue = _sequentialWorkQueue.Snapshot;
+
+            var work = workQueue.FirstOrDefault(_ => _.Metadata.DomainId == domainId && _.Metadata.WorkType == workType);
+
+            if (work != null)
+            {
+                return work.ToQueuedWorkDTO();
+            }
+            return null;
+        }
+
+        public QueuedWorkDTO GetFastQueuedWorkByDomainIdAndWorkType(Guid domainId, WorkType workType)
+        {
+            var workQueue = _fastSequentialWorkQueue.Snapshot;
+
+            var work = workQueue.FirstOrDefault(_ => _.Metadata.DomainId == domainId && _.Metadata.WorkType == workType);
+
+            if (work != null)
+            {
+                return work.ToQueuedWorkDTO();
+            }
+            return null;
         }
 
         public QueuedWorkDTO GetQueuedWorkByWorkId(Guid workId)
@@ -92,7 +118,7 @@ namespace BridgeCareCore.Services
 
             var work = workQueue.FirstOrDefault(_ => _.WorkId == workId.ToString());
 
-            if(work != null)
+            if (work != null)
             {
                 return work.ToQueuedWorkDTO();
             }

@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Controllers;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
@@ -24,7 +25,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
         public string WorkDescription => "Import Library Treatment";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryTreatment, DomainType = DomainType.Treatment };
+            new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryTreatment, DomainType = DomainType.Treatment, DomainId = TreatmentLibraryId};
 
         public string WorkName => treatmentName;
 
@@ -56,6 +57,11 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"successfully imported treatment library: {WorkName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
+            {
+                Id = Guid.Parse(WorkId),
+                WorkType = Metadata.WorkType
+            });
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

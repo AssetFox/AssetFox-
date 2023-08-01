@@ -37,6 +37,11 @@ export interface QueuedWork {
     domainType: DomainType;
 }
 
+export interface WorkQueueRequest {
+    domainId: string;
+    workType: WorkType;
+}
+
 export enum WorkType {
     SimulationAnalysis,
     DeleteNetwork,

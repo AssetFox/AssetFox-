@@ -34,6 +34,7 @@ namespace BridgeCareCore.Services
         {
             WorkType = WorkType.SimulationAnalysis,
             DomainType = DomainType.Simulation,
+            DomainId = SimulationId
         };
 
         public string WorkName => ScenarioName;

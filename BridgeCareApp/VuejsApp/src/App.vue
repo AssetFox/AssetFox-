@@ -205,8 +205,7 @@
             </v-toolbar>
                 <v-alert
                 v-model='alert'
-                type="info"
-                dismissible>
+                type="info">
                     {{stateAlertMessage}}
                 </v-alert>
                 <div class="scenario-status" v-if="hasSelectedScenario">
@@ -317,6 +316,7 @@ export default class AppComponent extends Vue {
     @State(state => state.adminSiteSettingsModule.productLogo) productLogoBase64: string;
     @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
     @State(state => state.alertModule.alertMessage) stateAlertMessage: string;
+    @State(state => state.alertModule.alert) stateAlert: boolean;
     
     @Action('logOut') logOutAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
@@ -450,6 +450,8 @@ export default class AppComponent extends Vue {
         if(this.stateAlertMessage.trim() !== ''){
             this.alert = true;
         }
+        else
+            this.alert = false;
     }
 
     @Watch('alert')

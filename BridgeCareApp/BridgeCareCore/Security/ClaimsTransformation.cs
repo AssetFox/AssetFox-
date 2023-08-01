@@ -15,7 +15,9 @@ namespace BridgeCareCore.Security
         private readonly IConfiguration _config;
         private readonly IRoleClaimsMapper _roleClaimsMapper;
         private readonly IGraphApiClientService _graphApiClientService;
-        private ClaimsIdentity identity;
+        private ClaimsIdentity _identity;
+        private string _userName = string.Empty;
+        private List<string> _b2cGroups = new();
 
         public ClaimsTransformation(IConfiguration config, IRoleClaimsMapper roleClaimsMapper, IGraphApiClientService graphApiClientService)
         {
@@ -42,11 +44,15 @@ namespace BridgeCareCore.Security
 
                 var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, rolesParsed);
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRolesFromMapper);
-                identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
+                _identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
             }
 
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.B2C)
             {
+                // Read user name
+                var userNameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname";
+                var userName = principal.Claims.FirstOrDefault(t => t.Type == userNameClaimType);
+
                 // Read group name(s) set in Azure B2C(that will be IP role name(s)
                 var groupNames = new List<string>();
                 var groupClaimType = "group";
@@ -60,12 +66,19 @@ namespace BridgeCareCore.Security
                 {
                     groupNames.Add(SecurityConstants.Role.Default);
                 }
-                var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, groupNames);
-                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRolesFromMapper);
-                identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
+
+                // Do below only if user or groups i.e. roles it belongs to changes
+                if (_userName != userName?.Value || !(_b2cGroups.All(groupNames.Contains) && groupNames.All(_b2cGroups.Contains)))
+                {
+                    _userName = userName.Value;
+                    _b2cGroups = groupNames;
+                    var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, groupNames);
+                    var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRolesFromMapper);
+                    _identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
+                }
             }
 
-            principal.AddIdentity(identity);
+            principal.AddIdentity(_identity);
             return principal;
         }
     }

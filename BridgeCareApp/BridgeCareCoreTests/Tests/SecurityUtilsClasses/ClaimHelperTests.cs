@@ -24,7 +24,6 @@ namespace BridgeCareCoreTests.Tests
             var resolveUnitOfWork = unitOfWork ?? UnitOfWorkMocks.New();
             var claimHelper = new ClaimHelper(
                 resolveUnitOfWork.Object,
-                simulationQueueService.Object,
                 contextAccessor.Object);
             return claimHelper;
         }

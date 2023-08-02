@@ -62,7 +62,7 @@ namespace BridgeCareCore.Services
             queueLog ??= new DoNothingWorkQueueLog();
             var validationMessages = new List<string>();
             var scenarioTreatments = new List<TreatmentDTO>();
-            var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);           
+            var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
             queueLog.UpdateWorkQueueStatus("Loading Excel");
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
@@ -70,9 +70,7 @@ namespace BridgeCareCore.Services
                 scenarioTreatments.Add(treatmentLoadResult.Treatment);
                 validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
             }
-            var combinedValidationMessage = string.Empty;
-
-            _unitOfWork.SelectableTreatmentRepo.AddScenarioSelectableTreatment(scenarioTreatments, simulationId);
+            var combinedValidationMessage = string.Empty;
             if (validationMessages.Any())
             {
                 var combinedValidationMessageBuilder = new StringBuilder();
@@ -82,8 +80,17 @@ namespace BridgeCareCore.Services
                 }
                 combinedValidationMessage = combinedValidationMessageBuilder.ToString();
             }
-
-          
+
+            var scenarioTreatmentImportResult = new ScenarioTreatmentImportResultDTO
+            {
+                Treatments = scenarioTreatments,
+                WarningMessage = combinedValidationMessage,
+            };
+            if (combinedValidationMessage.Length == 0)
+            {
+                queueLog.UpdateWorkQueueStatus("Upserting Treatments");
+                _unitOfWork.SelectableTreatmentRepo.AddScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
+            }
         }
 
         public void ImportLibraryTreatmentsFileSingle(

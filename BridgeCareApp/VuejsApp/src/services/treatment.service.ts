@@ -91,7 +91,7 @@ export default class TreatmentService {
         let formData = new FormData();
 
         formData.append('file', file);
-        //formData.append(forScenario ? 'simulationId' : 'libraryId', id);
+        formData.append(forScenario ? 'simulationId' : 'libraryId', id);
 
         coreAxiosInstance.post(
             `${API.Treatment}/ImportScenarioTreatmentsFileSingle`,

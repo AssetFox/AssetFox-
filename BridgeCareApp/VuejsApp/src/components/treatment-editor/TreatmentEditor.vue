@@ -1139,26 +1139,30 @@ export default class TreatmentEditor extends Vue {
         
         if(this.hasScenario){
             this.newTreatment.libraryId = this.parentLibraryId
+            this.newTreatment.name = result.file.name.slice(0, -5);
+            this.addedRows = append(this.newTreatment, this.addedRows);
+            this.simpleTreatments = append({name: result.file.name.slice(0, -5), id: this.selectedScenarioId}, this.simpleTreatments);
+            setTimeout(() => (this.treatmentSelectItemValue = this.newTreatment.id));
         }
         else{
             this.newTreatment.libraryId = this.selectedTreatmentLibrary.id
-        }
             this.newTreatment.name = result.file.name.slice(0, -5);
             this.addedRows = append(this.newTreatment, this.addedRows);
-            this.simpleTreatments = append({name: result.file.name.slice(0, -5), id: this.newTreatment.id}, this.simpleTreatments);
+            this.simpleTreatments = append({name: result.file.name.slice(0, -5), id: this.newTreatment.libraryId}, this.simpleTreatments);
             setTimeout(() => (this.treatmentSelectItemValue = this.newTreatment.id));
-
+        }
+            
             if (hasValue(result) && hasValue(result.file)) {
             const data: TreatmentsFileImport = {
-                file: result.file
+                file: result.file 
             };
             if (this.hasScenario) {
-                TreatmentService.importScenarioTreatment(data.file, this.parentLibraryId, this.hasScenario)
+                TreatmentService.importScenarioTreatment(data.file, this.newTreatment.libraryId, this.hasScenario)
             }
             else{
                 TreatmentService.importLibraryTreatment(data.file, this.selectedTreatmentLibrary.id, this.hasScenario)
             }
-            
+            this.hasImport = true;
         }
 
             

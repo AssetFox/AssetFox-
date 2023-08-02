@@ -5,6 +5,7 @@ import {clone} from 'ramda';
 export interface User {
     id: string;
     username: string;
+    description: string;
     criterionLibrary: CriterionLibrary;
     hasInventoryAccess: boolean;
     lastNewsAccessDate: string;
@@ -18,6 +19,7 @@ export interface UserNewsAccessDate {
 export const emptyUser: User = {
     id: getBlankGuid(),
     username: '',
+    description: '',
     criterionLibrary: clone(emptyCriterionLibrary),
     hasInventoryAccess: false,
     lastNewsAccessDate: new Date().toISOString()

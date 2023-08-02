@@ -383,6 +383,7 @@ export default class InvestmentEditor extends Vue {
     @Mutation('budgetLibraryMutator') budgetLibraryMutator: any;
     @Mutation('selectedBudgetLibraryMutator') selectedBudgetLibraryMutator: any;
     @Mutation('investmentPlanMutator') investmentPlanMutator: any;
+    @Mutation('isSuccessfulImportMutator') isSuccessfulImportMutator: any;
 
     addedBudgets: Budget[] = [];
     updatedBudgetsMap:Map<string, [Budget, Budget]> = new Map<string, [Budget, Budget]>();//0: original value | 1: updated value
@@ -462,36 +463,33 @@ export default class InvestmentEditor extends Vue {
             return this.investmentPlan.numberOfYearsInAnalysisPeriod;
         }
 
-        beforeRouteEnter(to: any, from: any, next: any) {
-            next((vm: any) => {
+        beforeRouteEnter(to: any, from: any, next:any) {
+            next((vm:any) => {
                 (async () => { 
                     vm.librarySelectItemValue = null;
                     await vm.getHasPermittedAccessAction();
-                    await vm.getBudgetLibrariesAction().then(async () => {
-                        if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
-                            vm.selectedScenarioId = to.query.scenarioId;
+                    await vm.getBudgetLibrariesAction()
+                    if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
+                        vm.selectedScenarioId = to.query.scenarioId;
 
-                            if (vm.selectedScenarioId === vm.uuidNIL) {
-                                vm.addErrorNotificationAction({
-                                    message: 'Found no selected scenario for edit',
-                                });
-                                vm.$router.push('/Scenarios/');
-                            }
-
-                            vm.hasScenario = true;
-                            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.scenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
-                                if(response.data){
-                                    vm.setAlertMessageAction("An investment import has been added to the work queue")
-                                }
-                            })
-                            await vm.initializePages();
+                        if (vm.selectedScenarioId === vm.uuidNIL) {
+                            vm.addErrorNotificationAction({
+                                message: 'Found no selected scenario for edit',
+                            });
+                            vm.$router.push('/Scenarios/');
                         }
-                        else
-                            vm.initializing = false;
 
-                    });
-                })
-                
+                        vm.hasScenario = true;
+                        ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.scenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+                            if(response.data){
+                                vm.setAlertMessageAction("An investment import has been added to the work queue")
+                            }
+                        })
+                        await vm.initializePages();
+                    }
+                    else
+                        vm.initializing = false;               
+                })();                    
             });
         }
 
@@ -504,6 +502,12 @@ export default class InvestmentEditor extends Vue {
 
         beforeDestroy() {
             this.setHasUnsavedChangesAction({ value: false });
+            this.$statusHub.$off(
+                Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+                this.importCompleted,
+            );
+
+            this.setAlertMessageAction('');
         }
 
     // Watchers
@@ -646,6 +650,8 @@ export default class InvestmentEditor extends Vue {
                 if(response.data){
                     this.setAlertMessageAction("An investment import has been added to the work queue")
                 }
+                else
+                    this.setAlertMessageAction("");
             })
         }
 
@@ -1150,14 +1156,7 @@ export default class InvestmentEditor extends Vue {
                     currentUserCriteriaFilter: this.currentUserCriteriaFilter
                 })
                 .then((response: any) => {
-                        this.getCriterionLibrariesAction();
-                        this.firstYearOfAnalysisPeriodShift = 0;
-                                    
-                        this.clearChanges();               
-                        this.pagination.page = 1;
-                        this.initializePages();
-                        this.setAlertMessageAction("Investment Budgets import has been added to the work queue. Please refresh page when import is done");
-                        this.librarySelectItemValue = null;
+                        this.setAlertMessageAction("Investment Budgets import has been added to the work queue.");
                 });
             } else {
                 this.importLibraryInvestmentBudgetsFileAction({
@@ -1166,11 +1165,7 @@ export default class InvestmentEditor extends Vue {
                     currentUserCriteriaFilter: this.currentUserCriteriaFilter
                 })
                 .then(() => {
-                        this.getCriterionLibrariesAction();
-                        this.librarySelectItemValue = null;
-                        this.clearChanges();
-                        this.resetPage();
-                        
+                        this.setAlertMessageAction("Investment Budgets import has been added to the work queue.");                     
                 });
             }
 
@@ -1482,11 +1477,13 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
 
     importCompleted(data: any){
         var importComp = data.importComp as importCompletion
-        if( importComp.worktype === WorkType.ImportScenarioInvestment && importComp.id === this.scenarioId ||
-            this.hasSelectedLibrary && importComp.worktype === WorkType.ImportLibraryInvestment && importComp.id === this.selectedBudgetLibrary.id){
+        if( importComp.workType === WorkType.ImportScenarioInvestment && importComp.id === this.selectedScenarioId ||
+            this.hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryInvestment && importComp.id === this.selectedBudgetLibrary.id){
             this.clearChanges()
+            this.pagination.page = 1
             this.onPaginationChanged().then(() => {
                 this.setAlertMessageAction('');
+                this.isSuccessfulImportMutator(true);
             })
         }        
     }

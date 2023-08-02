@@ -547,10 +547,10 @@ export default class TreatmentEditor extends Vue {
                     });
                 });
                 ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.selectedScenarioId, workType: WorkType.ImportScenarioTreatment}).then(response => {
-                if(response.data){
-                    this.setAlertMessageAction("A treatment curve has been added to the work queue")
-                }
-            })
+                    if(response.data){
+                        vm.setAlertMessageAction("A treatment curve has been added to the work queue")
+                    }
+                })
             }
         });
     }
@@ -562,6 +562,11 @@ export default class TreatmentEditor extends Vue {
         } 
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
+        this.$statusHub.$off(
+            Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+            this.importCompleted,
+        );
+        this.setAlertMessageAction('');
     }  
 
     @Watch('stateScenarioSimpleBudgetDetails')
@@ -653,6 +658,8 @@ export default class TreatmentEditor extends Vue {
                 if(response.data){
                     this.setAlertMessageAction("A treatment import has been added to the work queue")
                 }
+                else
+                    this.setAlertMessageAction("");
             })
         }
 
@@ -1148,20 +1155,14 @@ export default class TreatmentEditor extends Vue {
                     ...data,
                     id: this.selectedScenarioId
                 }).then(() => {
-                    this.treatmentSelectItemValue = "";
-                    this.librarySelectItemValue = "";
-                    this.clearChanges();        
-                    this.simpleTreatments = clone(this.stateSimpleScenarioSelectableTreatments);                  
+                                   
                 });
             } else {
                 this.importLibraryTreatmentsFileAction({
                     ...data,
                     id: this.selectedTreatmentLibrary.id
                 }).then(() => {
-                    this.treatmentSelectItemValue = "";
-                    this.librarySelectItemValue = "";
-                    this.clearChanges();        
-                    this.simpleTreatments = [];                  
+                                   
                 });;
             }
         }
@@ -1191,11 +1192,18 @@ export default class TreatmentEditor extends Vue {
 
     importCompleted(data: any){
         var importComp = data.importComp as importCompletion
-        if( importComp.worktype === WorkType.ImportScenarioTreatment && importComp.id === this.selectedScenarioId ||
-            this.hasSelectedLibrary && importComp.worktype === WorkType.ImportLibraryTreatment && importComp.id === this.selectedTreatmentLibrary.id){
+        if( importComp.workType === WorkType.ImportScenarioTreatment && importComp.id === this.selectedScenarioId ||
+            this.hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryTreatment && importComp.id === this.selectedTreatmentLibrary.id){
             this.clearChanges()
-            this.onPaginationChanged().then(() => {
-                this.setAlertMessageAction('');
+            this.getTreatmentLibrariesAction().then(async () => {
+                if(this.hasScenario){
+                    await this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId);
+                    this.onDiscardChanges();
+                }  
+                else{
+                    await this.getSimpleSelectableTreatmentsAction(this.selectedTreatmentLibrary.id);
+                }  
+                this.setAlertMessageAction('');             
             })
         }        
     }

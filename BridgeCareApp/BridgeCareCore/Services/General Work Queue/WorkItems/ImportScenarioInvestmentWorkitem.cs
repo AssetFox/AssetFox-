@@ -18,7 +18,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record ImportScenarioInvestmentWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter, bool OverwriteBudgets, string UserId, string InvestmentName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => SimulationId.ToString();
+        public string WorkId => SimulationId.ToString() + WorkType.ImportScenarioInvestment.ToString();
 
         public DateTime StartTime { get; set; }
 
@@ -59,7 +59,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported investment: {WorkName}");
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
             {
-                Id = Guid.Parse(WorkId),
+                Id = Metadata.DomainId,
                 WorkType = Metadata.WorkType
             });
         }

@@ -18,7 +18,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record ImportLibraryTreatmentWorkitem(Guid TreatmentLibraryId, ExcelPackage ExcelPackage, string UserId, string treatmentName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => TreatmentLibraryId.ToString();
+        public string WorkId => TreatmentLibraryId.ToString() + WorkType.ImportLibraryTreatment.ToString();
 
         public DateTime StartTime { get; set; }
 
@@ -59,7 +59,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"successfully imported treatment library: {WorkName}");
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
             {
-                Id = Guid.Parse(WorkId),
+                Id = Metadata.DomainId,
                 WorkType = Metadata.WorkType
             });
         }

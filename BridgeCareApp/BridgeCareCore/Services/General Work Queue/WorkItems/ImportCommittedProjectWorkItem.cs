@@ -18,7 +18,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record ImportCommittedProjectWorkItem(Guid SimulationId, ExcelPackage ExcelPackage, string Filename, bool ApplyNoTreatment, string UserId, string SimulationName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => SimulationId.ToString();
+        public string WorkId => SimulationId.ToString() + WorkType.ImportCommittedProject.ToString();
 
         public DateTime StartTime { get; set; }
 
@@ -55,7 +55,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported committed projects into simulation {WorkName}");
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
             {
-                Id = Guid.Parse(WorkId),
+                Id = Metadata.DomainId,
                 WorkType = Metadata.WorkType
             });
         }

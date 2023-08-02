@@ -22,7 +22,7 @@ namespace BridgeCareCore.Services
 {
     public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserInfo, string ScenarioName) : IWorkSpecification<WorkQueueMetadata>
     {
-        public string WorkId => SimulationId.ToString();
+        public string WorkId => SimulationId.ToString() + WorkType.SimulationAnalysis.ToString();
 
         public DateTime StartTime { get; set; }
 

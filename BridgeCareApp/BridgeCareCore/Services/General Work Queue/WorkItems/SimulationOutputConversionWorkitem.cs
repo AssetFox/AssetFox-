@@ -17,7 +17,7 @@ namespace BridgeCareCore.Services
     public record SimulationOutputConversionWorkitem(Guid ScenarioId, string UserId, string ScenarioName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => ScenarioId.ToString();
+        public string WorkId => ScenarioId.ToString() + WorkType.SimulationOutputConversion.ToString();
 
         public DateTime StartTime { get; set; }
 

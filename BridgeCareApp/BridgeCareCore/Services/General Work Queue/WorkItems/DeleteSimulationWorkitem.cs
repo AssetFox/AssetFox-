@@ -16,7 +16,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record DeleteSimulationWorkitem(Guid SimulationId, string UserId, string scenarioName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => SimulationId.ToString();
+        public string WorkId => SimulationId.ToString() + WorkType.DeleteSimulation.ToString();
 
         public DateTime StartTime { get; set; }
 

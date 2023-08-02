@@ -18,7 +18,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record ImportScenarioPerformanceCurveWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter, string UserId, string PerformanceCurveName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => SimulationId.ToString();
+        public string WorkId => SimulationId.ToString() + WorkType.ImportScenarioPerformanceCurve.ToString();
 
         public DateTime StartTime { get; set; }
 
@@ -59,7 +59,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported performance curve: {WorkName}");
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
             {
-                Id = Guid.Parse(WorkId),
+                Id = Metadata.DomainId,
                 WorkType = Metadata.WorkType
             });
         }

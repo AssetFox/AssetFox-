@@ -458,7 +458,6 @@ export default class CommittedProjectsEditor extends Vue  {
     reverseCatMap = clone(treatmentCategoryReverseMap);
     catMap = clone(treatmentCategoryMap);
     
-    brkey_: string = 'BRKEY_'
     keyattr: string = '';
 
     investmentYears: number[] = [];
@@ -1326,7 +1325,9 @@ export default class CommittedProjectsEditor extends Vue  {
 
     importCompleted(data: any){
         var importComp = data.importComp as importCompletion
-        if(importComp.id === this.scenarioId && importComp.worktype == WorkType.ImportCommittedProject){
+        if(importComp.id === this.scenarioId && importComp.workType == WorkType.ImportCommittedProject){
+            this.projectPagination.page = 1
+            this.clearChanges();
             this.onPaginationChanged().then(() => {
                 this.setAlertMessageAction('');
             })

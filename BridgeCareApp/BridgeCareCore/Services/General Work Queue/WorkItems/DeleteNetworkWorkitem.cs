@@ -26,7 +26,7 @@ namespace BridgeCareCore.Services
 {
     public record DeleteNetworkWorkitem(Guid NetworkId, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
     {
-        public string WorkId => NetworkId.ToString();
+        public string WorkId => NetworkId.ToString() + WorkType.DeleteNetwork.ToString();
 
         public DateTime StartTime { get; set; }
 

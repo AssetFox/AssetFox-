@@ -19,7 +19,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record ImportScenarioTreatmentWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, string UserId, string treratmentName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => SimulationId.ToString();
+        public string WorkId => SimulationId.ToString() + WorkType.ImportScenarioTreatment.ToString();
 
         public DateTime StartTime { get; set; }
 
@@ -60,7 +60,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported treatment: {WorkName}");
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
             {
-                Id = Guid.Parse(WorkId),
+                Id = Metadata.DomainId,
                 WorkType = Metadata.WorkType
             });
         }

@@ -23,7 +23,7 @@ namespace BridgeCareCore.Services
     public record ReportGenerationWorkitem(Guid scenarioId, string UserId, string scenarioName,  string reportName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => scenarioId.ToString();
+        public string WorkId => scenarioId.ToString() + WorkType.ReportGeneration.ToString();
 
         public DateTime StartTime { get; set; }
 
@@ -153,7 +153,7 @@ namespace BridgeCareCore.Services
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully generated {reportName} report for scenario: {scenarioName}");
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
             {
-                Id = Guid.Parse(WorkId),
+                Id = Metadata.DomainId,
                 WorkType = Metadata.WorkType
             });
         }

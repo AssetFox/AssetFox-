@@ -755,6 +755,13 @@ export default class PerformanceCurveEditor extends Vue {
 
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
+
+        this.$statusHub.$off(
+            Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+            this.importCompleted,
+        );
+
+        this.setAlertMessageAction('');
     }
 
     @Watch('performancePagination')
@@ -869,6 +876,8 @@ export default class PerformanceCurveEditor extends Vue {
                 if(response.data){
                     this.setAlertMessageAction("A performance curve import has been added to the work queue")
                 }
+                else
+                    this.setAlertMessageAction("");
             })
         }
 
@@ -1254,7 +1263,6 @@ export default class PerformanceCurveEditor extends Vue {
                         id: this.selectedScenarioId,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
                     }).then(() => {
-                        this.onDiscardChanges();
                     });
                 } else {
                     this.importLibraryPerformanceCurvesFileAction({
@@ -1262,7 +1270,6 @@ export default class PerformanceCurveEditor extends Vue {
                         id: this.selectedPerformanceCurveLibrary.id,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
                     }).then(() => {
-                        this.onDiscardChanges();
                     });
                 }
 
@@ -1389,9 +1396,10 @@ export default class PerformanceCurveEditor extends Vue {
 
     importCompleted(data: any){
         var importComp = data.importComp as importCompletion
-        if( importComp.worktype === WorkType.ImportScenarioPerformanceCurve && importComp.id === this.selectedScenarioId ||
-            this.hasSelectedLibrary && importComp.worktype === WorkType.ImportLibraryPerformanceCurve && importComp.id === this.selectedPerformanceCurveLibrary.id){
+        if( importComp.workType === WorkType.ImportScenarioPerformanceCurve && importComp.id === this.selectedScenarioId ||
+            this.hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryPerformanceCurve && importComp.id === this.selectedPerformanceCurveLibrary.id){
             this.clearChanges()
+            this.performancePagination.page = 1
             this.onPaginationChanged().then(() => {
                 this.setAlertMessageAction('');
             })

@@ -24,7 +24,7 @@ namespace BridgeCareCore.Services
     public record AggregationWorkitem(Guid NetworkId, string UserId, string NetworkName, List<AttributeDTO> Attributes) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => NetworkId.ToString();
+        public string WorkId => NetworkId.ToString() + WorkType.Aggregation.ToString();
 
         public DateTime StartTime { get; set; }
 

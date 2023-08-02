@@ -20,7 +20,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record ImportLibraryInvestmentWorkitem(Guid BudgetLibraryId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter,bool OverwriteBudgets, string UserId, string investmentName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => BudgetLibraryId.ToString();
+        public string WorkId => BudgetLibraryId.ToString() + WorkType.ImportLibraryInvestment.ToString();
 
         public DateTime StartTime { get; set; }
 
@@ -62,7 +62,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported investment library: {WorkName}");
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
             {
-                Id = Guid.Parse(WorkId),
+                Id = Metadata.DomainId,
                 WorkType = Metadata.WorkType
             });
         }

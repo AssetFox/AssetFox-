@@ -10,5 +10,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string Criteria { get; set; }
         public bool HasCriteria { get; set; }
         public bool HasAccess { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
 }

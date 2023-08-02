@@ -548,14 +548,6 @@ export default class CashFlowEditor extends Vue {
         this.libraryImported = true;
     }
 
-    importLibrary() {
-        this.setParentLibraryName(this.librarySelectItemValue ? this.librarySelectItemValue : "");
-        this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
-        this.importLibraryDisabled = true;
-        this.scenarioLibraryIsModified = false;
-        this.libraryImported = true;
-    }
-
     @Watch('stateSelectedCashRuleFlowLibrary')
     onStateSelectedCashFlowRuleLibraryChanged() {
         this.selectedCashFlowRuleLibrary = clone(

@@ -447,10 +447,13 @@ namespace BridgeCareCore.Controllers
         }
 
 
+
+
+
         [HttpPost]
-        [Route("ImportLibraryTreatmentsFile")]
+        [Route("ImportLibraryTreatmentsFileSingle")]
         [Authorize(Policy = Policy.ImportTreatmentFromLibrary)]
-        public async Task<IActionResult> ImportLibraryTreatmentsFile()
+        public async Task<IActionResult> ImportLibraryTreatmentsFileSingle()
         {
             try
             {
@@ -489,7 +492,7 @@ namespace BridgeCareCore.Controllers
                     }
                 });
 
-                ImportLibraryTreatmentWorkitem workItem = new ImportLibraryTreatmentWorkitem(treatmentLibraryId, excelPackage, UserInfo.Name, libraryName);
+                ImportLibraryTreatmentWorkitemSingle workItem = new ImportLibraryTreatmentWorkitemSingle(treatmentLibraryId, excelPackage, UserInfo.Name, libraryName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
 
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, libraryId.ToString());
@@ -567,6 +570,57 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteScenarioSelectableTreatment {treatmentName} - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("ImportScenarioTreatmentsFileSingle")]
+        [Authorize(Policy = Policy.ImportTreatmentFromScenario)]
+        public async Task<IActionResult> ImportScenarioTreatmentsFileSingle()
+        {
+            try
+            {
+                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+                {
+                    throw new ConstraintException("Request MIME type is invalid.");
+                }
+
+                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+                {
+                    throw new ConstraintException("Treatments file not found.");
+                }
+
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("simulationId", out var id))
+                {
+                    throw new ConstraintException("Request contained no simulation id.");
+                }
+
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+                var simulationId = Guid.Parse(id.ToString());
+
+                var simulationName = "";
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                    simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
+                });
+
+                ImportScenarioSingleTreatmentWorkitem workItem = new ImportScenarioSingleTreatmentWorkitem(simulationId, excelPackage, UserInfo.Name, simulationName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportScenarioTreatmentsFile - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportScenarioTreatmentsFile - {e.Message}");
                 throw;
             }
         }

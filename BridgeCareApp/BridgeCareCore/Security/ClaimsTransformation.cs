@@ -15,8 +15,7 @@ namespace BridgeCareCore.Security
         private readonly IConfiguration _config;
         private readonly IRoleClaimsMapper _roleClaimsMapper;
         private readonly IGraphApiClientService _graphApiClientService;
-        private ClaimsIdentity _identity;
-        private string _userName = string.Empty;
+        private Dictionary<string, UserCache> cache = new();
 
         public ClaimsTransformation(IConfiguration config, IRoleClaimsMapper roleClaimsMapper, IGraphApiClientService graphApiClientService)
         {
@@ -43,7 +42,8 @@ namespace BridgeCareCore.Security
 
                 var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, rolesParsed);
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRolesFromMapper);
-                _identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
+                var identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
+                principal.AddIdentity(identity);
             }
 
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.B2C)
@@ -52,14 +52,13 @@ namespace BridgeCareCore.Security
                 var userNameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname";
                 var userName = principal.Claims.FirstOrDefault(t => t.Type == userNameClaimType);
 
-                // Do below only if user login differs
-                if (_userName != userName?.Value)
+                var userCache = cache.ContainsKey(userName.Value) ? cache[userName.Value] : null;
+                if (userCache == null || userCache != null && userCache.LastRefreshTime < DateTime.Now.AddDays(-1))
                 {
-                    _userName = userName.Value;
-
                     // Read group name(s) set in Azure B2C(that will be IP role name(s)
                     var groupNames = new List<string>();
                     var groupClaimType = "group";
+
                     if (!principal.HasClaim(claim => claim.Type == groupClaimType))
                     {
                         var nameidentifierClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
@@ -69,16 +68,30 @@ namespace BridgeCareCore.Security
                     if (groupNames.Count == 0)
                     {
                         groupNames.Add(SecurityConstants.Role.Default);
-                    }                    
+                    }
 
                     var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, groupNames);
                     var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRolesFromMapper);
-                    _identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
-                }
-            }
+                    var identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
 
-            principal.AddIdentity(_identity);
+                    if (!cache.ContainsKey(userName.Value))
+                    {
+                        userCache = new UserCache { Identity = identity, LastRefreshTime = DateTime.Now };
+                        cache.Add(userName.Value, userCache);
+                    }
+                    else
+                    {
+                        if (userCache != null && userCache.LastRefreshTime < DateTime.Now.AddDays(-1))
+                        {
+                            userCache.Identity = identity;
+                            userCache.LastRefreshTime = DateTime.Now;
+                        }
+                    }                    
+                }
+                principal.AddIdentity(cache[userName.Value].Identity);
+            }
+            
             return principal;
         }
-    }
+    }    
 }

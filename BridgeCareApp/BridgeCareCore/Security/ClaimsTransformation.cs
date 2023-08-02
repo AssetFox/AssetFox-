@@ -17,7 +17,6 @@ namespace BridgeCareCore.Security
         private readonly IGraphApiClientService _graphApiClientService;
         private ClaimsIdentity _identity;
         private string _userName = string.Empty;
-        private List<string> _b2cGroups = new();
 
         public ClaimsTransformation(IConfiguration config, IRoleClaimsMapper roleClaimsMapper, IGraphApiClientService graphApiClientService)
         {
@@ -53,25 +52,25 @@ namespace BridgeCareCore.Security
                 var userNameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname";
                 var userName = principal.Claims.FirstOrDefault(t => t.Type == userNameClaimType);
 
-                // Read group name(s) set in Azure B2C(that will be IP role name(s)
-                var groupNames = new List<string>();
-                var groupClaimType = "group";
-                if (!principal.HasClaim(claim => claim.Type == groupClaimType))
-                {
-                    var nameidentifierClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
-                    var nameidentifier = principal.Claims.FirstOrDefault(t => t.Type == nameidentifierClaimType);
-                    groupNames = await _graphApiClientService.GetGraphApiUserMemberGroup(nameidentifier.Value);
-                }
-                if (groupNames.Count == 0)
-                {
-                    groupNames.Add(SecurityConstants.Role.Default);
-                }
-
-                // Do below only if user or groups i.e. roles it belongs to changes
-                if (_userName != userName?.Value || !(_b2cGroups.All(groupNames.Contains) && groupNames.All(_b2cGroups.Contains)))
+                // Do below only if user login differs
+                if (_userName != userName?.Value)
                 {
                     _userName = userName.Value;
-                    _b2cGroups = groupNames;
+
+                    // Read group name(s) set in Azure B2C(that will be IP role name(s)
+                    var groupNames = new List<string>();
+                    var groupClaimType = "group";
+                    if (!principal.HasClaim(claim => claim.Type == groupClaimType))
+                    {
+                        var nameidentifierClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+                        var nameidentifier = principal.Claims.FirstOrDefault(t => t.Type == nameidentifierClaimType);
+                        groupNames = await _graphApiClientService.GetGraphApiUserMemberGroup(nameidentifier.Value);
+                    }
+                    if (groupNames.Count == 0)
+                    {
+                        groupNames.Add(SecurityConstants.Role.Default);
+                    }                    
+
                     var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, groupNames);
                     var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRolesFromMapper);
                     _identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);

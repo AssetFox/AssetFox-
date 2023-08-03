@@ -26,5 +26,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             return dto;
         }
+        public static TargetConditionGoalDTO DtoWithCriterionLibrary(string attribute,
+            Guid? id = null,
+            string name = null)
+        {
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            var resolveId = id ?? Guid.NewGuid();
+            var resolveName = name ?? RandomStrings.Length11();
+            var dto = new TargetConditionGoalDTO
+            {
+                Id = resolveId,
+                Name = resolveName,
+                Attribute = attribute,
+                Target = 1,
+                CriterionLibrary = criterionLibrary
+            };
+            return dto;
+        }
     }
 }

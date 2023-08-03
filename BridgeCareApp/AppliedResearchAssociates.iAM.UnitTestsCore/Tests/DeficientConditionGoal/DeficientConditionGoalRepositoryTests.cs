@@ -451,7 +451,7 @@ namespace BridgeCareCoreTests.Tests
             var goalId = Guid.NewGuid();
             var criterionLibraryId = Guid.NewGuid();
             var attributeName = "nonexistentAttribute";
-            var goal = DeficientConditionGoalDtos.Dto(goalId, attributeName,  criterionLibraryId);
+            var goal = DeficientConditionGoalDtos.DtoWithIdOnlyCriterionLibrary(goalId, attributeName,  criterionLibraryId);
             library.DeficientConditionGoals.Add(goal);
             library.Description = "Updated description";
 

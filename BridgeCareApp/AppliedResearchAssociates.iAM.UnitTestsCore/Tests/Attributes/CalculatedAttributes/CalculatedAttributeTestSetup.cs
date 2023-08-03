@@ -59,20 +59,44 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.Calculate
 
         public static CalculatedAttributeDTO TestCalculatedAttributeDto(Guid calcAttrId, string attributeName)
         {
+            var pair = new CalculatedAttributeEquationCriteriaPairDTO()
+            {
+                Id = Guid.NewGuid(),
+                Equation = new EquationDTO()
+                {
+                    Id = Guid.NewGuid(),
+                    Expression = $"[{attributeName}]"
+                }
+            }; 
             var calcAttr = new CalculatedAttributeDTO
             {
                 Id = calcAttrId,
                 Attribute = attributeName,
                 CalculationTiming = 0,
-                Equations = new List<CalculatedAttributeEquationCriteriaPairDTO>() { new CalculatedAttributeEquationCriteriaPairDTO()
+                Equations = new List<CalculatedAttributeEquationCriteriaPairDTO>() {pair}
+            };
+            return calcAttr;
+        }
+
+        public static CalculatedAttributeDTO TestCalculatedAttributeDtoWithEquationCriterionLibrary(Guid calcAttrId, string attributeName, string mergeCriterionExpression = "mergeCriteriaExpression")
+        {
+            var criterionLibrary = CriterionLibraryDtos.Dto(null,mergeCriterionExpression);
+            var pair = new CalculatedAttributeEquationCriteriaPairDTO()
+            {
+                Id = Guid.NewGuid(),
+                Equation = new EquationDTO()
                 {
                     Id = Guid.NewGuid(),
-                    Equation = new EquationDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Expression = $"[{attributeName}]"
-                    }
-                } }
+                    Expression = $"[{attributeName}]"
+                },
+                CriteriaLibrary = criterionLibrary
+            };
+            var calcAttr = new CalculatedAttributeDTO
+            {
+                Id = calcAttrId,
+                Attribute = attributeName,
+                CalculationTiming = 0,
+                Equations = new List<CalculatedAttributeEquationCriteriaPairDTO>() { pair }
             };
             return calcAttr;
         }

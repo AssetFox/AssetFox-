@@ -18,7 +18,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record ImportScenarioInvestmentWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter, bool OverwriteBudgets, string UserId, string InvestmentName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => SimulationId.ToString() + WorkType.ImportScenarioInvestment.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(SimulationId, WorkType.ImportScenarioInvestment);
 
         public DateTime StartTime { get; set; }
 
@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<IInvestmentBudgetsService>();
-            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, SimulationId);
+            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             var importResult = _committedProjectService.ImportScenarioInvestmentBudgetsFile(SimulationId, ExcelPackage, CurrentUserCriteriaFilter, OverwriteBudgets, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null)
             {

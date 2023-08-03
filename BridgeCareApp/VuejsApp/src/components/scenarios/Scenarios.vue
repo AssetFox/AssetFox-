@@ -584,6 +584,7 @@ import {
     ScenarioUser,
     emptyQueuedWork,
     QueuedWork,
+    WorkType,
 } from '@/shared/models/iAM/scenario';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
@@ -1636,7 +1637,7 @@ export default class Scenarios extends Vue {
             simulationAnalysisDetail: data.simulationAnalysisDetail,
         });
         const updatedQueueItem: queuedWorkStatusUpdate = {
-            id: data.simulationAnalysisDetail.simulationId,
+            id: data.simulationAnalysisDetail.simulationId as string + WorkType[WorkType.SimulationAnalysis] ,
             status: data.simulationAnalysisDetail.status
         }
         this.updateQueuedWorkStatusAction({

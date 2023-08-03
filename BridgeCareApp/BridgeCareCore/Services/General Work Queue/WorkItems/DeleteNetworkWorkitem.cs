@@ -26,7 +26,7 @@ namespace BridgeCareCore.Services
 {
     public record DeleteNetworkWorkitem(Guid NetworkId, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
     {
-        public string WorkId => NetworkId.ToString() + WorkType.DeleteNetwork.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(NetworkId, WorkType.DeleteNetwork);
 
         public DateTime StartTime { get; set; }
 
@@ -43,7 +43,7 @@ namespace BridgeCareCore.Services
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, NetworkId);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             _unitOfWork.NetworkRepo.DeleteNetwork(NetworkId, cancellationToken, _queueLogger);
         }
 

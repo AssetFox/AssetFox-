@@ -20,7 +20,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record ImportLibraryInvestmentWorkitem(Guid BudgetLibraryId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter,bool OverwriteBudgets, string UserId, string investmentName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => BudgetLibraryId.ToString() + WorkType.ImportLibraryInvestment.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(BudgetLibraryId, WorkType.ImportLibraryInvestment);
 
         public DateTime StartTime { get; set; }
 
@@ -38,7 +38,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<IInvestmentBudgetsService>();
-            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, BudgetLibraryId);
+            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             _queueLogger.UpdateWorkQueueStatus("Starting Import");
             var importResult = _committedProjectService.ImportLibraryInvestmentBudgetsFile(BudgetLibraryId, ExcelPackage, CurrentUserCriteriaFilter, OverwriteBudgets, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null)

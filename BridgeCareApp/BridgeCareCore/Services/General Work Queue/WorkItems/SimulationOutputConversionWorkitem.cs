@@ -11,13 +11,14 @@ using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Services;
+using Microsoft.Graph.Models;
 
 namespace BridgeCareCore.Services
 {
     public record SimulationOutputConversionWorkitem(Guid ScenarioId, string UserId, string ScenarioName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => ScenarioId.ToString() + WorkType.SimulationOutputConversion.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(ScenarioId, WorkType.SimulationOutputConversion);
 
         public DateTime StartTime { get; set; }
 
@@ -33,7 +34,7 @@ namespace BridgeCareCore.Services
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, ScenarioId);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             _unitOfWork.SimulationOutputRepo.ConvertSimulationOutpuFromJsonTorelational(ScenarioId, cancellationToken, _queueLogger);
         }
 

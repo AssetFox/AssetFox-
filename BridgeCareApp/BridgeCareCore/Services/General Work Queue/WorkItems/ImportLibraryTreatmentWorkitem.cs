@@ -18,7 +18,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record ImportLibraryTreatmentWorkitem(Guid TreatmentLibraryId, ExcelPackage ExcelPackage, string UserId, string treatmentName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => TreatmentLibraryId.ToString() + WorkType.ImportLibraryTreatment.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(TreatmentLibraryId, WorkType.ImportLibraryTreatment);
 
         public DateTime StartTime { get; set; }
 
@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _treatmentService = scope.ServiceProvider.GetRequiredService<ITreatmentService>();
-            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, TreatmentLibraryId);
+            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             var importResult = _treatmentService.ImportLibraryTreatmentsFile(TreatmentLibraryId, ExcelPackage, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null && importResult.WarningMessage.Trim() != "")
             {

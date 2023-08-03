@@ -25,7 +25,7 @@ namespace BridgeCareCore.Services
             return workHandle;
         }
 
-        public bool Cancel(Guid workId)
+        public bool Cancel(string workId)
         {
             return _sequentialWorkQueue.Cancel(workId);
         }
@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services
             return workHandle;
         }
 
-        public bool CancelInFastQueue(Guid workId)
+        public bool CancelInFastQueue(string workId)
         {
             return _fastQueue.Cancel(workId);
         }

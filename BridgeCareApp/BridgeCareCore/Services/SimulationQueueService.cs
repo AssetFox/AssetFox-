@@ -112,11 +112,11 @@ namespace BridgeCareCore.Services
             return null;
         }
 
-        public QueuedWorkDTO GetQueuedWorkByWorkId(Guid workId)
+        public QueuedWorkDTO GetQueuedWorkByWorkId(string workId)
         {
             var workQueue = _sequentialWorkQueue.Snapshot;
 
-            var work = workQueue.FirstOrDefault(_ => _.WorkId == workId.ToString());
+            var work = workQueue.FirstOrDefault(_ => _.WorkId == workId);
 
             if (work != null)
             {
@@ -125,11 +125,11 @@ namespace BridgeCareCore.Services
             return null;
         }
 
-        public QueuedWorkDTO GetFastQueuedWorkByWorkId(Guid workId)
+        public QueuedWorkDTO GetFastQueuedWorkByWorkId(string workId)
         {
             var workQueue = _fastSequentialWorkQueue.Snapshot;
 
-            var work = workQueue.FirstOrDefault(_ => _.WorkId == workId.ToString());
+            var work = workQueue.FirstOrDefault(_ => _.WorkId == workId);
 
             if (work != null)
             {
@@ -140,7 +140,7 @@ namespace BridgeCareCore.Services
 
         private List<QueuedWorkDTO> GetQueuedWork(IReadOnlyList<IQueuedWorkHandle<WorkQueueMetadata>> workQueue)
         {
-            var simulationAnalysisIds = workQueue.Where(_ => _.Metadata.WorkType == WorkType.SimulationAnalysis).Select(_ => Guid.Parse(_.WorkId)).ToList();
+            var simulationAnalysisIds = workQueue.Where(_ => _.Metadata.WorkType == WorkType.SimulationAnalysis).Select(_ => _.Metadata.DomainId).ToList();
 
             var queuedWork = new List<QueuedWorkDTO>();
 
@@ -186,13 +186,18 @@ namespace BridgeCareCore.Services
             }
             return queuedWork;
         }
+
+        public static string FabricateWorkId(Guid domainId, WorkType workType)
+        {
+            return domainId.ToString() + workType.ToString();
+        }
     }
 
     public static class QueuedWorkTransform
     {
         public static QueuedWorkDTO ToQueuedWorkDTO(this SimulationDTO simulationDTO, IReadOnlyList<IQueuedWorkHandle<WorkQueueMetadata>> workQueue)
         {
-            var queuedWorkHandle = workQueue.SingleOrDefault(_ => new Guid(_.WorkId) == simulationDTO.Id);
+            var queuedWorkHandle = workQueue.SingleOrDefault(_ => _.Metadata.DomainId == simulationDTO.Id);
 
             if (queuedWorkHandle == null)
             {
@@ -210,7 +215,7 @@ namespace BridgeCareCore.Services
         {
             QueuedWorkDTO queuedSimulationDTO = new QueuedWorkDTO()
             {
-                Id = Guid.Parse(queuedWorkHandle.WorkId),
+                Id = queuedWorkHandle.WorkId,
                 Name = queuedWorkHandle.WorkName,             
                 QueueEntryTimestamp = queuedWorkHandle.QueueEntryTimestamp,
                 WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp,
@@ -218,7 +223,8 @@ namespace BridgeCareCore.Services
                 QueuePosition = queuedWorkHandle.QueueIndex,
                 WorkDescription = queuedWorkHandle.WorkDescription,
                 WorkType = queuedWorkHandle.Metadata.WorkType,
-                DomainType = queuedWorkHandle.Metadata.DomainType
+                DomainType = queuedWorkHandle.Metadata.DomainType,
+                DomainId = queuedWorkHandle.Metadata.DomainId
             };
 
             if (queuedWorkHandle.WorkCancellationTokenSource != null)

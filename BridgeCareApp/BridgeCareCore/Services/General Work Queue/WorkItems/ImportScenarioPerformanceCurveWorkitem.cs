@@ -18,7 +18,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record ImportScenarioPerformanceCurveWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter, string UserId, string PerformanceCurveName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => SimulationId.ToString() + WorkType.ImportScenarioPerformanceCurve.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(SimulationId, WorkType.ImportScenarioPerformanceCurve);
 
         public DateTime StartTime { get; set; }
 
@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _performanceCurvesService = scope.ServiceProvider.GetRequiredService<IPerformanceCurvesService>();
-            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, SimulationId);
+            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             var importResult = _performanceCurvesService.ImportScenarioPerformanceCurvesFile(SimulationId, ExcelPackage, CurrentUserCriteriaFilter, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null)
             {

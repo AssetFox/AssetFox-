@@ -24,7 +24,7 @@ namespace BridgeCareCore.Services
     public record AggregationWorkitem(Guid NetworkId, string UserId, string NetworkName, List<AttributeDTO> Attributes) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => NetworkId.ToString() + WorkType.Aggregation.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(NetworkId, WorkType.Aggregation);
 
         public DateTime StartTime { get; set; }
 
@@ -44,7 +44,7 @@ namespace BridgeCareCore.Services
             var _log = scope.ServiceProvider.GetRequiredService<ILog>();
             var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
             var state = new AggregationState();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, NetworkId);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             var timer = KeepUserInformedOfState(state);
             var readTask = Task.Run(() => ReadMessages(channel.Reader));
                  

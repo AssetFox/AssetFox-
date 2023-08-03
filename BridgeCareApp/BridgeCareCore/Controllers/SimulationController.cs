@@ -368,7 +368,7 @@ namespace BridgeCareCore.Controllers
         [HttpDelete]
         [Route("CancelSimulation/{workId}")]
         [Authorize]
-        public async Task<IActionResult> CancelSimulation(Guid workId)
+        public async Task<IActionResult> CancelSimulation(string workId)
         {
             try
             {
@@ -377,7 +377,7 @@ namespace BridgeCareCore.Controllers
                     return Ok();
                 if(work.WorkType == WorkType.SimulationAnalysis)
                 {
-                    _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(workId, UserInfo.Name, false);
+                    _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(work.DomainId, UserInfo.Name, false);
                     var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(workId);
                     await Task.Delay(125);
 
@@ -385,7 +385,7 @@ namespace BridgeCareCore.Controllers
                     {
                         HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
                         {
-                            SimulationId = workId,
+                            SimulationId = work.DomainId,
                             Status = "Canceled"
                         });
                         HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, workId);
@@ -394,7 +394,7 @@ namespace BridgeCareCore.Controllers
                     {
                         HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
                         {
-                            SimulationId = workId,
+                            SimulationId = work.DomainId,
                             Status = "Canceling analysis..."
                         });
                     }
@@ -428,7 +428,7 @@ namespace BridgeCareCore.Controllers
         [HttpDelete]
         [Route("CancelInFastQueue/{workId}")]
         [Authorize]
-        public async Task<IActionResult> CancelInFastQueue(Guid workId)
+        public async Task<IActionResult> CancelInFastQueue(string workId)
         {
             try
             {

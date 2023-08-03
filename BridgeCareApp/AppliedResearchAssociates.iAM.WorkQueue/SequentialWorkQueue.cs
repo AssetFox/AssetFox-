@@ -40,9 +40,9 @@ public class SequentialWorkQueue<T>
         }
     }
 
-    public bool Cancel(Guid workId)
+    public bool Cancel(string workId)
     {
-        IQueuedWorkHandle<T>? queuedWorkHandle = IncompleteElements.Values.SingleOrDefault(_ => Guid.Parse(_.WorkId) == workId);
+        IQueuedWorkHandle<T>? queuedWorkHandle = IncompleteElements.Values.SingleOrDefault(_ => _.WorkId == workId);
 
         if (queuedWorkHandle != null)
         {

@@ -23,7 +23,7 @@ namespace BridgeCareCore.Services
     public record ReportGenerationWorkitem(Guid scenarioId, string UserId, string scenarioName,  string reportName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => scenarioId.ToString() + WorkType.ReportGeneration.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(scenarioId, WorkType.ReportGeneration);
 
         public DateTime StartTime { get; set; }
 
@@ -41,7 +41,7 @@ namespace BridgeCareCore.Services
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _log = scope.ServiceProvider.GetRequiredService<ILog>();
             var _generator = scope.ServiceProvider.GetRequiredService<IReportGenerator>();
-            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, scenarioId);
+            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             updateStatusOnHandle.Invoke("Generating...");
             var report = GenerateReport(reportName, ReportType.File, scenarioId.ToString());
 

@@ -62,7 +62,9 @@ namespace BridgeCareCoreTests.Tests
                 Task.Delay(MsDelay).Wait();
             }
 
+            public void OnCompletion(IServiceProvider serviceProvider) {}
             public void OnFault(IServiceProvider serviceProvider, string errorMessage) => throw new NotImplementedException();
+            public void OnUpdate(IServiceProvider serviceProvider) { }
         }
     }
 }

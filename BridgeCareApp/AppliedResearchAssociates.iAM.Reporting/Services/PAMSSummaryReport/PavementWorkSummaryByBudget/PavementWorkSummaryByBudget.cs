@@ -29,7 +29,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             SimulationOutput reportOutputData,
             List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
-            IReadOnlyCollection<SelectableTreatment> selectableTreatments)
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments,
+            ICollection<CommittedProject> committedProjects)
         {
             var workSummaryByBudgetModels = CreateWorkSummaryByBudgetModels(reportOutputData);
             var committedTreatments = new HashSet<string>();
@@ -112,11 +113,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     costAndLengthPerTreatmentPerYear,
                     costAndLengthPerTreatmentGroupPerYear, // We only care about cost here
                     simulationTreatments, // This should be filtered by budget/year; do we already have this by this point?
-                    workTypeTotals);
+                    workTypeTotals,
+                    committedProjects);
 
                 // Finally, advance for next budget label
                 currentCell.Row++;
             }
+            worksheet.Cells.AutoFitColumns();
         }
 
         private static void SetupBudgetModelsAndCommittedTreatments(SimulationOutput reportOutputData, IReadOnlyCollection<SelectableTreatment> selectableTreatments, List<WorkSummaryByBudgetModel> workSummaryByBudgetModels, HashSet<string> committedTreatments)

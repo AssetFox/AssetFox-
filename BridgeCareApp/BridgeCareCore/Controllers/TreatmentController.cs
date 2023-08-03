@@ -447,7 +447,66 @@ namespace BridgeCareCore.Controllers
         }
 
 
+        [HttpPost]
+        [Route("ImportLibraryTreatmentsFile")]
+        [Authorize(Policy = Policy.ImportTreatmentFromLibrary)]
+        public async Task<IActionResult> ImportLibraryTreatmentsFile()
+        {
+            try
+            {
+                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+                {
+                    throw new ConstraintException("Request MIME type is invalid.");
+                }
 
+                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+                {
+                    throw new ConstraintException("Treatments file not found.");
+                }
+
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("libraryId", out var libraryId))
+                {
+                    throw new ConstraintException("Request contained no treatment library id.");
+                }
+
+                var treatmentLibraryId = Guid.Parse(libraryId.ToString());
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+
+                var libraryName = "";
+                await Task.Factory.StartNew(() =>
+                {
+                    var existingTreatmentLibrary = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+                    if (existingTreatmentLibrary != null)
+                        libraryName = existingTreatmentLibrary.Name;
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+
+                        if (existingTreatmentLibrary != null)
+                        {
+                            var accessModel = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(treatmentLibraryId, UserId);
+                            _claimHelper.CheckUserLibraryRecreateAuthorization(accessModel, UserId);
+                        }
+                    }
+                });
+
+                ImportLibraryTreatmentWorkitem workItem = new ImportLibraryTreatmentWorkitem(treatmentLibraryId, excelPackage, UserInfo.Name, libraryName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, libraryId.ToString());
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportLibraryTreatmentsFile - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportLibraryTreatmentsFile - {e.Message}");
+                throw;
+            }
+        }
 
 
         [HttpPost]
@@ -658,7 +717,7 @@ namespace BridgeCareCore.Controllers
                 });
 
                 ImportScenarioTreatmentWorkitem workItem = new ImportScenarioTreatmentWorkitem(simulationId, excelPackage, UserInfo.Name, simulationName);
-                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
 

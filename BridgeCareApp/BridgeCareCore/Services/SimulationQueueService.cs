@@ -11,6 +11,8 @@ using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using Microsoft.CodeAnalysis.Operations;
 using MoreLinq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace BridgeCareCore.Services
 {
@@ -19,11 +21,13 @@ namespace BridgeCareCore.Services
         private static IUnitOfWork _unitOfWork;
         private static ISimulationRepository _simulationRepository;
         private SequentialWorkQueue<WorkQueueMetadata> _sequentialWorkQueue;
+        private FastSequentialworkQueue<WorkQueueMetadata> _fastSequentialWorkQueue;
 
-        public WorkQueueService(IUnitOfWork unitOfWork, SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue, ISimulationRepository simulationRepository)
+        public WorkQueueService(IUnitOfWork unitOfWork, SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue, FastSequentialworkQueue<WorkQueueMetadata> fastSequentialworkQueue, ISimulationRepository simulationRepository)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
+            _fastSequentialWorkQueue = fastSequentialworkQueue ?? throw new ArgumentNullException(nameof(fastSequentialworkQueue));
 
             _simulationRepository = simulationRepository ?? throw new ArgumentNullException(nameof(simulationRepository));
         }
@@ -31,12 +35,26 @@ namespace BridgeCareCore.Services
 
         public PagingPageModel<QueuedWorkDTO> GetWorkQueuePage(PagingRequestModel<QueuedWorkDTO> request)
         {
+            var workQueue = _sequentialWorkQueue.Snapshot;
+
+            return pagingLogic(workQueue, request);
+        }
+
+        public PagingPageModel<QueuedWorkDTO> GetFastWorkQueuePage(PagingRequestModel<QueuedWorkDTO> request)
+        {
+            var workQueue = _fastSequentialWorkQueue.Snapshot;
+
+            return pagingLogic(workQueue, request);
+        }
+
+        private PagingPageModel<QueuedWorkDTO> pagingLogic(IReadOnlyList<IQueuedWorkHandle<WorkQueueMetadata>> queue, PagingRequestModel<QueuedWorkDTO> request)
+        {
             var skip = 0;
             var take = 0;
             var items = new List<QueuedWorkDTO>();
-            var workQueue = _sequentialWorkQueue.Snapshot;
 
-            var queuedWork = GetQueuedWork(workQueue);
+
+            var queuedWork = GetQueuedWork(queue);
 
             if (request.sortColumn.Trim() == "")
             {
@@ -75,6 +93,19 @@ namespace BridgeCareCore.Services
             var work = workQueue.FirstOrDefault(_ => _.WorkId == workId.ToString());
 
             if(work != null)
+            {
+                return work.ToQueuedWorkDTO();
+            }
+            return null;
+        }
+
+        public QueuedWorkDTO GetFastQueuedWorkByWorkId(Guid workId)
+        {
+            var workQueue = _fastSequentialWorkQueue.Snapshot;
+
+            var work = workQueue.FirstOrDefault(_ => _.WorkId == workId.ToString());
+
+            if (work != null)
             {
                 return work.ToQueuedWorkDTO();
             }
@@ -130,7 +161,6 @@ namespace BridgeCareCore.Services
             return queuedWork;
         }
     }
-
 
     public static class QueuedWorkTransform
     {

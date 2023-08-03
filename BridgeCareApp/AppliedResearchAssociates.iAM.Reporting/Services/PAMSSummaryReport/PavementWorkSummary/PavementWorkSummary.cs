@@ -34,7 +34,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             List<int> simulationYears,
             WorkSummaryModel workSummaryModel,
             Dictionary<string, Budget> yearlyBudgetAmount,
-            IReadOnlyCollection<SelectableTreatment> selectableTreatments)
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments,
+            ICollection<CommittedProject> committedProjects)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
@@ -55,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(reportOutputData, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear);
             var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
 
-            var chartRowsModel = _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals);
+            var chartRowsModel = _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals, committedProjects);
             chartRowsModel = _treatmentsWorkSummary.FillTreatmentsWorkSummarySections(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals, chartRowsModel);
             chartRowsModel = _iriConditionSummary.FillIriConditionSummarySection(worksheet, currentCell, reportOutputData, chartRowsModel);
             chartRowsModel = _opiConditionSummary.FillOpiConditionSummarySection(worksheet, currentCell, reportOutputData, chartRowsModel);

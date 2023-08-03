@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
 
-        public static DeficientConditionGoalDTO Dto(Guid? id = null, string attribute = "Attribute", Guid? criterionLibraryId = null)
+        public static DeficientConditionGoalDTO DtoWithIdOnlyCriterionLibrary(Guid? id = null, string attribute = "Attribute", Guid? criterionLibraryId = null)
         {
             var resolveId = id ?? Guid.NewGuid();
             var resolveCriterionLibraryId = criterionLibraryId ?? Guid.NewGuid();
@@ -44,6 +44,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 AllowedDeficientPercentage = 1,
                 DeficientLimit = 2,
                 Attribute = attribute,
+            };
+            return dto;
+        }
+
+        public static DeficientConditionGoalDTO DtoWithCriterionLibrary(Guid? id = null, string attribute = "Attribute", Guid? criterionLibraryId = null)
+        {
+            var resolveCriterionLibraryId = criterionLibraryId ?? Guid.NewGuid();
+            var criterionLibrary = CriterionLibraryDtos.Dto(resolveCriterionLibraryId);
+            var resolveId = id ?? Guid.NewGuid();           
+            var dto = new DeficientConditionGoalDTO
+            {
+                Id = resolveId,               
+                
+                Name = "Deficient Condition Goal",
+                AllowedDeficientPercentage = 1,
+                DeficientLimit = 2,
+                Attribute = attribute,
+                CriterionLibrary = criterionLibrary
             };
             return dto;
         }

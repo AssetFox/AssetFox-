@@ -1,4 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.WorkQueue;
@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<IInvestmentBudgetsService>();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, SimulationId);
+            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, SimulationId);
             var importResult = _committedProjectService.ImportScenarioInvestmentBudgetsFile(SimulationId, ExcelPackage, CurrentUserCriteriaFilter, OverwriteBudgets, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null)
             {
@@ -50,6 +50,20 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{InvestmentController.InvestmentError}::ImportScenarioInvestmentBudgetsExcelFile - {errorMessage}");
+        }
+
+        public void OnCompletion(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported investment: {WorkName}");
+        }
+
+        public void OnUpdate(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastFastWorkQueueUpdate, WorkId);
         }
     }
 }

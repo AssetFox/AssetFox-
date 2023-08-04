@@ -893,9 +893,14 @@ export default class TreatmentEditor extends Vue {
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 //this.clearChanges();
+                if(this.hasSelectedLibrary){
+                    this.librarySelectItemValue = null;
+                    this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId)
+                }
                 this.treatmentCache.push(this.selectedTreatment);
-                this.librarySelectItemValue = null;
+                
                 this.addSuccessNotificationAction({message: "Modified scenario's treatments"});   
+                
                 this.checkHasUnsavedChanges();
             }           
         });

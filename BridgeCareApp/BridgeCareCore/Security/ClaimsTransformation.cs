@@ -54,7 +54,7 @@ namespace BridgeCareCore.Security
                 var userNameValue = userName?.Value;
                 try
                 {
-                    if (!cache.ContainsKey(userNameValue) || cache[userNameValue].LastRefreshTime < DateTime.Now.AddDays(-1))
+                    if (userNameValue!=null && !cache.ContainsKey(userNameValue) || cache[userNameValue].LastRefreshTime < DateTime.Now.AddDays(-1))
                     {
                         // Read group name(s) set in Azure B2C(that will be IP role name(s)
                         var groupNames = new List<string>();

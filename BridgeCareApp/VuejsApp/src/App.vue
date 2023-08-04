@@ -4,9 +4,7 @@
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
                     <img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" /> 
-                    <!-- <v-divider class="mx-2 navbar-divider" vertical color="#798899"/> -->
                     <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
-                    <!-- <v-divider class="mx-2 navbar-divider" vertical color="#798899"/> -->
                 </v-toolbar-title>
                 <v-toolbar-items>
                     <v-btn

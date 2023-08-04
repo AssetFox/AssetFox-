@@ -555,14 +555,12 @@ export default class AppComponent extends Vue {
         this.currentURL = this.$router.currentRoute.name;
 
         if(this.$config.agencyLogo.trim() === "")
-            // this.agencyLogo = require(`@/assets/images/PennDOTLogo.svg`)
             this.agencyLogo = require(`@/assets/images/generic/IAM_Main.jpg`)
         else
             this.agencyLogo = this.$config.agencyLogo
 
         if(this.$config.productLogo.trim() === "")
             this.productLogo = require(`@/assets/images/generic/IAM_Banner.jpg`)
-            // this.productLogo = require(`@/assets/images/BridgeCareLogo.svg`)
         else
             this.productLogo = this.$config.productLogo
 

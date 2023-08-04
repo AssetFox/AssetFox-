@@ -88,10 +88,9 @@ namespace BridgeCareCore.Security
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    // Ignore: gets here due to concurrent calls
-                    var err = ex.Message;
+                    // Ignore: control gets here few times due to any concurrent calls. Solution to avoid any exception can be looked at later.
                 }
                 if (userNameValue != null)
                 {

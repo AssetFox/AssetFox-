@@ -149,7 +149,7 @@ const actions = {
                     localStorage.setItem('UserInfo', JSON.stringify(userInfo));
                     commit('usernameMutator', parseLDAP(userInfo.sub)[0]);
 
-                    const hasRole: boolean = userInfo.internalRoles != null && userInfo.internalRoles.length > 0;
+                    const hasRole: boolean = true; //we can set it to true as at least default role is assigned to user
 
                     commit('checkedForRoleMutator', hasRole);
                     commit('hasRoleMutator', hasRole);

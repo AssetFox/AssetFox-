@@ -93,7 +93,10 @@ namespace BridgeCareCore.Security
                     // Ignore: gets here due to concurrent calls
                     var err = ex.Message;
                 }
-                principal.AddIdentity(cache[userNameValue].Identity);
+                if (userNameValue != null)
+                {
+                    principal.AddIdentity(cache[userNameValue].Identity);
+                }
             }
             return principal;
         }

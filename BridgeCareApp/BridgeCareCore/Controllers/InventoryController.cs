@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Controllers.BaseController;
+using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +32,6 @@ namespace BridgeCareCore.Controllers
         private readonly IAttributeRepository _attributeRepository;
         private readonly IAssetData _maintainableAssetRepository;
         private readonly IAdminSettingsRepository _adminSettingsRepository;
-        private readonly IReportLookupLibrary _reportFactories;
 
         public InventoryController(IEsecSecurity esecSecurity,
             UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) :
@@ -76,21 +77,14 @@ namespace BridgeCareCore.Controllers
             var keySegmentDatums = new List<List<KeySegmentDatum>>();
             var dictionaryProperties = new Dictionary<Guid, List<string>>();
 
-            var result1 = _reportFactories;
-
             var keyPropertiesList = JsonConvert.DeserializeObject<List<string>>(keyProperties);
             foreach (var keyProperty in keyPropertiesList)
             {
                 if (_assetData.KeyProperties.ContainsKey(keyProperty))
                 {
-                    keySegmentDatums.Add(_assetData.KeyProperties[keyProperty]);
+                  keySegmentDatums.Add(_assetData.KeyProperties[keyProperty]);
                 }
             }
-
-            //if(result1 != null)
-            //{
-            //    if(_assetData.QueryKeyAttributes(dictionaryProperties)
-            //}
 
             foreach (var keySegmentDatum in keySegmentDatums)
             {
@@ -117,6 +111,7 @@ namespace BridgeCareCore.Controllers
 
             return Ok(inventoryItems);
         }
+
         [HttpPost]
         [Route("GetQuery")]
         [Authorize]
@@ -145,14 +140,45 @@ namespace BridgeCareCore.Controllers
             }
 
             // Get the data from the repo
-            var queryData = _maintainableAssetRepository.QueryKeyAttributes(attributeList, NetworkTypes.Raw);
+            List<MaintainableAssetQueryDTO> queryData;
+            var reportTypeParam = _adminSettingsRepository.GetInventoryReports();
+
+            try
+            {
+                if (reportTypeParam[0].Contains("(P)"))
+                {
+                    queryData = _maintainableAssetRepository.QueryKeyAttributes(attributeList, NetworkTypes.Main);
+                }
+                else
+                {
+                    queryData = _maintainableAssetRepository.QueryKeyAttributes(attributeList, NetworkTypes.Raw);
+                }
+            }
+            catch (RowNotInTableException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch
+            {
+                return BadRequest("Key attribute query failed with an unknown error");
+            }
 
             // Flatten out data
 
             var result = new List<QueryResponse>();
-            foreach (var field in _adminSettingsRepository.GetRawKeyFields())
+            if (reportTypeParam[0].Contains("(P)"))
             {
-                result.Add(GetUniqueForAttribute(field, queryData));
+                foreach (var field in _adminSettingsRepository.GetKeyFields())
+                {
+                    result.Add(GetUniqueForAttribute(field, queryData));
+                }
+            }
+            else if (reportTypeParam[0].Contains("(R)"))
+            {
+                foreach (var field in _adminSettingsRepository.GetRawKeyFields())
+                {
+                    result.Add(GetUniqueForAttribute(field, queryData));
+                }
             }
 
             return Ok(result);

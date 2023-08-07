@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using MoreLinq.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -19,10 +20,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public MaintainableAssetDataRepository(UnitOfDataPersistenceWork uow)
         {
             _unitOfWork = uow;
+            var reportTypeParam = uow.AdminSettingsRepo.GetInventoryReports();
             var network = _unitOfWork.NetworkRepo.GetMainNetwork();
             var keyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
             var rawNetwork = _unitOfWork.NetworkRepo.GetRawNetwork();
-            var keyRawDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetRawKeyFields();
+            var rawKeyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetRawKeyFields();
             
             var keyDatumFields = _unitOfWork.Context.Attribute
                 .Where(_ => keyDatumFieldNames.Contains(_.Name))
@@ -55,7 +57,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var dataValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
                     keyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, dataValue) });
                 }
-                KeyProperties.Add(attribute.Name, keyFieldValue);
+
+                if (reportTypeParam[0].Contains("(P)"))
+                {
+                    KeyProperties.Add(attribute.Name, keyFieldValue);
+                }
             }
 
             // Populate main key data table
@@ -82,22 +88,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // Populate raw key data table
             RawNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
-            var keyRawDatumFields = _unitOfWork.Context.Attribute
-                .Where(_ => keyDatumFieldNames.Contains(_.Name))
+
+            var rawKeyDatumFields = _unitOfWork.Context.Attribute
+                .Where(_ => rawKeyDatumFieldNames.Contains(_.Name))
                 .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                 .ToList();
+
+            var rawKeyDatumFieldsNetwork = _unitOfWork.Context.Attribute
+                .Where(_ => _.Id == rawNetwork.KeyAttributeId)
+                .Select(_ => new { _.Id, _.Name, Type = _.DataType })
+                .ToList();
+
             // Ensure the network's key datum field is in the list of key properties
-            foreach (var keyDatumField in keyDatumFieldsNetwork)
+            foreach (var rawKeyDatumField in rawKeyDatumFieldsNetwork)
             {
-                if (!keyRawDatumFields.Contains(keyDatumField))
+                if (!rawKeyDatumFields.Contains(rawKeyDatumField))
                 {
-                    keyRawDatumFields.Add(keyDatumField);
+                    rawKeyDatumFields.Add(rawKeyDatumField);
                 }
             }
-            var keyRawDatumFieldIds = keyRawDatumFields.Select(_ => _.Id).ToList();
+            var rawKeyDatumFieldIds = rawKeyDatumFields.Select(_ => _.Id).ToList();
             var filteredRawAggregatedData = _unitOfWork.Context.AggregatedResult
                 .Include(_ => _.MaintainableAsset)
-                .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && keyRawDatumFieldIds.Contains(_.AttributeId))
+                .Include(_ => _.Attribute)
+                .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && rawKeyDatumFieldIds.Contains(_.AttributeId))
                 .AsEnumerable()
                 .GroupBy (_ => _.MaintainableAssetId);
             foreach (var asset in filteredRawAggregatedData)
@@ -111,6 +125,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     queryData.AssetProperties.Add(convertedAttribute, dataValue);
                 }
                 RawNetworkKeyTable.Add(queryData);
+            }
+
+            foreach (var attribute in rawKeyDatumFields)
+            {
+                var rawKeyFieldValue = new List<KeySegmentDatum>();
+                var filteredRawAggregatedKeyData = _unitOfWork.Context.AggregatedResult
+                    .Include(_ => _.MaintainableAsset)
+                    .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && _.AttributeId == attribute.Id);
+
+                foreach (var datum in filteredRawAggregatedKeyData)
+                {
+                    var datumValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
+                    rawKeyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, datumValue)});
+                }
+                var raw = reportTypeParam[0].ElementAt(28);
+                
+               if (reportTypeParam[0].Contains("(R)"))
+                {
+                    KeyProperties.Add(attribute.Name, rawKeyFieldValue);
+                }
+
             }
         }
 
@@ -239,12 +274,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public List<MaintainableAssetQueryDTO> QueryKeyAttributes(Dictionary<AttributeDTO, string> queryParameters,
-            NetworkTypes networkType = NetworkTypes.Main, List<MaintainableAssetQueryDTO> previousQuery = null)
+            NetworkTypes networkType, List<MaintainableAssetQueryDTO> previousQuery = null)
         {
+            var reportTypeParam = _unitOfWork.AdminSettingsRepo.GetInventoryReports();
             // Populate the previous query with the entire network if it does not already exist
             if (previousQuery == null)
             {
-                previousQuery = networkType == NetworkTypes.Main ? MainNetworkKeyTable : RawNetworkKeyTable;
+                if(networkType == NetworkTypes.Raw)
+                {
+                    previousQuery = RawNetworkKeyTable;
+                }
+                else if(networkType == NetworkTypes.Main)
+                {
+                    previousQuery = MainNetworkKeyTable;
+                }
             }
 
             // Ensure that each attribute is in the previousQuery
@@ -280,7 +323,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         throw new RowNotInTableException($"Found multiple values for attribute {parameter.Key.Name} in attribute {asset.AssetId.ToString()}");
                     }
                 }
-                var newIdList = valueTable.Where(_ => _.Value == parameter.Value).Select(_ => _.Key);
+                var newIdList = valueTable.Where(_ => _.Value == parameter.Value).Select(_ => _.Key).ToList();
                 previousQuery = previousQuery.Where(_ => newIdList.Contains(_.AssetId)).ToList();
             }
 

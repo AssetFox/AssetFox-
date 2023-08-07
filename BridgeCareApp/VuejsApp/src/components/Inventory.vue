@@ -2,12 +2,12 @@
     <v-layout>
         <v-flex xs12>
             <v-layout justify-space-between row>
-                <v-subheader v-if="stateInventoryReportNames.length > 1" class="ghd-md-gray ghd-control-subheader">
-            <v-select
-            v-model="inventoryReportName" 
-            :items="stateInventoryReportNames"
-            class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
-            </v-select>
+                <v-subheader v-if="stateInventoryReportNames.length > 1" class="ghd-select ghd-text-field ghd-text-field-border">
+                    <v-select
+                        v-model="inventoryReportName" 
+                        :items="stateInventoryReportNames"
+                        class="ghd-select ghd-text-field ghd-text-field-border">
+                    </v-select>
                 </v-subheader>
            </v-layout>
             <v-layout justify-space-between row>
@@ -56,7 +56,6 @@
         @State(state => state.inventoryModule.inventoryItems) inventoryItems: InventoryItem[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
         @State(state => state.inventoryModule.querySet) querySet: InventoryParam[];
-        @State(state => state.inventoryModule.reportTypeIdentifier) reportTypeIdentifier: string;
         @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
         @State(state => state.adminDataModule.rawDataKeyFields) stateRawDataKeyFields: string[];
         @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
@@ -71,7 +70,6 @@
         @Action('getConstraintType') getConstraintTypeAction: any;
         @Action('getQuery') getQueryAction: any;
         @Action('getRawDataKeyFields') getRawDataKeyFieldsAction: any;
-        @Action('getReportTypeIdentifier') getReportTypeIdentifierAction: any;
 
         keyAttributeValues: string[][] = [];
 
@@ -123,19 +121,13 @@
         onStateRawKeyFieldsChanged(){
         }
 
-        @Watch('reportTypeIdentifier')
-        onStateReportTypeIdentifierChanged() {
-        }
-
         @Watch('stateInventoryReportNames')
         onStateInventoryReportNamesChanged(){
             if(this.stateInventoryReportNames.length > 0)
                 this.inventoryReportName = this.stateInventoryReportNames[0]
             
             this.lastThreeLetters = this.inventoryReportName.slice(-3);
-            this.reportTypeIdentifier = this.lastThreeLetters[1];
             this.reportType = this.lastThreeLetters[1];
-            console.log(this.reportTypeIdentifier);
             this.onStateKeyFieldsChanged();
         }
 

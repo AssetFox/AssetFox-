@@ -54,8 +54,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public IList<string> GetRawKeyFields()
         {
-            // TODO:  Replace with raw key fields
-            return GetKeyFields();
+            var existingRawKeyFields = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == rawDataFieldKey).FirstOrDefault();
+            if (existingRawKeyFields == null)
+            {
+                return null;
+            }
+            else
+            {
+                var rawKeyFields = existingRawKeyFields.Value;
+                IList<string> RawKeyFieldsList = rawKeyFields.Split(',').ToList();
+                return RawKeyFieldsList;
+            }
+
         }
 
         //String is to be passed in as parameter. Sets the KeyFields in the AdminSettings table. 

@@ -58,9 +58,8 @@ namespace BridgeCareCore.Controllers
             {
                 tempReportName = tempReportName.Substring(0, reportName.Length - 3);
             }
-            var testing1 = new PAMSInventorySectionsReport(UnitOfWork, "", new ReportIndexDTO());
-            testing1.NetworkStringType(last3Characters);
-            //reportName = tempReportName;
+            var transferType = new PAMSInventorySectionsReport(UnitOfWork, "", new ReportIndexDTO());
+            transferType.NetworkStringType(last3Characters);
 
             var report = await GenerateReport(reportName, ReportType.HTML, parameters);
 

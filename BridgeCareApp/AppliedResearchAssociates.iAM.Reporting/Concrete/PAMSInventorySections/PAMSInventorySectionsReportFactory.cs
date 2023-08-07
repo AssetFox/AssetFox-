@@ -9,6 +9,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class PAMSInventorySectionsReportPrimaryFactory : IReportFactory
     {
         public string Name => "PAMSInventoryLookupSections(P)";
+        public static string reportTypeIdentifier = "PRIMARY";
 
         public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
         {
@@ -19,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class PAMSInventorySectionsReportRawFactory : IReportFactory
     {
         public string Name => "PAMSInventoryLookupSections(R)";
+        string reportTypeIdentifier = "RAW";
 
         public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
         {

@@ -8,7 +8,6 @@ const state = {
     inventoryItems: [] as InventoryItem[],
     staticHTMLForInventory: '' as any,
     querySet: [] as string[],
-    reportTypeIdentifier: [] as string[]
 };
 
 const mutations = {

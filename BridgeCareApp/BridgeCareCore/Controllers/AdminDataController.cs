@@ -240,7 +240,7 @@ namespace BridgeCareCore.Controllers
                 {
                     try
                     {
-                        var unTypedReport = inventoryReport.Substring(0, inventoryReport.Length - 3);
+                        var unTypedReport = inventoryReport;
                         var reportObject = await _generator.Generate(unTypedReport);
                         
                         //If cannot be created in lookup library (Existence Check)

@@ -94,7 +94,7 @@ namespace BridgeCareCore.Security
                 catch (Exception e)
                 {
                     // Ignore: control gets here few times due to any concurrent calls. Solution to avoid any exception can be looked at later.
-                    _log.Error(e.Message);
+                    _log.Error("ClaimsTransformation Error: " + e.StackTrace);
                 }
                 if (userNameValue != null)
                 {

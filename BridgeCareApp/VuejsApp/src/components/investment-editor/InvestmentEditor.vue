@@ -1232,7 +1232,6 @@ export default class InvestmentEditor extends Vue {
     }
 
     onUpsertBudgetLibrary() {
-
         const sync: InvestmentPagingSyncModel = {
             libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
             updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
@@ -1481,9 +1480,17 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
             this.hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryInvestment && importComp.id === this.selectedBudgetLibrary.id){
             this.clearChanges()
             this.pagination.page = 1
-            this.onPaginationChanged().then(() => {
+            this.initializePages().then(async () => {
                 this.setAlertMessageAction('');
                 this.isSuccessfulImportMutator(true);
+                await this.getBudgetLibrariesAction()
+                if(this.hasScenario){                
+                    this.investmentPlanMutator(this.investmentPlan);
+                    this.firstYearOfAnalysisPeriodShift = 0;
+                }
+                else{
+
+                }
             })
         }        
     }

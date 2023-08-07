@@ -492,7 +492,7 @@ namespace BridgeCareCore.Controllers
                 ImportLibraryTreatmentWorkitem workItem = new ImportLibraryTreatmentWorkitem(treatmentLibraryId, excelPackage, UserInfo.Name, libraryName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, libraryId.ToString());
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, libraryId.ToString());
 
                 return Ok();
             }
@@ -606,7 +606,7 @@ namespace BridgeCareCore.Controllers
                 ImportScenarioTreatmentWorkitem workItem = new ImportScenarioTreatmentWorkitem(simulationId, excelPackage, UserInfo.Name, simulationName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, simulationId.ToString());
 
                 return Ok();
             }

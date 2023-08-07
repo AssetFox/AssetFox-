@@ -49,12 +49,12 @@ export default class ScenarioService {
         return coreAxiosInstance.post(`${API.Scenario}/RunSimulation/${networkId}/${scenarioId}`);
     }
 
-    static cancelSimulation(simulationId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`${API.Scenario}/CancelSimulation/${simulationId}`);
+    static cancelWorkQueueItem(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.delete(`${API.Scenario}/CancelWorkQueueItem/${simulationId}`);
     }
     
-    static cancelInFastQueue(simulationId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`${API.Scenario}/CancelInFastQueue/${simulationId}`);
+    static cancelFastQueueItem(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.delete(`${API.Scenario}/CancelFastQueueItem/${simulationId}`);
     }
 
     static getQueuedWorkByDomainIdAndWorkType(data:WorkQueueRequest): AxiosPromise {

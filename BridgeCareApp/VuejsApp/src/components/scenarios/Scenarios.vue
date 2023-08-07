@@ -686,7 +686,7 @@ export default class Scenarios extends Vue {
     @Action('cloneScenario') cloneScenarioAction: any;
     @Action('updateScenario') updateScenarioAction: any;
     @Action('deleteScenario') deleteScenarioAction: any;
-    @Action('cancelSimulation') cancelSimulationAction: any;
+    @Action('cancelWorkQueueItem') cancelWorkQueueItemAction: any;
     @Action('cancelFastQueueItem') cancelFastQueueItemAction: any;
     @Action('runSimulation') runSimulationAction: any;
     @Action('migrateLegacySimulationData')
@@ -1187,7 +1187,7 @@ export default class Scenarios extends Vue {
         };
         this.availableSimulationActions = {
             cancel: 'cancel',
-            fastCancel: 'cancel'
+            fastCancel: 'fastCancel'
         }
         this.actionItemsForSharedScenario = [
             {
@@ -1598,14 +1598,14 @@ export default class Scenarios extends Vue {
     onConfirmCancelAlertSubmit(submit: boolean) {
         this.confirmCancelAlertData = clone(emptyAlertData);
 
-        if (submit && this.selectedQueuedWork.id !== getBlankGuid()) {
-            this.cancelSimulationAction({
+        if (submit && this.selectedQueuedWork.id !== getBlankGuid() && this.selectedQueuedWork.id.trim() != '') {
+            this.cancelWorkQueueItem({
                 simulationId: this.selectedQueuedWork.id,
             }).then(() => {
                 this.selectedQueuedWork = clone(emptyQueuedWork);
             });
         }
-        else if(submit && this.selectedFastQueuedWork.id !== getBlankGuid()) {
+        else if(submit && this.selectedFastQueuedWork.id !== getBlankGuid() && this.selectedFastQueuedWork.id.trim() != '') {
             this.cancelFastQueueItemAction(this.selectedFastQueuedWork.id).then(() => {
                 this.selectedFastQueuedWork = clone(emptyQueuedWork);
             });

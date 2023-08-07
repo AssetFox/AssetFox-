@@ -128,7 +128,7 @@ namespace BridgeCareCore.Controllers
                 ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, scenarioId.ToString());
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, scenarioId.ToString());
 
                 return Ok();
             }

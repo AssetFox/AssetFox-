@@ -366,9 +366,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpDelete]
-        [Route("CancelSimulation/{workId}")]
+        [Route("CancelWorkQueueItem/{workId}")]
         [Authorize]
-        public async Task<IActionResult> CancelSimulation(string workId)
+        public async Task<IActionResult> CancelInWorkQueue(string workId)
         {
             try
             {
@@ -426,9 +426,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpDelete]
-        [Route("CancelInFastQueue/{workId}")]
+        [Route("CancelFastQueueItem/{workId}")]
         [Authorize]
-        public async Task<IActionResult> CancelInFastQueue(string workId)
+        public async Task<IActionResult> CancelFastQueueItem(string workId)
         {
             try
             {
@@ -439,9 +439,9 @@ namespace BridgeCareCore.Controllers
                 
                     var hasBeenRemovedFromQueue = _generalWorkQueueService.CancelInFastQueue(workId);
                     if (hasBeenRemovedFromQueue)
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, workId);
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, workId);
                     else
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = workId, Status = "Canceling" });
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = workId, Status = "Canceling" });
                 
 
                 return Ok();

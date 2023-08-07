@@ -42,7 +42,7 @@ namespace BridgeCareCore.Services
             var _log = scope.ServiceProvider.GetRequiredService<ILog>();
             var _generator = scope.ServiceProvider.GetRequiredService<IReportGenerator>();
             var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
-            updateStatusOnHandle.Invoke("Generating...");
+            _queueLogger.UpdateWorkQueueStatus("Generating...");
             var report = GenerateReport(reportName, ReportType.File, scenarioId.ToString());
 
             if (report == null)

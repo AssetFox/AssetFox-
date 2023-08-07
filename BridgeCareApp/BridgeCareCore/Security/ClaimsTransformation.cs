@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using BridgeCareCore.Security.Interfaces;
+using AppliedResearchAssociates.iAM.Common;
 
 namespace BridgeCareCore.Security
 {
@@ -16,12 +17,14 @@ namespace BridgeCareCore.Security
         private readonly IRoleClaimsMapper _roleClaimsMapper;
         private readonly IGraphApiClientService _graphApiClientService;
         private Dictionary<string, UserCache> cache = new();
+        private readonly ILog _log;
 
-        public ClaimsTransformation(IConfiguration config, IRoleClaimsMapper roleClaimsMapper, IGraphApiClientService graphApiClientService)
+        public ClaimsTransformation(IConfiguration config, IRoleClaimsMapper roleClaimsMapper, IGraphApiClientService graphApiClientService, ILog log)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _roleClaimsMapper = roleClaimsMapper ?? throw new ArgumentNullException(nameof(roleClaimsMapper));
             _graphApiClientService = graphApiClientService ?? throw new ArgumentNullException(nameof(graphApiClientService));
+            _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
         public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
@@ -91,6 +94,7 @@ namespace BridgeCareCore.Security
                 catch (Exception e)
                 {
                     // Ignore: control gets here few times due to any concurrent calls. Solution to avoid any exception can be looked at later.
+                    _log.Error(e.Message);
                 }
                 if (userNameValue != null)
                 {

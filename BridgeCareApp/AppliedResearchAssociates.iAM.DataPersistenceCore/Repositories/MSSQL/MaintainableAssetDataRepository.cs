@@ -237,7 +237,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
                 result.Add(assetTuple);
             }
-
             return result;
         }
 

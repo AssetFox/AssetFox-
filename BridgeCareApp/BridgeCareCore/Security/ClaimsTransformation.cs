@@ -55,46 +55,49 @@ namespace BridgeCareCore.Security
                 var userNameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname";
                 var userName = principal.Claims.FirstOrDefault(t => t.Type == userNameClaimType);
                 var userNameValue = userName?.Value;
-                try
+                lock (cache)
                 {
-                    if (userNameValue!=null && !cache.ContainsKey(userNameValue) || cache[userNameValue].LastRefreshTime < DateTime.Now.AddDays(-1))
+                    try
                     {
-                        // Read group name(s) set in Azure B2C(that will be IP role name(s)
-                        var groupNames = new List<string>();
-                        var groupClaimType = "group";
-                        if (!principal.HasClaim(claim => claim.Type == groupClaimType))
+                        if (userNameValue != null && !cache.ContainsKey(userNameValue) || cache[userNameValue].LastRefreshTime < DateTime.Now.AddDays(-1))
                         {
-                            var nameidentifierClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
-                            var nameidentifier = principal.Claims.FirstOrDefault(t => t.Type == nameidentifierClaimType);
-                            groupNames = await _graphApiClientService.GetGraphApiUserMemberGroup(nameidentifier.Value);
-                        }
-                        if (groupNames.Count == 0)
-                        {
-                            groupNames.Add(SecurityConstants.Role.Default);
-                        }
-
-                        var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, groupNames);
-                        var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRolesFromMapper);
-                        var identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
-
-                        if (!cache.ContainsKey(userNameValue))
-                        {
-                            cache.Add(userNameValue, new UserCache { Identity = identity, LastRefreshTime = DateTime.Now });
-                        }
-                        else
-                        {
-                            if (cache[userNameValue].LastRefreshTime < DateTime.Now.AddDays(-1))
+                            // Read group name(s) set in Azure B2C(that will be IP role name(s)
+                            var groupNames = new List<string>();
+                            var groupClaimType = "group";
+                            if (!principal.HasClaim(claim => claim.Type == groupClaimType))
                             {
-                                cache[userNameValue].Identity = identity;
-                                cache[userNameValue].LastRefreshTime = DateTime.Now;
+                                var nameidentifierClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+                                var nameidentifier = principal.Claims.FirstOrDefault(t => t.Type == nameidentifierClaimType);
+                                groupNames = _graphApiClientService.GetGraphApiUserMemberGroup(nameidentifier.Value)?.Result;
+                            }
+                            if (groupNames.Count == 0)
+                            {
+                                groupNames.Add(SecurityConstants.Role.Default);
+                            }
+
+                            var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, groupNames);
+                            var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRolesFromMapper);
+                            var identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
+
+                            if (!cache.ContainsKey(userNameValue))
+                            {
+                                cache.Add(userNameValue, new UserCache { Identity = identity, LastRefreshTime = DateTime.Now });
+                            }
+                            else
+                            {
+                                if (cache[userNameValue].LastRefreshTime < DateTime.Now.AddDays(-1))
+                                {
+                                    cache[userNameValue].Identity = identity;
+                                    cache[userNameValue].LastRefreshTime = DateTime.Now;
+                                }
                             }
                         }
                     }
-                }
-                catch (Exception e)
-                {
-                    // Ignore: control gets here few times due to any concurrent calls. Solution to avoid any exception can be looked at later.
-                    _log.Error("ClaimsTransformation Error: " + e.StackTrace);
+                    catch (Exception e)
+                    {
+                        // Ignore: control gets here few times due to any concurrent calls. Solution to avoid any exception can be looked at later.
+                        _log.Error("ClaimsTransformation Error: " + e.StackTrace);
+                    }
                 }
                 if (userNameValue != null)
                 {

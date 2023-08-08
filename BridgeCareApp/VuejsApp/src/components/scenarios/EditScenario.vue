@@ -178,7 +178,7 @@ export default class EditScenario extends Vue {
         },
         {
             tabName: 'Budget Priority',
-            tabIcon: 'fas fa-copy',
+            tabIcon: 'fas fa-balance-scale',
             navigation: {
                 path: '/BudgetPriorityEditor/Scenario/',
             },

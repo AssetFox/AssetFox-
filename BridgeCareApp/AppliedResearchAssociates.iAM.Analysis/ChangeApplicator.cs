@@ -1,17 +1,16 @@
 ﻿using System;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public sealed class ChangeApplicator
 {
-    public sealed class ChangeApplicator
+    internal ChangeApplicator(Action action, double? number)
     {
-        internal ChangeApplicator(Action action, double? number)
-        {
-            Action = action ?? throw new ArgumentNullException(nameof(action));
-            Number = number;
-        }
-
-        public Action Action { get; }
-
-        public double? Number { get; }
+        Action = action ?? throw new ArgumentNullException(nameof(action));
+        Number = number;
     }
+
+    public Action Action { get; }
+
+    public double? Number { get; }
 }

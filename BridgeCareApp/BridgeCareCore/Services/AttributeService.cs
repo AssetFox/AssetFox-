@@ -22,48 +22,25 @@ namespace BridgeCareCore.Services
         public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
         {
             var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributeNames);
-            if (!aggregatedResults.Any())
+            if (aggregatedResults.Count == 0)
+                return new();
+
+            List<AttributeSelectValuesResult> returnList = new();
+            foreach (var result in aggregatedResults)
             {
-                return new List<AttributeSelectValuesResult>();
-            }
-            return aggregatedResults
-                .GroupBy(_ => _.Attribute.Name, _ => _)
-                .ToDictionary(_ => _.Key, _ => _.ToList())
-                .Select(keyValuePair =>
+                var returnValue = new AttributeSelectValuesResult
                 {
-                    var values = new List<string>();
-                    var dtypes = new List<string>();
-                    if (keyValuePair.Value.All(aggregatedResult =>
-                        aggregatedResult.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
-                    {
-                        values = keyValuePair.Value.Where(_ => _.NumericValue.HasValue)
-                            .DistinctBy(_ => _.NumericValue).Select(_ => _.NumericValue!.Value.ToString()).ToList();
-                        dtypes = keyValuePair.Value.Where(_ => _.Attribute.Type == "NUMBER").DistinctBy(_ => _.Attribute.Type).Select(_ => _.Attribute.Type!).ToList();
-                    }
-                    if (keyValuePair.Value.All(aggregatedResult =>
-                        aggregatedResult.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
-                    {
-                        values = keyValuePair.Value.Where(_ => _.TextValue != null)
-                            .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue).ToList();
-                        dtypes = keyValuePair.Value.Where(_ => _.Attribute.Type == "NUMBER").DistinctBy(_ => _.Attribute.Type).Select(_ => _.Attribute.Type).ToList();
-                    }
-                    return new AttributeSelectValuesResult
-                    {
-                        Attribute = keyValuePair.Key,
-                        //Values = values.Count > 100
-                        Values = dtypes.Count > 0
-                            ? new List<string>()
-                            : values.ToSortedSet(new AlphanumericComparator()).ToList(),
-                        ResultMessage = !values.Any()
-                            ? $"No values found for attribute {keyValuePair.Key}; use text input"
- //                           : values.Count > 100
-                            : dtypes.Count > 0
-                                ? $"{ValuesForAttribute} {keyValuePair.Key} {IsANumberUseTextInput}"
-                                : "Success",
-                        ResultType = !values.Any() ? "warning" : "success"
-                    };
-                }).ToList();
+                    Attribute = result.Attribute.Name,
+                    Values = result.IsNumber ? new List<string>() : result.Values.ToSortedSet(new AlphanumericComparator()).ToList(),
+                    ResultMessage = !result.Values.Any() ? $"No values found for attribute {result.Attribute.Name}; use text input"
+                                                                   : result.IsNumber ? $"{ValuesForAttribute} {result.Attribute.Name} {IsANumberUseTextInput}" : "Success",
+                    ResultType = result.ResultType
+                };
+                returnList.Add(returnValue);
+            }
+            return returnList;
         }
+
         public static AttributeDTO ConvertAllAttribute(AllAttributeDTO allAttribute)
         {
             var result = new AttributeDTO

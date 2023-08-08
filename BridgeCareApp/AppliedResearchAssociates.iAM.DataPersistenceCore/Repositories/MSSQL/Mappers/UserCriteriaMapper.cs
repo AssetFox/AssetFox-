@@ -14,7 +14,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 UserName = entity.User.Username,
                 Criteria = entity.Criteria,
                 HasCriteria = entity.HasCriteria,
-                HasAccess = entity.User.HasInventoryAccess
+                HasAccess = entity.User.HasInventoryAccess,
+                Name = entity.User.Name,
+                Description = entity.User.Description,
             };
 
         public static UserCriteriaFilterEntity ToEntity(this UserCriteriaDTO dto) =>

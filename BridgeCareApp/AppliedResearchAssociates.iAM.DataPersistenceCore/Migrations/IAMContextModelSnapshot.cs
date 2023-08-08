@@ -22,30 +22,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AdminSettingEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AdminSettingsEntity", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
-
-                    b.Property<string>("ImplementationName")
+                    b.Property<string>("Value")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("InventoryReportNames")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Key");
 
-                    b.Property<string>("KeyFields")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PrimaryNetwork")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SimulationReportNames")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
+                    b.HasIndex("Key")
+                        .IsUnique();
 
                     b.ToTable("AdminSettings");
                 });
@@ -4778,6 +4767,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("HasInventoryAccess")
                         .HasColumnType("bit");
 
@@ -4789,6 +4781,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<DateTime>("LastNewsAccessDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Username")
                         .HasColumnType("nvarchar(max)");

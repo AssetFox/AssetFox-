@@ -39,12 +39,27 @@ export interface QueuedWork {
 
 export enum WorkType {
     SimulationAnalysis,
-    DeleteNetwork
+    DeleteNetwork,
+    Aggregation,
+    SimulationOutputConversion,
+    DeleteSimulation,
+    ReportGeneration,
+    ImportLibraryInvestment,
+    ImportLibraryPerformanceCurve,
+    ImportLibraryTreatment,
+    ImportScenarioInvestment,
+    ImportScenarioPerformanceCurve,
+    ImportScenarioTreatment,
+    ImportCommittedProject,
 }
 
 export enum DomainType {
     Simulation,
-    Network
+    Network,
+    Investment,
+    PerformanceCurve,
+    Treatment,
+    CommittedProject
 }
 
 export interface ScenarioActions {

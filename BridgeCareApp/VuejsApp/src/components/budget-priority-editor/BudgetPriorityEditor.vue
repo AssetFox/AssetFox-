@@ -282,7 +282,7 @@ export default class BudgetPriorityEditor extends Vue {
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @Mutation('budgetPriorityLibraryMutator') budgetPriorityLibraryMutator: any;
     @Mutation('selectedBudgetPriorityLibraryMutator') selectedBudgetPriorityLibraryMutator: any;
-
+    
     addedRows: BudgetPriority[] = [];
     updatedRowsMap:Map<string, [BudgetPriority, BudgetPriority]> = new Map<string, [BudgetPriority, BudgetPriority]>();//0: original value | 1: updated value
     deletionIds: string[] = [];
@@ -411,7 +411,6 @@ export default class BudgetPriorityEditor extends Vue {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
         }
-        
         this.updatedRowsMap.clear();
         this.deletionIds = [];
         this.addedRows = [];
@@ -479,6 +478,7 @@ export default class BudgetPriorityEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    this.populateEmptyBudgetPercentagePairs(this.currentPage);
                 }
             });
         else if(this.hasSelectedLibrary)
@@ -647,7 +647,7 @@ export default class BudgetPriorityEditor extends Vue {
                 }
 
                 this.budgetPriorityLibraryMutator(budgetPriorityLibrary);
-                this.selectedBudgetPriorityLibraryMutator(budgetPriorityLibrary.id);
+                this.selectedBudgetPriorityLibraryMutator(budgetPriorityLibrary.id);                
                 this.addSuccessNotificationAction({message:'Added budget priority library'})
             })
         }
@@ -747,6 +747,7 @@ export default class BudgetPriorityEditor extends Vue {
                 this.librarySelectItemValue = null;
                 this.addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
                 this.currentPage = sortByProperty("priorityLevel", this.currentPage);
+                this.onPaginationChanged();
             }           
         });
     }
@@ -774,7 +775,7 @@ export default class BudgetPriorityEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()               
                 this.budgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary);
-                this.selectedBudgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary.id);
+                this.selectedBudgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary.id);                
                 this.addSuccessNotificationAction({message: "Updated budget priority library",});
             }
         });
@@ -977,7 +978,13 @@ export default class BudgetPriorityEditor extends Vue {
         this.parentLibraryId = foundLibrary.id;
         this.parentLibraryName = foundLibrary.name;
     }
-
+    populateEmptyBudgetPercentagePairs(budgetPriorites: BudgetPriority[]) {
+        budgetPriorites.forEach(item => {
+            if (item.budgetPercentagePairs.length === 0) {
+                item.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
+            }
+        });
+    }
     initializePages(){
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
         const request: PagingRequest<BudgetPriority>= {
@@ -1002,6 +1009,8 @@ export default class BudgetPriorityEditor extends Vue {
                     this.currentPage = sortByProperty("priorityLevel", data.items);
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+
+                    this.populateEmptyBudgetPercentagePairs(this.currentPage);
                 }
                 this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
                 this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";

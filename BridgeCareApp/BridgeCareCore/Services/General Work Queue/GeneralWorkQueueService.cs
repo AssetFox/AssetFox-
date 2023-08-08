@@ -11,10 +11,12 @@ namespace BridgeCareCore.Services
     public class GeneralWorkQueueService : IGeneralWorkQueueService
     {
         private readonly SequentialWorkQueue<WorkQueueMetadata> _sequentialWorkQueue;
+        private readonly FastSequentialworkQueue<WorkQueueMetadata> _fastQueue;
 
-        public GeneralWorkQueueService(SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue)
+        public GeneralWorkQueueService(SequentialWorkQueue<WorkQueueMetadata> sequentialWorkQueue, FastSequentialworkQueue<WorkQueueMetadata> fastQueue)
         {
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
+            _fastQueue = fastQueue ?? throw new ArgumentNullException(nameof(fastQueue));
         }
 
         public IQueuedWorkHandle<WorkQueueMetadata> CreateAndRun(IWorkSpecification<WorkQueueMetadata> workItem)
@@ -26,6 +28,17 @@ namespace BridgeCareCore.Services
         public bool Cancel(Guid workId)
         {
             return _sequentialWorkQueue.Cancel(workId);
+        }
+
+        public IQueuedWorkHandle<WorkQueueMetadata> CreateAndRunInFastQueue(IWorkSpecification<WorkQueueMetadata> workItem)
+        {
+            _fastQueue.Enqueue(workItem, out var workHandle).Wait();
+            return workHandle;
+        }
+
+        public bool CancelInFastQueue(Guid workId)
+        {
+            return _fastQueue.Cancel(workId);
         }
     }
 }

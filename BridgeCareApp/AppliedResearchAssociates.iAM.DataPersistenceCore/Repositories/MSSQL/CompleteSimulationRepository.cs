@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return fullSimulation;
         }
-        public void Clone(CloneSimulationDTO dto)
+        public SimulationCloningResultDTO Clone(CloneSimulationDTO dto)
         {
             // load it
             var simulationId = dto.scenarioId.ToString();
@@ -60,14 +60,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // save it
             var network = _unitOfWork.Context.Network.First(n => n.Id == dto.networkId);
-            CreateNewSimulation(completeSimulation, network.KeyAttributeId);
+            var clone = CreateNewSimulation(completeSimulation, network.KeyAttributeId);
+            return clone;
         }
 
-        private void CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO, Guid keyAttributeId)
+        private SimulationCloningResultDTO CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO, Guid keyAttributeId)
         {
             var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
             var keyAttribute = _unitOfWork.AttributeRepo.GetAttributeName(keyAttributeId);
             var entity = CompleteSimulationMapper.ToNewEntity(completeSimulationDTO, attributes, keyAttribute);
+
+            _unitOfWork.AsTransaction(() =>
+            {
+                _unitOfWork.Context.Add(entity);
+                _unitOfWork.Context.SaveChanges();
+            });
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(completeSimulationDTO.Id);
+            var cloningResult = new SimulationCloningResultDTO
+            {
+                Simulation = simulation,
+            };
+            return cloningResult;
         }
     }
 }

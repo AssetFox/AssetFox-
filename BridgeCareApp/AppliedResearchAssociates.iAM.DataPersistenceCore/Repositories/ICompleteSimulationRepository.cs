@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ICompleteSimulationRepository
     {
+        SimulationCloningResultDTO Clone(CloneSimulationDTO dto);
         CompleteSimulationDTO GetSimulation(string simulationId);
     }
 }

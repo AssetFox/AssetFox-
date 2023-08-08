@@ -201,6 +201,11 @@
                     </v-btn>
                 </v-toolbar-title>
             </v-toolbar>
+                <v-alert
+                v-model='alert'
+                type="info">
+                    {{stateAlertMessage}}
+                </v-alert>
                 <div class="scenario-status" v-if="hasSelectedScenario">
                         <br>
                         <span>Scenario: </span>
@@ -308,6 +313,8 @@ export default class AppComponent extends Vue {
     @State(state => state.adminSiteSettingsModule.agencyLogo) agencyLogoBase64: string;
     @State(state => state.adminSiteSettingsModule.productLogo) productLogoBase64: string;
     @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
+    @State(state => state.alertModule.alertMessage) stateAlertMessage: string;
+    @State(state => state.alertModule.alert) stateAlert: boolean;
     
     @Action('logOut') logOutAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
@@ -333,6 +340,7 @@ export default class AppComponent extends Vue {
     @Action('getAgencyLogo') getAgencyLogoAction: any;
     @Action('getProductLogo') getProductLogoAction: any;
     @Action('getInventoryReports') getInventoryReportsAction: any;
+    @Action('setAlertMessage') setAlertMessageAction: any;
 
     drawer: boolean = false;
     latestNewsDate: string = '0001-01-01';
@@ -360,6 +368,7 @@ export default class AppComponent extends Vue {
     agencyLogo: string = '';
     productLogo: string = '';
     inventoryReportName: string = '';
+    alert: boolean = false;
 
     get container() {
         const container: any = {};
@@ -430,10 +439,25 @@ export default class AppComponent extends Vue {
     }
 
     @Watch('stateInventoryReportNames')
-        onStateInventoryReportNamesChanged(){
-            if(this.stateInventoryReportNames.length > 0)
-                this.inventoryReportName = this.stateInventoryReportNames[0]
+    onStateInventoryReportNamesChanged(){
+        if(this.stateInventoryReportNames.length > 0)
+            this.inventoryReportName = this.stateInventoryReportNames[0]
+    }
+    @Watch('stateAlertMessage')
+    onStateAlertMessageChanged(){
+        if(this.stateAlertMessage.trim() !== ''){
+            this.alert = true;
         }
+        else
+            this.alert = false;
+    }
+
+    @Watch('alert')
+    onAlertChanged(){
+        if(!this.alert){
+            this.setAlertMessageAction('');
+        }
+    }
 
     created() {
         // create a request handler

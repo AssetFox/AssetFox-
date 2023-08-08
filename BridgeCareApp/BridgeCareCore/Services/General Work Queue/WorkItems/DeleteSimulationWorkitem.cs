@@ -16,14 +16,14 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
     public record DeleteSimulationWorkitem(Guid SimulationId, string UserId, string scenarioName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => SimulationId.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(SimulationId, WorkType.DeleteSimulation);
 
         public DateTime StartTime { get; set; }
 
         public string WorkDescription => "Delete Simulation";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.DeleteSimulation, DomainType = DomainType.Network };
+            new WorkQueueMetadata() { WorkType = WorkType.DeleteSimulation, DomainType = DomainType.Simulation, DomainId = SimulationId};
 
         public string WorkName => scenarioName;
 
@@ -33,7 +33,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, SimulationId);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             _unitOfWork.SimulationRepo.DeleteSimulation(SimulationId, cancellationToken, _queueLogger);
         }
 

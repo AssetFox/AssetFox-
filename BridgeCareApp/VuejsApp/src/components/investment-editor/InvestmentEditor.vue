@@ -336,6 +336,10 @@ import {
     mapToIndexSignature
 } from '../../shared/utils/conversion-utils';
 import { isNullOrUndefined } from 'util';
+import { Hub } from '@/connectionHub';
+import ScenarioService from '@/services/scenario.service';
+import { WorkType } from '@/shared/models/iAM/scenario';
+import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 
 @Component({
     components: {
@@ -371,7 +375,7 @@ export default class InvestmentEditor extends Vue {
     @Action('importScenarioInvestmentBudgetsFile') importScenarioInvestmentBudgetsFileAction: any;
     @Action('importLibraryInvestmentBudgetsFile') importLibraryInvestmentBudgetsFileAction: any;
     @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-
+    @Action('setAlertMessage') setAlertMessageAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
@@ -379,6 +383,7 @@ export default class InvestmentEditor extends Vue {
     @Mutation('budgetLibraryMutator') budgetLibraryMutator: any;
     @Mutation('selectedBudgetLibraryMutator') selectedBudgetLibraryMutator: any;
     @Mutation('investmentPlanMutator') investmentPlanMutator: any;
+    @Mutation('isSuccessfulImportMutator') isSuccessfulImportMutator: any;
 
     addedBudgets: Budget[] = [];
     updatedBudgetsMap:Map<string, [Budget, Budget]> = new Map<string, [Budget, Budget]>();//0: original value | 1: updated value
@@ -458,11 +463,12 @@ export default class InvestmentEditor extends Vue {
             return this.investmentPlan.numberOfYearsInAnalysisPeriod;
         }
 
-        beforeRouteEnter(to: any, from: any, next: any) {
-            next((vm: any) => {
-                vm.librarySelectItemValue = null;
-                vm.getHasPermittedAccessAction();
-                vm.getBudgetLibrariesAction().then(() => {
+        beforeRouteEnter(to: any, from: any, next:any) {
+            next((vm:any) => {
+                (async () => { 
+                    vm.librarySelectItemValue = null;
+                    await vm.getHasPermittedAccessAction();
+                    await vm.getBudgetLibrariesAction()
                     if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
                         vm.selectedScenarioId = to.query.scenarioId;
 
@@ -474,17 +480,34 @@ export default class InvestmentEditor extends Vue {
                         }
 
                         vm.hasScenario = true;
-                        vm.initializePages();
+                        ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.scenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+                            if(response.data){
+                                vm.setAlertMessageAction("An investment import has been added to the work queue")
+                            }
+                        })
+                        await vm.initializePages();
                     }
                     else
-                        vm.initializing = false;
-
-                });
+                        vm.initializing = false;               
+                })();                    
             });
         }
 
+        mounted() {
+            this.$statusHub.$on(
+                Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+                this.importCompleted,
+            );
+        }  
+
         beforeDestroy() {
             this.setHasUnsavedChangesAction({ value: false });
+            this.$statusHub.$off(
+                Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+                this.importCompleted,
+            );
+
+            this.setAlertMessageAction('');
         }
 
     // Watchers
@@ -623,6 +646,13 @@ export default class InvestmentEditor extends Vue {
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: this.selectedBudgetLibrary.id, workType: WorkType.ImportLibraryInvestment}).then(response => {
+                if(response.data){
+                    this.setAlertMessageAction("An investment import has been added to the work queue")
+                }
+                else
+                    this.setAlertMessageAction("");
+            })
         }
 
         this.clearChanges()
@@ -1126,14 +1156,7 @@ export default class InvestmentEditor extends Vue {
                     currentUserCriteriaFilter: this.currentUserCriteriaFilter
                 })
                 .then((response: any) => {
-                        this.getCriterionLibrariesAction();
-                        this.firstYearOfAnalysisPeriodShift = 0;
-                                    
-                        this.clearChanges();               
-                        this.pagination.page = 1;
-                        this.initializePages();
-                            
-                        this.librarySelectItemValue = null
+                        this.setAlertMessageAction("Investment Budgets import has been added to the work queue.");
                 });
             } else {
                 this.importLibraryInvestmentBudgetsFileAction({
@@ -1142,10 +1165,7 @@ export default class InvestmentEditor extends Vue {
                     currentUserCriteriaFilter: this.currentUserCriteriaFilter
                 })
                 .then(() => {
-                        this.getCriterionLibrariesAction();
-                        this.librarySelectItemValue = null;
-                        this.clearChanges();
-                        this.resetPage();
+                        this.setAlertMessageAction("Investment Budgets import has been added to the work queue.");                     
                 });
             }
 
@@ -1212,7 +1232,6 @@ export default class InvestmentEditor extends Vue {
     }
 
     onUpsertBudgetLibrary() {
-
         const sync: InvestmentPagingSyncModel = {
             libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
             updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
@@ -1455,8 +1474,28 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
         this.parentLibraryName = foundLibrary.name;
     }
 
+    importCompleted(data: any){
+        var importComp = data.importComp as importCompletion
+        if( importComp.workType === WorkType.ImportScenarioInvestment && importComp.id === this.selectedScenarioId ||
+            this.hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryInvestment && importComp.id === this.selectedBudgetLibrary.id){
+            this.clearChanges()
+            this.pagination.page = 1
+            this.initializePages().then(async () => {
+                this.setAlertMessageAction('');
+                this.isSuccessfulImportMutator(true);
+                await this.getBudgetLibrariesAction()
+                if(this.hasScenario){                
+                    this.investmentPlanMutator(this.investmentPlan);
+                    this.firstYearOfAnalysisPeriodShift = 0;
+                }
+                else{
 
-    initializePages(){
+                }
+            })
+        }        
+    }
+
+    async initializePages(){
         const request: InvestmentPagingRequestModel= {
             page: 1,
             rowsPerPage: 5,
@@ -1478,7 +1517,7 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
         };
         
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
-            InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
+            await InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
@@ -1503,7 +1542,7 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
             });
         }            
         else if(this.hasSelectedLibrary)
-                InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+                await InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;

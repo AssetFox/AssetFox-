@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class QueuedWorkDTO
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
         public string Status { get; set; }
         public DateTime QueueEntryTimestamp { get; set; }
@@ -17,5 +17,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string WorkDescription { get; set; }
         public WorkType WorkType { get; set; }
         public DomainType DomainType { get; set; }
+        public Guid DomainId { get; set; }
     }
 }

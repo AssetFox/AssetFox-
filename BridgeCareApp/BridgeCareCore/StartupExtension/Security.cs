@@ -248,7 +248,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddSingleton<IAuthorizationHandler, RestrictAccessHandler>();
             services.AddSingleton<IRoleClaimsMapper, RoleClaimsMapper>();
             services.AddScoped<IClaimHelper, ClaimHelper>();
-            services.AddScoped<IGraphApiClientService, GraphApiClientService>();
+            services.AddSingleton<IGraphApiClientService, GraphApiClientService>();
         }
     }
 }

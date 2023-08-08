@@ -85,16 +85,8 @@ namespace BridgeCareCore.Security
             var decodedToken = DecodeToken(idToken);
             var claimsPrincipal = request.HttpContext.User;
 
-            if (_securityType == SecurityConstants.SecurityTypes.Esec)
-            {
-                var roleStrings = new List<string>();
-                roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
-                if (roleStrings.Count == 0)
-                {
-                    roleStrings.Add(SecurityConstants.Role.Default);
-                }
-
-                var internalRoles = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, roleStrings);
+            if (_securityType == SecurityTypes.Esec)
+            {                
                 var HasAdminAccess = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
                 var HasSimulationAccess = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
 
@@ -103,15 +95,12 @@ namespace BridgeCareCore.Security
                     Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],
                     Email = decodedToken.GetClaimValue("email"),
                     HasAdminAccess = HasAdminAccess,
-                    HasSimulationAccess = HasSimulationAccess,
-                    InternalRoles = internalRoles,
+                    HasSimulationAccess = HasSimulationAccess
                 };
             }
 
-            if (_securityType == SecurityConstants.SecurityTypes.B2C)
-            {
-                var internalRoles = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, new List<string>
-                { SecurityConstants.Role.Administrator });
+            if (_securityType == SecurityTypes.B2C)
+            {                
                 var HasAdminAccess = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
                 var HasSimulationAccess = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
 
@@ -120,8 +109,7 @@ namespace BridgeCareCore.Security
                     Name = decodedToken.GetClaimValue("name"),
                     Email = decodedToken.GetClaimValue("email"),
                     HasAdminAccess = HasAdminAccess, 
-                    HasSimulationAccess = HasSimulationAccess, 
-                    InternalRoles = internalRoles,
+                    HasSimulationAccess = HasSimulationAccess
                 };
             }
 

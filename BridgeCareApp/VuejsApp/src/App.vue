@@ -650,19 +650,19 @@ export default class AppComponent extends Vue {
      */
     onAuthenticate() {
         this.$forceUpdate();
-        this.getNetworksAction();
-        this.getAttributesAction();
-        this.getAllUsersAction();
-        this.getAnnouncementsAction();
-        this.getUserCriteriaFilterAction();
-        if (this.username != null && this.username != '') {
-            this.getCurrentUserByUserNameAction(this.username);
-        }
-
+        this.getNetworksAction().then(() =>
+        this.getAttributesAction().then(() =>
+        this.getAllUsersAction().then(() =>
+        this.getAnnouncementsAction().then(() =>
+        this.getUserCriteriaFilterAction().then(() =>{
+            if (this.username != null && this.username != '') {
+                this.getCurrentUserByUserNameAction(this.username);
+            }
+        }).then(() =>
         //If these gets are placed before authorization, GetUserInformation() in EsecSecurity.cs will throw an error, as its HttpRequest will have no Authorization header!
-        this.getImplementationNameAction();
-        this.getAgencyLogoAction();
-        this.getProductLogoAction();
+        this.getImplementationNameAction().then(() =>
+        this.getAgencyLogoAction().then(() => {this.getProductLogoAction();}
+        )))))));
     }
 
     /**

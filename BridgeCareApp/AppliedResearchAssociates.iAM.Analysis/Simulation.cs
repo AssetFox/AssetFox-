@@ -73,14 +73,14 @@ public sealed class Simulation : WeakEntity, IValidator
     {
         var results = new ValidationResultBag();
 
-        var treatmentsWithEmptyFeasibility = Treatments.Where(treatment => treatment.FeasibilityCriteria.Count == 0).ToList();
+        var treatmentsWithEmptyFeasibility = Treatments.Where(treatment => treatment.FeasibilityCriteria.All(criterion => criterion.ExpressionIsBlank)).ToList();
         if (treatmentsWithEmptyFeasibility.Count != 1)
         {
-            results.Add(ValidationStatus.Warning, $"There are {treatmentsWithEmptyFeasibility.Count} treatments with empty feasibility.", this, nameof(Treatments));
+            results.Add(ValidationStatus.Error, $"There are {treatmentsWithEmptyFeasibility.Count} treatments with empty feasibility.", this, nameof(Treatments));
         }
         else if (DesignatedPassiveTreatment != null && DesignatedPassiveTreatment != treatmentsWithEmptyFeasibility[0])
         {
-            results.Add(ValidationStatus.Warning, "Designated passive treatment is not the single treatment with empty feasibility.", this, nameof(DesignatedPassiveTreatment));
+            results.Add(ValidationStatus.Error, "Designated passive treatment is not the single treatment with empty feasibility.", this, nameof(DesignatedPassiveTreatment));
         }
 
         if (DesignatedPassiveTreatment == null)

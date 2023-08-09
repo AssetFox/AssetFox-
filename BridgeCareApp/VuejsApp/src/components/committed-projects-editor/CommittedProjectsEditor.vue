@@ -11,7 +11,7 @@
                             type="file"
                             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                             ref="committedProjectTemplateInput"
-                            @change="handlecommittedProjectTemplateUpload"
+                            @change="handleCommittedProjectTemplateUpload"
                             hidden/>
                         <v-btn @click="onUploadCommittedProjectTemplate"
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Upload Committed Project Template</v-btn>
@@ -1169,9 +1169,14 @@ export default class CommittedProjectsEditor extends Vue  {
     onUploadCommittedProjectTemplate(){
       document.getElementById("committedProjectTemplateUpload")?.click();
    }
+
     handleCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
       const file = event.target.files[0];
-      this.importCommittedProjectTemplate(file);   
+      CommittedProjectsService.importCommittedProjectTemplate(file).then((response: AxiosResponse) => {
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    this.addSuccessNotificationAction({message:'Updated Default Template'})      
+                }
+            });
    }
 
     checkAssetExistence(scp: SectionCommittedProjectTableData, keyAttr: string){

@@ -69,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void SetCommittedProjectTemplate(FileStream name)
+        public void SetCommittedProjectTemplate(Stream name)
         {
             BinaryReader br = new BinaryReader(name);
             var fileSize = name.Length;

@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects);
 
-        void SetCommittedProjectTemplate(FileStream name);
+        void SetCommittedProjectTemplate(Stream name);
 
         void DeleteSimulationCommittedProjects(Guid simulationId);
 

@@ -221,15 +221,17 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("SetCommittedProjectTemplate/{name}")]
-        [Authorize(Policy = Policy.ModifyAdminSiteSettings)]
-        public async Task<IActionResult> SetCommittedProjectTemplate(FileStream name)
+        [Route("SetCommittedProjectTemplate")]
+        [Authorize(Policy = Policy.ModifyCommittedProjects)]
+        public async Task<IActionResult> SetCommittedProjectTemplate()
         {
+            Stream stream = ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream();
+
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.CommittedProjectRepo.SetCommittedProjectTemplate(name);
+                    UnitOfWork.CommittedProjectRepo.SetCommittedProjectTemplate(stream);
                 });
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, "Successfully Updated Implementation Name");
                 return Ok();

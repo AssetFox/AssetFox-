@@ -71,6 +71,7 @@
                     >
                         <template v-slot:activator="{ on, attrs }">
                             <button
+                                id="App-notification-button"
                                 v-on="on"
                                 v-bind="attrs"
                                 @click="onNotificationMenuSelect"
@@ -95,7 +96,9 @@
                             </button>
                         </template>
                         <v-card class="mx-auto" max-width="100%">
-                            <v-toolbar color="#002E6C" dark>
+                            <v-toolbar 
+                                id = "App-notification-toolbar"
+                                color="#002E6C" dark>
                                 <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
                                 <v-toolbar-title>Notifications</v-toolbar-title>
@@ -117,7 +120,8 @@
                                         >{{ notification.icon }}</v-icon
                                     >
                                     <template v-slot:activator>
-                                        <v-list-tile>
+                                        <v-list-tile
+                                            id="App-notification-vListTile">
                                             <v-list-tile-content
                                                 style="font-size: 85%"
                                                 v-text="

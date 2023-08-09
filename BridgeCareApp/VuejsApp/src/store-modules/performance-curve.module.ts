@@ -152,13 +152,7 @@ const actions = {
             true,
             payload.currentUserCriteriaFilter,
         ).then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                const performanceCurves: PerformanceCurve[] = response.data as PerformanceCurve[];
-                commit('scenarioPerformanceCurvesMutator', performanceCurves);
-                dispatch('addSuccessNotification', {
-                    message: 'Deterioration models file imported',
-                });
-            }
+            dispatch('setAlertMessage', "A performance curve import has been added to the work queue");
         });
     },
     async importLibraryPerformanceCurvesFile(
@@ -171,14 +165,7 @@ const actions = {
             false,
             payload.currentUserCriteriaFilter,
         ).then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                const library: PerformanceCurveLibrary = response.data as PerformanceCurveLibrary;
-                commit('performanceCurveLibraryMutator', library);
-                commit('selectedPerformanceCurveLibraryMutator', library.id);               
-                dispatch('addSuccessNotification', {
-                    message: 'Deterioration Models file imported',
-                });
-            }
+            dispatch('setAlertMessage', "A performance curve import has been added to the work queue");
         });
     },
     async getPerformanceCurveLibraryUsers({ commit }: any, libraryId: string) {

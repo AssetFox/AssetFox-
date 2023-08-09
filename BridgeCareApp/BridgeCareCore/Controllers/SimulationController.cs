@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
+using BridgeCareCore.Models.General_Work_Queue;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
@@ -160,6 +161,40 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetFastWorkQueuePage - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetQueuedWorkByDomainIdAndWorkType")]
+        [Authorize]
+        public async Task<IActionResult> GetQueuedWorkByDomainIdAndWorkType([FromBody] WorkQueueRequestModel request)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _workQueueService.GetFastQueuedWorkByDomainIdAndWorkType(request.DomainId, request.WorkType));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetQueuedWorkByDomainIdAndWorkType - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetFastQueuedWorkByDomainIdAndWorkType")]
+        [Authorize]
+        public async Task<IActionResult> GetFastQueuedWorkByDomainIdAndWorkType([FromBody] WorkQueueRequestModel request)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _workQueueService.GetFastQueuedWorkByDomainIdAndWorkType(request.DomainId, request.WorkType));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetFastQueuedWorkByDomainIdAndWorkType - {e.Message}");
                 throw;
             }
         }
@@ -331,9 +366,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpDelete]
-        [Route("CancelSimulation/{workId}")]
+        [Route("CancelWorkQueueItem/{workId}")]
         [Authorize]
-        public async Task<IActionResult> CancelSimulation(Guid workId)
+        public async Task<IActionResult> CancelInWorkQueue(string workId)
         {
             try
             {
@@ -342,7 +377,7 @@ namespace BridgeCareCore.Controllers
                     return Ok();
                 if(work.WorkType == WorkType.SimulationAnalysis)
                 {
-                    _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(workId, UserInfo.Name, false);
+                    _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(work.DomainId, UserInfo.Name, false);
                     var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(workId);
                     await Task.Delay(125);
 
@@ -350,7 +385,7 @@ namespace BridgeCareCore.Controllers
                     {
                         HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
                         {
-                            SimulationId = workId,
+                            SimulationId = work.DomainId,
                             Status = "Canceled"
                         });
                         HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, workId);
@@ -359,7 +394,7 @@ namespace BridgeCareCore.Controllers
                     {
                         HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
                         {
-                            SimulationId = workId,
+                            SimulationId = work.DomainId,
                             Status = "Canceling analysis..."
                         });
                     }
@@ -391,9 +426,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpDelete]
-        [Route("CancelInFastQueue/{workId}")]
+        [Route("CancelFastQueueItem/{workId}")]
         [Authorize]
-        public async Task<IActionResult> CancelInFastQueue(Guid workId)
+        public async Task<IActionResult> CancelFastQueueItem(string workId)
         {
             try
             {
@@ -404,9 +439,9 @@ namespace BridgeCareCore.Controllers
                 
                     var hasBeenRemovedFromQueue = _generalWorkQueueService.CancelInFastQueue(workId);
                     if (hasBeenRemovedFromQueue)
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, workId);
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, workId);
                     else
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = workId, Status = "Canceling" });
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = workId, Status = "Canceling" });
                 
 
                 return Ok();

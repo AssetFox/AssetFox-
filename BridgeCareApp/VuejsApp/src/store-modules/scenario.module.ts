@@ -266,8 +266,8 @@ const actions = {
             },
         );
     },
-    async cancelSimulation({dispatch, state, commit}: any, payload: any) {
-        return await ScenarioService.cancelSimulation(payload.simulationId)
+    async cancelWorkQueueItem({dispatch, state, commit}: any, payload: any) {
+        return await ScenarioService.cancelWorkQueueItem(payload.simulationId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     dispatch('addSuccessNotification', {
@@ -278,7 +278,7 @@ const actions = {
         );
     },
     async cancelFastQueueItem({dispatch, state, commit}: any, workId:string) {
-        return await ScenarioService.cancelInFastQueue(workId)
+        return await ScenarioService.cancelFastQueueItem(workId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     dispatch('addSuccessNotification', {

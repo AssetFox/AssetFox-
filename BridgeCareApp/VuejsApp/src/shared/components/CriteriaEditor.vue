@@ -28,7 +28,7 @@
                                         <span class="ghd-control-text">{{ item.text }}</span>
                                     </template>
                                     <template v-slot:item="{ item }">
-                                        <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
+                                        <v-list-item class="ghd-control-text" v-on="on">
                                         <v-list-item-content>
                                             <v-list-item-title>
                                             <v-row no-gutters align="center">
@@ -42,6 +42,7 @@
                                 </v-layout>
                             </v-flex>
                                 <v-btn
+                                    v-if="selectedConjunction==='OR'"
                                     id="CriteriaEditor-addSubCriteria-btn"
                                     @click="onAddSubCriteria"
                                     class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"    
@@ -58,7 +59,7 @@
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <div v-for="(clause, index) in subCriteriaClauses">
+                            <div v-if="showCases()" v-for="(clause, index) in subCriteriaClauses">
                                 <v-textarea style="padding-left:0px;"
                                     :class="{
                                         'textarea-focused':
@@ -305,6 +306,7 @@ import {
 } from '@/shared/models/iAM/expression-validation';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 import { getBlankGuid } from '../utils/uuid-utils';
+import { isNull } from 'util';
 
 @Component({
     components: { VueQueryBuilder },
@@ -349,17 +351,21 @@ export default class CriteriaEditor extends Vue {
     ];
     selectedConjunction: string = 'OR';
     subCriteriaClauses: string[] = [];
+    subCriteriaClausesAND: string[] = [];
+    subCriteraiClausesOR: string[] = [];
     selectedSubCriteriaClauseIndex: number = -1;
     selectedSubCriteriaClause: Criteria | null = null;
     selectedRawSubCriteriaClause: string = '';
     activeTab = 'tree-view';
     checkOutput: boolean = false;
 
+    andArray: string[] = [];
+    orArray: string[] = [];
     mounted() {
         if (hasValue(this.stateAttributes)) {
             this.setQueryBuilderRules();
             
-        }      
+        }     
     }
 
     @Watch('criteriaEditorData')
@@ -375,7 +381,6 @@ export default class CriteriaEditor extends Vue {
                 : '',
             this.addErrorNotificationAction,
         ) as Criteria;
-
         const parsedSubCriteria:
             | string[]
             | null = convertCriteriaObjectToCriteriaExpression(
@@ -400,6 +405,9 @@ export default class CriteriaEditor extends Vue {
 
             this.selectedConjunction = mainCriteria.logicalOperator;
 
+            this.andArray = this.criteriaEditorData.mergedCriteriaExpression ? this.criteriaEditorData.mergedCriteriaExpression.split(' AND ') : [];
+            this.orArray  = this.criteriaEditorData.mergedCriteriaExpression ? this.criteriaEditorData.mergedCriteriaExpression.split(' OR ') : [];
+
             this.setSubCriteriaClauses(mainCriteria);
         }
     }
@@ -419,7 +427,6 @@ export default class CriteriaEditor extends Vue {
     @Watch('selectedSubCriteriaClause')
     onSelectedClauseChanged() {
         this.resetSubCriteriaValidationProperties();
-
         if (
             hasValue(this.selectedSubCriteriaClause) &&
             hasValue(this.selectedSubCriteriaClause!.children)
@@ -503,6 +510,12 @@ export default class CriteriaEditor extends Vue {
                 const clause: string = convertCriteriaTypeObjectToCriteriaExpression(
                     criteriaType,
                 );
+                if (hasValue(clause) && this.orArray.length > 1) {
+                    this.subCriteraiClausesOR.indexOf(clause) < 0 ? this.subCriteraiClausesOR.push(clause) : {};
+                }
+                if (hasValue(clause) && this.andArray.length > 1) {
+                    this.subCriteriaClausesAND.indexOf(clause) < 0 ? this.subCriteriaClausesAND.push(clause) : {};
+                }
                 if (hasValue(clause)) {
                     this.subCriteriaClauses.push(clause);
                 }
@@ -538,6 +551,7 @@ export default class CriteriaEditor extends Vue {
                 this.subCriteriaClauses.length,
             );
             this.subCriteriaClauses.push('');
+            this.subCriteraiClausesOR.push('');
             this.selectedSubCriteriaClauseIndex =
                 this.subCriteriaClauses.length - 1;
             this.selectedSubCriteriaClause = clone(emptyCriteria);
@@ -839,6 +853,8 @@ export default class CriteriaEditor extends Vue {
             }
         } else {
             this.selectedConjunction = 'OR';
+            this.subCriteraiClausesOR = [];
+            this.subCriteriaClausesAND = [];
             this.$emit('submitCriteriaEditorResult', null);
         }
     }
@@ -954,6 +970,21 @@ export default class CriteriaEditor extends Vue {
         }
 
         return missingAttributes;
+    }
+    showCases() {
+        // Case of no 'or' or 'and' in expression
+        if (this.subCriteraiClausesOR.length === 0 && this.subCriteriaClausesAND.length === 0) {
+            return true;
+        }
+        // Show the or criteria
+        if (this.selectedConjunction === 'OR' && !isNull(this.subCriteraiClausesOR)) {
+            if (this.subCriteraiClausesOR.length > 1) return true;
+        }
+        // Show the and criteria
+        if (this.selectedConjunction === 'AND' && !isNull(this.subCriteraiClausesAND)) {
+            if (this.subCriteriaClausesAND.length > 1) return true;
+        }
+        return false;
     }
 }
 </script>

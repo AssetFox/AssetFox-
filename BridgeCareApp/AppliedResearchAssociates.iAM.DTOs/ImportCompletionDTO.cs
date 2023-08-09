@@ -5,9 +5,9 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
-    public class QueuedWorkStatusUpdateModel
+    public class ImportCompletionDTO
     {
-        public string Id { get; set; }
-        public string Status { get; set; }
+        public Guid Id { get; set; }
+        public WorkType WorkType { get; set; }
     }
 }

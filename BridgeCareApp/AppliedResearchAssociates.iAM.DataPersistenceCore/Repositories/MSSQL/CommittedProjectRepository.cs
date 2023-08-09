@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,6 +15,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -66,6 +68,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             }
         }
+
+        public void SetCommittedProjectTemplate(FileStream name)
+        {
+            BinaryReader br = new BinaryReader(name);
+            var fileSize = name.Length;
+            var bytes = br.ReadBytes(Convert.ToInt32(name));
+            br.Close();
+            name.Close();
+
+            var existingComittedProjectTemplate = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "Committed Project Template").FirstOrDefault();
+            if (existingComittedProjectTemplate == null)
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                {
+                    Key = "Committed Project Template",
+                    Value = string.Format(Convert.ToBase64String(bytes))
+                });
+            else
+            {
+                existingComittedProjectTemplate.Value = string.Format(Convert.ToBase64String(bytes));
+                _unitOfWork.Context.AdminSettings.Update(existingComittedProjectTemplate);
+            }
+            _unitOfWork.Context.SaveChanges();
+        }
+
 
         public double GetDefaultNoTreatmentCost(TreatmentDTO treatment, Guid assetId)
         {

@@ -20,6 +20,17 @@ export default class CommittedProjectsService {
             `${API.CommittedProject}/GetSectionCommittedProjects/${scenarioId}`,
         );
     }
+    static importCommittedProjectTemplate(file: File): AxiosPromise {
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        let formData = new FormData();
+        formData.append('file', file);
+        return coreAxiosInstance.post(
+            `${API.CommittedProject}/SetCommittedProjectTemplate`,
+            formData,
+            {headers: {'Content-Type': 'multipart/form-data'}},
+        );
+    }
     static getCommittedProjectsPage(scenarioId: string, data:PagingRequest<SectionCommittedProject>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.CommittedProject}/GetSectionCommittedProjectsPage/${scenarioId}`, data

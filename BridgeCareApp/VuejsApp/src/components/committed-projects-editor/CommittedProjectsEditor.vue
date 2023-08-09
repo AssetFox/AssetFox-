@@ -5,13 +5,22 @@
                 <v-flex xs12>
                     <v-layout>
                         <v-btn @click='OnGetTemplateClick' 
-                            class="ghd-white-bg ghd-blue ghd-button" outline>Get Template</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Get Template</v-btn>
+                            <input
+                            id="committedProjectTemplateUpload"
+                            type="file"
+                            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                            ref="committedProjectTemplateInput"
+                            @change="handlecommittedProjectTemplateUpload"
+                            hidden/>
+                        <v-btn @click="onUploadCommittedProjectTemplate"
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Upload Committed Project Template</v-btn>
                         <v-btn @click='showImportExportCommittedProjectsDialog = true' 
-                            class="ghd-white-bg ghd-blue ghd-button" outline>Import Projects</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Import Projects</v-btn>
                         <v-btn @click='OnExportProjectsClick' 
-                            class="ghd-white-bg ghd-blue ghd-button" outline>Export Projects</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Export Projects</v-btn>
                         <v-btn @click='OnDeleteAllClick' 
-                            class="ghd-white-bg ghd-blue ghd-button" outline>Delete All</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Delete All</v-btn>
                     </v-layout>
                 </v-flex>
 
@@ -411,6 +420,7 @@ export default class CommittedProjectsEditor extends Vue  {
     projectPagination: Pagination = clone(emptyPagination);
 
     @State(state => state.committedProjectsModule.sectionCommittedProjects) stateSectionCommittedProjects: SectionCommittedProject[];
+    @State(state => state.committedProjectsModule.committedProjectTemplate) committedProjectTemplate: string;
     @State(state => state.treatmentModule.treatmentLibraries)stateTreatmentLibraries: TreatmentLibrary[];
     selectedLibraryTreatments: Treatment[];
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
@@ -420,6 +430,7 @@ export default class CommittedProjectsEditor extends Vue  {
     @State(state => state.networkModule.networks) networks: Network[];
 
     @Action('getCommittedProjects') getCommittedProjects: any;
+    @Action('importComittedProjectTemplate') importCommittedProjectTemplate: any;
     @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
     @Action('getScenarioSelectableTreatments') getScenarioSelectableTreatmentsAction: any;
     @Action('getInvestmentPlan') getInvestmentPlanAction: any;
@@ -439,6 +450,7 @@ export default class CommittedProjectsEditor extends Vue  {
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
+   
 
     cpItems: SectionCommittedProjectTableData[] = [];
     selectedCpItems: SectionCommittedProjectTableData[] = [];
@@ -1153,6 +1165,14 @@ export default class CommittedProjectsEditor extends Vue  {
         this.updateCommittedProject(row, factor, 'performanceFactor');
         this.onPaginationChanged();
     }
+
+    onUploadCommittedProjectTemplate(){
+      document.getElementById("committedProjectTemplateUpload")?.click();
+   }
+    handleCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
+      const file = event.target.files[0];
+      this.importCommittedProjectTemplate(file);   
+   }
 
     checkAssetExistence(scp: SectionCommittedProjectTableData, keyAttr: string){
         CommittedProjectsService.validateAssetExistence(this.network, keyAttr).then((response: AxiosResponse) => {

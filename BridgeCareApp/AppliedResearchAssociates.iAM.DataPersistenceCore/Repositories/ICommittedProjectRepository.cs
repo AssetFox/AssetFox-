@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs;
+using System.IO;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -18,6 +19,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<BaseCommittedProjectDTO> GetCommittedProjectsForExport(Guid simulationId);
 
         void UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects);
+
+        void SetCommittedProjectTemplate(FileStream name);
 
         void DeleteSimulationCommittedProjects(Guid simulationId);
 

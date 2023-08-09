@@ -7,11 +7,15 @@ import { any, append, clone, contains, findIndex, propEq, update } from "ramda";
 
 const state = {
     sectionCommittedProjects: [] as SectionCommittedProject[],
+    committedProjectTemplate : ''
 };
 
 const mutations = {
     sectionCommittedProjectsCloneMutator(state: any, sectionCommittedProjects: SectionCommittedProject[] ) {
         state.sectionCommittedProjects = clone(sectionCommittedProjects);
+    },
+    committedProjectTemplateMutator(state: any, committedProjectTemplate: string){
+        state.committedProjectTemplate = committedProjectTemplate;
     },
     sectionCommittedProjectsMutator(state: any, sectionCommittedProjects: SectionCommittedProject[] ) {
         sectionCommittedProjects.forEach((proj: SectionCommittedProject) => {
@@ -57,6 +61,19 @@ const actions = {
                 }
             })
     },
+    async importCommittedProjectTemplate({commit, dispatch}: any, payload: File) {
+        await CommittedProjectsService.importCommittedProjectTemplate(payload)
+        .then(async (response: AxiosResponse) => {
+            if (response.status >= 200 && response.status < 300) {
+                const base64 = await convertFileToBase64(payload);
+                commit('agencyLogoMutator', base64);
+                commit('isSuccessfulImportMutator', true);
+                dispatch('addSuccessNotification',{
+                    message: 'Agency logo imported'
+                });
+            }
+        });
+    },
     async deleteSimulationCommittedProjects({commit, dispatch}: any, scenarioId: string){
         await CommittedProjectsService.deleteSimulationCommittedProjects(scenarioId)
             .then((response: AxiosResponse) => {
@@ -83,6 +100,14 @@ const actions = {
         });
     },
 }
+
+function convertFileToBase64(file: File): Promise<string> {
+    return new Promise<string>(() => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+    });
+  }
+  
 export default {
     state,
     actions,

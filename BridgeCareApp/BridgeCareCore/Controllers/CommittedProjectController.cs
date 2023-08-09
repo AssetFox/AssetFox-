@@ -21,6 +21,8 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
+using System.IO;
+using Org.BouncyCastle.Utilities;
 
 namespace BridgeCareCore.Controllers
 {
@@ -216,6 +218,27 @@ namespace BridgeCareCore.Controllers
         {
             var result = await Task.Factory.StartNew(() => _committedProjectService.CreateCommittedProjectTemplate(networkId));
             return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("SetCommittedProjectTemplate/{name}")]
+        [Authorize(Policy = Policy.ModifyAdminSiteSettings)]
+        public async Task<IActionResult> SetCommittedProjectTemplate(FileStream name)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.CommittedProjectRepo.SetCommittedProjectTemplate(name);
+                });
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, "Successfully Updated Implementation Name");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"::Unable to Upload Template - {e.Message}");
+                throw;
+            }
         }
 
         [HttpDelete]

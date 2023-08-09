@@ -594,7 +594,7 @@ export default class TreatmentEditor extends Vue {
         this.budgets = clone(this.stateScenarioSimpleBudgetDetails);
     }
 
-    
+  
     @Watch('stateTreatmentLibraries')
     onStateTreatmentLibrariesChanged() {
         this.librarySelectItems = this.stateTreatmentLibraries.map(
@@ -763,6 +763,7 @@ export default class TreatmentEditor extends Vue {
             criterionLibrary: this.selectedTreatment.criterionLibrary,
             category: this.selectedTreatment.category,
             assetType: this.selectedTreatment.assetType,
+            isUnselectable: this.selectedTreatment.isUnselectable,
         };
 
         this.isNoTreatmentSelected = this.selectedTreatment.name == 'No Treatment';
@@ -929,30 +930,27 @@ export default class TreatmentEditor extends Vue {
 
     onUpsertScenarioTreatments() {
 
-        if (this.selectedTreatmentLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
-        else { this.scenarioLibraryIsModified = false; }
-
-        TreatmentService.upsertScenarioSelectedTreatments({
-            libraryId: this.selectedTreatmentLibrary.id === this.uuidNIL ? null : this.selectedTreatmentLibrary.id,
-            rowsForDeletion: [],
-            updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows,
-            isModified: this.scenarioLibraryIsModified,
-        }, this.selectedScenarioId).then((response: AxiosResponse) => {
-            if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                //this.clearChanges();
-                if(this.hasSelectedLibrary){
-                    this.librarySelectItemValue = null;
-                    this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId)
-                }
-                this.treatmentCache.push(this.selectedTreatment);
-                
-                this.addSuccessNotificationAction({message: "Modified scenario's treatments"});   
-                
-                this.checkHasUnsavedChanges();
-            }           
-        });
+if (this.selectedTreatmentLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
+else { this.scenarioLibraryIsModified = false; }
+TreatmentService.upsertScenarioSelectedTreatments({
+    libraryId: this.selectedTreatmentLibrary.id === this.uuidNIL ? null : this.selectedTreatmentLibrary.id,
+    rowsForDeletion: [],
+    updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+    addedRows: this.addedRows,
+    isModified: this.scenarioLibraryIsModified,
+}, this.selectedScenarioId).then((response: AxiosResponse) => {
+    if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+        this.clearChanges();
+        if(this.hasSelectedLibrary){
+            this.librarySelectItemValue = null;
+            this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId)
+        }
+        this.treatmentCache.push(this.selectedTreatment);
         
+        this.addSuccessNotificationAction({message: "Modified scenario's treatments"});   
+        this.checkHasUnsavedChanges();
+    }           
+});      
     }
 
     onUpsertTreatmentLibrary() {
@@ -968,6 +966,7 @@ export default class TreatmentEditor extends Vue {
                 },
                 scenarioId: null
         }
+
         TreatmentService.upsertTreatmentLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges();              
@@ -1001,6 +1000,7 @@ export default class TreatmentEditor extends Vue {
                 criterionLibrary: treatmentDetails.criterionLibrary,
                 category: treatmentDetails.category,
                 assetType: treatmentDetails.assetType,
+                isUnselectable: treatmentDetails.isUnselectable,
             });
         }
     }
@@ -1098,11 +1098,10 @@ export default class TreatmentEditor extends Vue {
     }
 
     modifySelectedTreatment(treatment: Treatment) {
-        this.selectedTreatment = treatment;
-
-        this.onUpdateRow(treatment.id, treatment);
-        this.checkHasUnsavedChanges();
-    }
+    this.selectedTreatment = treatment;
+    this.onUpdateRow(treatment.id, treatment);
+    this.checkHasUnsavedChanges();
+}
 
     onDiscardChanges() {
         this.treatmentSelectItemValue = "";
@@ -1297,13 +1296,13 @@ export default class TreatmentEditor extends Vue {
     }
 
     checkHasUnsavedChanges(){
-        const hasUnsavedChanges: boolean = 
-            this.addedRows.length > 0 ||
-            this.updatedRowsMap.size > 0 || 
-            (this.hasScenario && this.hasSelectedLibrary) ||
-            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.stateSelectedTreatmentLibrary, this.selectedTreatmentLibrary))
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-    }
+    const hasUnsavedChanges: boolean =
+        this.addedRows.length > 0 ||
+        this.updatedRowsMap.size > 0 ||
+        (this.hasScenario && this.hasSelectedLibrary) ||
+        (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.stateSelectedTreatmentLibrary, this.selectedTreatmentLibrary)) 
+    this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+}
 
     CheckUnsavedDialog(next: any, otherwise: any) {
         if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {

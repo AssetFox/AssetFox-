@@ -26,7 +26,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Description = dto.Description,
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
-                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType
+                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
+                IsUnselectable = dto.IsUnselectable
             };
 
         public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this TreatmentDTO dto, Guid simulationId) =>
@@ -41,6 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 IsModified = dto.IsModified,
                 LibraryId = dto.LibraryId,
+                IsUnselectable = dto.IsUnselectable,
 
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
                 AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
@@ -153,7 +155,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),
                 Category = (TreatmentCategory)entity.Category,
-                AssetType = (AssetCategories)entity.AssetType
+                AssetType = (AssetCategories)entity.AssetType,
+                // TODO: Handle the "unselectable" flag when integrating with the simulation engine
+                IsUnselectable = entity.IsUnselectable
+
             };
 
         public static TreatmentDTOWithSimulationId ToDtoWithSimulationId(this ScenarioSelectableTreatmentEntity entity)
@@ -235,7 +240,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsModified = entity.IsModified,
                 LibraryId = entity.LibraryId,
 
-                AssetType = (AssetCategories)entity.AssetType
+                AssetType = (AssetCategories)entity.AssetType,
+                // TODO: Handle the "unselectable" flag when integrating with the simulation engine
+                IsUnselectable = entity.IsUnselectable
             };
     }
 }

@@ -66,7 +66,7 @@ export default class TreatmentService {
     }
 
 
-    static importLibraryTreatment(
+    static importLibraryTreatments(
         file: File,
         id: string,
         forScenario: boolean
@@ -83,7 +83,7 @@ export default class TreatmentService {
         );
     }
 
-    static importScenarioTreatment(
+    static importScenarioTreatments(
         file: File,
         id: string,
         forScenario: boolean

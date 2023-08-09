@@ -38,10 +38,6 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _treatmentService = scope.ServiceProvider.GetRequiredService<ITreatmentService>();
             var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, SimulationId);
             _treatmentService.ImportScenarioTreatmentsFileSingle(SimulationId, ExcelPackage, cancellationToken, _queueLogger);
-            //if (importResult.WarningMessage != null && importResult.WarningMessage.Trim() != "")
-            //{
-               // _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWarning, importResult.WarningMessage);
-            //}
         }
 
         public void OnFault(IServiceProvider serviceProvider, string errorMessage)

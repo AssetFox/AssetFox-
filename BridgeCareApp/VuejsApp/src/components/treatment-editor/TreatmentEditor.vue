@@ -1157,10 +1157,10 @@ export default class TreatmentEditor extends Vue {
                 file: result.file 
             };
             if (this.hasScenario) {
-                TreatmentService.importScenarioTreatment(data.file, this.newTreatment.libraryId, this.hasScenario)
+                TreatmentService.importScenarioTreatments(data.file, this.newTreatment.libraryId, this.hasScenario)
             }
             else{
-                TreatmentService.importLibraryTreatment(data.file, this.selectedTreatmentLibrary.id, this.hasScenario)
+                TreatmentService.importLibraryTreatments(data.file, this.selectedTreatmentLibrary.id, this.hasScenario)
             }
             this.hasImport = true;
         }

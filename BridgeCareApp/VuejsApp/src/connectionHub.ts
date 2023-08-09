@@ -11,6 +11,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import has = Reflect.has;
 import { getUserName } from '@/shared/utils/get-user-info';
 import { queuedWorkStatusUpdate } from './shared/models/iAM/queuedWorkStatusUpdate';
+import { importCompletion } from './shared/models/iAM/ImportCompletion';
 
 export default {
     install(Vue: any) {
@@ -100,6 +101,12 @@ export default {
             });
         });
 
+        connection.on(Hub.BroadcastType.BroadcastImportCompletion, (importComp: importCompletion) => {
+            statusHub.$emit(Hub.BroadcastEventType.BroadcastImportCompletionEvent, {
+                importComp,
+            });
+        });
+
         connection.on(Hub.BroadcastType.BroadcastError, error => {
             statusHub.$emit(Hub.BroadcastEventType.BroadcastErrorEvent, {
                 error,
@@ -173,7 +180,8 @@ export const Hub = {
         BroadcastWorkQueueUpdate: 'BroadcastWorkQueueUpdate',
         BroadcastWorkQueueStatusUpdate: 'BroadcastWorkQueueStatusUpdate',
         BroadcastFastWorkQueueUpdate: 'BroadcastFastWorkQueueUpdate',
-        BroadcastFastWorkQueueStatusUpdate: 'BroadcastFastWorkQueueStatusUpdate',        
+        BroadcastFastWorkQueueStatusUpdate: 'BroadcastFastWorkQueueStatusUpdate',
+        BroadcastImportCompletion: 'BroadcastImportCompletion',        
     },
     BroadcastEventType: {
         BroadcastErrorEvent: 'BroadcastErrorEvent',
@@ -193,5 +201,6 @@ export const Hub = {
         BroadcastWorkQueueStatusUpdateEvent: 'BroadcastWorkQueueStatusUpdateEvent',
         BroadcastFastWorkQueueUpdateEvent: 'BroadcastFastWorkQueueUpdateEvent',
         BroadcastFastWorkQueueStatusUpdateEvent: 'BroadcastFastWorkQueueStatusUpdateEvent',        
+        BroadcastImportCompletionEvent: 'BroadcastImportCompletionEvent',
     },
 };

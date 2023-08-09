@@ -15,19 +15,19 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportLibraryPerformanceCurveWorkitem(Guid PerformanceCurveLibraryId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportLibraryPerformanceCurveWorkitem(Guid PerformanceCurveLibraryId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter, string UserId, string PerformanceCurveName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => PerformanceCurveLibraryId.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(PerformanceCurveLibraryId, WorkType.ImportLibraryPerformanceCurve);
 
         public DateTime StartTime { get; set; }
 
         public string WorkDescription => "Import Library Performance Curve";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryPerformanceCurve, DomainType = DomainType.PerformanceCurve };
+            new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryPerformanceCurve, DomainType = DomainType.PerformanceCurve, DomainId = PerformanceCurveLibraryId};
 
-        public string WorkName => NetworkName;
+        public string WorkName => PerformanceCurveName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _performanceCurvesService = scope.ServiceProvider.GetRequiredService<IPerformanceCurvesService>();
-            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, PerformanceCurveLibraryId);
+            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             var importResult = _performanceCurvesService.ImportLibraryPerformanceCurvesFile(PerformanceCurveLibraryId, ExcelPackage, CurrentUserCriteriaFilter, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null)
             {
@@ -57,6 +57,11 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported performance curve library: {WorkName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
+            {
+                Id = Metadata.DomainId,
+                WorkType = Metadata.WorkType
+            });
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

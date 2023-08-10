@@ -44,7 +44,6 @@
                         Administration
                     </v-btn>
                     <v-btn
-                    v-if="stateInventoryReportNames.length > 0"
                         id="App-inventory-btn"
                         @click="onNavigate('/Inventory/')"
                         class="ara-blue-pantone-281"

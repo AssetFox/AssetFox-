@@ -109,16 +109,20 @@
         onStateKeyFieldsChanged(){
             if(this.reportType === 'P') {
                 this.inventoryDetails = clone(this.stateKeyFields);
+                this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
+                this.getInventoryAction(this.inventoryDetails);
             }
-            else if(this.reportType === 'R') {
-                this.inventoryDetails = clone(this.stateRawDataKeyFields);
-            }
-            this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
-            this.getInventoryAction(this.inventoryDetails);
         }
 
-        @Watch('stateRawKeyFields')
+        @Watch('stateRawDataKeyFields')
         onStateRawKeyFieldsChanged(){
+            if(this.reportType === 'R') {
+                this.inventoryDetails = clone(this.stateRawDataKeyFields);
+
+                this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
+                this.getInventoryAction(this.inventoryDetails);
+            } 
+
         }
 
         @Watch('stateInventoryReportNames')
@@ -128,7 +132,6 @@
             
             this.lastThreeLetters = this.inventoryReportName.slice(-3);
             this.reportType = this.lastThreeLetters[1];
-            this.onStateKeyFieldsChanged();
         }
 
         @Watch('stateConstraintType')

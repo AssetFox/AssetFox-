@@ -162,7 +162,9 @@
                 </v-toolbar-title>
                 <v-toolbar-title style="margin-left:2px !important" class="navbar-gray" v-if="authenticated">
                     <img style="height:40px; position:relative; top:2px" :src="require('@/assets/icons/user-no-circle.svg')"/>
-                    <span>{{ username }}</span>
+                    <span
+                      id="App-username-span"
+                    >{{ username }}</span>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
                     <v-btn
@@ -186,6 +188,7 @@
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="authenticated">
                     <v-btn
+                        id="App-b2cLogout-vbtn"
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogout"
                         class="mx-2"
@@ -195,6 +198,7 @@
                         <v-icon small color="white">fas fa-sign-out-alt</v-icon>
                     </v-btn>
                     <v-btn
+                        id="App-esecLogout-vbtn"
                         v-if="securityType === esecSecurityType"
                         @click="onLogout"
                         class="mx-2"
@@ -710,6 +714,7 @@ export default class AppComponent extends Vue {
                     'http://www.bamssyst.penndot.gov/iAM?host=' +
                     encodeURI(window.location.host);
             } else {
+                alert(window.location.host);
                 this.onNavigate('/iAM/');
             }
         });

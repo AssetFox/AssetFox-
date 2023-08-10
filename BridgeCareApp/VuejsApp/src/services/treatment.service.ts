@@ -65,6 +65,41 @@ export default class TreatmentService {
         );
     }
 
+
+    static importLibraryTreatments(
+        file: File,
+        id: string,
+        forScenario: boolean
+    ){
+        let formData = new FormData();
+
+        formData.append('file', file);
+        formData.append(forScenario ? 'simulationId' : 'libraryId', id);
+
+        coreAxiosInstance.post(
+            `${API.Treatment}/ImportLibraryTreatmentsFileSingle`,
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } },
+        );
+    }
+
+    static importScenarioTreatments(
+        file: File,
+        id: string,
+        forScenario: boolean
+    ){
+        let formData = new FormData();
+
+        formData.append('file', file);
+        formData.append(forScenario ? 'simulationId' : 'libraryId', id);
+
+        coreAxiosInstance.post(
+            `${API.Treatment}/ImportScenarioTreatmentsFileSingle`,
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } },
+        );
+    }
+
     static importTreatments(
         file: File,
         id: string,

@@ -22,7 +22,7 @@ namespace BridgeCareCore.Services
 {
     public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserInfo, string ScenarioName) : IWorkSpecification<WorkQueueMetadata>
     {
-        public string WorkId => SimulationId.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(SimulationId, WorkType.SimulationAnalysis);
 
         public DateTime StartTime { get; set; }
 
@@ -34,6 +34,7 @@ namespace BridgeCareCore.Services
         {
             WorkType = WorkType.SimulationAnalysis,
             DomainType = DomainType.Simulation,
+            DomainId = SimulationId
         };
 
         public string WorkName => ScenarioName;

@@ -20,6 +20,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void DeleteTreatmentLibrary(Guid libraryId);
 
+        void AddLibraryTreatments(List<TreatmentDTO> treatments, Guid libraryId);
+        void AddScenarioSelectableTreatment(List<TreatmentDTO> scenarioSelectableTreatments,
+           Guid simulationId);
+
         List<TreatmentDTO> GetScenarioSelectableTreatments(Guid simulationId);
         List<TreatmentDTO> GetSelectableTreatments(Guid libraryId);
 

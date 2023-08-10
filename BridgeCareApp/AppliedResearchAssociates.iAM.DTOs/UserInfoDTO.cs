@@ -13,7 +13,5 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public bool HasAdminAccess { get; set; }
 
         public bool HasSimulationAccess { get; set; }
-
-        public List<string> InternalRoles { get; set; }
     }
 }

@@ -19,9 +19,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Logging
         private readonly IHubService _hubService;
         private readonly string _username;
         private Action<string> _updateAction;
-        private Guid _workId;
+        private string _workId;
 
-        public GeneralWorkQueueLogger(IHubService hubService, string userName, Action<string> updateAction, Guid workId)
+        public GeneralWorkQueueLogger(IHubService hubService, string userName, Action<string> updateAction, string workId)
         {
             _hubService = hubService;
             _username = userName;

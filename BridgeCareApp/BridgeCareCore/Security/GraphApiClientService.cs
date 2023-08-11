@@ -17,7 +17,7 @@ namespace BridgeCareCore.Security
         public GraphApiClientService(IConfiguration configuration)
         {
             var azureAdB2CSection = configuration.GetSection("AzureAdB2C");
-            if (azureAdB2CSection.Value == null)
+            if (!azureAdB2CSection.GetChildren().Any())
             {
                 return;
             }

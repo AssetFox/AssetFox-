@@ -69,7 +69,7 @@ const actions = {
                 commit('agencyLogoMutator', base64);
                 commit('isSuccessfulImportMutator', true);
                 dispatch('addSuccessNotification',{
-                    message: 'Agency logo imported'
+                    message: 'Committed Project Template imported'
                 });
             }
         });

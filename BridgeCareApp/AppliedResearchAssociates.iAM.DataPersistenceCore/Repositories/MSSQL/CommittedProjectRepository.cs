@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -13,6 +14,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.Hubs.Services;
+using AppliedResearchAssociates.iAM.Hubs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
@@ -73,13 +76,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             BinaryReader br = new BinaryReader(name);
             var fileSize = name.Length;
-            var bytes = br.ReadBytes(Convert.ToInt32(name));
+            var bytes = br.ReadBytes(Convert.ToInt32(fileSize));
             br.Close();
             name.Close();
 
-            var existingComittedProjectTemplate = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == "Committed Project Template").FirstOrDefault();
+            var existingComittedProjectTemplate = _unitOfWork.Context.CommittedProjectSettings.Where(_ => _.Key == "Committed Project Template").FirstOrDefault();
             if (existingComittedProjectTemplate == null)
-                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                _unitOfWork.Context.CommittedProjectSettings.Add(new CommittedProjectSettingsEntity
                 {
                     Key = "Committed Project Template",
                     Value = string.Format(Convert.ToBase64String(bytes))
@@ -87,7 +90,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             else
             {
                 existingComittedProjectTemplate.Value = string.Format(Convert.ToBase64String(bytes));
-                _unitOfWork.Context.AdminSettings.Update(existingComittedProjectTemplate);
+                _unitOfWork.Context.CommittedProjectSettings.Update(existingComittedProjectTemplate);
             }
             _unitOfWork.Context.SaveChanges();
         }
@@ -130,6 +133,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 totalCost += currentCost;
             });
             return totalCost;
+        }
+
+        public string DownloadCommittedProjectTemplate()
+        {
+            try
+            {
+                return _unitOfWork.Context.CommittedProjectSettings.Where(_ => _.Key == "Committed Project Template").FirstOrDefault().Value;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
 
         private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)

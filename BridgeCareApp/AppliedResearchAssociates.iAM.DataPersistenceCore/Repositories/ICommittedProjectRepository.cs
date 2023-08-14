@@ -22,6 +22,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void SetCommittedProjectTemplate(Stream name);
 
+        string DownloadCommittedProjectTemplate();
+
         void DeleteSimulationCommittedProjects(Guid simulationId);
 
         void DeleteSpecificCommittedProjects(List<Guid> projectIds);

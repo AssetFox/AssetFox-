@@ -136,6 +136,23 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("DownloadCommittedProjectTemplate")]
+        [Authorize]
+        public async Task<IActionResult> DownloadCommittedProjectTemplate()
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.CommittedProjectRepo.DownloadCommittedProjectTemplate());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"::Unable to DownloadedTemplate - {e.Message}");
+                throw;
+            }
+        }
+
         [HttpPost]
         [Route("ValidateAssetExistence/{keyAttrValue}")]
         [Authorize]

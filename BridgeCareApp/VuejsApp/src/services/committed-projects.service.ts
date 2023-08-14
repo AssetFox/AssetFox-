@@ -10,6 +10,11 @@ export default class CommittedProjectsService {
             `${API.CommittedProject}/CommittedProjectTemplate/${networkId}`,
         );
     }
+    static getUploadedCommittedProjectTemplate(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.CommittedProject}/DownloadCommittedProjectTemplate`,
+        );
+    }
     static exportCommittedProjects(scenarioId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.CommittedProject}/ExportCommittedProjects/${scenarioId}`,

@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             string networkKeyAttribute)
         {
             var analysisMethod = AnalysisMethodMapper.ToEntity(dto.AnalysisMethod, dto.Id);
-            var investmentPlan = InvestmentPlanMapper.ToEntity(dto.InvestmentPlan, dto.Id);
+            var investmentPlan = InvestmentPlanMapper.ToEntityNullPropagating(dto.InvestmentPlan, dto.Id);
             var reportIndexEntities = new List<ReportIndexEntity>();
             foreach (var report in dto.ReportIndexes)
             {
@@ -68,7 +68,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var scenarioRemainingLifeLimitEntities = new List<ScenarioRemainingLifeLimitEntity>();
             foreach (var remainingLifeLimit in dto.RemainingLifeLimits)
             {
-                var remainingLifeLimitEntity = remainingLifeLimit.ToScenarioEntity(dto.Id, dto.Id);
+                var attributeName = remainingLifeLimit.Attribute;
+                var attribute = attributes.FirstOrDefault(a => a.Name == attributeName);
+                var remainingLifeLimitEntity = remainingLifeLimit.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, attribute.Id);
                 scenarioRemainingLifeLimitEntities.Add(remainingLifeLimitEntity);
             }
             var scenarioBudgetPriorityEntities = new List<ScenarioBudgetPriorityEntity>();
@@ -107,6 +109,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 BudgetPriorities = scenarioBudgetPriorityEntities,
                 CashFlowRules = scenarioCashFlowRuleEntities,
                 CommittedProjects = committedProjectEntities,
+                SelectableTreatments = scenarioSelectableTreatmentEntities,
             };
 
             return entity;

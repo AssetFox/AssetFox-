@@ -615,10 +615,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationDto = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(_testSimulationToClone.Id);
             var cloneSimulationDto = new CloneSimulationDTO
             {
-                networkId = _testSimulationToClone.NetworkId,
-                scenarioId = _testSimulationToClone.Id,
+                NetworkId = _testSimulationToClone.NetworkId,
+                SourceScenarioId = _testSimulationToClone.Id,
                 Id = Guid.NewGuid(),
-                scenarioName = _testSimulationToClone.Name,
+                ScenarioName = _testSimulationToClone.Name,
             };
 
             // Act

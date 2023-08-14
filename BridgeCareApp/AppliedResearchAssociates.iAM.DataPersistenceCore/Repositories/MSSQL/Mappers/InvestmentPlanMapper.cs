@@ -33,6 +33,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldAccumulateUnusedBudgetAmounts = dto.ShouldAccumulateUnusedBudgetAmounts
             };
 
+        public static InvestmentPlanEntity ToEntityNullPropagating(this InvestmentPlanDTO dto, Guid simulationId)
+        {
+            if (dto == null)
+            {
+                return null;
+            }
+            return ToEntity(dto, simulationId);
+        }
+
+
+
         public static InvestmentPlanDTO ToDto(this InvestmentPlanEntity entity) =>
             new InvestmentPlanDTO
             {

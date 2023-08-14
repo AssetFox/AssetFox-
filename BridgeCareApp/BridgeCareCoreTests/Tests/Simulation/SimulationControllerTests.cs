@@ -249,9 +249,9 @@ namespace BridgeCareCoreTests.Tests
             repo.Setup(r => r.CloneSimulation(simulationId, networkId, SimulationName)).Returns(cloneResult);
             var cloneSimulationDto = new CloneSimulationDTO
             {
-                scenarioId = simulationId,
-                networkId = networkId,
-                scenarioName = SimulationName,
+                SourceScenarioId = simulationId,
+                NetworkId = networkId,
+                ScenarioName = SimulationName,
             };
 
             var result = await controller.CloneSimulation(cloneSimulationDto);

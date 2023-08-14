@@ -30,7 +30,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 Name = coreSimulation.Name,
                 NetworkId = coreSimulation.NetworkId,
-                ReportStatus = coreSimulation.ReportStatus
+                ReportStatus = coreSimulation.ReportStatus,
+                Id = simulationGuid,
             };
 
             fullSimulation.AnalysisMethod = _unitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationGuid);
@@ -39,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             fullSimulation.ReportIndexes = _unitOfWork.ReportIndexRepository.GetAllForScenario(simulationGuid);
             fullSimulation.CommittedProjects = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationGuid);
             fullSimulation.CalculatedAttributes = _unitOfWork.CalculatedAttributeRepo.GetScenarioCalculatedAttributes(simulationGuid).ToList();
-            fullSimulation.Treatments = _unitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(simulationGuid);
+            fullSimulation.Treatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationGuid);
             fullSimulation.TargetConditionGoals = _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationGuid);
             fullSimulation.Budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationGuid);
             fullSimulation.DeficientConditionGoals = _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationGuid);
@@ -52,15 +53,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public SimulationCloningResultDTO Clone(CloneSimulationDTO dto)
         {
             // load it
-            var simulationId = dto.scenarioId.ToString();
-            var completeSimulation = this.GetSimulation(simulationId);
+            var sourceSimulationId = dto.SourceScenarioId.ToString();
+            var sourceSimulation = this.GetSimulation(sourceSimulationId);
 
             // do the clone
-            var cloneSimulation = CompleteSimulationCloner.Clone(completeSimulation, dto);
+            var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto);
 
             // save it
-            var network = _unitOfWork.Context.Network.First(n => n.Id == dto.networkId);
-            var clone = CreateNewSimulation(completeSimulation, network.KeyAttributeId);
+            var network = _unitOfWork.Context.Network.First(n => n.Id == dto.NetworkId);
+            var clone = CreateNewSimulation(cloneSimulation, network.KeyAttributeId);
             return clone;
         }
 

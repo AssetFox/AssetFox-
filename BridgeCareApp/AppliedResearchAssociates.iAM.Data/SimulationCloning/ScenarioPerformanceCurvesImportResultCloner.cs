@@ -25,5 +25,10 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             return clone;
 
         }
+        internal static List<ScenarioPerformanceCurvesImportResultDTO> CloneListNullPropagating(IEnumerable<ScenarioPerformanceCurvesImportResultDTO> scenarioPerformanceCurvesImportResult)
+        {
+           if (scenarioPerformanceCurvesImportResult == null) { return null; }
+           return CloneList(scenarioPerformanceCurvesImportResult);
+        }
     }
 }

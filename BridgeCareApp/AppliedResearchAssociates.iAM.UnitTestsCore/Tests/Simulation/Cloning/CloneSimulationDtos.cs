@@ -9,14 +9,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
 {
     public static class CloneSimulationDtos
     {
-        public static CloneSimulationDTO Create(Guid simulationId, Guid networkId, string newSimulationName)
+        public static CloneSimulationDTO Create(Guid sourceSimulationId, Guid networkId, string newSimulationName)
         {
             var dto = new CloneSimulationDTO
             {
                 Id = Guid.NewGuid(),
-                networkId = networkId,
-                scenarioId = simulationId,
-                scenarioName = newSimulationName
+                NetworkId = networkId,
+                SourceScenarioId = sourceSimulationId,
+                ScenarioName = newSimulationName
             };
             return dto;
         }

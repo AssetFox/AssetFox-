@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             var cloneCashFlowFule = CashFlowRuleCloner.CloneList(completeSimulation.CashFlowRules);
             var cloneInvestmentPlan = InvestmentPlanCloner.Clone(completeSimulation.InvestmentPlan);
             var cloneReportIndex = ReportIndexCloner.CloneList(completeSimulation.ReportIndexes);
-            var cloneScenarioPerformanceCurvesImportResult = ScenarioPerformanceCurvesImportResultCloner.CloneList(completeSimulation.PerformanceCurves);
+            var cloneScenarioPerformanceCurvesImportResult = ScenarioPerformanceCurvesImportResultCloner.CloneListNullPropagating(completeSimulation.PerformanceCurves);
             var cloneCalculatedTribute = CalculatedAttributeCloner.CloneList(completeSimulation.CalculatedAttributes);
             var cloneRemainingLifeLimits = RemainingLifeLimitCloner.CloneList(completeSimulation.RemainingLifeLimits);
             var cloneTreatment = TreatmentCloner.CloneList(completeSimulation.Treatments);
@@ -24,8 +24,8 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
            var clone = new CompleteSimulationDTO
             {
                 NoTreatmentBeforeCommittedProjects = completeSimulation.NoTreatmentBeforeCommittedProjects,
-                Name = cloneRequest.scenarioName,
-                NetworkId = cloneRequest.networkId,
+                Name = cloneRequest.ScenarioName,
+                NetworkId = cloneRequest.NetworkId,
                 //figure out where the properties come from
                 AnalysisMethod = cloneAnalysisMethod,
                 ReportIndexes = cloneReportIndex,
@@ -39,6 +39,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
                 DeficientConditionGoals = cloneDeficientConditionGoal,
                 Budgets = cloneBudget,
                 CommittedProjects = cloneBaseCommittedProject,
+                Id = cloneRequest.Id,
             };
             return clone;
 

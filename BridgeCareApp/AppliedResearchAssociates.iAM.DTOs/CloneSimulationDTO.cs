@@ -5,9 +5,9 @@ namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class CloneSimulationDTO : BaseDTO
     {
-        public Guid scenarioId { get; set; }
-        public Guid networkId { get; set; }
-        public string scenarioName { get; set; }
+        public Guid SourceScenarioId { get; set; }
+        public Guid NetworkId { get; set; }
+        public string ScenarioName { get; set; }
 
     }
 }

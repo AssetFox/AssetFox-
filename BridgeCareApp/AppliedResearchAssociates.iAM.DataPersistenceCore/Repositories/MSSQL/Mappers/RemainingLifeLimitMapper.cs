@@ -51,6 +51,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Value = dto.Value,
             };
 
+        public static ScenarioRemainingLifeLimitEntity ToScenarioEntityWithCriterionLibraryJoin(this RemainingLifeLimitDTO dto, Guid simulationId,
+            Guid attributeId)
+        {
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var criterionLibrary = new CriterionLibraryEntity
+            {
+                MergedCriteriaExpression = criterionLibraryDto.MergedCriteriaExpression,
+                Id = criterionLibraryDto.Id,
+                Name = criterionLibraryDto.Name,
+            };
+            var entity = ToScenarioEntity(dto, simulationId,
+            attributeId);
+            var join = new CriterionLibraryScenarioRemainingLifeLimitEntity
+            {
+                ScenarioRemainingLifeLimitId = entity.Id,
+                CriterionLibrary = criterionLibrary,                
+            };
+            entity.CriterionLibraryScenarioRemainingLifeLimitJoin = join;
+
+            return entity;
+        }
+
+
         public static RemainingLifeLimitLibraryEntity ToEntity(this RemainingLifeLimitLibraryDTO dto) =>
             new RemainingLifeLimitLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };
 

@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
@@ -15,7 +15,7 @@ public class SimulationRunnerTests
     [Fact]
     public Task CommittedProjectBeforeAnalysisPeriod()
     {
-        var scenario = CreateExtremelyMinimalInput();
+        var scenario = InputCreation.CreateExtremelyMinimalInput();
 
         scenario.CommittedProjects.Add(new()
         {
@@ -40,159 +40,25 @@ public class SimulationRunnerTests
     }
 
     [Fact]
-    public Task ExtremelyMinimalInput() => RunTest(CreateExtremelyMinimalInput());
+    public Task ExtremelyMinimalInput() => RunTest(InputCreation.CreateExtremelyMinimalInput());
 
-    private static readonly JsonSerializerOptions SerializerOptions = new()
+    [Theory]
+    [ClassData(typeof(ScenarioJsonFilePaths))]
+    public Task JsonFileInputs(string fileName)
     {
-        Converters = { new JsonStringEnumConverter() },
-        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        WriteIndented = true,
-    };
+        var path = Path.Combine(ScenarioJsonFilePaths.ScenarioJsonFolderPath, fileName);
+        var scenario = InputCreation.CreateInputFromJsonFile(path);
+        return RunTest(scenario, fileName);
+    }
 
-    private static Scenario CreateExtremelyMinimalInput() => new()
-    {
-        AnalysisMethod = new()
-        {
-            BenefitAttributeName = "HEALTH",
-            BudgetPriorities =
-            {
-                new()
-                {
-                    BudgetPercentagePairs =
-                    {
-                        new()
-                        {
-                            BudgetName = "Bag of money",
-                            Percentage = 100,
-                        },
-                    },
-                },
-            },
-            SpendingStrategy = DTOs.Enums.SpendingStrategy.UnlimitedSpending,
-        },
-        InvestmentPlan =
-        {
-            Budgets =
-            {
-                new()
-                {
-                    Name = "Bag of money",
-                    YearlyAmounts = { 1_000_000 },
-                },
-            },
-            FirstYearOfAnalysisPeriod = 2020,
-            NumberOfYearsInAnalysisPeriod = 1,
-        },
-        Name = "Extremely minimal input",
-        NameOfPassiveTreatment = "Forget about it",
-        Network = new()
-        {
-            AttributeSystem =
-            {
-                NumberAttributes =
-                {
-                    new()
-                    {
-                        Name = "HEALTH",
-                        IsDecreasingWithDeterioration = true,
-                        MaximumValue = 100,
-                        MinimumValue = 0,
-                        DefaultValue = 50,
-                    },
-                },
-            },
-            MaintainableAssets =
-            {
-                new()
-                {
-                    Name = "LA 1",
-                    NumberAttributeHistories =
-                    {
-                        new()
-                        {
-                            AttributeName = "AGE",
-                            History =
-                            {
-                                new()
-                                {
-                                    Value = 20,
-                                    Year = 2015,
-                                },
-                            },
-                        },
-                        new()
-                        {
-                            AttributeName = "HEALTH",
-                            History =
-                            {
-                                new()
-                                {
-                                    Value = 90,
-                                    Year = 2015,
-                                },
-                            },
-                        },
-                    },
-                    SpatialWeightExpression = "1",
-                },
-            },
-        },
-        NumberOfYearsOfTreatmentOutlook = 100,
-        PerformanceCurves =
-        {
-            new()
-            {
-                AttributeName = "HEALTH",
-                EquationExpression = "(0,100)(100,0)",
-            },
-        },
-        SelectableTreatments =
-        {
-            new()
-            {
-                Name = "Forget about it",
-                Consequences =
-                {
-                    new()
-                    {
-                        AttributeName = "AGE",
-                        ChangeExpression = "+1",
-                    },
-                },
-            },
-            new()
-            {
-                Name = "Eldritch wizardry",
-                Consequences =
-                {
-                    new()
-                    {
-                        AttributeName = "HEALTH",
-                        ChangeExpression = "+10",
-                    },
-                },
-                Costs =
-                {
-                    new()
-                    {
-                        EquationExpression = "10000 * (100 - HEALTH)",
-                    },
-                },
-                FeasibilityCriterionExpressions = { "AGE >= 0" },
-                NamesOfUsableBudgets = { "Bag of money" },
-                ShadowForAnyTreatment = 2,
-                ShadowForSameTreatment = 5,
-            },
-        },
-    };
-
-    private static Task RunTest(Scenario scenario)
+    private static Task RunTest(Scenario scenario, string parametersText = null)
     {
         var input = scenario.ConvertOut();
         var runner = new SimulationRunner(input);
         runner.Run();
         var output = input.Results;
-        var outputJson = JsonSerializer.Serialize(output, SerializerOptions);
-        return Verifier.Verify(outputJson, "json").UseDirectory("Outputs");
+        var outputJson = JsonSerializer.Serialize(output, Serialization.Options);
+        var result = Verifier.Verify(outputJson, "json").UseDirectory("Outputs");
+        return parametersText is null ? result : result.UseTextForParameters(parametersText);
     }
 }

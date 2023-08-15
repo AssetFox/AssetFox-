@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using VerifyXunit;
 using Xunit;
 
@@ -43,12 +44,30 @@ public class SimulationRunnerTests
     public Task ExtremelyMinimalInput() => RunTest(InputCreation.CreateExtremelyMinimalInput());
 
     [Theory]
-    [ClassData(typeof(ScenarioJsonFilePaths))]
-    public Task JsonFileInputs(string fileName)
+    [ClassData(typeof(ScenarioJsonFileNames))]
+    public Task JsonFileInput(string fileName)
     {
-        var path = Path.Combine(ScenarioJsonFilePaths.ScenarioJsonFolderPath, fileName);
+        var path = Path.Combine(ScenarioJsonFileNames.FolderPath, fileName);
         var scenario = InputCreation.CreateInputFromJsonFile(path);
         return RunTest(scenario, fileName);
+    }
+
+    [Theory]
+    [ClassData(typeof(EnumValues<OptimizationStrategy>))]
+    public Task OptimizationStrategyUsage(OptimizationStrategy strategy)
+    {
+        var scenario = InputCreation.CreateSmallButRealInput();
+        scenario.AnalysisMethod.OptimizationStrategy = strategy;
+        return RunTest(scenario, strategy.ToString());
+    }
+
+    [Theory]
+    [ClassData(typeof(EnumValues<SpendingStrategy>))]
+    public Task SpendingStrategyUsage(SpendingStrategy strategy)
+    {
+        var scenario = InputCreation.CreateSmallButRealInput();
+        scenario.AnalysisMethod.SpendingStrategy = strategy;
+        return RunTest(scenario, strategy.ToString());
     }
 
     private static Task RunTest(Scenario scenario, string parametersText = null)

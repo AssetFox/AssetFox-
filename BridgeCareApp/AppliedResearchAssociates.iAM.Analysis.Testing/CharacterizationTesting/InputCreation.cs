@@ -148,4 +148,13 @@ public static class InputCreation
         using var jsonFile = File.OpenRead(path);
         return JsonSerializer.Deserialize<Scenario>(jsonFile, Serialization.Options);
     }
+
+    public static Scenario CreateSmallButRealInput()
+    {
+        var path = Path.Combine(
+            ScenarioJsonFileNames.FolderPath,
+            "2023-08-11 - iamtest - test scenario1.json");
+
+        return CreateInputFromJsonFile(path);
+    }
 }

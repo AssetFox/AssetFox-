@@ -272,7 +272,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             var lifeLimitBefore = lifeLimitsBefore.Single();
 
 
-            // var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+            //var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
             var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);

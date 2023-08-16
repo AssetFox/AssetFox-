@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
                 Id = Guid.NewGuid(),
                 IsSingleUse = critionLibrary.IsSingleUse,
                 MergedCriteriaExpression = critionLibrary.MergedCriteriaExpression,
+                Name = critionLibrary.Name,
             };
             return clone;
         }

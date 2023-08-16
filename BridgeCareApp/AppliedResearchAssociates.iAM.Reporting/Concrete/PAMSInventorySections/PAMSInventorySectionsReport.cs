@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
 
-            var sectionIds = Parse(parameters);
+            var sectionIds = JsonConvert.DeserializeObject<PAMSParameters>(parameters);
             _sectionData = GetAsset(sectionIds);
             if (Errors.Count > 0) return; // Errors occured in the GetAsset method
 

@@ -139,7 +139,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var datumValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
                     rawKeyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, datumValue)});
                 }
-                var raw = reportTypeParam[0].ElementAt(28);
                 
                if (reportTypeParam[0].Contains("(R)"))
                 {

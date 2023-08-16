@@ -293,7 +293,7 @@
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 
-                this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data});              
+                this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data.keyProperties}); 
         }
 
         QueryAccess() {

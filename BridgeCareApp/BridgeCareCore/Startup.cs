@@ -104,7 +104,8 @@ namespace BridgeCareCore
         {
             var reportFactoryList = new List<IReportFactory>();
             //reportFactoryList.Add(new HelloWorldReportFactory());
-            reportFactoryList.Add(new BAMSInventoryReportFactory());
+            reportFactoryList.Add(new BAMSInventoryPrimaryReportFactory());
+            reportFactoryList.Add(new BAMSInventoryRawReportFactory());
             reportFactoryList.Add(new BAMSSummaryReportFactory());
             reportFactoryList.Add(new ScenarioOutputReportFactory());
             reportFactoryList.Add(new PAMSSummaryReportFactory());

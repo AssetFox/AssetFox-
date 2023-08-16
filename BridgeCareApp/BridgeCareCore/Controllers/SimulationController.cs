@@ -584,16 +584,13 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                var scenarioName = "";
+                _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);                
                 await Task.Factory.StartNew(() =>
                 {
-                    scenarioName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
+                    var simulation = AnalysisInputLoading.GetSimulationWithoutAssets(UnitOfWork, networkId, simulationId);
+                    var validationResults = simulation.GetAllValidationResults(Enumerable.Empty<string>());
                 });
-
-                var simulation = AnalysisInputLoading.GetSimulationWithoutAssets(UnitOfWork, networkId, simulationId);
-                var validationResults = simulation.GetAllValidationResults(Enumerable.Empty<string>());
-
+                
                 // return results from validationResults in Ok
                 return Ok();
             }

@@ -46,9 +46,7 @@ export default class ScenarioService {
     }
 
     static runSimulation(networkId: string, scenarioId: string | undefined): AxiosPromise {
-        // TODO remove after testing Validate api
-        return coreAxiosInstance.post(`${API.Scenario}/ValidateSimulation/${networkId}/${scenarioId}`);
-        // return coreAxiosInstance.post(`${API.Scenario}/RunSimulation/${networkId}/${scenarioId}`);
+        return coreAxiosInstance.post(`${API.Scenario}/RunSimulation/${networkId}/${scenarioId}`);
     }
 
     static cancelWorkQueueItem(simulationId: string): AxiosPromise {

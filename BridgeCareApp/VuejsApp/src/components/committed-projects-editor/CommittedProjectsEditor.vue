@@ -23,19 +23,6 @@
 
                 <v-flex xs12 class="ghd-constant-header">
                     <v-layout>
-                        <v-flex xs6>
-                            <v-layout column>
-                                <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
-                                <v-select
-                                    id="CommittedProjectsEditor-treatmentLibrary-vSelect"
-                                    outline
-                                    append-icon=$vuetify.icons.ghd-down
-                                    class="ghd-select ghd-text-field ghd-text-field-border pa-0"
-                                    :items='librarySelectItems' 
-                                    v-model='librarySelectItemValue'>
-                                </v-select>                       
-                            </v-layout>
-                        </v-flex>
                         <v-flex xs6 style="margin-left: 5px">
                             <v-subheader class="ghd-control-label ghd-md-gray"></v-subheader>
                             <v-layout>                                
@@ -284,7 +271,6 @@ export default class CommittedProjectsEditor extends Vue  {
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
     attributeSelectItems: SelectItem[] = [];
-    treatmentSelectItems: string[] = [];
     budgetSelectItems: SelectItem[] = [];
     categorySelectItems: SelectItem[] = [];
     categories: string[] = [];
@@ -309,7 +295,6 @@ export default class CommittedProjectsEditor extends Vue  {
 
     @State(state => state.committedProjectsModule.sectionCommittedProjects) stateSectionCommittedProjects: SectionCommittedProject[];
     @State(state => state.treatmentModule.treatmentLibraries)stateTreatmentLibraries: TreatmentLibrary[];
-    selectedLibraryTreatments: Treatment[];
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
     @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
     @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
@@ -499,23 +484,6 @@ export default class CommittedProjectsEditor extends Vue  {
         }           
     }
 
-    @Watch('stateTreatmentLibraries')
-    onStateTreatmentLibrariesChanged() {
-        this.librarySelectItems = this.stateTreatmentLibraries.map(
-            (library: TreatmentLibrary) => ({
-                text: library.name,
-                value: library.id
-            }),
-        );
-    }
-
-    @Watch('selectedLibraryTreatments', {deep: true})
-    onSelectedLibraryTreatmentsChanged(){
-        this.treatmentSelectItems = this.selectedLibraryTreatments.map(
-            (treatment: Treatment) => (treatment.name)
-        );
-    }
-
     @Watch('stateAttributes')
     onStateAttributesChanged(){
         this.attributeSelectItems = this.stateAttributes.map(
@@ -552,16 +520,6 @@ export default class CommittedProjectsEditor extends Vue  {
             this.setCpItems();
     }
 
-    @Watch('librarySelectItemValue')
-    onSelectAttributeItemValueChanged() {
-        this.selectTreatmentLibraryAction(this.librarySelectItemValue);
-        this.hasSelectedLibrary = true;
-        const library = this.stateTreatmentLibraries.find(o => o.id == this.librarySelectItemValue)
-        if(!isNil(library)){
-            this.selectedLibraryTreatments = library.treatments;
-            this.onSelectedLibraryTreatmentsChanged()
-        }        
-    }
 
 
     @Watch('sectionCommittedProjects')
@@ -609,13 +567,13 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.totalItems = data.totalItems;
                     const row = data.items.find(scp => scp.id == this.selectedCommittedProject);
 
-                    // Updated existing data with no factor set to 1
+                   // Updated existing data with no factor set to 1.2
                     this.sectionCommittedProjects.forEach(element => {
                         if (element.consequences !=null){
                             element.consequences.forEach(consequence => {
-                            if (consequence.performanceFactor !== 1) {
-                                consequence.performanceFactor = 1;
-                                this.updateCommittedProject(row ? row : emptySectionCommittedProject, "1", "performanceFactor");
+                            if (consequence.performanceFactor === 0) {
+                                consequence.performanceFactor = 1.2;
+                                this.updateCommittedProject(row ? row : emptySectionCommittedProject, "1.2", "performanceFactor");
                             }
                         });
                         }
@@ -907,33 +865,6 @@ export default class CommittedProjectsEditor extends Vue  {
         return row
     }
 
-    handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
-        row.treatment = treatmentName;
-        this.updateCommittedProject(row, treatmentName, 'treatment')  
-        CommittedProjectsService.FillTreatmentValues({
-            committedProjectId: row.id,
-            treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : getBlankGuid(),
-            treatmentName: treatmentName,
-            KeyAttributeValue: row.locationKeys[this.keyattr],
-            networkId: this.networkId
-        })
-        .then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                var values = response.data as CommittedProjectFillTreatmentReturnValues
-                row.cost = values.treatmentCost;
-                row.consequences = values.validTreatmentConsequences;
-                row.category = values.treatmentCategory;
-                scp.cost = row.cost;
-                let cat = this.reverseCatMap.get(row.category);
-                if(!isNil(cat))
-                    scp.category = cat;           
-                this.updateCommittedProject(row, row.cost, 'cost')  
-                this.updateCommittedProject(row, row.consequences, 'consequences')  
-                this.onSelectedCommittedProject();
-                this.onPaginationChanged();
-            }                            
-        });                                                
-    }
     handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, budgetName: string){
         const budget: SimpleBudgetDetail = find(
             propEq('name', budgetName), this.stateScenarioSimpleBudgetDetails,

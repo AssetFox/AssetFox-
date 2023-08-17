@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using Microsoft.Extensions.DependencyModel;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -227,8 +228,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var criterionJoins = new List<CriterionLibraryBudgetEntity>();
 
                 var criteria = budgets
-                    .Where(budget => budget.CriterionLibrary?.Id != null && budget.CriterionLibrary?.Id != Guid.Empty &&
-                                     !string.IsNullOrEmpty(budget.CriterionLibrary.MergedCriteriaExpression))
+                    .Where(budget => budget.CriterionLibrary.IsValid())
                     .Select(budget =>
                     {
                         var criterion = new CriterionLibraryEntity

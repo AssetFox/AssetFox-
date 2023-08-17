@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -54,22 +55,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static ScenarioRemainingLifeLimitEntity ToScenarioEntityWithCriterionLibraryJoin(this RemainingLifeLimitDTO dto, Guid simulationId,
             Guid attributeId)
         {
+            //MD Detect if we want the CritionLibrary or not
+            var entity = ToScenarioEntity(dto, simulationId,attributeId);
             var criterionLibraryDto = dto.CriterionLibrary;
-            var criterionLibrary = new CriterionLibraryEntity
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
             {
-                MergedCriteriaExpression = criterionLibraryDto.MergedCriteriaExpression,
-                Id = criterionLibraryDto.Id,
-                Name = criterionLibraryDto.Name,
-            };
-            var entity = ToScenarioEntity(dto, simulationId,
-            attributeId);
-            var join = new CriterionLibraryScenarioRemainingLifeLimitEntity
-            {
-                ScenarioRemainingLifeLimitId = entity.Id,
-                CriterionLibrary = criterionLibrary,                
-            };
-            entity.CriterionLibraryScenarioRemainingLifeLimitJoin = join;
-
+                var criterionLibrary = new CriterionLibraryEntity
+                {
+                    MergedCriteriaExpression = criterionLibraryDto.MergedCriteriaExpression,
+                    Id = criterionLibraryDto.Id,
+                    Name = criterionLibraryDto.Name,
+                };
+                
+                var join = new CriterionLibraryScenarioRemainingLifeLimitEntity
+                {
+                    ScenarioRemainingLifeLimitId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                entity.CriterionLibraryScenarioRemainingLifeLimitJoin = join;
+            }
             return entity;
         }
 

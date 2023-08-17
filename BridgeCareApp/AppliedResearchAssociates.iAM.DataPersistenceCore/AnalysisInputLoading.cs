@@ -80,7 +80,7 @@ public static class AnalysisInputLoading
         }
 
         // load
-        var network = unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, allowLoadingOfAssets);
+        var network = unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, allowLoadingOfAssets, simulationId);
         if (!allowLoadingOfAssets)
         {
             var fakeAsset = network.AddAsset();

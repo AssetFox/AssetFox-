@@ -25,5 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         string GetPredominantAssetSpatialWeighting(Guid networkId);
 
         MaintainableAsset GetMaintainableAssetByKeyAttribute(Guid networkId, string attributeValue);
+
+        List<Guid> GetAllIdsInCommittedProjectsForSimulation(Guid simulationId);
     }
 }

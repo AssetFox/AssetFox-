@@ -11,8 +11,6 @@ using EFCore.BulkExtensions;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Data;
-using AppliedResearchAssociates.iAM.Data.Aggregation;
-using AppliedResearchAssociates.iAM.Data.Attributes;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -282,6 +280,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .OrderByDescending(_ => _.Count())
                 .Select(_ => _.Key)
                 .FirstOrDefault();
+        }
+
+        public List<Guid> GetAllIdsInCommittedProjectsForSimulation(Guid simulationId)
+        {
+            var committedProjects = _unitOfWork.Context.CommittedProject.Where(c => c.SimulationId == simulationId).ToList();
+            var assets = _unitOfWork.Context.MaintainableAsset
+                .Where(a => committedProjects.Any(c => c.CommittedProjectLocation.ToDomain() == a.MaintainableAssetLocation.ToDomain()))
+                .Select(a => a.Id)
+                .ToList();
+            return assets;
         }
     }
 }

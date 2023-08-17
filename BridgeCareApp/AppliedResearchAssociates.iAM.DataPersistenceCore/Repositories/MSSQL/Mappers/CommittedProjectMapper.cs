@@ -68,10 +68,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         Category = convertedCategory,
                         LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
                     };
-                    foreach (var consequence in entity.CommittedProjectConsequences)
-                    {
-                        commit.Consequences.Add(consequence.ToDTO());
-                    }
                     return commit;
                 default:
                     throw new ArgumentException($"Location type of {entity.CommittedProjectLocation.Discriminator} is not supported.");
@@ -91,12 +87,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Category = dto.Category.ToString(),
                 Year = dto.Year,
-                CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
             };
-            foreach (var consequence in dto.Consequences)
-            {
-                result.CommittedProjectConsequences.Add(consequence.ToEntity(attributes));
-            }
                         
             if (dto is SectionCommittedProjectDTO)
             {                

@@ -6,9 +6,9 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class RemainingLifeLimitCloner
     {
-        internal static RemainingLifeLimitDTO Clone(RemainingLifeLimitDTO remainingLifeLimit)
+        internal static RemainingLifeLimitDTO Clone(RemainingLifeLimitDTO remainingLifeLimit, Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.Clone(remainingLifeLimit.CriterionLibrary);
+            var cloneCritionLibrary = CriterionLibraryCloner.Clone(remainingLifeLimit.CriterionLibrary, ownerId);
             var clone = new RemainingLifeLimitDTO
             {
                 LibraryId = remainingLifeLimit.LibraryId,
@@ -20,12 +20,12 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             return clone;
         }
 
-        internal static List<RemainingLifeLimitDTO> CloneList(IEnumerable<RemainingLifeLimitDTO> remainingLifeLimits)
+        internal static List<RemainingLifeLimitDTO> CloneList(IEnumerable<RemainingLifeLimitDTO> remainingLifeLimits, Guid ownerId)
         {
             var clone = new List<RemainingLifeLimitDTO>();
             foreach (var remainingLifeLimit in remainingLifeLimits)
             {
-                var childClone = Clone(remainingLifeLimit);
+                var childClone = Clone(remainingLifeLimit, ownerId);
                 clone.Add(childClone);
             }
             return clone;

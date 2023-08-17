@@ -1,23 +1,24 @@
-﻿using AppliedResearchAssociates.iAM.DTOs;
+﻿using System;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     public class CompleteSimulationCloner
     {
-        public static CompleteSimulationDTO Clone(CompleteSimulationDTO completeSimulation, CloneSimulationDTO cloneRequest)
+        public static CompleteSimulationDTO Clone(CompleteSimulationDTO completeSimulation, CloneSimulationDTO cloneRequest, Guid ownerId)
         {
-            var cloneAnalysisMethod = AnalysisMethodCloner.Clone(completeSimulation.AnalysisMethod);
-            var cloneBudgetPriorities = BudgetPriorityCloner.CloneList(completeSimulation.BudgetPriorities);
-            var cloneCashFlowFule = CashFlowRuleCloner.CloneList(completeSimulation.CashFlowRules);
+            var cloneAnalysisMethod = AnalysisMethodCloner.Clone(completeSimulation.AnalysisMethod, ownerId);
+            var cloneBudgetPriorities = BudgetPriorityCloner.CloneList(completeSimulation.BudgetPriorities, ownerId);
+            var cloneCashFlowFule = CashFlowRuleCloner.CloneList(completeSimulation.CashFlowRules, ownerId);
             var cloneInvestmentPlan = InvestmentPlanCloner.Clone(completeSimulation.InvestmentPlan);
             var cloneReportIndex = ReportIndexCloner.CloneList(completeSimulation.ReportIndexes);
             var cloneScenarioPerformanceCurvesImportResult = ScenarioPerformanceCurvesImportResultCloner.CloneListNullPropagating(completeSimulation.PerformanceCurves);
             var cloneCalculatedTribute = CalculatedAttributeCloner.CloneList(completeSimulation.CalculatedAttributes);
-            var cloneRemainingLifeLimits = RemainingLifeLimitCloner.CloneList(completeSimulation.RemainingLifeLimits);
-            var cloneTreatment = TreatmentCloner.CloneList(completeSimulation.Treatments);
-            var cloneTargetConditionGoal = TargetConditionGoalCloner.CloneList(completeSimulation.TargetConditionGoals);
-            var cloneDeficientConditionGoal = DeficientConditionGoalCloner.CloneList(completeSimulation.DeficientConditionGoals);
-            var cloneBudget = BudgetCloner.CloneList(completeSimulation.Budgets);
+            var cloneRemainingLifeLimits = RemainingLifeLimitCloner.CloneList(completeSimulation.RemainingLifeLimits, ownerId);
+            var cloneTreatment = TreatmentCloner.CloneList(completeSimulation.Treatments, ownerId);
+            var cloneTargetConditionGoal = TargetConditionGoalCloner.CloneList(completeSimulation.TargetConditionGoals, ownerId);
+            var cloneDeficientConditionGoal = DeficientConditionGoalCloner.CloneList(completeSimulation.DeficientConditionGoals, ownerId);
+            var cloneBudget = BudgetCloner.CloneList(completeSimulation.Budgets, ownerId);
             var cloneBaseCommittedProject = BaseCommittedProjectCloner.CloneList(completeSimulation.CommittedProjects);
 
 

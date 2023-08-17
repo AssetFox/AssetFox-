@@ -233,6 +233,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
         }
 
         [Fact]
+        public void PlayWithNullCoalescingOperator()
+        {
+            int? x = null;
+            int? y = 2;
+            int a = x ?? 10;
+            int b = y ?? 10;
+
+        }
+
+
+        [Fact]
         public void SimulationInDbWithRemainingLifeLimit_Clone_Clones()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -282,7 +293,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             var lifeLimitsBefore = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationId);
             var lifeLimitBefore = lifeLimitsBefore.Single();
 
-
             //var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
@@ -304,7 +314,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             //Assert.NotEqual(lifeLimitBefore.CriterionLibrary.IsSingleUse, clonedLifeLimit.CriterionLibrary.IsSingleUse);
             //Assert.NotEqual(lifeLimitBefore.CriterionLibrary.Name, clonedLifeLimit.CriterionLibrary.Name);
         }
-
+        
 
 
         [Fact]

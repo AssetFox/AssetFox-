@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.Data.SimulationCloning;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -57,7 +58,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var sourceSimulation = this.GetSimulation(sourceSimulationId);
 
             // do the clone
-            var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto);
+            var ownerId = _unitOfWork.CurrentUser?.Id??Guid.Empty;
+            var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId);
 
             // save it
             var network = _unitOfWork.Context.Network.First(n => n.Id == dto.NetworkId);
@@ -73,8 +75,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.AsTransaction(() =>
             {
-                _unitOfWork.Context.Add(entity);
-                _unitOfWork.Context.SaveChanges();
+                _unitOfWork.Context.AddEntity(entity);               
             });
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(completeSimulationDTO.Id);
             var cloningResult = new SimulationCloningResultDTO

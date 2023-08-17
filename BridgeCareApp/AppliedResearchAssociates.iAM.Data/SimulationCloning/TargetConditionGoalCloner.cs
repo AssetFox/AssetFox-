@@ -6,9 +6,9 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class TargetConditionGoalCloner
     {
-        internal static TargetConditionGoalDTO Clone(TargetConditionGoalDTO targetConditionGoal)
+        internal static TargetConditionGoalDTO Clone(TargetConditionGoalDTO targetConditionGoal, Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.Clone(targetConditionGoal.CriterionLibrary);
+            var cloneCritionLibrary = CriterionLibraryCloner.Clone(targetConditionGoal.CriterionLibrary, ownerId);
             var clone = new TargetConditionGoalDTO
             {
                Id = Guid.NewGuid(),
@@ -22,12 +22,12 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             };
             return clone;
         }
-        internal static List<TargetConditionGoalDTO> CloneList(IEnumerable<TargetConditionGoalDTO> targetConditionGoals)
+        internal static List<TargetConditionGoalDTO> CloneList(IEnumerable<TargetConditionGoalDTO> targetConditionGoals, Guid ownerId)
         {
             var clone = new List<TargetConditionGoalDTO>();
             foreach (var targetConditionGoal in targetConditionGoals)
             {
-                var childClone = Clone(targetConditionGoal);
+                var childClone = Clone(targetConditionGoal, ownerId);
                 clone.Add(childClone);
             }
             return clone;

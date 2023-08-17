@@ -6,9 +6,9 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class TreatmentCloner
     {
-        internal static TreatmentDTO Clone(TreatmentDTO treatment)
+        internal static TreatmentDTO Clone(TreatmentDTO treatment, Guid ownerId)
         {            
-            var cloneCritionLibrary = CriterionLibraryCloner.Clone(treatment.CriterionLibrary);           
+            var cloneCritionLibrary = CriterionLibraryCloner.Clone(treatment.CriterionLibrary, ownerId);           
             var clone = new TreatmentDTO
             {
               Name = treatment.Name,
@@ -29,12 +29,12 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             };
             return clone;
         }
-        internal static List<TreatmentDTO> CloneList(IEnumerable<TreatmentDTO> treatments)
+        internal static List<TreatmentDTO> CloneList(IEnumerable<TreatmentDTO> treatments, Guid ownerId)
         {
             var clone = new List<TreatmentDTO>();
             foreach (var treatment in treatments)
             {
-                var childClone = Clone(treatment);
+                var childClone = Clone(treatment, ownerId);
                 clone.Add(childClone);
             }
             return clone;

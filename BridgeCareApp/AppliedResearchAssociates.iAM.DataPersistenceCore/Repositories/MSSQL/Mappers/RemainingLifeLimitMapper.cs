@@ -66,6 +66,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     MergedCriteriaExpression = criterionLibraryDto.MergedCriteriaExpression,
                     Id = criterionLibraryDto.Id,
                     Name = criterionLibraryDto.Name,
+                    CreatedBy = criterionLibraryDto.Owner,
                 };
                 
                 var join = new CriterionLibraryScenarioRemainingLifeLimitEntity

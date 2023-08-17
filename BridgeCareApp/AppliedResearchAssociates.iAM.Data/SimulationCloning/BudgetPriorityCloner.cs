@@ -6,9 +6,9 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class BudgetPriorityCloner
     {
-        internal static BudgetPriorityDTO Clone(BudgetPriorityDTO budgetPriority)
+        internal static BudgetPriorityDTO Clone(BudgetPriorityDTO budgetPriority, Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.Clone(budgetPriority.CriterionLibrary);
+            var cloneCritionLibrary = CriterionLibraryCloner.Clone(budgetPriority.CriterionLibrary, ownerId);
             var clone = new BudgetPriorityDTO
             {
                Id = Guid.NewGuid(),
@@ -21,12 +21,12 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             };
             return clone;
         }      
-        internal static List<BudgetPriorityDTO> CloneList(IEnumerable<BudgetPriorityDTO> budgetPriorities)
+        internal static List<BudgetPriorityDTO> CloneList(IEnumerable<BudgetPriorityDTO> budgetPriorities, Guid ownerId)
         {
             var clone = new List<BudgetPriorityDTO>();
             foreach (var budgetPrioritiy in budgetPriorities)
             {
-                var childClone = Clone(budgetPrioritiy);
+                var childClone = Clone(budgetPrioritiy, ownerId);
                 clone.Add(childClone);
             }
             return clone;

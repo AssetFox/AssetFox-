@@ -6,10 +6,10 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class AnalysisMethodCloner
     {
-        internal static AnalysisMethodDTO Clone(AnalysisMethodDTO analysisMethod)
+        internal static AnalysisMethodDTO Clone(AnalysisMethodDTO analysisMethod, Guid ownerId)
         {
             var cloneBenefit = BenefitCloner.Clone(analysisMethod.Benefit);
-            var cloneCritionLibrary = CriterionLibraryCloner.Clone(analysisMethod.CriterionLibrary);
+            var cloneCritionLibrary = CriterionLibraryCloner.Clone(analysisMethod.CriterionLibrary, ownerId);
             var clone = new AnalysisMethodDTO
             {
                 Id = Guid.NewGuid(),

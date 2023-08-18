@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
@@ -26,6 +25,7 @@ using Microsoft.SqlServer.Dac.Model;
 using MoreLinq;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.Validation;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Controllers
 {
@@ -584,15 +584,18 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);                
+                _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                ValidationResultBag validationResultBag = null;
+                var validationResults = new List<ValidationResult>();
+
                 await Task.Factory.StartNew(() =>
                 {
                     var simulation = AnalysisInputLoading.GetSimulationWithoutAssets(UnitOfWork, networkId, simulationId);
-                    var validationResults = simulation.GetAllValidationResults(Enumerable.Empty<string>());
+                    validationResultBag = simulation.GetAllValidationResults(Enumerable.Empty<string>());
+                    validationResults = validationResultBag.GetEnumerable().ToList();
                 });
-                
-                // return results from validationResults in Ok
-                return Ok();
+
+                return Ok(validationResults);
             }
             catch (UnauthorizedAccessException)
             {

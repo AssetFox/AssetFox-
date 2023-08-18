@@ -282,14 +282,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .FirstOrDefault();
         }
 
-        public List<Guid> GetAllIdsInCommittedProjectsForSimulation(Guid simulationId)
+        public List<Guid> GetAllIdsInCommittedProjectsForSimulation(Guid simulationId, Guid networkId)
         {
-            var committedProjects = _unitOfWork.Context.CommittedProject.Where(c => c.SimulationId == simulationId).ToList();
+            var assetIds = new List<Guid>();
+            var committedProjects = _unitOfWork.Context.CommittedProject.Include(c => c.CommittedProjectLocation).Where(c => c.SimulationId == simulationId);
+            var committedProjectLocations = committedProjects.Select(c => c.CommittedProjectLocation.ToDomain()).ToList();
+
             var assets = _unitOfWork.Context.MaintainableAsset
-                .Where(a => committedProjects.Any(c => c.CommittedProjectLocation.ToDomain() == a.MaintainableAssetLocation.ToDomain()))
-                .Select(a => a.Id)
-                .ToList();
-            return assets;
+               .Where(_ => _.NetworkId == networkId)
+               .Include(_ => _.MaintainableAssetLocation)
+               .ToList();
+
+            foreach (var committedProjectLocation in committedProjectLocations)
+            {
+                var assetId = assets.FirstOrDefault(a => committedProjectLocation.MatchOn(a.MaintainableAssetLocation.ToDomain())).Id;
+                if (!assetIds.Contains(assetId))
+                {
+                    assetIds.Add(assetId);
+                }
+            }
+
+            return assetIds;
         }
     }
 }

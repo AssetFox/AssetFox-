@@ -106,18 +106,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 var attributeIdLookup = getAttributeIdLookUp();
                 networkEntity.MaintainableAssets = getInitialQuery()
-                    .Where(_ => _.NetworkId == networkId)
-                    .Select(asset => getMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
+                                                    .Where(_ => _.NetworkId == networkId)
+                                                    .Select(asset => getMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
             }
 
             if (!areFacilitiesRequired && simulationId != null)
             {
-                // Load simulation's committed projects specific Assets(this case is used by simulation pre-checks system)
+                // Load Assets corresponding to simulation's committed projects(this case is used by simulation pre-checks system)
                 var attributeIdLookup = getAttributeIdLookUp();
-                var assetIdsInCommittedProjectsForSimulation = _unitOfWork.MaintainableAssetRepo.GetAllIdsInCommittedProjectsForSimulation((Guid)simulationId);
+                var assetIdsInCommittedProjectsForSimulation = _unitOfWork.MaintainableAssetRepo.GetAllIdsInCommittedProjectsForSimulation((Guid)simulationId, networkId);
                 networkEntity.MaintainableAssets = getInitialQuery()
-                    .Where(_ => assetIdsInCommittedProjectsForSimulation.Contains(_.Id))
-                    .Select(asset => getMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
+                                                    .Where(_ => assetIdsInCommittedProjectsForSimulation.Contains(_.Id))
+                                                    .Select(asset => getMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
             }
 
             var domain = networkEntity.ToDomain(explorer);
@@ -143,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .AsSplitQuery();
         }
 
-        private MaintainableAssetEntity getMaintainableAssetEntity(MaintainableAssetEntity asset, Dictionary<Guid, string> attributeIdLookup)
+        private static MaintainableAssetEntity getMaintainableAssetEntity(MaintainableAssetEntity asset, Dictionary<Guid, string> attributeIdLookup)
         {
             return new MaintainableAssetEntity
             {

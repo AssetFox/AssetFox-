@@ -15,6 +15,8 @@ namespace AppliedResearchAssociates.Validation
 
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Results).GetEnumerator();
 
+        public IEnumerable<ValidationResult> GetEnumerable() => Results;
+
         private readonly HashSet<ValidationResult> Results = new HashSet<ValidationResult>();
     }
 }

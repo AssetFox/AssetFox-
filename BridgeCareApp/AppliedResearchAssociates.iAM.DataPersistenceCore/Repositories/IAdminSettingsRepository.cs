@@ -24,6 +24,8 @@ public interface IAdminSettingsRepository
     void SetPrimaryNetwork(string name);
 
     void SetRawDataNetwork(string name);
+    Guid? GetPrimaryNetworkId();
+    Guid? GetRawDataNetworkId();
 
     string GetPrimaryNetwork();
 

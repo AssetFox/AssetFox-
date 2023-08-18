@@ -6,24 +6,13 @@ using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
-    public class PAMSInventorySectionsReportPrimaryFactory : IReportFactory
+    public class PAMSInventorySectionsReportFactory : IReportFactory
     {
-        public string Name => "PAMSInventoryLookupSections(P)";
+        public string Name => "PAMSInventoryLookupSections";
 
-        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService, string suffix = "")
         {
-            return new PAMSInventorySectionsReport(uow, Name, results);
+            return new PAMSInventorySectionsReport(uow, Name, results, suffix);
         }
     }
-
-    public class PAMSInventorySectionsReportRawFactory : IReportFactory
-    {
-        public string Name => "PAMSInventoryLookupSections(R)";
-
-        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
-        {
-            return new PAMSInventorySectionsReport(uow, Name, results);
-        }
-    }
-
 }

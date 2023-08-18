@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DTOs;
 using System.Threading;
 using AppliedResearchAssociates.iAM.Common.Logging;
+using AppliedResearchAssociates.iAM.Common;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -29,6 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private Guid _networkId;
         private Dictionary<string, AttributeDescription> _fieldDescriptions;
 
+        public string Suffix {  get; private set; }
         public Guid ID { get; set; }
         public Guid? SimulationID { get => null; set { } }
         public string Results { get; private set; }
@@ -43,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private List<SegmentAttributeDatum> segmentData;
         private InventoryParameters segmentIds;
 
-        public BAMSInventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results)
+        public BAMSInventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results, string suffix)
         {
             _unitofwork = uow;
             ReportTypeName = name;
@@ -55,11 +57,37 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Report definition created.";
             Results = string.Empty;
             IsComplete = false;         
-            _networkId = _unitofwork.NetworkRepo.GetMainNetwork().Id;
+            Suffix = suffix;
+            if (suffix == ReportSuffixType.primaryDataSuffix)
+            {
+                var primaryNetworkId = _unitofwork.AdminSettingsRepo.GetPrimaryNetworkId();
+                if (primaryNetworkId == null)
+                {
+                    Errors.Add("Does not have a primary network");
+                }
+                else
+                {
+                    _networkId = primaryNetworkId.Value;
+                }
+            }
+            else
+            {
+                var rawNetworkId = _unitofwork.AdminSettingsRepo.GetRawDataNetworkId();
+                if (rawNetworkId == null)
+                {
+                    Errors.Add("Does not have a raw network");
+                }
+                else
+                {
+                    _networkId = rawNetworkId.Value;
+                }
+            }
         }
 
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
+            if (Errors.Count > 0) return; // Errors occured in the GetAsset method
+
             segmentIds = Parse(parameters);
 
             if (segmentIds.BRKEY_ == -1 && string.IsNullOrEmpty(segmentIds.BMSID)) return; // report failed due to bad parameters

@@ -497,6 +497,47 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             _unitOfWork.Context.DeleteEntity<AdminSettingsEntity>(_ => _.Key == settingKey);
         }
+
+        public Guid? GetPrimaryNetworkId()
+        {
+            var existingPrimaryNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == primaryNetworkKey);
+            if (existingPrimaryNetwork == null)
+            {
+                return null;
+            }
+            var adminNetworkGuid = new Guid(existingPrimaryNetwork.Value);
+            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == adminNetworkGuid);
+
+            if (existingNetwork == null)
+            {
+                return null;
+            }
+            else
+            {
+                return existingNetwork.Id;
+            }
+
+        }
+        public Guid? GetRawDataNetworkId()
+        {
+            var existingRawDataNetwork = _unitOfWork.Context.AdminSettings.SingleOrDefault(_ => _.Key == rawDataNetworkKey);
+            if (existingRawDataNetwork == null)
+            {
+                return null;
+            }
+            var rawDataNetworkGuid = new Guid(existingRawDataNetwork.Value);
+            var existingNetwork = _unitOfWork.Context.Network.SingleOrDefault(_ => _.Id == rawDataNetworkGuid);
+
+            if (existingNetwork == null)
+            {
+                return null;
+            }
+            else
+            {
+                return existingNetwork.Id;
+            }
+
+        }
     }
 
     

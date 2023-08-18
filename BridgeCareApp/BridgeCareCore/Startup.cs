@@ -104,16 +104,14 @@ namespace BridgeCareCore
         {
             var reportFactoryList = new List<IReportFactory>();
             //reportFactoryList.Add(new HelloWorldReportFactory());
-            reportFactoryList.Add(new BAMSInventoryPrimaryReportFactory());
-            reportFactoryList.Add(new BAMSInventoryRawReportFactory());
+            reportFactoryList.Add(new BAMSInventoryReportFactory());
             reportFactoryList.Add(new BAMSSummaryReportFactory());
             reportFactoryList.Add(new ScenarioOutputReportFactory());
             reportFactoryList.Add(new PAMSSummaryReportFactory());
             reportFactoryList.Add(new BAMSAuditReportFactory());
             reportFactoryList.Add(new BAMSPBExportReportFactory());
             reportFactoryList.Add(new PAMSPBExportReportFactory());
-            reportFactoryList.Add(new PAMSInventorySectionsReportPrimaryFactory());
-            reportFactoryList.Add(new PAMSInventorySectionsReportRawFactory());
+            reportFactoryList.Add(new PAMSInventorySectionsReportFactory());
             reportFactoryList.Add(new PAMSInventorySegmentsReportFactory());
             services.AddSingleton<IReportLookupLibrary>(service => new ReportLookupLibrary(reportFactoryList));
         }

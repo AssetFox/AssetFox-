@@ -51,15 +51,6 @@ namespace BridgeCareCore.Controllers
 
             //SendRealTimeMessage($"Starting to process {reportName}.");
             var parameters = await GetParameters();
-            string tempReportName = reportName;
-            string last3Characters = reportName.Substring(reportName.Length - 3, 3);
-
-            if (last3Characters == "(P)" || last3Characters == "(R)")
-            {
-                tempReportName = tempReportName.Substring(0, reportName.Length - 3);
-            }
-            var transferType = new PAMSInventorySectionsReport(UnitOfWork, "", new ReportIndexDTO());
-            transferType.NetworkStringType(last3Characters);
 
             var report = await GenerateReport(reportName, ReportType.HTML, parameters);
 
@@ -244,8 +235,19 @@ namespace BridgeCareCore.Controllers
         private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType, string parameters)
         {
             var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(parameters);
+            IReport reportObject;
+            if (ReportType.HTML == expectedReportType)
+            {
+                var last3Characters = reportName.Substring(reportName.Length - 3);
+                reportName = reportName.Substring(0, reportName.Length - 3);
+                reportObject = await _generator.Generate(reportName, last3Characters);
+            }
+            else
+            {
+                 reportObject = await _generator.Generate(reportName);
+            }
+
             //generate report
-            var reportObject = await _generator.Generate(reportName);
 
             if (reportObject == null)
             {

@@ -5,24 +5,13 @@ using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
-    public class BAMSInventoryPrimaryReportFactory : IReportFactory
+    public class BAMSInventoryReportFactory : IReportFactory
     {
-        public string Name => "BAMSInventoryLookup(P)";
+        public string Name => "BAMSInventoryLookup";
 
-        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService, string suffix = "")
         {
-            return new BAMSInventoryReport(uow, Name, results);
+            return new BAMSInventoryReport(uow, Name, results, suffix);
         }
     }
-
-    public class BAMSInventoryRawReportFactory : IReportFactory
-    {
-        public string Name => "BAMSInventoryLookup(R)";
-
-        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
-        {
-            return new BAMSInventoryReport(uow, Name, results);
-        }
-    }
-
 }

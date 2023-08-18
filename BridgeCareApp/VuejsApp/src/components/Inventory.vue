@@ -110,7 +110,8 @@
             if(this.reportType === 'P') {
                 this.inventoryDetails = clone(this.stateKeyFields);
                 this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
-                this.getInventoryAction(this.inventoryDetails);
+
+                this.getInventoryAction(this.inventoryDetails[0]);
             }
         }
 

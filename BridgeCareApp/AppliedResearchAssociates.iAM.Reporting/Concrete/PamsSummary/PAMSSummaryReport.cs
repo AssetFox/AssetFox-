@@ -62,6 +62,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Suffix => throw new NotImplementedException();
+
         public PAMSSummaryReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             //store passed parameter   

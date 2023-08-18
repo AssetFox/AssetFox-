@@ -17,6 +17,7 @@ using AppliedResearchAssociates.iAM.Reporting;
 using System.Linq;
 using static BridgeCareCore.Security.SecurityConstants;
 using System.Data;
+using HotChocolate.Types.Descriptors.Definitions;
 
 namespace BridgeCareCore.Controllers
 {
@@ -238,10 +239,10 @@ namespace BridgeCareCore.Controllers
                 //Checking every report being passed in from the parameter
                 foreach (string inventoryReport in InventoryReportsList)
                 {
+                    var unTypedReport = inventoryReport.Substring(0, inventoryReport.Length - 3);
                     try
                     {
-                        var unTypedReport = inventoryReport;
-                        var reportObject = await _generator.Generate(unTypedReport);
+                        var reportObject = await _generator.GenerateInventoryReport(unTypedReport);
                         
                         //If cannot be created in lookup library (Existence Check)
                         if (!_factory.CanGenerateReport(unTypedReport))

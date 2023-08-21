@@ -1222,9 +1222,8 @@ export default class InvestmentEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.firstYearOfAnalysisPeriodShift = 0;
-                this.investmentPlanMutator(this.investmentPlan)                
-                this.clearChanges();               
-                this.resetPage();
+                this.investmentPlanMutator(this.investmentPlan)
+                this.clearChanges();                                            
                 this.addSuccessNotificationAction({message: "Modified investment"});
                 this.librarySelectItemValue = null;
             }           

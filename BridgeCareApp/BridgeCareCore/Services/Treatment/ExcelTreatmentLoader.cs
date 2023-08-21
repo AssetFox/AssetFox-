@@ -45,7 +45,7 @@ namespace BridgeCareCore.Services.Treatment
             }
             if (returnValue == endIndex + 1)
             {
-                returnValue = (content == TreatmentExportStringConstants.Budgets) ? 0 : throw new Exception($"Cell with content {content} not found!");
+                returnValue = (content == TreatmentExportStringConstants.PerformanceFactors) ? 0 : throw new Exception($"Cell with content {content} not found!");
             }
 
             return returnValue;
@@ -54,6 +54,15 @@ namespace BridgeCareCore.Services.Treatment
         private static int ParseInt(string s, int defaultValue = 0)
         {
             if (int.TryParse(s, out var returnValue))
+            {
+                return returnValue;
+            }
+            return defaultValue;
+        }
+
+        private static float ParseFloat(string s, int defaultValue = 0)
+        {
+            if (float.TryParse(s, out var returnValue))
             {
                 return returnValue;
             }
@@ -214,13 +223,13 @@ namespace BridgeCareCore.Services.Treatment
             var validationMessages = new List<string>();
 
             var budgetsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Budgets, 2);
-            if(budgetsLineIndex == 0)
+            var PfLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Budgets, budgetsLineIndex);
+            if (budgetsLineIndex == 0)
             {
                 throw new Exception($"Cell with content {TreatmentExportStringConstants.Budgets} not found!");
             }
 
-            var height = worksheet.Dimension.End.Row;
-            for (var i = budgetsLineIndex + 2; i <= height; i++)
+            for (var i = budgetsLineIndex + 2; i <= PfLineIndex; i++)
             {
                 var budgetName = worksheet.Cells[i, 1].Text;
                 if (!string.IsNullOrEmpty(budgetName))
@@ -240,6 +249,32 @@ namespace BridgeCareCore.Services.Treatment
             return new TreatmentBudgetsLoadResult { budgetIds = budgetIds, ValidationMessages = validationMessages };
         }
 
+        private TreatmentPerformanceFactorLoadResult LoadPerformanceFactor(ExcelWorksheet worksheet)
+        {
+            var performanceFactors = new List<TreatmentPerformanceFactorDTO>();
+            var validationMessages = new List<string>();
+
+            var pfLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.PerformanceFactors, 2);
+            if (pfLineIndex == 0)
+            {
+                throw new Exception($"Cell with content {TreatmentExportStringConstants.PerformanceFactors} not found!");
+            }
+
+            var height = worksheet.Dimension.End.Row;
+            for (var i = pfLineIndex + 2; i <= height; i++)
+            {
+                var attribute = worksheet.Cells[i, 1].Text;
+                var pf = worksheet.Cells[i, 2].Text;
+
+                if (!string.IsNullOrEmpty(attribute) && !string.IsNullOrEmpty(pf))
+                {
+                    performanceFactors.Add(new TreatmentPerformanceFactorDTO() { Attribute = attribute, PerformanceFactor = ParseFloat(pf) , Id = Guid.NewGuid()});
+                }
+            }
+
+            return new TreatmentPerformanceFactorLoadResult { PerformanceFactors = performanceFactors, ValidationMessages = validationMessages };
+        }
+
         public TreatmentLoadResult LoadTreatment(ExcelWorksheet worksheet)
         {
             var worksheetName = worksheet.Name;
@@ -252,6 +287,7 @@ namespace BridgeCareCore.Services.Treatment
             var assetTypeString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
             var assetType = EnumDeserializer.Deserialize<AssetCategories>(assetTypeString);
             var criterion = dictionary.GetValueOrDefault(TreatmentExportStringConstants.Criterion.ToLowerInvariant());
+            var performanceFactors = LoadPerformanceFactor(worksheet);
             var loadCosts = LoadCosts(worksheet);
             var loadConsequences = LoadConsequences(worksheet);
             var newTreatment = new TreatmentDTO
@@ -270,7 +306,8 @@ namespace BridgeCareCore.Services.Treatment
                     MergedCriteriaExpression = criterion,
                     IsSingleUse = true,
                     Name = "Is from import"
-                } : new CriterionLibraryDTO()
+                } : new CriterionLibraryDTO(),
+                PerformanceFactors = performanceFactors.PerformanceFactors
             };
             var validationMessages = new List<string>();
             validationMessages.AddRange(loadCosts.ValidationMessages);

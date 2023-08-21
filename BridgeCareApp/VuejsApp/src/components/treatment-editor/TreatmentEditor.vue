@@ -5,6 +5,7 @@
                 <v-flex xs6>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
+                        id="TreatmentEditor-treatmentLibrary-select"
                         :items='librarySelectItems'
                         append-icon=$vuetify.icons.ghd-down
                         class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
@@ -83,6 +84,7 @@
         <v-divider style="margin-top:-10px" v-show='hasSelectedLibrary || hasScenario'></v-divider>        
         <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top:-20px;margin-bottom:-15px;">                
                <v-btn
+                    id="TreatmentEditor-addTreatment-btn"
                     @click='showCreateTreatmentDialog = true'
                     depressed
                     class='ghd-white-bg ghd-blue ghd-button-text ghd-text-padding'                              
@@ -116,7 +118,7 @@
             <v-layout>
                 <div xs2>
                     <v-flex>
-                        <v-list class='treatments-list'>
+                        <v-list id='TreatmentEditor-Treatment-list' class='treatments-list'>
                             <template v-for='treatmentSelectItem in treatmentSelectItems'>
                                 <v-list-tile :key='treatmentSelectItem.value' ripple :class="{'selected-treatment-item': isSelectedTreatmentItem(treatmentSelectItem.value)}"
                                              avatar @click='onSetTreatmentSelectItemValue(treatmentSelectItem.value)'>

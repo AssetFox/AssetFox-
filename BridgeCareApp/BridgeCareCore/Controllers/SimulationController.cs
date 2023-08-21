@@ -592,7 +592,7 @@ namespace BridgeCareCore.Controllers
                 {
                     var simulation = AnalysisInputLoading.GetSimulationWithoutAssets(UnitOfWork, networkId, simulationId);
                     validationResultBag = simulation.GetAllValidationResults(Enumerable.Empty<string>());
-                    validationResults = validationResultBag.GetEnumerable().ToList();
+                    var validationResults = validationResultBag.AsEnumerable().ToList();
                 });
 
                 return Ok(validationResults);

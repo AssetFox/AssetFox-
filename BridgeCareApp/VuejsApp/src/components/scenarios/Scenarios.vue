@@ -23,7 +23,7 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-layout>
+                                        <v-layout style = "margin-right: -100px;">
                                             <v-text-field
                                                 id="Scenarios-searchScenarios-textField"
                                                 type="text"
@@ -52,6 +52,23 @@
                                                 @click="showFilterScenarioList = true">
                                                 Filter
                                             </v-btn>
+                                            <span class="Scenario-status"  >
+                                                <div v-if = "(sortedMineCategory != '' && sortedMineValue!='')&&(sortedMineValue != undefined && sortedMineCategory != null)">
+                                                     Current Filter: 
+                                                     <v-chip
+                                                        class="ma-2"
+                                                        closeable
+                                                        color=primary
+                                                        text-color="white"
+                                                        :model-value="true"
+                                                        icon
+                                                        >
+                                                        {{sortedMineCategory}} by {{ sortedMineValue }}
+                                                        
+                                                        <img class='img-general' :src="require('@/assets/icons/x-circle.svg')" @click="onMineFilterClearClick()"  >
+                                                </v-chip>
+                                                </div>
+                                            </span>
                                         </v-layout>
                                     </v-flex>
                                     <v-flex xs4></v-flex>
@@ -212,7 +229,7 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-layout>
+                                        <v-layout style = "margin-right:-200px">
                                             <v-text-field
                                                 id="Scenarios-shared-searchScenarios-textField"
                                                 label="Search"
@@ -241,17 +258,25 @@
                                                 @click="showSharedFilterScenarioList = true">
                                                 Filter
                                             </v-btn>
-                                            
-                                                <h5 class="dialog-header" >
+                                            <span class="Scenario-status"  >
                                                 <div v-if = "(sortedCategory != '' && sortedValue!='')&&(sortedValue != undefined && sortedCategory != null)">
                                                      Current Filter: 
+                                                     <v-chip
+                                                        class="ma-2"
+                                                        closeable
+                                                        color=primary
+                                                        text-color="white"
+                                                        :model-value="true"
+                                                        icon
+                                                        >
+                                                        {{sortedCategory}} by {{ sortedValue }}
+                                                        
+                                                        <img class='img-general' :src="require('@/assets/icons/x-circle.svg')" @click="onSharedFilterClearClick()"  >
+                                                </v-chip>
                                                 </div>
-                                                </h5>
-                                            
-                                         
-                                                                                       
-                                            
+                                            </span>
                                         </v-layout>
+                                        
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
@@ -941,6 +966,8 @@ export default class Scenarios extends Vue {
     availableActions: any;
     availableSimulationActions: any;
     nameUpdate: string = '';
+    sortedMineCategory: string = '';
+    sortedMineValue: string = '';
     sortedCategory: string = '';
     sortedValue: string = '';
     scenarios: Scenario[] = [];
@@ -1742,8 +1769,8 @@ export default class Scenarios extends Vue {
     }
     onFilterScenarioListSubmit(filterCategory:string, FilterValue:string) {
         this.showFilterScenarioList = false;
-        this.sortedCategory = filterCategory;
-        this.sortedValue = FilterValue;
+        this.sortedMineCategory = filterCategory;
+        this.sortedMineValue = FilterValue;
         if ((filterCategory !=''&&!isNil(filterCategory)) && (FilterValue !=''&&!isNil(FilterValue)))
         {
             this.currentSearchMine = FilterValue;
@@ -1751,6 +1778,8 @@ export default class Scenarios extends Vue {
         }
         else if(!isNil(filterCategory)||!isNil(FilterValue))
         {
+            this.sortedMineCategory = '';
+            this.sortedMineValue = '';
             this.currentSearchMine = '';
             this.resetPageMine();
         }
@@ -1759,7 +1788,6 @@ export default class Scenarios extends Vue {
         this.showSharedFilterScenarioList = false;
         this.sortedCategory = filterCategory;
         this.sortedValue = FilterValue;
-        this.setup();
         if ((filterCategory !=''&&!isNil(filterCategory)) && (FilterValue !=''&&!isNil(FilterValue)))
         {
             this.currentSearchShared = FilterValue;
@@ -1767,6 +1795,8 @@ export default class Scenarios extends Vue {
         }
         else if(!isNil(filterCategory)||!isNil(FilterValue))
         {
+            this.sortedCategory = ''
+            this.sortedValue = ''
             this.currentSearchShared = '';
             this.resetPageShared();
         }
@@ -1931,6 +1961,12 @@ export default class Scenarios extends Vue {
         this.searchMine = '';
         this.onMineSearchClick();
     }
+    onMineFilterClearClick(){
+        this.sortedMineCategory = '';
+        this.sortedMineValue = '';
+        this.currentSearchMine= '';
+        this.resetPageMine()
+    }
 
     resetPageMine(){
         this.userScenariosPagination.page = 1;
@@ -1939,6 +1975,12 @@ export default class Scenarios extends Vue {
 
     onSharedSearchClick(){
         this.currentSearchShared = this.searchShared;
+        this.resetPageShared()
+    }
+    onSharedFilterClearClick(){
+        this.sortedCategory = '';
+        this.sortedValue = '';
+        this.currentSearchShared = '';
         this.resetPageShared()
     }
 

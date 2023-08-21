@@ -55,6 +55,7 @@
             public const string UpdateSimulation = "UpdateSimulation";
             public const string RunSimulation = "RunSimulation";
             public const string CloneSimulation = "CloneSimulation";
+            public const string ValidateSimulation = "ValidateSimulation";
             public const string ViewBudgetPriorityFromLibrary = "ViewBudgetPriorityFromLibrary";
             public const string ModifyBudgetPriorityFromLibrary = "ModifyBudgetPriorityFromLibrary";
             public const string DeleteBudgetPriorityFromLibrary = "DeleteBudgetPriorityFromLibrary";
@@ -165,6 +166,8 @@
             public const string SimulationRunPermittedAccess = "SimulationRunPermittedAccess";
             public const string SimulationClonePermittedAccess = "SimulationClonePermittedAccess";
             public const string SimulationViewPermittedAccess = "SimulationViewPermittedAccess";
+            public const string SimulationValidatePermittedAccess = "SimulationValidatePermittedAccess";
+            public const string SimulationValidateAnyAccess = "SimulationValidateAnyAccess";
             public const string BudgetPriorityAddPermittedFromLibraryAccess = "BudgetPriorityAddPermittedFromLibraryAccess";
             public const string BudgetPriorityUpdatePermittedFromLibraryAccess = "BudgetPriorityUpdatePermittedFromLibraryAccess";
             public const string BudgetPriorityDeletePermittedFromLibraryAccess = "BudgetPriorityDeletePermittedFromLibraryAccess";

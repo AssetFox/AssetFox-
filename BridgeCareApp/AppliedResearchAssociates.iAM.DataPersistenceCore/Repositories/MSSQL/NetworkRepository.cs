@@ -11,14 +11,8 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
-using AppliedResearchAssociates.iAM.Data.Networking;
 using System.Threading;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Hubs.Services;
-using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Common.Logging;
-using Microsoft.IdentityModel.Tokens;
-using System.Xml.Serialization;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -105,9 +99,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (areFacilitiesRequired)
             {
                 var attributeIdLookup = getAttributeIdLookUp();
-                networkEntity.MaintainableAssets = getInitialQuery()
+                networkEntity.MaintainableAssets = GetInitialQuery()
                                                     .Where(_ => _.NetworkId == networkId)
-                                                    .Select(asset => getMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
+                                                    .Select(asset => GetMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
             }
 
             if (!areFacilitiesRequired && simulationId != null)
@@ -115,9 +109,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 // Load Assets corresponding to simulation's committed projects(this case is used by simulation pre-checks system)
                 var attributeIdLookup = getAttributeIdLookUp();
                 var assetIdsInCommittedProjectsForSimulation = _unitOfWork.MaintainableAssetRepo.GetAllIdsInCommittedProjectsForSimulation((Guid)simulationId, networkId);
-                networkEntity.MaintainableAssets = getInitialQuery()
+                networkEntity.MaintainableAssets = GetInitialQuery()
                                                     .Where(_ => assetIdsInCommittedProjectsForSimulation.Contains(_.Id))
-                                                    .Select(asset => getMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
+                                                    .Select(asset => GetMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
             }
 
             var domain = networkEntity.ToDomain(explorer);
@@ -135,7 +129,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        private IQueryable<MaintainableAssetEntity> getInitialQuery()
+        private IQueryable<MaintainableAssetEntity> GetInitialQuery()
         {
             return _unitOfWork.Context.MaintainableAsset
                 .Include(a => a.MaintainableAssetLocation)
@@ -143,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .AsSplitQuery();
         }
 
-        private static MaintainableAssetEntity getMaintainableAssetEntity(MaintainableAssetEntity asset, Dictionary<Guid, string> attributeIdLookup)
+        private static MaintainableAssetEntity GetMaintainableAssetEntity(MaintainableAssetEntity asset, Dictionary<Guid, string> attributeIdLookup)
         {
             return new MaintainableAssetEntity
             {

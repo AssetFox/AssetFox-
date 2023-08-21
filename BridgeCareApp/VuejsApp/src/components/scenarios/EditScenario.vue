@@ -30,6 +30,7 @@
                                     <AnalysisMethodSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Analysis Method'"/>  
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
                                     <CommittedProjectSvg style="height: 32px; width: 24px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
+                                    <CommittedProjectSvg style="height: 32px; width: 24px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Summary Reports'"/>  
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-content>
@@ -38,6 +39,16 @@
                         </v-list-tile>
                     </v-list-item-group>
                 </v-list>
+                                <div style="margin: auto; width: 85%;">
+                    <v-btn
+                        class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
+                        depressed
+                        block
+                        outlined>
+                        Reports
+                    </v-btn>
+                </div>
+
                 <div style="margin: auto; width: 85%;">
                     <v-btn
                         class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
@@ -216,6 +227,13 @@ export default class EditScenario extends Vue {
             tabIcon: 'fas fa-clipboard',
             navigation: {
                 path: '/CommittedProjectsEditor/Scenario/',
+            },
+        },
+        {
+            tabName: 'Summary Reports',
+            tabIcon: 'fas fa-clipboard,',
+            navigation: {
+                path: '/SummaryReport/Scenario/',
             },
         },
     ];

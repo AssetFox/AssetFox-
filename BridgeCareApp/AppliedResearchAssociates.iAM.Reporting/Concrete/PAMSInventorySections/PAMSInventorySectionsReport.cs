@@ -145,7 +145,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             List<SegmentAttributeDatum> result = new List<SegmentAttributeDatum>();
             //var attributeList = new List<string>() {"County", "SR"};
-            var networkTypeVariable = networkType;
 
             var allAttributes = _unitofwork.AttributeRepo.GetAttributes();
             allAttributes.Add(new AttributeDTO() { Name = "Segment", Command = "SEG", DataSource = allAttributes.Single(_ => _.Name == "COUNTY").DataSource});

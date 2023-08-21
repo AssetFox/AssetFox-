@@ -16,7 +16,8 @@
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
                         <v-autocomplete :items="keyAttributeValues[index]" @change="onSelectInventoryItem(index)" item-text="identifier" item-value="identifier"
                                         :label="`Select by ${key} Key`" outline
-                                        v-model="selectedKeys[index]">
+                                        v-model="selectedKeys[index]"
+                                        :disabled = "isDisabled(index)">
                             <template slot="item" slot-scope="data">
                                 <template v-if="typeof data.item !== 'object'">
                                     <v-list-tile-content v-text="data.item"></v-list-tile-content>
@@ -111,7 +112,7 @@
                 this.inventoryDetails = clone(this.stateKeyFields);
                 this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
 
-                this.getInventoryAction(this.inventoryDetails[0]);
+                this.getInventoryAction(this.inventoryDetails);
             }
         }
 
@@ -121,7 +122,7 @@
                 this.inventoryDetails = clone(this.stateRawDataKeyFields);
 
                 this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
-                this.getInventoryAction(this.inventoryDetails);
+                this.getInventoryAction([this.inventoryDetails[0]]);
             } 
 
         }
@@ -245,7 +246,7 @@
             }
             else if(this.constraintDetails == 'AND') {
                 let selectedCounter = 0;
-                //Get the first use selected key field and it's selection and put it in a dictionary
+                //Get the first user selected key field and it's selection and put it in a dictionary
                 this.QueryAccess();
 
                 //Check if any dropdowns are empty
@@ -316,6 +317,13 @@
                     //Send to back end to recieve dropdown lists for the other key fields                     
                     this.getQueryAction({querySet: this.querySelectedData});           
             }
+        }
+
+        isDisabled(index: number) {
+            if(this.querySelectedData.length < index * 2) {
+                return true;
+            }
+            return false;
         }
     }
 

@@ -141,13 +141,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private List<SegmentAttributeDatum> GetAsset(PAMSParameters keyProperties)
         {
-            var reportTypeParam = _adminSettingsRepository.GetInventoryReports();
             List<SegmentAttributeDatum> result = new List<SegmentAttributeDatum>();
 
             //var attributeList = new List<string>() {"County","SR"};
 
             var allAttributes = _unitofwork.AttributeRepo.GetAttributes();
-            //allAttributes.Add(new AttributeDTO() { Name = "Segment", Command = "SEG", DataSource = allAttributes.Single(_ => _.Name == "COUNTY").DataSource });
+            allAttributes.Add(new AttributeDTO() { Name = "Segment", Command = "SEG", DataSource = allAttributes.Single(_ => _.Name == "COUNTY").DataSource });
             var queryDictionary = new Dictionary<AttributeDTO, string>();
             try
             {

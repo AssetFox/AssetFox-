@@ -88,9 +88,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="b2c.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Update="esec.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>

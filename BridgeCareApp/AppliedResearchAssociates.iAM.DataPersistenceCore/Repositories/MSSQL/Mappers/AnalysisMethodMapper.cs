@@ -81,6 +81,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldDeteriorateDuringCashFlow = dto.ShouldDeteriorateDuringCashFlow,
                 ShouldUseExtraFundsAcrossBudgets = dto.ShouldUseExtraFundsAcrossBudgets,
                 AttributeId = attributeId,
+               
             };
 
         public static AnalysisMethodDTO ToDto(this AnalysisMethodEntity entity) =>

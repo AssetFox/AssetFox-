@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static ScenarioRemainingLifeLimitEntity ToScenarioEntityWithCriterionLibraryJoin(this RemainingLifeLimitDTO dto, Guid simulationId,
             Guid attributeId)
         {
-            //MD Detect if we want the CritionLibrary or not
+            
             var entity = ToScenarioEntity(dto, simulationId,attributeId);
             var criterionLibraryDto = dto.CriterionLibrary;
             var isvalid = criterionLibraryDto.IsValid();

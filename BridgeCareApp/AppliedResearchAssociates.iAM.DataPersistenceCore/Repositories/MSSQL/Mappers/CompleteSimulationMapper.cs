@@ -17,6 +17,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -28,6 +29,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             string networkKeyAttribute)
         {
             var analysisMethod = AnalysisMethodMapper.ToEntity(dto.AnalysisMethod, dto.Id);
+            if (CriterionLibraryValidityChecker.IsValid(dto.AnalysisMethod.CriterionLibrary))
+            {
+                var analysisMethodCriterionLibraryEntity = CriterionMapper.ToEntity(dto.AnalysisMethod.CriterionLibrary);
+                var analysisMethodJoin = new CriterionLibraryAnalysisMethodEntity
+                {
+                    AnalysisMethodId = dto.AnalysisMethod.Id,
+                    CriterionLibrary = analysisMethodCriterionLibraryEntity,
+                };
+                analysisMethod.CriterionLibraryAnalysisMethodJoin = analysisMethodJoin;
+            }
             var investmentPlan = InvestmentPlanMapper.ToEntityNullPropagating(dto.InvestmentPlan, dto.Id);
             var reportIndexEntities = new List<ReportIndexEntity>();
             foreach (var report in dto.ReportIndexes)
@@ -62,7 +73,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var scenarioDeficientConditionGoals = new List<ScenarioDeficientConditionGoalEntity>();
             foreach (var scenarioDeficientConditionGoal in dto.DeficientConditionGoals)
             {
-                var deficientConditionGoal = scenarioDeficientConditionGoal.ToScenarioEntity(dto.Id, dto.Id);
+                var attributeName = scenarioDeficientConditionGoal.Attribute;
+                var attribute = attributes.FirstOrDefault(a => a.Name == attributeName);
+                var deficientConditionGoal = scenarioDeficientConditionGoal.ToScenarioEntity(dto.Id, attribute.Id);
                 scenarioDeficientConditionGoals.Add(deficientConditionGoal);
             }
             var scenarioRemainingLifeLimitEntities = new List<ScenarioRemainingLifeLimitEntity>();

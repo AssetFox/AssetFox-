@@ -259,8 +259,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
 
             TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(limits, simulationId);
 
-            //var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
-
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
             var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
           
@@ -293,8 +291,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             var lifeLimitsBefore = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationId);
             var lifeLimitBefore = lifeLimitsBefore.Single();
 
-            //var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
-
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
             var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
 
@@ -310,10 +306,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             Assert.NotEqual(Guid.Empty, clonedLifeLimit.CriterionLibrary.Id);
             Assert.NotEqual(lifeLimitBefore.Id, clonedLifeLimit.Id);
             Assert.NotEqual(lifeLimitBefore.CriterionLibrary.Id, clonedLifeLimit.CriterionLibrary.Id);
-            //Assert.NotEqual(lifeLimitBefore.CriterionLibrary.MergedCriteriaExpression, clonedLifeLimit.CriterionLibrary.MergedCriteriaExpression);
-            //Assert.NotEqual(lifeLimitBefore.CriterionLibrary.IsSingleUse, clonedLifeLimit.CriterionLibrary.IsSingleUse);
-            //Assert.NotEqual(lifeLimitBefore.CriterionLibrary.Name, clonedLifeLimit.CriterionLibrary.Name);
-        }
+         }
         
 
 
@@ -333,7 +326,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
 
             TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(deficientconditiongoals, simulationId);
 
-            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+            var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
 
             var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
@@ -366,9 +360,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             var deficientConditionGoalsBefore = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
             var deficientConditionGoalBefore = deficientConditionGoalsBefore.Single();
 
-            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
-            //var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
-            //var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
+            
+            var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
 
             var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
@@ -378,9 +372,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             Assert.Equal(newSimulationName, clonedSimulation.Name);
             Assert.Equal(networkId, clonedSimulation.NetworkId);
             Assert.Equal("Test Network", clonedSimulation.NetworkName);
-            ObjectAssertions.EquivalentExcluding(deficientConditionGoalBefore.CriterionLibrary, clonedDeficientConditionGoal.CriterionLibrary, c => c.Id);
+            ObjectAssertions.EquivalentExcluding(deficientConditionGoalBefore.CriterionLibrary, clonedDeficientConditionGoal.CriterionLibrary, c => c.Id, c => c.MergedCriteriaExpression, c => c.IsSingleUse, c => c.Name);
             Assert.NotEqual(deficientConditionGoalBefore.Id, clonedDeficientConditionGoal.Id);
-            Assert.NotEqual(deficientConditionGoalBefore.CriterionLibrary.Id, clonedDeficientConditionGoal.CriterionLibrary.Id);
+            Assert.NotEqual(deficientConditionGoalBefore.CriterionLibrary.Id, clonedDeficientConditionGoal.CriterionLibrary.Id);          
+     
         }
 
 
@@ -411,7 +406,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             TestHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, "");
             var newSimulationName = RandomStrings.WithPrefix("cloned");
 
-            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+            //var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+            var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
 
             var clonedSimulation = cloningResult.Simulation;
             var clonedAnalysisMethod = TestHelper.UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(clonedSimulation.Id);
@@ -443,7 +440,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             var treatmentsBefore = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             var treatmentBefore = treatmentsBefore.Single();
 
-            var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+            //var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+            var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
 
             var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);

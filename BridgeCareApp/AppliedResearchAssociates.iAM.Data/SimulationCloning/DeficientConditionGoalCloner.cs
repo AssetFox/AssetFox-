@@ -14,6 +14,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             {
                 LibraryId = deficientConditionGoal.LibraryId,
                 CriterionLibrary = cloneCritionLibrary,
+                Attribute = deficientConditionGoal.Attribute,
                 DeficientLimit = deficientConditionGoal.DeficientLimit,
                 AllowedDeficientPercentage = deficientConditionGoal.AllowedDeficientPercentage,
                 IsModified = deficientConditionGoal.IsModified,

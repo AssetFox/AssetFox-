@@ -22,6 +22,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
                 ShouldDeteriorateDuringCashFlow = analysisMethod.ShouldDeteriorateDuringCashFlow,
                 ShouldUseExtraFundsAcrossBudgets = analysisMethod.ShouldUseExtraFundsAcrossBudgets,
                 SpendingStrategy = analysisMethod.SpendingStrategy,
+
             };
             return clone;
         }

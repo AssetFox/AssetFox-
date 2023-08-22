@@ -39,16 +39,6 @@
                         </v-list-tile>
                     </v-list-item-group>
                 </v-list>
-                                <div style="margin: auto; width: 85%;">
-                    <v-btn
-                        class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
-                        depressed
-                        block
-                        outlined>
-                        Reports
-                    </v-btn>
-                </div>
-
                 <div style="margin: auto; width: 85%;">
                     <v-btn
                         class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"

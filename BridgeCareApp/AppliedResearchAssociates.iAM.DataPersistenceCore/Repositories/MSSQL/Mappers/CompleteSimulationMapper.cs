@@ -49,25 +49,42 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var scenarioBudgetsEntities = new List<ScenarioBudgetEntity>();
             foreach (var budget in dto.Budgets)
             {
-                var scenarioBudgetEntity = budget.ToScenarioEntity(dto.Id);
+                var scenarioBudgetEntity = budget.ToScenarioEntityWithBudgetAmounts(dto.Id);
                 scenarioBudgetsEntities.Add(scenarioBudgetEntity);
             }
             var scenarioCalculatedAttributeEntities = new List<ScenarioCalculatedAttributeEntity>();
             foreach (var calculatedAttribute in dto.CalculatedAttributes)
             {
-                var scenarioCalculatedAtrributeEntity = calculatedAttribute.ToScenarioEntity(dto.Id, dto.Id);
+                var attributeName = calculatedAttribute.Attribute;
+                var attribute = attributes.FirstOrDefault(a => a.Name == attributeName);
+                var scenarioCalculatedAtrributeEntity = calculatedAttribute.ToScenarioEntity(dto.Id, attribute.Id);
                 scenarioCalculatedAttributeEntities.Add(scenarioCalculatedAtrributeEntity);
             }            
-            var scenarioSelectableTreatmentEntities = new List<ScenarioSelectableTreatmentEntity>();
+            var scenarioSelectableTreatmentEntities = new List<ScenarioSelectableTreatmentEntity>();           
             foreach (var treatment in dto.Treatments)
             {
+                var budgetJoins = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>();
+                foreach (var treatmentBudget in treatment.Budgets)
+                {
+                    var budgetDto = dto.Budgets.FirstOrDefault(b => b.Name == treatmentBudget.Name);
+                    var budgetJoin = new ScenarioSelectableTreatmentScenarioBudgetEntity
+                    {
+                        ScenarioSelectableTreatmentId = dto.Id,
+                        ScenarioBudgetId = budgetDto.Id,
+
+                    };
+                    budgetJoins.Add(budgetJoin);
+                }
                 var scenarioSelectableTreatmentEntity = treatment.ToScenarioEntity(dto.Id);
+                scenarioSelectableTreatmentEntity.ScenarioSelectableTreatmentScenarioBudgetJoins = budgetJoins;
                 scenarioSelectableTreatmentEntities.Add(scenarioSelectableTreatmentEntity);
             }
             var scenarioTargetConditionGoalEntities = new List<ScenarioTargetConditionGoalEntity>();
             foreach (var targetConditionGoal in dto.TargetConditionGoals)
             {
-                var scenarioTargetConditionGoalEntity = targetConditionGoal.ToScenarioEntity(dto.Id, dto.Id);
+                var attributeName = targetConditionGoal.Attribute;
+                var attribute = attributes.FirstOrDefault(a => a.Name == attributeName);
+                var scenarioTargetConditionGoalEntity = targetConditionGoal.ToScenarioEntity(dto.Id, attribute.Id);
                 scenarioTargetConditionGoalEntities.Add(scenarioTargetConditionGoalEntity);
             }
             var scenarioDeficientConditionGoals = new List<ScenarioDeficientConditionGoalEntity>();

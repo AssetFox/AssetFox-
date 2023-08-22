@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static ScenarioBudgetEntity ToScenarioEntity(this BudgetDTO dto, Guid simulationId) =>
             new ScenarioBudgetEntity { Id = dto.Id, SimulationId = simulationId, LibraryId = dto.LibraryId, IsModified = dto.IsModified, Name = dto.Name, BudgetOrder = dto.BudgetOrder };
 
-        public static ScenarioBudgetEntity ToScenarioEntityWithBudgetAmount(this BudgetDTO dto, Guid simulationId) =>
+        public static ScenarioBudgetEntity ToScenarioEntityWithBudgetAmounts(this BudgetDTO dto, Guid simulationId) =>
             new ScenarioBudgetEntity
             {
                 Id = dto.Id,

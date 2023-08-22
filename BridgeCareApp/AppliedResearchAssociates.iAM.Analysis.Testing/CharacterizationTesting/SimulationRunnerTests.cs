@@ -27,14 +27,7 @@ public class SimulationRunnerTests
             NameOfUsableBudget = scenario.InvestmentPlan.Budgets.First().Name,
             Cost = 100,
             Name = "Lovecraftian Horror",
-            Consequences =
-            {
-                new()
-                {
-                    AttributeName = "HEALTH",
-                    ChangeExpression = "+50",
-                },
-            },
+            NameOfTemplateTreatment = scenario.SelectableTreatments.Single(t => t.ForCommittedProjectsOnly).Name,
         });
 
         return RunTest(scenario);

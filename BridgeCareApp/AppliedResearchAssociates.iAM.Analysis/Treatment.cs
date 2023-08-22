@@ -9,7 +9,7 @@ public abstract class Treatment : WeakEntity, IValidator
 {
     public string Name { get; set; }
 
-    public Dictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors { get; } = new();
+    public abstract Dictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors { get; }
 
     public int ShadowForAnyTreatment
     {
@@ -41,21 +41,10 @@ public abstract class Treatment : WeakEntity, IValidator
             results.Add(ValidationStatus.Warning, "\"Same\" shadow is less than \"any\" shadow.", this);
         }
 
-        foreach (var (attribute, factor) in PerformanceCurveAdjustmentFactors)
-        {
-            if (factor <= 0)
-            {
-                results.Add(
-                    ValidationStatus.Error,
-                    $"Attribute \"{attribute.Name}\" performance curve adjustment factor is non-positive.",
-                    this);
-            }
-        }
-
         return results;
     }
 
-    public abstract IEnumerable<TreatmentScheduling> GetSchedulings();
+    internal abstract IEnumerable<TreatmentScheduling> GetSchedulings();
 
     internal abstract bool CanUseBudget(Budget budget);
 

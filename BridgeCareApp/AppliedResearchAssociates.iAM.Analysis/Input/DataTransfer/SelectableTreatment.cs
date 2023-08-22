@@ -10,6 +10,8 @@ public sealed class SelectableTreatment : Treatment
 
     public List<string> FeasibilityCriterionExpressions { get; init; } = new();
 
+    public bool ForCommittedProjectsOnly { get; set; }
+
     public List<string> NamesOfUsableBudgets { get; init; } = new();
 
     public List<PerformanceCurveAdjustmentFactor> PerformanceCurveAdjustmentFactors { get; init; } = new();

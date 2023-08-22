@@ -2,14 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.Validation;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis;
 
 public sealed class SelectableTreatment : Treatment
 {
+    public SelectableTreatment(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
+
+    /// <summary>
+    ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
+    ///     types in this module.
+    /// </summary>
+    public AssetCategory AssetCategory { get; set; }
+
     public ICollection<Budget> Budgets { get; } = new SetWithoutNulls<Budget>();
+
+    /// <summary>
+    ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
+    ///     types in this module.
+    /// </summary>
+    public TreatmentCategory Category { get; set; }
 
     public IReadOnlyCollection<ConditionalTreatmentConsequence> Consequences => _Consequences;
 
@@ -17,17 +31,17 @@ public sealed class SelectableTreatment : Treatment
 
     public string Description { get; set; }
 
-    public TreatmentCategory Category { get; set; }
-
-    public AssetCategory AssetCategory { get; set; }
-
     public IReadOnlyCollection<Criterion> FeasibilityCriteria => _FeasibilityCriteria;
+
+    public bool ForCommittedProjectsOnly { get; set; }
+
+    public override Dictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors { get; } = new();
 
     public ICollection<TreatmentScheduling> Schedulings { get; } = new SetWithoutNulls<TreatmentScheduling>();
 
-    public IReadOnlyCollection<TreatmentSupersession> Supersessions => _Supersessions;
-
     public override ValidatorBag Subvalidators => base.Subvalidators.Add(Consequences).Add(Costs).Add(FeasibilityCriteria).Add(Schedulings).Add(Supersessions);
+
+    public IReadOnlyCollection<TreatmentSupersession> Supersessions => _Supersessions;
 
     public ConditionalTreatmentConsequence AddConsequence() => _Consequences.GetAdd(new ConditionalTreatmentConsequence(Simulation.Network.Explorer));
 
@@ -74,12 +88,19 @@ public sealed class SelectableTreatment : Treatment
             results.Add(ValidationStatus.Warning, "At least one treatment is unconditionally superseded more than once.", this, nameof(Supersessions));
         }
 
+        foreach (var (attribute, factor) in PerformanceCurveAdjustmentFactors)
+        {
+            if (factor <= 0)
+            {
+                results.Add(
+                    ValidationStatus.Error,
+                    $"Attribute \"{attribute.Name}\" performance curve adjustment factor is non-positive.",
+                    this);
+            }
+        }
+
         return results;
     }
-
-    public override IEnumerable<TreatmentScheduling> GetSchedulings() => Schedulings;
-
-    internal bool IsFeasible(AssetContext scope) => FeasibilityCriteria.Any(feasibility => feasibility.EvaluateOrDefault(scope));
 
     public void Remove(TreatmentSupersession supersession) => _Supersessions.Remove(supersession);
 
@@ -88,8 +109,6 @@ public sealed class SelectableTreatment : Treatment
     public void Remove(TreatmentCost cost) => _Costs.Remove(cost);
 
     public void RemoveFeasibilityCriterion(Criterion criterion) => _FeasibilityCriteria.Remove(criterion);
-
-    public SelectableTreatment(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
     internal override bool CanUseBudget(Budget budget) => Budgets.Contains(budget);
 
@@ -120,7 +139,7 @@ public sealed class SelectableTreatment : Treatment
                 return changeApplicators[0].Action.Once();
             }
 
-            if (!(consequences.Key is NumberAttribute numberAttribute))
+            if (consequences.Key is not NumberAttribute numberAttribute)
             {
                 var messageBuilder = new SimulationMessageBuilder(MessageStrings.NonNumberAttributeIsBeingActedOnByMultipleConsequences)
                 {
@@ -141,6 +160,39 @@ public sealed class SelectableTreatment : Treatment
         }
     }
 
+    internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts)
+    {
+        var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
+        if (feasibleCosts.Length == 0)
+        {
+            return 0;
+        }
+
+        return shouldApplyMultipleFeasibleCosts ? feasibleCosts.Sum(cost => getCost(cost, scope)) : feasibleCosts.Max(cost => getCost(cost, scope));
+    }
+
+    internal override IEnumerable<TreatmentScheduling> GetSchedulings() => Schedulings;
+
+    internal bool IsFeasible(AssetContext scope) => FeasibilityCriteria.Any(feasibility => feasibility.EvaluateOrDefault(scope));
+
+    internal void SetConsequencesPerAttribute() => ConsequencesPerAttribute = Consequences.ToLookup(c => c.Attribute);
+
+    internal void UnsetConsequencesPerAttribute() => ConsequencesPerAttribute = null;
+
+    private static readonly IComparer<ChangeApplicator> ChangeApplicatorComparer = SelectionComparer<ChangeApplicator>.Create(applicator => applicator.Number.Value);
+
+    private readonly List<ConditionalTreatmentConsequence> _Consequences = new();
+
+    private readonly List<TreatmentCost> _Costs = new();
+
+    private readonly List<Criterion> _FeasibilityCriteria = new();
+
+    private readonly List<TreatmentSupersession> _Supersessions = new();
+
+    private readonly Simulation Simulation;
+
+    private ILookup<Attribute, ConditionalTreatmentConsequence> ConsequencesPerAttribute;
+
     private double getCost(TreatmentCost cost, AssetContext scope)
     {
         var returnValue = cost.Equation.Compute(scope);
@@ -158,33 +210,4 @@ public sealed class SelectableTreatment : Treatment
         }
         return returnValue;
     }
-
-    internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts)
-    {
-        var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
-        if (feasibleCosts.Length == 0)
-        {
-            return 0;
-        }
-
-        return shouldApplyMultipleFeasibleCosts ? feasibleCosts.Sum(cost => getCost(cost, scope)) : feasibleCosts.Max(cost => getCost(cost, scope));
-    }
-
-    internal void SetConsequencesPerAttribute() => ConsequencesPerAttribute = Consequences.ToLookup(c => c.Attribute);
-
-    internal void UnsetConsequencesPerAttribute() => ConsequencesPerAttribute = null;
-
-    private static readonly IComparer<ChangeApplicator> ChangeApplicatorComparer = SelectionComparer<ChangeApplicator>.Create(applicator => applicator.Number.Value);
-
-    private readonly List<ConditionalTreatmentConsequence> _Consequences = new List<ConditionalTreatmentConsequence>();
-
-    private readonly List<TreatmentCost> _Costs = new List<TreatmentCost>();
-
-    private readonly List<Criterion> _FeasibilityCriteria = new List<Criterion>();
-
-    private readonly List<TreatmentSupersession> _Supersessions = new List<TreatmentSupersession>();
-
-    private readonly Simulation Simulation;
-
-    private ILookup<Attribute, ConditionalTreatmentConsequence> ConsequencesPerAttribute;
 }

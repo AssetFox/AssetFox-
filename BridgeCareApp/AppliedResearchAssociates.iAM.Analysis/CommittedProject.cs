@@ -27,7 +27,7 @@ public sealed class CommittedProject : Treatment
     /// </summary>
     public DateTime LastModifiedDate { get; set; }
 
-    public override Dictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors => TemplateTreatment.PerformanceCurveAdjustmentFactors;
+    public override IReadOnlyDictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors => TemplateTreatment.PerformanceCurveAdjustmentFactors;
 
     public override int ShadowForAnyTreatment => TemplateTreatment.ShadowForAnyTreatment;
 

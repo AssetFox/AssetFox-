@@ -39,6 +39,10 @@ public sealed class SelectableTreatment : Treatment
 
     public ICollection<TreatmentScheduling> Schedulings { get; } = new SetWithoutNulls<TreatmentScheduling>();
 
+    public override int ShadowForAnyTreatment => _ShadowForAnyTreatment;
+
+    public override int ShadowForSameTreatment => _ShadowForSameTreatment;
+
     public override ValidatorBag Subvalidators => base.Subvalidators.Add(Consequences).Add(Costs).Add(FeasibilityCriteria).Add(Schedulings).Add(Supersessions);
 
     public IReadOnlyCollection<TreatmentSupersession> Supersessions => _Supersessions;
@@ -64,6 +68,11 @@ public sealed class SelectableTreatment : Treatment
     public override ValidationResultBag GetDirectValidationResults()
     {
         var results = base.GetDirectValidationResults();
+
+        if (ShadowForSameTreatment < ShadowForAnyTreatment)
+        {
+            results.Add(ValidationStatus.Warning, "\"Same\" shadow is less than \"any\" shadow.", this);
+        }
 
         if (Schedulings.Select(scheduling => scheduling.OffsetToFutureYear).Distinct().Count() < Schedulings.Count)
         {
@@ -109,6 +118,10 @@ public sealed class SelectableTreatment : Treatment
     public void Remove(TreatmentCost cost) => _Costs.Remove(cost);
 
     public void RemoveFeasibilityCriterion(Criterion criterion) => _FeasibilityCriteria.Remove(criterion);
+
+    public void SetShadowForAnyTreatment(int value) => _ShadowForAnyTreatment = Math.Max(value, DEFAULT_SHADOW);
+
+    public void SetShadowForSameTreatment(int value) => _ShadowForSameTreatment = Math.Max(value, DEFAULT_SHADOW);
 
     internal override bool CanUseBudget(Budget budget) => Budgets.Contains(budget);
 
@@ -179,6 +192,8 @@ public sealed class SelectableTreatment : Treatment
 
     internal void UnsetConsequencesPerAttribute() => ConsequencesPerAttribute = null;
 
+    private const int DEFAULT_SHADOW = 1;
+
     private static readonly IComparer<ChangeApplicator> ChangeApplicatorComparer = SelectionComparer<ChangeApplicator>.Create(applicator => applicator.Number.Value);
 
     private readonly List<ConditionalTreatmentConsequence> _Consequences = new();
@@ -190,6 +205,10 @@ public sealed class SelectableTreatment : Treatment
     private readonly List<TreatmentSupersession> _Supersessions = new();
 
     private readonly Simulation Simulation;
+
+    private int _ShadowForAnyTreatment = DEFAULT_SHADOW;
+
+    private int _ShadowForSameTreatment = DEFAULT_SHADOW;
 
     private ILookup<Attribute, ConditionalTreatmentConsequence> ConsequencesPerAttribute;
 

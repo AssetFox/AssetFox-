@@ -153,6 +153,8 @@ public static class InputCreation
                     },
                 },
                 FeasibilityCriterionExpressions = { "AGE >= 0" },
+                ShadowForAnyTreatment = 5,
+                ShadowForSameTreatment = 10,
             },
         },
     };

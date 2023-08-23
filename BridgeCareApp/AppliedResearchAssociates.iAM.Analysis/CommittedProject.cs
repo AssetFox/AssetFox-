@@ -29,6 +29,10 @@ public sealed class CommittedProject : Treatment
 
     public override Dictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors => TemplateTreatment.PerformanceCurveAdjustmentFactors;
 
+    public override int ShadowForAnyTreatment => TemplateTreatment.ShadowForAnyTreatment;
+
+    public override int ShadowForSameTreatment => TemplateTreatment.ShadowForSameTreatment;
+
     public SelectableTreatment TemplateTreatment { get; set; }
 
     /// <summary>

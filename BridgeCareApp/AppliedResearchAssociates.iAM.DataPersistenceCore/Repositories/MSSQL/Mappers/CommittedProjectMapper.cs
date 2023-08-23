@@ -217,8 +217,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));
             committedProject.Id = entity.Id;
             committedProject.Name = entity.Name;
-            committedProject.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
-            committedProject.ShadowForSameTreatment = entity.ShadowForSameTreatment;
             committedProject.Cost = entity.Cost; 
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
             committedProject.LastModifiedDate = entity.LastModifiedDate;
@@ -249,8 +247,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         var projectToAdd = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, year));
                         projectToAdd.Id = Guid.NewGuid();
                         projectToAdd.Name = noTreatmentEntity.Name;
-                        projectToAdd.ShadowForAnyTreatment = 0;
-                        projectToAdd.ShadowForSameTreatment = 0;
                         projectToAdd.Cost = noTreatmentDefaultCost;
                         projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
                         //projectToAdd.Budget = null;  // This would be the better way, but it fails vaildation

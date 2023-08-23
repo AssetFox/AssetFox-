@@ -143,8 +143,6 @@ public sealed class Scenario
         AssetID = source.Asset.Id,
         Cost = source.Cost,
         Name = source.Name,
-        ShadowForAnyTreatment = source.ShadowForAnyTreatment,
-        ShadowForSameTreatment = source.ShadowForSameTreatment,
         NameOfUsableBudget = source.Budget.Name,
         NameOfTemplateTreatment = source.TemplateTreatment.Name,
         Year = source.Year,
@@ -337,8 +335,8 @@ public sealed class Scenario
 
             result.Category = source.Category;
             result.Name = source.Name;
-            result.ShadowForAnyTreatment = source.ShadowForAnyTreatment;
-            result.ShadowForSameTreatment = source.ShadowForSameTreatment;
+            result.SetShadowForAnyTreatment(source.ShadowForAnyTreatment);
+            result.SetShadowForSameTreatment(source.ShadowForSameTreatment);
             result.ForCommittedProjectsOnly = source.ForCommittedProjectsOnly;
 
             foreach (var item in source.NamesOfUsableBudgets)
@@ -566,8 +564,6 @@ public sealed class Scenario
                 Budget = BudgetByName[source.NameOfUsableBudget],
                 Cost = source.Cost,
                 Name = source.Name,
-                ShadowForAnyTreatment = source.ShadowForAnyTreatment,
-                ShadowForSameTreatment = source.ShadowForSameTreatment,
                 treatmentCategory = source.Category,
                 TemplateTreatment = TreatmentByName[source.NameOfTemplateTreatment],
             };

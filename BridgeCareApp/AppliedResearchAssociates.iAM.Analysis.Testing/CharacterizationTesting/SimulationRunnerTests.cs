@@ -22,8 +22,6 @@ public class SimulationRunnerTests
         {
             AssetID = scenario.Network.MaintainableAssets.Find(asset => asset.Name == "LA 1").ID,
             Year = 2018,
-            ShadowForAnyTreatment = 5,
-            ShadowForSameTreatment = 10,
             NameOfUsableBudget = scenario.InvestmentPlan.Budgets.First().Name,
             Cost = 100,
             Name = "Lovecraftian Horror",

@@ -18,5 +18,9 @@ public sealed class SelectableTreatment : Treatment
 
     public List<TreatmentScheduling> Schedulings { get; init; } = new();
 
+    public int ShadowForAnyTreatment { get; set; }
+
+    public int ShadowForSameTreatment { get; set; }
+
     public List<TreatmentSupersession> Supersessions { get; init; } = new();
 }

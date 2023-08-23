@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -23,9 +22,9 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTa
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.Reporting.Services;
-using System.Threading;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.Reporting.Services;
+using System.Threading;
 using AppliedResearchAssociates.iAM.Common.Logging;using AppliedResearchAssociates.iAM.WorkQueue;
 
 namespace AppliedResearchAssociates.iAM.Reporting
@@ -65,6 +64,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Criteria { get; set; }
 
         public BAMSSummaryReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
@@ -109,7 +109,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
         }
 
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
-        {
+        {            // TODO Read criteria from parameters? set to property
+
             workQueueLog ??= new DoNothingWorkQueueLog();
             //check for the parameters string
             if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters)) {
@@ -206,6 +207,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
 
+            // reportOutputData will be having all assets data, should we filter it laer before adding any to report??
+            _reportHelper.FilterReportOutputData(reportOutputData, Criteria);
+
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
             reportDetailDto.Status = $"Checking initial sections";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
@@ -265,7 +269,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var simulationYearsCount = simulationYears.Count;
 
-            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();            
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 

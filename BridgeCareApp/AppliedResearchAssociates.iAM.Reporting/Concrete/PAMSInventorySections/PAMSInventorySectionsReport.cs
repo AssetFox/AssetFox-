@@ -35,6 +35,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public List<string> Errors { get; private set; }
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
+        public string Criteria { get; set; }
 
         private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown",Route=0,Segment=0};
 

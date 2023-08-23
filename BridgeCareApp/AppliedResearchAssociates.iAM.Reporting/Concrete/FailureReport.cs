@@ -38,6 +38,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status => String.Empty;
 
+        public string Criteria { get => null; set { } }
+
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             _isComplete = false;

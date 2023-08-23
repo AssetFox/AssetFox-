@@ -59,5 +59,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// Status message to be shown in UI
         /// </summary>
         string Status { get; }
+
+        /// <summary>
+        /// Report criteria to filter report output based on criteria compatible assets
+        /// </summary>
+        string Criteria { get; set; }
     }
 }

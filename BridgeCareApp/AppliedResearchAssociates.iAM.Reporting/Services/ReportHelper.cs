@@ -1,14 +1,18 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services
 {
     public class ReportHelper
     {
+     //   private readonly IExpressionValidationService _expressionValidationService;
+
+       // ReportHelper(IExpressionValidationService expressionValidationService)=> _expressionValidationService = expressionValidationService ?? throw new ArgumentNullException(nameof(expressionValidationService));
+
         public T CheckAndGetValue<T>(IDictionary itemsArray, string itemName)
         {
             var itemValue = default(T);
@@ -156,6 +160,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
         {
             var treatedSections = simulationYearDetail.Assets.Where(section => section.TreatmentCause is not TreatmentCause.NoSelection);
             return treatedSections.ToList();
+        }
+
+        /// <summary>
+        /// Filter the reportOutputData based on given criteria, keep criteria specific assets in InitialAssetSummaries and Years' Assets
+        /// </summary>
+        /// <param name="reportOutputData"></param>
+        /// <param name="criteria"></param>
+        public void FilterReportOutputData(SimulationOutput reportOutputData, string criteria)
+        {
+
         }
     }
 }

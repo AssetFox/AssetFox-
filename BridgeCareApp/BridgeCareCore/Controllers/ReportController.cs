@@ -111,7 +111,7 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetFile(string reportName)
         {
             try
-            {
+            { // TODO check with Shaun how the criteria string will be passed to backend.
                 var parameters = await GetParameters();
                 var scenarioName = "";
                 var scenarioId = new Guid();

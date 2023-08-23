@@ -38,6 +38,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status => "No report to run.";
 
+        public string Criteria { get => null; set { } }
+
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             try

@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static BudgetDTO Clone(BudgetDTO budget, Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.Clone(budget.CriterionLibrary, ownerId);
+            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(budget.CriterionLibrary, ownerId);
             var cloneBudgetAmounts = BudgetAmountCloner.CloneList(budget.BudgetAmounts);
             var clone = new BudgetDTO
             {

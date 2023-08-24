@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static RemainingLifeLimitDTO Clone(RemainingLifeLimitDTO remainingLifeLimit, Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.Clone(remainingLifeLimit.CriterionLibrary, ownerId);
+            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(remainingLifeLimit.CriterionLibrary, ownerId);
             var clone = new RemainingLifeLimitDTO
             {
                 LibraryId = remainingLifeLimit.LibraryId,

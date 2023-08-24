@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static TreatmentDTO Clone(TreatmentDTO treatment, Guid ownerId)
         {            
-            var cloneCritionLibrary = CriterionLibraryCloner.Clone(treatment.CriterionLibrary, ownerId);           
+            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(treatment.CriterionLibrary, ownerId);           
             var clone = new TreatmentDTO
             {
               Name = treatment.Name,

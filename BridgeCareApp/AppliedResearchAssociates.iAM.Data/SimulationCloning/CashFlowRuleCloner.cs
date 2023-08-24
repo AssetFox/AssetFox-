@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static CashFlowRuleDTO Clone(CashFlowRuleDTO cashFlowRule, Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.Clone(cashFlowRule.CriterionLibrary, ownerId);
+            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(cashFlowRule.CriterionLibrary, ownerId);
             var clone = new CashFlowRuleDTO
             {
                 Id = Guid.NewGuid(),

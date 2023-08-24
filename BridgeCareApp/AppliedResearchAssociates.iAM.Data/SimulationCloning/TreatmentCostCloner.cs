@@ -7,8 +7,8 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static TreatmentCostDTO Clone(TreatmentCostDTO treatmentCost, Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.Clone(treatmentCost.CriterionLibrary, ownerId);
-            var cloneEquation = EquationCloner.Clone(treatmentCost.Equation);
+            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(treatmentCost.CriterionLibrary, ownerId);
+            var cloneEquation = EquationCloner.Clone(treatmentCost.Equation, ownerId);
             var clone = new TreatmentCostDTO
             {
                 Equation = cloneEquation,

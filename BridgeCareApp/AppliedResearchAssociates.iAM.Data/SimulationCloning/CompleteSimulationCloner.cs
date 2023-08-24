@@ -14,8 +14,14 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             var cloneInvestmentPlan = InvestmentPlanCloner.Clone(completeSimulation.InvestmentPlan);
             var cloneReportIndex = ReportIndexCloner.CloneList(completeSimulation.ReportIndexes);
             var cloneScenarioPerformanceCurvesImportResult = ScenarioPerformanceCurvesImportResultCloner.CloneListNullPropagating(completeSimulation.PerformanceCurves);
-            var cloneCalculatedTribute = CalculatedAttributeCloner.CloneList(completeSimulation.CalculatedAttributes);
+            var cloneCalculatedTribute = CalculatedAttributeCloner.CloneList(completeSimulation.CalculatedAttributes, ownerId);
+            //var cloneEquation = EquationCloner.CloneList(completeSimulation.Equation);
 
+            ////var equationIdMap = new Dictionary<Guid, Guid>();
+            ////for (int equationIndex = 0; equationIndex < cloneCalculatedAttribute.Count; equationIndex++)
+            ////{
+            ////    equationIdMap[completeSimulation.Budgets[equationIndex].Id] = cloneBudget[equationIndex].Id;
+            //}
 
             var cloneRemainingLifeLimits = RemainingLifeLimitCloner.CloneList(completeSimulation.RemainingLifeLimits, ownerId);
             var cloneTreatment = TreatmentCloner.CloneList(completeSimulation.Treatments, ownerId);

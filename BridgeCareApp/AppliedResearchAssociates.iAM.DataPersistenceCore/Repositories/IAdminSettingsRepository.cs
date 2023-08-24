@@ -44,11 +44,13 @@ public interface IAdminSettingsRepository
 
     string GetAgencyLogo();
 
-    void SetAgencyLogo(Image agencyLogo);
+    void SetAgencyLogo(Image agencyLogo, string imageType);
+    void SetAgencyLogo(byte[] productLogo);
 
     string GetImplementationLogo();
 
-    void SetImplementationLogo(Image productLogo);
+    void SetImplementationLogo(Image productLogo, string imageType);
+    void SetImplementationLogo(byte[] productLogo);
 
     void DeleteAdminSetting(string settingKey);
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
@@ -18,6 +19,17 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             return clone;
         }
 
+        internal static List<CommittedProjectConsequenceDTO> CloneList(IEnumerable<CommittedProjectConsequenceDTO> committedProjectConsequences)
+        {
+            var clone = new List<CommittedProjectConsequenceDTO>();
+            foreach (var committedProjectConsequence in committedProjectConsequences)
+            {
+                var childClone = Clone(committedProjectConsequence);
+                clone.Add(childClone);
+            }
+            return clone;
+
+        }
     }
 
 }

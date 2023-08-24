@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -15,6 +17,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
+using AppliedResearchAssociates.iAM.Data.Networking;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
 {
@@ -116,7 +119,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             Assert.Empty(clonedTreatment.Budgets);
             Assert.Empty(clonedTreatment.BudgetIds);
             ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedTreatment.CriterionLibrary);
-
         }
 
 
@@ -160,22 +162,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             Assert.NotEqual(treatmentBefore.CriterionLibrary.IsSingleUse, clonedTreatment.CriterionLibrary.IsSingleUse);
             Assert.NotEqual(treatmentBefore.CriterionLibrary.Name, clonedTreatment.CriterionLibrary.Name);
         }
-
-        [Fact]
-
-        public void PlayWithDictionaries()
-        {
-            var names = new Dictionary<int, string>();
-            names[1] = "one";
-            names[2] = "two";
-            names[3] = "three";
-            names[10] = "ten";
-
-            var ten = names[10];
-
-
-        }
-
+               
 
         [Fact]
         public void SimulationInDbWithSelectableTreatmentWithConsequences_Clone_Clones()
@@ -242,6 +229,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
 
         }
 
+        [Fact]
+        public void PlayWithNullables()
+        {
+            int? x = null;
+            int? y = 2;
+            int a = y.Value;
+            var exception = Assert.Throws<InvalidOperationException>(()=> x.Value);
+            int t = 2;
+        }
 
         [Fact]
         public void SimulationInDbWithRemainingLifeLimit_Clone_Clones()
@@ -359,7 +355,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(deficientconditiongoals, simulationId);
             var deficientConditionGoalsBefore = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
             var deficientConditionGoalBefore = deficientConditionGoalsBefore.Single();
-
             
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
             var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
@@ -375,9 +370,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             ObjectAssertions.EquivalentExcluding(deficientConditionGoalBefore.CriterionLibrary, clonedDeficientConditionGoal.CriterionLibrary, c => c.Id, c => c.MergedCriteriaExpression, c => c.IsSingleUse, c => c.Name);
             Assert.NotEqual(deficientConditionGoalBefore.Id, clonedDeficientConditionGoal.Id);
             Assert.NotEqual(deficientConditionGoalBefore.CriterionLibrary.Id, clonedDeficientConditionGoal.CriterionLibrary.Id);          
-     
         }
-
 
         [Fact]
         public void SimulationInDbWithAnalysisMethodInCriterionLibrary_Clone_Clones()
@@ -439,7 +432,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             var treatmentsBefore = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             var treatmentBefore = treatmentsBefore.Single();
 
-            //var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
             var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
 
@@ -595,7 +587,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             var networkId = Guid.NewGuid();
             var keyAttributeId = TestAttributeIds.BrKeyId;
 
-            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, new List<Data.Networking.MaintainableAsset>(), networkId, keyAttributeId);
+            var maintainableAssets = new List<MaintainableAsset>();
+            var assetId = Guid.Parse("f286b7cf-445d-4291-9167-0f225b170cae");
+            var locationIdentifier = RandomStrings.WithPrefix("Location");
+            var location = Locations.Section(locationIdentifier);
+            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+            var maintainableAssetEntity = maintainableAsset.ToEntity(networkId);
+            var maintainableAssetLocation = new MaintainableAssetLocationEntity()
+            {
+                Id = Guid.Parse("75b07f98-e168-438f-84b6-fcc57b3e3d8f"),
+                LocationIdentifier = "2",
+                Discriminator = DataPersistenceConstants.SectionLocation,
+            };
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            maintainableAssetEntity.MaintainableAssetLocation = maintainableAssetLocation;
+            var testMaintainableAsset = maintainableAssetEntity.ToDomain(locationIdentifier);
+            maintainableAssets.Add(testMaintainableAsset);
+           
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId);
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
@@ -615,7 +624,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             };
             TestHelper.UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(sectionCommittedProjects);
 
-            //var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
             var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
 

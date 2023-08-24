@@ -4,9 +4,9 @@ namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class SectionCommittedProjectDTO : BaseCommittedProjectDTO
     {
-        public override TOutput Accept<TOutput>(Abstract.IBaseCommittedProjectDtoVisitor<TOutput> visitor)
+        public override TOutput Accept<TOutput, THelper>(Abstract.IBaseCommittedProjectDtoVisitor<THelper, TOutput> visitor, THelper helper)
         {
-            return visitor.Visit(this);
+            return visitor.Visit(this, helper);
         } 
 
         public override bool VerifyLocation(string networkKeyAttribute)

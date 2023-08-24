@@ -82,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// </returns>
         public abstract bool VerifyLocation(string networkKeyAttribute);
 
-        public abstract TOutput Accept<TOutput>(IBaseCommittedProjectDtoVisitor<TOutput> visitor);
+        public abstract TOutput Accept<TOutput, THelper>(IBaseCommittedProjectDtoVisitor<THelper, TOutput> visitor, THelper helper);
 
     }
 }

@@ -4,8 +4,8 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 {
-    public interface IBaseCommittedProjectDtoVisitor<TOutput>
+    public interface IBaseCommittedProjectDtoVisitor<THelper, TOutput>
     {
-        TOutput Visit(SectionCommittedProjectDTO dto);
+        TOutput Visit(SectionCommittedProjectDTO dto, THelper helper);
     }
 }

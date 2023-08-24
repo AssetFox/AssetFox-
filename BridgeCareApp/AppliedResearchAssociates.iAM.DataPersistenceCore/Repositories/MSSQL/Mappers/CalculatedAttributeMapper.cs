@@ -112,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsModified = dto.IsModified,
                 AttributeId = attributeId,
                 CalculationTiming = dto.CalculationTiming,
-                SimulationId = simulationId
+                SimulationId = simulationId,                             
             };
 
         public static ScenarioCalculatedAttributeEquationCriteriaPairEntity ToScenarioEntity(this CalculatedAttributeEquationCriteriaPairDTO dto, Guid calculatedAttributeId) =>

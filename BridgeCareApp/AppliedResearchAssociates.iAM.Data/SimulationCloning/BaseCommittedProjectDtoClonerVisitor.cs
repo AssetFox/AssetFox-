@@ -1,22 +1,27 @@
-﻿using AppliedResearchAssociates.iAM.DTOs;
+﻿using System;
+using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
-    public class BaseCommittedProjectDtoClonerVisitor : IBaseCommittedProjectDtoVisitor<BaseCommittedProjectDTO>
+    public class BaseCommittedProjectDtoClonerVisitor : IBaseCommittedProjectDtoVisitor<Dictionary<Guid, Guid>, BaseCommittedProjectDTO>
     {
-        public BaseCommittedProjectDTO Visit(SectionCommittedProjectDTO dto)
+        public BaseCommittedProjectDTO Visit(SectionCommittedProjectDTO dto, Dictionary<Guid, Guid> helper)
         {
             var clone = new SectionCommittedProjectDTO
             {
 
             };
-            CopyAbstractFields(dto, clone);
+            CopyAbstractFields(dto, clone, helper);
+            clone.Id = Guid.NewGuid();
             return clone;
         }
 
-        private void CopyAbstractFields(BaseCommittedProjectDTO dto, BaseCommittedProjectDTO clone)
-        {            
+        private void CopyAbstractFields(BaseCommittedProjectDTO dto, BaseCommittedProjectDTO clone, Dictionary<Guid, Guid> budgetIdMap)
+        {
+            var cloneConsequences = CommittedProjectConsequenceCloner.CloneList(dto.Consequences);
+            clone.Consequences = cloneConsequences;
             clone.Cost = dto.Cost;
             clone.Treatment = dto.Treatment;
             clone.ShadowForAnyTreatment = dto.ShadowForAnyTreatment;
@@ -24,9 +29,16 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             clone.Category = dto.Category;
             clone.Year = dto.Year;
             clone.SimulationId = dto.SimulationId;
-            clone.ScenarioBudgetId = dto.ScenarioBudgetId;
+            if (dto.ScenarioBudgetId != null)
+            {
+                clone.ScenarioBudgetId = budgetIdMap[dto.ScenarioBudgetId.Value];
+            }
+            else
+            {
+                clone.ScenarioBudgetId = null;
+            }
             clone.Treatment = dto.Treatment;
-            clone.Consequences = dto.Consequences;          
+            clone.LocationKeys = new Dictionary<string, string>(dto.LocationKeys);
         }
         
     }

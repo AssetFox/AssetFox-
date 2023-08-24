@@ -7,20 +7,20 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     internal class BaseCommittedProjectCloner
     {
-        internal static BaseCommittedProjectDTO Clone(BaseCommittedProjectDTO baseCommittedProject)
+        internal static BaseCommittedProjectDTO Clone(BaseCommittedProjectDTO baseCommittedProject, Dictionary<Guid, Guid> budgetIdMap)
         {
             var visitor = new BaseCommittedProjectDtoClonerVisitor();
-            var clone = baseCommittedProject.Accept(visitor);
+            var clone = baseCommittedProject.Accept(visitor, budgetIdMap);
             return clone;
 
         }
 
-        internal static List<BaseCommittedProjectDTO> CloneList(IEnumerable<BaseCommittedProjectDTO> baseCommittedProjects)
+        internal static List<BaseCommittedProjectDTO> CloneList(IEnumerable<BaseCommittedProjectDTO> baseCommittedProjects, Dictionary<Guid, Guid> budgetIdMap)
         {
             var clone = new List<BaseCommittedProjectDTO>();
             foreach (var baseCommittedProject in baseCommittedProjects)
             {
-                var childClone = Clone(baseCommittedProject);
+                var childClone = Clone(baseCommittedProject, budgetIdMap);
                 clone.Add(childClone);
             }
             return clone;

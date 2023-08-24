@@ -5,6 +5,7 @@
                 <v-flex xs6>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
+                        id="TreatmentEditor-treatmentLibrary-select"
                         :items='librarySelectItems'
                         append-icon=$vuetify.icons.ghd-down
                         class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
@@ -27,7 +28,16 @@
                     >
                     </v-select>
                 </v-flex>
-
+                <v-flex style="padding-right: 5px">
+                    <v-btn
+                        @click='showImportTreatmentDialog = true'
+                        depressed
+                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
+                        v-show='hasSelectedLibrary'                        
+                    >
+                        Import Treatment
+                    </v-btn>
+                </v-flex>
                 <v-flex style="padding-right: 5px">
                     <v-btn
                         @click='onShowConfirmDeleteTreatmentAlert'
@@ -74,6 +84,7 @@
         <v-divider style="margin-top:-10px" v-show='hasSelectedLibrary || hasScenario'></v-divider>        
         <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top:-20px;margin-bottom:-15px;">                
                <v-btn
+                    id="TreatmentEditor-addTreatment-btn"
                     @click='showCreateTreatmentDialog = true'
                     depressed
                     class='ghd-white-bg ghd-blue ghd-button-text ghd-text-padding'                              
@@ -107,7 +118,7 @@
             <v-layout>
                 <div xs2>
                     <v-flex>
-                        <v-list class='treatments-list'>
+                        <v-list id='TreatmentEditor-Treatment-list' class='treatments-list'>
                             <template v-for='treatmentSelectItem in treatmentSelectItems'>
                                 <v-list-tile :key='treatmentSelectItem.value' ripple :class="{'selected-treatment-item': isSelectedTreatmentItem(treatmentSelectItem.value)}"
                                              avatar @click='onSetTreatmentSelectItemValue(treatmentSelectItem.value)'>
@@ -176,8 +187,8 @@
                                                     class='card-tab-content'
                                                 >
                                                     <PerformanceFactorTab
-                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
                                                         :selectedTreatment='selectedTreatment'
+                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
                                                         :scenarioId='loadedScenarioId'
                                                         :rules='rules'
                                                         :callFromScenario='hasScenario'
@@ -270,7 +281,7 @@
                     class='ghd-blue-bg ghd-white ghd-button-text'
                     depressed
                     v-show='hasScenario'
-                    :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
+                    :disabled='disableCrudButtonsResult || !hasUnsavedChanges || hasImport'>
                     Save
                 </v-btn>
                 <v-btn
@@ -278,7 +289,7 @@
                     class='ghd-blue-bg ghd-white ghd-button-text  ghd-text-padding'
                     depressed
                     v-show='!hasScenario'
-                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges || hasImport'
                 >
                     Update Library
                 </v-btn>
@@ -300,6 +311,11 @@
         <CreateTreatmentDialog
             :showDialog='showCreateTreatmentDialog'
             @submit='onAddTreatment'
+        />
+
+        <ImportNewTreatmentDialog
+            :showDialog ='showImportTreatmentDialog'
+            @submit='onSubmitNewTreatment'
         />
 
         <ImportExportTreatmentsDialog :showDialog='showImportTreatmentsDialog'
@@ -379,6 +395,7 @@ import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { hasUnsavedChangesCore, isEqual } from '@/shared/utils/has-unsaved-changes-helper';
 import { getUserName } from '@/shared/utils/get-user-info';
 import ImportExportTreatmentsDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportExportTreatmentsDialog.vue';
+import ImportNewTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportNewTreatmentDialog.vue';
 import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/import-export-treatments-dialog-result';
 import TreatmentService from '@/services/treatment.service';
 import { AxiosResponse } from 'axios';
@@ -394,6 +411,7 @@ import { Hub } from '@/connectionHub';
 import ScenarioService from '@/services/scenario.service';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
+import { ImportNewTreatmentDialogResult } from '@/shared/models/modals/import-new-treatment-dialog-result';
 
 @Component({
     components: {
@@ -406,6 +424,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
         TreatmentDetailsTab,
         CreateTreatmentDialog,
         CreateTreatmentLibraryDialog,
+        ImportNewTreatmentDialog,
         ConfirmDeleteAlert: Alert,
         ConfirmDeleteTreatmentAlert: Alert
     },
@@ -480,6 +499,7 @@ export default class TreatmentEditor extends Vue {
         emptyCreateTreatmentLibraryDialogData,
     );
     showCreateTreatmentDialog: boolean = false;
+    showImportTreatmentDialog: boolean = false;
     confirmBeforeDeleteAlertData: AlertData = clone(emptyAlertData);
     hasSelectedTreatment: boolean = false;
     rules: InputValidationRules = rules;
@@ -493,6 +513,7 @@ export default class TreatmentEditor extends Vue {
     showImportTreatmentsDialog: boolean = false;
     confirmBeforeDeleteTreatmentAlertData: AlertData = clone(emptyAlertData);
     isNoTreatmentSelected: boolean = false;
+    hasImport: boolean = false;
 
     addedRows: Treatment[] = [];
     updatedRowsMap:Map<string, [Treatment, Treatment]> = new Map<string, [Treatment, Treatment]>();//0: original value | 1: updated value
@@ -522,6 +543,7 @@ export default class TreatmentEditor extends Vue {
     loadedParentName: string = "";
     loadedParentId: string  = this.uuidNIL;
     newLibrarySelection: boolean = false;
+    newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -963,7 +985,7 @@ export default class TreatmentEditor extends Vue {
         if (!isNil(newTreatment)) {
             if(this.hasScenario)
                 newTreatment.libraryId = this.parentLibraryId
-            else
+            else 
                 newTreatment.libraryId = this.selectedTreatmentLibrary.id
             this.addedRows = append(newTreatment, this.addedRows);
             this.simpleTreatments = append({name: newTreatment.name, id: newTreatment.id}, this.simpleTreatments);
@@ -1145,6 +1167,41 @@ export default class TreatmentEditor extends Vue {
 
         this.disableCrudButtonsResult = !allDataIsValid;
         return !allDataIsValid;
+    }
+
+    onSubmitNewTreatment(result: ImportNewTreatmentDialogResult){
+        this.showImportTreatmentDialog = false;
+        
+        if(this.hasScenario){
+            this.newTreatment.libraryId = this.parentLibraryId
+            this.newTreatment.name = result.file.name.slice(0, -5);
+            this.addedRows = append(this.newTreatment, this.addedRows);
+            this.simpleTreatments = append({name: result.file.name.slice(0, -5), id: this.selectedScenarioId}, this.simpleTreatments);
+            setTimeout(() => (this.treatmentSelectItemValue = this.newTreatment.id));
+        }
+        else{
+            this.newTreatment.libraryId = this.selectedTreatmentLibrary.id
+            this.newTreatment.name = result.file.name.slice(0, -5);
+            this.addedRows = append(this.newTreatment, this.addedRows);
+            this.simpleTreatments = append({name: result.file.name.slice(0, -5), id: this.newTreatment.libraryId}, this.simpleTreatments);
+            setTimeout(() => (this.treatmentSelectItemValue = this.newTreatment.id));
+        }
+            
+            if (hasValue(result) && hasValue(result.file)) {
+            const data: TreatmentsFileImport = {
+                file: result.file 
+            };
+            if (this.hasScenario) {
+                TreatmentService.importScenarioTreatments(data.file, this.newTreatment.libraryId, this.hasScenario)
+            }
+            else{
+                TreatmentService.importLibraryTreatments(data.file, this.selectedTreatmentLibrary.id, this.hasScenario)
+            }
+            this.hasImport = true;
+        }
+
+            
+
     }
 
      onSubmitImportTreatmentsDialogResult(result: ImportExportTreatmentsDialogResult) {

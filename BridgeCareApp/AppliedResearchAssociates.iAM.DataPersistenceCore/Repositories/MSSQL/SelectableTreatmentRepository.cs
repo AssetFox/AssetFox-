@@ -289,6 +289,72 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertTreatmentLibrary(TreatmentLibraryDTO dto) =>
         _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
 
+
+        public void AddLibraryTreatments(List<TreatmentDTO> treatments, Guid libraryId)
+        {
+            if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException("The specified treatment library was not found.");
+            }
+
+            var selectableTreatmentEntities = treatments.Select(_ => _.ToLibraryEntity(libraryId)).ToList();
+
+            var entityIds = selectableTreatmentEntities.Select(_ => _.Id).ToList();
+
+            var existingEntityIds = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Where(_ => _.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
+                .ToList();
+    
+
+            _unitOfWork.Context.AddAll(selectableTreatmentEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                .ToList());
+           
+            if (treatments.Any(_ => _.Costs.Any()))
+            {
+                var costsPerTreatmentId =
+                    treatments.Where(_ => _.Costs.Any()).ToList().ToDictionary(_ => _.Id, _ => _.Costs);
+                _unitOfWork.TreatmentCostRepo.UpsertOrDeleteTreatmentCosts(costsPerTreatmentId, libraryId);
+            }
+
+            if (treatments.Any(_ => _.Consequences.Any()))
+            {
+                var consequencesPerTreatmentId = treatments.Where(_ => _.Consequences.Any()).ToList()
+                    .ToDictionary(_ => _.Id, _ => _.Consequences);
+                _unitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteTreatmentConsequences(consequencesPerTreatmentId,
+                    libraryId);
+            }
+
+            if (treatments.Any(_ =>
+                _.CriterionLibrary?.Id != null && _.CriterionLibrary.Id != Guid.Empty &&
+                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+            {
+                var criterionJoins = new List<CriterionLibrarySelectableTreatmentEntity>();
+
+                var criteria = treatments
+                    .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary.Id != Guid.Empty &&
+                                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
+                    .Select(treatment =>
+                    {
+                        var criterionLibraryEntity = new CriterionLibraryEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            MergedCriteriaExpression = treatment.CriterionLibrary.MergedCriteriaExpression,
+                            Name = $"{treatment.Name} Criterion",
+                            IsSingleUse = true
+                        };
+                        criterionJoins.Add(new CriterionLibrarySelectableTreatmentEntity
+                        {
+                            CriterionLibraryId = criterionLibraryEntity.Id,
+                            SelectableTreatmentId = treatment.Id
+                        });
+                        return criterionLibraryEntity;
+                    }).ToList();
+
+                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
+            }
+        }
+
         public void UpsertOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId)
         {
             if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
@@ -428,6 +494,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.ScenarioBudget)
                 .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.ScenarioTreatmentPerformanceFactors)
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -474,6 +541,99 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.TreatmentLibraryId == libraryId)
                 .Select(_ => _.ToDto())
                 .ToList();
+        }
+
+        public void AddScenarioSelectableTreatment(List<TreatmentDTO> scenarioSelectableTreatments,
+           Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+
+            var scenarioSelectableTreatmentEntities =
+                scenarioSelectableTreatments.Select(_ => _.ToScenarioEntity(simulationId)).ToList();
+            var entityIds = scenarioSelectableTreatmentEntities.Select(_ => _.Id).ToList();
+
+            var existingEntityIds = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+                .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id)).Select(_ => _.Id)
+                .ToList();
+            _unitOfWork.AsTransaction(() =>
+            {
+                
+                _unitOfWork.Context.AddAll(scenarioSelectableTreatmentEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                    .ToList());
+
+             
+                if (scenarioSelectableTreatments.Any(_ => _.Costs.Any()))
+                {
+                    var costsPerTreatmentId =
+                        scenarioSelectableTreatments.Where(_ => _.Costs.Any()).ToList()
+                            .ToDictionary(_ => _.Id, _ => _.Costs);
+                    _unitOfWork.TreatmentCostRepo.UpsertOrDeleteScenarioTreatmentCosts(costsPerTreatmentId, simulationId);
+                }
+
+                if (scenarioSelectableTreatments.Any(_ => _.Consequences.Any()))
+                {
+                    var consequencesPerTreatmentId = scenarioSelectableTreatments.Where(_ => _.Consequences.Any()).ToList()
+                        .ToDictionary(_ => _.Id, _ => _.Consequences);
+                    _unitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteScenarioTreatmentConsequences(
+                        consequencesPerTreatmentId, simulationId);
+                }
+                if (scenarioSelectableTreatments.Any(_ => _.PerformanceFactors.Any()))
+                {
+                    var performancePerTreatmentId = scenarioSelectableTreatments.Where(_ => _.PerformanceFactors.Any()).ToList()
+                    .ToDictionary(_ => _.Id, _ => _.PerformanceFactors);
+                    _unitOfWork.TreatmentPerformanceFactorRepo.UpsertScenarioTreatmentPerformanceFactors(performancePerTreatmentId, simulationId);
+                }
+                if (scenarioSelectableTreatments.Any(_ => _.BudgetIds.Any()))
+                {
+                    var treatmentBudgetJoinsToAdd = scenarioSelectableTreatments.Where(_ => _.BudgetIds.Any()).SelectMany(
+                        _ =>
+                            _.BudgetIds.Select(budgetId =>
+                                new ScenarioSelectableTreatmentScenarioBudgetEntity
+                                {
+                                    ScenarioSelectableTreatmentId = _.Id,
+                                    ScenarioBudgetId = budgetId
+                                })).ToList();
+
+                    _unitOfWork.Context.AddAll(treatmentBudgetJoinsToAdd, _unitOfWork.UserEntity?.Id);
+                }
+
+                if (scenarioSelectableTreatments.Any(_ =>
+                    _.CriterionLibrary?.Id != null && _.CriterionLibrary.Id != Guid.Empty &&
+                    !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+                {
+                    var criterionJoins = new List<CriterionLibraryScenarioSelectableTreatmentEntity>();
+
+                    var criteria = scenarioSelectableTreatments
+                        .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary.Id != Guid.Empty &&
+                                    !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
+                        .Select(treatment =>
+                        {
+                            var criterionLibraryEntity = new CriterionLibraryEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                MergedCriteriaExpression = treatment.CriterionLibrary.MergedCriteriaExpression,
+                                Name = $"{treatment.Name} Criterion",
+                                IsSingleUse = true
+                            };
+                            criterionJoins.Add(new CriterionLibraryScenarioSelectableTreatmentEntity
+                            {
+                                CriterionLibraryId = criterionLibraryEntity.Id,
+                                ScenarioSelectableTreatmentId = treatment.Id
+                            });
+                            return criterionLibraryEntity;
+                        }).ToList();
+
+                    _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                    _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
+                }
+
+                // Update last modified date
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+            });
         }
 
         public void UpsertOrDeleteScenarioSelectableTreatment(List<TreatmentDTO> scenarioSelectableTreatments,

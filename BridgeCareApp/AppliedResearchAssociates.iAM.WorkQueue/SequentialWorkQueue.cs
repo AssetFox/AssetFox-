@@ -160,6 +160,8 @@ public class SequentialWorkQueue<T>
             }
         }
 
+        
+
         public void RemoveFromQueue(bool setCanceled)
         {
             _ = WorkQueue.IncompleteElements.TryRemove(WorkId, out _);

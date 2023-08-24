@@ -18,9 +18,9 @@
                         <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
                             <v-list-tile-action>
                                 <v-list-tile-icon class="sidebar-icon">
-                                    <AttributesSvg style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Attributes'"/>    
-                                    <DataSourceSvg style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'DataSource'"/>
-                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Networks'"/>                            
+                                    <AttributesSvg id="EditRawData-attributes-button" style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Attributes'"/>    
+                                    <DataSourceSvg id="EditRawData-dataSource-button" style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'DataSource'"/>
+                                    <NetworksSvg  id="EditRawData-networks-button" style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Networks'"/>                            
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-content>

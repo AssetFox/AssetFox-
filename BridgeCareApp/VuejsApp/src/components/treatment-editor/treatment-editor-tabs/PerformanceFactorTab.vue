@@ -16,8 +16,8 @@
                                 <v-text-field v-if="header.value === 'attribute'" readonly single-line class='ghd-control-text-sm'
                                               :value='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                <v-text-field v-if="header.value === 'factor'" readonly single-line class='ghd-control-text-sm'
-                                              :value='parseFloat(props.item.factor).toFixed(2)'
+                                <v-text-field v-if="header.value === 'performanceFactor'" readonly single-line class='ghd-control-text-sm'
+                                              :value='parseFloat(props.item.performanceFactor).toFixed(2)'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                 <template slot='input'>
                                     <v-select v-if="header.value === 'attribute'" :items='attributeSelectItems'
@@ -25,8 +25,8 @@
                                               label='Edit'
                                               v-model='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    <v-text-field v-if="header.value === 'factor'" label='Edit' single-line maxLength="5"
-                                                  v-model='props.item.factor'
+                                    <v-text-field v-if="header.value === 'performanceFactor'" label='Edit' single-line maxLength="5"
+                                                  v-model='props.item.performanceFactor'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                 </template>
                             </v-edit-dialog>
@@ -55,6 +55,7 @@ import {
     PerformanceCurve,
 } from '@/shared/models/iAM/performance';
 import { isNullOrUndefined } from 'util';
+import { clone } from 'ramda';
 
 @Component({
     components: {
@@ -73,27 +74,15 @@ export default class PerformanceFactorTab extends Vue {
 
     factorGridHeaders: DataTableHeader[] = [
         { text: 'Attribute', value: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
-        { text: 'Performance Factor', value: 'factor', align: 'left', sortable: false, class: '', width: '100px' },
+        { text: 'Performance Factor', value: 'performanceFactor', align: 'left', sortable: false, class: '', width: '100px' },
     ];
-    factorGridData: TreatmentAttributeFactor[] = [];
+    factorGridData: TreatmentPerformanceFactor[] = [];
     attributeSelectItems: SelectItem[] = [];
     uuidNIL: string = getBlankGuid();
 
     mounted() {
         this.setAttributeSelectItems();
    }
-
-    @Watch('selectedTreatmentPerformanceFactors')
-    onSelectedTreatmentPerformanceFactorsChanged() {
-        this.factorGridData.forEach(data => {
-            this.selectedTreatmentPerformanceFactors.forEach(factors => {
-                if (factors.attribute === data.attribute) {
-                    data.attribute = factors.attribute;
-                    data.factor = factors.performanceFactor;
-                }
-            });
-        });
-    }
 
     @Watch('stateAttributes')
     onStateAttributesChanged() {
@@ -103,6 +92,21 @@ export default class PerformanceFactorTab extends Vue {
     onSelectedTreatmentChanged() {
         if (this.selectedTreatmentPerformanceFactors.length <= 0) {
            this.buildDataFromCurves(); 
+           this.factorGridData.forEach(_ => this.$emit('onModifyPerformanceFactor', clone(_)))
+        }
+        else{
+            this.factorGridData.forEach(data => {
+                let found = false;
+                this.selectedTreatmentPerformanceFactors.forEach(factors => {
+                    if (factors.attribute === data.attribute) {
+                        data.id = factors.id;
+                        data.performanceFactor = factors.performanceFactor;
+                        found = true
+                    }
+                });
+                if(!found)
+                    this.$emit('onModifyPerformanceFactor', clone(data))
+            });
         }
     }
     @Watch('stateScenarioPerformanceCurves')
@@ -122,6 +126,8 @@ export default class PerformanceFactorTab extends Vue {
         this.$emit('onModifyPerformanceFactor', setItemPropertyValue(property, value, performancefactor));
     }
     buildDataFromCurves() {
+        if(this.callFromLibrary)
+            return;
         let testStateAttributes:Attribute[] = [];
         this.stateScenarioPerformanceCurves.forEach(curve => {
             this.stateAttributes.forEach(state => {
@@ -136,7 +142,7 @@ export default class PerformanceFactorTab extends Vue {
         this.factorGridData = testStateAttributes.map(_ => ({
             id: getNewGuid(),
             attribute: _.name,
-            factor: 1.0
+            performanceFactor: 1.0
         }));
     }
 }

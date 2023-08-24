@@ -216,19 +216,24 @@
         <v-flex xs8 style="border:1px solid #999999 !important;" v-if="selectedCommittedProject !== ''">
             <v-layout column>
                 <v-flex xs12>
-                    <v-btn @click="selectedCommittedProject = ''" flat class="ghd-close-button">
+                    <v-btn 
+                       id="CommittedProjectsEditor-closeSelectedCommitedProject-vbtn"
+                       @click="selectedCommittedProject = ''" flat class="ghd-close-button">
                         X
                     </v-btn>
                 </v-flex>
                 <v-flex xs12>
                     <v-layout justify-center>
-                        <v-btn @click="showCreateCommittedProjectConsequenceDialog = true" 
+                        <v-btn 
+                            id="CommittedProjectsEditor-addConsequence-vbtn"
+                            @click="showCreateCommittedProjectConsequenceDialog = true" 
                             class="ghd-white-bg ghd-blue ghd-button btn-style" outline>Add Conseqence
                         </v-btn> 
                     </v-layout>
                 </v-flex>
                 <v-flex xs12>
                     <v-data-table
+                    id="CommittedProjectsEditor-consequences-vDataTable"
                     :headers="consequenceHeaders"
                     :items="selectedConsequences"
                     item-key='id'
@@ -313,7 +318,9 @@
                                 </v-edit-dialog>
                             </td>
                             <td>
-                                <v-btn @click="OnDeleteConsequence(props.item.id)"  class="ghd-blue" icon>
+                                <v-btn 
+                                    id="CommittedProjectsEditor-deleteConsequence-vbtn"
+                                    @click="OnDeleteConsequence(props.item.id)"  class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </td>
@@ -372,6 +379,10 @@ import InvestmentService from '@/services/investment.service';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { isNullOrUndefined } from 'util';
 import { max } from 'moment';
+import { stat } from 'fs';
+import { Hub } from '@/connectionHub';
+import { WorkType } from '@/shared/models/iAM/scenario';
+import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -404,7 +415,7 @@ export default class CommittedProjectsEditor extends Vue  {
     currentSearch = '';
     totalItems = 0;
     currentPage: SectionCommittedProjectTableData[] = [];
-    initializing: boolean = true;
+    isRunning: boolean = true;
 
     isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
@@ -436,6 +447,7 @@ export default class CommittedProjectsEditor extends Vue  {
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
     @Action('selectScenario') selectScenarioAction: any;
+    @Action('setAlertMessage') setAlertMessageAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
@@ -453,7 +465,6 @@ export default class CommittedProjectsEditor extends Vue  {
     reverseCatMap = clone(treatmentCategoryReverseMap);
     catMap = clone(treatmentCategoryMap);
     
-    brkey_: string = 'BRKEY_'
     keyattr: string = '';
 
     investmentYears: number[] = [];
@@ -560,9 +571,21 @@ export default class CommittedProjectsEditor extends Vue  {
         this.reverseCatMap.forEach(cat => {
             this.categorySelectItems.push({text: cat, value: cat})        
         })
+
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+            this.importCompleted,
+        );
     }   
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
+
+        this.$statusHub.$off(
+            Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+            this.importCompleted,
+        );
+
+        this.setAlertMessageAction('');
     }
     beforeRouteEnter(to: any, from: any, next:any) {
         next((vm:any) => {
@@ -593,7 +616,12 @@ export default class CommittedProjectsEditor extends Vue  {
                 await vm.getTreatmentLibrariesAction();
                 await vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.scenarioId});
                 await vm.selectScenarioAction({ scenarioId: vm.scenarioId });
-                vm.initializePages();
+                await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
+                    if(response.data){
+                        vm.setAlertMessageAction("Committed project import has been added to the work queue")
+                    }
+                })
+                await vm.initializePages()
             })();                    
         });
     }
@@ -709,9 +737,10 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     @Watch('projectPagination')
-    onPaginationChanged() {
-        if(this.initializing)
+    async onPaginationChanged() {
+        if(this.isRunning)
             return;
+        this.isRunning = true
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.projectPagination;
 
@@ -732,6 +761,7 @@ export default class CommittedProjectsEditor extends Vue  {
         if(this.scenarioId !== this.uuidNIL)
             CommittedProjectsService.getCommittedProjectsPage(this.scenarioId, request).then(response => {
                 if(response.data){
+                    this.isRunning = false;
                     let data = response.data as PagingPage<SectionCommittedProject>;
                     this.sectionCommittedProjects = data.items;
                     this.rowCache = clone(this.sectionCommittedProjects)
@@ -755,6 +785,8 @@ export default class CommittedProjectsEditor extends Vue  {
                     }
                 } 
             }); 
+        else
+            this.isRunning = false;
     }
 
      @Watch('deletionIds')
@@ -919,8 +951,8 @@ export default class CommittedProjectsEditor extends Vue  {
                     value = this.catMap.get(value);
                 this.updateCommittedProject(row, value, property)
                 this.onPaginationChanged()
-            }    
-        }       
+            }
+        }
     }
 
     //Consequence Funtions
@@ -953,34 +985,22 @@ export default class CommittedProjectsEditor extends Vue  {
     ) {
         this.showImportExportCommittedProjectsDialog = false;
 
-        if (hasValue(result)) {
-            
+        if (hasValue(result)) {         
             if (hasValue(result.file)) {
                 CommittedProjectsService.importCommittedProjects(
                     result.file,
                     result.applyNoTreatment,
                     this.scenarioId,
-                ).then((response: AxiosResponse) => {
-                    if (
-                        hasValue(response, 'status') &&
-                        http2XX.test(response.status.toString())
-                    ) {
-                        this.addSuccessNotificationAction({
-                            message: 'Successful upload.',
-                            longMessage:
-                                'Successfully uploaded committed projects.',
-                        });
-                        this.onCancelClick() ;
-                    }
-                });
+                ).then((response: any) =>{
+                    this.setAlertMessageAction("Committed project import has been added to the work queue")
+                })
             } else {
                 this.addErrorNotificationAction({
                     message: 'No file selected.',
                     longMessage:
                         'No file selected to upload the committed projects.',
                 });
-            }
-            
+            }          
         }
     }
 
@@ -1310,7 +1330,18 @@ export default class CommittedProjectsEditor extends Vue  {
             this.updatedRowsMap.size > 0 || (this.hasScenario && this.hasSelectedLibrary)
     }
 
-    initializePages(){
+    importCompleted(data: any){
+        var importComp = data.importComp as importCompletion
+        if(importComp.id === this.scenarioId && importComp.workType == WorkType.ImportCommittedProject){
+            this.projectPagination.page = 1
+            this.clearChanges();
+            this.onPaginationChanged().then(() => {
+                this.setAlertMessageAction('');
+            })
+        }        
+    }
+
+    async initializePages(){
         const request: PagingRequest<SectionCommittedProject>= {
             page: 1,
             rowsPerPage: 5,
@@ -1325,8 +1356,8 @@ export default class CommittedProjectsEditor extends Vue  {
             isDescending: false,
             search: ''
         };
-        CommittedProjectsService.getCommittedProjectsPage(this.scenarioId,request).then(response => {
-            this.initializing = false
+        await CommittedProjectsService.getCommittedProjectsPage(this.scenarioId,request).then(response => {
+            this.isRunning = false
             if(response.data){
                 let data = response.data as PagingPage<SectionCommittedProject>;
                 this.sectionCommittedProjects = data.items;

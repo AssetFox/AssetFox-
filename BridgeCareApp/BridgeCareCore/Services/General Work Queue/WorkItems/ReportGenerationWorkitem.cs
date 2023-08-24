@@ -23,7 +23,7 @@ namespace BridgeCareCore.Services
     public record ReportGenerationWorkitem(Guid scenarioId, string UserId, string scenarioName,  string reportName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => scenarioId.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(scenarioId, WorkType.ReportGeneration);
 
         public DateTime StartTime { get; set; }
 
@@ -31,7 +31,7 @@ namespace BridgeCareCore.Services
 
         public string WorkName => scenarioName;
 
-        public WorkQueueMetadata Metadata => new WorkQueueMetadata() {DomainType = DomainType.Simulation, WorkType = WorkType.ReportGeneration};
+        public WorkQueueMetadata Metadata => new WorkQueueMetadata() {DomainType = DomainType.Simulation, WorkType = WorkType.ReportGeneration, DomainId = scenarioId};
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -41,8 +41,8 @@ namespace BridgeCareCore.Services
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _log = scope.ServiceProvider.GetRequiredService<ILog>();
             var _generator = scope.ServiceProvider.GetRequiredService<IReportGenerator>();
-            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, scenarioId);
-            updateStatusOnHandle.Invoke("Generating...");
+            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
+            _queueLogger.UpdateWorkQueueStatus("Generating...");
             var report = GenerateReport(reportName, ReportType.File, scenarioId.ToString());
 
             if (report == null)
@@ -151,6 +151,11 @@ namespace BridgeCareCore.Services
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully generated {reportName} report for scenario: {scenarioName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
+            {
+                Id = Metadata.DomainId,
+                WorkType = Metadata.WorkType
+            });
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

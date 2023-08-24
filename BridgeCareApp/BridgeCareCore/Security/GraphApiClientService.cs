@@ -17,7 +17,7 @@ namespace BridgeCareCore.Security
         public GraphApiClientService(IConfiguration configuration)
         {
             var azureAdB2CSection = configuration.GetSection("AzureAdB2C");
-            if (azureAdB2CSection == null)
+            if (!azureAdB2CSection.GetChildren().Any())
             {
                 return;
             }
@@ -44,13 +44,10 @@ namespace BridgeCareCore.Security
         public async Task<List<string>> GetGraphApiUserMemberGroup(string userId)
         {
             var groupNames = new List<string>();
-            var groups = _graphServiceClient.Groups.GetAsync();
-
             var objectCollectionResponse = await _graphServiceClient.Users[userId].MemberOf.GetAsync();
-            var result = objectCollectionResponse;
+            var result = objectCollectionResponse.Value;
 
-
-            foreach (var group in result.Value.Cast<Group>())
+            foreach (var group in result.Cast<Group>())
             {
                 groupNames.Add(group.DisplayName);
             }

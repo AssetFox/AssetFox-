@@ -105,35 +105,6 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpDelete]
-        [Route("Cancel/{networkId}")]
-        [Authorize]
-        public async Task<IActionResult> CancelNetworkDeletion(Guid networkId)
-        {
-            try
-            {
-                var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(networkId);
-                await Task.Delay(125);
-
-                if (hasBeenRemovedFromQueue)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceled" });
-                }
-                else
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceling network deletion..." });
-
-                }
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling network deltion for {networkName}::{e.Message}");
-                throw;
-            }
-        }
-
         [HttpPost]
         [Route("GetFile/{reportName}")]
         [Authorize]
@@ -157,7 +128,7 @@ namespace BridgeCareCore.Controllers
                 ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, scenarioId.ToString());
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, scenarioId.ToString());
 
                 return Ok();
             }

@@ -8,11 +8,12 @@
         "name": "Applied Research Associates"
     },
     "scripts": {
-        "serve": "vue-cli-service serve",
-        "build-prod": "vue-cli-service build",
-        "stage": "vue-cli-service build --mode staging",
+        "dev": "vite",
+        "serve": "vite preview",
         "lint": "wotan 'src/**'",
-        "lint-fix": "wotan --fix 'src/**'"
+        "build-prod": "vite build",
+        "lint-fix": "wotan --fix 'src/**'",
+        "stage": "vite build --mode staging"
     },
     "dependencies": {
         "@microsoft/signalr": "^3.1.22",
@@ -35,21 +36,19 @@
         "socket.io-client": "^2.2.0",
         "util": "^0.12.5",
         "uuid": "^8.3.2",
-        "vue": "2.6.12",
-        "vue-class-component": "6.0.0",
-        "vue-currency-input": "1.18.3",
+        "vue-3-sanitize": "^0.1.4",
+        "vue": "^3.3.4", 
+        "@vue/compat": "^3.3.4",   
+        "vue-currency-input": "3.0.5",
         "vue-notification-bell": "^0.9.12",
-        "vue-property-decorator": "7.0.0",
         "vue-query-builder": "0.7.1",
-        "vue-router": "^3.5.3",
-        "vue-sanitize": "^0.2.1",
+        "vue-router": "^4.0.13",
         "vue-screen": "^1.5.6",
         "vue-socket.io-extended": "^3.2.2",
         "vue-worker": "1.2.1",
         "vuejs-dialog": "^1.4.2",
         "vuetify": "^1.5.18",
-        "vuex": "^3.1.1",
-        "vuex-class": "0.3.1"
+        "vuex": "^4.1.0"
     },
     "devDependencies": {
         "@fimbul/valtyr": "0.19.0",
@@ -58,21 +57,19 @@
         "@fortawesome/fontawesome-free": "^5.15.4",
         "@types/node": "^17.0.8",
         "@types/uuid": "^8.3.4",
-        "@vue/cli-plugin-babel": "^5.0.0",
-        "@vue/cli-plugin-typescript": "^5.0.0",
-        "@vue/cli-service": "^5.0.0",
         "axios-mock-adapter": "1.16.0",
-        "core-js": "2.6.5",
         "sass": "1.57.1",
         "prettier": "1.19.1",
-        "sass-loader": "^13.0.0",
         "stylus": "^0.54.5",
         "stylus-loader": "^3.0.2",
         "tslint": "5.13.1",
         "typescript": "^3.9.10",
-        "vue-cli-plugin-vuetify": "^0.4.6",
-        "vue-template-compiler": "2.6.12",
-        "vuetify-loader": "^1.7.3"
+        "@vitejs/plugin-vue": "^1.6.1",
+        "vite": "^2.5.4",
+        "@originjs/vite-plugin-commonjs": "1.0.3",
+        "vuetify-loader": "^1.7.3",
+        "autoprefixer": "10.4.15"
+
     },
     "postcss": {
         "plugins": {

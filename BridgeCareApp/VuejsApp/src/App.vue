@@ -251,12 +251,9 @@
     </v-app>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
+<script setup lang="ts">
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import NotificationBell from 'vue-notification-bell';
-import { Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
 import Spinner from './shared/modals/Spinner.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
@@ -292,194 +289,195 @@ import {
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 import NewsDialog from '@/components/NewsDialog.vue'
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-    components: { Alert, Spinner, NotificationBell, NewsDialog },
-})
-export default class AppComponent extends Vue {
-    @State(state => state.authenticationModule.authenticated)
-    authenticated: boolean;
-    @State(state => state.authenticationModule.hasRole) hasRole: boolean;
-    @State(state => state.authenticationModule.username) username: string;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.authenticationModule.refreshing) refreshing: boolean;
-    @State(state => state.breadcrumbModule.navigation) navigation: any[];
-    @State(state => state.notificationModule.notifications)
-    notifications: Notification[];
-    @State(state => state.notificationModule.counter)
-    notificationCounter: number;
-    @State(state => state.scenarioModule.selectedScenario)
-    stateSelectedScenario: Scenario;
-    @State(state => state.announcementModule.packageVersion)
-    packageVersion: string;
-    @State(state => state.authenticationModule.securityType)
-    securityType: string;
-    @State(state => state.announcementModule.announcements) announcements: Announcement[];
-    @State(state => state.userModule.currentUser) currentUser: User;
-    @State(state => state.adminSiteSettingsModule.implementationName) stateImplementationName: string;
-    @State(state => state.adminSiteSettingsModule.agencyLogo) agencyLogoBase64: string;
-    @State(state => state.adminSiteSettingsModule.productLogo) productLogoBase64: string;
-    @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
-    @State(state => state.alertModule.alertMessage) stateAlertMessage: string;
-    @State(state => state.alertModule.alert) stateAlert: boolean;
-    
-    @Action('logOut') logOutAction: any;
-    @Action('setIsBusy') setIsBusyAction: any;
-    @Action('getNetworks') getNetworksAction: any;
-    @Action('getAttributes') getAttributesAction: any;
-    @Action('getAnnouncements') getAnnouncementsAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('addWarningNotification') addWarningNotificationAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('addInfoNotification') addInfoNotificationAction: any;
-    @Action('addTaskCompletedNotification') addTaskCompletedNotificationAction: any;
-    @Action('removeNotification') removeNotificationAction: any;
-    @Action('clearNotificationCounter') clearNotificationCounterAction: any;
-    @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
-    @Action('getAllUsers') getAllUsersAction: any;
-    @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
-    @Action('loadNotifications') loadNotificationsActions: any;
-    @Action('azureB2CLogin') azureB2CLoginAction: any;
-    @Action('azureB2CLogout') azureB2CLogoutAction: any;
-    @Action('getCurrentUserByUserName') getCurrentUserByUserNameAction: any;
-    @Action('updateUserLastNewsAccessDate') updateUserLastNewsAccessDateAction: any;
-    @Action('getImplementationName') getImplementationNameAction: any;
-    @Action('getAgencyLogo') getAgencyLogoAction: any;
-    @Action('getProductLogo') getProductLogoAction: any;
-    @Action('getInventoryReports') getInventoryReportsAction: any;
-    @Action('setAlertMessage') setAlertMessageAction: any;
 
-    drawer: boolean = false;
-    latestNewsDate: string = '0001-01-01';
-    currentUserLastNewsAccessDate: string = '0001-01-01';
-    alertDialogData: AlertData = clone(emptyAlertData);
-    pushRouteUpdate: boolean = false;
-    route: any = {};
-    selectedScenario: Scenario = clone(emptyScenario);
-    hasSelectedScenario: boolean = false;
-    selectedScenarioHasStatus: boolean = false;
-    ignoredAPIs: string[] = [
+    let store = useStore();
+    let authenticated = ref<boolean>(store.state.authenticationModule.authenticated);
+    let hasRole = ref<boolean>(store.state.authenticationModule.hasRole);
+    let username = ref<string>(store.state.authenticationModule.username);
+    let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
+    let refreshing = ref<boolean>(store.state.authenticationModule.refreshing);
+    let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
+    let notifications = ref<Notification[]>(store.state.notificationModule.notifications);
+    let notificationCounter = ref<number>(store.state.notificationModule.conotificationCounterunter);
+    let stateSelectedScenario = ref<Scenario>(store.state.scenarioModule.selectedScenario);
+    let packageVersion = ref<string>(store.state.announcementModule.packageVersion);
+    let securityType = ref<string>(store.state.authenticationModule.securityType);
+    let announcements = ref<Announcement[]>(store.state.announcementModule.announcements);
+    let currentUser = ref<User>(store.state.userModule.currentUser);
+    let stateImplementationName = ref<string>(store.state.adminSiteSettingsModule.implementationName);
+    let agencyLogoBase64 = ref<string>(store.state.adminSiteSettingsModule.agencyLogo);
+    let productLogoBase64 = ref<string>(store.state.adminSiteSettingsModule.productLogo);
+    let stateInventoryReportNames = ref<string[]>(store.state.adminDataModule.inventoryReportNames);
+    let stateAlertMessage = ref<string>(store.state.alertModule.alertMessage);
+    let stateAlert = ref<boolean>(store.state.alertModule.alert);
+    async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut');}
+    async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy');}
+    async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks');}
+    async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes');}
+    async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements');}
+    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification');}
+    async function addWarningNotificationAction(payload?: any): Promise<any> { await store.dispatch('addWarningNotification');}
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification');} 
+    async function addInfoNotificationAction(payload?: any): Promise<any> { await store.dispatch('addInfoNotification');} 
+    async function addTaskCompletedNotificationAction(payload: any): Promise<any> { await store.dispatch('addTaskCompletedNotification', payload)}
+    async function removeNotificationAction(payload?: any): Promise<any> { await store.dispatch('removeNotification');}
+    async function clearNotificationCounterAction(payload?: any): Promise<any> { await store.dispatch('clearNotificationCounter');} 
+    async function generatePollingSessionIdAction(payload?: any): Promise<any> { await store.dispatch('generatePollingSessionId');}
+    async function getAllUsersAction(payload?: any): Promise<any> { await store.dispatch('getAllUsers');}
+    async function getUserCriteriaFilterAction(payload?: any): Promise<any> { await store.dispatch('getUserCriteriaFilter');} 
+    async function loadNotificationsActions(payload?: any): Promise<any> { await store.dispatch('loadNotifications');} 
+    async function azureB2CLoginAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogin');} 
+    async function azureB2CLogoutAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogout');} 
+    async function getCurrentUserByUserNameAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserByUserName');}
+    async function updateUserLastNewsAccessDateAction(payload?: any): Promise<any> { await store.dispatch('updateUserLastNewsAccessDate');}
+    async function getImplementationNameAction(payload?: any): Promise<any> { await store.dispatch('getImplementationName');}
+    async function getAgencyLogoAction(payload?: any): Promise<any> { await store.dispatch('getAgencyLogo');} 
+    async function getProductLogoAction(payload?: any): Promise<any> { await store.dispatch('getProductLogo');} 
+    async function getInventoryReportsAction(payload?: any): Promise<any> { await store.dispatch('getInventoryReports');} 
+    async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage');} 
+
+    let drawer: boolean = false;
+    let latestNewsDate: string = '0001-01-01';
+    let currentUserLastNewsAccessDate: string = '0001-01-01';
+    let alertDialogData: AlertData = clone(emptyAlertData);
+    let pushRouteUpdate: boolean = false;
+    let route: any = {};
+    let selectedScenario: Scenario = clone(emptyScenario);
+    let hasSelectedScenario: boolean = false;
+    let selectedScenarioHasStatus: boolean = false;
+    let ignoredAPIs: string[] = [
         'SynchronizeLegacySimulation',
         'RunSimulation',
         'GenerateReport',
         'AggregateNetworkData',
         'RefreshToken',
     ];
-    esecSecurityType: string = SecurityTypes.esec;
-    b2cSecurityType: string = SecurityTypes.b2c;
-    showNewsDialog: boolean = false;
-    hasUnreadNewsItem: boolean = false;
-    currentURL: any = '';
-    unauthorizedError: string = '';
-    implementationName: string = '';
-    agencyLogo: string = '';
-    productLogo: string = '';
-    inventoryReportName: string = '';
-    alert: boolean = false;
+    let esecSecurityType: string = SecurityTypes.esec;
+    let b2cSecurityType: string = SecurityTypes.b2c;
+    let showNewsDialog: boolean = false;
+    let hasUnreadNewsItem: boolean = false;
+    let currentURL: any = '';
+    let unauthorizedError: string = '';
+    let implementationName: string = '';
+    let agencyLogo: string = '';
+    let productLogo: string = '';
+    let inventoryReportName: string = '';
+    let alert: Ref<boolean> = ref(false);
 
-    get container() {
+    const $vuetify = inject('$vuetify') as any
+    const $router = useRouter();
+    const $statusHub = inject('$statusHub') as any
+    const $config = inject('$config') as any
+
+    created();
+
+    function container() {
         const container: any = {};
 
-        if (this.$vuetify.breakpoint.xs) {
+        if ($vuetify.breakpoint.xs) {
             container['grid-list-xs'] = true;
         }
 
-        if (this.$vuetify.breakpoint.sm) {
+        if ($vuetify.breakpoint.sm) {
             container['grid-list-sm'] = true;
         }
 
-        if (this.$vuetify.breakpoint.md) {
+        if ($vuetify.breakpoint.md) {
             container['grid-list-md'] = true;
         }
 
-        if (this.$vuetify.breakpoint.lg) {
+        if ($vuetify.breakpoint.lg) {
             container['grid-list-lg'] = true;
         }
 
-        if (this.$vuetify.breakpoint.xl) {
+        if ($vuetify.breakpoint.xl) {
             container['grid-list-xl'] = true;
         }
 
         return container;
     }
 
-    get authenticatedWithRole() {
-        return this.authenticated && this.hasRole;
+    function authenticatedWithRole() {
+        return authenticated && hasRole;
+    }
+    watch(stateSelectedScenario, () => onStateSelectedScenarioChanged)
+    function onStateSelectedScenarioChanged() {
+        selectedScenario = clone(stateSelectedScenario.value);
+        hasSelectedScenario = selectedScenario.id !== getBlankGuid();
+        selectedScenarioHasStatus = hasValue(selectedScenario.status);
     }
 
-    @Watch('stateSelectedScenario')
-    onStateSelectedScenarioChanged() {
-        this.selectedScenario = clone(this.stateSelectedScenario);
-        this.hasSelectedScenario = this.selectedScenario.id !== getBlankGuid();
-        this.selectedScenarioHasStatus = hasValue(this.selectedScenario.status);
-    }
-
-    @Watch('authenticated')
-    onAuthenticationChange() {
-        if (this.authenticated) {
-            this.onAuthenticate();
+    watch(authenticated, () => onAuthenticationChange)
+    function onAuthenticationChange() {
+        if (authenticated) {
+            onAuthenticate();
         }
     }
 
-    @Watch('announcements')
-    onAnnouncementsChange() {
-        this.latestNewsDate = getDateOnly(this.announcements[0].createdDate.toString()); 
+    watch(announcements, () => onAnnouncementsChange)
+    function onAnnouncementsChange() {
+        latestNewsDate = getDateOnly(announcements.value[0].createdDate.toString()); 
     }
 
-    @Watch('currentUser')
-    onCurrentUserChange() {
-        this.currentUserLastNewsAccessDate = getDateOnly(this.currentUser.lastNewsAccessDate);
-        this.checkLastNewsAccessDate();
-    }
-    @Watch('stateImplementationName')
-    onimplementationNameChange() {
-        this.implementationName = this.stateImplementationName;
-    }
-    @Watch('agencyLogoBase64')
-    onAgencyLogoBase64Change() {
-        this.agencyLogo = this.agencyLogoBase64;
+    watch(currentUser, () => onCurrentUserChange)
+    function onCurrentUserChange() {
+        currentUserLastNewsAccessDate = getDateOnly(currentUser.value.lastNewsAccessDate);
+        checkLastNewsAccessDate();
     }
 
-    @Watch('productLogoBase64')
-    onProductLogoBase64Change() {
-        this.productLogo = this.productLogoBase64;
+    watch(stateImplementationName, () => onimplementationNameChange)
+    function onimplementationNameChange() {
+        implementationName = stateImplementationName.value;
     }
 
-    @Watch('stateInventoryReportNames')
-    onStateInventoryReportNamesChanged(){
-        if(this.stateInventoryReportNames.length > 0)
-            this.inventoryReportName = this.stateInventoryReportNames[0]
+    watch(agencyLogoBase64, () => onAgencyLogoBase64Change)
+    function onAgencyLogoBase64Change() {
+        agencyLogo = agencyLogoBase64.value;
     }
-    @Watch('stateAlertMessage')
-    onStateAlertMessageChanged(){
-        if(this.stateAlertMessage.trim() !== ''){
-            this.alert = true;
+
+    watch(productLogoBase64, () => onProductLogoBase64Change)
+    function onProductLogoBase64Change() {
+        productLogo = productLogoBase64.value;
+    }
+
+    watch(stateInventoryReportNames, () => onStateInventoryReportNamesChanged)
+    function onStateInventoryReportNamesChanged(){
+        if(stateInventoryReportNames.value.length > 0)
+            inventoryReportName = stateInventoryReportNames.value[0]
+    }
+
+    watch(stateAlertMessage, () => onStateAlertMessageChanged)
+    function onStateAlertMessageChanged(){
+        if(stateAlertMessage.value.trim() !== ''){
+            alert.value = true;
         }
         else
-            this.alert = false;
+            alert.value = false;
     }
 
-    @Watch('alert')
-    onAlertChanged(){
-        if(!this.alert){
-            this.setAlertMessageAction('');
+    watch(alert, () => onAlertChanged)
+    function onAlertChanged(){
+        if(!alert){
+            setAlertMessageAction('');
         }
     }
-
-    created() {
+    
+    function created() {
         // create a request handler
         async function requestHandler(
-            app: AppComponent,
             request: AxiosRequestConfig,
         ) {
             request.headers = setContentTypeCharset(request.headers);
-            if (app.refreshing) {
+            if (refreshing) {
                 await new Promise(_ => setTimeout(_, 5000));
             }
 
             request.headers = setAuthHeader(request.headers);
-            app.setIsBusyAction({
-                isBusy: app.ignoredAPIs.every(
+            setIsBusyAction({
+                isBusy: ignoredAPIs.every(
                     (ignored: string) => request.url!.indexOf(ignored) === -1,
                 ),
             });
@@ -488,20 +486,20 @@ export default class AppComponent extends Vue {
 
         // set axios request interceptor to use request handler
         axiosInstance.interceptors.request.use((request: any) =>
-            requestHandler(this, request),
+            requestHandler(request),
         );
         // set nodejs axios request interceptor to use request handler
         nodejsAxiosInstance.interceptors.request.use((request: any) =>
-            requestHandler(this, request),
+            requestHandler(request),
         );
         // set bridge care core axios request interceptor to use request handler
         coreAxiosInstance.interceptors.request.use((request: any) =>
-            requestHandler(this, request),
+            requestHandler(request),
         );
         // create a success & error handler
         const successHandler = (response: AxiosResponse) => {
             response.headers = setContentTypeCharset(response.headers);
-            this.setIsBusyAction({ isBusy: false });
+            setIsBusyAction({ isBusy: false });
             return response;
         };
         const errorHandler = (error: AxiosError) => {
@@ -515,13 +513,13 @@ export default class AppComponent extends Vue {
                     error.response.headers,
                 );
             }
-            this.setIsBusyAction({ isBusy: false });            
-            this.unauthorizedError = hasValue(this.unauthorizedError) ? error.response!.data : "User is not authorized!";
+            setIsBusyAction({ isBusy: false });            
+            unauthorizedError = hasValue(unauthorizedError) ? error.response!.data : "User is not authorized!";
             if (error.response!.status === 500) return;
             
-            this.addErrorNotificationAction({
+            addErrorNotificationAction({
                 message: error.response!.status === 403 ? "Authorization Failed" : "HTTP Error",
-                longMessage: error.response!.status === 403 ? this.unauthorizedError : getErrorMessage(error),
+                longMessage: error.response!.status === 403 ? unauthorizedError : getErrorMessage(error),
             });
             if (
                 hasValue(error, 'response') &&
@@ -553,9 +551,9 @@ export default class AppComponent extends Vue {
         );
 
         if (
-            this.securityType === SecurityTypes.esec &&
+            securityType === SecurityTypes.esec &&
             UnsecuredRoutePathNames.indexOf(
-                this.$router.currentRoute.name as string,
+                $router.currentRoute.value.name as string,
             ) === -1
         ) {
             // Upon opening the page, and every 30 seconds, check if authentication data
@@ -565,143 +563,150 @@ export default class AppComponent extends Vue {
         }
     }
 
-    mounted() {
-        this.$statusHub.$on(
+    
+    onMounted(() => mounted());
+    function mounted() {
+
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastErrorEvent,
-            this.onAddErrorNotification,
+            onAddErrorNotification,
         );
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastWarningEvent,
-            this.onAddWarningNotification,
+            onAddWarningNotification,
         );
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastInfoEvent,
-            this.onAddInfoNotification,
+            onAddInfoNotification,
         );
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastTaskCompletedEvent,
-            this.onAddTaskCompletedNotification
+            onAddTaskCompletedNotification
         );
         
-        this.currentURL = this.$router.currentRoute.name;
+        currentURL = $router.currentRoute.value.name;
 
-        if(this.$config.agencyLogo.trim() === "")
-            this.agencyLogo = require(`@/assets/images/generic/IAM_Main.jpg`)
+        if($config.agencyLogo.trim() === "")
+            agencyLogo = require(`@/assets/images/generic/IAM_Main.jpg`)
         else
-            this.agencyLogo = this.$config.agencyLogo
+            agencyLogo = $config.agencyLogo
 
-        if(this.$config.productLogo.trim() === "")
-            this.productLogo = require(`@/assets/images/generic/IAM_Banner.jpg`)
+        if($config.productLogo.trim() === "")
+            productLogo = require(`@/assets/images/generic/IAM_Banner.jpg`)
         else
-            this.productLogo = this.$config.productLogo
+            productLogo = $config.productLogo
 
-        if(this.implementationName === "")
-            this.implementationName = "BridgeCare"
+        if(implementationName === "")
+            implementationName = "BridgeCare"
         else
-            this.implementationName = this.$config.implementationName
+            implementationName = $config.implementationName
     }
 
-    beforeDestroy() {
-        this.$statusHub.$off(
+    onBeforeUnmount(() => beforeDestroy());
+    function beforeDestroy() {
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastErrorEvent,
-            this.onAddErrorNotification,
+            onAddErrorNotification,
         );
     }
 
-    onAddErrorNotification(data: any) {
+    function onAddErrorNotification(data: any) {
         let errorNotification:string = data.error.toString();
         let spl = errorNotification.split('::');
         if (spl.length > 0 ) {
-            this.addErrorNotificationAction( {
+            addErrorNotificationAction( {
                 message: spl[0],
                 longMessage: spl.length>1 ? spl[1] : 'Unknown Error'
             });
         } else {
-            this.addErrorNotificationAction( {
+            addErrorNotificationAction( {
                 message: 'Server Error',
                 longMessage: data.error
             });
         }
     }
 
-    onAddInfoNotification(data: any) {
-        this.addInfoNotificationAction({
+    function onAddInfoNotification(data: any) {
+        addInfoNotificationAction({
             message: 'Server Update',
             longMessage: data.info
         });
     }
 
-    onAddWarningNotification(data: any) {
+    function onAddWarningNotification(data: any) {
         let warningNotification:string = data.warning.toString();
         let spl = warningNotification.split('::');
         if (spl.length > 0) {
-            this.addWarningNotificationAction({
+            addWarningNotificationAction({
                 message: spl[0],
                 longMessage: spl.length > 1 ? spl[1] : ''
             });
         } else {
-            this.addWarningNotificationAction({
+            addWarningNotificationAction({
                 message: 'Server Warning',
                 longMessage: data.warning,
             });
         }
     }
 
-    onAddTaskCompletedNotification(data: any) {
-        this.addTaskCompletedNotificationAction({
+    function onAddTaskCompletedNotification(data: any) {
+        addTaskCompletedNotificationAction({
             message: 'Task Completed',
             longMessage: data.task
         });
     }
 
 
-    onAlertResult(submit: boolean) {
-        this.alertDialogData = clone(emptyAlertData);
+    function onAlertResult(submit: boolean) {
+        alertDialogData = clone(emptyAlertData);
 
         if (submit) {
-            this.pushRouteUpdate = true;
-            this.onNavigate(this.route);
+            pushRouteUpdate = true;
+            onNavigate(route);
         }
     }
 
-    onAzureLogin() {
-        if (this.$router.currentRoute.name === 'AuthenticationStart') {
-            this.azureB2CLoginAction();
+    function onAzureLogin() {
+        if ($router.currentRoute.value.name === 'AuthenticationStart') {
+            azureB2CLoginAction();
         } else {
-            this.$router.push('/AuthenticationStart');
+            $router.push('/AuthenticationStart');
         }
     }
 
-    onAzureLogout() {
-        this.azureB2CLogoutAction().then(() => this.onLogout());
+    function onAzureLogout() {
+        azureB2CLogoutAction().then(() => onLogout());
     }
     
     /**
      * Sets up a recurring attempt at refreshing user tokens, and fetches network and attribute data
      */
-    onAuthenticate() {
-        this.$forceUpdate();
-        this.getNetworksAction().then(() =>
-        this.getAttributesAction().then(() =>
-        this.getAllUsersAction().then(() =>
-        this.getAnnouncementsAction().then(() =>
-        this.getUserCriteriaFilterAction().then(() =>{
-            if (this.username != null && this.username != '') {
-                this.getCurrentUserByUserNameAction(this.username);
+    function onAuthenticate() {
+        $forceUpdate();
+        getNetworksAction().then(() =>
+        getAttributesAction().then(() =>
+        getAllUsersAction().then(() =>
+        getAnnouncementsAction().then(() =>
+        getUserCriteriaFilterAction().then(() =>{
+            if (username != null && username.value != '') {
+                getCurrentUserByUserNameAction(username.value);
             }
         }).then(() =>
         //If these gets are placed before authorization, GetUserInformation() in EsecSecurity.cs will throw an error, as its HttpRequest will have no Authorization header!
-        this.getImplementationNameAction().then(() =>
-        this.getAgencyLogoAction().then(() => {this.getProductLogoAction();}
+        getImplementationNameAction().then(() =>
+        getAgencyLogoAction().then(() => {getProductLogoAction();}
         )))))));
     }
+  function $forceUpdate() {
+    throw new Error('Method not implemented.');
+  }
 
     /**
      * Dispatches an action that will revoke all user tokens, prevents token refresh attempts,
      * and redirects users to the landing page
      */
-    onLogout() {
-        this.logOutAction().then(() => {
+    function onLogout() {
+        logOutAction().then(() => {
             clearRefreshIntervalID(); 
             if (window.location.host.toLowerCase().indexOf('penndot.gov') === -1) {
                 /*
@@ -713,7 +718,7 @@ export default class AppComponent extends Vue {
                     'http://www.bamssyst.penndot.gov/iAM?host=' +
                     encodeURI(window.location.host);
             } else {
-                this.onNavigate('/iAM/');
+                onNavigate('/iAM/');
             }
         });
     }
@@ -722,34 +727,34 @@ export default class AppComponent extends Vue {
      * Navigates a user to a page using the specified routeName
      * @param route The route name to use when navigating a user
      */
-    onNavigate(route: any) {
-        if (this.$router.currentRoute.path !== route.path) {
-            this.$router.push(route).catch(() => {});
+    function onNavigate(route: any) {
+        if ($router.currentRoute.value.path !== route.path) {
+            $router.push(route).catch(() => {});
         }
     }
 
-    onNotificationMenuSelect() {
-        this.clearNotificationCounterAction();
+    function onNotificationMenuSelect() {
+        clearNotificationCounterAction();
     }
 
-    onRemoveNotification(id: number) {
-        this.removeNotificationAction(id);
+    function onRemoveNotification(id: number) {
+        removeNotificationAction(id);
     }
 
-    onShowNewsDialog() {
-        this.showNewsDialog = true;
-        this.updateUserLastNewsAccessDateAction({id: this.currentUser.id, accessDate: this.latestNewsDate});
-        this.hasUnreadNewsItem = false;
+    function onShowNewsDialog() {
+        showNewsDialog = true;
+        updateUserLastNewsAccessDateAction({id: currentUser.value.id, accessDate: latestNewsDate});
+        hasUnreadNewsItem = false;
     }
 
-    onCloseNewsDialog() {
-        this.showNewsDialog = false;
+    function onCloseNewsDialog() {
+        showNewsDialog = false;
     }
 
-    checkLastNewsAccessDate () {
-        this.hasUnreadNewsItem = newsAccessDateComparison(this.latestNewsDate, this.currentUserLastNewsAccessDate);
+    function checkLastNewsAccessDate () {
+        hasUnreadNewsItem = newsAccessDateComparison(latestNewsDate, currentUserLastNewsAccessDate);
     }
-}
+
 </script>
 
 <style>

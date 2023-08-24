@@ -1,6 +1,6 @@
 //import '@babel/polyfill';
 import '@fortawesome/fontawesome-free/css/all.css';
-import Vue from 'vue';
+import Vue, { createApp, defineComponent, watch, reactive } from 'vue';
 import 'vuetify/dist/vuetify.min.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -18,7 +18,7 @@ import { KendoChartInstaller } from '@progress/kendo-charts-vue-wrapper';
 import VueCurrencyInput from 'vue-currency-input';
 import connectionHub from './connectionHub';
 // @ts-ignore
-import VueSanitize from 'vue-sanitize';
+import VueSanitize from 'vue-3-sanitize';
 // @ts-ignore
 import VuejsDialog from 'vuejs-dialog';
 // @ts-ignore
@@ -27,11 +27,17 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 import GhdDownSvg from '@/shared/icons/GhdDownSvg.vue';
 import GhdTableSortSvg from '@/shared/icons/GhdTableSortSvg.vue';
 import authenticationModule from './store-modules/authentication.module';
+import { ap } from 'ramda';
 
 fetch(process.env.BASE_URL + 'config.json')
     .then(response => response.json())
     .then(config => {
-      Vue.use(Vuetify, {
+      const app = createApp({
+        store,
+        router,
+        render: (h: (arg0: typeof Vue) => any) => h(App),
+    })
+      app.use(Vuetify, {
         iconfont: 'fa',
         icons: {
             'ghd-search': {
@@ -55,15 +61,15 @@ fetch(process.env.BASE_URL + 'config.json')
         }
       });
     
-      Vue.use(VueWorker);
+      app.use(VueWorker);
       
-      Vue.use(KendoChartInstaller);
+      app.use(KendoChartInstaller);
       
-      Vue.use(VueCurrencyInput);
+      //app.use(VueCurrencyInput);
       authenticationModule.state.securityType = config.securityType as string;
-      Vue.use(connectionHub);
+      app.use(connectionHub);
       
-      Vue.use(VueScreen, {
+      app.use(VueScreen, {
           sm: 576,
           md: 768,
           lg: 992,
@@ -83,15 +89,10 @@ fetch(process.env.BASE_URL + 'config.json')
           allowedAttributes: false,
       };
       
-      Vue.use(VueSanitize, defaultOptions);
+      app.use(VueSanitize, defaultOptions);
       
-      Vue.config.productionTip = false;
-      
-      Vue.use(VuejsDialog);
-          Vue.prototype.$config = config;
-          new Vue({
-              store,
-              router,
-              render: h => h(App),
-          }).$mount('#app');
+      app.config.globalProperties.productionTip = false;
+      app.use(VuejsDialog);
+      app.config.globalProperties.$config = config;
+      app.mount('#app');
     });

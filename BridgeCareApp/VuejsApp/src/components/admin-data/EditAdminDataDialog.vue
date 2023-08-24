@@ -42,7 +42,7 @@
                 <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
                 Cancel
                 </v-btn >
-                <v-btn  @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                <v-btn @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                 Save
                 </v-btn>         
             </v-layout>

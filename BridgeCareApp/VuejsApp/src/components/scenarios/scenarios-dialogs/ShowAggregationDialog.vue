@@ -178,7 +178,7 @@ export default class ShowAggregationDialog extends Vue {
         emptyEquationEditorDialogData,
     );
     confirmDataAggregationAlertData: AlertData = clone(emptyAlertData);
-
+    
     networkDataAssignmentStatus: string = '';
     networkDataAssignmentPercentage = 0;
     networkGridHeaders: DataTableHeader[] = [

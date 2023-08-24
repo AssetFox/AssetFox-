@@ -49,6 +49,7 @@ import {
 import {getUserName} from '@/shared/utils/get-user-info';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import { nextTick } from 'process';
 
 @Component
 export default class CreatePriorityLibraryDialog extends Vue {
@@ -58,7 +59,7 @@ export default class CreatePriorityLibraryDialog extends Vue {
 
   newBudgetPriorityLibrary: BudgetPriorityLibrary = {...emptyBudgetPriorityLibrary, id: getNewGuid()};
   rules: InputValidationRules = rules;
-
+  
   @Watch('dialogData')
   onDialogDataChanged() {
     let currentUser: string = getUserName();

@@ -7,12 +7,8 @@
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
-@Component({
 
-})
-export default class GhdTableSortSvg extends Vue {
+export default class GhdTableSortSvg{
     
 }
 </script>

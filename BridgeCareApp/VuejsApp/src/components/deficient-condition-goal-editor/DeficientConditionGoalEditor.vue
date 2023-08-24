@@ -293,8 +293,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
+
 import { Action, Getter, Mutation, State } from 'vuex-class';
 import {
     DeficientConditionGoal,

@@ -471,8 +471,8 @@
     </v-layout>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
+<script setup lang="ts">
+import { reactive } from 'vue'
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
 import { Action, State, Getter, Mutation } from 'vuex-class';

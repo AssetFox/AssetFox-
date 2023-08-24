@@ -57,10 +57,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 var attributeName = calculatedAttribute.Attribute;
                 var attribute = attributes.FirstOrDefault(a => a.Name == attributeName);
-                var scenarioCalculatedAtrributeEntity = calculatedAttribute.ToScenarioEntity(dto.Id, attribute.Id);
-                scenarioCalculatedAttributeEntities.Add(scenarioCalculatedAtrributeEntity);
-            }            
-            var scenarioSelectableTreatmentEntities = new List<ScenarioSelectableTreatmentEntity>();           
+                var scenarioCalculatedAttributeEntity = calculatedAttribute.ToScenarioEntity(dto.Id, attribute.Id);
+                foreach (var equationCriterionPair in calculatedAttribute.Equations)
+                {
+                    var equationCriterionPairEntity = CalculatedAttributeEquationCriteriaPairMapper.ToScenarioEntity(equationCriterionPair, attribute.Id);
+                    var equationEntity = EquationMapper.ToEntity(equationCriterionPair.Equation);
+                    var equationJoin = new ScenarioEquationCalculatedAttributePairEntity
+                    {
+                        ScenarioCalculatedAttributePairId = equationCriterionPairEntity.Id,
+                        Equation = equationEntity,
+                    };
+                    equationCriterionPairEntity.EquationCalculatedAttributeJoin = equationJoin;
+                    scenarioCalculatedAttributeEntity.Equations.Add(equationCriterionPairEntity);
+                }
+
+                scenarioCalculatedAttributeEntities.Add(scenarioCalculatedAttributeEntity);
+            }
+            var scenarioSelectableTreatmentEntities = new List<ScenarioSelectableTreatmentEntity>();
             foreach (var treatment in dto.Treatments)
             {
                 var budgetJoins = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>();

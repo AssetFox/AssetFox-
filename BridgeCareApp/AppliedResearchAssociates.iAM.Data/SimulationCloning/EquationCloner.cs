@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
         {
              var clone = new EquationDTO
              {
+                 Id = Guid.NewGuid(),
                  Expression = equation.Expression,
              };
             return clone;

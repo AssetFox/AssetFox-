@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             var cloneInvestmentPlan = InvestmentPlanCloner.Clone(completeSimulation.InvestmentPlan);
             var cloneReportIndex = ReportIndexCloner.CloneList(completeSimulation.ReportIndexes);
             var cloneScenarioPerformanceCurvesImportResult = ScenarioPerformanceCurvesImportResultCloner.CloneListNullPropagating(completeSimulation.PerformanceCurves);
-            var cloneCalculatedTribute = CalculatedAttributeCloner.CloneList(completeSimulation.CalculatedAttributes, ownerId);
+            var cloneCalculatedAttribute = CalculatedAttributeCloner.CloneList(completeSimulation.CalculatedAttributes, ownerId);
             //var cloneEquation = EquationCloner.CloneList(completeSimulation.Equation);
 
             ////var equationIdMap = new Dictionary<Guid, Guid>();
@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
                 AnalysisMethod = cloneAnalysisMethod,
                 ReportIndexes = cloneReportIndex,
                 PerformanceCurves = cloneScenarioPerformanceCurvesImportResult,
-                CalculatedAttributes = cloneCalculatedTribute,
+                CalculatedAttributes = cloneCalculatedAttribute,
                 BudgetPriorities = cloneBudgetPriorities,
                 CashFlowRules = cloneCashFlowFule,
                 RemainingLifeLimits = cloneRemainingLifeLimits,

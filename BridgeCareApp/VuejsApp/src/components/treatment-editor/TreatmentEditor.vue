@@ -185,8 +185,8 @@
                                                     class='card-tab-content'
                                                 >
                                                     <PerformanceFactorTab
-                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
                                                         :selectedTreatment='selectedTreatment'
+                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
                                                         :scenarioId='loadedScenarioId'
                                                         :rules='rules'
                                                         :callFromScenario='hasScenario'

@@ -21,7 +21,7 @@
                         <div class="header-text-content invest-owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                         </div>
-                        <v-btn @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                                v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -30,7 +30,7 @@
                 <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
                     <v-layout row align-end justify-end class="header-alignment-padding-right">
                         <v-spacer></v-spacer>
-                        <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        <v-btn id="InvestmentEditor-CreateNewLibrary-vbtn" @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
                         outline>
                             Create New Library
@@ -1222,9 +1222,8 @@ export default class InvestmentEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.firstYearOfAnalysisPeriodShift = 0;
-                this.investmentPlanMutator(this.investmentPlan)                
-                this.clearChanges();               
-                this.resetPage();
+                this.investmentPlanMutator(this.investmentPlan)
+                this.clearChanges();                                            
                 this.addSuccessNotificationAction({message: "Modified investment"});
                 this.librarySelectItemValue = null;
             }           

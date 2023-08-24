@@ -11,13 +11,8 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
-using AppliedResearchAssociates.iAM.Data.Networking;
 using System.Threading;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Hubs.Services;
-using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Common.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -91,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.Id == mainNetworkId);
         }
 
-        public Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true)
+        public Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true, Guid? simulationId = null)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
@@ -103,44 +98,68 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (areFacilitiesRequired)
             {
+                var attributeIdLookup = getAttributeIdLookUp();
+                networkEntity.MaintainableAssets = GetInitialQuery()
+                                                    .Where(_ => _.NetworkId == networkId)
+                                                    .Select(asset => GetMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
+            }
 
-                var allAttributes = _unitOfWork.AttributeRepo.GetAttributes();
-                var attributeIdLookup = new Dictionary<Guid, string>();
-                foreach (var attribute in allAttributes)
-                {
-                    attributeIdLookup[attribute.Id] = attribute.Name;
-                }
-
-                networkEntity.MaintainableAssets = _unitOfWork.Context.MaintainableAsset
-                    .Include(a => a.MaintainableAssetLocation)
-                    .Include(a => a.AggregatedResults)
-                    .AsSplitQuery()
-                    .Where(_ => _.NetworkId == networkId)
-                    .Select(asset => new MaintainableAssetEntity
-                    {
-                        Id = asset.Id,
-                        SpatialWeighting = asset.SpatialWeighting,
-                        AssetName = asset.AssetName,
-                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
-                        {
-                            LocationIdentifier = asset.MaintainableAssetLocation.LocationIdentifier
-                        },
-                        AggregatedResults = asset.AggregatedResults.Select(result => new AggregatedResultEntity
-                        {
-                            Discriminator = result.Discriminator,
-                            Year = result.Year,
-                            TextValue = result.TextValue,
-                            NumericValue = result.NumericValue,
-                            Attribute = new AttributeEntity
-                            {
-                                Name = attributeIdLookup[result.AttributeId],
-                            }
-                        }).ToList()
-                    }).AsNoTracking().ToList();
+            if (!areFacilitiesRequired && simulationId != null)
+            {
+                // Load Assets corresponding to simulation's committed projects(this case is used by simulation pre-checks system)
+                var attributeIdLookup = getAttributeIdLookUp();
+                var assetIdsInCommittedProjectsForSimulation = _unitOfWork.MaintainableAssetRepo.GetAllIdsInCommittedProjectsForSimulation((Guid)simulationId, networkId);
+                networkEntity.MaintainableAssets = GetInitialQuery()
+                                                    .Where(_ => assetIdsInCommittedProjectsForSimulation.Contains(_.Id))
+                                                    .Select(asset => GetMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
             }
 
             var domain = networkEntity.ToDomain(explorer);
             return domain;
+
+            Dictionary<Guid,string> getAttributeIdLookUp()
+            {
+                var attributeIdLookup = new Dictionary<Guid, string>();
+                var allAttributes = _unitOfWork.AttributeRepo.GetAttributes();
+                foreach (var attribute in allAttributes)
+                {
+                    attributeIdLookup[attribute.Id] = attribute.Name;
+                }
+                return attributeIdLookup;
+            }
+        }
+
+        private IQueryable<MaintainableAssetEntity> GetInitialQuery()
+        {
+            return _unitOfWork.Context.MaintainableAsset
+                .Include(a => a.MaintainableAssetLocation)
+                .Include(a => a.AggregatedResults)
+                .AsSplitQuery();
+        }
+
+        private static MaintainableAssetEntity GetMaintainableAssetEntity(MaintainableAssetEntity asset, Dictionary<Guid, string> attributeIdLookup)
+        {
+            return new MaintainableAssetEntity
+            {
+                Id = asset.Id,
+                SpatialWeighting = asset.SpatialWeighting,
+                AssetName = asset.AssetName,
+                MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                {
+                    LocationIdentifier = asset.MaintainableAssetLocation.LocationIdentifier
+                },
+                AggregatedResults = asset.AggregatedResults.Select(result => new AggregatedResultEntity
+                {
+                    Discriminator = result.Discriminator,
+                    Year = result.Year,
+                    TextValue = result.TextValue,
+                    NumericValue = result.NumericValue,
+                    Attribute = new AttributeEntity
+                    {
+                        Name = attributeIdLookup[result.AttributeId],
+                    }
+                }).ToList()
+            };
         }
 
         public void DeleteNetworkData()

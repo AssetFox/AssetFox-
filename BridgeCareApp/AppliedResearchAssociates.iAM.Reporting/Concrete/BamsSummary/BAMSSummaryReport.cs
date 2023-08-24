@@ -208,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
 
             // reportOutputData will be having all assets data, should we filter it laer before adding any to report??
-            _reportHelper.FilterReportOutputData(reportOutputData, Criteria);
+            _reportHelper.FilterReportOutputData(reportOutputData, networkId, Criteria);
 
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
             reportDetailDto.Status = $"Checking initial sections";

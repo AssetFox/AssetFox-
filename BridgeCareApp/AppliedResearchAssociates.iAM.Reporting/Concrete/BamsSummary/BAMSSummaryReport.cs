@@ -90,7 +90,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _bridgeWorkSummary = new BridgeWorkSummary(Warnings, _unitOfWork);
             if (_bridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummary)); }
 
-            _bridgeWorkSummaryByBudget = new BridgeWorkSummaryByBudget();
+            _bridgeWorkSummaryByBudget = new BridgeWorkSummaryByBudget(_unitOfWork);
             _summaryReportGlossary = new SummaryReportGlossary();
             _summaryReportParameters = new SummaryReportParameters(_unitOfWork);                        
             _addGraphsInTabs = new AddGraphsInTabs();
@@ -208,7 +208,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
 
             // reportOutputData will be having all assets data, should we filter it laer before adding any to report??
-            _reportHelper.FilterReportOutputData(reportOutputData, networkId, Criteria);
+            // TODO remove later
+            Criteria = "[DISTRICT]='04'";
+            var criteriaValidationResult =  _reportHelper.FilterReportOutputData(reportOutputData, networkId, Criteria);
 
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
             reportDetailDto.Status = $"Checking initial sections";

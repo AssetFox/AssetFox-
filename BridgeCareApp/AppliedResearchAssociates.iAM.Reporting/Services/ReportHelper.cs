@@ -210,15 +210,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                 }
                                 
                 var compiler = new CalculateEvaluateCompiler();
-                compiler.GetEvaluator(modifiedExpression);
-
                 var attributes = _unitOfWork.AttributeRepo.GetAttributesWithNames(attributeNames);
                 attributes.ForEach(attribute =>
                 {
                     compiler.ParameterTypes[attribute.Name] = attribute.Type == "NUMBER"
                         ? CalculateEvaluateParameterType.Number
                         : CalculateEvaluateParameterType.Text;
-                });                
+                });
+                compiler.GetEvaluator(modifiedExpression);                               
 
                 var customAttributes = new List<(string name, string datatype)>();
                 foreach (var attribute in attributes)
@@ -226,8 +225,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                     customAttributes.Add((attribute.Name, attribute.Type));
                 }
 
-                //TODO get assets and update reportOutputData by filtering
+                // TODO get assets and update reportOutputData by filtering
                 var assetIds = GetAssetIds(modifiedExpression, customAttributes, networkId);
+                //.....
 
                 return new CriteriaValidationResult
                 {
@@ -272,7 +272,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
         private List<Guid> GetAssetIds(string expression, List<(string name, string dataType)> attributes, Guid networkId)
         {
             var assetIds = new List<Guid>();
-            //var flattenedDataTable = CreateFlattenedDataTable(attributes);
+            var flattenedDataTable = CreateFlattenedDataTable(attributes);
 
             var attributeNames = new List<string>();
             foreach (var attribute in attributes)
@@ -297,15 +297,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                         return (data, type);
                     });
                     return value;
-                });
-            assetIds = valuePerAttributeNamePerMaintainableAssetId.Keys.ToList();
-            assetIds = results.Select(r=>r.MaintainableAssetId).Distinct().ToList();
-//            AddToFlattenedDataTable(flattenedDataTable, valuePerAttributeNamePerMaintainableAssetId);
-         //   var dataRows = flattenedDataTable.Select(expression);
-            // Retrieve asset ids
+                });            
+            AddToFlattenedDataTable(flattenedDataTable, valuePerAttributeNamePerMaintainableAssetId);
+            var dataRows = flattenedDataTable.Select(expression);            
+            assetIds = dataRows.Select(_ => (Guid)_.ItemArray[0]).ToList();
 
-
-            return assetIds;
+            return assetIds.ToList();
         }
 
         private DataTable CreateFlattenedDataTable(List<(string name, string dataType)> attributeNames)

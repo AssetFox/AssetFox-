@@ -75,26 +75,26 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Warnings = new List<string>();
 
             //create summary report objects
-            _bridgeDataForSummaryReport = new BridgeDataForSummaryReport();
+            _bridgeDataForSummaryReport = new BridgeDataForSummaryReport(_unitOfWork);
             if (_bridgeDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_bridgeDataForSummaryReport)); }
 
-            _fundedTreatmentList = new FundedTreatmentList();
+            _fundedTreatmentList = new FundedTreatmentList(_unitOfWork);
             if (_fundedTreatmentList == null) { throw new ArgumentNullException(nameof(_fundedTreatmentList)); }
 
-            _unfundedTreatmentFinalList = new UnfundedTreatmentFinalList();
+            _unfundedTreatmentFinalList = new UnfundedTreatmentFinalList(_unitOfWork);
             if (_unfundedTreatmentFinalList == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentFinalList)); }
 
-            _unfundedTreatmentTime = new UnfundedTreatmentTime();
+            _unfundedTreatmentTime = new UnfundedTreatmentTime(_unitOfWork);
             if (_unfundedTreatmentTime == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentTime)); }
                       
-            _bridgeWorkSummary = new BridgeWorkSummary(Warnings);
+            _bridgeWorkSummary = new BridgeWorkSummary(Warnings, _unitOfWork);
             if (_bridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummary)); }
 
             _bridgeWorkSummaryByBudget = new BridgeWorkSummaryByBudget();
             _summaryReportGlossary = new SummaryReportGlossary();
-            _summaryReportParameters = new SummaryReportParameters();                        
+            _summaryReportParameters = new SummaryReportParameters(_unitOfWork);                        
             _addGraphsInTabs = new AddGraphsInTabs();
-            _reportHelper = new ReportHelper();
+            _reportHelper = new ReportHelper(_unitOfWork);
 
             //check for existing report id
             var reportId = results?.Id; if(reportId == null) { reportId = Guid.NewGuid(); }

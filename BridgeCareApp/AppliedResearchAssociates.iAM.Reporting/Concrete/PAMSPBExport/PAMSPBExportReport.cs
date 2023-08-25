@@ -30,9 +30,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
-            _reportHelper = new ReportHelper();
-            _treatmentTab = new TreatmentTab();
-            _masTab = new MASTab();
+            _reportHelper = new ReportHelper(_unitOfWork);
+            _treatmentTab = new TreatmentTab(_unitOfWork);
+            _masTab = new MASTab(_unitOfWork);
 
             // Check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }

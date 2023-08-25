@@ -11,18 +11,18 @@ using AppliedResearchAssociates.iAM.Common;
 using System.Data;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services
 {
     public class ReportHelper
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILog _log;
+        private ILog _log;
 
-        public ReportHelper(IUnitOfWork unitOfWork, ILog log)
+        public ReportHelper(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
         public T CheckAndGetValue<T>(IDictionary itemsArray, string itemName)
@@ -186,6 +186,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
         {
             try
             {
+                _log = new LogNLog();
                 if (string.IsNullOrEmpty(criteria))
                 {
                     return new CriteriaValidationResult { IsValid = false, ValidationMessage = "There is no criterion expression." };

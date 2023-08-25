@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
@@ -17,10 +18,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         private const int headerRow1 = 1;
         private const int headerRow2 = 2;
         private List<int> columnNumbersBudgetsUsed;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public DecisionTab()
+        public DecisionTab(IUnitOfWork unitOfWork)
         {
-            _reportHelper = new ReportHelper();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation, HashSet<string> performanceCurvesAttributes)

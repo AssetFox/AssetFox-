@@ -7,6 +7,7 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -20,18 +21,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private PostedClosedBridgeWorkSummary _postedClosedBridgeWorkSummary;
         private ProjectsCompletedCount _projectsCompletedCount;
         private ReportHelper _reportHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public BridgeWorkSummary(IList<string> Warnings)
+        public BridgeWorkSummary(IList<string> Warnings, IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _bridgesCulvertsWorkSummary = new BridgesCulvertsWorkSummary(Warnings);
             var workSummaryModel = new WorkSummaryModel();
             _costBudgetsWorkSummary = new CostBudgetsWorkSummary(workSummaryModel);
-            _bridgeRateDeckAreaWorkSummary = new BridgeRateDeckAreaWorkSummary();
-            _nhsBridgeDeckAreaWorkSummary = new NHSBridgeDeckAreaWorkSummary();
-            _deckAreaBridgeWorkSummary = new DeckAreaBridgeWorkSummary();
-            _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel);
-            _projectsCompletedCount = new ProjectsCompletedCount(Warnings);
-            _reportHelper = new ReportHelper();
+            _bridgeRateDeckAreaWorkSummary = new BridgeRateDeckAreaWorkSummary(_unitOfWork);
+            _nhsBridgeDeckAreaWorkSummary = new NHSBridgeDeckAreaWorkSummary(_unitOfWork);
+            _deckAreaBridgeWorkSummary = new DeckAreaBridgeWorkSummary(_unitOfWork);
+            _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel, _unitOfWork);
+            _projectsCompletedCount = new ProjectsCompletedCount(Warnings);            
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,

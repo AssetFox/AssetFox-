@@ -11,16 +11,19 @@ using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Parameters
 {
     public class SummaryReportParameters
     {        
         private ReportHelper _reportHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public SummaryReportParameters()
-        {            
-            _reportHelper = new ReportHelper();
+        public SummaryReportParameters(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel, Simulation simulation, SimulationOutput reportOutputData)

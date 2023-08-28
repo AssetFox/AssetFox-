@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static SimulationEntity ToNewEntity(
             this CompleteSimulationDTO dto,
             List<AttributeEntity> attributes,
-            string networkKeyAttribute)
+            string networkKeyAttribute, Guid ownerId)
         {
             var analysisMethod = AnalysisMethodMapper.ToEntity(dto.AnalysisMethod, dto.Id);
             if (CriterionLibraryValidityChecker.IsValid(dto.AnalysisMethod.CriterionLibrary))
@@ -69,8 +69,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     };
                     equationCriterionPairEntity.EquationCalculatedAttributeJoin = equationJoin;
                     scenarioCalculatedAttributeEntity.Equations.Add(equationCriterionPairEntity);
-                }
+                    var equationCriterionLibraryDto = equationCriterionPair.CriteriaLibrary;
+                    if (CriterionLibraryValidityChecker.IsValid(equationCriterionLibraryDto))
+                    {
+                        var equationCriterionLibraryEntity = CriterionMapper.ToEntity(equationCriterionLibraryDto);
+                        equationCriterionLibraryEntity.CreatedBy = equationCriterionLibraryDto.Owner;
+                        var criterionLibraryCalculatedAttributeJoin = new ScenarioCriterionLibraryCalculatedAttributePairEntity
+                        {
+                            ScenarioCalculatedAttributePairId = equationCriterionPairEntity.Id,
+                            CriterionLibrary = equationCriterionLibraryEntity,
 
+                        };
+                        equationCriterionPairEntity.CriterionLibraryCalculatedAttributeJoin = criterionLibraryCalculatedAttributeJoin;
+                    }
+                }
                 scenarioCalculatedAttributeEntities.Add(scenarioCalculatedAttributeEntity);
             }
             var scenarioSelectableTreatmentEntities = new List<ScenarioSelectableTreatmentEntity>();
@@ -97,7 +109,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 var attributeName = targetConditionGoal.Attribute;
                 var attribute = attributes.FirstOrDefault(a => a.Name == attributeName);
-                var scenarioTargetConditionGoalEntity = targetConditionGoal.ToScenarioEntity(dto.Id, attribute.Id);
+                var scenarioTargetConditionGoalEntity = targetConditionGoal.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, attribute.Id);
                 scenarioTargetConditionGoalEntities.Add(scenarioTargetConditionGoalEntity);
             }
             var scenarioDeficientConditionGoals = new List<ScenarioDeficientConditionGoalEntity>();
@@ -105,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 var attributeName = scenarioDeficientConditionGoal.Attribute;
                 var attribute = attributes.FirstOrDefault(a => a.Name == attributeName);
-                var deficientConditionGoal = scenarioDeficientConditionGoal.ToScenarioEntity(dto.Id, attribute.Id);
+                var deficientConditionGoal = scenarioDeficientConditionGoal.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, attribute.Id);
                 scenarioDeficientConditionGoals.Add(deficientConditionGoal);
             }
             var scenarioRemainingLifeLimitEntities = new List<ScenarioRemainingLifeLimitEntity>();
@@ -135,7 +147,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var committedProjectEntity = committedProject.ToEntity(attributes, networkKeyAttribute);
                 committedProjectEntities.Add(committedProjectEntity);
             }
-
+            var userJoins = new List<SimulationUserEntity>();
+            foreach (var user in dto.Users)
+            {
+                var userJoin = user.ToEntity(dto.Id);
+                userJoins.Add(userJoin);
+            }
+            
             var entity = new SimulationEntity
             {
                 Name = dto.Name,
@@ -153,6 +171,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CashFlowRules = scenarioCashFlowRuleEntities,
                 CommittedProjects = committedProjectEntities,
                 SelectableTreatments = scenarioSelectableTreatmentEntities,
+                CreatedBy = ownerId,
+                SimulationUserJoins = userJoins,
             };
 
             return entity;

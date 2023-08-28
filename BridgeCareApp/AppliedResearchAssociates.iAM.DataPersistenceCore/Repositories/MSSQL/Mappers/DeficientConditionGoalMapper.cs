@@ -6,6 +6,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -55,6 +57,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AllowedDeficientPercentage = dto.AllowedDeficientPercentage,
                 DeficientLimit = dto.DeficientLimit
             };
+
+
+        public static ScenarioDeficientConditionGoalEntity ToScenarioEntityWithCriterionLibraryJoin(this DeficientConditionGoalDTO dto, Guid simulationId,
+          Guid attributeId)
+        {
+
+            var entity = ToScenarioEntity(dto, simulationId, attributeId);
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
+            {
+                var criterionLibrary = new CriterionLibraryEntity
+                {
+                    MergedCriteriaExpression = criterionLibraryDto.MergedCriteriaExpression,
+                    Id = criterionLibraryDto.Id,
+                    Name = criterionLibraryDto.Name,
+                    CreatedBy = criterionLibraryDto.Owner,
+                };
+
+                var join = new CriterionLibraryScenarioDeficientConditionGoalEntity
+                {
+                    ScenarioDeficientConditionGoalId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                entity.CriterionLibraryScenarioDeficientConditionGoalJoin = join;
+            }
+            return entity;
+        }
+
 
         public static DeficientConditionGoalLibraryEntity ToEntity(this DeficientConditionGoalLibraryDTO dto) =>
             new DeficientConditionGoalLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };

@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 {
     public class CompleteSimulationCloner
     {
-        public static CompleteSimulationDTO Clone(CompleteSimulationDTO completeSimulation, CloneSimulationDTO cloneRequest, Guid ownerId)
+        public static CompleteSimulationDTO Clone(CompleteSimulationDTO completeSimulation, CloneSimulationDTO cloneRequest, Guid ownerId, string ownerName)
         {
             var cloneAnalysisMethod = AnalysisMethodCloner.Clone(completeSimulation.AnalysisMethod, ownerId);
             var cloneBudgetPriorities = BudgetPriorityCloner.CloneList(completeSimulation.BudgetPriorities, ownerId);
@@ -15,14 +15,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             var cloneReportIndex = ReportIndexCloner.CloneList(completeSimulation.ReportIndexes);
             var cloneScenarioPerformanceCurvesImportResult = ScenarioPerformanceCurvesImportResultCloner.CloneListNullPropagating(completeSimulation.PerformanceCurves);
             var cloneCalculatedAttribute = CalculatedAttributeCloner.CloneList(completeSimulation.CalculatedAttributes, ownerId);
-            //var cloneEquation = EquationCloner.CloneList(completeSimulation.Equation);
-
-            ////var equationIdMap = new Dictionary<Guid, Guid>();
-            ////for (int equationIndex = 0; equationIndex < cloneCalculatedAttribute.Count; equationIndex++)
-            ////{
-            ////    equationIdMap[completeSimulation.Budgets[equationIndex].Id] = cloneBudget[equationIndex].Id;
-            //}
-
+         
             var cloneRemainingLifeLimits = RemainingLifeLimitCloner.CloneList(completeSimulation.RemainingLifeLimits, ownerId);
             var cloneTreatment = TreatmentCloner.CloneList(completeSimulation.Treatments, ownerId);
             var cloneTargetConditionGoal = TargetConditionGoalCloner.CloneList(completeSimulation.TargetConditionGoals, ownerId);
@@ -35,9 +28,22 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             }
 
             var cloneBaseCommittedProject = BaseCommittedProjectCloner.CloneList(completeSimulation.CommittedProjects, budgetIdMap);
-
-
-           var clone = new CompleteSimulationDTO
+            var user = new SimulationUserDTO
+            {
+                CanModify = true,
+                UserId = ownerId,
+                IsOwner = true,
+                Username = ownerName,
+            };
+            var users = new List<SimulationUserDTO>
+            {
+                
+            };
+            if (ownerId != Guid.Empty&&! string.IsNullOrEmpty(ownerName))
+            {
+                users.Add(user);
+            }
+            var clone = new CompleteSimulationDTO
             {
                 NoTreatmentBeforeCommittedProjects = completeSimulation.NoTreatmentBeforeCommittedProjects,
                 Name = cloneRequest.ScenarioName,
@@ -56,6 +62,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
                 Budgets = cloneBudget,
                 CommittedProjects = cloneBaseCommittedProject,
                 Id = cloneRequest.Id,
+                Users = users,
             };
             return clone;
 

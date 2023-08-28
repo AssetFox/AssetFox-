@@ -59,19 +59,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // do the clone
             var ownerId = _unitOfWork.CurrentUser?.Id??Guid.Empty;
-            var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId);
+            var ownerName = _unitOfWork.CurrentUser?.Username;
+            var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId, ownerName);
 
             // save it
             var network = _unitOfWork.Context.Network.First(n => n.Id == dto.NetworkId);
-            var clone = CreateNewSimulation(cloneSimulation, network.KeyAttributeId);
+            var clone = CreateNewSimulation(cloneSimulation, network.KeyAttributeId, ownerId);
             return clone;
         }
 
-        private SimulationCloningResultDTO CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO, Guid keyAttributeId)
+        private SimulationCloningResultDTO CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO, Guid keyAttributeId, Guid ownerId)
         {
             var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
             var keyAttribute = _unitOfWork.AttributeRepo.GetAttributeName(keyAttributeId);
-            var entity = CompleteSimulationMapper.ToNewEntity(completeSimulationDTO, attributes, keyAttribute);
+            var entity = CompleteSimulationMapper.ToNewEntity(completeSimulationDTO, attributes, keyAttribute, ownerId);
 
             _unitOfWork.AsTransaction(() =>
             {

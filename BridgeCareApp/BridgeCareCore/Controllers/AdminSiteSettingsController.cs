@@ -14,6 +14,8 @@ using Humanizer;
 using System.Data;
 using System.Drawing;
 using static BridgeCareCore.Security.SecurityConstants;
+using System.IO;
+using NetTopologySuite.Operation.Buffer;
 
 namespace BridgeCareCore.Controllers
 {
@@ -87,13 +89,28 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                var files = HttpContext.Request.Form.Files[0];
+                byte[] buffer;
                 if (!ContextAccessor.HttpContext.Request.HasFormContentType)
                     throw new ConstraintException("Request MIME type is invalid.");
                 if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
                     throw new ConstraintException("Attributes file not found.");
+                if (files.ContentType == "image/svg+xml")
+                {
+                    using (var MemoryStream = new MemoryStream())
+                    {
+                        await
+                        ContextAccessor.HttpContext.Request.Form.Files[0].CopyToAsync(MemoryStream);
+                        buffer = MemoryStream.ToArray();
+                    }
+                    await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.SetAgencyLogo(buffer));
+                }
+                else
+                {
+                    Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+                    await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.SetAgencyLogo(logo,files.ContentType.ToString()));
+                }
                 //https://stackoverflow.com/questions/8848725/asp-net-c-sharp-convert-filestream-to-image
-                Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.SetAgencyLogo(logo));
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, "Successfully Updated Agency Logo");
                 return Ok();
             }
@@ -127,12 +144,28 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                var files = HttpContext.Request.Form.Files[0];
+                byte[] buffer;
                 if (!ContextAccessor.HttpContext.Request.HasFormContentType)
                     throw new ConstraintException("Request MIME type is invalid.");
                 if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
                     throw new ConstraintException("Attributes file not found.");
-                Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                await Task.Factory.StartNew( () => UnitOfWork.AdminSettingsRepo.SetImplementationLogo(logo) );
+                if (files.ContentType == "image/svg+xml")
+                {
+                    using (var MemoryStream = new MemoryStream())
+                    {
+                        await
+                        ContextAccessor.HttpContext.Request.Form.Files[0].CopyToAsync(MemoryStream);
+                        buffer = MemoryStream.ToArray();
+                    }
+
+                    await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.SetImplementationLogo(buffer));
+                }      
+                else
+                {
+                    Image logo = Image.FromStream(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+                    await Task.Factory.StartNew(() => UnitOfWork.AdminSettingsRepo.SetImplementationLogo(logo,files.ContentType.ToString()));
+                }
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, "Successfully Updated Implementation Logo");
                 return Ok();
             }

@@ -140,6 +140,22 @@ public static class InputCreation
                 ShadowForAnyTreatment = 2,
                 ShadowForSameTreatment = 5,
             },
+            new()
+            {
+                Name = "Eldritch wizardry for CPs",
+                ForCommittedProjectsOnly = true,
+                Consequences =
+                {
+                    new()
+                    {
+                        AttributeName = "HEALTH",
+                        ChangeExpression = "+50",
+                    },
+                },
+                FeasibilityCriterionExpressions = { "AGE >= 0" },
+                ShadowForAnyTreatment = 5,
+                ShadowForSameTreatment = 10,
+            },
         },
     };
 

@@ -51,7 +51,7 @@ public sealed class Simulation : WeakEntity, IValidator
     /// </summary>
     public bool ShouldPreapplyPassiveTreatment { get; set; } = true;
 
-    public ValidatorBag Subvalidators => new ValidatorBag { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
+    public ValidatorBag Subvalidators => new() { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
 
     public IReadOnlyCollection<SelectableTreatment> Treatments => _Treatments;
 
@@ -63,7 +63,7 @@ public sealed class Simulation : WeakEntity, IValidator
 
     public IReadOnlyCollection<SelectableTreatment> GetActiveTreatments()
     {
-        var result = Treatments.ToList();
+        var result = Treatments.Where(treatment => !treatment.ForCommittedProjectsOnly).ToList();
         _ = result.Remove(DesignatedPassiveTreatment);
         result.Sort(TreatmentComparer);
         return result;

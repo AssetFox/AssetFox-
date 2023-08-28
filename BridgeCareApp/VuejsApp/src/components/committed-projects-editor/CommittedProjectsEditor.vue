@@ -90,7 +90,6 @@
                                                 && header.value !== 'year' 
                                                 && header.value !== 'keyAttr' 
                                                 && header.value !== 'treatment'
-                                                && header.value !== 'performanceFactor'
                                                 && header.value !== 'cost'"
                                                 readonly
                                                 class="sm-txt"
@@ -116,10 +115,6 @@
 
                                             <v-text-field v-if="header.value === 'cost'"
                                                 :value='formatAsCurrency(props.item[header.value])'
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-
-                                            <v-text-field v-if="header.value === 'performanceFactor'"
-                                                :value='parseFloat(props.item[header.value])'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template slot="input">
@@ -567,18 +562,6 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.totalItems = data.totalItems;
                     const row = data.items.find(scp => scp.id == this.selectedCommittedProject);
 
-                   // Updated existing data with no factor set to 1.2
-                    this.sectionCommittedProjects.forEach(element => {
-                        if (element.consequences !=null){
-                            element.consequences.forEach(consequence => {
-                            if (consequence.performanceFactor === 0) {
-                                consequence.performanceFactor = 1.2;
-                                this.updateCommittedProject(row ? row : emptySectionCommittedProject, "1.2", "performanceFactor");
-                            }
-                        });
-                        }
-                        
-                    });
                     if(isNil(row)) {
                         this.selectedCommittedProject = '';
                     }
@@ -728,9 +711,6 @@ export default class CommittedProjectsEditor extends Vue  {
             }
             else if(property === 'keyAttr'){
                 this.handleKeyAttrChange(row, scp, value);               
-            }
-            else if(property === 'performanceFactor') {
-                this.handleFactorChange(row, scp, value);
             }
             else if(property === 'budget'){
                 this.handleBudgetChange(row, scp, value)

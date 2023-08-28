@@ -1,8 +1,8 @@
 <template>
-    <v-layout column class="Montserrat-font-family">
+    <v-layout column class="Montserrat-font-family" justify-start>
         <v-layout align-center>
             <v-flex xs4 class="ghd-constant-header">
-                <v-subheader class="ghd-md-gray ghd-control-label">Select a Summary Report</v-subheader>
+                <v-subheader class="ghd-md-gray ghd-control-label">Select a Report</v-subheader>
                 <v-select
                     :items='reports'
                     v-model='selectedReport'
@@ -25,51 +25,42 @@
                 >Download Report</v-btn>
             </v-flex>
         </v-layout>
-        <v-flex>
-            <v-layout style="height=12px;padding-bottom:5px;padding-right:90px;" justify-space-between align-center>
-                <v-subheader class="ghd-control-label ghd-md-gray">                             
-                    Report Criteria
-                </v-subheader>
-                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
-                    <v-btn
-                        id="SummaryReport-criteriaEditor-btn"
-                        style="!important;"
-                        @click="
-                            onShowCriterionEditorDialog
-                        "
-                        class="edit-icon ghd-control-label"
-                        icon
-                    >
-                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
-                    </v-btn>
-                </v-flex>
+            <v-layout style="margin:10px; padding-left:0px" column>
+                <v-layout justify-space-between align-center>
+                    <v-subheader class="ghd-control-label ghd-md-gray">                             
+                        Report Criteria
+                    </v-subheader>
+                    <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
+                        <v-btn
+                            id="SummaryReport-criteriaEditor-btn"
+                            style="!important;"
+                            @click="
+                                onShowCriterionEditorDialog
+                            "
+                            class="edit-icon ghd-control-label"
+                            icon
+                        >
+                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                        </v-btn>
+                    </v-flex>
+                </v-layout>
+                <v-layout>
+                   <v-textarea
+                       id="SummaryReport-criteria-textArea"
+                       class="ghd-control-text ghd-control-border"
+                       style="padding-bottom: 0px; padding-right:30px; height: 90px;"
+                       no-resize
+                       outline
+                       readonly
+                       :rows=4
+                       v-model=mergedCriteriaExpression
+                   >
+                   </v-textarea>
+                </v-layout>
             </v-layout>
-            <v-layout style="padding-bottom:5px;">
-               <v-textarea
-                   id="SummaryReport-criteria-textArea"
-                   class="ghd-control-text ghd-control-border"
-                   style="padding-bottom: 0px; padding-right: 90px; height: 90px;"
-                   no-resize
-                   outline
-                   readonly
-                   :rows=4
-                   v-model=mergedCriteriaExpression
-               >
-               </v-textarea>
-            </v-layout>
-            <!-- <v-checkbox
-                id="SummaryReport-criteria-checkbox"
-                style="padding-top: 0px; margin-top: 4px;"
-                class="ghd-checkbox ghd-md-gray"
-                label="Criteria is intentionally empty (MUST check to Save)" 
-                v-model="criteriaIsIntentionallyEmpty"
-                v-show="criteriaIsEmpty()"
-            >
-            </v-checkbox> -->
-        </v-flex>
-            <v-layout style="padding-top:0px;padding-left:5px" justify-left row>
+        <v-layout row>
             <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" depressed>Simulation Log</v-btn>
-            </v-layout>
+        </v-layout>
         <GeneralCriterionEditorDialog
             :dialogData="criterionEditorDialogData"
             @submit="onCriterionEditorDialogSubmit"

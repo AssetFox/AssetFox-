@@ -59,10 +59,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
 
-            var sectionIds = Parse(parameters);
+            var sectionIds = Parse(scenarioId);
             _sectionData = GetAsset(sectionIds);
 
             var crspieces = _sectionData.FirstOrDefault(_ => _.Key == "CRS_Data").Value.Split(new[] { '_' }, 4);

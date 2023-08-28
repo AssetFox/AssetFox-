@@ -66,11 +66,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Criteria { get; set; }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
             // Check for the parameters
-            if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
+            if (string.IsNullOrEmpty(scenarioId) || string.IsNullOrWhiteSpace(scenarioId))
             {
                 Errors.Add("No simulation ID provided in the parameters of BAMS Simulation Report runner");
                 IndicateError();
@@ -78,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Set simulation id
-            if (!Guid.TryParse(parameters, out Guid _simulationId))
+            if (!Guid.TryParse(scenarioId, out Guid _simulationId))
             {
                 Errors.Add("Provided simulation ID is not a GUID");
                 IndicateError();

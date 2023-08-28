@@ -58,9 +58,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _networkId = _unitofwork.NetworkRepo.GetMainNetwork().Id;
         }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
-            segmentIds = Parse(parameters);
+            segmentIds = Parse(scenarioId);
             var keyProperties = segmentIds.keyProperties;
             if (keyProperties[1] == "-1" && string.IsNullOrEmpty(keyProperties[0])) return; // report failed due to bad parameters
             if (!Validate(keyProperties)) return; // report failed due to validation

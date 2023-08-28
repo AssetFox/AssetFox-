@@ -187,11 +187,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
             try
             {
                 _log = new LogNLog();
-                if (string.IsNullOrEmpty(criteria))
-                {
-                    return new CriteriaValidationResult { IsValid = false, ValidationMessage = "There is no criterion expression." };
-                }
-
                 CheckAttributes(criteria);
 
                 var modifiedExpression = criteria
@@ -225,9 +220,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                     customAttributes.Add((attribute.Name, attribute.Type));
                 }
 
-                // TODO get assets and update reportOutputData by filtering
-                var assetIds = GetAssetIds(modifiedExpression, customAttributes, networkId);
-                //.....
+                // Get assets and update reportOutputData by filtering
+                var assetIds = GetAssetIds(modifiedExpression, customAttributes, networkId);                
+                var count = reportOutputData.InitialAssetSummaries.RemoveAll(_ => !assetIds.Contains(_.AssetId));
+                foreach (var year in reportOutputData.Years)
+                {
+                   year.Assets.RemoveAll(_ => !assetIds.Contains(_.AssetId));
+                }
 
                 return new CriteriaValidationResult
                 {

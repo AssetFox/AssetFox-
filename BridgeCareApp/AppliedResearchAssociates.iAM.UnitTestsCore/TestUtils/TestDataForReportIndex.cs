@@ -106,7 +106,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public string Status => "Report finished running";
 
-        public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
+        public string Criteria { get; set; }
+
+        public Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }
 
     public class TestHTMLFileFactory : IReportFactory
@@ -157,7 +159,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public string Status => "Report finished running";
 
-        public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
+        public string Criteria { get ; set ; }
+
+        public Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }
 
     public class TestBadReportFactory : IReportFactory
@@ -198,6 +202,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public string Status => "Report finished running";
 
-        public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
+        public string Criteria { get; set; }
+
+        public Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }
 }

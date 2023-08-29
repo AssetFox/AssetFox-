@@ -14,6 +14,7 @@ public interface IAdminSettingsRepository
     string GetConstraintType();
     void SetConstraintType(string constraintType);
     IList<string> GetKeyFields();
+    IList<string> GetRawKeyFields();
 
     void SetKeyFields(string keyFields);
 
@@ -23,6 +24,8 @@ public interface IAdminSettingsRepository
     void SetPrimaryNetwork(string name);
 
     void SetRawDataNetwork(string name);
+    Guid? GetPrimaryNetworkId();
+    Guid? GetRawDataNetworkId();
 
     string GetPrimaryNetwork();
 

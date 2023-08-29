@@ -38,6 +38,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status => String.Empty;
 
+        public string Suffix => throw new NotImplementedException();
+
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             _isComplete = false;

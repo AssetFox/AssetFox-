@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -23,10 +22,11 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTa
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.Reporting.Services;
-using System.Threading;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.Reporting.Services;
+using System.Threading;
 using AppliedResearchAssociates.iAM.Common.Logging;using AppliedResearchAssociates.iAM.WorkQueue;
+using Newtonsoft.Json.Linq;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -65,6 +65,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Criteria { get; set; }
 
         public BAMSSummaryReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
@@ -75,26 +76,26 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Warnings = new List<string>();
 
             //create summary report objects
-            _bridgeDataForSummaryReport = new BridgeDataForSummaryReport();
+            _bridgeDataForSummaryReport = new BridgeDataForSummaryReport(_unitOfWork);
             if (_bridgeDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_bridgeDataForSummaryReport)); }
 
-            _fundedTreatmentList = new FundedTreatmentList();
+            _fundedTreatmentList = new FundedTreatmentList(_unitOfWork);
             if (_fundedTreatmentList == null) { throw new ArgumentNullException(nameof(_fundedTreatmentList)); }
 
-            _unfundedTreatmentFinalList = new UnfundedTreatmentFinalList();
+            _unfundedTreatmentFinalList = new UnfundedTreatmentFinalList(_unitOfWork);
             if (_unfundedTreatmentFinalList == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentFinalList)); }
 
-            _unfundedTreatmentTime = new UnfundedTreatmentTime();
+            _unfundedTreatmentTime = new UnfundedTreatmentTime(_unitOfWork);
             if (_unfundedTreatmentTime == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentTime)); }
                       
-            _bridgeWorkSummary = new BridgeWorkSummary(Warnings);
+            _bridgeWorkSummary = new BridgeWorkSummary(Warnings, _unitOfWork);
             if (_bridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummary)); }
 
-            _bridgeWorkSummaryByBudget = new BridgeWorkSummaryByBudget();
+            _bridgeWorkSummaryByBudget = new BridgeWorkSummaryByBudget(_unitOfWork);
             _summaryReportGlossary = new SummaryReportGlossary();
-            _summaryReportParameters = new SummaryReportParameters();                        
+            _summaryReportParameters = new SummaryReportParameters(_unitOfWork);                        
             _addGraphsInTabs = new AddGraphsInTabs();
-            _reportHelper = new ReportHelper();
+            _reportHelper = new ReportHelper(_unitOfWork);
 
             //check for existing report id
             var reportId = results?.Id; if(reportId == null) { reportId = Guid.NewGuid(); }
@@ -104,22 +105,23 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Errors = new List<string>();
             if (Warnings == null) { Warnings = new List<string>(); }
             Status = "Report definition created.";
-            Results = String.Empty;
+            Results = string.Empty;
             IsComplete = false;
         }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
-        {
-            workQueueLog ??= new DoNothingWorkQueueLog();
+        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        {
+            Criteria = criteria;
+            workQueueLog ??= new DoNothingWorkQueueLog();            
             //check for the parameters string
-            if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters)) {
+            if (string.IsNullOrEmpty(scenarioId) || string.IsNullOrWhiteSpace(scenarioId)) {
                 Errors.Add("Parameters string is empty OR there are no parameters defined");
                 IndicateError();
                 return;
             }
 
-            // Determine the Guid for the simulation and set simulation id
-            if (!Guid.TryParse(parameters, out Guid _simulationId)) {
+            // Determine the Guid for the simulation and set simulation id            
+            if (!Guid.TryParse(scenarioId, out Guid _simulationId)) {
                 Errors.Add("Simulation ID could not be parsed to a Guid");
                 IndicateError();
                 return;
@@ -153,9 +155,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Generate Summary report 
             var summaryReportPath = "";
             try
-            {
+            {
                 checkCancelled(cancellationToken, _simulationId);
                 summaryReportPath = GenerateSummaryReport(_networkId, _simulationId, workQueueLog, cancellationToken);
+                if(!string.IsNullOrEmpty(Criteria) && string.IsNullOrEmpty(summaryReportPath))
+                {
+                    var errorStatus = "No assets found for given criteria";
+                    IndicateError(errorStatus);
+                    Errors.Add(errorStatus);                    
+                    return;
+                }
             }
             catch (Exception e)
             {
@@ -205,6 +214,21 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
+                        
+            // reportOutputData will be having all assets data, filter it based on criteria expression
+            if (!string.IsNullOrEmpty(Criteria))
+            {
+                var criteriaValidationResult = _reportHelper.FilterReportOutputData(reportOutputData, networkId, Criteria);
+
+                if (!reportOutputData.InitialAssetSummaries.Any())
+                {
+                    reportDetailDto.Status = "Failed to generate report due to no assets found for given criteria";
+                    workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);                    
+                    UpdateSimulationAnalysisDetail(reportDetailDto);                    
+
+                    return string.Empty;
+                }
+            }
 
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
             reportDetailDto.Status = $"Checking initial sections";
@@ -265,7 +289,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var simulationYearsCount = simulationYears.Count;
 
-            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();            
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
@@ -449,9 +473,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, dto.Status, dto.SimulationId);
         }
 
-        private void IndicateError()
+        private void IndicateError(string status = null)
         {
-            Status = "Summary output report completed with errors";
+            Status = status ?? "Summary output report completed with errors";
             IsComplete = true;
         }
 

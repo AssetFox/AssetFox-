@@ -4,15 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Common.Logging;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Treatments;
 using BridgeCareCore.Services;
@@ -24,8 +20,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         protected readonly IHubService _hubService;
         private readonly IUnitOfWork _unitOfWork;
-        private Guid _networkId;        
-        private readonly ReportHelper _reportHelper;
+        private Guid _networkId;                
 
         private readonly TreatmentForPBExportReport _treatmentForPBExportReportReport;
 
@@ -34,10 +29,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
-            _reportHelper = new ReportHelper();
 
             //create summary report objects
-            _treatmentForPBExportReportReport = new TreatmentForPBExportReport();
+            _treatmentForPBExportReportReport = new TreatmentForPBExportReport(_unitOfWork);
             if (_treatmentForPBExportReportReport == null) { throw new ArgumentNullException(nameof(_treatmentForPBExportReportReport)); }
 
             // Check for existing report id
@@ -70,11 +64,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public string Criteria { get; set; }
+
+        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
             // Check for the parameters
-            if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
+            if (string.IsNullOrEmpty(scenarioId) || string.IsNullOrWhiteSpace(scenarioId))
             {
                 Errors.Add("No simulation ID provided in the parameters of BAMS Simulation Report runner");
                 IndicateError();
@@ -82,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Set simulation id
-            if (!Guid.TryParse(parameters, out Guid _simulationId))
+            if (!Guid.TryParse(scenarioId, out Guid _simulationId))
             {
                 Errors.Add("Provided simulation ID is not a GUID");
                 IndicateError();

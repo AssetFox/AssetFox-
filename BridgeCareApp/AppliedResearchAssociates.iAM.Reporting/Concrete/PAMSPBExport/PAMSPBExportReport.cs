@@ -30,9 +30,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
-            _reportHelper = new ReportHelper();
-            _treatmentTab = new TreatmentTab();
-            _masTab = new MASTab();
+            _reportHelper = new ReportHelper(_unitOfWork);
+            _treatmentTab = new TreatmentTab(_unitOfWork);
+            _masTab = new MASTab(_unitOfWork);
 
             // Check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -64,11 +64,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public string Criteria { get; set; }
+
+        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
             // Check for the parameters
-            if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
+            if (string.IsNullOrEmpty(scenarioId) || string.IsNullOrWhiteSpace(scenarioId))
             {
                 Errors.Add("No simulation ID provided in the parameters of PAMS Simulation Report runner");
                 IndicateError();
@@ -76,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Set simulation id
-            if (!Guid.TryParse(parameters, out Guid _simulationId))
+            if (!Guid.TryParse(scenarioId, out Guid _simulationId))
             {
                 Errors.Add("Provided simulation ID is not a GUID");
                 IndicateError();

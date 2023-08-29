@@ -320,7 +320,7 @@
         }
 
         isDisabled(index: number) {
-            if(this.querySelectedData.length < index * 2) {
+            if(this.querySelectedData.length < index * 2 && this.constraintDetails == "AND") {
                 return true;
             }
             return false;

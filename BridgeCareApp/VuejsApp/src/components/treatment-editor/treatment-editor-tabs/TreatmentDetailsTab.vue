@@ -4,7 +4,8 @@
             <v-layout column>                
                 <v-flex>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Description</v-subheader>
-                    <v-textarea                        
+                    <v-textarea  
+                        id ="TreatmentDetailsTab-desc-vtextarea"                      
                         class='ghd-control-border ghd-control-text'
                         no-resize
                         outline
@@ -21,7 +22,7 @@
                 <v-layout xs12 row class="ghd-left-padding ghd-right-padding">
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Category</v-subheader>
-                        <v-select
+                        <v-select id="TreatmentDetailsTab-category-vselect"
                         class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                             :items="Array.from(treatmentCategoryMap.keys())"
                             append-icon=$vuetify.icons.ghd-down
@@ -39,7 +40,7 @@
                     </v-flex>
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Asset type</v-subheader>
-                        <v-select
+                        <v-select id="TreatmentDetailsTab-assetType-vselect"
                         class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                         :items="Array.from(assetTypeMap.keys())"
                         append-icon=$vuetify.icons.ghd-down
@@ -57,7 +58,7 @@
                     </v-flex>
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Years Before Any</v-subheader>
-                        <v-text-field 
+                        <v-text-field id="TreatmentDetailsTab-yearsBeforeAny-vtext"
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
                             :mask="'####'"
                             @input="
@@ -76,7 +77,7 @@
                     </v-flex>
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Years Before Same</v-subheader>
-                        <v-text-field
+                        <v-text-field id="TreatmentDetailsTab-yearsBeforeSame-vtext"
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
                             :mask="'####'"
                             rows="4"
@@ -137,7 +138,7 @@
                                         >
                                             <v-icon style="font-size:20px !important" class="ghd-blue">fas fa-eraser</v-icon>
                                         </v-btn>
-                                        <v-btn
+                                        <v-btn id="TreatmentDetailsTab-Criteria-EditBtn"
                                             @click="
                                                 onShowTreatmentCriterionEditorDialog
                                             "

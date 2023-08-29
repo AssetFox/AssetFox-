@@ -4,9 +4,7 @@
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
                     <img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" /> 
-                    <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
                     <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
-                    <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
                 </v-toolbar-title>
                 <v-toolbar-items>
                     <v-btn
@@ -72,6 +70,7 @@
                     >
                         <template v-slot:activator="{ on, attrs }">
                             <button
+                                id="App-notification-button"
                                 v-on="on"
                                 v-bind="attrs"
                                 @click="onNotificationMenuSelect"
@@ -96,7 +95,9 @@
                             </button>
                         </template>
                         <v-card class="mx-auto" max-width="100%">
-                            <v-toolbar color="#002E6C" dark>
+                            <v-toolbar 
+                                id = "App-notification-toolbar"
+                                color="#002E6C" dark>
                                 <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
                                 <v-toolbar-title>Notifications</v-toolbar-title>
@@ -118,7 +119,8 @@
                                         >{{ notification.icon }}</v-icon
                                     >
                                     <template v-slot:activator>
-                                        <v-list-tile>
+                                        <v-list-tile
+                                            id="App-notification-vListTile">
                                             <v-list-tile-content
                                                 style="font-size: 85%"
                                                 v-text="
@@ -159,7 +161,9 @@
                 </v-toolbar-title>
                 <v-toolbar-title style="margin-left:2px !important" class="navbar-gray" v-if="authenticated">
                     <img style="height:40px; position:relative; top:2px" :src="require('@/assets/icons/user-no-circle.svg')"/>
-                    <span>{{ username }}</span>
+                    <span
+                      id="App-username-span"
+                    >{{ username }}</span>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
                     <v-btn
@@ -183,6 +187,7 @@
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="authenticated">
                     <v-btn
+                        id="App-b2cLogout-vbtn"
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogout"
                         class="mx-2"
@@ -192,6 +197,7 @@
                         <v-icon small color="white">fas fa-sign-out-alt</v-icon>
                     </v-btn>
                     <v-btn
+                        id="App-esecLogout-vbtn"
                         v-if="securityType === esecSecurityType"
                         @click="onLogout"
                         class="mx-2"
@@ -202,6 +208,11 @@
                     </v-btn>
                 </v-toolbar-title>
             </v-toolbar>
+                <v-alert
+                v-model='alert'
+                type="info">
+                    {{stateAlertMessage}}
+                </v-alert>
                 <div class="scenario-status" v-if="hasSelectedScenario">
                         <br>
                         <span>Scenario: </span>
@@ -309,6 +320,8 @@ export default class AppComponent extends Vue {
     @State(state => state.adminSiteSettingsModule.agencyLogo) agencyLogoBase64: string;
     @State(state => state.adminSiteSettingsModule.productLogo) productLogoBase64: string;
     @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
+    @State(state => state.alertModule.alertMessage) stateAlertMessage: string;
+    @State(state => state.alertModule.alert) stateAlert: boolean;
     
     @Action('logOut') logOutAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
@@ -334,6 +347,7 @@ export default class AppComponent extends Vue {
     @Action('getAgencyLogo') getAgencyLogoAction: any;
     @Action('getProductLogo') getProductLogoAction: any;
     @Action('getInventoryReports') getInventoryReportsAction: any;
+    @Action('setAlertMessage') setAlertMessageAction: any;
 
     drawer: boolean = false;
     latestNewsDate: string = '0001-01-01';
@@ -361,6 +375,7 @@ export default class AppComponent extends Vue {
     agencyLogo: string = '';
     productLogo: string = '';
     inventoryReportName: string = '';
+    alert: boolean = false;
 
     get container() {
         const container: any = {};
@@ -431,10 +446,25 @@ export default class AppComponent extends Vue {
     }
 
     @Watch('stateInventoryReportNames')
-        onStateInventoryReportNamesChanged(){
-            if(this.stateInventoryReportNames.length > 0)
-                this.inventoryReportName = this.stateInventoryReportNames[0]
+    onStateInventoryReportNamesChanged(){
+        if(this.stateInventoryReportNames.length > 0)
+            this.inventoryReportName = this.stateInventoryReportNames[0]
+    }
+    @Watch('stateAlertMessage')
+    onStateAlertMessageChanged(){
+        if(this.stateAlertMessage.trim() !== ''){
+            this.alert = true;
         }
+        else
+            this.alert = false;
+    }
+
+    @Watch('alert')
+    onAlertChanged(){
+        if(!this.alert){
+            this.setAlertMessageAction('');
+        }
+    }
 
     created() {
         // create a request handler
@@ -556,12 +586,12 @@ export default class AppComponent extends Vue {
         this.currentURL = this.$router.currentRoute.name;
 
         if(this.$config.agencyLogo.trim() === "")
-            this.agencyLogo = require(`@/assets/images/PennDOTLogo.svg`)
+            this.agencyLogo = require(`@/assets/images/generic/IAM_Main.jpg`)
         else
             this.agencyLogo = this.$config.agencyLogo
 
         if(this.$config.productLogo.trim() === "")
-            this.productLogo = require(`@/assets/images/BridgeCareLogo.svg`)
+            this.productLogo = require(`@/assets/images/generic/IAM_Banner.jpg`)
         else
             this.productLogo = this.$config.productLogo
 
@@ -651,19 +681,19 @@ export default class AppComponent extends Vue {
      */
     onAuthenticate() {
         this.$forceUpdate();
-        this.getNetworksAction();
-        this.getAttributesAction();
-        this.getAllUsersAction();
-        this.getAnnouncementsAction();
-        this.getUserCriteriaFilterAction();
-        if (this.username != null && this.username != '') {
-            this.getCurrentUserByUserNameAction(this.username);
-        }
-
+        this.getNetworksAction().then(() =>
+        this.getAttributesAction().then(() =>
+        this.getAllUsersAction().then(() =>
+        this.getAnnouncementsAction().then(() =>
+        this.getUserCriteriaFilterAction().then(() =>{
+            if (this.username != null && this.username != '') {
+                this.getCurrentUserByUserNameAction(this.username);
+            }
+        }).then(() =>
         //If these gets are placed before authorization, GetUserInformation() in EsecSecurity.cs will throw an error, as its HttpRequest will have no Authorization header!
-        this.getImplementationNameAction();
-        this.getAgencyLogoAction();
-        this.getProductLogoAction();
+        this.getImplementationNameAction().then(() =>
+        this.getAgencyLogoAction().then(() => {this.getProductLogoAction();}
+        )))))));
     }
 
     /**

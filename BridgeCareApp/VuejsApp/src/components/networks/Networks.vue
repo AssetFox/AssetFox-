@@ -4,14 +4,16 @@
             <v-flex xs8 class="ghd-constant-header">
                 <v-layout>
                     <v-layout column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Network</v-subheader>
+                        <v-subheader id="Networks-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Network</v-subheader>
                         <v-select :items='selectNetworkItems'
+                            id="Networks-selectNetwork-vselect"
                             outline  
                             v-model='selectNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
                     </v-layout>
                     <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
+                        id="Networks-addNetwork-vbtn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                         @click="onAddNetworkDialog">
                         Add Network
@@ -28,6 +30,7 @@
                             Key Attribute
                         </v-subheader>
                         <v-select
+                            id="Networks-KeyAttribute-vselect"
                             outline                           
                             class="ghd-select ghd-text-field ghd-text-field-border"
                             :disabled="!isNewNetwork"
@@ -39,6 +42,7 @@
                 <v-flex xs5>
                 <v-layout v-show="!isNewNetwork">
                     <v-select
+                        id="Networks-DataSource-vselect"
                         outline 
                         :items="selectDataSourceItems"  
                         style="margin-top: 18px !important;"                  
@@ -47,6 +51,7 @@
                         v-model="selectDataSourceId">
                     </v-select>  
                     <v-btn style="margin-top: 20px !important;" 
+                        id="Networks-SelectAllFromSource-vbtn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                         @click="selectAllFromSource">
                         Select All From Source
@@ -67,6 +72,7 @@
                                 </v-flex>
                                 <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
                                     <v-btn
+                                        id="Networks-EditSpatialWeightingEquation-vbtn"
                                         style="padding-right:20px !important;"
                                         class="edit-icon ghd-control-label"
                                         icon
@@ -76,7 +82,7 @@
                                     </v-btn>
                                 </v-flex>
                             </v-layout>
-                        <v-text-field outline class="ghd-text-field-border ghd-text-field" 
+                        <v-text-field id="Networks-EditSpatialWeightingEquation-vtextfield" outline class="ghd-text-field-border ghd-text-field" 
                            :disabled="!isNewNetwork" v-model="spatialWeightingEquationValue.expression"/>                         
                     </v-layout>
                     <v-layout v-show="hasStartedAggregation">
@@ -104,18 +110,18 @@
                     <v-layout column>
                         <div class='priorities-data-table' v-show="!isNewNetwork">
                             <v-layout justify-center>
-                                <v-btn flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                                <v-btn id="Networks-AddAll-vbtn" flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onAddAll">
                                     Add All
                                 </v-btn>
                                 <v-divider class="investment-divider" inset vertical>
                                 </v-divider>
-                                <v-btn flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                                <v-btn id="Networks-RemoveAll-vbtn" flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onRemoveAll">
                                     Remove All
                                 </v-btn>
                             </v-layout>
-                            <v-data-table :headers='dataSourceGridHeaders' :items='attributeRows'
+                            <v-data-table id="Networks-Attributes-vdatatable" :headers='dataSourceGridHeaders' :items='attributeRows'
                                 class='v-table__overflow ghd-table' item-key='id' select-all
                                 v-model="selectedAttributeRows"
                                 :must-sort='true'
@@ -123,14 +129,14 @@
                                 :pagination.sync="pagination">
                                 <template slot='items' slot-scope='props'>
                                     <td>
-                                        <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
+                                        <v-checkbox id="Networks-SelectAttribute-vcheckbox" hide-details primary v-model='props.selected'></v-checkbox>
                                     </td>
                                     <td>{{ props.item.name }}</td> 
                                     <td>{{ props.item.dataSource.type }}</td> 
                                 </template>
                             </v-data-table>    
                             <div class="text-xs-center pt-2">
-                                <v-pagination class="ghd-pagination ghd-button-text" 
+                                <v-pagination id="Networks-ChangeTablePage-vpagination" class="ghd-pagination ghd-button-text" 
                                     v-model="pagination.page" 
                                     :length="pages()"
                                     ></v-pagination>
@@ -143,17 +149,17 @@
         <!-- The Buttons  -->
         <v-flex xs12 v-show="hasSelectedNetwork">        
             <v-layout justify-center style="padding-top: 30px !important">
-                <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
+                <v-btn id="Networks-Cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
                     flat class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Aggregate
                 </v-btn>
-                <v-btn @click='onDeleteClick' :disabled='isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Delete
                 </v-btn>
-                <v-btn @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
+                <v-btn id="Networks-Create-vbtn" @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
                     v-show="isNewNetwork"
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Create

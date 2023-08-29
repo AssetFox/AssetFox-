@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.WorkQueue;
+namespace AppliedResearchAssociates.iAM.WorkQueue;
 
 public interface IWorkSpecification<T>
 {
@@ -13,5 +13,8 @@ public interface IWorkSpecification<T>
     T Metadata { get; } 
 
     void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken);
+
     void OnFault(IServiceProvider serviceProvider, string errorMessage);
+    void OnCompletion(IServiceProvider serviceProvider);
+    void OnUpdate(IServiceProvider serviceProvider);
 }

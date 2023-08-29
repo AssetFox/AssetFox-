@@ -87,9 +87,9 @@ namespace BridgeCareCore.Controllers
                     siulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 });
                 ImportCommittedProjectWorkItem workItem = new ImportCommittedProjectWorkItem(simulationId, excelPackage, filename,applyNoTreatment, UserInfo.Name, siulationName);
-                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, simulationId.ToString());
 
                 return Ok();
             }

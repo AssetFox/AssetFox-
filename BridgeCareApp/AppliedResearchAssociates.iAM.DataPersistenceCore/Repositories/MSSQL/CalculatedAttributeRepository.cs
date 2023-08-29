@@ -378,7 +378,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var noCriteriaExpressionAttributes = calcAttr.Equations
                     .Where(_ => _.CriteriaLibrary != null)
                     .Where(_ => string.IsNullOrEmpty(_.CriteriaLibrary.MergedCriteriaExpression));
-                if (nullCriteria.Count() + noCriteriaExpressionAttributes.Count() != 1) attributesWithErrors.Add(calcAttr.Attribute);
+                if (nullCriteria.Count() + noCriteriaExpressionAttributes.Count() != 1)
+                    attributesWithErrors.Add(calcAttr.Attribute);
             }
 
             if (attributesWithErrors.Count > 0)

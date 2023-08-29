@@ -60,7 +60,7 @@ namespace BridgeCareCore
             }));
 
             services.AddSecurityConfig(Configuration);
-            services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
+            services.AddSingleton<IClaimsTransformation, ClaimsTransformation>();
 
             services.AddSingleton(Configuration);
             services.AddControllers().AddNewtonsoftJson();
@@ -90,9 +90,6 @@ namespace BridgeCareCore
                 //.AddAuthorization();
 
             SetupReporting(services);
-            var reportLookup = new Dictionary<string, Type>();
-
-            reportLookup.Add("PAMSSummaryReport", typeof(PAMSSummaryReport));
 
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
             services.AddScoped<IAggregationService, AggregationService>();

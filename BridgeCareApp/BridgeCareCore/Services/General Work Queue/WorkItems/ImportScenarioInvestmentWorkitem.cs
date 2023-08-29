@@ -1,4 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.WorkQueue;
@@ -15,19 +15,19 @@ using BridgeCareCore.Controllers;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportScenarioInvestmentWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter, bool OverwriteBudgets, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportScenarioInvestmentWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, UserCriteriaDTO CurrentUserCriteriaFilter, bool OverwriteBudgets, string UserId, string InvestmentName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => SimulationId.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(SimulationId, WorkType.ImportScenarioInvestment);
 
         public DateTime StartTime { get; set; }
 
         public string WorkDescription => "Import Sceenario Investment";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioInvestment, DomainType = DomainType.Investment };
+            new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioInvestment, DomainType = DomainType.Simulation, DomainId = SimulationId };
 
-        public string WorkName => NetworkName;
+        public string WorkName => InvestmentName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<IInvestmentBudgetsService>();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, SimulationId);
+            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             var importResult = _committedProjectService.ImportScenarioInvestmentBudgetsFile(SimulationId, ExcelPackage, CurrentUserCriteriaFilter, OverwriteBudgets, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null)
             {
@@ -50,6 +50,25 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{InvestmentController.InvestmentError}::ImportScenarioInvestmentBudgetsExcelFile - {errorMessage}");
+        }
+
+        public void OnCompletion(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported investment: {WorkName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
+            {
+                Id = Metadata.DomainId,
+                WorkType = Metadata.WorkType
+            });
+        }
+
+        public void OnUpdate(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastFastWorkQueueUpdate, WorkId);
         }
     }
 }

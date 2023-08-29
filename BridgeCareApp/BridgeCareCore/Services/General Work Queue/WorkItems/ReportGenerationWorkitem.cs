@@ -17,10 +17,13 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Controllers;
+using AppliedResearchAssociates.iAM.Analysis;
+using Microsoft.Graph.Models;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeCareCore.Services
 {
-    public record ReportGenerationWorkitem(Guid scenarioId, string UserId, string scenarioName,  string reportName) : IWorkSpecification<WorkQueueMetadata>
+    public record ReportGenerationWorkitem(Guid scenarioId, string UserId, string scenarioName, string reportName, string criteria) : IWorkSpecification<WorkQueueMetadata>
 
     {
         public string WorkId => WorkQueueWorkIdFactory.CreateId(scenarioId, WorkType.ReportGeneration);
@@ -43,7 +46,7 @@ namespace BridgeCareCore.Services
             var _generator = scope.ServiceProvider.GetRequiredService<IReportGenerator>();
             var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             _queueLogger.UpdateWorkQueueStatus("Generating...");
-            var report = GenerateReport(reportName, ReportType.File, scenarioId.ToString());
+            var report = GenerateReport(reportName, ReportType.File, scenarioId.ToString(), criteria);
 
             if (report == null)
             {
@@ -52,8 +55,8 @@ namespace BridgeCareCore.Services
 
             // Handle a completed run with errors
             if (report.Errors.Any())
-            {
-                SendRealTimeMessage($"Failed to generate '{reportName}' on simulation '{scenarioName}'");
+            {                 
+                SendRealTimeMessage($"Failed to generate '{reportName}' on simulation '{scenarioName}':: {report.Status}");
 
                 _log.Information($"Failed to generate '{reportName}'");
 
@@ -77,7 +80,7 @@ namespace BridgeCareCore.Services
                 SendRealTimeMessage($"Failed to create report repository index on {reportName}");
             }
 
-            IReport GenerateReport(string reportName, ReportType expectedReportType, string parameters)
+            IReport GenerateReport(string reportName, ReportType expectedReportType, string scenarioId, string criteria)
             {
                 //generate report
                 var reportObject = _generator.Generate(reportName).Result;
@@ -102,10 +105,8 @@ namespace BridgeCareCore.Services
                 // Run the report as long as it does not have any existing errors (i.e., failure on generation)
                 // Note:  If report was switched to a FailureReport previously, this will not run again
                 if (!reportObject.Errors.Any())
-                {
-                    //SendRealTimeMessage($"Running {reportName}.");
-                    reportObject.Run(parameters, cancellationToken, _queueLogger).Wait();
-                    //SendRealTimeMessage($"Completed running {reportName}");
+                {                    
+                    reportObject.Run(scenarioId, criteria, cancellationToken, _queueLogger).Wait();                 
                 }
 
                 //return object
@@ -149,7 +150,7 @@ namespace BridgeCareCore.Services
         public void OnCompletion(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
-            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();            
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully generated {reportName} report for scenario: {scenarioName}");
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
             {

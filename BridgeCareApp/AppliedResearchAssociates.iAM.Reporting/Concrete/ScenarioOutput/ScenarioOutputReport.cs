@@ -35,6 +35,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Criteria { get; set; }
+
         public ScenarioOutputReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork;
@@ -47,14 +49,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = false;
         }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
             // TODO:  Don't regenerate the report if it has already been generated AND the date on the file was after the LastRun date of the
             // scenario.
 
             // Determine the Guid for the simulation
-            if (!Guid.TryParse(parameters, out Guid simulationGuid))
+            if (!Guid.TryParse(scenarioId, out Guid simulationGuid))
             {
                 Errors.Add("Simulation ID could not be parsed to a Guid");
                 IndicateError();

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.Logging;
@@ -23,7 +24,8 @@ using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.Graph.Models;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeCareCore.Controllers
 {
@@ -52,10 +54,8 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetHtml(string reportName)
         {
             // NOTE:  This might be useful:  https://weblog.west-wind.com/posts/2013/dec/13/accepting-raw-request-body-content-with-aspnet-web-api
-
-            //SendRealTimeMessage($"Starting to process {reportName}.");
+                        
             var parameters = await GetParameters();
-
             var report = await GenerateReport(reportName, ReportType.HTML, parameters);
 
             if (report == null)
@@ -111,11 +111,12 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetFile(string reportName)
         {
             try
-            {
+            { 
                 var parameters = await GetParameters();
                 var scenarioName = "";
                 var scenarioId = new Guid();
-                if (Guid.TryParse(parameters, out scenarioId))
+                var id = parameters.SelectToken("scenarioId").ToObject<string>()?.ToString();
+                if (Guid.TryParse(id, out scenarioId))
                 {
                     await Task.Factory.StartNew(() =>
                     {
@@ -125,7 +126,8 @@ namespace BridgeCareCore.Controllers
                 else
                     scenarioId = Guid.NewGuid();
 
-                ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName);
+                var criteria = parameters.SelectToken("expression").ToObject<string>()?.ToString();
+                ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName, criteria);
                 var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, scenarioId.ToString());
@@ -194,22 +196,26 @@ namespace BridgeCareCore.Controllers
         #endregion
 
         #region "Internal functions"
-        private async Task<string> GetParameters()
+        private async Task<JObject> GetParameters()
         {
             // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
-            var parameters = string.Empty;
+            var data = string.Empty;
+            var parameters = new List<string>();
             if (Request.ContentLength > 0)
             {
                 using var reader = new StreamReader(Request.Body, Encoding.UTF8);
-                parameters = await reader.ReadToEndAsync();
-            }
-
-            return parameters;
+                data = await reader.ReadToEndAsync();
+            }            
+            var parameterObj = JObject.Parse(data);
+            
+            return parameterObj;
         }
 
-        private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType, string parameters)
+        private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType, JObject parameters)
         {
-            var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(parameters);
+            var simulationId = parameters.SelectToken("scenarioId").ToObject<IEnumerable<object>>().FirstOrDefault()?.ToString();
+            var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+            var criteria = parameters.SelectToken("expression").ToObject<IEnumerable<object>>().FirstOrDefault()?.ToString();
             //generate report
             var reportObject = await _generator.Generate(reportName);
 
@@ -235,7 +241,7 @@ namespace BridgeCareCore.Controllers
             if (!reportObject.Errors.Any())
             {
                 //SendRealTimeMessage($"Running {reportName}.");
-                await reportObject.Run(parameters);
+                await reportObject.Run(simulationId, criteria);
                 //SendRealTimeMessage($"Completed running {reportName}");
             }
 
@@ -260,29 +266,7 @@ namespace BridgeCareCore.Controllers
                 MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             };
         }
-
-        private string createReportIndexRepository(IReport reportObject)
-        {
-            var functionRetrunValue = "";
-
-            //configure report index dto
-            var reportIndexDto = new ReportIndexDTO()
-            {
-                Id = reportObject.ID,
-                SimulationId = reportObject.SimulationID,
-                Type = reportObject.ReportTypeName,
-                Result = reportObject.Results,
-                ExpirationDate = DateTime.Now.AddDays(30),
-            };
-
-            ////create report index repository
-            var isSuccess = this.UnitOfWork.ReportIndexRepository.Add(reportIndexDto);
-            if (isSuccess == true) { functionRetrunValue = reportIndexDto.Id.ToString(); }
-
-            //return value
-            return functionRetrunValue;
-        }
-
+        
         private byte[] FetchFromFileLocation(string filePath)
         {
             if (System.IO.File.Exists(filePath) == false)
@@ -294,7 +278,6 @@ namespace BridgeCareCore.Controllers
             byte[] summaryReportData = System.IO.File.ReadAllBytes(filePath);
             return summaryReportData;
         }
-
 
         private void SendRealTimeMessage(string message) =>
             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, message);

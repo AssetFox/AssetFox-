@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
@@ -11,10 +12,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
     public class BridgesTreatments
     {
         private ReportHelper _reportHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public BridgesTreatments()
+        public BridgesTreatments(IUnitOfWork unitOfWork)
         {
-            _reportHelper = new ReportHelper();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet)

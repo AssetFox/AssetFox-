@@ -1,14 +1,30 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.CalculateEvaluate;
+using System.Text.RegularExpressions;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Common;
+using System.Data;
+using MoreLinq;
+using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services
 {
     public class ReportHelper
     {
+        private readonly IUnitOfWork _unitOfWork;
+        private ILog _log;
+
+        public ReportHelper(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        }
+
         public T CheckAndGetValue<T>(IDictionary itemsArray, string itemName)
         {
             var itemValue = default(T);
@@ -157,5 +173,181 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
             var treatedSections = simulationYearDetail.Assets.Where(section => section.TreatmentCause is not TreatmentCause.NoSelection);
             return treatedSections.ToList();
         }
-    }
+
+        /// <summary>
+        /// Validate criteria expression and filter the reportOutputData based on given criteria,
+        /// keep only criteria specific assets in InitialAssetSummaries and Years' Assets
+        /// </summary>
+        /// <param name="reportOutputData"></param>
+        /// <param name="networkId"></param>
+        /// <param name="criteria"></param>
+        /// <returns>CriteriaValidationResult</returns>
+        public CriteriaValidationResult FilterReportOutputData(SimulationOutput reportOutputData, Guid networkId, string criteria)
+        {
+            try
+            {
+                _log = new LogNLog();
+                CheckAttributes(criteria);
+
+                var modifiedExpression = criteria
+                    .Replace("[", "")
+                    .Replace("]", "")
+                    .Replace("@", "")
+                    .Replace("|", "'")
+                    .ToUpper();
+                var pattern = "\\[[^\\]]*\\]";
+                var rg = new Regex(pattern);
+                var match = rg.Matches(criteria);
+                var attributeNames = new List<string>();
+                foreach (Match m in match)
+                {
+                    attributeNames.Add(m.Value.Substring(1, m.Value.Length - 2));
+                }
+                                
+                var compiler = new CalculateEvaluateCompiler();
+                var attributes = _unitOfWork.AttributeRepo.GetAttributesWithNames(attributeNames);
+                attributes.ForEach(attribute =>
+                {
+                    compiler.ParameterTypes[attribute.Name] = attribute.Type == "NUMBER"
+                        ? CalculateEvaluateParameterType.Number
+                        : CalculateEvaluateParameterType.Text;
+                });
+                compiler.GetEvaluator(modifiedExpression);                               
+
+                var customAttributes = new List<(string name, string datatype)>();
+                foreach (var attribute in attributes)
+                {
+                    customAttributes.Add((attribute.Name, attribute.Type));
+                }
+
+                // Get assets and update reportOutputData by filtering
+                var assetIds = GetAssetIds(modifiedExpression, customAttributes, networkId);                
+                var count = reportOutputData.InitialAssetSummaries.RemoveAll(_ => !assetIds.Contains(_.AssetId));
+                foreach (var year in reportOutputData.Years)
+                {
+                   year.Assets.RemoveAll(_ => !assetIds.Contains(_.AssetId));
+                }
+
+                return new CriteriaValidationResult
+                {
+                    IsValid = true,
+                    ValidationMessage = "Success"
+                };
+            }
+            catch (CalculateEvaluateException e)
+            {
+                _log.Error($"{e.Message}\r\n{e.StackTrace}");
+                return new CriteriaValidationResult { IsValid = false, ValidationMessage = e.Message };
+            }
+            catch (Exception e)
+            {
+                _log.Error($"{e.Message}\r\n{e.StackTrace}");
+                return new CriteriaValidationResult { IsValid = false, ValidationMessage = e.Message };
+            }
+        }
+
+        private void CheckAttributes(string target)
+        {
+            var attributes = _unitOfWork.AttributeRepo.GetAllAttributesAbbreviated();
+            target = target.Replace('[', '?');
+            foreach (var allowedAttribute in attributes.Where(allowedAttribute => target.IndexOf("?" + allowedAttribute.Name + "]", StringComparison.Ordinal) >= 0))
+            {
+                target = allowedAttribute.Type == "STRING"
+                    ? target.Replace("?" + allowedAttribute.Name + "]", "[@" + allowedAttribute.Name + "]")
+                    : target.Replace("?" + allowedAttribute.Name + "]", "[" + allowedAttribute.Name + "]");
+            }
+
+            if (target.Count(f => f == '?') <= 0)
+            {
+                return;
+            }
+
+            var start = target.IndexOf('?');
+            var end = target.IndexOf(']');
+            _log.Error("Unsupported Attribute " + target.Substring(start + 1, end - 1));
+            throw new InvalidOperationException("Unsupported Attribute " + target.Substring(start + 1, end - 1));
+        }
+
+        private List<Guid> GetAssetIds(string expression, List<(string name, string dataType)> attributes, Guid networkId)
+        {
+            var assetIds = new List<Guid>();
+            var flattenedDataTable = CreateFlattenedDataTable(attributes);
+
+            var attributeNames = new List<string>();
+            foreach (var attribute in attributes)
+            {
+                attributeNames.Add(attribute.name);
+            }
+
+            var results =
+                _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(networkId,
+                attributeNames);
+            var valuePerAttributeNamePerMaintainableAssetId = results
+                .GroupBy(_ => _.MaintainableAssetId, _ => _)
+                .ToDictionary(_ => _.Key, aggregatedResults =>
+                {
+                    var value = aggregatedResults.ToDictionary(_ => _.Attribute.Name, _ =>
+                    {
+                        var data = _.Attribute.Type == AttributeTypeNames.Number
+                            ? _.NumericValue?.ToString()
+                            : _.TextValue;
+
+                        var type = _.Attribute.Type;
+                        return (data, type);
+                    });
+                    return value;
+                });            
+            AddToFlattenedDataTable(flattenedDataTable, valuePerAttributeNamePerMaintainableAssetId);
+            var dataRows = flattenedDataTable.Select(expression);            
+            assetIds = dataRows.Select(_ => (Guid)_.ItemArray[0]).ToList();
+
+            return assetIds.ToList();
+        }
+
+        private DataTable CreateFlattenedDataTable(List<(string name, string dataType)> attributeNames)
+        {
+            var flattenedDataTable = new DataTable("FlattenedDataTable");
+            flattenedDataTable.Columns.Add("MaintainableAssetId", typeof(Guid));
+            attributeNames.ForEach(attributeName =>
+            {
+                if (!flattenedDataTable.Columns.Contains(attributeName.name))
+                {
+                    if (attributeName.dataType.Equals("NUMBER", StringComparison.OrdinalIgnoreCase))
+                    {
+                        flattenedDataTable.Columns.Add(attributeName.name, typeof(double));
+                    }
+                    else
+                    {
+                        flattenedDataTable.Columns.Add(attributeName.name, typeof(string));
+                    }
+                }
+            });
+            return flattenedDataTable;
+        }
+
+        private void AddToFlattenedDataTable(DataTable flattenedDataTable,
+            Dictionary<Guid, Dictionary<string, (string data, string type)>> valuePerAttributeNamePerMaintainableAssetId) =>
+            valuePerAttributeNamePerMaintainableAssetId.Keys.ForEach(maintainableAssetId =>
+            {
+                var row = flattenedDataTable.NewRow();
+                row["MaintainableAssetId"] = maintainableAssetId;
+                valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId].Keys.ForEach(attributeName =>
+                {
+                    var currData = valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId][attributeName];
+
+                    if (currData.type.Equals("NUMBER", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (double.TryParse(valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId][attributeName].data, out var res))
+                        {
+                            row[attributeName] = res;
+                        }
+                    }
+                    else
+                    {
+                        row[attributeName] = valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId][attributeName].data;
+                    }
+                });
+                flattenedDataTable.Rows.Add(row);
+            });
+    }    
 }

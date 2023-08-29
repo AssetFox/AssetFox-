@@ -24,8 +24,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// <summary>
         /// Runs the report, populating all read only fields
         /// </summary>
-        /// <param name="parameters">JSON representation of data to be projected in report</param>
-        Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null);
+        ///<param name="scenarioId"></param>
+        ///<param name="criteria"></param>
+        ///<param name="cancellationToken"></param>
+        ///<param name="workQueueLog"></param>
+        Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null);
 
         /// <summary>
         /// Report results in format specified by ReportType
@@ -59,5 +62,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// Status message to be shown in UI
         /// </summary>
         string Status { get; }
+
+        /// <summary>
+        /// Report criteria to filter report output based on criteria compatible assets
+        /// </summary>
+        string Criteria { get; set; }
     }
 }

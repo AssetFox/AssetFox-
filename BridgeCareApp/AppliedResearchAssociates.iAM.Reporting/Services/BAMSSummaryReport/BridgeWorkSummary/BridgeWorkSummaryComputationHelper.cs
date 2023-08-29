@@ -2,15 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
     public class BridgeWorkSummaryComputationHelper
     {
         private ReportHelper _reportHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public BridgeWorkSummaryComputationHelper()
+        public BridgeWorkSummaryComputationHelper(IUnitOfWork unitOfWork)
         {
-            _reportHelper = new ReportHelper();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public int TotalInitialPoorBridgesCount(SimulationOutput reportOutputData) => CountAndAreaOfBridges.GetTotalInitialPoorCount(reportOutputData.InitialAssetSummaries);

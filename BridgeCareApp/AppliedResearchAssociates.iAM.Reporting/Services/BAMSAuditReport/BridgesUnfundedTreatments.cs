@@ -4,6 +4,8 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using System;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
@@ -12,11 +14,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         private ReportHelper _reportHelper;
         private BridgesTreatments _bridgesTreatments;
         private const string BRIDGE_FUNDING = "Bridge Funding";
+        private readonly IUnitOfWork _unitOfWork;
 
-        public BridgesUnfundedTreatments()
+        public BridgesUnfundedTreatments(IUnitOfWork unitOfWork)
         {
-            _reportHelper = new ReportHelper();
-            _bridgesTreatments = new BridgesTreatments();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _reportHelper = new ReportHelper(_unitOfWork);
+            _bridgesTreatments = new BridgesTreatments(_unitOfWork);
         }
 
         public void FillDataInWorksheet(ExcelWorksheet worksheet, CurrentCell currentCell, BridgeDataModel bridgeDataModel)

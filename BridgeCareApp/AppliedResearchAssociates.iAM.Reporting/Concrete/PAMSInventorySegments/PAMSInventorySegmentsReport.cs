@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public List<string> Errors { get; private set; }
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
-
+        public string Criteria { get; set; }
         private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", Route = 0, Segment = 0 };
 
         private Dictionary<string, string> _sectionData;
@@ -59,10 +59,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
 
-            var sectionIds = Parse(parameters);
+            var sectionIds = Parse(scenarioId);
             _sectionData = GetAsset(sectionIds);
 
             var crspieces = _sectionData.FirstOrDefault(_ => _.Key == "CRS_Data").Value.Split(new[] { '_' }, 4);

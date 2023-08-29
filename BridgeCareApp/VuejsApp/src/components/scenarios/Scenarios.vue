@@ -511,10 +511,14 @@
                 </v-tabs-items>
             </v-card>
         </v-flex>
-        <ConfirmAnalysisRunAlert
-            :dialogData="confirmAnalysisRunAlertData"
-            @submit="onConfirmAnalysisRunAlertSubmit"
+         <ConfirmAnalysisRunAlert
+            :dialogData="onSecondConfirmAnalysisRunAlertData"
+            @submit="onSecondConfirmAnalysisRunAlertSubmit"
         />
+         <ConfirmAnalysisRunAlertWithButtons
+            :dialogDataWithButtons="confirmAnalysisRunAlertData"
+            @submit="onConfirmAnalysisRunAlertSubmit"
+            />
 
         <ConfirmConvertToRelationalAlert
             :dialogData="ConfirmConvertJsonToRelationalData"
@@ -562,7 +566,6 @@
             :dialogData="alertDataForDeletingCommittedProjects"
             @submit="onDeleteCommittedProjectsSubmit"
         />
-
         <CommittedProjectsFileUploaderDialog
             :showDialog="showImportExportCommittedProjectsDialog"
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
@@ -587,8 +590,10 @@ import {
     WorkType,
 } from '@/shared/models/iAM/scenario';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import { AlertData, AlertDataWithButtons, emptyAlertData, emptyAlertDataWithButtons } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
+import AlertWithButtons from '@/shared/modals/AlertWithButtons.vue';
+import { emptySampleButton } from '@/shared/models/modals/alert-data';
 import ReportsDownloaderDialog from '@/components/scenarios/scenarios-dialogs/ReportsDownloaderDialog.vue';
 import ShowAggregationDialog from '@/components/scenarios/scenarios-dialogs/ShowAggregationDialog.vue';
 import {
@@ -639,6 +644,7 @@ import ScenarioService from '@/services/scenario.service';
         ConfirmCancelAlert: Alert,
         ConfirmRollupAlert: Alert,
         ConfirmAnalysisRunAlert: Alert,
+        ConfirmAnalysisRunAlertWithButtons: AlertWithButtons,
         ConfirmConvertToRelationalAlert: Alert,
         ReportsDownloaderDialog,
         CreateScenarioDialog,
@@ -648,6 +654,7 @@ import ScenarioService from '@/services/scenario.service';
         ShowAggregationDialog,
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
         Alert,
+        AlertWithButtons,
         GhdShareSvg,
         GhdStarSvg,
         GhdQueueSvg
@@ -689,6 +696,7 @@ export default class Scenarios extends Vue {
     @Action('cancelWorkQueueItem') cancelWorkQueueItemAction: any;
     @Action('cancelFastQueueItem') cancelFastQueueItemAction: any;
     @Action('runSimulation') runSimulationAction: any;
+    @Action('validateSimulation') validateSimulationAction: any;
     @Action('migrateLegacySimulationData')
     migrateLegacySimulationDataAction: any;
     @Action('updateSimulationAnalysisDetail')
@@ -928,7 +936,8 @@ export default class Scenarios extends Vue {
     reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(
         emptyReportsDownloadDialogData,
     );
-    confirmAnalysisRunAlertData: AlertData = clone(emptyAlertData);
+    confirmAnalysisRunAlertData: AlertDataWithButtons = clone(emptyAlertDataWithButtons);
+    onSecondConfirmAnalysisRunAlertData: AlertData = clone(emptyAlertData);
     shareScenarioDialogData: ShareScenarioDialogData = clone(
         emptyShareScenarioDialogData,
     );
@@ -1397,6 +1406,8 @@ export default class Scenarios extends Vue {
     onShowConfirmAnalysisRunAlert(scenario: Scenario) {
         this.selectedScenario = clone(scenario);
 
+        let sampleButton = emptySampleButton;
+        sampleButton.label  = "Run Pre-Checks" + "Cancel" + "Continue";
         this.confirmAnalysisRunAlertData = {
             showDialog: true,
             heading: 'Warning',
@@ -1404,18 +1415,50 @@ export default class Scenarios extends Vue {
             message:
                 'Only one simulation can be run at a time. The model run you are about to queue will be ' +
                 'executed in the order in which it was received.',
+            buttons: [sampleButton.label]
         };
     }
 
-    onConfirmAnalysisRunAlertSubmit(submit: boolean) {
-        this.confirmAnalysisRunAlertData = clone(emptyAlertData);
-
-        if (submit && this.selectedScenario.id !== getBlankGuid()) {
-            this.runSimulationAction({
-                networkId: this.selectedScenario.networkId,
-                scenarioId: this.selectedScenario.id,
-            }).then(() => (this.selectedScenario = clone(emptyScenario)));
+    onConfirmAnalysisRunAlertSubmit(submit: string) {
+        var preCheckResults;
+        this.confirmAnalysisRunAlertData = clone(emptyAlertDataWithButtons);
+        if(submit == "pre-checks"){
+                if (submit && this.selectedScenario.id !== getBlankGuid()) {
+                    ScenarioService.upsertValidateSimulation(this.selectedScenario.networkId, this.selectedScenario.id).then((response: AxiosResponse) => {
+                    if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                        preCheckResults = response;
+                        console.log(preCheckResults.data[0].status);
+                        this.addSuccessNotificationAction({message: "Simulation pre-checks started",});
+                    }
+                });
+            }
+                     if(submit) {
+                        (this.selectedScenario = clone(emptyScenario));
+                        this.onSecondConfirmAnalysisRunAlertData = {
+                        showDialog: true,
+                        heading: 'Warning',
+                        choice: true,
+                        message:
+                            'The following errors have been returned: ' + 
+                            ' You can choose to continue or cancel the operation',
+                        }
+                    }
+             }
+        else if(submit == "continue") {
+            if (submit && this.selectedScenario.id !== getBlankGuid()) {
+                this.runSimulationAction({
+                    networkId: this.selectedScenario.networkId,
+                    scenarioId: this.selectedScenario.id,
+                }).then(() => (this.selectedScenario = clone(emptyScenario)));
+            }
         }
+        else if(submit == "cancel") {
+            //this.onSecondConfirmAnalysisRunAlertSubmit();
+        }
+    }
+
+    onSecondConfirmAnalysisRunAlertSubmit(response: AxiosResponse) {
+        console.log(response);
     }
 
     onShowConfirmConvertJsonToRelationalAlert(scenario: Scenario) {

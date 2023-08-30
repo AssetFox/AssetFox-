@@ -51,49 +51,62 @@
                             </v-layout>
                         </div>
                         <v-card-text
-                            :class="{
-                                'clauses-card-dialog':
-                                    !criteriaEditorData.isLibraryContext,
-                                'clauses-card-library':
-                                    criteriaEditorData.isLibraryContext,
-                            }"
-                        >
-                            <div v-for="(clause, index) in subCriteriaClauses">
-                                <v-textarea style="padding-left:0px;"
-                                    :class="{
-                                        'textarea-focused':
-                                            index ===
-                                            selectedSubCriteriaClauseIndex,
-                                        'clause-textarea':
-                                            index !=
-                                            selectedSubCriteriaClauseIndex,
-                                    }"
-                                    :value="clause"
-                                    @click="
-                                        onClickSubCriteriaClauseTextarea(
-                                            clause,
-                                            index,
-                                        )
-                                    "
-                                    box
-                                    class="ghd-control-text"
-                                    full-width
-                                    no-resize
-                                    readonly
-                                    rows="3"
-                                >
-                                    <template slot="append">
-                                        <v-btn
-                                            @click="onRemoveSubCriteria(index)"
-                                            class="ghd-blue"
-                                            icon
-                                        >
-                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                                        </v-btn>
-                                    </template>
-                                </v-textarea>
-                            </div>
-                        </v-card-text>
+    :class="{
+        'clauses-card-dialog': 
+            !criteriaEditorData.isLibraryContext,
+        'clauses-card-library': 
+            criteriaEditorData.isLibraryContext,
+    }"
+>
+<v-textarea
+    v-if="isAndConjunction"
+    style="padding-left:0px;"
+    :class="getClassForTextarea(-1)"
+    :value="getValueForTextarea(-1)"
+    @click="onClickSubCriteriaClauseTextarea(subCriteriaClauses.join(' '), -1)"
+    box
+    class="ghd-control-text"
+    full-width
+    no-resize
+    readonly
+    rows="3"
+>
+    <template slot="append">
+        <v-btn
+            @click="onRemoveSubCriteria(selectedSubCriteriaClauseIndex)"
+            class="ghd-blue"
+            icon
+        >
+            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+        </v-btn>
+    </template>
+</v-textarea>
+<div v-else>
+    <div v-for="(clause, index) in subCriteriaClauses" :key="index">
+        <v-textarea style="padding-left:0px;"
+            :class="getClassForTextarea(index)"
+            :value="getValueForTextarea(index)"
+            @click="onClickSubCriteriaClauseTextarea(clause, index)"
+            box
+            class="ghd-control-text"
+            full-width
+            no-resize
+            readonly
+            rows="3"
+        >
+            <template slot="append">
+                <v-btn
+                    @click="onRemoveSubCriteria(index)"
+                    class="ghd-blue"
+                    icon
+                >
+                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                </v-btn>
+            </template>
+        </v-textarea>
+    </div>
+</div>
+</v-card-text>
                         <v-card-actions
                             :class="{
                                 'validation-actions':
@@ -486,6 +499,28 @@ export default class CriteriaEditor extends Vue {
         }
     }
 
+    get isAndConjunction() {
+        return this.selectedConjunction === 'AND';
+    }
+
+    getClassForTextarea(index: number) {
+        if (this.isAndConjunction) {
+            return {
+                'textarea-focused': this.selectedSubCriteriaClauseIndex === -1,
+                'clause-textarea': this.selectedSubCriteriaClauseIndex !== -1
+            };
+        } else {
+            return {
+                'textarea-focused': index === this.selectedSubCriteriaClauseIndex,
+                'clause-textarea': index !== this.selectedSubCriteriaClauseIndex
+            };
+        }
+    }
+
+    getValueForTextarea(index: number) {
+        return this.isAndConjunction ? this.subCriteriaClauses.join(' ') : this.subCriteriaClauses[index];
+    }
+
     setQueryBuilderRules() {
         this.queryBuilderRules = this.stateAttributes.map(
             (attribute: Attribute) => ({
@@ -790,7 +825,7 @@ export default class CriteriaEditor extends Vue {
             this.invalidSubCriteriaMessage = 'No criteria to evaluate';
             return;
         }
-
+        
         this.subCriteriaClauses = update(
             this.selectedSubCriteriaClauseIndex,
             criteria,

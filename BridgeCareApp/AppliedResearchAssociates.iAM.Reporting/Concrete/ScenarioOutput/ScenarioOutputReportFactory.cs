@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         public string Name => "ScenarioOutput";
 
-        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService, string suffix = "")
         {
             var report = new ScenarioOutputReport(uow, Name, results, hubService);
             return report;

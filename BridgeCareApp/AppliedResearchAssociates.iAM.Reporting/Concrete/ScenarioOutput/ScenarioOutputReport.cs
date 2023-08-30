@@ -35,6 +35,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Suffix => throw new NotImplementedException();
+
         public string Criteria { get; set; }
 
         public ScenarioOutputReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)

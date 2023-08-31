@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
@@ -131,21 +132,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var scenarioBudgetPriorityEntities = new List<ScenarioBudgetPriorityEntity>();
             foreach (var budgetPriority in dto.BudgetPriorities)
             {
-                var budgetPriorityEntity = budgetPriority.ToScenarioEntity(dto.Id);
+                var budgetPriorityEntity = budgetPriority.ToScenarioEntityWithCriterionLibraryJoin(dto.Id);
                 scenarioBudgetPriorityEntities.Add(budgetPriorityEntity);
             }
             var scenarioCashFlowRuleEntities = new List<ScenarioCashFlowRuleEntity>();
             foreach (var cashFlowRule in dto.CashFlowRules)
             {
-                var cashFlowRuleEntity = cashFlowRule.ToScenarioEntity(dto.Id);
+                var cashFlowRuleEntity = cashFlowRule.ToScenarioEntityWithCriterionLibraryJoin(dto.Id);
+                foreach (var distributionRule in cashFlowRule.CashFlowDistributionRules)
+                {
+                    var distributionRuleEntity = CashFlowDistributionRuleMapper.ToScenarioEntity(distributionRule, cashFlowRule.Id);
+                    cashFlowRuleEntity.ScenarioCashFlowDistributionRules.Add(distributionRuleEntity);
+                }
                 scenarioCashFlowRuleEntities.Add(cashFlowRuleEntity);
             }
             var committedProjectEntities = new List<CommittedProjectEntity>();
-
             foreach (var committedProject in dto.CommittedProjects)
             {
                 var committedProjectEntity = committedProject.ToEntity(attributes, networkKeyAttribute);
                 committedProjectEntities.Add(committedProjectEntity);
+            }
+            var scenarioPerformanceCurves = new List<ScenarioPerformanceCurveEntity>();
+            foreach (var performanceCurve in dto.PerformanceCurves)
+            {
+                var attributeName = performanceCurve.Attribute;
+                var attribute = attributes.FirstOrDefault(a => a.Name == attributeName);
+                var performanceCurveEntity = performanceCurve.ToScenarioEntityWithCriterionLibraryJoinAndEquationJoin(dto.Id, attribute.Id);
+                scenarioPerformanceCurves.Add(performanceCurveEntity);
             }
             var userJoins = new List<SimulationUserEntity>();
             foreach (var user in dto.Users)
@@ -153,7 +166,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var userJoin = user.ToEntity(dto.Id);
                 userJoins.Add(userJoin);
             }
-            
             var entity = new SimulationEntity
             {
                 Name = dto.Name,
@@ -166,6 +178,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CalculatedAttributes = scenarioCalculatedAttributeEntities,
                 ScenarioTargetConditionalGoals = scenarioTargetConditionGoalEntities,
                 ScenarioDeficientConditionGoals = scenarioDeficientConditionGoals,
+                PerformanceCurves = scenarioPerformanceCurves,
                 RemainingLifeLimits = scenarioRemainingLifeLimitEntities,
                 BudgetPriorities = scenarioBudgetPriorityEntities,
                 CashFlowRules = scenarioCashFlowRuleEntities,

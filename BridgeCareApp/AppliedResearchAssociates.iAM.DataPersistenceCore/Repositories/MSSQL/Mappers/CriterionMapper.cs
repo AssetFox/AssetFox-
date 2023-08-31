@@ -24,6 +24,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsSingleUse = dto.IsSingleUse
             };
 
+        public static CriterionLibraryEntity ToSingleUseEntity(this CriterionLibraryDTO dto)
+        {
+            var entity = dto.ToEntity();
+            entity.IsSingleUse = true;
+            return entity;
+        }
+
         public static CriterionLibraryDTO ToDto(this CriterionLibraryEntity entity) =>
             new CriterionLibraryDTO
             {

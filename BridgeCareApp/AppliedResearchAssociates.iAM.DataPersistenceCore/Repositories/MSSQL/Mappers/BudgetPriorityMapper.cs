@@ -6,7 +6,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 using MoreLinq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -31,6 +33,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 PriorityLevel = dto.PriorityLevel,
                 Year = dto.Year
             };
+
+        public static ScenarioBudgetPriorityEntity ToScenarioEntityWithCriterionLibraryJoin(this BudgetPriorityDTO dto, Guid simulationId)
+        {
+
+            var entity = ToScenarioEntity(dto, simulationId);
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
+            {
+                var criterionLibrary = new CriterionLibraryEntity
+                {
+                    MergedCriteriaExpression = criterionLibraryDto.MergedCriteriaExpression,
+                    Id = criterionLibraryDto.Id,
+                    Name = criterionLibraryDto.Name,
+                    CreatedBy = criterionLibraryDto.Owner,
+                };
+
+                var join = new CriterionLibraryScenarioBudgetPriorityEntity
+                {
+                    ScenarioBudgetPriorityId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                entity.CriterionLibraryScenarioBudgetPriorityJoin = join;
+            }
+            return entity;
+        }
+
 
         public static BudgetPriorityEntity ToLibraryEntity(this BudgetPriorityDTO dto, Guid libraryId) =>
             new BudgetPriorityEntity

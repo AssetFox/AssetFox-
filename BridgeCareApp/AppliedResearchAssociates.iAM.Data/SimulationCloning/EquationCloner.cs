@@ -8,11 +8,11 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static EquationDTO Clone(EquationDTO equation, Guid ownerId)
         {
-             var clone = new EquationDTO
-             {
-                 Id = Guid.NewGuid(),
-                 Expression = equation.Expression,
-             };
+            var clone = new EquationDTO
+            {
+                Id = equation.Id == Guid.Empty ? Guid.Empty : Guid.NewGuid(),
+                Expression = equation.Expression,
+            };
             return clone;
         }
         internal static List<EquationDTO> CloneList(IEnumerable<EquationDTO> equations, Guid ownerId)

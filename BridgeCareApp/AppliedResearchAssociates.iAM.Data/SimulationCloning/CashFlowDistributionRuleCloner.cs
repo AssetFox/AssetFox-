@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
@@ -17,5 +18,16 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             return clone;
         }
 
+        internal static List<CashFlowDistributionRuleDTO> CloneList(IEnumerable<CashFlowDistributionRuleDTO> cashFlowDistrubtionRules)
+        {
+            var clone = new List<CashFlowDistributionRuleDTO>();
+            foreach (var cashFlowRule in cashFlowDistrubtionRules)
+            {
+                var childClone = Clone(cashFlowRule);
+                clone.Add(childClone);
+            }
+            return clone;
+
+        }
     }
 }

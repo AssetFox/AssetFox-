@@ -6,6 +6,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DTOs.Static;
+
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -20,7 +23,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static ScenarioCashFlowRuleEntity ToScenarioEntity(this CashFlowRuleDTO dto, Guid simulationId) =>
-            new ScenarioCashFlowRuleEntity { Id = dto.Id, Name = dto.Name, LibraryId = dto.LibraryId, IsModified = dto.IsModified, SimulationId = simulationId };
+            new ScenarioCashFlowRuleEntity
+            {
+                Id = dto.Id, Name = dto.Name,
+                LibraryId = dto.LibraryId,
+                IsModified = dto.IsModified,
+                SimulationId = simulationId
+            };
+
+        public static ScenarioCashFlowRuleEntity ToScenarioEntityWithCriterionLibraryJoin(this CashFlowRuleDTO dto, Guid simulationId)
+        {
+
+            var entity = ToScenarioEntity(dto, simulationId);
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
+            {
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity();
+
+                var join = new CriterionLibraryScenarioCashFlowRuleEntity
+                {
+                    ScenarioCashFlowRuleId = entity.Id,                    
+                    CriterionLibrary = criterionLibrary,
+                };
+                entity.CriterionLibraryScenarioCashFlowRuleJoin = join;
+            }
+            return entity;
+        }
+
+
 
         public static CashFlowRuleDTO ToDto(this ScenarioCashFlowRuleEntity entity) =>
             new CashFlowRuleDTO

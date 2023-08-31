@@ -61,14 +61,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var isvalid = criterionLibraryDto.IsValid();
             if (isvalid)
             {
-                var criterionLibrary = new CriterionLibraryEntity
-                {
-                    MergedCriteriaExpression = criterionLibraryDto.MergedCriteriaExpression,
-                    Id = criterionLibraryDto.Id,
-                    Name = criterionLibraryDto.Name,
-                    CreatedBy = criterionLibraryDto.Owner,
-                };
-                
+                var criterionLibrary  = criterionLibraryDto.ToSingleUseEntity();
+
                 var join = new CriterionLibraryScenarioRemainingLifeLimitEntity
                 {
                     ScenarioRemainingLifeLimitId = entity.Id,

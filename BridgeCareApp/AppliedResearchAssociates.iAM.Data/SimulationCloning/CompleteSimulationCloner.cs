@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             var cloneCashFlowFule = CashFlowRuleCloner.CloneList(completeSimulation.CashFlowRules, ownerId);
             var cloneInvestmentPlan = InvestmentPlanCloner.Clone(completeSimulation.InvestmentPlan);
             var cloneReportIndex = ReportIndexCloner.CloneList(completeSimulation.ReportIndexes);
-            var cloneScenarioPerformanceCurvesImportResult = ScenarioPerformanceCurvesImportResultCloner.CloneListNullPropagating(completeSimulation.PerformanceCurves);
+            var clonePerformanceCurves = PerformanceCurvesCloner.CloneListNullPropagating(completeSimulation.PerformanceCurves, ownerId);
             var cloneCalculatedAttribute = CalculatedAttributeCloner.CloneList(completeSimulation.CalculatedAttributes, ownerId);
          
             var cloneRemainingLifeLimits = RemainingLifeLimitCloner.CloneList(completeSimulation.RemainingLifeLimits, ownerId);
@@ -51,10 +51,11 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
                 //figure out where the properties come from
                 AnalysisMethod = cloneAnalysisMethod,
                 ReportIndexes = cloneReportIndex,
-                PerformanceCurves = cloneScenarioPerformanceCurvesImportResult,
+                PerformanceCurves = clonePerformanceCurves,
                 CalculatedAttributes = cloneCalculatedAttribute,
                 BudgetPriorities = cloneBudgetPriorities,
                 CashFlowRules = cloneCashFlowFule,
+                InvestmentPlan = cloneInvestmentPlan,
                 RemainingLifeLimits = cloneRemainingLifeLimits,
                 Treatments = cloneTreatment,
                 TargetConditionGoals = cloneTargetConditionGoal,

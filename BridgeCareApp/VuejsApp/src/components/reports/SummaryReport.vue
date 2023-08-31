@@ -1,6 +1,96 @@
 <template>
     <v-layout column class="Montserrat-font-family" justify-start>
-        <v-layout align-center>
+        <v-flex xs12>
+            <v-layout class="data-table" justify-left>
+                <v-flex xs12>
+                    <v-card class="elevation-0">
+                        <v-data-table
+                            id="SummaryReport-datatable"
+                            :headers="reportsGridHeaders"
+                            :items="currentPage"                       
+                            :rows-per-page-items=[5,10,25]
+                            sort-icon=$vuetify.icons.ghd-table-sort
+                            v-model='selectedReportEquations'
+                            class="fixed-header ghd-table v-table__overflow"
+                            item-key="id"
+                        >
+                            <template slot="items" slot-scope="props">
+                                <td class="text-xs-left">
+                                    <div>
+                                        <span class='lg-txt'>{{props.item.name}}</span>
+                                    </div>
+                                </td>
+                                <td class="text-xs-left">
+                                    <v-menu
+                                        min-height="500px"
+                                        min-width="500px"
+                                        right
+                                    >
+                                        <template slot="activator">
+                                            <v-btn class="ghd-blue" tooltip flat icon>
+                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
+                                            </v-btn>
+                                        </template>
+                                        <v-card>
+                                            <v-card-text>
+                                                <v-textarea
+                                                    class="sm-txt Montserrat-font-family"
+                                                    :value=mergedCriteriaExpression
+                                                    full-width
+                                                    no-resize
+                                                    outline
+                                                    readonly
+                                                    rows="5"
+                                                />
+                                            </v-card-text>
+                                        </v-card>
+                                    </v-menu>
+                                    <v-btn
+                        @click="
+                            onShowCriterionEditorDialog
+                        "
+                                        class="ghd-blue"
+                                        icon
+                                    >
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
+                                    </v-btn>
+                                </td>
+                                <td class="text-xs-left">
+                                    <v-btn
+                                        @click="onGenerateReport(true)"
+                                        class="ghd-blue"
+                                        icon
+                                    >
+                                        <img class="img-general" :src="require('@/assets/icons/attributes-dark.svg')"/>
+
+                                    </v-btn>
+                                    <v-btn
+                                        @click="onDownloadReport()"
+                                        icon
+                                    >
+                                        <img class='img-general' :src="require('@/assets/icons/download.svg')"/>
+                                    </v-btn>
+                                </td>
+                            </template>
+                            <template v-slot:body.append>
+                            </template>                               
+                        </v-data-table>
+                    </v-card>
+                </v-flex>
+            </v-layout>
+        </v-flex>
+        <v-flex xs12>
+        <v-layout column>
+            <v-subheader dark class="ghd-md-gray ghd-control-label">
+                Diagnostics & Logging
+            </v-subheader>
+            <v-divider style="margin:0px;" />
+            <v-layout style="margin:0px;">
+                <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" depressed>Simulation Log</v-btn>
+            </v-layout>
+        </v-layout>
+        </v-flex>
+        <!-- <v-layout align-center>
             <v-flex xs4 class="ghd-constant-header">
                 <v-subheader class="ghd-md-gray ghd-control-label">Select a Report</v-subheader>
                 <v-select
@@ -25,42 +115,39 @@
                 >Download Report</v-btn>
             </v-flex>
         </v-layout>
-            <v-layout style="margin:10px; padding-left:0px" column>
-                <v-layout justify-space-between align-center>
-                    <v-subheader class="ghd-control-label ghd-md-gray">                             
-                        Report Criteria
-                    </v-subheader>
-                    <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
-                        <v-btn
-                            id="SummaryReport-criteriaEditor-btn"
-                            style="!important;"
-                            @click="
-                                onShowCriterionEditorDialog
-                            "
-                            class="edit-icon ghd-control-label"
-                            icon
-                        >
-                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
-                        </v-btn>
-                    </v-flex>
-                </v-layout>
-                <v-layout>
-                   <v-textarea
-                       id="SummaryReport-criteria-textArea"
-                       class="ghd-control-text ghd-control-border"
-                       style="padding-bottom: 0px; padding-right:30px; height: 90px;"
-                       no-resize
-                       outline
-                       readonly
-                       :rows=4
-                       v-model=mergedCriteriaExpression
-                   >
-                   </v-textarea>
-                </v-layout>
+        <v-layout style="margin:10px; padding-left:0px" column>
+            <v-layout justify-space-between align-center>
+                <v-subheader class="ghd-control-label ghd-md-gray">                             
+                    Report Criteria
+                </v-subheader>
+                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
+                    <v-btn
+                        id="SummaryReport-criteriaEditor-btn"
+                        style="!important;"
+                        @click="
+                            onShowCriterionEditorDialog
+                        "
+                        class="edit-icon ghd-control-label"
+                        icon
+                    >
+                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                    </v-btn>
+                </v-flex>
             </v-layout>
-        <v-layout row>
-            <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" depressed>Simulation Log</v-btn>
-        </v-layout>
+            <v-layout>
+               <v-textarea
+                   id="SummaryReport-criteria-textArea"
+                   class="ghd-control-text ghd-control-border"
+                   style="padding-bottom: 0px; padding-right:30px; height: 90px;"
+                   no-resize
+                   outline
+                   readonly
+                   :rows=4
+                   v-model=mergedCriteriaExpression
+               >
+               </v-textarea>
+            </v-layout>
+        </v-layout> -->
         <GeneralCriterionEditorDialog
             :dialogData="criterionEditorDialogData"
             @submit="onCriterionEditorDialogSubmit"
@@ -83,6 +170,12 @@ import FileDownload from 'js-file-download';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
+import { DataTableHeader } from '@/shared/models/vue/data-table-header';
+import { Report, emptyReport } from '@/shared/models/iAM/reports';
+import {
+    InputValidationRules,
+    rules,
+} from '@/shared/utils/input-validation-rules';
 
 @Component({
     components: { GeneralCriterionEditorDialog },
@@ -106,9 +199,39 @@ export default class SummaryReports extends Vue {
     reports: SelectItem[] = [];   
     selectedReport: string = ''; 
 
+    rules: InputValidationRules = clone(rules);
+
     criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
         emptyGeneralCriterionEditorDialogData,
     );
+    currentPage: Report[] = [];
+    selectedReportEquations: Report[] = [];
+    reportsGridHeaders: DataTableHeader[] = [
+        {
+            text: 'Name',
+            value: 'name',
+            align: 'left',
+            sortable: true,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Criteria',
+            value: 'criterionLibrary',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Actions',
+            value: '',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+    ];
 
     mounted() {
         this.getSimulationReportsAction().then(() => {
@@ -116,6 +239,12 @@ export default class SummaryReports extends Vue {
             this.reports = reports.map(rep => {
                 return {text: rep, value: rep}
             })
+
+            const newReport: Report = emptyReport;
+            newReport.name = "Report 1";
+            newReport.id = getBlankGuid();
+            this.currentPage.push(newReport);
+            console.log("here");
 
             if(reports.length > 0)
                 this.selectedReport = reports[0];

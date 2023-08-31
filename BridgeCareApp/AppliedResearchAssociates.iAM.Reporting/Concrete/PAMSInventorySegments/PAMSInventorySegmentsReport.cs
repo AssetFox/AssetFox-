@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
@@ -28,7 +29,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private IUnitOfWork _unitofwork;
         private Guid _networkId;
         private Dictionary<string, AttributeDescription> _fieldDescriptions;
+        private readonly IAdminSettingsRepository _adminSettingsRepository;
 
+        public string Suffix { get; private set; }
         public Guid ID { get; set; }
         public Guid? SimulationID { get => null; set { } }
         public string Results { get; private set; }
@@ -38,12 +41,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
         public string Criteria { get; set; }
-        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", Route = 0, Segment = 0 };
+        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", Routenum = 0, Segment = 0 };
 
-        private Dictionary<string, string> _sectionData;
+        private List<SegmentAttributeDatum> _sectionData;
         private InventoryParameters sectionIds;
 
-        public PAMSInventorySegmentsReport(IUnitOfWork uow, string name, ReportIndexDTO results)
+        public PAMSInventorySegmentsReport(IUnitOfWork uow, string name, ReportIndexDTO results, string suffix)
         {
             _unitofwork = uow;
             ReportTypeName = name;
@@ -55,20 +58,45 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Report definition created.";
             Results = string.Empty;
             IsComplete = false;
-            _networkId = _unitofwork.NetworkRepo.GetMainNetwork().Id;
-
+            Suffix = suffix;
+            if (suffix == ReportSuffixType.primaryDataSuffix)
+            {
+                var primaryNetworkId = _unitofwork.AdminSettingsRepo.GetPrimaryNetworkId();
+                if (primaryNetworkId == null)
+                {
+                    Errors.Add("Does not have a primary network");
+                }
+                else
+                {
+                    _networkId = primaryNetworkId.Value;
+                }
+            }
+            else
+            {
+                var rawNetworkId = _unitofwork.AdminSettingsRepo.GetRawDataNetworkId();
+                if (rawNetworkId == null)
+                {
+                    Errors.Add("Does not have a raw network");
+                }
+                else
+                {
+                    _networkId = rawNetworkId.Value;
+                }
+            }
         }
 
-        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
+            if (Errors.Count > 0) return; // Errors occured in the GetAsset method
 
-            var sectionIds = Parse(scenarioId);
+            var sectionIds = JsonConvert.DeserializeObject<PAMSParameters>(parameters);            
             _sectionData = GetAsset(sectionIds);
+            if (Errors.Count > 0) return; // Errors occured in the GetAsset method
 
-            var crspieces = _sectionData.FirstOrDefault(_ => _.Key == "CRS_Data").Value.Split(new[] { '_' }, 4);
+            var crspieces = _sectionData.FirstOrDefault(_ => _.Name == "CRS_Data").Value.Split(new[] { '_' }, 4);
             var routeArray = crspieces[3].Split(new[] { '-' }, 2);
-            _sectionData.Add("FROMSEGMENT", routeArray[0].ToString());
-            _sectionData.Add("TOSEGMENT", routeArray[1].ToString());
+            _sectionData.Add(new SegmentAttributeDatum("FROMSEGMENT", routeArray[0]));
+            _sectionData.Add(new SegmentAttributeDatum("TOSEGMENT", routeArray[1]));
 
             var resultsString = new StringBuilder();
             resultsString.Append("<table class=\"report-cell\">");
@@ -85,6 +113,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
 
         }
+
+        private class IncomingParameters
+        {
+            public PAMSParameters KeyProperties { get; set; }
+        }
+
 
         private PAMSParameters Parse(string parameters)
         {
@@ -105,31 +139,67 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
         }
 
-        //private List<SegmentAttributeDatum> GetAsset(PAMSParameters keyProperties)
-        private Dictionary<string, string> GetAsset(PAMSParameters keyProperties)
+        private List<SegmentAttributeDatum> GetAsset(PAMSParameters keyProperties)
         {
+            List<SegmentAttributeDatum> result = new List<SegmentAttributeDatum>();
 
             //var attributeList = new List<string>() {"County","SR"};
 
             var allAttributes = _unitofwork.AttributeRepo.GetAttributes();
             allAttributes.Add(new AttributeDTO() { Name = "Segment", Command = "SEG", DataSource = allAttributes.Single(_ => _.Name == "COUNTY").DataSource });
             var queryDictionary = new Dictionary<AttributeDTO, string>();
-            queryDictionary.Add(allAttributes.Single(_ => _.Name == "COUNTY"), keyProperties.County);
-            queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.Route.ToString());
-            queryDictionary.Add(allAttributes.Single(_ => _.Name == "Segment"), keyProperties.Segment.ToString());
+            try
+            {
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "COUNTY"), keyProperties.County);
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.Routenum.ToString());
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "Segment"), keyProperties.Segment.ToString());
+            }
+            catch
+            {
+                var errorMessage = $"Unable to find the segment in the database (County: {keyProperties.County}, Route: {keyProperties.Routenum}, Segment: {keyProperties.Segment}";
+                Errors.Add(errorMessage);
+                return new List<SegmentAttributeDatum>();
+                //throw new RowNotInTableException(errorMessage);
+            }
 
-            var tmpsectionData = _unitofwork.DataSourceRepo.GetRawData(queryDictionary);
-            var sectionId = tmpsectionData["CRS_Data"];
-            var result = _unitofwork.AssetDataRepository.GetAssetAttributes("CRS", sectionId);
+            if (Suffix == ReportSuffixType.rawDataSuffix)
+            {
+                try
+                {
+                    var tmpsectionData = _unitofwork.DataSourceRepo.GetRawData(queryDictionary);
+                    var sectionId = tmpsectionData["CRS_Data"];
+                    result = _unitofwork.AssetDataRepository.GetAssetAttributes("CRS", sectionId);
+                }
+                catch (Exception)
+                {
+                    var errorMessage = $"Unable to access raw data";
+                    Errors.Add(errorMessage);
+                    //throw new InvalidOperationException(errorMessage);
+                }
+            }
+            else if (Suffix == ReportSuffixType.primaryDataSuffix)
+            {
+                try
+                {
+                    var tmpsectionData = _unitofwork.DataSourceRepo.GetRawData(queryDictionary);
+                    var sectionId = tmpsectionData["CRS_Data"];
+                    result = _unitofwork.AssetDataRepository.GetAssetAttributes("CRS", sectionId);
+                }
+                catch (Exception)
+                {
+                    var errorMessage = $"Unable to access primary data";
+                    Errors.Add(errorMessage);
+                    //throw new InvalidOperationException(errorMessage);
+                }
+            }
 
-           // return result;
-            return tmpsectionData;
+            return result;
         }
 
 
         private string GetAttribute(string attributeName, bool previous = false)
         {
-            var returnVal = _sectionData.FirstOrDefault(_ => _.Key.ToUpper() == attributeName.ToUpper());
+            var returnVal = _sectionData.FirstOrDefault(_ => _.Name.ToUpper() == attributeName.ToUpper());
 
             var returnstr = string.Empty;
 

@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Interfaces
     {
         string Name { get; }
 
-        IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService);
+        IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService, string suffix = "");
     }
 }

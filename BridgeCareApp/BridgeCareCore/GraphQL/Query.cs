@@ -75,5 +75,19 @@ namespace BridgeCareCore.GraphQL
             var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationGuid);
             return simulationOutput;
         }
+
+        /// <summary>
+        /// Get the key field values used in sorting
+        /// </summary>
+        /// <returns>The name of the key fields and their matching values</returns>
+        //[UseFiltering]
+        //[UseSorting]
+        public KeyFieldValues GetKeyFields([Service(ServiceKind.Synchronized)] IUnitOfWork _unitOfWork)
+        {
+            var result = new KeyFieldValues();
+            result.FieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields().ToList();
+            result.Values = _unitOfWork.AssetDataRepository.GetKeyPropertiesTable(result.FieldNames);
+            return result;
+        }
     }  
 }

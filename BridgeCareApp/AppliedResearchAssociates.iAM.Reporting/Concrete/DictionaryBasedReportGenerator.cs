@@ -31,12 +31,25 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return await Generate(reportName, null);
         }
 
+        public async Task<IReport> Generate(string reportName, string suffix = "")
+        {
+            return await Generate(reportName, null, suffix);
+        }
+
+        public async Task<IReport> GenerateInventoryReport(string reportName)
+        {
+            var last3Characters = reportName.Substring(reportName.Length - 3);
+            reportName = reportName.Substring(0, reportName.Length - 3);
+
+            return await Generate(reportName, null);
+        }
+
         /// <summary>
         /// Specific generator used to recreate reports from data persistence
         /// </summary>
-        private async Task<IReport> Generate(string reportName, ReportIndexDTO results)
+        private async Task<IReport> Generate(string reportName, ReportIndexDTO results, string suffix = "")
         {
-            var generatedReport = _reportLookup.GetReport(reportName, _dataRepository, results, _hubService);
+            var generatedReport = _reportLookup.GetReport(reportName, _dataRepository, results, _hubService, suffix);
             //Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName, results, _hubService);
             if (generatedReport is FailureReport failure) {
                 await failure.Run($"No report was found with the name {reportName}");

@@ -10,7 +10,7 @@
                             :items="currentPage"                       
                             :rows-per-page-items=[5,10,25]
                             sort-icon=$vuetify.icons.ghd-table-sort
-                            v-model='selectedReportEquations'
+
                             class="fixed-header ghd-table v-table__overflow"
                             item-key="id"
                         >
@@ -35,7 +35,7 @@
                                             <v-card-text>
                                                 <v-textarea
                                                     class="sm-txt Montserrat-font-family"
-                                                    :value=mergedCriteriaExpression
+                                                    :value=props.item.mergedExpression
                                                     full-width
                                                     no-resize
                                                     outline
@@ -47,7 +47,7 @@
                                     </v-menu>
                                     <v-btn
                         @click="
-                            onShowCriterionEditorDialog
+                            onShowCriterionEditorDialog(props.item.id)
                         "
                                         class="ghd-blue"
                                         icon
@@ -57,7 +57,7 @@
                                 </td>
                                 <td class="text-xs-left">
                                     <v-btn
-                                        @click="onGenerateReport(true)"
+                                        @click="onGenerateReport(props.item.id, true)"
                                         class="ghd-blue"
                                         icon
                                     >
@@ -65,7 +65,7 @@
 
                                     </v-btn>
                                     <v-btn
-                                        @click="onDownloadReport()"
+                                        @click="onDownloadReport(props.item.id)"
                                         icon
                                     >
                                         <img class='img-general' :src="require('@/assets/icons/download.svg')"/>
@@ -81,13 +81,16 @@
         </v-flex>
         <v-flex xs12>
         <v-layout column>
-            <v-subheader dark class="ghd-md-gray ghd-control-label">
-                Diagnostics & Logging
-            </v-subheader>
-            <v-divider style="margin:0px;" />
-            <v-layout style="margin:0px;">
-                <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" depressed>Simulation Log</v-btn>
-            </v-layout>
+            <v-flex>
+                <v-subheader class="ghd-md-gray ghd-control-label">
+                    Diagnostics & Logging
+                </v-subheader>
+                <v-divider style="margin:0px;" />
+                <v-layout style="margin:0px;">
+                    <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" depressed>Simulation Log</v-btn>
+                </v-layout>
+            </v-flex>
+
         </v-layout>
         </v-flex>
         <!-- <v-layout align-center>
@@ -159,7 +162,7 @@
 import Vue from 'vue';
 import { Action, State } from 'vuex-class';
 import Component from 'vue-class-component';
-import { clone, contains } from 'ramda';
+import { clone, update, find, findIndex, propEq } from 'ramda';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import ReportsService from '@/services/reports.service';
@@ -168,7 +171,7 @@ import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import {AxiosResponse} from 'axios';
 import FileDownload from 'js-file-download';
 import {hasValue} from '@/shared/utils/has-value-util';
-import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { Report, emptyReport } from '@/shared/models/iAM/reports';
@@ -189,15 +192,11 @@ export default class SummaryReports extends Vue {
     @Action('getSimulationReports') getSimulationReportsAction: any;
 
     initializedBudgets: boolean = false;
-    mergedCriteriaExpression: string = "";
 
     simulationName: string;
     networkName: string = '';
     networkId: string = getBlankGuid();
     selectedScenarioId: string = getBlankGuid();
-
-    reports: SelectItem[] = [];   
-    selectedReport: string = ''; 
 
     rules: InputValidationRules = clone(rules);
 
@@ -205,7 +204,9 @@ export default class SummaryReports extends Vue {
         emptyGeneralCriterionEditorDialogData,
     );
     currentPage: Report[] = [];
-    selectedReportEquations: Report[] = [];
+    reports: SelectItem[] = [];   
+    selectedReport: Report = emptyReport; 
+
     reportsGridHeaders: DataTableHeader[] = [
         {
             text: 'Name',
@@ -240,14 +241,21 @@ export default class SummaryReports extends Vue {
                 return {text: rep, value: rep}
             })
 
-            const newReport: Report = emptyReport;
-            newReport.name = "Report 1";
-            newReport.id = getBlankGuid();
-            this.currentPage.push(newReport);
-            console.log("here");
+            this.stateSimulationReportNames.forEach(reportName => {
+                this.currentPage.push({
+                    id: getNewGuid(),
+                    name: reportName,
+                    mergedExpression: ""
+                });
+            });
+            // const newReport: Report = emptyReport;
+            // newReport.name = "Report 1";
+            // newReport.id = getBlankGuid();
+            // newReport.mergedExpression = "";
+            // this.currentPage.push(newReport);
 
             if(reports.length > 0)
-                this.selectedReport = reports[0];
+                this.selectedReport = this.currentPage[0];// reports[0];
         });
     }
     beforeRouteEnter(to: any, from: any, next: any) {
@@ -265,27 +273,33 @@ export default class SummaryReports extends Vue {
             }
         });
     }
-    onShowCriterionEditorDialog() {
+    onShowCriterionEditorDialog(reportId: string) {
+
+        this.selectedReport = find(
+            propEq('id', reportId),
+            this.currentPage,
+        ) as Report;
+
         this.criterionEditorDialogData = {
             showDialog: true,
-            CriteriaExpression: this.mergedCriteriaExpression,
+            CriteriaExpression: this.selectedReport.mergedExpression,
         };
     }
     onCriterionEditorDialogSubmit(criterionexpression: string) {
         this.criterionEditorDialogData = clone(
             emptyGeneralCriterionEditorDialogData,
         );
-        this.mergedCriteriaExpression = criterionexpression;
+        this.currentPage = update(
+            findIndex(
+                propEq('id', this.selectedReport.id), this.currentPage), { ...this.selectedReport, mergedExpression: criterionexpression}, this.currentPage,
+            );
     }
     async onDownloadSimulationLog(download: boolean) {
         if (download) {            
-            //this.isDownloading = true;
-            //this.dialogData.showModal = false;
             await ReportsService.downloadSimulationLog(
                 this.networkId,
                 this.selectedScenarioId,
             ).then((response: AxiosResponse<any>) => {
-                //this.isDownloading = false;
                 if (hasValue(response, 'data')) {
                     this.addSuccessNotificationAction({
                         message: 'Report downloaded',
@@ -304,21 +318,24 @@ export default class SummaryReports extends Vue {
             });
         } 
     }
-    async onGenerateReport(download: boolean) {
+    async onGenerateReport(reportId: string, download: boolean) {
         if (download) {            
-            //this.isDownloading = true;
-            //this.dialogData.showModal = false;
+            // Get the selected report
+            this.selectedReport = find(
+                propEq('id', reportId),
+                this.currentPage,
+            ) as Report;
+            // Generate report with selected one from table
             await ReportsService.generateReportWithCriteria(
-                this.selectedScenarioId, this.mergedCriteriaExpression, this.selectedReport
+                this.selectedScenarioId, this.selectedReport.mergedExpression, this.selectedReport.name
             ).then((response: AxiosResponse<any>) => {
-                //this.isDownloading = false;
                 if (response.status == 200) {
                     if (hasValue(response, 'data')) {
                         const resultId: string = response.data as string;
                         this.reportIndexID = resultId;
                     }
                     this.addSuccessNotificationAction({
-                        message: this.selectedReport +  ' report generation started for ' + this.simulationName + '.',
+                        message: this.selectedReport.name +  ' report generation started for ' + this.simulationName + '.',
                     });
                 } else {
                     this.addErrorNotificationAction({
@@ -331,13 +348,15 @@ export default class SummaryReports extends Vue {
         }
     }
 
-    async onDownloadReport() {        
-        //this.isDownloading = true;
-        //this.dialogData.showModal = false;        
+    async onDownloadReport(reportId: string) {        
+
+        this.selectedReport = find(
+            propEq('id', reportId),
+            this.currentPage,
+        ) as Report;
         await ReportsService.downloadReport(
-            this.selectedScenarioId, this.selectedReport
+            this.selectedScenarioId, this.selectedReport.name
         ).then((response: AxiosResponse<any>) => {
-            //this.isDownloading = false;
             if (hasValue(response, 'data')) {
                 const fileInfo: FileInfo = response.data as FileInfo;
                 FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);

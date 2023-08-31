@@ -9,10 +9,11 @@ import { getBlankGuid } from '@/shared/utils/uuid-utils';
 export interface Report {
     id: string;
     name: string;
-    criterionLibrary: CriterionLibrary;
+    mergedExpression: string;
+    
 }
 export const emptyReport: Report = {
     id: getBlankGuid(),
     name: '',
-    criterionLibrary: clone(emptyCriterionLibrary),
+    mergedExpression: '',
 };

@@ -209,8 +209,8 @@ namespace BridgeCareCore.Controllers
         }
 
         private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType, JObject parameters)
-        {
-            var simulationId = parameters.SelectToken("scenarioId").ToObject<IEnumerable<object>>().FirstOrDefault()?.ToString();
+        {            
+            var simulationId = parameters.SelectToken("scenarioId")?.ToObject<IEnumerable<object>>().FirstOrDefault()?.ToString();
             var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
             IReport reportObject;
             if (ReportType.HTML == expectedReportType)
@@ -224,9 +224,9 @@ namespace BridgeCareCore.Controllers
                 reportObject = await _generator.Generate(reportName);
             }
 
-            var criteria = parameters.SelectToken("expression").ToObject<IEnumerable<object>>().FirstOrDefault()?.ToString();
-            //generate report
+           // var criteria = parameters.SelectToken("expression")?.ToObject<IEnumerable<object>>().FirstOrDefault()?.ToString();
 
+            //generate report
             if (reportObject == null)
             {
                 // Set the error string before creating the FailureReport output object as the report type will be overwritten
@@ -247,10 +247,8 @@ namespace BridgeCareCore.Controllers
             // Run the report as long as it does not have any existing errors (i.e., failure on generation)
             // Note:  If report was switched to a FailureReport previously, this will not run again
             if (!reportObject.Errors.Any())
-            {
-                //SendRealTimeMessage($"Running {reportName}.");
-                await reportObject.Run(simulationId, criteria);
-                //SendRealTimeMessage($"Completed running {reportName}");
+            {                
+                await reportObject.Run(parameters.ToString());
             }
 
             //return object

@@ -107,18 +107,19 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = false;
         }
 
-        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
-        {            Criteria = criteria;
+        public async Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        {            
             workQueueLog ??= new DoNothingWorkQueueLog();            
             //check for the parameters string
-            if (string.IsNullOrEmpty(scenarioId) || string.IsNullOrWhiteSpace(scenarioId)) {
+            if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters)) {
                 Errors.Add("Parameters string is empty OR there are no parameters defined");
                 IndicateError();
                 return;
             }
 
-            // Determine the Guid for the simulation and set simulation id            
-            if (!Guid.TryParse(scenarioId, out Guid _simulationId)) {
+            // Determine the Guid for the simulation and set simulation id
+            string simulationId = ReportHelper.GetSimulationId(parameters);
+            if (!Guid.TryParse(simulationId, out Guid _simulationId)) {
                 Errors.Add("Simulation ID could not be parsed to a Guid");
                 IndicateError();
                 return;
@@ -153,6 +154,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var summaryReportPath = "";
             try
             {                checkCancelled(cancellationToken, _simulationId);
+                Criteria = ReportHelper.GetCriteria(parameters);
                 summaryReportPath = GenerateSummaryReport(_networkId, _simulationId, workQueueLog, cancellationToken);
                 if(!string.IsNullOrEmpty(Criteria) && string.IsNullOrEmpty(summaryReportPath))
                 {

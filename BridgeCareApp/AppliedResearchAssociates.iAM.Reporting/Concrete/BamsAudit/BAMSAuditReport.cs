@@ -70,11 +70,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
         
         public string Criteria { get; set; }
 
-        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
             // Check for the parameters
-            if (string.IsNullOrEmpty(scenarioId) || string.IsNullOrWhiteSpace(scenarioId))
+            if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
                 Errors.Add("Parameters string is empty OR there are no parameters defined");
                 IndicateError();
@@ -82,7 +82,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Set simulation id
-            if (!Guid.TryParse(scenarioId, out Guid _simulationId))
+            string simulationId = ReportHelper.GetSimulationId(parameters);
+            if (!Guid.TryParse(simulationId, out Guid _simulationId))
             {
                 Errors.Add("Simulation ID could not be parsed to a Guid");
                 IndicateError();

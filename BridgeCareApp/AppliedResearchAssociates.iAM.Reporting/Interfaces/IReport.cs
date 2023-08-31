@@ -24,11 +24,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// <summary>
         /// Runs the report, populating all read only fields
         /// </summary>
-        ///<param name="scenarioId"></param>
+        ///<param name="parameters"></param>
         ///<param name="criteria"></param>
         ///<param name="cancellationToken"></param>
         ///<param name="workQueueLog"></param>
-        Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null);
+        Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null);
 
         /// <summary>
         /// Report results in format specified by ReportType

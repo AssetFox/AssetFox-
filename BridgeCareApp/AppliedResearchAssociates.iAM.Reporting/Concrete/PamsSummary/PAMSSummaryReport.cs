@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.Reporting.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.CountySummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.GraphTabs;
@@ -90,15 +91,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             ID = (Guid)reportId;
             Errors = new List<string>();
             Status = "Report definition created.";
-            Results = String.Empty;
+            Results = string.Empty;
             IsComplete = false;
         }
 
-        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
             //check for the parameters string
-            if (string.IsNullOrEmpty(scenarioId) || string.IsNullOrWhiteSpace(scenarioId))
+            if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
                 Errors.Add("Parameters string is empty OR there are no parameters defined");
                 IndicateError();
@@ -106,7 +107,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Determine the Guid for the simulation and set simulation id
-            if (!Guid.TryParse(scenarioId, out Guid _simulationId))
+            string simulationId = ReportHelper.GetSimulationId(parameters);
+            if (!Guid.TryParse(simulationId, out Guid _simulationId))
             {
                 Errors.Add("Simulation ID could not be parsed to a Guid");
                 IndicateError();

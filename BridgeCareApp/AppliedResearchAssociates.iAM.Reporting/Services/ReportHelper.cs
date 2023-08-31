@@ -12,6 +12,7 @@ using System.Data;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services
 {
@@ -203,7 +204,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                 {
                     attributeNames.Add(m.Value.Substring(1, m.Value.Length - 2));
                 }
-                                
+
                 var compiler = new CalculateEvaluateCompiler();
                 var attributes = _unitOfWork.AttributeRepo.GetAttributesWithNames(attributeNames);
                 attributes.ForEach(attribute =>
@@ -212,7 +213,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                         ? CalculateEvaluateParameterType.Number
                         : CalculateEvaluateParameterType.Text;
                 });
-                compiler.GetEvaluator(modifiedExpression);                               
+                compiler.GetEvaluator(modifiedExpression);
 
                 var customAttributes = new List<(string name, string datatype)>();
                 foreach (var attribute in attributes)
@@ -221,11 +222,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                 }
 
                 // Get assets and update reportOutputData by filtering
-                var assetIds = GetAssetIds(modifiedExpression, customAttributes, networkId);                
+                var assetIds = GetAssetIds(modifiedExpression, customAttributes, networkId);
                 var count = reportOutputData.InitialAssetSummaries.RemoveAll(_ => !assetIds.Contains(_.AssetId));
                 foreach (var year in reportOutputData.Years)
                 {
-                   year.Assets.RemoveAll(_ => !assetIds.Contains(_.AssetId));
+                    year.Assets.RemoveAll(_ => !assetIds.Contains(_.AssetId));
                 }
 
                 return new CriteriaValidationResult
@@ -296,9 +297,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                         return (data, type);
                     });
                     return value;
-                });            
+                });
             AddToFlattenedDataTable(flattenedDataTable, valuePerAttributeNamePerMaintainableAssetId);
-            var dataRows = flattenedDataTable.Select(expression);            
+            var dataRows = flattenedDataTable.Select(expression);
             assetIds = dataRows.Select(_ => (Guid)_.ItemArray[0]).ToList();
 
             return assetIds.ToList();
@@ -349,5 +350,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                 });
                 flattenedDataTable.Rows.Add(row);
             });
+
+        public static string GetSimulationId(string parameters)
+        {
+            var parameterObj = JObject.Parse(parameters);
+            return parameterObj.SelectToken("scenarioId")?.ToObject<string>();
+        }
+
+        internal static string GetCriteria(string parameters)
+        {
+            var parameterObj = JObject.Parse(parameters);
+            return parameterObj.SelectToken("expression")?.ToObject<string>();
+        }
     }    
 }

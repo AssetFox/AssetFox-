@@ -593,7 +593,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, AlertDataWithButtons, emptyAlertData, emptyAlertDataWithButtons } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import AlertWithButtons from '@/shared/modals/AlertWithButtons.vue';
-import { emptySampleButton } from '@/shared/models/modals/alert-data';
+import { emptyAlertButton } from '@/shared/models/modals/alert-data';
 import ReportsDownloaderDialog from '@/components/scenarios/scenarios-dialogs/ReportsDownloaderDialog.vue';
 import ShowAggregationDialog from '@/components/scenarios/scenarios-dialogs/ShowAggregationDialog.vue';
 import {
@@ -915,6 +915,10 @@ export default class Scenarios extends Vue {
     nameUpdate: string = '';
 
     scenarios: Scenario[] = [];
+
+    preCheckStatus: any;
+    preCheckMessage: any;
+    runAnalysisScenario: Scenario = clone(emptyScenario);
 
     userScenarios: Scenario[] = [];
     currentUserScenariosPage: Scenario[] = []
@@ -1406,8 +1410,8 @@ export default class Scenarios extends Vue {
     onShowConfirmAnalysisRunAlert(scenario: Scenario) {
         this.selectedScenario = clone(scenario);
 
-        let sampleButton = emptySampleButton;
-        sampleButton.label  = "Run Pre-Checks" + "Cancel" + "Continue";
+        let AlertButton = emptyAlertButton;
+        AlertButton.label  = "Run Pre-Checks" + "Cancel" + "Continue";
         this.confirmAnalysisRunAlertData = {
             showDialog: true,
             heading: 'Warning',
@@ -1415,34 +1419,27 @@ export default class Scenarios extends Vue {
             message:
                 'Only one simulation can be run at a time. The model run you are about to queue will be ' +
                 'executed in the order in which it was received.',
-            buttons: [sampleButton.label]
+            buttons: [AlertButton.label]
         };
     }
 
-    onConfirmAnalysisRunAlertSubmit(submit: string) {
-        var preCheckResults;
+    async onConfirmAnalysisRunAlertSubmit(submit: string) {
         this.confirmAnalysisRunAlertData = clone(emptyAlertDataWithButtons);
+        this.runAnalysisScenario = this.selectedScenario;
+
         if(submit == "pre-checks"){
-                if (submit && this.selectedScenario.id !== getBlankGuid()) {
-                    ScenarioService.upsertValidateSimulation(this.selectedScenario.networkId, this.selectedScenario.id).then((response: AxiosResponse) => {
-                    if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                        preCheckResults = response;
-                        console.log(preCheckResults.data[0].status);
-                        this.addSuccessNotificationAction({message: "Simulation pre-checks started",});
-                    }
-                });
-            }
-                     if(submit) {
-                        (this.selectedScenario = clone(emptyScenario));
-                        this.onSecondConfirmAnalysisRunAlertData = {
-                        showDialog: true,
-                        heading: 'Warning',
-                        choice: true,
-                        message:
-                            'The following errors have been returned: ' + 
-                            ' You can choose to continue or cancel the operation',
+                if (submit && this.selectedScenario.id !== getBlankGuid()) 
+                {
+                        await ScenarioService.upsertValidateSimulation(this.selectedScenario.networkId, this.selectedScenario.id).then((response: AxiosResponse) => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                            this.addSuccessNotificationAction({message: "Simulation pre-checks completed",});
+                            if(this.preCheckStatus != undefined && this.preCheckMessage != undefined)
+                            this.preCheckStatus = response.data[0].status;
+                            this.preCheckMessage = response.data[0].message;
                         }
-                    }
+                    });
+                }
+                this.secondRunAnalysisModal();
              }
         else if(submit == "continue") {
             if (submit && this.selectedScenario.id !== getBlankGuid()) {
@@ -1452,13 +1449,57 @@ export default class Scenarios extends Vue {
                 }).then(() => (this.selectedScenario = clone(emptyScenario)));
             }
         }
-        else if(submit == "cancel") {
-            //this.onSecondConfirmAnalysisRunAlertSubmit();
-        }
     }
 
-    onSecondConfirmAnalysisRunAlertSubmit(response: AxiosResponse) {
-        console.log(response);
+    onSecondConfirmAnalysisRunAlertSubmit(submit: string) {
+        this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertData);
+        
+        this.selectedScenario = this.runAnalysisScenario;
+
+        if (submit && this.selectedScenario.id !== getBlankGuid()) {
+                this.runSimulationAction({
+                    networkId: this.selectedScenario.networkId,
+                    scenarioId: this.selectedScenario.id,
+                }).then(() => (this.selectedScenario = clone(emptyScenario)));
+            }
+    }
+
+    secondRunAnalysisModal() {
+            this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertData);
+
+            if(this.preCheckStatus = 0) 
+            {
+                (this.selectedScenario = clone(emptyScenario));
+                this.onSecondConfirmAnalysisRunAlertData = {
+                showDialog: true,
+                heading: 'Error',
+                choice: false,
+                message:
+                'The following errors have been returned: ' + (this.preCheckMessage),
+                }
+            }
+            else if(this.preCheckStatus = 1)
+            {
+                (this.selectedScenario = clone(emptyScenario));
+                this.onSecondConfirmAnalysisRunAlertData = {
+                showDialog: true,
+                heading: 'Warning',
+                choice: true,
+                message:
+                'The following warnings have been returned:' + (this.preCheckMessage),
+                }
+            }
+            else if(this.preCheckStatus = 2)
+            {
+                (this.selectedScenario = clone(emptyScenario));
+                this.onSecondConfirmAnalysisRunAlertData = {
+                showDialog: true,
+                heading: 'Information',
+                choice: true,
+                message:
+                'The following information has been returned: ' + (this.preCheckMessage),
+                }
+            }
     }
 
     onShowConfirmConvertJsonToRelationalAlert(scenario: Scenario) {

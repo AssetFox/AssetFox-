@@ -28,10 +28,10 @@ export const emptyAlertDataWithButtons: AlertDataWithButtons = {
     buttons : ['']
 };
 
-export interface SampleButton {
+export interface AlertButton {
     label: string;
 }
 
-export const emptySampleButton: SampleButton = {
+export const emptyAlertButton: AlertButton = {
     label: '',
 }

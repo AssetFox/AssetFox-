@@ -64,13 +64,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Suffix => throw new NotImplementedException();
+        
         public string Criteria { get; set; }
 
-        public async Task Run(string scenarioId, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
             // Check for the parameters
-            if (string.IsNullOrEmpty(scenarioId) || string.IsNullOrWhiteSpace(scenarioId))
+            if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
                 Errors.Add("No simulation ID provided in the parameters of PAMS Simulation Report runner");
                 IndicateError();
@@ -78,7 +80,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Set simulation id
-            if (!Guid.TryParse(scenarioId, out Guid _simulationId))
+            string simulationId = ReportHelper.GetSimulationId(parameters);
+            if (!Guid.TryParse(parameters, out Guid _simulationId))
             {
                 Errors.Add("Provided simulation ID is not a GUID");
                 IndicateError();

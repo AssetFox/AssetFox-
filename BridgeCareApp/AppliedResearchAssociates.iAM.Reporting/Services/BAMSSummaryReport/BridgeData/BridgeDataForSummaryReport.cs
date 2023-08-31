@@ -441,12 +441,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     setColor((int)_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "PARALLEL"), section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
                         yearlySectionData.Year, index, worksheet, row, column);
 
-                    // Work done in a year                    
-                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis 
-                    var range = worksheet.Cells[row, column];
+                    // Work done in a year                                        
+                    var appliedTreatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var cost = appliedTreatmentConsideration == null ? 0 : Math.Round(appliedTreatmentConsideration.BudgetUsages.Sum(b => b.CoveredCost), 0); // Rounded cost to whole number based on comments from Jeff Davis                    
+                    var workCell = worksheet.Cells[row, column];
                     if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
                     {
-                        range.Value = abbreviatedTreatmentNames[section.AppliedTreatment];
+                        workCell.Value = abbreviatedTreatmentNames[section.AppliedTreatment];
                         worksheet.Cells[row, column + 1].Value = cost;
 
                         if (!isInitialYear && section.TreatmentCause == TreatmentCause.CashFlowProject)
@@ -458,7 +459,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             }
                             if (prevYearSection.AppliedTreatment == section.AppliedTreatment)
                             {
-                                range.Value = "--";
+                                workCell.Value = "--";
                                 worksheet.Cells[row, column + 1].Value = cost;
                             }
                         }
@@ -468,13 +469,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     else
                     {
-                        range.Value = section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" :
+                        workCell.Value = section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" :
                             section.AppliedTreatment.ToLower();
 
                         worksheet.Cells[row, column + 1].Value = cost;
                         ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);
                     }
-                    if (!range.Value.Equals("--"))
+                    if (!workCell.Value.Equals("--"))
                     {
                         workDoneData[i]++;
                     }

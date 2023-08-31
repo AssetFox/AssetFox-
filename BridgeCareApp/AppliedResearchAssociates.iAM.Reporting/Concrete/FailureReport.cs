@@ -39,6 +39,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status => String.Empty;
 
+        public string Suffix => throw new NotImplementedException();
+                
         public string Criteria { get => null; set { } }
 
         public async Task Run(string errorMessage, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)

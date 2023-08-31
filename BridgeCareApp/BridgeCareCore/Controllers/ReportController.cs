@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Common;
-using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -18,7 +16,6 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -212,13 +209,24 @@ namespace BridgeCareCore.Controllers
         }
 
         private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType, JObject parameters)
-        {
-            var simulationId = parameters.SelectToken("scenarioId").ToObject<IEnumerable<object>>().FirstOrDefault()?.ToString();
+        {            
+            var simulationId = parameters.SelectToken("scenarioId")?.ToObject<IEnumerable<object>>().FirstOrDefault()?.ToString();
             var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-            var criteria = parameters.SelectToken("expression").ToObject<IEnumerable<object>>().FirstOrDefault()?.ToString();
-            //generate report
-            var reportObject = await _generator.Generate(reportName);
+            IReport reportObject;
+            if (ReportType.HTML == expectedReportType)
+            {
+                var last3Characters = reportName.Substring(reportName.Length - 3);
+                reportName = reportName.Substring(0, reportName.Length - 3);
+                reportObject = await _generator.Generate(reportName, last3Characters);
+            }
+            else
+            {
+                reportObject = await _generator.Generate(reportName);
+            }
 
+           // var criteria = parameters.SelectToken("expression")?.ToObject<IEnumerable<object>>().FirstOrDefault()?.ToString();
+
+            //generate report
             if (reportObject == null)
             {
                 // Set the error string before creating the FailureReport output object as the report type will be overwritten
@@ -239,10 +247,8 @@ namespace BridgeCareCore.Controllers
             // Run the report as long as it does not have any existing errors (i.e., failure on generation)
             // Note:  If report was switched to a FailureReport previously, this will not run again
             if (!reportObject.Errors.Any())
-            {
-                //SendRealTimeMessage($"Running {reportName}.");
-                await reportObject.Run(simulationId, criteria);
-                //SendRealTimeMessage($"Completed running {reportName}");
+            {                
+                await reportObject.Run(parameters.ToString());
             }
 
             //return object
@@ -284,7 +290,7 @@ namespace BridgeCareCore.Controllers
 
         private IActionResult CreateErrorListing(List<string> errors)
         {
-            var errorHtml = new StringBuilder("<h2>Error Listing</h2><list>");
+            var errorHtml = new StringBuilder("<h2>Report Errors</h2><list>");
             foreach (var item in errors)
             {
                 errorHtml.Append($"<li>{item}</li>");

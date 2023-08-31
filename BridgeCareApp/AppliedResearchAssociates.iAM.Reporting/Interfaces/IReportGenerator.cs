@@ -15,6 +15,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// <param name="reportName">Name of the object to create</param>
         /// <returns>A report object based on the provided name</returns>
         Task<IReport> Generate(string reportName);
+        Task<IReport> Generate(string reportName, string suffix = "");
+
+        Task<IReport> GenerateInventoryReport(string reportName);
 
         /// <summary>
         /// Lists the names of all reports in a given scenario

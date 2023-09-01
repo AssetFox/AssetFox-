@@ -12,6 +12,20 @@ export const emptyAlertData: AlertData = {
     choice: false
 };
 
+export interface AlertPreChecksData {
+    showDialog: boolean;
+    heading: string;
+    message: string;
+    choice: boolean;
+}
+
+export const emptyAlertPreChecksData: AlertPreChecksData = {
+    showDialog: false,
+    heading: '',
+    message: '',
+    choice: false
+};
+
 export interface AlertDataWithButtons {
     showDialog: boolean;
     heading: string;

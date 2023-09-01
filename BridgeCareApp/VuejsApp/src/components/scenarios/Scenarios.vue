@@ -511,8 +511,8 @@
                 </v-tabs-items>
             </v-card>
         </v-flex>
-         <ConfirmAnalysisRunAlert
-            :dialogData="onSecondConfirmAnalysisRunAlertData"
+         <ConfirmAnalysisRunAlertPrehecks
+            :dialogDataPreChecks="onSecondConfirmAnalysisRunAlertData"
             @submit="onSecondConfirmAnalysisRunAlertSubmit"
         />
          <ConfirmAnalysisRunAlertWithButtons
@@ -590,9 +590,10 @@ import {
     WorkType,
 } from '@/shared/models/iAM/scenario';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { AlertData, AlertDataWithButtons, emptyAlertData, emptyAlertDataWithButtons } from '@/shared/models/modals/alert-data';
+import { AlertData, AlertDataWithButtons, AlertPreChecksData, emptyAlertData, emptyAlertDataWithButtons, emptyAlertPreChecksData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import AlertWithButtons from '@/shared/modals/AlertWithButtons.vue';
+import AlertPreChecks from '@/shared/modals/AlertPreChecks.vue';
 import { emptyAlertButton } from '@/shared/models/modals/alert-data';
 import ReportsDownloaderDialog from '@/components/scenarios/scenarios-dialogs/ReportsDownloaderDialog.vue';
 import ShowAggregationDialog from '@/components/scenarios/scenarios-dialogs/ShowAggregationDialog.vue';
@@ -645,6 +646,7 @@ import ScenarioService from '@/services/scenario.service';
         ConfirmRollupAlert: Alert,
         ConfirmAnalysisRunAlert: Alert,
         ConfirmAnalysisRunAlertWithButtons: AlertWithButtons,
+        ConfirmAnalysisRunAlertPrehecks: AlertPreChecks,
         ConfirmConvertToRelationalAlert: Alert,
         ReportsDownloaderDialog,
         CreateScenarioDialog,
@@ -655,6 +657,7 @@ import ScenarioService from '@/services/scenario.service';
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
         Alert,
         AlertWithButtons,
+        AlertPreChecks,
         GhdShareSvg,
         GhdStarSvg,
         GhdQueueSvg
@@ -941,7 +944,7 @@ export default class Scenarios extends Vue {
         emptyReportsDownloadDialogData,
     );
     confirmAnalysisRunAlertData: AlertDataWithButtons = clone(emptyAlertDataWithButtons);
-    onSecondConfirmAnalysisRunAlertData: AlertData = clone(emptyAlertData);
+    onSecondConfirmAnalysisRunAlertData: AlertPreChecksData = clone(emptyAlertPreChecksData);
     shareScenarioDialogData: ShareScenarioDialogData = clone(
         emptyShareScenarioDialogData,
     );
@@ -1452,7 +1455,7 @@ export default class Scenarios extends Vue {
     }
 
     onSecondConfirmAnalysisRunAlertSubmit(submit: string) {
-        this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertData);
+        this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertPreChecksData);
         
         this.selectedScenario = this.runAnalysisScenario;
 
@@ -1465,7 +1468,9 @@ export default class Scenarios extends Vue {
     }
 
     secondRunAnalysisModal() {
-            this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertData);
+            this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertPreChecksData);
+            this.preCheckMessage = this.preCheckMessage.split('.');
+            this.preCheckMessage.pop();
 
             if(this.preCheckStatus = 0) 
             {
@@ -1483,10 +1488,9 @@ export default class Scenarios extends Vue {
                 (this.selectedScenario = clone(emptyScenario));
                 this.onSecondConfirmAnalysisRunAlertData = {
                 showDialog: true,
-                heading: 'Warning',
+                heading: 'The following warnings have been returned: ',
                 choice: true,
-                message:
-                'The following warnings have been returned:' + (this.preCheckMessage),
+                message:(this.preCheckMessage),
                 }
             }
             else if(this.preCheckStatus = 2)

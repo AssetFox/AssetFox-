@@ -10,7 +10,7 @@ export const ScenarioRoutePaths: any = {
     CashFlow: 'CashFlowEditor/Scenario',
     CommittedProjects: 'CommittedProjectsEditor/Scenario',
     CalculatedAttribute: 'CalculatedAttributeEditor/Scenario',
-    SummaryReports: 'SummaryReport/Scenario',
+    ReportsAndOutputs: 'ReportsAndOutputs/Scenario',
 };
 
 export const UnsecuredRoutePathNames: string[] = [

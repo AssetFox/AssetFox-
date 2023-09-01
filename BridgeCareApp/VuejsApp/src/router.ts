@@ -39,9 +39,9 @@ const TreatmentEditor = () =>
     import(
         /* webpackChunkName: "treatmentEditor" */ '@/components/treatment-editor/TreatmentEditor.vue'
     );
-const SummaryReport = () =>
+const ReportsAndOutputs = () =>
     import(
-        '@/components/reports/SummaryReport.vue'
+        '@/components/reports/ReportsAndOutputs.vue'
     );
 const BudgetPriorityEditor = () =>
     import(
@@ -283,8 +283,8 @@ const router = new VueRouter({
                     beforeEnter: beforeEnterFunc
                 },
                 {
-                    path: '/SummaryReport/Scenario',
-                    component: SummaryReport,
+                    path: '/ReportsAndOutputs/Scenario',
+                    component: ReportsAndOutputs,
                     props: true,
                     beforeEnter: beforeEachFunc,
                 },

@@ -1477,7 +1477,7 @@ export default class Scenarios extends Vue {
     onNavigateToReportsView(localScenario: Scenario) {
         this.selectScenarioAction({scenarioId: localScenario.id });
         this.$router.push({
-            path: '/SummaryReport/Scenario/',
+            path: '/ReportsAndOutputs/Scenario/',
             query: {
                 scenarioId: localScenario.id,
                 networkId: localScenario.networkId,

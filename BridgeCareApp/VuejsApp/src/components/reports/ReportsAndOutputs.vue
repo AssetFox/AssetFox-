@@ -3,9 +3,12 @@
         <v-flex xs12>
             <v-layout class="data-table" justify-left>
                 <v-flex xs12>
+                    <v-subheader>
+                        Available Reports
+                    </v-subheader>
                     <v-card class="elevation-0">
                         <v-data-table
-                            id="SummaryReport-datatable"
+                            id="ReportsAndOutputs-datatable"
                             :headers="reportsGridHeaders"
                             :items="currentPage"                       
                             :rows-per-page-items=[5,10,25]
@@ -79,7 +82,7 @@
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-flex xs12>
+        <v-flex>
         <v-layout column>
             <v-flex>
                 <v-subheader class="ghd-md-gray ghd-control-label">
@@ -183,7 +186,7 @@ import {
 @Component({
     components: { GeneralCriterionEditorDialog },
 })
-export default class SummaryReports extends Vue {
+export default class ReportsAndOutputs extends Vue {
 
     @State(state => state.adminDataModule.simulationReportNames) stateSimulationReportNames: string[];
 
@@ -341,7 +344,7 @@ export default class SummaryReports extends Vue {
                     this.addErrorNotificationAction({
                         message: 'Failed to generate apricot for ' + this.simulationName + '.',
                         longMessage:
-                            'Failed to generate the summary report. Make sure the scenario has been run',
+                            'Failed to generate the report or output. Make sure the scenario has been run',
                     });
                 }
             });
@@ -364,7 +367,7 @@ export default class SummaryReports extends Vue {
                 this.addErrorNotificationAction({
                     message: 'Failed to download report.',
                     longMessage:
-                        'Failed to download the summary report. Make sure the scenario has been run',
+                        'Failed to download the report or output. Make sure the scenario has been run',
                 });
             }
         });

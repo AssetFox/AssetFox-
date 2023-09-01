@@ -30,7 +30,7 @@
                                     <AnalysisMethodSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Analysis Method'"/>  
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
                                     <CommittedProjectSvg style="height: 32px; width: 24px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
-                                    <ReportsSvg style="height: 38px; width: 30px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Summary Reports'"/>  
+                                    <ReportsSvg style="height: 38px; width: 30px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-content>
@@ -222,10 +222,10 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Summary Reports',
+            tabName: 'Reports & Outputs',
             tabIcon: 'fas fa-clipboard,',
             navigation: {
-                path: '/SummaryReport/Scenario/',
+                path: '/ReportsAndOutputs/Scenario/',
             },
         },
     ];

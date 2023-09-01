@@ -1302,7 +1302,7 @@ export default class TreatmentEditor extends Vue {
         const hasUnsavedChanges: boolean = 
             this.addedRows.length > 0 ||
             this.updatedRowsMap.size > 0 || 
-            //(this.hasScenario && this.hasSelectedLibrary) ||
+            (this.hasScenario && this.hasSelectedLibrary) ||
             (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.stateSelectedTreatmentLibrary, this.selectedTreatmentLibrary))
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }

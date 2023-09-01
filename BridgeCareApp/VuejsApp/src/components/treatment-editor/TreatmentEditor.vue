@@ -19,6 +19,7 @@
                 <v-flex xs6>                       
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
                     <v-select
+                    id="TreatmentEditor-treatment-select"
                         :items='treatmentSelectItems'
                         append-icon=$vuetify.icons.ghd-down
                         class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
@@ -50,6 +51,7 @@
                 </v-flex>
                 <v-flex justify-right align-end style="padding-top: 38px !important;" >
                     <v-btn
+                        id="TreatmentEditor-createLibrary-btn"
                         @click='onShowCreateTreatmentLibraryDialog(false)'
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
@@ -139,8 +141,8 @@
                     <v-layout column> 
                         <v-flex xs12>               
                             <div v-show='selectedTreatment.id !== uuidNIL'>                                                
-                                <v-tabs v-model='activeTab'>
-                                    <v-tab
+                                <v-tabs v-model='activeTab' id='TreatmentEditor-treatmenttabs'>
+                                    <v-tab 
                                         :key='index'
                                         @click='activeTab = index'
                                         ripple
@@ -285,6 +287,7 @@
                     Save
                 </v-btn>
                 <v-btn
+                    id="TreatmentEditor-updateLibrary-btn"
                     @click='onUpsertTreatmentLibrary'
                     class='ghd-blue-bg ghd-white ghd-button-text  ghd-text-padding'
                     depressed

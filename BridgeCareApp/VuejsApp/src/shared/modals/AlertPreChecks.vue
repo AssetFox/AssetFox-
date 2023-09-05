@@ -1,6 +1,6 @@
 <template>
     <v-layout>
-        <v-dialog max-width='800px' persistent scrollable v-model="dialogDataPreChecks.showDialog">
+        <v-dialog style="overflow-y: auto" max-width='800px' persistent scrollable v-model="dialogDataPreChecks.showDialog">
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-layout justify-space-between align-center>
@@ -10,12 +10,12 @@
                         </v-btn>
                     </v-layout>
                 </v-card-title>
-                    <v-layout justify-center>
+                    <v-layout justify-center style="font-weight: 500">
                         {{dialogDataPreChecks.heading}}
                     </v-layout>
-                <div style='height: 500px; max-width:800px' class="ghd-dialog-box-padding-center">
+                <div style='height: 100%; max-width:100%' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
-                        <v-card-text class="px-4">
+                        <v-card-text style="border:1px solid black;" class="px-4">
                             <ul>
                                 <li class="text--primary" v-for="(key, index) in dialogDataPreChecks.message" :key="index">
                                 {{key}}

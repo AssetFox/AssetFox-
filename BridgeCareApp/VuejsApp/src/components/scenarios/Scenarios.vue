@@ -1479,8 +1479,7 @@ export default class Scenarios extends Vue {
                 showDialog: true,
                 heading: 'Error',
                 choice: false,
-                message:
-                'The following errors have been returned: ' + (this.preCheckMessage),
+                message:(this.preCheckMessage),
                 }
             }
             else if(this.preCheckStatus = 1)
@@ -1488,7 +1487,7 @@ export default class Scenarios extends Vue {
                 (this.selectedScenario = clone(emptyScenario));
                 this.onSecondConfirmAnalysisRunAlertData = {
                 showDialog: true,
-                heading: 'The following warnings have been returned: ',
+                heading: 'Warnings',
                 choice: true,
                 message:(this.preCheckMessage),
                 }
@@ -1500,8 +1499,7 @@ export default class Scenarios extends Vue {
                 showDialog: true,
                 heading: 'Information',
                 choice: true,
-                message:
-                'The following information has been returned: ' + (this.preCheckMessage),
+                message:(this.preCheckMessage),
                 }
             }
     }

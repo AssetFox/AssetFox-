@@ -68,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         
         public string Criteria { get; set; }
 
-        public async Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
             // Check for the parameters

@@ -107,7 +107,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = false;
         }
 
-        public async Task Run(string parameters, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {            
             workQueueLog ??= new DoNothingWorkQueueLog();            
             //check for the parameters string

@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 
         public string Criteria { get => null; set { } }
 
-        public async Task Run(string errorMessage, string criteria = null, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string errorMessage, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             _isComplete = false;            
             _errorList.Add(errorMessage);

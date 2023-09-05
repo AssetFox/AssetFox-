@@ -112,7 +112,7 @@ namespace BridgeCareCore.Controllers
                 var parameters = await GetParameters();
                 var scenarioName = "";
                 var scenarioId = new Guid();
-                var id = parameters.SelectToken("scenarioId").ToObject<string>()?.ToString();
+                var id = parameters.SelectToken("scenarioId")?.ToObject<string>()?.ToString();
                 if (Guid.TryParse(id, out scenarioId))
                 {
                     await Task.Factory.StartNew(() =>
@@ -122,9 +122,8 @@ namespace BridgeCareCore.Controllers
                 }
                 else
                     scenarioId = Guid.NewGuid();
-
-                var criteria = parameters.SelectToken("expression").ToObject<string>()?.ToString();
-                ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName, criteria);
+                                
+                ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(parameters, UserInfo.Name, scenarioName, reportName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, scenarioId.ToString());

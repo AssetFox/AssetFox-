@@ -1412,8 +1412,8 @@ export default class Scenarios extends Vue {
 
     onShowConfirmAnalysisRunAlert(scenario: Scenario) {
         this.selectedScenario = clone(scenario);
-
         let AlertButton = emptyAlertButton;
+        
         AlertButton.label  = "Run Pre-Checks" + "Cancel" + "Continue";
         this.confirmAnalysisRunAlertData = {
             showDialog: true,

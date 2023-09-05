@@ -129,7 +129,7 @@
                                         <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
                                     </v-flex>
                                     <v-flex xs2>                                 
-                                        <v-btn
+                                        <v-btn id="TreatmentDetailsTab-RemoveCriteria-vbtn"
                                             @click="
                                                 onRemoveTreatmentCriterion
                                             "
@@ -138,7 +138,7 @@
                                         >
                                             <v-icon style="font-size:20px !important" class="ghd-blue">fas fa-eraser</v-icon>
                                         </v-btn>
-                                        <v-btn id="TreatmentDetailsTab-Criteria-EditBtn"
+                                        <v-btn id="TreatmentDetailsTab-EditCriteria-vbtn"
                                             @click="
                                                 onShowTreatmentCriterionEditorDialog
                                             "

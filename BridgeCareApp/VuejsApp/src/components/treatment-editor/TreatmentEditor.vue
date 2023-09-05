@@ -261,7 +261,7 @@
                 >
                     Cancel
                 </v-btn>
-                <v-btn outline
+                <v-btn id='TreatmentEditor-deleteLibrary-btn' outline
                     @click='onShowConfirmDeleteAlert'
                     class='ghd-white-bg ghd-blue ghd-button-text'
                     depressed

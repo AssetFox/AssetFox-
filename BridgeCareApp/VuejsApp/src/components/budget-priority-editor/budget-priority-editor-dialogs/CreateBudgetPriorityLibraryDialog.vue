@@ -36,9 +36,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Getter} from 'vuex-class';
+import Vue, { reactive, watch } from 'vue';
 import {CreateBudgetPriorityLibraryDialogData} from '@/shared/models/modals/create-budget-priority-library-dialog-data';
 import {
   BudgetPercentagePair,
@@ -47,43 +45,45 @@ import {
   emptyBudgetPriorityLibrary
 } from '@/shared/models/iAM/budget-priority';
 import {getUserName} from '@/shared/utils/get-user-info';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { nextTick } from 'process';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreatePriorityLibraryDialog extends Vue {
-  @Prop() dialogData: CreateBudgetPriorityLibraryDialogData;
+  let store = useStore();
+  const props = defineProps<{
+    dialogData: CreateBudgetPriorityLibraryDialogData
+  }>()
+  let dialogData = reactive(props.dialogData);
+  const emit = defineEmits(['submit'])
+  let getIdByUserNameGetter: any = store.getters.getIdByUserName;
 
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
-
-  newBudgetPriorityLibrary: BudgetPriorityLibrary = {...emptyBudgetPriorityLibrary, id: getNewGuid()};
-  rules: InputValidationRules = rules;
+  let newBudgetPriorityLibrary: BudgetPriorityLibrary = {...emptyBudgetPriorityLibrary, id: getNewGuid()};
+  let rules: InputValidationRules = validationRules;
   
-  @Watch('dialogData')
-  onDialogDataChanged() {
+  watch(dialogData, onDialogDataChanged )
+  function onDialogDataChanged() {
     let currentUser: string = getUserName();
 
-    this.newBudgetPriorityLibrary = {
-      ...this.newBudgetPriorityLibrary,
-      budgetPriorities: this.dialogData.budgetPriorities.map((budgetPriority: BudgetPriority) => ({
+    newBudgetPriorityLibrary = {
+      ...newBudgetPriorityLibrary,
+      budgetPriorities: dialogData.budgetPriorities.map((budgetPriority: BudgetPriority) => ({
         ...budgetPriority, id: getNewGuid(),
         budgetPercentagePairs: budgetPriority.budgetPercentagePairs.map((budgetPercentagePair: BudgetPercentagePair) => ({
           ...budgetPercentagePair, id: getNewGuid()
         }))
       })),
-      owner: this.getIdByUserNameGetter(currentUser),
+      owner: getIdByUserNameGetter(currentUser),
     };
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newBudgetPriorityLibrary);
+      emit('submit', newBudgetPriorityLibrary);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newBudgetPriorityLibrary = {...emptyBudgetPriorityLibrary, id: getNewGuid()};
+    newBudgetPriorityLibrary = {...emptyBudgetPriorityLibrary, id: getNewGuid()};
   }
-}
 </script>

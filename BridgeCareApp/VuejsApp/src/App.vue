@@ -290,7 +290,7 @@ import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 import NewsDialog from '@/components/NewsDialog.vue'
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
 
 
     let store = useStore();

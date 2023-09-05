@@ -100,7 +100,6 @@ export default class EditAdminDataDialog extends Vue {
                 value = _;
 
             toReturn = {value: value, networkType: type};
-                
             return toReturn
         });
         this.settingsList = clone(this.DialogData.settingsList);

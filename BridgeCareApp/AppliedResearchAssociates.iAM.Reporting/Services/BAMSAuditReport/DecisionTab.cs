@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 decisionsTreatment.Benefit = treatmentOption != null ? decisionsTreatment.BCRatio * decisionsTreatment.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? BAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);
                 var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
-                var budgetPriorityLevel = treatmentConsideration != null ? treatmentConsideration.BudgetPriorityLevel.Value.ToString() : string.Empty;
+                var budgetPriorityLevel = treatmentConsideration != null && treatmentConsideration.BudgetPriorityLevel != null ? treatmentConsideration.BudgetPriorityLevel.Value.ToString() : string.Empty;
                 decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.BudgetUsages.Sum(_ => _.CoveredCost) : 0;
                 var budgetsUsed = treatmentConsideration?.BudgetUsages.Where(_ => _.CoveredCost > 0);
                 var budgetsUsedValue = budgetsUsed != null && budgetsUsed.Any() ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName)) : string.Empty; // currently this will be single value

@@ -5,7 +5,7 @@
     "reportType": [ "BAMSSummaryReport", "BAMSPBExportReport", 
                 "InventoryLookup", "PAMSSummaryReport", 
                 "ScenarioOutput", "BAMSAuditReport", 
-                "PAMSPBExportReport", "BAMSInventoryLookup" ],
+                "PAMSPBExportReport", "BAMSInventoryLookup", "PAMSInventoryLookupSections", "PAMSInventoryLookupSegments" ],
     "agencyLogo": "",
     "productLogo": "",
     "securityType": "B2C"

@@ -5,11 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Common;
-using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -17,7 +14,6 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -210,8 +206,19 @@ namespace BridgeCareCore.Controllers
         private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType, string parameters)
         {
             var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(parameters);
+            IReport reportObject;
+            if (ReportType.HTML == expectedReportType)
+            {
+                var last3Characters = reportName.Substring(reportName.Length - 3);
+                reportName = reportName.Substring(0, reportName.Length - 3);
+                reportObject = await _generator.Generate(reportName, last3Characters);
+            }
+            else
+            {
+                 reportObject = await _generator.Generate(reportName);
+            }
+
             //generate report
-            var reportObject = await _generator.Generate(reportName);
 
             if (reportObject == null)
             {
@@ -301,7 +308,7 @@ namespace BridgeCareCore.Controllers
 
         private IActionResult CreateErrorListing(List<string> errors)
         {
-            var errorHtml = new StringBuilder("<h2>Error Listing</h2><list>");
+            var errorHtml = new StringBuilder("<h2>Report Errors</h2><list>");
             foreach (var item in errors)
             {
                 errorHtml.Append($"<li>{item}</li>");

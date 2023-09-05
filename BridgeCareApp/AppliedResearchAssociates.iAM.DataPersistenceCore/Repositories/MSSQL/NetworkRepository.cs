@@ -86,6 +86,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.Id == mainNetworkId);
         }
 
+        public NetworkEntity GetRawNetwork()
+        {
+            var rawDataNetworkId = new Guid(_unitOfWork.Context.AdminSettings.Where(_ => _.Key == "rawDataNetwork").SingleOrDefault().Value);
+
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == rawDataNetworkId))
+            {
+                throw new RowNotInTableException("Unable to find raw Data network ID specified in appsettings.json");
+            }
+
+            return _unitOfWork.Context.Network
+                .Single(_ => _.Id == rawDataNetworkId);
+        }
+
         public Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true, Guid? simulationId = null)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))

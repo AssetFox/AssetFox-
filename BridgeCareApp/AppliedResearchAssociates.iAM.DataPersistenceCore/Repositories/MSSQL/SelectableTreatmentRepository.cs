@@ -996,6 +996,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        public void AddDefaultPerformanceFactors(Guid scenarioId, List<TreatmentDTO> treatments)
+        {
+            var distinctPerformanceCurves = _unitOfWork.Context.ScenarioPerformanceCurve.Include(_ => _.Attribute).Where(_ => _.SimulationId == scenarioId).ToList().GroupBy(_ => _.Attribute.Name).Select(_ => _.First()).ToList();
+            if (distinctPerformanceCurves.Count > 0)
+            {
+                treatments.ForEach(_ =>
+                {
+                    if(_.PerformanceFactors != null && _.PerformanceFactors.Count == 0)
+                    {
+                        _.PerformanceFactors = distinctPerformanceCurves.Select(__ => new TreatmentPerformanceFactorDTO() { Attribute = __.Attribute.Name, Id = Guid.NewGuid(), PerformanceFactor = 1 }).ToList();
+                    }
+                });
+            }
+        }
+
         public void UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(TreatmentLibraryDTO dto, bool isNewLibrary, Guid userId)
         {
             _unitOfWork.AsTransaction(() =>

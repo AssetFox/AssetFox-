@@ -9,11 +9,11 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static DeficientConditionGoalDTO Clone(DeficientConditionGoalDTO deficientConditionGoal, Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(deficientConditionGoal.CriterionLibrary, ownerId);
+            var cloneCriterionLibrary = CriterionLibraryCloner.CloneNullPropagating(deficientConditionGoal.CriterionLibrary, ownerId);
             var clone = new DeficientConditionGoalDTO
             {
                 LibraryId = deficientConditionGoal.LibraryId,
-                CriterionLibrary = cloneCritionLibrary,
+                CriterionLibrary = cloneCriterionLibrary,
                 Attribute = deficientConditionGoal.Attribute,
                 DeficientLimit = deficientConditionGoal.DeficientLimit,
                 AllowedDeficientPercentage = deficientConditionGoal.AllowedDeficientPercentage,

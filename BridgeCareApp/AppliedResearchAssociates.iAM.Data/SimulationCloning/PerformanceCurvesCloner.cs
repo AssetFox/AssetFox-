@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
         internal static PerformanceCurveDTO Clone(PerformanceCurveDTO performanceCurve, Guid ownerId)
         {
 
-            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(performanceCurve.CriterionLibrary, ownerId);
+            var cloneCriterionLibrary = CriterionLibraryCloner.CloneNullPropagating(performanceCurve.CriterionLibrary, ownerId);
             var cloneEquation = EquationCloner.Clone(performanceCurve.Equation, ownerId);
             var clone = new PerformanceCurveDTO            
             {
@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
                 Shift = performanceCurve.Shift,
                 Attribute = performanceCurve.Attribute,
                 LibraryId = performanceCurve.LibraryId,
-                CriterionLibrary = cloneCritionLibrary,
+                CriterionLibrary = cloneCriterionLibrary,
                 Equation = cloneEquation,                
             };
             return clone;

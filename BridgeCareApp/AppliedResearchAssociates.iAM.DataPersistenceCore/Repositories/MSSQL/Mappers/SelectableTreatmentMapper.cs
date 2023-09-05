@@ -12,6 +12,9 @@ using Microsoft.Extensions.DependencyModel;
 using MathNet.Numerics.Statistics.Mcmc;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DTOs.Static;
+
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -30,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType
             };
 
-        public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this TreatmentDTO dto, Guid simulationId)
+        public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this TreatmentDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties=null)
         {
            
             var treatment = new ScenarioSelectableTreatmentEntity
@@ -48,10 +51,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
                 AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
-                ScenarioTreatmentPerformanceFactors = dto.ToScenarioSelectableTreatmentPerformanceFactorEntity(),
+                ScenarioTreatmentPerformanceFactors = dto.ToScenarioSelectableTreatmentPerformanceFactorEntity(baseEntityProperties),
             };
+            BaseEntityPropertySetter.SetBaseEntityProperties(treatment, baseEntityProperties);
             return treatment;
-        } 
+        }
+
+        public static ScenarioSelectableTreatmentEntity ToScenarioEntityWithCriterionLibraryWithChildren(this TreatmentDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties = null)
+        {
+            var entity = ToScenarioEntity(dto, simulationId);
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
+            {
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
+                var join = new CriterionLibraryScenarioSelectableTreatmentEntity
+                {
+                    ScenarioSelectableTreatmentId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
+                entity.CriterionLibraryScenarioSelectableTreatmentJoin = join;
+            }
+            var costEntities = new List<ScenarioTreatmentCostEntity>();
+            foreach (var cost in dto.Costs)
+            {               
+                var costEntity = cost.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, baseEntityProperties);
+                costEntities.Add(costEntity);
+            }
+            entity.ScenarioTreatmentCosts = costEntities;
+            return entity;
+        }
+
+
         public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this Treatment domain, Guid simulationId) =>
             new ScenarioSelectableTreatmentEntity
             {
@@ -171,18 +204,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Treatment = treatmentDto,
             };
         }
-        public static List<ScenarioTreatmentPerformanceFactorEntity> ToScenarioSelectableTreatmentPerformanceFactorEntity(this TreatmentDTO dto)
+        public static List<ScenarioTreatmentPerformanceFactorEntity> ToScenarioSelectableTreatmentPerformanceFactorEntity(this TreatmentDTO dto, BaseEntityProperties baseEntityProperties)
         {
             List<ScenarioTreatmentPerformanceFactorEntity> treatmentPerformanceFactors = new List<ScenarioTreatmentPerformanceFactorEntity>();
             // need to return a list of scenariotretmentperformancefactorentities
             // how do i get the attribute from the dto?
             dto.PerformanceFactors.ForEach(p =>
             {
-                treatmentPerformanceFactors.Add(new ScenarioTreatmentPerformanceFactorEntity()
+                var treatmentPerformanceFactor = new ScenarioTreatmentPerformanceFactorEntity()
                 {
                     Attribute = p.Attribute,
                     PerformanceFactor = p.PerformanceFactor
-                });
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(treatmentPerformanceFactor, baseEntityProperties);
+                treatmentPerformanceFactors.Add(treatmentPerformanceFactor);
             });
             return treatmentPerformanceFactors;
         }

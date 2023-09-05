@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.Data.SimulationCloning;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -61,20 +62,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // do the clone
             var ownerId = _unitOfWork.CurrentUser?.Id??Guid.Empty;
+            var baseEntityProperties = new BaseEntityProperties {CreatedBy = ownerId, LastModifiedBy = ownerId };
             var ownerName = _unitOfWork.CurrentUser?.Username;
             var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId, ownerName);
 
             // save it
             var network = _unitOfWork.Context.Network.First(n => n.Id == dto.NetworkId);
-            var clone = CreateNewSimulation(cloneSimulation, network.KeyAttributeId, ownerId);
+            var clone = CreateNewSimulation(cloneSimulation, network.KeyAttributeId, baseEntityProperties);
             return clone;
         }
 
-        private SimulationCloningResultDTO CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO, Guid keyAttributeId, Guid ownerId)
+        private SimulationCloningResultDTO CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO, Guid keyAttributeId, BaseEntityProperties baseEntityProperties)
         {
             var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
             var keyAttribute = _unitOfWork.AttributeRepo.GetAttributeName(keyAttributeId);
-            var entity = CompleteSimulationMapper.ToNewEntity(completeSimulationDTO, attributes, keyAttribute, ownerId);
+            var entity = CompleteSimulationMapper.ToNewEntity(completeSimulationDTO, attributes, keyAttribute, baseEntityProperties);
 
             _unitOfWork.AsTransaction(() =>
             {

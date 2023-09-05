@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static ScenarioPerformanceCurveEntity ToScenarioEntityWithCriterionLibraryJoinAndEquationJoin(this PerformanceCurveDTO dto, Guid simulationId,
-         Guid attributeId)
+         Guid attributeId, BaseEntityProperties baseEntityProperties)
         {
 
             var entity = ToScenarioEntity(dto, simulationId, attributeId);
@@ -54,26 +54,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var isvalid = criterionLibraryDto.IsValid();
             if (isvalid)
             {
-                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity();
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
 
                 var join = new CriterionLibraryScenarioPerformanceCurveEntity
                 {
                     ScenarioPerformanceCurveId = entity.Id,                    
                     CriterionLibrary = criterionLibrary,
                 };
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
                 entity.CriterionLibraryScenarioPerformanceCurveJoin = join;
             }
             var hasEquation = dto.Equation != null && dto.Equation.Id != Guid.Empty;
             if (hasEquation)
             {
-                var equation = EquationMapper.ToEntity(dto.Equation);
+                var equation = EquationMapper.ToEntity(dto.Equation, baseEntityProperties);
                 var joinEquation = new ScenarioPerformanceCurveEquationEntity
                 {
                     ScenarioPerformanceCurveId = entity.Id,
                     Equation = equation,
                 };
+                BaseEntityPropertySetter.SetBaseEntityProperties(joinEquation, baseEntityProperties);
                 entity.ScenarioPerformanceCurveEquationJoin = joinEquation;
             }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             return entity;
         }
 

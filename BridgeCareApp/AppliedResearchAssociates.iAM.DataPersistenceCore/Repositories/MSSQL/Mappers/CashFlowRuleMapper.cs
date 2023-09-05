@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 SimulationId = simulationId
             };
 
-        public static ScenarioCashFlowRuleEntity ToScenarioEntityWithCriterionLibraryJoin(this CashFlowRuleDTO dto, Guid simulationId)
+        public static ScenarioCashFlowRuleEntity ToScenarioEntityWithCriterionLibraryJoin(this CashFlowRuleDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties)
         {
 
             var entity = ToScenarioEntity(dto, simulationId);
@@ -39,13 +39,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var isvalid = criterionLibraryDto.IsValid();
             if (isvalid)
             {
-                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity();
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
 
                 var join = new CriterionLibraryScenarioCashFlowRuleEntity
                 {
                     ScenarioCashFlowRuleId = entity.Id,                    
                     CriterionLibrary = criterionLibrary,
                 };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
                 entity.CriterionLibraryScenarioCashFlowRuleJoin = join;
             }
             return entity;

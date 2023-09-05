@@ -9,12 +9,12 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static CalculatedAttributeEquationCriteriaPairDTO Clone(CalculatedAttributeEquationCriteriaPairDTO calculatedAttributeEquationCriterionPair,Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(calculatedAttributeEquationCriterionPair.CriteriaLibrary, ownerId);
+            var cloneCriterionLibrary = CriterionLibraryCloner.CloneNullPropagating(calculatedAttributeEquationCriterionPair.CriteriaLibrary, ownerId);
             var cloneEquation = EquationCloner.Clone(calculatedAttributeEquationCriterionPair.Equation, ownerId);
             var clone = new CalculatedAttributeEquationCriteriaPairDTO
             {
                 Id = Guid.NewGuid(),
-                CriteriaLibrary = cloneCritionLibrary,
+                CriteriaLibrary = cloneCriterionLibrary,
                 Equation = cloneEquation,
                 
             };

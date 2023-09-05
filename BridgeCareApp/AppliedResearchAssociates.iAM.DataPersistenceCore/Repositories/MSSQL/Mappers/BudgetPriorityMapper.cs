@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Year = dto.Year
             };
 
-        public static ScenarioBudgetPriorityEntity ToScenarioEntityWithCriterionLibraryJoin(this BudgetPriorityDTO dto, Guid simulationId)
+        public static ScenarioBudgetPriorityEntity ToScenarioEntityWithCriterionLibraryJoin(this BudgetPriorityDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties)
         {
 
             var entity = ToScenarioEntity(dto, simulationId);
@@ -42,19 +42,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var isvalid = criterionLibraryDto.IsValid();
             if (isvalid)
             {
-                var criterionLibrary = new CriterionLibraryEntity
-                {
-                    MergedCriteriaExpression = criterionLibraryDto.MergedCriteriaExpression,
-                    Id = criterionLibraryDto.Id,
-                    Name = criterionLibraryDto.Name,
-                    CreatedBy = criterionLibraryDto.Owner,
-                };
+                var criterionLibrary = CriterionMapper.ToSingleUseEntity(criterionLibraryDto, baseEntityProperties);
 
                 var join = new CriterionLibraryScenarioBudgetPriorityEntity
                 {
                     ScenarioBudgetPriorityId = entity.Id,
                     CriterionLibrary = criterionLibrary,
                 };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
                 entity.CriterionLibraryScenarioBudgetPriorityJoin = join;
             }
             return entity;

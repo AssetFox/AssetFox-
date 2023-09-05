@@ -9,14 +9,14 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
         internal static AnalysisMethodDTO Clone(AnalysisMethodDTO analysisMethod, Guid ownerId)
         {
             var cloneBenefit = BenefitCloner.Clone(analysisMethod.Benefit);
-            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(analysisMethod.CriterionLibrary, ownerId);
+            var cloneCriterionLibrary = CriterionLibraryCloner.CloneNullPropagating(analysisMethod.CriterionLibrary, ownerId);
             var clone = new AnalysisMethodDTO
             {
                 Id = Guid.NewGuid(),
                 Attribute = analysisMethod.Attribute,
                 Description = analysisMethod.Description,
                 Benefit = cloneBenefit,
-                CriterionLibrary = cloneCritionLibrary,
+                CriterionLibrary = cloneCriterionLibrary,
                 OptimizationStrategy = analysisMethod.OptimizationStrategy,
                 ShouldApplyMultipleFeasibleCosts = analysisMethod.ShouldApplyMultipleFeasibleCosts,
                 ShouldDeteriorateDuringCashFlow = analysisMethod.ShouldDeteriorateDuringCashFlow,

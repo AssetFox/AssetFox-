@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static ScenarioBudgetEntity ToScenarioEntity(this BudgetDTO dto, Guid simulationId) =>
             new ScenarioBudgetEntity { Id = dto.Id, SimulationId = simulationId, LibraryId = dto.LibraryId, IsModified = dto.IsModified, Name = dto.Name, BudgetOrder = dto.BudgetOrder };
 
-        public static ScenarioBudgetEntity ToScenarioEntityWithBudgetAmounts(this BudgetDTO dto, Guid simulationId)
+        public static ScenarioBudgetEntity ToScenarioEntityWithBudgetAmounts(this BudgetDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties)
         {
             var entity = new ScenarioBudgetEntity            
             {
@@ -31,33 +31,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ScenarioBudgetAmounts = dto.BudgetAmounts.Select(_ => _.ToScenarioEntity(dto.Id)).ToList()
             };
             var criterionLibraryDto = dto.CriterionLibrary;
-            JoinEntityToCriterionLibrary(entity, criterionLibraryDto);
-            
+            JoinEntityToCriterionLibrary(entity, criterionLibraryDto, baseEntityProperties);
+
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             return entity;
         }
         
 
-        public static ScenarioBudgetEntity ToScenarioEntityWithCriterionLibraryJoin(this BudgetDTO dto, Guid simulationId)
+        public static ScenarioBudgetEntity ToScenarioEntityWithCriterionLibraryJoin(this BudgetDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties)
         {
 
             var entity = ToScenarioEntity(dto, simulationId);
             var criterionLibraryDto = dto.CriterionLibrary;
-            JoinEntityToCriterionLibrary(entity, criterionLibraryDto);
+            JoinEntityToCriterionLibrary(entity, criterionLibraryDto, baseEntityProperties);
             return entity;
         }
 
-        private static void JoinEntityToCriterionLibrary(ScenarioBudgetEntity entity, CriterionLibraryDTO criterionLibraryDto)
+        private static void JoinEntityToCriterionLibrary(ScenarioBudgetEntity entity, CriterionLibraryDTO criterionLibraryDto, BaseEntityProperties baseEntityProperties)
         {
             var isvalid = criterionLibraryDto.IsValid();
             if (isvalid)
             {
-                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity();
-
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(criterionLibrary, baseEntityProperties);
                 var join = new CriterionLibraryScenarioBudgetEntity
                 {
                     ScenarioBudgetId = entity.Id,
                     CriterionLibrary = criterionLibrary,
                 };
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
                 entity.CriterionLibraryScenarioBudgetJoin = join;
             }
         }

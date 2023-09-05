@@ -74,19 +74,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 EquationId = equation.Id, CalculatedAttributePairId = calculatedAttributePairId
             };
 
-      
 
-        public static ScenarioCalculatedAttributeEntity ToScenarioEntity(this CalculatedAttributeDTO dto, Guid simulationId, Guid attributeId) =>
-            new ScenarioCalculatedAttributeEntity()
+
+        public static ScenarioCalculatedAttributeEntity ToScenarioEntity(this CalculatedAttributeDTO dto, Guid simulationId, Guid attributeId, BaseEntityProperties baseEntityProperties=null)
+        {
+            var entity = new ScenarioCalculatedAttributeEntity()
             {
                 Id = dto.Id,
                 LibraryId = dto.LibraryId,
                 IsModified = dto.IsModified,
                 AttributeId = attributeId,
                 CalculationTiming = dto.CalculationTiming,
-                SimulationId = simulationId,                             
+                SimulationId = simulationId,
             };
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
 
+        }
       
     }
 }

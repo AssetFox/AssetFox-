@@ -78,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes, string networkKeyAttribute)
+        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes, string networkKeyAttribute, BaseEntityProperties baseEntityProperties=null)
         {
             var result = new CommittedProjectEntity
             {
@@ -121,7 +121,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 throw new ArgumentException($"Cannot convert the DTO location for committed project with the ID ${dto.Id}");
             }
-
+            BaseEntityPropertySetter.SetBaseEntityProperties(result, baseEntityProperties);
             return result;
         }
 

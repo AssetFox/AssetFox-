@@ -8,7 +8,8 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static TreatmentDTO Clone(TreatmentDTO treatment, Guid ownerId)
         {            
-            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(treatment.CriterionLibrary, ownerId);           
+            var cloneCriterionLibrary = CriterionLibraryCloner.CloneNullPropagating(treatment.CriterionLibrary, ownerId);
+            var cloneTreatmentCost = TreatmentCostCloner.CloneList(treatment.Costs, ownerId);
             var clone = new TreatmentDTO
             {
               Name = treatment.Name,
@@ -16,13 +17,13 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
               Description = treatment.Description,
               ShadowForAnyTreatment = treatment.ShadowForAnyTreatment,
               ShadowForSameTreatment = treatment.ShadowForSameTreatment,
-              CriterionLibrary = cloneCritionLibrary,
+              CriterionLibrary = cloneCriterionLibrary,
               AssetType = treatment.AssetType,
               BudgetIds = treatment.BudgetIds,
               Budgets = treatment.Budgets,
               Category = treatment.Category,
               Consequences = treatment.Consequences,
-              Costs = treatment.Costs,
+              Costs = cloneTreatmentCost,
               Id = Guid.NewGuid(),
               IsModified = treatment.IsModified,
               PerformanceFactors = treatment.PerformanceFactors,              

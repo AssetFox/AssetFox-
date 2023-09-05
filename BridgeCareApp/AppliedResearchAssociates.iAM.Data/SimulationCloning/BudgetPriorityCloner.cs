@@ -8,12 +8,12 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static BudgetPriorityDTO Clone(BudgetPriorityDTO budgetPriority, Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(budgetPriority.CriterionLibrary, ownerId);
+            var cloneCriterionLibrary = CriterionLibraryCloner.CloneNullPropagating(budgetPriority.CriterionLibrary, ownerId);
             var clone = new BudgetPriorityDTO
             {
                Id = Guid.NewGuid(),
                libraryId = budgetPriority.libraryId,
-               CriterionLibrary = cloneCritionLibrary,
+               CriterionLibrary = cloneCriterionLibrary,
                PriorityLevel = budgetPriority.PriorityLevel,
                BudgetPercentagePairs = budgetPriority.BudgetPercentagePairs,
                IsModified = budgetPriority.IsModified,

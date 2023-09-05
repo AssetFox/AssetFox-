@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
 
         public static ScenarioDeficientConditionGoalEntity ToScenarioEntityWithCriterionLibraryJoin(this DeficientConditionGoalDTO dto, Guid simulationId,
-          Guid attributeId)
+          Guid attributeId, BaseEntityProperties baseEntityProperties)
         {
 
             var entity = ToScenarioEntity(dto, simulationId, attributeId);
@@ -68,13 +68,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var isvalid = criterionLibraryDto.IsValid();
             if (isvalid)
             {
-                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity();
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
 
                 var join = new CriterionLibraryScenarioDeficientConditionGoalEntity
                 {
                     ScenarioDeficientConditionGoalId = entity.Id,
                     CriterionLibrary = criterionLibrary,
                 };
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
                 entity.CriterionLibraryScenarioDeficientConditionGoalJoin = join;
             }
             return entity;

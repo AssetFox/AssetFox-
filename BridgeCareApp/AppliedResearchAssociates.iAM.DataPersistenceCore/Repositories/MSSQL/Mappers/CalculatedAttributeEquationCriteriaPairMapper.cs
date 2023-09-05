@@ -11,10 +11,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class CalculatedAttributeEquationCriteriaPairMapper
     {
-        public static ScenarioCalculatedAttributeEquationCriteriaPairEntity ToScenarioEntity(this CalculatedAttributeEquationCriteriaPairDTO dto, Guid calculatedAttributeId) =>
-            new ScenarioCalculatedAttributeEquationCriteriaPairEntity() { Id = dto.Id, ScenarioCalculatedAttributeId = calculatedAttributeId };
-
-        public static ScenarioCriterionLibraryCalculatedAttributePairEntity ToScenarioEntity(this CriterionLibraryDTO criterion, Guid calculatedAttributePairId) =>
+        public static ScenarioCalculatedAttributeEquationCriteriaPairEntity ToScenarioEntity(this CalculatedAttributeEquationCriteriaPairDTO dto, Guid calculatedAttributeId, BaseEntityProperties baseEntityProperties=null)
+        {
+            var entity = new ScenarioCalculatedAttributeEquationCriteriaPairEntity()
+            {
+                Id = dto.Id,
+                ScenarioCalculatedAttributeId = calculatedAttributeId
+            };
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
+          public static ScenarioCriterionLibraryCalculatedAttributePairEntity ToScenarioEntity(this CriterionLibraryDTO criterion, Guid calculatedAttributePairId) =>
             new ScenarioCriterionLibraryCalculatedAttributePairEntity()
             {
                 CriterionLibraryId = criterion.Id,

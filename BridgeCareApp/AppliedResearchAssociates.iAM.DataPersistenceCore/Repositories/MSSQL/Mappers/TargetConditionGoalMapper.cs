@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static ScenarioTargetConditionGoalEntity ToScenarioEntityWithCriterionLibraryJoin(this TargetConditionGoalDTO dto, Guid simulationId,
-           Guid attributeId)
+           Guid attributeId, BaseEntityProperties baseEntityProperties)
         {
 
             var entity = ToScenarioEntity(dto, simulationId, attributeId);
@@ -71,21 +71,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var isvalid = criterionLibraryDto.IsValid();
             if (isvalid)
             {
-                var criterionLibrary = new CriterionLibraryEntity
-                {
-                    MergedCriteriaExpression = criterionLibraryDto.MergedCriteriaExpression,
-                    Id = criterionLibraryDto.Id,
-                    Name = criterionLibraryDto.Name,
-                    CreatedBy = criterionLibraryDto.Owner,
-                };
+                var criterionLibrary = CriterionMapper.ToSingleUseEntity(criterionLibraryDto, baseEntityProperties);
 
                 var join = new CriterionLibraryScenarioTargetConditionGoalEntity
                 {
                     ScenarioTargetConditionGoalId = entity.Id,
                     CriterionLibrary = criterionLibrary,
                 };
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
                 entity.CriterionLibraryScenarioTargetConditionGoalJoin = join;
             }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             return entity;
         }
 

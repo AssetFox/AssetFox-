@@ -8,12 +8,12 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         internal static TargetConditionGoalDTO Clone(TargetConditionGoalDTO targetConditionGoal, Guid ownerId)
         {
-            var cloneCritionLibrary = CriterionLibraryCloner.CloneNullPropagating(targetConditionGoal.CriterionLibrary, ownerId);
+            var cloneCriterionLibrary = CriterionLibraryCloner.CloneNullPropagating(targetConditionGoal.CriterionLibrary, ownerId);
             var clone = new TargetConditionGoalDTO
             {
                Id = Guid.NewGuid(),
                LibraryId = targetConditionGoal.LibraryId,
-               CriterionLibrary = cloneCritionLibrary,
+               CriterionLibrary = cloneCriterionLibrary,
                Attribute = targetConditionGoal.Attribute,
                IsModified = targetConditionGoal.IsModified,
                Name = targetConditionGoal.Name,

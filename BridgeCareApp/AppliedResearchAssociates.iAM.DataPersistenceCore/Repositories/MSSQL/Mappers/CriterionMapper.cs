@@ -14,8 +14,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 MergedCriteriaExpression = domain.Expression
             };
 
-        public static CriterionLibraryEntity ToEntity(this CriterionLibraryDTO dto) =>
-            new CriterionLibraryEntity
+        public static CriterionLibraryEntity ToEntity(this CriterionLibraryDTO dto, BaseEntityProperties baseEntityProperties=null)
+        {
+            var entity = new CriterionLibraryEntity
             {
                 Id = dto.Id,
                 Name = dto.Name,
@@ -23,10 +24,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 MergedCriteriaExpression = dto.MergedCriteriaExpression,
                 IsSingleUse = dto.IsSingleUse
             };
-
-        public static CriterionLibraryEntity ToSingleUseEntity(this CriterionLibraryDTO dto)
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
+        public static CriterionLibraryEntity ToSingleUseEntity(this CriterionLibraryDTO dto, BaseEntityProperties baseEntityProperties)
         {
-            var entity = dto.ToEntity();
+            var entity = dto.ToEntity(baseEntityProperties);
             entity.IsSingleUse = true;
             return entity;
         }

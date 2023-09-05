@@ -149,10 +149,10 @@ import { getUserName } from '@/shared/utils/get-user-info';
         CriteriaEditor,
     },
 })
-export default class CriterionLibraryEditor extends Vue {
-    @Prop() dialogLibraryId: string;
-    @Prop() dialogIsFromScenario: boolean;
-    @Prop() dialogIsFromLibrary: boolean;
+
+    let dialogLibraryId: string;
+    let dialogIsFromScenario: boolean;
+    let dialogIsFromLibrary: boolean;
 
     @State(state => state.criterionModule.criterionLibraries)
     stateCriterionLibraries: CriterionLibrary[];
@@ -178,31 +178,31 @@ export default class CriterionLibraryEditor extends Vue {
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
-    hasSelectedCriterionLibrary: boolean = false;
-    criterionLibrarySelectItems: SelectItem[] = [];
-    librarySelectItemValue: string | null = null;
-    selectedCriterionLibrary: CriterionLibrary = clone(emptyCriterionLibrary);
-    criteriaEditorData: CriteriaEditorData = {
+    let hasSelectedCriterionLibrary: boolean = false;
+    let criterionLibrarySelectItems: SelectItem[] = [];
+    let librarySelectItemValue: string | null = null;
+    let selectedCriterionLibrary: CriterionLibrary = clone(emptyCriterionLibrary);
+    let criteriaEditorData: CriteriaEditorData = {
         ...emptyCriteriaEditorData,
         isLibraryContext: true,
     };
-    isLibraryContext: boolean = true;
-    createCriterionLibraryDialogData: CreateCriterionLibraryDialogData = clone(
+    let isLibraryContext: boolean = true;
+    let createCriterionLibraryDialogData: CreateCriterionLibraryDialogData = clone(
         emptyCreateCriterionLibraryDialogData,
     );
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    canUpdateOrCreate: boolean = false;
-    uuidNIL: string = getBlankGuid();
-    callFromScenario: boolean = false;
-    callFromLibraryToEditCriterion: boolean = false;
-    criteriaForScenario: string | null = null;
-    selectedScenarioRelatedCriteria: CriterionLibrary = clone(
+    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let canUpdateOrCreate: boolean = false;
+    let uuidNIL: string = getBlankGuid();
+    let callFromScenario: boolean = false;
+    let callFromLibraryToEditCriterion: boolean = false;
+    let criteriaForScenario: string | null = null;
+    let selectedScenarioRelatedCriteria: CriterionLibrary = clone(
         emptyCriterionLibrary,
     );
-    hasCreatedLibrary: boolean = false;
-    hasLibraryEditPermission: boolean = false;
+    let hasCreatedLibrary: boolean = false;
+    let hasLibraryEditPermission: boolean = false;
 
-    beforeRouteEnter(to: any, from: any, next: any) {
+   function beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.getHasPermittedAccessAction();
 
@@ -215,7 +215,7 @@ export default class CriterionLibraryEditor extends Vue {
         });
     }
 
-    beforeDestroy() {
+    function beforeDestroy() {
         if (this.isLibraryContext) {
             this.setHasUnsavedChangesAction({ value: false });
         }
@@ -429,5 +429,5 @@ export default class CriterionLibraryEditor extends Vue {
             }).then(() => (this.librarySelectItemValue = null));
         }
     }
-}
+
 </script>

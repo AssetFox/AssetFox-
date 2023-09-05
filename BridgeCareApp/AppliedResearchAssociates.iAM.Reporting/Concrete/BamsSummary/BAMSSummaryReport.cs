@@ -26,8 +26,8 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedT
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.Reporting.Services;
 using System.Threading;
-using AppliedResearchAssociates.iAM.Common.Logging;
-
+using AppliedResearchAssociates.iAM.Common.Logging;using AppliedResearchAssociates.iAM.WorkQueue;
+
 namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class BAMSSummaryReport : IReport
@@ -65,6 +65,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Suffix => throw new NotImplementedException();
 
         public BAMSSummaryReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
@@ -225,7 +226,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var sectionValueAttribute = reportOutputData.Years[0].Assets[0].ValuePerNumericAttribute;
             reportDetailDto.Status = $"Checking sections";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
-            new QueuedWorkStatusUpdateModel() { Id = simulationId, Status = reportDetailDto.Status };
+            new QueuedWorkStatusUpdateModel() { Id = WorkQueueWorkIdFactory.CreateId(simulationId, DTOs.Enums.WorkType.ReportGeneration), Status = reportDetailDto.Status };
             foreach (var item in requiredSections)
             {
                 checkCancelled(cancellationToken, simulationId);

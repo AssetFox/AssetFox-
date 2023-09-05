@@ -35,16 +35,37 @@ export interface QueuedWork {
     workDescription: string;
     workType: WorkType;
     domainType: DomainType;
+    domainId: string;
+}
+
+export interface WorkQueueRequest {
+    domainId: string;
+    workType: WorkType;
 }
 
 export enum WorkType {
     SimulationAnalysis,
-    DeleteNetwork
+    DeleteNetwork,
+    Aggregation,
+    SimulationOutputConversion,
+    DeleteSimulation,
+    ReportGeneration,
+    ImportLibraryInvestment,
+    ImportLibraryPerformanceCurve,
+    ImportLibraryTreatment,
+    ImportScenarioInvestment,
+    ImportScenarioPerformanceCurve,
+    ImportScenarioTreatment,
+    ImportCommittedProject,
 }
 
 export enum DomainType {
     Simulation,
-    Network
+    Network,
+    Investment,
+    PerformanceCurve,
+    Treatment,
+    CommittedProject
 }
 
 export interface ScenarioActions {
@@ -76,7 +97,7 @@ export const emptyScenario: Scenario = {
 };
 
 export const emptyQueuedWork: QueuedWork = {
-    id: getBlankGuid(),
+    id: '',
     name: '',
     queueEntryTimestamp: new Date(),
     workStartedTimestamp: new Date(),
@@ -84,6 +105,6 @@ export const emptyQueuedWork: QueuedWork = {
     queuePosition: 0,
     workDescription: '',
     workType: WorkType.SimulationAnalysis,
-    domainType: DomainType.Simulation
-
+    domainType: DomainType.Simulation,
+    domainId: getBlankGuid()
 };

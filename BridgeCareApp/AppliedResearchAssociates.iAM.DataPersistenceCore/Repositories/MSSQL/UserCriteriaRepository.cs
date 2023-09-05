@@ -120,7 +120,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     Id = dto.UserId,
                     Username = dto.UserName,
-                    HasInventoryAccess = dto.HasAccess
+                    HasInventoryAccess = dto.HasAccess,
+                    Name = dto.Name,
+                    Description = dto.Description
                 };
                 _unitOfWork.Context.UpdateEntity(userEntity, dto.UserId, _unitOfWork.UserEntity?.Id);
             });

@@ -5,11 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Common;
-using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -17,7 +14,6 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -105,35 +101,6 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpDelete]
-        [Route("Cancel/{networkId}")]
-        [Authorize]
-        public async Task<IActionResult> CancelNetworkDeletion(Guid networkId)
-        {
-            try
-            {
-                var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(networkId);
-                await Task.Delay(125);
-
-                if (hasBeenRemovedFromQueue)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceled" });
-                }
-                else
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = networkId, Status = "Canceling network deletion..." });
-
-                }
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling network deltion for {networkName}::{e.Message}");
-                throw;
-            }
-        }
-
         [HttpPost]
         [Route("GetFile/{reportName}")]
         [Authorize]
@@ -155,9 +122,9 @@ namespace BridgeCareCore.Controllers
                     scenarioId = Guid.NewGuid();
 
                 ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(scenarioId, UserInfo.Name, scenarioName, reportName);
-                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, scenarioId.ToString());
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, scenarioId.ToString());
 
                 return Ok();
             }
@@ -239,8 +206,19 @@ namespace BridgeCareCore.Controllers
         private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType, string parameters)
         {
             var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(parameters);
+            IReport reportObject;
+            if (ReportType.HTML == expectedReportType)
+            {
+                var last3Characters = reportName.Substring(reportName.Length - 3);
+                reportName = reportName.Substring(0, reportName.Length - 3);
+                reportObject = await _generator.Generate(reportName, last3Characters);
+            }
+            else
+            {
+                 reportObject = await _generator.Generate(reportName);
+            }
+
             //generate report
-            var reportObject = await _generator.Generate(reportName);
 
             if (reportObject == null)
             {
@@ -330,7 +308,7 @@ namespace BridgeCareCore.Controllers
 
         private IActionResult CreateErrorListing(List<string> errors)
         {
-            var errorHtml = new StringBuilder("<h2>Error Listing</h2><list>");
+            var errorHtml = new StringBuilder("<h2>Report Errors</h2><list>");
             foreach (var item in errors)
             {
                 errorHtml.Append($"<li>{item}</li>");

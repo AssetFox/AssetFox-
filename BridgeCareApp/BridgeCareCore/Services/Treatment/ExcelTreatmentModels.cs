@@ -27,7 +27,9 @@ namespace BridgeCareCore.Services.Treatment
                 RowBasedExcelRegionModels.BlankLine,
                 TreatmentConsequencesRegion.ConsequencesRegion(dto),
                 RowBasedExcelRegionModels.BlankLine,
-                TreatmentBudgetsRegion.BudgetsRegion(dto)
+                TreatmentBudgetsRegion.BudgetsRegion(dto),
+                RowBasedExcelRegionModels.BlankLine,
+                TreatmentPerformanceRecordRegion.PerformanceFactorsRegion(dto)
                 );
             return returnValue;
         }

@@ -86,14 +86,50 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .AsNoTracking().AsSplitQuery().ToList();
         }
 
-        public List<AggregatedResultDTO> GetAggregatedResultsForAttributeNames(List<string> attributeNames)
+        public List<AggregatedSelectValuesResultDTO> GetAggregatedResultsForAttributeNames(List<string> attributeNames)
         {
-            return _unitOfWork.Context.AggregatedResult
-                .Include(_ => _.MaintainableAsset)
+            List<AggregatedSelectValuesResultDTO> returnList = new();
+            var uniqueAttributes = attributeNames.Distinct().ToList();
+            var allOfAttributeDTOs = _unitOfWork.Context.AggregatedResult
                 .Include(_ => _.Attribute)
-                .Where(_ => attributeNames.Contains(_.Attribute.Name))
+                .Where(_ => uniqueAttributes.Contains(_.Attribute.Name))
                 .Select(e => AggregatedResultMapper.ToDto(e))
                 .AsNoTracking().AsSplitQuery().ToList();
+
+            foreach (var attributeName in uniqueAttributes)
+            {
+                var attributeDTO = allOfAttributeDTOs.Where(_ => _.Attribute.Name == attributeName).ToList();
+
+                if (!attributeDTO.Any())
+                    break;
+
+                var values = new List<string>();
+                bool isNumber = false;
+                if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
+                {
+                    values = attributeDTO.Where(_ => _.NumericValue.HasValue).Select(_ => _.NumericValue.Value.ToString()).Distinct().ToList();
+                    isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
+                }
+                else if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
+                {
+                    values = attributeDTO.Where(_ => _.TextValue != null).Select(_ => _.TextValue).Distinct().ToList();
+                    isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
+                }
+                else
+                    break;
+
+                AttributeDTO attr = attributeDTO.Select(_ => _.Attribute).FirstOrDefault();
+                string resultType = values.Any() ? "success" : "warning";
+                AggregatedSelectValuesResultDTO returnResult = new()
+                {
+                    Attribute = attr,
+                    Values = values,
+                    ResultType = resultType,
+                    IsNumber = isNumber
+                };
+                returnList.Add(returnResult);
+            }
+            return returnList;
         }
 
         public List<AggregatedResultDTO> GetAggregatedResultsForMaintainableAsset(Guid assetId, List<Guid> attributeIds)

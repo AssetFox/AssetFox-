@@ -5,14 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
 {
     public class SimulationCloningScenarioBudgetTests
     {
+
         [Fact]
         public void SimulationInDbWithBudgetWithPercentagePair_Clone_Clones()
         {
@@ -22,17 +22,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
             var budgetId = Guid.NewGuid();
-            var budget = BudgetDtos.WithSingleAmount(budgetId, "budget", 2023, 4321);
+            var budget = BudgetDtos.New(budgetId);
             var budgets = new List<BudgetDTO> { budget };
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
-            var budgetPriority = BudgetPriorityDtos.New();
-            var percentagePair = new BudgetPercentagePairDTO
-            {
-                BudgetId = budget.Id,
-                BudgetName = budget.Name,
-                Percentage = 12,
-            };
-            budgetPriority.BudgetPercentagePairs = new List<BudgetPercentagePairDTO> { percentagePair };
+            var budgetPriority = BudgetPriorityDtos.WithPercentagePair(budget.Name, budgetId);
             var budgetPriorities = new List<BudgetPriorityDTO> { budgetPriority };
             TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(budgetPriorities, simulationId);
 
@@ -41,10 +34,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
             var clonedPriorities = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(clonedSimulation.Id);
             var clonedPriority = clonedPriorities.Single();
-            ObjectAssertions.EquivalentExcluding(budgetPriority, clonedPriority,
-                bp => bp.Id, bp => bp.CriterionLibrary,
-                bp => bp.BudgetPercentagePairs[0].Id,
-                bp => bp.BudgetPercentagePairs[0].BudgetId);
+            var originalPair = budgetPriority.BudgetPercentagePairs[0];
+            var clonedPair = clonedPriority.BudgetPercentagePairs[0];
+            var clonedbudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(clonedSimulation.Id);
+            var clonedbudget = clonedbudgets.Single();
+            Assert.NotEqual(originalPair.Id, clonedPair.Id);
+            Assert.Equal(clonedbudget.Id, clonedPair.BudgetId);
+            Assert.Equal(originalPair.Percentage, clonedPair.Percentage);
+            Assert.Equal(budget.Name, clonedPair.BudgetName);
+            ObjectAssertions.EquivalentExcluding(budgetPriority, clonedPriority, bp => bp.Id, bp => bp.CriterionLibrary, bp => bp.BudgetPercentagePairs);
         }
 
         [Fact]

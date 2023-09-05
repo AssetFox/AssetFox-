@@ -16,7 +16,7 @@ namespace BridgeCareCore.Services
         public const string UnknownBudgetName = "Unknown";
 
         // TODO: Determine based on associated network
-        private readonly string _networkKeyField = "BRKEY_";
+        private string _networkKeyField = "";
 
         public CommittedProjectPagingService(IUnitOfWork unitOfWork)
         {
@@ -32,9 +32,7 @@ namespace BridgeCareCore.Services
 
             request.search = request.search == null ? "" : request.search;
             request.sortColumn = request.sortColumn == null ? "" : request.sortColumn;
-
-
-
+            
             committedProjects = SyncDataset(committedProjects, request.SyncModel);
             committedProjects = committedProjects.OrderBy(_ => _.Id).ToList();
             totalItems = committedProjects.Count;
@@ -43,6 +41,11 @@ namespace BridgeCareCore.Services
             {
                 var budgetIds = committedProjects.Select(_ => _.ScenarioBudgetId).Distinct().Where(x => x!=null).Select(x => x.Value).ToList();
                 budgetdict = _unitOfWork.BudgetRepo.GetScenarioBudgetDictionary(budgetIds);
+            }
+            if(committedProjects.Count > 0 && (request.search.Trim() != "" || request.sortColumn.Trim() != ""))
+            {
+                var networkId = _unitOfWork.SimulationRepo.GetSimulation(committedProjects.First().SimulationId).NetworkId;
+                _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(networkId);
             }
 
             if (request.search.Trim() != "")
@@ -79,7 +82,6 @@ namespace BridgeCareCore.Services
             return SyncDataset(committedProjects, request);
         }
 
-
         private List<SectionCommittedProjectDTO> OrderByColumn(List<SectionCommittedProjectDTO> committedProjects,
             string sortColumn,
             bool isDescending,
@@ -88,7 +90,7 @@ namespace BridgeCareCore.Services
             sortColumn = sortColumn?.ToLower();
             switch (sortColumn)
             {
-            case "brkey":
+            case "keyattr":
                 if (isDescending)
                     return committedProjects.OrderByDescending(_ => _.LocationKeys[_networkKeyField], new AlphanumericComparator()).ToList();
                 else
@@ -119,6 +121,7 @@ namespace BridgeCareCore.Services
                 else
                     return committedProjects.OrderBy(_ => _.Cost).ToList();
             }
+            
             return committedProjects;
         }
 

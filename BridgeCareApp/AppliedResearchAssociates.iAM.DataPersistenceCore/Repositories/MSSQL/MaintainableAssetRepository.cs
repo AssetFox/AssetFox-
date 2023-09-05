@@ -11,8 +11,6 @@ using EFCore.BulkExtensions;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Data;
-using AppliedResearchAssociates.iAM.Data.Aggregation;
-using AppliedResearchAssociates.iAM.Data.Attributes;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -282,6 +280,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .OrderByDescending(_ => _.Count())
                 .Select(_ => _.Key)
                 .FirstOrDefault();
+        }
+
+        public List<Guid> GetAllIdsInCommittedProjectsForSimulation(Guid simulationId, Guid networkId)
+        {
+            var assetIds = new List<Guid>();
+            var committedProjects = _unitOfWork.Context.CommittedProject.Include(c => c.CommittedProjectLocation).Where(c => c.SimulationId == simulationId);
+            var committedProjectLocations = committedProjects.Select(c => c.CommittedProjectLocation.ToDomain()).ToList();
+
+            var assets = _unitOfWork.Context.MaintainableAsset
+               .Where(_ => _.NetworkId == networkId)
+               .Include(_ => _.MaintainableAssetLocation)
+               .ToList();
+
+            foreach (var committedProjectLocation in committedProjectLocations)
+            {
+                var assetId = assets.FirstOrDefault(a => committedProjectLocation.MatchOn(a.MaintainableAssetLocation.ToDomain())).Id;
+                if (!assetIds.Contains(assetId))
+                {
+                    assetIds.Add(assetId);
+                }
+            }
+
+            return assetIds;
         }
     }
 }

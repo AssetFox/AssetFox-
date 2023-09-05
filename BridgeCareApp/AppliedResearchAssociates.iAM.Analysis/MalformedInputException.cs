@@ -1,24 +1,23 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public class MalformedInputException : Exception
 {
-    public class MalformedInputException : Exception
+    public MalformedInputException()
     {
-        public MalformedInputException()
-        {
-        }
+    }
 
-        public MalformedInputException(string message) : base(message)
-        {
-        }
+    public MalformedInputException(string message) : base(message)
+    {
+    }
 
-        public MalformedInputException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+    public MalformedInputException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
 
-        protected MalformedInputException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+    protected MalformedInputException(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
     }
 }

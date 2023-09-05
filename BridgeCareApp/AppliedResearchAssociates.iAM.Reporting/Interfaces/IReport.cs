@@ -36,6 +36,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
         string Results { get; }
 
         /// <summary>
+        /// Report suffix for deciding whether to use raw or primary data network
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        string Suffix { get; }
+
+
+        /// <summary>
         /// Describes the format of the results field
         /// </summary>
         ReportType Type { get; }

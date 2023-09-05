@@ -1,5 +1,5 @@
 import {AxiosPromise} from 'axios';
-import {CloneScenarioData, Scenario, QueuedWork} from '@/shared/models/iAM/scenario';
+import {CloneScenarioData, Scenario, QueuedWork, WorkQueueRequest} from '@/shared/models/iAM/scenario';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import { PagingRequest } from '@/shared/models/iAM/paging';
 import { BlobOptions } from 'buffer';
@@ -25,6 +25,10 @@ export default class ScenarioService {
         return coreAxiosInstance.post(`${API.Scenario}/GetWorkQueuePage/`, data);
     }    
 
+    static getFastWorkQueuePage(data:PagingRequest<QueuedWork>): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetFastWorkQueuePage/`, data);
+    }
+
     static createScenario(data: Scenario, networkId: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.Scenario}/CreateScenario/${networkId}`, data);
     }
@@ -45,9 +49,21 @@ export default class ScenarioService {
         return coreAxiosInstance.post(`${API.Scenario}/RunSimulation/${networkId}/${scenarioId}`);
     }
 
-    static cancelSimulation(simulationId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`${API.Scenario}/CancelSimulation/${simulationId}`);
-    }    
+    static cancelWorkQueueItem(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.delete(`${API.Scenario}/CancelWorkQueueItem/${simulationId}`);
+    }
+    
+    static cancelFastQueueItem(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.delete(`${API.Scenario}/CancelFastQueueItem/${simulationId}`);
+    }
+
+    static getQueuedWorkByDomainIdAndWorkType(data:WorkQueueRequest): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetQueuedWorkByDomainIdAndWorkType/`, data);
+    }
+    
+    static getFastQueuedWorkByDomainIdAndWorkType(data:WorkQueueRequest): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetFastQueuedWorkByDomainIdAndWorkType/`, data);
+    }
 
     static migrateLegacySimulationData(simulationId: number): AxiosPromise {
         return coreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacySimulation/${simulationId}`);

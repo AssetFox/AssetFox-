@@ -72,6 +72,7 @@ namespace BridgeCareCore.Services
                     {
                         _.BudgetIds = budgetIds;
                     }
+                    _unitOfWork.SelectableTreatmentRepo.AddDefaultPerformanceFactors(simulationId, rows);
                 });
             }
             return rows;

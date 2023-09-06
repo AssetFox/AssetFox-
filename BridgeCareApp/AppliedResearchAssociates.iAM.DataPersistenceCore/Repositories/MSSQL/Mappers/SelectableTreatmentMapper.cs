@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
-using MoreLinq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using Microsoft.Extensions.DependencyModel;
-using MathNet.Numerics.Statistics.Mcmc;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DTOs.Static;
+using MoreLinq;
 
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -57,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return treatment;
         }
 
-        public static ScenarioSelectableTreatmentEntity ToScenarioEntityWithCriterionLibraryWithChildren(this TreatmentDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties = null)
+        public static ScenarioSelectableTreatmentEntity ToScenarioEntityWithCriterionLibraryWithChildren(this TreatmentDTO dto, Guid simulationId, IEnumerable<AttributeEntity> attributes, BaseEntityProperties baseEntityProperties = null)
         {
             var entity = ToScenarioEntity(dto, simulationId);
             var criterionLibraryDto = dto.CriterionLibrary;
@@ -81,6 +76,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 costEntities.Add(costEntity);
             }
             entity.ScenarioTreatmentCosts = costEntities;
+
+            var consequencetEntities = new List<ScenarioConditionalTreatmentConsequenceEntity>();
+            foreach (var consequence in dto.Consequences)
+            {
+                var attributeName = consequence.Attribute;
+                var attribute = attributes.FirstOrDefault(a => a.Name == attributeName);
+                var consequenceEntity = consequence.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, attribute.Id, baseEntityProperties);
+                consequencetEntities.Add(consequenceEntity);
+            }
+            entity.ScenarioTreatmentConsequences = consequencetEntities;
             return entity;
         }
 

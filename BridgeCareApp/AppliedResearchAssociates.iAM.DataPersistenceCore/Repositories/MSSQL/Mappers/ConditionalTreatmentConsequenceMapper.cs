@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Attribute = AppliedResearchAssociates.iAM.Analysis.Attribute;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -38,6 +39,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AttributeId = attributeId,
                 ChangeValue = dto.ChangeValue
             };
+
+        public static ScenarioConditionalTreatmentConsequenceEntity ToScenarioEntityWithCriterionLibraryJoin(this TreatmentConsequenceDTO dto, Guid treatmentId, Guid attributeId, BaseEntityProperties baseEntityProperties)
+        {
+
+            var entity = ToScenarioEntity(dto,treatmentId, attributeId);
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
+            {
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
+                var join = new CriterionLibraryScenarioConditionalTreatmentConsequenceEntity
+                {
+                    ScenarioConditionalTreatmentConsequenceId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
+                entity.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin = join;
+            }
+            return entity;
+        }
+
 
         public static void CreateConditionalTreatmentConsequence(this ScenarioConditionalTreatmentConsequenceEntity entity, SelectableTreatment treatment, IEnumerable<Attribute> attributes)
         {

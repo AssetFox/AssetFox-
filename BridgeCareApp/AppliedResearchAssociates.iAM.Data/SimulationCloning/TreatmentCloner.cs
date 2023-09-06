@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
         {            
             var cloneCriterionLibrary = CriterionLibraryCloner.CloneNullPropagating(treatment.CriterionLibrary, ownerId);
             var cloneTreatmentCost = TreatmentCostCloner.CloneList(treatment.Costs, ownerId);
+            var cloneTreatmentConsequence = TreatmentConsequenceCloner.CloneList(treatment.Consequences, ownerId);
             var clone = new TreatmentDTO
             {
               Name = treatment.Name,
@@ -22,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
               BudgetIds = treatment.BudgetIds,
               Budgets = treatment.Budgets,
               Category = treatment.Category,
-              Consequences = treatment.Consequences,
+              Consequences = cloneTreatmentConsequence,
               Costs = cloneTreatmentCost,
               Id = Guid.NewGuid(),
               IsModified = treatment.IsModified,

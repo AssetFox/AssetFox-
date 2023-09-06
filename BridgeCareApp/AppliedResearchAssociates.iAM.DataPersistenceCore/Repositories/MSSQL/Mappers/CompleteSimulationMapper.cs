@@ -102,7 +102,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     BaseEntityPropertySetter.SetBaseEntityProperties(budgetJoin, baseEntityProperties);
                     budgetJoins.Add(budgetJoin);
                 }
-                var scenarioSelectableTreatmentEntity = treatment.ToScenarioEntityWithCriterionLibraryWithChildren(dto.Id, baseEntityProperties);
+                
+                var scenarioSelectableTreatmentEntity = treatment.ToScenarioEntityWithCriterionLibraryWithChildren(dto.Id, attributes, baseEntityProperties);
                 scenarioSelectableTreatmentEntity.ScenarioSelectableTreatmentScenarioBudgetJoins = budgetJoins;
                 scenarioSelectableTreatmentEntities.Add(scenarioSelectableTreatmentEntity);
             }

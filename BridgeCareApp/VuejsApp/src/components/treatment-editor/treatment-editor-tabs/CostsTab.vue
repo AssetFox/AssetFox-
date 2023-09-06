@@ -15,7 +15,7 @@
                             <td xs5>                            
                                 <v-layout xs6 align-center>                                
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Equation</v-subheader>
-                                    <v-btn
+                                    <v-btn id="TreatmentCostsTab-EquationEditorBtn"
                                         @click="
                                             onShowCostEquationEditorDialog(
                                                 props.item,
@@ -43,7 +43,7 @@
                             <td xs5>
                                 <v-layout xs6 align-center>
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Criteria</v-subheader>
-                                    <v-btn
+                                    <v-btn id="TreatmentCostsTab-CriteriaEditorBtn"
                                         @click="
                                             onShowCostCriterionEditorDialog(
                                                 props.item,

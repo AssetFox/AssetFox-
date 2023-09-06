@@ -15,7 +15,7 @@ export default class TreatmentService {
             data,
         );
     }
-
+    
     static deleteTreatmentLibrary(libraryId: string): AxiosPromise {
         return coreAxiosInstance.delete(
             `${API.Treatment}/DeleteTreatmentLibrary/${libraryId}`,

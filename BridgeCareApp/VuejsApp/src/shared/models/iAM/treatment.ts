@@ -60,6 +60,7 @@ export interface Treatment {
     assetType: AssetType;
     isModified: boolean;
     libraryId: string;
+    isUnselectable: boolean;
 }
 
 export interface SimpleTreatment {
@@ -91,6 +92,7 @@ export interface TreatmentDetails {
     criterionLibrary: CriterionLibrary;
     category: TreatmentCategory;
     assetType: AssetType;
+    isUnselectable: boolean;
 }
 
 export interface BudgetGridRow {
@@ -128,6 +130,7 @@ export const emptyTreatment: Treatment = {
     performanceFactors: [],
     isModified: false,
     libraryId:  getBlankGuid(),
+    isUnselectable: false,
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {
@@ -154,6 +157,7 @@ export const emptyTreatmentDetails: TreatmentDetails = {
     criterionLibrary: clone(emptyCriterionLibrary),
     category: TreatmentCategory.preservation,
     assetType: AssetType.bridge,
+    isUnselectable: false,
 };
 
 export const assetTypeMap: Map<string, AssetType> = new Map([

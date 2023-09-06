@@ -50,8 +50,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var projects = _unitOfWork.Context.CommittedProject
                 .Include(_ => _.CommittedProjectLocation)
                 .Include(_ => _.ScenarioBudget)
-                .Include(_ => _.CommittedProjectConsequences)
-                .ThenInclude(_ => _.Attribute)
                 .Where(_ => _.SimulationId == simulation.Id).ToList();
 
             var keyPropertyNames = (List<string>)_unitOfWork.AdminSettingsRepo.GetKeyFields();
@@ -195,8 +193,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var allProjectsInScenario = _unitOfWork.Context.CommittedProject.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
-                .Include(_ => _.CommittedProjectConsequences)
-                .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CommittedProjectLocation)
                 .Include(_=>_.Simulation.Network);
 
@@ -217,8 +213,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return _unitOfWork.Context.CommittedProject
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
-                .Include(_ => _.CommittedProjectConsequences)
-                .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CommittedProjectLocation)
                 .Include(_ => _.Simulation.Network)
                 .Select(_ => _.ToDTO(networkKeyAttribute))
@@ -261,14 +255,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     return p.ToEntity(attributes, GetNetworkKeyAttribute(p.SimulationId));
                 }).ToList();
 
-            var committedProjectConsequenceEntities = committedProjectEntities
-                    .Where(_ => _.CommittedProjectConsequences.Any())
-                    .SelectMany(_ => _.CommittedProjectConsequences)
-                    .ToList();
-
-            var allProvidedConsequenceEntityIds = committedProjectConsequenceEntities.Select(_ => _.Id).ToList();
-            _unitOfWork.Context.DeleteAll<CommittedProjectConsequenceEntity>(_ => !allProvidedConsequenceEntityIds.Contains(_.Id));
-
             var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
 
             // Determine the committed projects that exist
@@ -286,7 +272,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 // Upsert(update/insert) all
                 _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
-                _unitOfWork.Context.UpsertAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
                 
                 _unitOfWork.Commit();
             }
@@ -364,8 +349,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private void AssignIdWhenNull(BaseCommittedProjectDTO dto)
         {
             if (dto.Id == Guid.Empty) dto.Id = Guid.NewGuid();
-            dto.Consequences.Where(c => c.Id == Guid.Empty)
-                .ForEach(n => n.Id = Guid.NewGuid());
         }
 
         public string GetNetworkKeyAttribute(Guid simulationId)

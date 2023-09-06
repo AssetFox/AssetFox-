@@ -59,8 +59,8 @@ namespace BridgeCareCore.Services
         /**
          * Adds excel worksheet header row cell values for Committed Project Export
          */
-        private void AddHeaderCells(ExcelWorksheet worksheet, List<string> attributeNames)
-        {            
+        private void AddHeaderCells(ExcelWorksheet worksheet)
+        {
             var column = 1;
             if (_keyFields.Contains(_networkKeyField))
             {
@@ -79,14 +79,13 @@ namespace BridgeCareCore.Services
             {
                 worksheet.Cells[1, column++].Value = InitialHeaders[headerCount];
             }
-
-            attributeNames.ForEach(attributeName => worksheet.Cells[1, column++].Value = attributeName);
         }
+
 
         /**
          * Adds excel worksheet cell values for Committed Project Export
          */
-        private void AddDataCells(ExcelWorksheet worksheet, List<BaseCommittedProjectDTO> committedProjectDTOs, List<string> orderedAttributeNames)
+        private void AddDataCells(ExcelWorksheet worksheet, List<BaseCommittedProjectDTO> committedProjectDTOs)
         {
             var row = 2;
             committedProjectDTOs.OrderBy(_ => _.LocationKeys[_networkKeyField])
@@ -137,15 +136,7 @@ namespace BridgeCareCore.Services
                         worksheet.Cells[row, column++].Value = project.Cost;
                         worksheet.Cells[row, column++].Value = string.Empty; // AREA
                         worksheet.Cells[row, column++].Value = project.Category.ToString();
-                        // Cycling through the existing attributes will ensure the change values are matched to the correct attribute
-                        orderedAttributeNames.ForEach(attribute =>
-                        {
-                            var specificChangeValue = project.Consequences.FirstOrDefault(_ => _.Attribute == attribute)?.ChangeValue ?? "";
-                            worksheet.Cells[row, column++].Value = specificChangeValue;
 
-                            var performanceFactorValue = project.Consequences.FirstOrDefault(_ => _.Attribute == attribute)?.PerformanceFactor ?? float.Parse(_unitOfWork.Config["PerformanceFactorDefaults:CommittedProject"]);
-                            worksheet.Cells[row, column++].Value = performanceFactorValue;
-                        });
                         row++;
                     });
         }
@@ -154,11 +145,11 @@ namespace BridgeCareCore.Services
         {
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
             var simulationName = simulation.Name;
-            
+
             _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
 
             var committedProjectDTOs = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
-                        
+
             var fileName = $"CommittedProjects_{simulationName.Trim().Replace(" ", "_")}.xlsx";
 
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
@@ -166,29 +157,17 @@ namespace BridgeCareCore.Services
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
+
             if (committedProjectDTOs.Any())
             {
-                var attributeNames = committedProjectDTOs
-                    .SelectMany(_ =>
-                        _.Consequences.Select(__ => __.Attribute).Distinct().OrderBy(__ => __))
-                    .Distinct()
-                    .ToList();
-                List<string> attributesWithFactorNames = new List<string>();
-                foreach(var attributeName in attributeNames)
-                {
-                    var attributeWithFactor = attributeName + "_factor";
-                    attributesWithFactorNames.Add(attributeName);
-                    attributesWithFactorNames.Add(attributeWithFactor);
-                }
-                AddHeaderCells(worksheet, attributesWithFactorNames);
-                AddDataCells(worksheet, committedProjectDTOs, attributeNames);
+                AddHeaderCells(worksheet);
+                AddDataCells(worksheet, committedProjectDTOs);
             }
             else
             {
                 // Return a template
-                AddHeaderCells(worksheet, new List<string>());
+                AddHeaderCells(worksheet);
             }
-            
 
             return new FileInfoDTO
             {
@@ -197,6 +176,7 @@ namespace BridgeCareCore.Services
                 MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             };
         }
+
 
         public FileInfoDTO CreateCommittedProjectTemplate(Guid networkId)
         {
@@ -209,7 +189,7 @@ namespace BridgeCareCore.Services
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(networkId);
 
-            AddHeaderCells(worksheet, new List<string> { "Add Consequences Here and in columns to the right" });
+            AddHeaderCells(worksheet);
 
             return new FileInfoDTO
             {
@@ -397,27 +377,11 @@ namespace BridgeCareCore.Services
                     ShadowForSameTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 4), // Assumes that InitialHeaders stays constant
                     Cost = worksheet.GetCellValue<double>(row, _keyFields.Count + 6), // Assumes that InitialHeaders stays constant
                     Category = convertedCategory,
-                    Consequences = new List<CommittedProjectConsequenceDTO>()
                 };
                 // factor needs additional column, so increment by 2
                 // otherwise support old export files
                 int incrementCount = 1;
                 if (newImportFile) { incrementCount = 2; }
-                if (end.Column > _keyFields.Count + InitialHeaders.Count)
-                {
-                    // There are consequences in the committed project file - add them to the DTO
-                    for (var column = _keyFields.Count + InitialHeaders.Count + 1; column <= end.Column; column+=incrementCount)
-                    {
-                        project.Consequences.Add(new CommittedProjectConsequenceDTO
-                        {
-                            Id = Guid.NewGuid(),
-                            CommittedProjectId = project.Id,
-                            Attribute = worksheet.GetCellValue<string>(1, column),
-                            ChangeValue = worksheet.GetCellValue<string>(row, column),
-                            PerformanceFactor = newImportFile ? worksheet.GetCellValue<float>(row, column + 1) : worksheet.GetCellValue<float>(row, column),
-                        });
-                    }
-                }
 
                 // Add to the list of projects
                 projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifier, projectYear), project);
@@ -454,14 +418,6 @@ namespace BridgeCareCore.Services
                             ShadowForAnyTreatment = 0,
                             ShadowForSameTreatment = 0,
                             Cost = 0,
-                            Consequences = project.Consequences.Select(_ =>
-                                new CommittedProjectConsequenceDTO
-                                {
-                                    Id = Guid.NewGuid(),
-                                    CommittedProjectId = noTreatmentProjectId,
-                                    Attribute = _.Attribute,
-                                    ChangeValue = "+0"
-                                }).ToList()
                         };
 
                         projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifierAndYearTuple.Item1, year),

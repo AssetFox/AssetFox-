@@ -708,11 +708,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithOne(p => p.CommittedProject)
                     .HasForeignKey<CommittedProjectLocationEntity>(d => d.CommittedProjectId)
                     .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasMany(d => d.CommittedProjectConsequences)
-                    .WithOne(p => p.CommittedProject)
-                    .HasForeignKey(d => d.CommittedProjectId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<CommittedProjectLocationEntity>(entity =>
@@ -743,10 +738,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.PerformanceFactor).IsRequired();
 
-                entity.HasOne(d => d.CommittedProject)
-                    .WithMany(p => p.CommittedProjectConsequences)
-                    .HasForeignKey(d => d.CommittedProjectId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<CriterionLibraryEntity>(entity =>

@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -526,6 +527,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.AddAll(scenarioPerformanceCurveEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
 
+            updateTreatmentPerformanceFactors(scenarioPerformanceCurves, simulationId);
+
             // wjwjwj probably should not be deleting and re-adding? Instead, keep equations around if poossible, and
             // the same for criteria? But when making the change, see if we run into trouble.
             _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
@@ -587,6 +590,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
             _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+        }
+
+        private void updateTreatmentPerformanceFactors(List<PerformanceCurveDTO> scenarioPerformanceCurves,Guid simulationId)
+        {
+            var treatments = _unitOfWork.Context.ScenarioSelectableTreatment
+                .Include(_ => _.ScenarioTreatmentPerformanceFactors).Where(_ => _.SimulationId == simulationId).AsNoTracking().ToList();
+
+            var distinctPerformanceCurves = scenarioPerformanceCurves.GroupBy(_ => _.Attribute).Select(_ => _.First().Attribute).ToList();
+            var factorsToBeAdded = new List<ScenarioTreatmentPerformanceFactorEntity>();
+            var factorsToBeRemovedIds = new List<Guid>();
+            if (distinctPerformanceCurves.Count > 0)
+            {
+                treatments.ForEach(_ =>
+                {
+                    factorsToBeRemovedIds = _.ScenarioTreatmentPerformanceFactors.Where(p => !distinctPerformanceCurves.Contains(p.Attribute)).Select(__ => __.Id).ToList();
+                    var factorAttrsToBeAdded = distinctPerformanceCurves.Where(dpc => _.ScenarioTreatmentPerformanceFactors.FirstOrDefault(__ => __.Attribute == dpc) == null).ToList();
+                    if (factorAttrsToBeAdded.Count > 0)
+                        factorsToBeAdded.AddRange(factorAttrsToBeAdded.Select(__ => new ScenarioTreatmentPerformanceFactorEntity() { Attribute = __, Id = Guid.NewGuid(), PerformanceFactor = 1 , ScenarioSelectableTreatmentId = _.Id}));
+                });
+            }
+
+            if (factorsToBeAdded.Count > 0)
+                _unitOfWork.Context.AddAll(factorsToBeAdded);
+            if (factorsToBeRemovedIds.Count > 0)
+                _unitOfWork.Context.DeleteAll<ScenarioTreatmentPerformanceFactorEntity>(_ => factorsToBeRemovedIds.Contains(_.Id));
         }
 
         public void UpsertOrDeleteScenarioPerformanceCurves(

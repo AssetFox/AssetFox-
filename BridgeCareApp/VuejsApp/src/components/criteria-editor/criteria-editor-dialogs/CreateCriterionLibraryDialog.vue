@@ -46,42 +46,44 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Getter} from 'vuex-class';
-import {Component, Prop, Watch} from 'vue-property-decorator';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
 import {CreateCriterionLibraryDialogData} from '@/shared/models/modals/create-criterion-library-dialog-data';
 import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
-@Component
-export default class CreateCriterionLibraryDialog extends Vue {
-  @Prop() dialogData: CreateCriterionLibraryDialogData;
+const props = defineProps<{dialogData: CreateCriterionLibraryDialogData}>()
+let newCriterionLibrary: CriterionLibrary = {...emptyCriterionLibrary, id: getNewGuid(), isSingleUse: false};
+let store = useStore();
+const emit = defineEmits(['submit'])
 
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+async function getIdByUserNameGetter(payload?: any): Promise<any> {
+        await store.dispatch('getIdByUserName');
+}
 
-  newCriterionLibrary: CriterionLibrary = {...emptyCriterionLibrary, id: getNewGuid(), isSingleUse: false};
-
-  @Watch('dialogData')
-  onDialogDataChanged() {
+  watch(props.dialogData, () => onDialogDataChanged)
+  async function onDialogDataChanged() {
     let currentUser: string = getUserName();
 
-    this.newCriterionLibrary = {
-      ...this.newCriterionLibrary,
-      mergedCriteriaExpression: this.dialogData.mergedCriteriaExpression,
-      owner: this.getIdByUserNameGetter(currentUser),
+    newCriterionLibrary = {
+      ...newCriterionLibrary,
+      mergedCriteriaExpression: props.dialogData.mergedCriteriaExpression,
+      owner: await getIdByUserNameGetter(currentUser),
     };
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newCriterionLibrary);
+      emit('submit', newCriterionLibrary);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newCriterionLibrary = {...emptyCriterionLibrary, id: getNewGuid()};
+    newCriterionLibrary = {...emptyCriterionLibrary, id: getNewGuid()};
   }
-}
+
+
 </script>

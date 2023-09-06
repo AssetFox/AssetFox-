@@ -59,6 +59,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // load it
             var sourceSimulationId = dto.SourceScenarioId.ToString();
             var sourceSimulation = this.GetSimulation(sourceSimulationId);
+            var simulationCloningCommittedProjectErrors = new SimulationCloningCommittedProjectErrors();
+            var badCommittedProjects = sourceSimulation.CommittedProjects.Where(c => ! sourceSimulation.Budgets.Any(b => b.Id==c.ScenarioBudgetId)).ToList();
+            if (badCommittedProjects.Any())
+            {
+                var badCommittedProjectIds = badCommittedProjects.Select(b => b.ScenarioBudgetId.Value).ToList();
+                var dictionary = _unitOfWork.BudgetRepo.GetScenarioBudgetDictionary(badCommittedProjectIds);
+                simulationCloningCommittedProjectErrors.NumberOfCommittedProjectsAffected = badCommittedProjects.Count();
+                foreach (var badBudgetName in dictionary.Values)
+                {
+                    if (!simulationCloningCommittedProjectErrors.BudgetsPreventingCloning.Contains(badBudgetName))
+                    {
+                        simulationCloningCommittedProjectErrors.BudgetsPreventingCloning.Add(badBudgetName);
+                    }
+                }
+            }
 
             // do the clone
             var ownerId = _unitOfWork.CurrentUser?.Id??Guid.Empty;
@@ -68,11 +83,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // save it
             var network = _unitOfWork.Context.Network.First(n => n.Id == dto.NetworkId);
-            var clone = CreateNewSimulation(cloneSimulation, network.KeyAttributeId, baseEntityProperties);
+            var clone = CreateNewSimulation(cloneSimulation, network.KeyAttributeId, simulationCloningCommittedProjectErrors, baseEntityProperties);
             return clone;
         }
 
-        private SimulationCloningResultDTO CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO, Guid keyAttributeId, BaseEntityProperties baseEntityProperties)
+        private SimulationCloningResultDTO CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO, Guid keyAttributeId, SimulationCloningCommittedProjectErrors simulationCloningCommittedProjectErrors, BaseEntityProperties baseEntityProperties)
         {
             var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
             var keyAttribute = _unitOfWork.AttributeRepo.GetAttributeName(keyAttributeId);
@@ -83,9 +98,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddEntity(entity);               
             });
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(completeSimulationDTO.Id);
+            var warningMessage = simulationCloningCommittedProjectErrors.BudgetsPreventingCloning.Any() && simulationCloningCommittedProjectErrors.NumberOfCommittedProjectsAffected > 0
+                    ? $"The following committed project budgets were not found which has prevented {simulationCloningCommittedProjectErrors.NumberOfCommittedProjectsAffected} committed project(s) from being cloned: {string.Join(", ", simulationCloningCommittedProjectErrors.BudgetsPreventingCloning)}"
+                    : null;
             var cloningResult = new SimulationCloningResultDTO
             {
                 Simulation = simulation,
+                WarningMessage = warningMessage,
             };
             return cloningResult;
         }

@@ -20,8 +20,11 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             var clone = new List<BaseCommittedProjectDTO>();
             foreach (var baseCommittedProject in baseCommittedProjects)
             {
-                var childClone = Clone(baseCommittedProject, budgetIdMap);
-                clone.Add(childClone);
+                if (budgetIdMap.ContainsKey(baseCommittedProject.ScenarioBudgetId.Value))
+                {
+                    var childClone = Clone(baseCommittedProject, budgetIdMap);
+                    clone.Add(childClone);
+                }
             }
             return clone;
 

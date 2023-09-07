@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using MoreLinq;
+using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -83,6 +84,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AttributeId = attributeId,
                
             };
+
+        public static AnalysisMethodEntity ToEntityWithBenefit(this AnalysisMethodDTO dto, Guid simulationId, List<AttributeEntity> attributes, Guid? attributeId = null)
+        {
+            var entity = dto.ToEntity(simulationId, attributeId);
+            var benefit = dto.Benefit;
+            if (benefit != null&&benefit.Id!=Guid.Empty)
+            {
+                var benefitAttribute = attributes.First(a => a.Name == benefit.Attribute);
+                var benefitEntity = benefit.ToEntity(dto.Id, benefitAttribute.Id);
+                entity.Benefit = benefitEntity;                
+            }
+            return entity;
+         }
 
         public static AnalysisMethodDTO ToDto(this AnalysisMethodEntity entity) =>
             new AnalysisMethodDTO

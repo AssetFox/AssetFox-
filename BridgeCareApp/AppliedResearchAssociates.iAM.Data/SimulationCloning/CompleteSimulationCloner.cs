@@ -8,8 +8,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
     {
         public static CompleteSimulationDTO Clone(CompleteSimulationDTO completeSimulation, CloneSimulationDTO cloneRequest, Guid ownerId, string ownerName)
         {
-            var cloneAnalysisMethod = AnalysisMethodCloner.Clone(completeSimulation.AnalysisMethod, ownerId);
-            var cloneBudgetPriorities = BudgetPriorityCloner.CloneList(completeSimulation.BudgetPriorities, ownerId);
+            var cloneAnalysisMethod = AnalysisMethodCloner.Clone(completeSimulation.AnalysisMethod, ownerId);            
             var cloneCashFlowFule = CashFlowRuleCloner.CloneList(completeSimulation.CashFlowRules, ownerId);
             var cloneInvestmentPlan = InvestmentPlanCloner.Clone(completeSimulation.InvestmentPlan);
             var cloneReportIndex = ReportIndexCloner.CloneList(completeSimulation.ReportIndexes);
@@ -26,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
             {
                 budgetIdMap[completeSimulation.Budgets[budgetIndex].Id] = cloneBudget[budgetIndex].Id;
             }
-
+            var cloneBudgetPriorities = BudgetPriorityCloner.CloneList(completeSimulation.BudgetPriorities, budgetIdMap, ownerId);
             var cloneBaseCommittedProject = BaseCommittedProjectCloner.CloneList(completeSimulation.CommittedProjects, budgetIdMap);
             var user = new SimulationUserDTO
             {

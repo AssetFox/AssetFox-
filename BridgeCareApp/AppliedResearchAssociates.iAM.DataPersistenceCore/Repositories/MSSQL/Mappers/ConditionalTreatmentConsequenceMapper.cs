@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static ScenarioConditionalTreatmentConsequenceEntity ToScenarioEntityWithCriterionLibraryJoin(this TreatmentConsequenceDTO dto, Guid treatmentId, Guid attributeId, BaseEntityProperties baseEntityProperties)
         {
 
-            var entity = ToScenarioEntity(dto,treatmentId, attributeId);
+            var entity = ToScenarioEntity(dto, treatmentId, attributeId);
             var criterionLibraryDto = dto.CriterionLibrary;
             var isvalid = criterionLibraryDto.IsValid();
             if (isvalid)
@@ -57,6 +57,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
                 BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
                 entity.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin = join;
+            }
+            if (dto.Equation != null && dto.Equation.Id != Guid.Empty)
+            {
+                var equationEntity = EquationMapper.ToEntity(dto.Equation, baseEntityProperties);
+                var equationJoin = new ScenarioConditionalTreatmentConsequenceEquationEntity
+                {
+                    Equation = equationEntity,
+                    ScenarioConditionalTreatmentConsequenceId = entity.Id,
+                };
+                entity.ScenarioConditionalTreatmentConsequenceEquationJoin = equationJoin;
             }
             return entity;
         }

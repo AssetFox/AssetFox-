@@ -183,7 +183,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             TestHelper.UnitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteScenarioTreatmentConsequences(treatmentConsequencesPerTreatmentId, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
-            var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
+            var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);            
+            //var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
 
             var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
@@ -196,13 +197,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             Assert.NotEqual(treatment.Id, clonedTreatment.Id);
             Assert.Empty(clonedTreatment.Budgets);
             Assert.Empty(clonedTreatment.BudgetIds);
-            Assert.NotEqual(treatment, clonedTreatment);
-            var expectedTreatmentConsequence = new TreatmentConsequenceDTO();
-            Assert.NotEqual(expectedTreatmentConsequence.Id, treatmentConsequence.Id);
-            Assert.NotEqual(expectedTreatmentConsequence.Attribute, treatmentConsequence.Attribute);
-            Assert.NotEqual(expectedTreatmentConsequence.ChangeValue, treatmentConsequence.ChangeValue);
-            Assert.NotEqual(expectedTreatmentConsequence.CriterionLibrary, treatmentConsequence.CriterionLibrary);
-        }       
+            ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment, t => t.Id, t => t.Consequences, t => t.CriterionLibrary, t => t.BudgetIds, t => t.Budgets);
+            AssertValidLibraryClone(treatment.CriterionLibrary, clonedTreatment.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
+            var clonedConsequence = clonedTreatment.Consequences.Single();
+            ObjectAssertions.EquivalentExcluding(treatmentConsequence, clonedConsequence, c => c.Id, c => c.CriterionLibrary, c => c.Equation.Id);
+            AssertValidLibraryClone(treatmentConsequence.CriterionLibrary, clonedConsequence.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
+            Assert.NotEqual(treatmentConsequence.Id, clonedConsequence.Id);            
+        }
 
         [Fact]
         public void SimulationInDbWithRemainingLifeLimit_Clone_Clones()
@@ -357,7 +358,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             analysisMethodDto.Benefit = new BenefitDTO
             {
                 Id = Guid.NewGuid(),
-                Limit = 0.0,
+                Limit = 1.0,
                 Attribute = TestAttributeNames.CulvDurationN,
             };
             analysisMethodDto.CriterionLibrary = CriterionLibraryDtos.Dto();
@@ -371,6 +372,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
 
             var clonedSimulation = cloningResult.Simulation;
             var clonedAnalysisMethod = TestHelper.UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(clonedSimulation.Id);
+            var clonedBenefit = clonedAnalysisMethod.Benefit;
+            ObjectAssertions.EquivalentExcluding(analysisMethodDto.Benefit, clonedBenefit, b => b.Id);
+            Assert.NotEqual(analysisMethodDto.Benefit.Id, clonedBenefit.Id);
             Assert.NotEqual(analysisMethodDto.Id, clonedAnalysisMethod.Id);
             Assert.NotEqual(analysisMethodDto.CriterionLibrary.Id, clonedAnalysisMethod.CriterionLibrary.Id);
             Assert.Equal("mergedCriteriaExpression", clonedAnalysisMethod.CriterionLibrary.MergedCriteriaExpression);
@@ -643,6 +647,63 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
             Assert.NotEqual(budgetId, clonedBudget.Id);
             Assert.NotEqual(budget.BudgetAmounts[0].Id, clonedBudget.BudgetAmounts[0].Id);
             ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.CriterionLibrary, b => b.BudgetAmounts[0].Id);
+        }
+
+        [Fact]
+        public void SimulationInDbWithScenarioBudget_Clone_Clones()
+        {
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.New(budgetId);
+            var budgets = new List<BudgetDTO> { budget };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
+
+            var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
+            var clonedBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(cloningResult.Simulation.Id);
+            var clonedBudget = clonedBudgets.Single();
+            ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.CriterionLibrary);
+        }
+
+        [Fact]
+        public void SimulationInDbWithBudgetWithPercentagePair_Clone_Clones()
+        {
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var budgetId = Guid.NewGuid();
+            var budget = BudgetDtos.New(budgetId);
+            var budgets = new List<BudgetDTO> { budget };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
+            var budgetPriority = BudgetPriorityDtos.WithPercentagePair(budget.Name, budgetId);
+            var budgetPriorities = new List<BudgetPriorityDTO> { budgetPriority };
+            TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(budgetPriorities, simulationId);
+
+            //var cloningResult = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(simulationEntity.Id, networkId, newSimulationName);
+            var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            var cloningResult = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
+
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(cloningResult.Simulation.Id);
+            var clonedPriorities = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(clonedSimulation.Id);
+            var clonedPriority = clonedPriorities.Single();
+            var originalPair = budgetPriority.BudgetPercentagePairs[0];
+            var clonedPair = clonedPriority.BudgetPercentagePairs[0];
+            var clonedbudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(clonedSimulation.Id);
+            var clonedbudget = clonedbudgets.Single();
+            Assert.NotEqual(originalPair.Id, clonedPair.Id);
+            Assert.Equal(clonedbudget.Id, clonedPair.BudgetId);
+            Assert.Equal(originalPair.Percentage, clonedPair.Percentage);
+            Assert.Equal(budget.Name, clonedPair.BudgetName);
+            ObjectAssertions.EquivalentExcluding(budgetPriority, clonedPriority, bp => bp.Id, bp => bp.CriterionLibrary, bp => bp.BudgetPercentagePairs);
         }
 
         [Fact]

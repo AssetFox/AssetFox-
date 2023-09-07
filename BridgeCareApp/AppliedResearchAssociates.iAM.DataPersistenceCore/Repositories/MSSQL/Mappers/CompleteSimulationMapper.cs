@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         List<AttributeEntity> attributes,
             string networkKeyAttribute, BaseEntityProperties baseEntityProperties)
         {
-            var analysisMethod = AnalysisMethodMapper.ToEntity(dto.AnalysisMethod, dto.Id);
+            var analysisMethod = AnalysisMethodMapper.ToEntityWithBenefit(dto.AnalysisMethod, dto.Id, attributes);
             if (CriterionLibraryValidityChecker.IsValid(dto.AnalysisMethod.CriterionLibrary))
             {
                 var analysisMethodCriterionLibraryEntity = CriterionMapper.ToSingleUseEntity(dto.AnalysisMethod.CriterionLibrary, baseEntityProperties);
@@ -136,6 +136,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 var budgetPriorityEntity = budgetPriority.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, baseEntityProperties);
                 scenarioBudgetPriorityEntities.Add(budgetPriorityEntity);
+
             }
             var scenarioCashFlowRuleEntities = new List<ScenarioCashFlowRuleEntity>();
             foreach (var cashFlowRule in dto.CashFlowRules)

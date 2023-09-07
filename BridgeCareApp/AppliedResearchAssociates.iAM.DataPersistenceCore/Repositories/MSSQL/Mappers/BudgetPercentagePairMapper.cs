@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Percentage = domain.Percentage
             };
 
-        public static BudgetPercentagePairEntity ToEntity(this BudgetPercentagePairDTO dto, Guid budgetPriorityId) =>
+        public static BudgetPercentagePairEntity ToEntity(this BudgetPercentagePairDTO dto, Guid budgetPriorityId, BaseEntityProperties baseEntityProperties = null) =>
             new BudgetPercentagePairEntity
             {
                 Id = dto.Id,

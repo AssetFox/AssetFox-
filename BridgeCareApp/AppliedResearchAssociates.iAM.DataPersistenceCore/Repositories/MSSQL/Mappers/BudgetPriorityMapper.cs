@@ -9,6 +9,8 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Static;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using Org.BouncyCastle.Asn1.Cms;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -43,7 +45,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (isvalid)
             {
                 var criterionLibrary = CriterionMapper.ToSingleUseEntity(criterionLibraryDto, baseEntityProperties);
-
                 var join = new CriterionLibraryScenarioBudgetPriorityEntity
                 {
                     ScenarioBudgetPriorityId = entity.Id,
@@ -53,7 +54,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
                 entity.CriterionLibraryScenarioBudgetPriorityJoin = join;
             }
+            var budgetPercentagePairEntities = new List<BudgetPercentagePairEntity>();
+            foreach (var budgetPercentagePair in dto.BudgetPercentagePairs)
+            {
+                var budgetPercentagePairEntity = budgetPercentagePair.ToEntity(entity.Id, baseEntityProperties);
+                budgetPercentagePairEntities.Add(budgetPercentagePairEntity);
+            }
+            entity.BudgetPercentagePairs = budgetPercentagePairEntities;
             return entity;
+
         }
 
 

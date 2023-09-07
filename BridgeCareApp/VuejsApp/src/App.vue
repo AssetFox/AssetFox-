@@ -4,7 +4,9 @@
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
                     <img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" /> 
+                    <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
                     <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
+                    <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
                 </v-toolbar-title>
                 <v-toolbar-items>
                     <v-btn
@@ -586,12 +588,12 @@ export default class AppComponent extends Vue {
         this.currentURL = this.$router.currentRoute.name;
 
         if(this.$config.agencyLogo.trim() === "")
-            this.agencyLogo = require(`@/assets/images/generic/IAM_Main.jpg`)
+            this.agencyLogo = require(`@/assets/images/PennDOTLogo.svg`)
         else
             this.agencyLogo = this.$config.agencyLogo
 
         if(this.$config.productLogo.trim() === "")
-            this.productLogo = require(`@/assets/images/generic/IAM_Banner.jpg`)
+            this.productLogo = require(`@/assets/images/BridgeCareLogo.svg`)
         else
             this.productLogo = this.$config.productLogo
 

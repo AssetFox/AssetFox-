@@ -482,9 +482,13 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
             width: '',
         },
     ];
-
-    function beforeRouteEnter(to: any, from: any, next: any){
-        next((vm: any) => {
+    const $vuetify = inject('$vuetify') as any
+    const $router = useRouter();
+    const $statusHub = inject('$statusHub') as any
+    const $config = inject('$config') as any
+    beforeRouteEnter();
+    function beforeRouteEnter(){
+        ((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.attributeSelectItemValue = null;
 
@@ -492,8 +496,8 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                 vm.getCalculatedAttributeLibrariesAction().then(() => {
                     vm.setAttributeSelectItems()
                     vm.setAttributeTimingSelectItems();
-                    if (to.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
-                        vm.selectedScenarioId = to.query.scenarioId;
+                    if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
+                        vm.selectedScenarioId = $router.currentRoute.value.query.scenarioId;
 
                         if (vm.selectedScenarioId === vm.uuidNIL) {
                             vm.addErrorNotificationAction({

@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Xunit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -32,6 +33,8 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using Microsoft.Data.SqlClient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
+using Newtonsoft.Json;
+using AppliedResearchAssociates.iAM.TestHelpers.Extensions;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -622,8 +625,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
             // Act
-            var result = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(_testSimulationToClone.Id, _testSimulationToClone.NetworkId, _testSimulationToClone.Name);
-
+            //var result = TestHelper.UnitOfWork.SimulationRepo.CloneSimulation(_testSimulationToClone.Id, _testSimulationToClone.NetworkId, _testSimulationToClone.Name);
+            var result = TestHelper.UnitOfWork.CompleteSimulationRepo.Clone(cloneSimulationDto);
             // Assert
             var dto = result.Simulation;
 
@@ -794,6 +797,77 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotEqual(clonedSimulation.AnalysisMethod.Id, originalSimulation.AnalysisMethod.Id);
             Assert.Equal(clonedSimulation.AnalysisMethod.Benefit.AttributeId,
                 originalSimulation.AnalysisMethod.Benefit.AttributeId);
+            var jsonSettings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            };
+            var serializeOriginal = JsonConvert.SerializeObject(originalSimulation, Formatting.Indented, jsonSettings);
+            var serializeClone = JsonConvert.SerializeObject(clonedSimulation, Formatting.Indented, jsonSettings);
+            var originalLines = StringExtensions.ToLines(serializeOriginal);
+            var cloneLines = StringExtensions.ToLines(serializeClone);
+            var lastModifiedDate = @"""LastModifiedDate""";
+            var createdDate = @"""CreatedDate""";
+            var createdBy = @"""CreatedBy""";
+            var lastModifiedBy = @"""LastModifiedBy""";
+            var id = @"Id""";
+            var ignoreProperties = new List<string> { createdDate, createdBy, lastModifiedDate, lastModifiedBy };
+            var expectedCreatedBy = "";
+            var expectedLastModifiedBy = "";
+            var byProperties = new List<string> { createdBy, lastModifiedBy };
+            for (int i=0; i<originalLines.Count; i++)
+            {
+                var originalLine = originalLines[i];
+                var cloneLine = cloneLines[i];
+                var trimOriginal = originalLine.Trim(); 
+                var trimClone = cloneLine.Trim();
+                if (trimOriginal.StartsWith(createdBy))
+                {
+                    Assert.StartsWith(createdBy, trimClone);
+                    if (expectedCreatedBy == "")
+                    {
+                        expectedCreatedBy = trimClone;
+                    } else
+                    {
+                        Assert.Equal(expectedCreatedBy, trimClone);
+                    }
+                }
+                if (trimClone.StartsWith(lastModifiedBy))
+                {
+                    Assert.StartsWith(lastModifiedBy, trimClone);
+                    if (expectedLastModifiedBy == "")
+                    {
+                        expectedLastModifiedBy = trimClone;
+                    }
+                    else
+                    {
+                        Assert.Equal(expectedLastModifiedBy, trimClone);
+                    }
+                }
+                var bothLines = originalLine + Environment.NewLine + cloneLine;
+
+                if (originalLine!=cloneLine)
+                {
+                    bool shouldContinue = false;
+                    foreach (var ignore in ignoreProperties)
+                    {
+                        if (originalLine.Trim().StartsWith(ignore) && cloneLine.Trim().StartsWith(ignore))
+                        {
+                            shouldContinue = true;
+                            break;
+                        }
+                    }
+                    if (shouldContinue)
+                    {
+                        continue;
+                    }
+                    if (originalLine.Contains(id) && cloneLine.Contains(id))
+                    {
+                        continue;
+                    }
+                    Assert.Equal(originalLine, cloneLine);
+                }
+            }
+            Assert.Equal(originalLines.Count, cloneLines.Count);
         }
 
         [Fact (Skip ="Fails for reasons WJ does not understand.")]

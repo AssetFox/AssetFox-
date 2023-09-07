@@ -1217,8 +1217,8 @@ export default class CommittedProjectsEditor extends Vue  {
             scp.yearErrors = ['Value cannot be empty'];
         else if (this.investmentYears.length === 0)
             scp.yearErrors = ['There are no years in the investment settings']
-        else if(scp.year.toString().length < 4 ) // TODO ask how much prior the year can be?
-            scp.yearErrors = ['Invalid value for Year'];      
+        else if(scp.year.toString().length < 4 || scp.year < 1900)
+            scp.yearErrors = ['Invalid Year value'];      
         else
             scp.yearErrors = [];
     }

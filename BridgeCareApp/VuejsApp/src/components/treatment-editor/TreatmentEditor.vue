@@ -279,7 +279,7 @@
                     class='ghd-blue-bg ghd-white ghd-button-text'
                     depressed
                     v-show='hasScenario'
-                    :disabled='disableCrudButtonsResult || !hasUnsavedChanges || hasImport'>
+                    :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
                 <v-btn
@@ -287,7 +287,7 @@
                     class='ghd-blue-bg ghd-white ghd-button-text  ghd-text-padding'
                     depressed
                     v-show='!hasScenario'
-                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges || hasImport'
+                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                 >
                     Update Library
                 </v-btn>
@@ -707,6 +707,8 @@ export default class TreatmentEditor extends Vue {
             text: treatment.name,
             value: treatment.id,
         }));       
+        this.hasUnsavedChanges = false;
+        this.disableCrudButtons();
     }
 
     @Watch('treatmentSelectItemValue')
@@ -940,7 +942,7 @@ export default class TreatmentEditor extends Vue {
             isModified: this.scenarioLibraryIsModified,
         }, this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                //this.clearChanges();
+                this.clearChanges();
                 if(this.hasSelectedLibrary){
                     this.librarySelectItemValue = null;
                     this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId)

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -35,5 +37,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         /// <param name="attribute">Name of attribute</param>
         /// <returns>All values for a specific attribute on a specific asset in the database with a primary key of year</returns>
         Dictionary<int, SegmentAttributeDatum> GetAttributeValueHistory(string keyName, string keyValue, string attribute);
+
+        /// <summary>
+        /// Provides an ordered table of tuples to the user for use in lookups
+        /// </summary>
+        /// <param name="keyFieldNames">List of desired key fields</param>
+        /// <returns></returns>
+        List<List<string>> GetKeyPropertiesTable(List<string> keyFieldNames);
+
+        /// <summary>
+        /// Given a dictionary based query using key attributes, returns the key attributes matching that query
+        /// </summary>
+        /// <param name="queryParameters">Dictionary of attributes and filtering parameters</param>
+        /// <param name="networkType">Main or Raw</param>
+        /// <param name="previousQuery">Provides a previous query to base this on.  The previous query is pulled from all asssets in the provided network type if not specified</param>
+        /// <returns>A list of assets and their key properties</returns>
+        List<MaintainableAssetQueryDTO> QueryKeyAttributes(Dictionary<AttributeDTO, string> queryParameters, NetworkTypes networkType = NetworkTypes.Main, List<MaintainableAssetQueryDTO> previousQuery = null);
     }
 }

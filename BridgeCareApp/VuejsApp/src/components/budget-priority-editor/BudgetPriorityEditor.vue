@@ -194,151 +194,139 @@
     </v-layout>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, State, Getter, Mutation } from 'vuex-class';
-import {
-    BudgetPercentagePair,
-    BudgetPriority,
-    BudgetPriorityGridDatum,
-    BudgetPriorityLibrary,
-    BudgetPriorityLibraryUser,
-    emptyBudgetPriority,
-    emptyBudgetPriorityLibrary,
-    emptyBudgetPriorityLibraryUsers
-} from '@/shared/models/iAM/budget-priority';
-import CreatePriorityDialog
-    from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityDialog.vue';
-import { any, clone, contains, find, findIndex, isNil, prepend, propEq, update } from 'ramda';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import { hasValue } from '@/shared/utils/has-value-util';
-import { getPropertyValues } from '@/shared/utils/getter-utils';
-import { setItemPropertyValue } from '@/shared/utils/setter-utils';
-import { SelectItem } from '@/shared/models/vue/select-item';
-import {
-    CreateBudgetPriorityLibraryDialogData,
-    emptyCreateBudgetPriorityLibraryDialogData,
-} from '@/shared/models/modals/create-budget-priority-library-dialog-data';
-import {
-    ShareBudgetPriorityLibraryDialogData,
-    emptyShareBudgetPriorityLibraryDialogData
-} from '@/shared/models/modals/share-budget-priority-library-dialog-data';
-import ShareBudgetPriorityLibraryDialog from './budget-priority-editor-dialogs/ShareBudgetPriorityLibraryDialog.vue';
-import CreatePriorityLibraryDialog
-    from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityLibraryDialog.vue';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import Alert from '@/shared/modals/Alert.vue';
-import { hasUnsavedChangesCore, isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
-import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
-import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
-import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { getAppliedLibraryId, hasAppliedLibrary } from '@/shared/utils/library-utils';
-import { CriterionLibrary } from '@/shared/models/iAM/criteria';
-import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
-import { getUserName } from '@/shared/utils/get-user-info';
-import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
-import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
-import BudgetPriorityService from '@/services/budget-priority.service';
-import { AxiosResponse } from 'axios';
-import { http2XX } from '@/shared/utils/http-utils';
-import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
-import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
-import { sortByProperty } from '../../shared/utils/sorter-utils';
-import {LibraryUser} from '@/shared/models/iAM/user'
-import { isNullOrUndefined } from 'util';
+<script setup lang='ts'>
+    import Vue, { reactive, Ref, ref, watch } from 'vue';
+    import {
+        BudgetPercentagePair,
+        BudgetPriority,
+        BudgetPriorityGridDatum,
+        BudgetPriorityLibrary,
+        BudgetPriorityLibraryUser,
+        emptyBudgetPriority,
+        emptyBudgetPriorityLibrary,
+        emptyBudgetPriorityLibraryUsers
+    } from '@/shared/models/iAM/budget-priority';
+    import { any, clone, contains, find, findIndex, isNil, prepend, propEq, update } from 'ramda';
+    import { DataTableHeader } from '@/shared/models/vue/data-table-header';
+    import { hasValue } from '@/shared/utils/has-value-util';
+    import { getPropertyValues } from '@/shared/utils/getter-utils';
+    import { setItemPropertyValue } from '@/shared/utils/setter-utils';
+    import { SelectItem } from '@/shared/models/vue/select-item';
+    import {
+        CreateBudgetPriorityLibraryDialogData,
+        emptyCreateBudgetPriorityLibraryDialogData,
+    } from '@/shared/models/modals/create-budget-priority-library-dialog-data';
+    import {
+        ShareBudgetPriorityLibraryDialogData,
+        emptyShareBudgetPriorityLibraryDialogData
+    } from '@/shared/models/modals/share-budget-priority-library-dialog-data';
+    import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+    import Alert from '@/shared/modals/Alert.vue';
+    import { hasUnsavedChangesCore, isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
+    import { InputValidationRules, rules as validationRules } from '@/shared/utils/input-validation-rules';
+    import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
+    import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
+    import { getAppliedLibraryId, hasAppliedLibrary } from '@/shared/utils/library-utils';
+    import { CriterionLibrary } from '@/shared/models/iAM/criteria';
+    import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+    import { getUserName } from '@/shared/utils/get-user-info';
+    import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
+    import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
+    import BudgetPriorityService from '@/services/budget-priority.service';
+    import { AxiosResponse } from 'axios';
+    import { http2XX } from '@/shared/utils/http-utils';
+    import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+    import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+    import { sortByProperty } from '../../shared/utils/sorter-utils';
+    import {LibraryUser} from '@/shared/models/iAM/user'
+    import { isNullOrUndefined } from 'util';
+    import { useStore } from 'vuex';
+import { stat } from 'fs';
 
-const ObjectID = require('bson-objectid');
-
-@Component({
-    components: {
-        CreatePriorityLibraryDialog, CreatePriorityDialog, GeneralCriterionEditorDialog, ConfirmDeleteAlert: Alert, ShareBudgetPriorityLibraryDialog
-    },
-})
-export default class BudgetPriorityEditor  {
-    @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
-    @State(state => state.budgetPriorityModule.budgetPriorityLibraries) stateBudgetPriorityLibraries: BudgetPriorityLibrary[];
-    @State(state => state.budgetPriorityModule.selectedBudgetPriorityLibrary) stateSelectedBudgetPriorityLibrary: BudgetPriorityLibrary;
-    @State(state => state.budgetPriorityModule.scenarioBudgetPriorities) stateScenarioBudgetPriorities: BudgetPriority[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.budgetPriorityModule.hasPermittedAccess) hasPermittedAccess: boolean;
-    @State(state => state.budgetPriorityModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedBudgetPriorityLibrary') getIsSharedLibraryAction: any;
-    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('getBudgetPriorityLibraries') getBudgetPriorityLibrariesAction: any;
-    @Action('selectBudgetPriorityLibrary') selectBudgetPriorityLibraryAction: any;
-    @Action('upsertBudgetPriorityLibrary') upsertBudgetPriorityLibraryAction: any;
-    @Action('deleteBudgetPriorityLibrary') deleteBudgetPriorityLibraryAction: any;
-    @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;
-    @Action('upsertScenarioBudgetPriorities') upsertScenarioBudgetPrioritiesAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
-
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
-    @Mutation('budgetPriorityLibraryMutator') budgetPriorityLibraryMutator: any;
-    @Mutation('selectedBudgetPriorityLibraryMutator') selectedBudgetPriorityLibraryMutator: any;
+    const ObjectID = require('bson-objectid');
+    let store = useStore();
+    let stateScenarioSimpleBudgetDetails = ref<SimpleBudgetDetail[]>(store.state.investmentModule.scenarioSimpleBudgetDetails);
+    let stateBudgetPriorityLibraries = ref<BudgetPriorityLibrary[]>(store.state.budgetPriorityModule.budgetPriorityLibraries);
+    let stateSelectedBudgetPriorityLibrary = ref<BudgetPriorityLibrary>(store.state.budgetPriorityModule.selectedBudgetPriorityLibrary);
+    let stateScenarioBudgetPriorities = ref<BudgetPriority[]>(store.state.budgetPriorityModule.scenarioBudgetPriorities);
+    let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+    let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
+    let hasPermittedAccess = ref<boolean>(store.state.budgetPriorityModule.hasPermittedAccess);
+    let isSharedLibrary = ref<boolean>(store.state.budgetPriorityModule.isSharedLibrary);
+    async function getIsSharedLibraryAction(payload?: any): Promise<any>{await store.dispatch('getIsSharedBudgetPriorityLibrary')}
+    async function getHasPermittedAccessAction(payload?: any): Promise<any>{await store.dispatch('getHasPermittedAccess')}
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification') }
+    async function getBudgetPriorityLibrariesAction(payload?: any): Promise<any>{await store.dispatch('getBudgetPriorityLibraries')}
+    async function selectBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('selectBudgetPriorityLibrary')}
+    async function upsertBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('upsertBudgetPriorityLibrary') }
+    async function deleteBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('deleteBudgetPriorityLibrary')}
+    async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any>{await store.dispatch('getScenarioSimpleBudgetDetails')} 
+    async function upsertScenarioBudgetPrioritiesAction(payload?: any): Promise<any>{await store.dispatch('upsertScenarioBudgetPriorities') }
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges') }
+    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification')}
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch( 'getCurrentUserOrSharedScenario')}
+    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario')}
     
-    addedRows: BudgetPriority[] = [];
-    updatedRowsMap:Map<string, [BudgetPriority, BudgetPriority]> = new Map<string, [BudgetPriority, BudgetPriority]>();//0: original value | 1: updated value
-    deletionIds: string[] = [];
-    rowCache: BudgetPriority[] = [];
-    gridSearchTerm = '';
-    currentSearch = '';
-    pagination: Pagination = clone(emptyPagination);
-    isPageInit = false;
-    totalItems = 0;
-    currentPage: BudgetPriority[] = [];
-    initializing: boolean = true;
-    currentPriorityList: number[] = [];
+    let getUserNameByIdGetter: any = store.getters.getUserNameById;
+    function budgetPriorityLibraryMutator(payload: any){store.commit('budgetPriorityLibraryMutator');}
+    function selectedBudgetPriorityLibraryMutator(payload: any){store.commit('selectedBudgetPriorityLibraryMutator');}
+    
+    let addedRows: Ref<BudgetPriority[]> = ref([]);
+    let updatedRowsMap:Map<string, [BudgetPriority, BudgetPriority]> = new Map<string, [BudgetPriority, BudgetPriority]>();//0: original value | 1: updated value
+    let deletionIds: Ref<string[]> = ref([]);
+    let rowCache: BudgetPriority[] = [];
+    let gridSearchTerm = '';
+    let currentSearch = '';
+    let pagination: Ref<Pagination> = ref(clone(emptyPagination));
+    let isPageInit = false;
+    let totalItems = 0;
+    let currentPage: Ref<BudgetPriority[]> = ref([]);
+    let initializing: boolean = true;
+    let currentPriorityList: number[] = [];
 
-    unsavedDialogAllowed: boolean = true;
-    trueLibrarySelectItemValue: string | null = ''
-    librarySelectItemValueAllowedChanged: boolean = true;
-    librarySelectItemValue: string | null = null;
+    let unsavedDialogAllowed: boolean = true;
+    let trueLibrarySelectItemValue: string | null = ''
+    let librarySelectItemValueAllowedChanged: boolean = true;
+    let librarySelectItemValue: Ref<string | null> = ref(null);
 
-    selectedScenarioId: string = getBlankGuid();
-    hasSelectedLibrary: boolean = false;
-    librarySelectItems: SelectItem[] = [];
-    shareBudgetPriorityLibraryDialogData: ShareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
-    isShared: boolean = false;
+    let selectedScenarioId: string = getBlankGuid();
+    let hasSelectedLibrary: boolean = false;
+    let librarySelectItems: SelectItem[] = [];
+    let shareBudgetPriorityLibraryDialogData: ShareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
+    let isShared: boolean = false;
 
-    selectedBudgetPriorityLibrary: BudgetPriorityLibrary = clone(emptyBudgetPriorityLibrary);
-    budgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
-    actionHeader: DataTableHeader = { text: 'Action', value: '', align: 'left', sortable: false, class: '', width: ''}
-    budgetPriorityGridHeaders: DataTableHeader[] = [
+    let selectedBudgetPriorityLibrary: BudgetPriorityLibrary = clone(emptyBudgetPriorityLibrary);
+    let budgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
+    let actionHeader: DataTableHeader = { text: 'Action', value: '', align: 'left', sortable: false, class: '', width: ''}
+    let budgetPriorityGridHeaders: DataTableHeader[] = [
         { text: 'Priority', value: 'priorityLevel', align: 'left', sortable: true, class: '', width: '' },
         { text: 'Year', value: 'year', align: 'left', sortable: false, class: '', width: '7%' },
         { text: 'Criteria', value: 'criteria', align: 'left', sortable: false, class: '', width: '' },
-        this.actionHeader
+        actionHeader
     ];
-    selectedBudgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
-    selectedBudgetPriorityIds: string[] = [];
-    selectedBudgetPriorityForCriteriaEdit: BudgetPriority = clone(emptyBudgetPriority);
-    showCreateBudgetPriorityDialog: boolean = false;
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
-    createBudgetPriorityLibraryDialogData: CreateBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    rules: InputValidationRules = rules;
-    uuidNIL: string = getBlankGuid();
-    hasScenario: boolean = false;  
-    disableCrudButtonsResult: boolean = false;
-    checkBoxChanged: boolean = false;
-    hasLibraryEditPermission: boolean = false;
-    hasCreatedLibrary: boolean = false;
-    parentLibraryName: string = "None";
-    parentLibraryId: string = "";
-    parentModifiedFlag: boolean = false;
-    scenarioLibraryIsModified: boolean = false;
-    loadedParentName: string = "";
-    loadedParentId: string = "";
-    newLibrarySelection: boolean = false;
+    let selectedBudgetPriorityGridRows: Ref<BudgetPriorityGridDatum[]> = ref([]);
+    let selectedBudgetPriorityIds: string[] = [];
+    let selectedBudgetPriorityForCriteriaEdit: BudgetPriority = clone(emptyBudgetPriority);
+    let showCreateBudgetPriorityDialog: boolean = false;
+    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+    let createBudgetPriorityLibraryDialogData: CreateBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
+    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let rules: InputValidationRules = validationRules;
+    let uuidNIL: string = getBlankGuid();
+    let hasScenario: boolean = false;  
+    let disableCrudButtonsResult: boolean = false;
+    let checkBoxChanged: boolean = false;
+    let hasLibraryEditPermission: boolean = false;
+    let hasCreatedLibrary: boolean = false;
+    let parentLibraryName: string = "None";
+    let parentLibraryId: string = "";
+    let parentModifiedFlag: boolean = false;
+    let scenarioLibraryIsModified: boolean = false;
+    let loadedParentName: string = "";
+    let loadedParentId: string = "";
+    let newLibrarySelection: boolean = false;
 
-    beforeRouteEnter(to: any, from: any, next: any) {
+    function beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getBudgetPriorityLibrariesAction();
@@ -364,150 +352,147 @@ export default class BudgetPriorityEditor  {
         });
     }
 
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
+    function beforeDestroy() {
+        setHasUnsavedChangesAction({ value: false });
     }
-
-    @Watch('stateBudgetPriorityLibraries')
-    onStateBudgetPriorityLibrariesChanged() {
-        this.librarySelectItems = this.stateBudgetPriorityLibraries.map((library: BudgetPriorityLibrary) => ({
+    watch(stateBudgetPriorityLibraries, onStateBudgetPriorityLibrariesChanged)
+    function onStateBudgetPriorityLibrariesChanged() {
+        librarySelectItems = stateBudgetPriorityLibraries.value.map((library: BudgetPriorityLibrary) => ({
             text: library.name,
             value: library.id,
         }));
     }
     //this is so that a user is asked wether or not to continue when switching libraries after they have made changes
     //but only when in libraries
-    @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(this.hasScenario){
-            this.onSelectItemValueChanged();
-            this.unsavedDialogAllowed = false;
+    watch(librarySelectItemValue, onLibrarySelectItemValueChangedCheckUnsaved )
+    function onLibrarySelectItemValueChangedCheckUnsaved(){
+        if(hasScenario){
+            onSelectItemValueChanged();
+            unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged) {
-            this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
-                this.librarySelectItemValueAllowedChanged = false;
-                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+        else if(librarySelectItemValueAllowedChanged) {
+            CheckUnsavedDialog(onSelectItemValueChanged, () => {
+                librarySelectItemValueAllowedChanged = false;
+                librarySelectItemValue.value = trueLibrarySelectItemValue;               
             });
         }
-        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-        this.newLibrarySelection = true;
-        this.librarySelectItemValueAllowedChanged = true;
+        parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+        newLibrarySelection = true;
+        librarySelectItemValueAllowedChanged = true;
     }
-    onSelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue;
-        this.selectBudgetPriorityLibraryAction({ libraryId: this.librarySelectItemValue });
+    function onSelectItemValueChanged() {
+        trueLibrarySelectItemValue = librarySelectItemValue.value;
+        selectBudgetPriorityLibraryAction({ libraryId: librarySelectItemValue });
     }
-
-    @Watch('stateSelectedBudgetPriorityLibrary')
-    onStateSelectedPriorityLibraryChanged() {
-        this.selectedBudgetPriorityLibrary = clone(this.stateSelectedBudgetPriorityLibrary);
+    watch(stateSelectedBudgetPriorityLibrary, onStateSelectedPriorityLibraryChanged)
+    function onStateSelectedPriorityLibraryChanged() {
+        selectedBudgetPriorityLibrary = clone(stateSelectedBudgetPriorityLibrary.value);
     }
+    watch(selectedBudgetPriorityLibrary, onSelectedPriorityLibraryChanged)
+    function onSelectedPriorityLibraryChanged() {
+        hasSelectedLibrary = selectedBudgetPriorityLibrary.id !== uuidNIL;
 
-    @Watch('selectedBudgetPriorityLibrary')
-    onSelectedPriorityLibraryChanged() {
-        this.hasSelectedLibrary = this.selectedBudgetPriorityLibrary.id !== this.uuidNIL;
-
-        if (this.hasSelectedLibrary) {
-            this.checkLibraryEditPermission();
-            this.hasCreatedLibrary = false;
+        if (hasSelectedLibrary) {
+            checkLibraryEditPermission();
+            hasCreatedLibrary = false;
         }
-        this.updatedRowsMap.clear();
-        this.deletionIds = [];
-        this.addedRows = [];
-        this.initializing = false;
-        if(this.hasSelectedLibrary)
-            this.onPaginationChanged();//
+        updatedRowsMap.clear();
+        deletionIds.value = [];
+        addedRows.value = [];
+        initializing = false;
+        if(hasSelectedLibrary)
+            onPaginationChanged();
     }
-
-    @Watch('stateScenarioBudgetPriorities')
-    onStateScenarioBudgetPrioritiesChanged() {
-        if (this.hasScenario) {
-            this.onPaginationChanged();
+    watch(stateScenarioBudgetPriorities, onStateScenarioBudgetPrioritiesChanged)
+    function onStateScenarioBudgetPrioritiesChanged() {
+        if (hasScenario) {
+            onPaginationChanged();
         }
     }
 
-    @Watch('currentPage')
-    onBudgetPrioritiesChanged() {
-        this.setGridCriteriaColumnWidth();
-        this.setGridHeaders();
-        this.setGridData();
-        this.currentPage.forEach((item) => {
-            this.currentPriorityList.push(item.priorityLevel);
+    watch(currentPage, onBudgetPrioritiesChanged )
+    function onBudgetPrioritiesChanged() {
+        setGridCriteriaColumnWidth();
+        setGridHeaders();
+        setGridData();
+        currentPage.value.forEach((item) => {
+            currentPriorityList.push(item.priorityLevel);
         });
         // Get parent name from library id
-        this.librarySelectItems.forEach(library => {
-            if (library.value === this.parentLibraryId) {
-                this.parentLibraryName = library.text;
+        librarySelectItems.forEach(library => {
+            if (library.value === parentLibraryId) {
+                parentLibraryName = library.text;
             }
         });
     }
 
-    @Watch('selectedBudgetPriorityGridRows')
-    onSelectedPriorityRowsChanged() {
-        this.selectedBudgetPriorityIds = getPropertyValues('id', this.selectedBudgetPriorityGridRows) as string[];
-    }
-    @Watch('isSharedLibrary')
-    onStateSharedAccessChanged() {
-        this.isShared = this.isSharedLibrary;
+    watch(selectedBudgetPriorityGridRows, onSelectedPriorityRowsChanged )
+    function onSelectedPriorityRowsChanged() {
+        selectedBudgetPriorityIds = getPropertyValues('id', selectedBudgetPriorityGridRows.value) as string[];
     }
 
-    @Watch('pagination')
-    onPaginationChanged() {
-        if(this.initializing)
+    watch(isSharedLibrary, onStateSharedAccessChanged )
+    function onStateSharedAccessChanged() {
+        isShared = isSharedLibrary.value;
+    }
+
+    watch(pagination, onPaginationChanged )
+    function onPaginationChanged() {
+        if(initializing)
             return;
-        this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+        checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = pagination.value;
         const request: PagingRequest<BudgetPriority>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: this.librarySelectItemValue !== null ? this.librarySelectItemValue : null,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                rowsForDeletion: this.deletionIds,
-                addedRows: this.addedRows,
-                isModified: this.scenarioLibraryIsModified
+                libraryId: librarySelectItemValue.value !== null ? librarySelectItemValue.value : null,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: deletionIds.value,
+                addedRows: addedRows.value,
+                isModified: scenarioLibraryIsModified
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
-            search: this.currentSearch
+            search: currentSearch
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            BudgetPriorityService.getScenarioBudgetPriorityPage(this.selectedScenarioId, request).then(response => {
+        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+            BudgetPriorityService.getScenarioBudgetPriorityPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    this.populateEmptyBudgetPercentagePairs(this.currentPage);
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
+                    populateEmptyBudgetPercentagePairs(currentPage.value);
                 }
             });
-        else if(this.hasSelectedLibrary)
-             BudgetPriorityService.getLibraryBudgetPriorityPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+        else if(hasSelectedLibrary)
+             BudgetPriorityService.getLibraryBudgetPriorityPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
 
-                    if (!isNullOrUndefined(this.selectedBudgetPriorityLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedBudgetPriorityLibrary).then(this.isShared = this.isSharedLibrary);
+                    if (!isNullOrUndefined(selectedBudgetPriorityLibrary.id) ) {
+                        getIsSharedLibraryAction(selectedBudgetPriorityLibrary).then(() => isShared = isSharedLibrary.value);
                     }           
                 }
             });     
     }
 
-    @Watch('deletionIds')
-    onDeletionIdsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(deletionIds, onDeletionIdsChanged )
+    function onDeletionIdsChanged(){
+        checkHasUnsavedChanges();
     }
 
-    @Watch('addedRows')
-    onAddedRowsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(addedRows, onAddedRowsChanged)
+    function onAddedRowsChanged(){
+        checkHasUnsavedChanges();
     }
 
-    hasBudgetPercentagePairsThatMatchBudgets(budgetPriority: BudgetPriority) {
-        if (!hasValue(this.stateScenarioSimpleBudgetDetails)) {
+    function hasBudgetPercentagePairsThatMatchBudgets(budgetPriority: BudgetPriority) {
+        if (!hasValue(stateScenarioSimpleBudgetDetails)) {
             return true;
         }
 
@@ -516,11 +501,11 @@ export default class BudgetPriorityEditor  {
                 id: budgetPercentagePair.budgetId, name: budgetPercentagePair.budgetName,
             })) as SimpleBudgetDetail[];
 
-        return isEqual(sortNonObjectLists(simpleBudgetDetails), sortNonObjectLists(clone(this.stateScenarioSimpleBudgetDetails)));
+        return isEqual(sortNonObjectLists(simpleBudgetDetails), sortNonObjectLists(clone(stateScenarioSimpleBudgetDetails)));
     }
 
-    createNewBudgetPercentagePairsFromBudgets() {
-        return this.stateScenarioSimpleBudgetDetails.map((simpleBudgetDetail: SimpleBudgetDetail) => ({
+    function createNewBudgetPercentagePairsFromBudgets() {
+        return stateScenarioSimpleBudgetDetails.value.map((simpleBudgetDetail: SimpleBudgetDetail) => ({
             id: getNewGuid(),
             budgetId: simpleBudgetDetail.id,
             budgetName: simpleBudgetDetail.name,
@@ -528,11 +513,11 @@ export default class BudgetPriorityEditor  {
         })) as BudgetPercentagePair[];
     }
 
-    setGridCriteriaColumnWidth() {
+    function setGridCriteriaColumnWidth() {
         let criteriaColumnWidth = '75%';
 
-        if (this.hasScenario) {
-            switch (this.stateScenarioSimpleBudgetDetails.length) {
+        if (hasScenario) {
+            switch (stateScenarioSimpleBudgetDetails.value.length) {
                 case 0:
                     criteriaColumnWidth = '75%';
                     break;
@@ -554,12 +539,12 @@ export default class BudgetPriorityEditor  {
             }
         }
 
-        this.budgetPriorityGridHeaders[2].width = criteriaColumnWidth;
+        budgetPriorityGridHeaders[2].width = criteriaColumnWidth;
     }
 
-    setGridHeaders() {
-        if (this.hasScenario) {
-            const budgetNames: string[] = getPropertyValues('name', this.stateScenarioSimpleBudgetDetails) as string[];
+    function setGridHeaders() {
+        if (hasScenario) {
+            const budgetNames: string[] = getPropertyValues('name', stateScenarioSimpleBudgetDetails.value) as string[];
             if (hasValue(budgetNames)) {
                 const budgetHeaders: DataTableHeader[] = budgetNames.map((budgetName: string) => ({
                     text: `${budgetName} %`,
@@ -569,19 +554,19 @@ export default class BudgetPriorityEditor  {
                     class: '',
                     width: '',
                 }));
-                this.budgetPriorityGridHeaders = [
-                    this.budgetPriorityGridHeaders[0],
-                    this.budgetPriorityGridHeaders[1],
-                    this.budgetPriorityGridHeaders[2],
+                budgetPriorityGridHeaders = [
+                    budgetPriorityGridHeaders[0],
+                    budgetPriorityGridHeaders[1],
+                    budgetPriorityGridHeaders[2],
                     ...budgetHeaders,
-                    this.actionHeader
+                    actionHeader
                 ];
             }
         }
     }
 
-    setGridData() {
-        this.budgetPriorityGridRows = this.currentPage.map((budgetPriority: BudgetPriority) => {
+    function setGridData() {
+        budgetPriorityGridRows = currentPage.value.map((budgetPriority: BudgetPriority) => {
             const row: BudgetPriorityGridDatum = {
                 id: budgetPriority.id,
                 priorityLevel: budgetPriority.priorityLevel.toString(),
@@ -589,7 +574,7 @@ export default class BudgetPriorityEditor  {
                 criteria: budgetPriority.criterionLibrary.mergedCriteriaExpression != null ? budgetPriority.criterionLibrary.mergedCriteriaExpression : '',
             };
 
-            if (this.hasScenario && hasValue(budgetPriority.budgetPercentagePairs)) {
+            if (hasScenario && hasValue(budgetPriority.budgetPercentagePairs)) {
                 budgetPriority.budgetPercentagePairs.forEach((budgetPercentagePair: BudgetPercentagePair) => {
                     row[budgetPercentagePair.budgetName] = budgetPercentagePair.percentage.toString();
                 });
@@ -599,77 +584,77 @@ export default class BudgetPriorityEditor  {
         });
     }
 
-    getOwnerUserName(): string {
+    function getOwnerUserName(): string {
 
-        if (!this.hasCreatedLibrary) {
-        return this.getUserNameByIdGetter(this.selectedBudgetPriorityLibrary.owner);
+        if (!hasCreatedLibrary) {
+        return getUserNameByIdGetter(selectedBudgetPriorityLibrary.owner);
         }
         
         return getUserName();
     }
 
-    checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
+    function checkLibraryEditPermission() {
+        hasLibraryEditPermission = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
     }
 
-    checkUserIsLibraryOwner() {
-        return this.getUserNameByIdGetter(this.selectedBudgetPriorityLibrary.owner) == getUserName();
+    function checkUserIsLibraryOwner() {
+        return getUserNameByIdGetter(selectedBudgetPriorityLibrary.owner) == getUserName();
     }
 
-    onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {
-        this.createBudgetPriorityLibraryDialogData = {
+    function onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {
+        createBudgetPriorityLibraryDialogData = {
             showDialog: true,
-            budgetPriorities: createAsNewLibrary ? this.currentPage : [],
+            budgetPriorities: createAsNewLibrary ? currentPage.value : [],
         };
     }
 
-    onSubmitCreateBudgetPriorityLibraryDialogResult(budgetPriorityLibrary: BudgetPriorityLibrary) {
-        this.createBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
+    function onSubmitCreateBudgetPriorityLibraryDialogResult(budgetPriorityLibrary: BudgetPriorityLibrary) {
+        createBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
         if (!isNil(budgetPriorityLibrary)) {
             const upsertRequest: LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority> = {
                 library: budgetPriorityLibrary,    
                 isNewLibrary: true,           
                 syncModel: {
-                    libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 || !this.hasSelectedLibrary ? null : this.selectedBudgetPriorityLibrary.id,
-                    rowsForDeletion: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : this.deletionIds,
-                    updateRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : this.addedRows,
+                    libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 || !hasSelectedLibrary ? null : selectedBudgetPriorityLibrary.id,
+                    rowsForDeletion: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : deletionIds.value,
+                    updateRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : addedRows.value,
                     isModified: false
                 },
-                scenarioId: this.hasScenario ? this.selectedScenarioId : null
+                scenarioId: hasScenario ? selectedScenarioId : null
             }
             BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then(() => {
-                this.hasCreatedLibrary = true;
-                this.librarySelectItemValue = budgetPriorityLibrary.id;
+                hasCreatedLibrary = true;
+                librarySelectItemValue.value = budgetPriorityLibrary.id;
                 
                 if(budgetPriorityLibrary.budgetPriorities.length == 0){
-                    this.clearChanges();
+                    clearChanges();
                 }
 
-                this.budgetPriorityLibraryMutator(budgetPriorityLibrary);
-                this.selectedBudgetPriorityLibraryMutator(budgetPriorityLibrary.id);                
-                this.addSuccessNotificationAction({message:'Added budget priority library'})
+                budgetPriorityLibraryMutator(budgetPriorityLibrary);
+                selectedBudgetPriorityLibraryMutator(budgetPriorityLibrary.id);                
+                addSuccessNotificationAction({message:'Added budget priority library'})
             })
         }
     }
 
-    onAddBudgetPriority(newBudgetPriority: BudgetPriority) {
-        this.showCreateBudgetPriorityDialog = false;
+    function onAddBudgetPriority(newBudgetPriority: BudgetPriority) {
+        showCreateBudgetPriorityDialog = false;
 
         if (!isNil(newBudgetPriority)) {
-            if (this.hasScenario && hasValue(this.stateScenarioSimpleBudgetDetails)) {
-                newBudgetPriority.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
+            if (hasScenario && hasValue(stateScenarioSimpleBudgetDetails)) {
+                newBudgetPriority.budgetPercentagePairs = createNewBudgetPercentagePairsFromBudgets();
             }
 
-            this.addedRows.push(newBudgetPriority);
-            this.onPaginationChanged()
+            addedRows.value.push(newBudgetPriority);
+            onPaginationChanged()
         }
     }
 
-    onEditBudgetPriority(budgetPriorityGridDatum: BudgetPriorityGridDatum, property: string, value: any) {
-        if (any(propEq('id', budgetPriorityGridDatum.id), this.currentPage)) {
+    function onEditBudgetPriority(budgetPriorityGridDatum: BudgetPriorityGridDatum, property: string, value: any) {
+        if (any(propEq('id', budgetPriorityGridDatum.id), currentPage.value)) {
             let budgetPriority: BudgetPriority = find(
-                propEq('id', budgetPriorityGridDatum.id), this.currentPage,
+                propEq('id', budgetPriorityGridDatum.id), currentPage.value,
             ) as BudgetPriority;
 
             if (property === 'year' && (!hasValue(value) || parseInt(value) === 0)) {
@@ -677,21 +662,21 @@ export default class BudgetPriorityEditor  {
             } else {
                 budgetPriority = setItemPropertyValue(property, value, budgetPriority) as BudgetPriority;
             }
-            this.onUpdateRow(budgetPriority.id, clone(budgetPriority))
-            this.onPaginationChanged();
+            onUpdateRow(budgetPriority.id, clone(budgetPriority))
+            onPaginationChanged();
         }
     }
 
-    onEditBudgetPercentagePair(budgetPriorityGridDatum: BudgetPriorityGridDatum, budgetName: string, percentage: number) {
+    function onEditBudgetPercentagePair(budgetPriorityGridDatum: BudgetPriorityGridDatum, budgetName: string, percentage: number) {
         const budgetPriority: BudgetPriority = find(
-            propEq('id', budgetPriorityGridDatum.id), this.currentPage,
+            propEq('id', budgetPriorityGridDatum.id), currentPage.value,
         ) as BudgetPriority;
 
         const budgetPercentagePair: BudgetPercentagePair = find(
             propEq('budgetName', budgetName), budgetPriority.budgetPercentagePairs,
         ) as BudgetPercentagePair;
 
-        this.onUpdateRow(budgetPriority.id, {
+        onUpdateRow(budgetPriority.id, {
                 ...budgetPriority, budgetPercentagePairs: update(
                     findIndex(propEq('id', budgetPercentagePair.id), budgetPriority.budgetPercentagePairs),
                     setItemPropertyValue('percentage', percentage, budgetPercentagePair) as BudgetPercentagePair,
@@ -699,127 +684,127 @@ export default class BudgetPriorityEditor  {
                 ),
             } as BudgetPriority)
 
-        this.onPaginationChanged();
+        onPaginationChanged();
     }
 
-    onShowCriterionLibraryEditorDialog(budgetPriorityGridDatum: BudgetPriorityGridDatum) {
-        this.selectedBudgetPriorityForCriteriaEdit = find(
-            propEq('id', budgetPriorityGridDatum.id), this.currentPage,
+    function onShowCriterionLibraryEditorDialog(budgetPriorityGridDatum: BudgetPriorityGridDatum) {
+        selectedBudgetPriorityForCriteriaEdit = find(
+            propEq('id', budgetPriorityGridDatum.id), currentPage.value,
         ) as BudgetPriority;
 
-        this.criterionEditorDialogData = {
+        criterionEditorDialogData = {
             showDialog: true,
-            CriteriaExpression: this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.mergedCriteriaExpression,
+            CriteriaExpression: selectedBudgetPriorityForCriteriaEdit.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onSubmitCriterionLibraryEditorDialogResult(criterionExpression: string) {
-        this.criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+    function onSubmitCriterionLibraryEditorDialogResult(criterionExpression: string) {
+        criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionExpression) && this.selectedBudgetPriorityForCriteriaEdit.id !== this.uuidNIL) {
-            if(this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id === getBlankGuid())
-                this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id = getNewGuid();
-            this.onUpdateRow(this.selectedBudgetPriorityForCriteriaEdit.id, 
-            { ...this.selectedBudgetPriorityForCriteriaEdit, 
-            criterionLibrary: {...this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
+        if (!isNil(criterionExpression) && selectedBudgetPriorityForCriteriaEdit.id !== uuidNIL) {
+            if(selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id = getNewGuid();
+            onUpdateRow(selectedBudgetPriorityForCriteriaEdit.id, 
+            { ...selectedBudgetPriorityForCriteriaEdit, 
+            criterionLibrary: {...selectedBudgetPriorityForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
 
-            this.onPaginationChanged();
+            onPaginationChanged();
         }
 
-        this.selectedBudgetPriorityForCriteriaEdit = clone(emptyBudgetPriority);
+        selectedBudgetPriorityForCriteriaEdit = clone(emptyBudgetPriority);
     }
 
-    onUpsertScenarioBudgetPriorities() {
+    function onUpsertScenarioBudgetPriorities() {
 
-        if (this.selectedBudgetPriorityLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
-        else { this.scenarioLibraryIsModified = false; }
+        if (selectedBudgetPriorityLibrary.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
+        else { scenarioLibraryIsModified = false; }
 
         BudgetPriorityService.upsertScenarioBudgetPriorities({
-            libraryId: this.selectedBudgetPriorityLibrary.id === this.uuidNIL ? null : this.selectedBudgetPriorityLibrary.id,
-            rowsForDeletion: this.deletionIds,
-            updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows,
-            isModified: this.scenarioLibraryIsModified
-        }, this.selectedScenarioId).then((response: AxiosResponse) => {
+            libraryId: selectedBudgetPriorityLibrary.id === uuidNIL ? null : selectedBudgetPriorityLibrary.id,
+            rowsForDeletion: deletionIds.value,
+            updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+            addedRows: addedRows.value,
+            isModified: scenarioLibraryIsModified
+        }, selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-                this.clearChanges();
-                this.librarySelectItemValue = null;
-                this.addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
-                this.currentPage = sortByProperty("priorityLevel", this.currentPage);
-                this.onPaginationChanged();
+                parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+                clearChanges();
+                librarySelectItemValue.value = null;
+                addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
+                currentPage.value = sortByProperty("priorityLevel", currentPage.value);
+                onPaginationChanged();
             }           
         });
     }
 
-    onUpsertBudgetPriorityLibrary() {
+    function onUpsertBudgetPriorityLibrary() {
         const budgetPriorityLibrary: BudgetPriorityLibrary = {
-            ...clone(this.selectedBudgetPriorityLibrary),
-            budgetPriorities: clone(this.currentPage),
+            ...clone(selectedBudgetPriorityLibrary),
+            budgetPriorities: clone(currentPage.value),
         };
-        this.upsertBudgetPriorityLibraryAction(budgetPriorityLibrary);
+        upsertBudgetPriorityLibraryAction(budgetPriorityLibrary);
 
         const upsertRequest: LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority> = {
-                library: this.selectedBudgetPriorityLibrary,
+                library: selectedBudgetPriorityLibrary,
                 isNewLibrary: false,
                  syncModel: {
-                    libraryId: this.selectedBudgetPriorityLibrary.id === this.uuidNIL ? null : this.selectedBudgetPriorityLibrary.id,
-                    rowsForDeletion: this.deletionIds,
-                    updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: this.addedRows,
+                    libraryId: selectedBudgetPriorityLibrary.id === uuidNIL ? null : selectedBudgetPriorityLibrary.id,
+                    rowsForDeletion: deletionIds.value,
+                    updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: addedRows.value,
                     isModified: false
                  }
                  , scenarioId: null
         }
         BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()               
-                this.budgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary);
-                this.selectedBudgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary.id);                
-                this.addSuccessNotificationAction({message: "Updated budget priority library",});
+                clearChanges()               
+                budgetPriorityLibraryMutator(selectedBudgetPriorityLibrary);
+                selectedBudgetPriorityLibraryMutator(selectedBudgetPriorityLibrary.id);                
+                addSuccessNotificationAction({message: "Updated budget priority library",});
             }
         });
     }
 
-    onDiscardChanges() {
-        this.librarySelectItemValue = null;
+    function onDiscardChanges() {
+        librarySelectItemValue.value = null;
         setTimeout(() => {
-            if (this.hasScenario) {
-                this.clearChanges();
-                this.resetPage();
+            if (hasScenario) {
+                clearChanges();
+                resetPage();
             }
         });
-        this.parentLibraryName = this.loadedParentName;
-        this.parentLibraryId = this.loadedParentId;
+        parentLibraryName = loadedParentName;
+        parentLibraryId = loadedParentId;
     }
 
-    onRemoveBudgetPriorities() {
-        this.selectedBudgetPriorityIds.forEach(_ => {
-            this.removePriorityLogic(_);
+    function onRemoveBudgetPriorities() {
+        selectedBudgetPriorityIds.forEach(_ => {
+            removePriorityLogic(_);
         });
 
-        this.selectedBudgetPriorityIds = [];
-        this.onPaginationChanged();
+        selectedBudgetPriorityIds = [];
+        onPaginationChanged();
     }
 
-    onRemoveBudgetPriority(id: string){
-        this.removePriorityLogic(id)
-        this.onPaginationChanged();
+    function onRemoveBudgetPriority(id: string){
+        removePriorityLogic(id)
+        onPaginationChanged();
     }
 
-    removePriorityLogic(id: string){
-        if(isNil(find(propEq('id', id), this.addedRows))){
-            this.deletionIds.push(id);
-            if(!isNil(this.updatedRowsMap.get(id)))
-                this.updatedRowsMap.delete(id)
+    function removePriorityLogic(id: string){
+        if(isNil(find(propEq('id', id), addedRows.value))){
+            deletionIds.value.push(id);
+            if(!isNil(updatedRowsMap.get(id)))
+                updatedRowsMap.delete(id)
         }           
         else{          
-            this.addedRows = this.addedRows.filter((bp: BudgetPriority) => bp.id !== id)
+            addedRows.value = addedRows.value.filter((bp: BudgetPriority) => bp.id !== id)
         }  
     }
 
-    onShowConfirmDeleteAlert() {
-        this.confirmDeleteAlertData = {
+    function onShowConfirmDeleteAlert() {
+        confirmDeleteAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -827,83 +812,83 @@ export default class BudgetPriorityEditor  {
         };
     }
 
-    onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        this.confirmDeleteAlertData = clone(emptyAlertData);
+    function onSubmitConfirmDeleteAlertResult(submit: boolean) {
+        confirmDeleteAlertData = clone(emptyAlertData);
 
         if (submit) {
-            this.deleteBudgetPriorityLibraryAction(this.selectedBudgetPriorityLibrary.id)
-                .then(() => this.librarySelectItemValue = null);
+            deleteBudgetPriorityLibraryAction(selectedBudgetPriorityLibrary.id)
+                .then(() => librarySelectItemValue.value = null);
         }
     }
 
-    disableCrudButtons() {
-        const rows = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+    function disableCrudButtons() {
+        const rows = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const allDataIsValid: boolean = rows.every((budgetPriority: BudgetPriority) => {
-            const priorityIsValid = this.hasBudgetPercentagePairsThatMatchBudgets(budgetPriority);
-            const allSubDataIsValid: boolean = this.hasScenario
+            const priorityIsValid = hasBudgetPercentagePairsThatMatchBudgets(budgetPriority);
+            const allSubDataIsValid: boolean = hasScenario
                 ? budgetPriority.budgetPercentagePairs.every((budgetPercentagePair: BudgetPercentagePair) => {
                     return priorityIsValid &&
-                        this.rules['generalRules'].valueIsNotEmpty(budgetPercentagePair.percentage) &&
-                        this.rules['generalRules'].valueIsWithinRange(budgetPercentagePair.percentage, [0, 100]);
+                        rules['generalRules'].valueIsNotEmpty(budgetPercentagePair.percentage) &&
+                        rules['generalRules'].valueIsWithinRange(budgetPercentagePair.percentage, [0, 100]);
                 })
                 : true;
 
-            return this.rules['generalRules'].valueIsNotEmpty(budgetPriority.priorityLevel) === true && allSubDataIsValid;
+            return rules['generalRules'].valueIsNotEmpty(budgetPriority.priorityLevel) === true && allSubDataIsValid;
         })
 
-        if (this.hasSelectedLibrary) {
-            return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedBudgetPriorityLibrary.name) === true && allDataIsValid);
+        if (hasSelectedLibrary) {
+            return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetPriorityLibrary.name) === true && allDataIsValid);
         }
-        this.disableCrudButtonsResult = !allDataIsValid;
+        disableCrudButtonsResult = !allDataIsValid;
         return !allDataIsValid;
     }
 
-    onUpdateRow(rowId: string, updatedRow: BudgetPriority){
-        if(any(propEq('id', rowId), this.addedRows)){
-            const index = this.addedRows.findIndex(item => item.id == updatedRow.id)
-            this.addedRows[index] = updatedRow;
+    function onUpdateRow(rowId: string, updatedRow: BudgetPriority){
+        if(any(propEq('id', rowId), addedRows.value)){
+            const index = addedRows.value.findIndex(item => item.id == updatedRow.id)
+            addedRows.value[index] = updatedRow;
             return;
         }
 
-        let mapEntry = this.updatedRowsMap.get(rowId)
+        let mapEntry = updatedRowsMap.get(rowId)
 
         if(isNil(mapEntry)){
-            const row = this.rowCache.find(r => r.id === rowId);
+            const row = rowCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
-                this.updatedRowsMap.set(rowId, [row , updatedRow])
+                updatedRowsMap.set(rowId, [row , updatedRow])
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
             mapEntry[1] = updatedRow;
         }
         else
-            this.updatedRowsMap.delete(rowId)
+            updatedRowsMap.delete(rowId)
 
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    clearChanges(){
-        this.updatedRowsMap.clear();
-        this.addedRows = [];
-        this.deletionIds = [];
+    function clearChanges(){
+        updatedRowsMap.clear();
+        addedRows.value = [];
+        deletionIds.value = [];
     }
 
-    resetPage(){
-        this.pagination.page = 1;
-        this.onPaginationChanged();
+    function resetPage(){
+        pagination.value.page = 1;
+        onPaginationChanged();
     }
 
-    checkHasUnsavedChanges(){
+    function checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 
-            this.deletionIds.length > 0 || 
-            this.addedRows.length > 0 ||
-            this.updatedRowsMap.size > 0 || 
-            (this.hasScenario && this.hasSelectedLibrary) ||
-            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedBudgetPriorityLibrary, this.stateSelectedBudgetPriorityLibrary))
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+            deletionIds.value.length > 0 || 
+            addedRows.value.length > 0 ||
+            updatedRowsMap.size > 0 || 
+            (hasScenario && hasSelectedLibrary) ||
+            (hasSelectedLibrary && hasUnsavedChangesCore('', selectedBudgetPriorityLibrary, stateSelectedBudgetPriorityLibrary))
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    CheckUnsavedDialog(next: any, otherwise: any) {
-        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
+    function CheckUnsavedDialog(next: any, otherwise: any) {
+        if (hasUnsavedChanges && unsavedDialogAllowed) {
             // @ts-ignore
             Vue.dialog
                 .confirm(
@@ -915,21 +900,21 @@ export default class BudgetPriorityEditor  {
 
         } 
         else {
-            this.unsavedDialogAllowed = true;
+            unsavedDialogAllowed = true;
             next();
         }
     };
-    onShowShareBudgetPriorityLibraryDialog(budgetPriorityLibrary: BudgetPriorityLibrary) {
-        this.shareBudgetPriorityLibraryDialogData = {
+    function onShowShareBudgetPriorityLibraryDialog(budgetPriorityLibrary: BudgetPriorityLibrary) {
+        shareBudgetPriorityLibraryDialogData = {
             showDialog:true,
             budgetPriorityLibrary: clone(budgetPriorityLibrary)
         }
     }
 
-    onShareBudgetPriorityLibraryDialogSubmit(budgetPriorityLibraryUsers: BudgetPriorityLibraryUser[]) {
-            this.shareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
+    function onShareBudgetPriorityLibraryDialogSubmit(budgetPriorityLibraryUsers: BudgetPriorityLibraryUser[]) {
+            shareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
 
-            if (!isNil(budgetPriorityLibraryUsers) && this.selectedBudgetPriorityLibrary.id !== getBlankGuid())
+            if (!isNil(budgetPriorityLibraryUsers) && selectedBudgetPriorityLibrary.id !== getBlankGuid())
             {
                 let libraryUserData: LibraryUser[] = [];
 
@@ -952,41 +937,41 @@ export default class BudgetPriorityEditor  {
                     libraryUserData.push(libraryUser);
                 });
 
-                if (!isNullOrUndefined(this.selectedBudgetPriorityLibrary.id) ) {
-                            this.getIsSharedLibraryAction(this.selectedBudgetPriorityLibrary).then(this.isShared = this.isSharedLibrary);
+                if (!isNullOrUndefined(selectedBudgetPriorityLibrary.id) ) {
+                            getIsSharedLibraryAction(selectedBudgetPriorityLibrary).then(() => isShared = isSharedLibrary.value);
                 }
                 //update budget library sharing
-                BudgetPriorityService.upsertOrDeleteBudgetPriorityLibraryUsers(this.selectedBudgetPriorityLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                BudgetPriorityService.upsertOrDeleteBudgetPriorityLibraryUsers(selectedBudgetPriorityLibrary.id, libraryUserData).then((response: AxiosResponse) => {
                     if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                     {
-                        this.resetPage();
+                        resetPage();
                     }
             });
         }
     }
-    setParentLibraryName(libraryId: string) {
+    function setParentLibraryName(libraryId: string) {
         if (libraryId === "None") {
-            this.parentLibraryName = "None";
+            parentLibraryName = "None";
             return;
         }
         let foundLibrary: BudgetPriorityLibrary = emptyBudgetPriorityLibrary;
-        this.stateBudgetPriorityLibraries.forEach(library => {
+        stateBudgetPriorityLibraries.value.forEach(library => {
             if (library.id === libraryId ) {
                 foundLibrary = clone(library);
             }
         });
-        this.parentLibraryId = foundLibrary.id;
-        this.parentLibraryName = foundLibrary.name;
+        parentLibraryId = foundLibrary.id;
+        parentLibraryName = foundLibrary.name;
     }
-    populateEmptyBudgetPercentagePairs(budgetPriorites: BudgetPriority[]) {
+    function populateEmptyBudgetPercentagePairs(budgetPriorites: BudgetPriority[]) {
         budgetPriorites.forEach(item => {
             if (item.budgetPercentagePairs.length === 0) {
-                item.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
+                item.budgetPercentagePairs = createNewBudgetPercentagePairsFromBudgets();
             }
         });
     }
-    initializePages(){
-        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+    function initializePages(){
+        const { sortBy, descending, page, rowsPerPage } = pagination.value;
         const request: PagingRequest<BudgetPriority>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -1001,24 +986,23 @@ export default class BudgetPriorityEditor  {
             isDescending: descending != null ? descending : false,
             search: ''
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            BudgetPriorityService.getScenarioBudgetPriorityPage(this.selectedScenarioId, request).then(response => {
-                this.initializing = false
+        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+            BudgetPriorityService.getScenarioBudgetPriorityPage(selectedScenarioId, request).then(response => {
+                initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
-                    this.currentPage = sortByProperty("priorityLevel", data.items);
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
+                    currentPage.value = sortByProperty("priorityLevel", data.items);
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
 
-                    this.populateEmptyBudgetPercentagePairs(this.currentPage);
+                    populateEmptyBudgetPercentagePairs(currentPage.value);
                 }
-                this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
-                this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
-                this.loadedParentName = this.parentLibraryName; //store original
-                this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
+                setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
+                loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
+                loadedParentName = parentLibraryName; //store original
+                scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
             });
     }
-}
 </script>
 
 <style>

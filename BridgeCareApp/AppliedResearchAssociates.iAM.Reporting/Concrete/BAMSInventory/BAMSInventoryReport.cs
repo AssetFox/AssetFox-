@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DTOs;
 using System.Threading;
 using AppliedResearchAssociates.iAM.Common.Logging;
+using AppliedResearchAssociates.iAM.Common;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -29,6 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private Guid _networkId;
         private Dictionary<string, AttributeDescription> _fieldDescriptions;
 
+        public string Suffix {  get; private set; }
         public Guid ID { get; set; }
         public Guid? SimulationID { get => null; set { } }
         public string Results { get; private set; }
@@ -38,12 +40,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
 
-        private InventoryParameters _failedQuery = new InventoryParameters { keyProperties = new List<string> { string.Empty, "-1" } };
+        private InventoryParameters _failedQuery = new InventoryParameters { BMSID = string.Empty, BRKEY_ = -1 };
 
         private List<SegmentAttributeDatum> segmentData;
         private InventoryParameters segmentIds;
 
-        public BAMSInventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results)
+        public BAMSInventoryReport(IUnitOfWork uow, string name, ReportIndexDTO results, string suffix)
         {
             _unitofwork = uow;
             ReportTypeName = name;
@@ -55,27 +57,53 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Report definition created.";
             Results = string.Empty;
             IsComplete = false;         
-            _networkId = _unitofwork.NetworkRepo.GetMainNetwork().Id;
+            Suffix = suffix;
+            if (suffix == ReportSuffixType.primaryDataSuffix)
+            {
+                var primaryNetworkId = _unitofwork.AdminSettingsRepo.GetPrimaryNetworkId();
+                if (primaryNetworkId == null)
+                {
+                    Errors.Add("Does not have a primary network");
+                }
+                else
+                {
+                    _networkId = primaryNetworkId.Value;
+                }
+            }
+            else
+            {
+                var rawNetworkId = _unitofwork.AdminSettingsRepo.GetRawDataNetworkId();
+                if (rawNetworkId == null)
+                {
+                    Errors.Add("Does not have a raw network");
+                }
+                else
+                {
+                    _networkId = rawNetworkId.Value;
+                }
+            }
         }
 
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
+            if (Errors.Count > 0) return; // Errors occured in the GetAsset method
+
             segmentIds = Parse(parameters);
-            var keyProperties = segmentIds.keyProperties;
-            if (keyProperties[1] == "-1" && string.IsNullOrEmpty(keyProperties[0])) return; // report failed due to bad parameters
-            if (!Validate(keyProperties)) return; // report failed due to validation
+
+            if (segmentIds.BRKEY_ == -1 && string.IsNullOrEmpty(segmentIds.BMSID)) return; // report failed due to bad parameters
+            if (!Validate(segmentIds)) return; // report failed due to validation
 
             // Check if asset actually exists
             string providedKey;
-            if (Convert.ToInt32(segmentIds.keyProperties[1]) < 1)
+            if (segmentIds.BRKEY_ < 1)
             {
-                providedKey = $"BMSID: {segmentIds.keyProperties[0]}";
-                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BMSID", segmentIds.keyProperties[0]);
+                providedKey = $"BMSID: {segmentIds.BMSID}";
+                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BMSID", segmentIds.BMSID);
             }
             else
             {
-                providedKey = $"BRKEY_:  {segmentIds.keyProperties[1]}";
-                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BRKEY_", segmentIds.keyProperties[1]);
+                providedKey = $"BRKEY_:  {segmentIds.BRKEY_}";
+                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BRKEY_", segmentIds.BRKEY_.ToString());
             }
             if (segmentData.Count() < 1)
             {
@@ -122,35 +150,35 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
         }
 
-        private bool Validate(List<string> keyProperties)
+        private bool Validate(InventoryParameters keyProperties)
         {
-            if (Convert.ToInt32(keyProperties[1]) < 1 && string.IsNullOrEmpty(keyProperties[0]))
+            if (keyProperties.BRKEY_ < 1 && string.IsNullOrEmpty(keyProperties.BMSID))
             {
                 // No parameters provided
                 return false;
             }
 
-            if (Convert.ToInt32(keyProperties[1]) > 0 && !string.IsNullOrEmpty(keyProperties[0]))
+            if (keyProperties.BRKEY_ > 0 && !string.IsNullOrEmpty(keyProperties.BMSID))
             {
                 // Both parameters provided.  Check to see if they are the same asset
-                var BRKeyGuid = _unitofwork.AssetDataRepository.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == keyProperties[1].ToString());
+                var BRKeyGuid = _unitofwork.AssetDataRepository.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == keyProperties.BRKEY_.ToString());
                 if (BRKeyGuid == null)
                 {
                     // BRKey was not found
-                    Errors.Add($"Unable to find BRKey {keyProperties[1]}.  Did not attempt to find {keyProperties[0]}");
+                    Errors.Add($"Unable to find BRKey {keyProperties.BRKEY_}.  Did not attempt to find {keyProperties.BMSID}");
                     return false;
                 }
-                var BMSIDGuid = _unitofwork.AssetDataRepository.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == keyProperties[0]);
+                var BMSIDGuid = _unitofwork.AssetDataRepository.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == keyProperties.BMSID);
                 if (BMSIDGuid == null)
                 {
                     // BMSID was not found
-                    Errors.Add($"Unable to find BMSID {keyProperties[0]}.  Will not use {keyProperties[1]}");
+                    Errors.Add($"Unable to find BMSID {keyProperties.BMSID}.  Will not use {keyProperties.BRKEY_}");
                     return false;
                 }
                 if (BRKeyGuid.AssetId != BMSIDGuid.AssetId)
                 {
                     // Keys were provided for two different assets
-                    Errors.Add($"The BRKey {keyProperties[1]} and BMSID {keyProperties[0]}.  No report will be provided");
+                    Errors.Add($"The BRKey {keyProperties.BRKEY_} and BMSID {keyProperties.BMSID}.  No report will be provided");
                     return false;
                 }
             }
@@ -161,8 +189,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private string GetAttribute(string attributeName, bool previous)
         {
-            string result;
-
             if (!previous)
             {
                 var returnVal = segmentData.FirstOrDefault(_ => _.Name == attributeName);
@@ -171,13 +197,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
             else
             {
                 Dictionary<int, SegmentAttributeDatum> attrubuteValueHistory;
-                if (Convert.ToInt32(segmentIds.keyProperties[1]) < 1)
+                if (segmentIds.BRKEY_ < 1)
                 {
-                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BMSID", segmentIds.keyProperties[0], attributeName);
+                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BMSID", segmentIds.BMSID, attributeName);
                 }
                 else
                 {
-                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BRKEY_", segmentIds.keyProperties[1], attributeName);
+                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BRKEY_", segmentIds.BRKEY_.ToString(), attributeName);
                 }
                 if (attrubuteValueHistory.Count < 2) return DEFAULT_VALUE;  // The default value is returned if there is either no values OR one value (the previous value is still unknown)
 

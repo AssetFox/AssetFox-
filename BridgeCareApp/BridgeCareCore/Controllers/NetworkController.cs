@@ -159,20 +159,10 @@ namespace BridgeCareCore.Controllers
             try
             {
                 // var attributesForOriginalNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
-               // var attributesForOriginalNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
                 var networks = await UnitOfWork.NetworkRepo.Networks();
                 var originalNetwork = networks.First(_ => _.Id == networkId);
                 var compatibleNetworks = new List<NetworkDTO>();
                 compatibleNetworks.Add(originalNetwork);
-
-                /* TODO: Support cross network cloning. Disabling check until implemented.
-                    foreach (var network in networks)
-                    {
-                        if(network.Id == networkId)
-                            continue;
-                        if (network.KeyAttribute != originalNetwork.KeyAttribute)
-                            continue;
-                        var attributesForNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(network.Id);
 
             /* TODO: Support cross network cloning. Disabling check until implemented.
                 foreach (var network in networks)
@@ -191,14 +181,6 @@ namespace BridgeCareCore.Controllers
                 */
 
                 return Ok(compatibleNetworks);
-                    if (attributesForOriginalNetwork.TrueForAll(_ => attributesForNetwork.Any(__ => _ == __))) {
-                        compatibleNetworks.Add(network);
-                    }
-                    
-                }
-            */
-                
-             return Ok(compatibleNetworks);
 
             }
             catch (Exception e)

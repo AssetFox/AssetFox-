@@ -113,95 +113,93 @@
     </v-layout>
 </template>
 
-<script lang='ts'>
+<script lang='ts' setup>
 
 import { SelectItem } from '@/shared/models/vue/select-item';
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import Vue, { shallowRef } from 'vue';
+
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import EditAdminDataDialog from './EditAdminDataDialog.vue';
 import {EditAdminDataDialogData, emptyEditAdminDataDialogData} from '@/shared/models/modals/edit-data-dialog-data';
 import { clone } from 'ramda';
-import { Watch } from 'vue-property-decorator';
+
 import { Network } from '@/shared/models/iAM/network';
-import { Action, State } from 'vuex-class';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
+    let store = useStore();
+    let stateAvailableReportNames = ref<string[]>(store.state.adminDataModule.availableReportNames);
+    let stateSimulationReportNames = ref<string[]>(store.state.adminDataModule.stateSimulationReportNames);
+    let stateInventoryReportNames = ref<string[]>(store.state.adminDataModule.stateInventoryReportNames);
+    let statePrimaryNetwork = ref<string>(store.state.adminDataModule.statePrimaryNetwork);
+    let stateKeyFields = ref<string[]>(store.state.adminDataModule.keyFields);
+    let stateRawDataKeyFields = ref<string[]>(store.state.adminDataModule.rawDataKeyFields);
+    let stateRawdataNetwork = ref<string>(store.state.adminDataModule.stateRawdataNetwork);
+    let stateConstraintType = ref<string>(store.state.adminDataModule.stateConstraintType);
+    let hasUnsavedChanges = ref<boolean>(store.state.adminDataModule.hasUnsavedChanges);
+    let stateNetworks = ref<Network[]>(store.state.adminDataModule.stateNetworks);
+    let stateAttributes = ref<Attribute[]>(store.state.adminDataModule.stateAttributes);
+    async function getAvailableReportsAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
+    async function getSimulationReportsAction(payload?: any): Promise<any> {await store.dispatch('getSimulationReports');}
+    async function getInventoryReportsAction(payload?: any): Promise<any> {await store.dispatch('getInventoryReports');}
+    async function getPrimaryNetworkAction(payload?: any): Promise<any> {await store.dispatch('getPrimaryNetwork');}
+    async function getRawdataNetworkAction(payload?: any): Promise<any> {await store.dispatch('getRawdataNetwork');}
+    async function getKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('getKeyFields');}
+    async function getRawDataKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('getRawDataKeyFields');}
+    async function getConstraintTypeAction(payload?: any): Promise<any> {await store.dispatch('getConstraintType');}
+    async function setSimulationReportsAction(payload?: any): Promise<any> {await store.dispatch('setSimulationReports');}
+    async function setInventoryReportsAction(payload?: any): Promise<any> {await store.dispatch('setInventoryReports');}
+    async function setPrimaryNetworkAction(payload?: any): Promise<any> {await store.dispatch('setPrimaryNetwork');}
+    async function setRawdataNetworkAction(payload?: any): Promise<any> {await store.dispatch('setRawdataNetwork');}
+    async function setKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('setKeyFields');}
+    async function setRawDataKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('setRawDataKeyFields');}
+    async function setConstraintTypeAction(payload?: any): Promise<any> {await store.dispatch('setConstraintType');}
+    async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks');}
+    async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
 
-@Component({
-    components:{
-        EditAdminDataDialog
-    }  
-})
-export default class Data extends Vue {
-    @State(state => state.adminDataModule.availableReportNames) stateAvailableReportNames: string[];
-    @State(state => state.adminDataModule.simulationReportNames) stateSimulationReportNames: string[];
-    @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
-    @State(state => state.adminDataModule.primaryNetwork) statePrimaryNetwork: string;   
-    @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
-    @State(state => state.adminDataModule.rawDataKeyFields) stateRawDataKeyFields: string[];
-    @State(state => state.adminDataModule.rawdataNetwork) stateRawdataNetwork: string;
-    @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
-    @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+    let selectPrimaryNetworkItems: SelectItem[] = [];
+    let selectRawDataNetworkItems: SelectItem[] = [];
+    let selectPrimaryNetworkItemValue = shallowRef<string>('');
+    let selectRawdataNetworkItemValue = shallowRef<string>('');
 
-    @Action('getAvailableReports') getAvailableReportsAction: any;
-    @Action('getSimulationReports') getSimulationReportsAction: any;
-    @Action('getInventoryReports') getInventoryReportsAction: any;
-    @Action('getPrimaryNetwork') getPrimaryNetworkAction: any;
-    @Action('getRawdataNetwork') getRawdataNetworkAction: any;
-    @Action('getKeyFields') getKeyFieldsAction: any;
-    @Action('getRawDataKeyFields') getRawDataKeyFieldsAction: any;
-    @Action('getConstraintType') getConstraintTypeAction: any;
-    @Action('setSimulationReports') setSimulationReportsAction: any;
-    @Action('setInventoryReports') setInventoryReportsAction: any;
-    @Action('setPrimaryNetwork') setPrimaryNetworkAction: any;
-    @Action('setRawdataNetwork') setRawdataNetworkAction: any;
-    @Action('setKeyFields') setKeyFieldsAction: any;
-    @Action('setRawDataKeyFields') setRawDataKeyFieldsAction: any;
-    @Action('setConstraintType') setConstraintTypeAction: any;
-    @Action('getNetworks') getNetworks: any;
-    @Action('getAttributes') getAttributes: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+    const props = defineProps<{
+    editAdminDataDialogData: EditAdminDataDialogData
+    }>()
 
-    selectPrimaryNetworkItems: SelectItem[] = [];
-    selectRawDataNetworkItems: SelectItem[] = [];
-    selectPrimaryNetworkItemValue: string | null = null;
-    selectRawdataNetworkItemValue: string | null = null;
+    let keyFields: string[] = [];
+    let simulationReports: string[] = [];
+    let inventoryReports: string[] = [];
+    let networks: Network[] = [];
 
-    editAdminDataDialogData: EditAdminDataDialogData = clone(emptyEditAdminDataDialogData)
+    let selectedKeyFields: string[] = [];
+    let selectedRawDataKeyFields: string[] = []
+    let selectedAvailableReports: string[] = [];
+    let selectedSimulationReports: string[] = [];
+    let selectedInventoryReports: string[] = [];
+    let primaryNetwork = shallowRef<string>('');
+    let rawdataNetwork: string = '';
 
-    keyFields: string[] = [];
-    simulationReports: string[] = [];
-    inventoryReports: string[] = [];
-    networks: Network[] = [];
+    let keyFieldsDelimited: string = '';
+    let rawDataKeyFieldsDelimited: string = '';
+    let simulationReportsDelimited: string = '';
+    let inventoryReportsDelimited: string = '';
 
-    selectedKeyFields: string[] = [];
-    selectedRawDataKeyFields: string[] = []
-    selectedAvailableReports: string[] = [];
-    selectedSimulationReports: string[] = [];
-    selectedInventoryReports: string[] = [];
-    primaryNetwork: string = '';
-    rawdataNetwork: string = '';
+    let keyFieldsName: string  = 'KeyFields';
+    let rawDataKeyFieldsName: string = 'RawDataKeyFields';
+    let simulationReportsName: string = 'SimulationReports';
+    let inventoryReportsName: string = 'InventoryReports';
 
-    keyFieldsDelimited: string = '';
-    rawDataKeyFieldsDelimited: string = '';
-    simulationReportsDelimited: string = '';
-    inventoryReportsDelimited: string = '';
+    let InputRules: InputValidationRules = rules;
 
-    keyFieldsName: string  = 'KeyFields';
-    rawDataKeyFieldsName: string = 'RawDataKeyFields';
-    simulationReportsName: string = 'SimulationReports';
-    inventoryReportsName: string = 'InventoryReports';
+    let constraintTypeRadioGroup = shallowRef<string>('');
+    created();
 
-    rules: InputValidationRules = rules;
-
-    constraintTypeRadioGroup: string = '';
-
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
+    function created() {
+        ((vm: any) => {
             (async () => { 
                 await vm.getAttributes();
                 await vm.getNetworks();
@@ -222,193 +220,190 @@ export default class Data extends Vue {
             
         });
     }
-
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
-    }
-    //Watches
-    @Watch('stateNetworks')
-    onStateNetworksChanged(){
-        this.networks = clone(this.stateNetworks);
+    onBeforeUnmount(() => beforeDestroy());
+    function beforeDestroy() {
+        setHasUnsavedChangesAction({ value: false });
     }
 
-    @Watch('stateAttributes')
-    onStateAttributesChanged(){
-        this.keyFields = clone(this.stateAttributes).map(_ => _.name)
+    //watchers
+    watch(stateNetworks, () => onStateNetworksChanged)
+    function onStateNetworksChanged() {
+        networks = clone(stateNetworks.value);
     }
-
-    @Watch('stateSimulationReportNames')
-    onStateSimulationReportNamesChanged(){
-        this.selectedSimulationReports = clone(this.stateSimulationReportNames);
+    watch(stateAttributes,() => onStateAttributesChanged)
+    function onStateAttributesChanged(){
+        keyFields = clone(stateAttributes.value).map(_ =>_.name) //.map(_ => _.name)
     }
-    @Watch('stateAvailableReportNames')
-    onStateAvailableReportNamesChanged(){
-        this.selectedAvailableReports = clone(this.stateAvailableReportNames);
-        const reports: string[] = this.stateAvailableReportNames;
-        this.simulationReports = clone(reports);
-        this.inventoryReports = clone(reports);
+    watch(stateSimulationReportNames,() => onStateSimulationReportNamesChanged)
+    function onStateSimulationReportNamesChanged(){
+        selectedSimulationReports = clone(stateSimulationReportNames.value);
     }
-
-    @Watch('stateInventoryReportNames')
-    onStateInventoryReportNamesChanged(){
-        this.selectedInventoryReports = clone(this.stateInventoryReportNames);
+    watch(stateAvailableReportNames,() => onStateAvailableReportNamesChanged)
+    function onStateAvailableReportNamesChanged()
+    {
+        selectedAvailableReports = clone(stateAvailableReportNames.value);
+        const reports: string[] = stateAvailableReportNames.value;
+        simulationReports = clone(reports);
+        inventoryReports = clone(reports);
     }
-
-    @Watch('statePrimaryNetwork')
-    onStatePrimaryNetworkChanged(){
-        this.selectPrimaryNetworkItemValue = this.statePrimaryNetwork;
+    watch(stateInventoryReportNames,() =>onStateInventoryReportNamesChanged)
+    function onStateInventoryReportNamesChanged()
+    {
+        selectedInventoryReports = clone(stateInventoryReportNames.value);
     }
-    @Watch('stateRawdataNetwork')
-    onStateRawdataNetworkChanged() {
-        this.selectRawdataNetworkItemValue = this.stateRawdataNetwork;
+    watch(statePrimaryNetwork,() => onStatePrimaryNetworkChanged)
+    function onStatePrimaryNetworkChanged(){
+        selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
     }
-    @Watch('stateKeyFields')
-    onStateKeyFieldsChanged(){
-        this.selectedKeyFields = clone(this.stateKeyFields);
+    watch(stateRawdataNetwork,() => onStateRawdataNetworkChanged)
+    function onStateRawdataNetworkChanged() {
+        selectRawdataNetworkItemValue.value = stateRawdataNetwork.value;
     }
-
-    @Watch('stateRawDataKeyFields')
-    onStateRawDataKeyFieldsChanged(){
-        this.selectedRawDataKeyFields = clone(this.stateRawDataKeyFields);
+    watch(stateKeyFields,() => onStateKeyFieldsChanged)
+    function onStateKeyFieldsChanged(){
+        selectedKeyFields = clone(stateKeyFields.value);
     }
-
-    @Watch('stateConstraintType')
-    onStateConstraintTypeChanged(){
-        this.constraintTypeRadioGroup = this.stateConstraintType
+    watch(stateRawDataKeyFields,() => onStateRawDataKeyFieldsChanged)
+    function onStateRawDataKeyFieldsChanged(){
+        selectedRawDataKeyFields = clone(stateRawDataKeyFields.value);
     }
-
-    @Watch('networks')
-    onNetworksChanged(){
-        this.selectPrimaryNetworkItems = this.networks.map(_ => {
+    watch(stateConstraintType,() => onStateConstraintTypeChanged)
+    function onStateConstraintTypeChanged(){
+        constraintTypeRadioGroup.value = stateConstraintType.value
+    }
+    watch(networks,() => onNetworksChanged)
+    function onNetworksChanged(){
+        selectPrimaryNetworkItems = networks.map(_ => {
             return {text: _.name, value: _.name}
         });
-        this.selectRawDataNetworkItems = this.networks.map(_ => {
+        selectRawDataNetworkItems = networks.map(_ => {
             return {text: _.name, value: _.name}
         });
     }
-
-    @Watch('selectedKeyFields')
-    onSelectedKeyFieldsChanged(){
-        this.keyFieldsDelimited = '';
-        this.keyFieldsDelimited = this.convertToDelimited(this.selectedKeyFields, ', ')
-        this.checkHasUnsaved();       
+    watch(selectedKeyFields,() => onSelectedKeyFieldsChanged)
+    function onSelectedKeyFieldsChanged(){
+        keyFieldsDelimited = '';
+        keyFieldsDelimited = convertToDelimited(selectedKeyFields, ', ')
+        checkHasUnsaved();       
+    }
+    watch(selectedRawDataKeyFields,() => onSelectedRawDataKeyFieldsChanged)
+    function onSelectedRawDataKeyFieldsChanged(){
+        rawDataKeyFieldsDelimited = '';
+        rawDataKeyFieldsDelimited = convertToDelimited(selectedRawDataKeyFields, ', ')
+        checkHasUnsaved();       
+    }
+    watch(selectedSimulationReports,() => onSelectedSimulationReportsChanged)
+    function onSelectedSimulationReportsChanged(){
+        simulationReportsDelimited = '';
+        simulationReportsDelimited = convertToDelimited(selectedSimulationReports, ', ')
+        checkHasUnsaved();       
     }
 
-    @Watch('selectedRawDataKeyFields')
-    onSelectedRawDataKeyFieldsChanged(){
-        this.rawDataKeyFieldsDelimited = '';
-        this.rawDataKeyFieldsDelimited = this.convertToDelimited(this.selectedRawDataKeyFields, ', ')
-        this.checkHasUnsaved();       
+    watch(selectedInventoryReports,() => onSelectedInventoryReportsChanged)
+    function onSelectedInventoryReportsChanged(){
+        inventoryReportsDelimited = '';
+        inventoryReportsDelimited = convertToDelimited(selectedInventoryReports, ', ')
+        checkHasUnsaved();       
     }
 
-    @Watch('selectedSimulationReports')
-    onSelectedSimulationReportsChanged(){
-        this.simulationReportsDelimited = '';
-        this.simulationReportsDelimited = this.convertToDelimited(this.selectedSimulationReports, ', ')
-        this.checkHasUnsaved();       
-    }
-
-    @Watch('selectedInventoryReports')
-    onSelectedInventoryReportsChanged(){
-        this.inventoryReportsDelimited = '';
-        this.inventoryReportsDelimited = this.convertToDelimited(this.selectedInventoryReports, ', ')
-        this.checkHasUnsaved();       
-    }
-
-    @Watch('selectPrimaryNetworkItemValue')
-    onSelectPrimaryNetworkItemValueChanged(){
-        if(this.selectPrimaryNetworkItemValue === null)
-            this.primaryNetwork = ''
+    watch(selectPrimaryNetworkItemValue,() => onSelectPrimaryNetworkItemValueChanged)
+    function onSelectPrimaryNetworkItemValueChanged(){
+        if(selectPrimaryNetworkItemValue === null)
+            primaryNetwork.value = ''
         else
-            this.primaryNetwork = this.selectPrimaryNetworkItemValue;  
-        this.checkHasUnsaved();       
+            primaryNetwork.value = selectPrimaryNetworkItemValue.value;  
+        checkHasUnsaved();       
     }
 
-    @Watch('selectRawdataNetworkItemValue')
-    onSelectRawdataNetworkItemValueChanged() {
-        if (this.selectRawdataNetworkItemValue === null) 
-            this.rawdataNetwork = '';
+    watch(selectRawdataNetworkItemValue,() => onSelectRawdataNetworkItemValueChanged)
+    function onSelectRawdataNetworkItemValueChanged() {
+        if (selectRawdataNetworkItemValue === null) 
+            rawdataNetwork = '';
         else 
-            this.rawdataNetwork = this.selectRawdataNetworkItemValue;
-        this.checkHasUnsaved();
+            rawdataNetwork = selectRawdataNetworkItemValue.value;
+        checkHasUnsaved();
     }
 
-    @Watch('primaryNetwork')
-    onPrimaryNetworkChanged(){
-        this.checkHasUnsaved();       
+    watch(primaryNetwork,() => onPrimaryNetworkChanged)
+    function onPrimaryNetworkChanged(){
+        checkHasUnsaved();       
     }
 
-    @Watch('constraintTypeRadioGroup')
-    onConstraintTypeRadioGroupChanged(){
-        this.checkHasUnsaved();
+    watch(constraintTypeRadioGroup,() => onConstraintTypeRadioGroupChanged)
+    function onConstraintTypeRadioGroupChanged(){
+        checkHasUnsaved();
     }
+
     //Buttons
-    onSaveClick(){
+    function onSaveClick(){
         (async () => {
-            await this.setPrimaryNetworkAction(this.primaryNetwork); 
-            await this.setRawdataNetworkAction(this.rawdataNetwork);
-            await this.setConstraintTypeAction(this.constraintTypeRadioGroup);
-            await this.setSimulationReportsAction(this.convertToDelimited(this.selectedSimulationReports, ','));
-            await this.setInventoryReportsAction(this.convertToDelimited(this.selectedInventoryReports, ','));
-            await this.setKeyFieldsAction(this.convertToDelimited(this.selectedKeyFields, ','));
-            await this.setRawDataKeyFieldsAction(this.convertToDelimited(this.selectedRawDataKeyFields, ','));                      
+            await setPrimaryNetworkAction(primaryNetwork); 
+            await setRawdataNetworkAction(rawdataNetwork);
+            await setConstraintTypeAction(constraintTypeRadioGroup);
+            await setSimulationReportsAction(convertToDelimited(selectedSimulationReports, ','));
+            await setInventoryReportsAction(convertToDelimited(selectedInventoryReports, ','));
+            await setKeyFieldsAction(convertToDelimited(selectedKeyFields, ','));
+            await setRawDataKeyFieldsAction(convertToDelimited(selectedRawDataKeyFields, ','));                      
         })();
     }
-
-    onEditKeyFieldsClick(){
-        this.editAdminDataDialogData.showDialog = true;
-        this.editAdminDataDialogData.selectedSettings = clone(this.selectedKeyFields);
-        this.editAdminDataDialogData.settingName = this.keyFieldsName;
-        this.editAdminDataDialogData.settingsList = clone(this.keyFields);
+    function onEditKeyFieldsClick(){
+        props.editAdminDataDialogData.showDialog = true;
+        props.editAdminDataDialogData.selectedSettings = clone(selectedKeyFields);
+        props.editAdminDataDialogData.settingName = keyFieldsName;
+        props.editAdminDataDialogData.settingsList = clone(keyFields);
     }
-    onEditRawDataKeyFieldsClick(){
-        this.editAdminDataDialogData.showDialog = true;
-        this.editAdminDataDialogData.selectedSettings = clone(this.selectedRawDataKeyFields);
-        this.editAdminDataDialogData.settingName = this.rawDataKeyFieldsName;
-        this.editAdminDataDialogData.settingsList = clone(this.keyFields);
+    function onEditRawDataKeyFieldsClick(){
+        props.editAdminDataDialogData.showDialog = true;
+        props.editAdminDataDialogData.selectedSettings = clone(  selectedRawDataKeyFields);
+        props.editAdminDataDialogData.settingName =   rawDataKeyFieldsName;
+        props.editAdminDataDialogData.settingsList = clone(  keyFields);
     }
-    onEditInventoryReportsClick(){
-        this.editAdminDataDialogData.showDialog = true;
-        this.editAdminDataDialogData.selectedSettings = clone(this.selectedInventoryReports);
-        this.editAdminDataDialogData.settingName = this.inventoryReportsName;
-        this.editAdminDataDialogData.settingsList = clone(this.inventoryReports);
+    function onEditInventoryReportsClick(){
+        props.editAdminDataDialogData.showDialog = true;
+        props.editAdminDataDialogData.selectedSettings = clone(  selectedInventoryReports);
+        props.editAdminDataDialogData.settingName =   inventoryReportsName;
+        props.editAdminDataDialogData.settingsList = clone(  inventoryReports);
     }
-    onEditSimulationReportsClick(){
-        this.editAdminDataDialogData.showDialog = true;
-        this.editAdminDataDialogData.selectedSettings = clone(this.selectedSimulationReports);
-        this.editAdminDataDialogData.settingName = this.simulationReportsName;
-        this.editAdminDataDialogData.settingsList = clone(this.simulationReports);
+    function onEditSimulationReportsClick(){
+        props.editAdminDataDialogData.showDialog = true;
+        props.editAdminDataDialogData.selectedSettings = clone(  selectedSimulationReports);
+        props.editAdminDataDialogData.settingName =   simulationReportsName;
+        props.editAdminDataDialogData.settingsList = clone(  simulationReports);
     }
-    onSubmitEditAdminDataDialogResult(selectedSettings: string[]){
+    function onSubmitEditAdminDataDialogResult(selectedSettings: string[]){
         if(selectedSettings !== null)
-            switch(this.editAdminDataDialogData.settingName){
-                case this.keyFieldsName:
-                    this.selectedKeyFields = clone(selectedSettings);
+            switch(  props.editAdminDataDialogData.settingName){
+                case   keyFieldsName:
+                      selectedKeyFields = clone(selectedSettings);
                     break;
-                case this.rawDataKeyFieldsName:
-                    this.selectedRawDataKeyFields = clone(selectedSettings);
+                case   rawDataKeyFieldsName:
+                      selectedRawDataKeyFields = clone(selectedSettings);
                     break;
-                case this.inventoryReportsName:
-                    this.selectedInventoryReports = clone(selectedSettings);
+                case   inventoryReportsName:
+                      selectedInventoryReports = clone(selectedSettings);
                     break;
-                case this.simulationReportsName:
-                    this.selectedSimulationReports = clone(selectedSettings);
+                case   simulationReportsName:
+                      selectedSimulationReports = clone(selectedSettings);
                     break;
             }
 
-        this.editAdminDataDialogData = clone(emptyEditAdminDataDialogData);
+            props.editAdminDataDialogData.selectedSettings = clone(emptyEditAdminDataDialogData.selectedSettings);
+            props.editAdminDataDialogData.settingName = clone(emptyEditAdminDataDialogData.settingName);
+            props.editAdminDataDialogData.settingsList = clone(emptyEditAdminDataDialogData.settingsList);
+            props.editAdminDataDialogData.showDialog = clone(emptyEditAdminDataDialogData.showDialog);
     }
+
     //Subroutines
-    checkHasUnsaved(){
-        const hasChanged = hasUnsavedChangesCore('', this.selectedInventoryReports, this.stateInventoryReportNames) ||
-            hasUnsavedChangesCore('', this.selectedSimulationReports, this.stateSimulationReportNames) ||
-            hasUnsavedChangesCore('', this.selectedKeyFields, this.stateKeyFields) ||
-            hasUnsavedChangesCore('', this.selectedRawDataKeyFields, this.stateRawDataKeyFields) ||
-            this.primaryNetwork != this.statePrimaryNetwork || this.rawdataNetwork != this.stateRawdataNetwork ||
-            this.constraintTypeRadioGroup != this.stateConstraintType
-        this.setHasUnsavedChangesAction({ value: hasChanged });
+    function checkHasUnsaved(){
+        const hasChanged = hasUnsavedChangesCore('', selectedInventoryReports, stateInventoryReportNames) ||
+            hasUnsavedChangesCore('', selectedSimulationReports, stateSimulationReportNames) ||
+            hasUnsavedChangesCore('', selectedKeyFields, stateKeyFields) ||
+            hasUnsavedChangesCore('', selectedRawDataKeyFields, stateRawDataKeyFields) ||
+            primaryNetwork.value != statePrimaryNetwork.value || rawdataNetwork != stateRawdataNetwork.value ||
+            constraintTypeRadioGroup.value != stateConstraintType.value
+        setHasUnsavedChangesAction({ value: hasChanged });
     }
-    convertToDelimited(listToBeDelimited: string[], delimitValue: string){
+    function convertToDelimited(listToBeDelimited: string[], delimitValue: string){
         let delimitedList = '';
         for(let i = 0; i < listToBeDelimited.length; i++){
             delimitedList += listToBeDelimited[i];
@@ -419,17 +414,17 @@ export default class Data extends Vue {
 
         return delimitedList
     }
-
-    disableCrudButtons() {
-        let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedKeyFields) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedInventoryReports) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedSimulationReports) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.primaryNetwork.trim()) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.constraintTypeRadioGroup.trim()) === true
+    function disableCrudButtons() {
+        let allValid = rules['generalRules'].valueIsNotEmpty(selectedKeyFields) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedInventoryReports) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedSimulationReports) === true
+            && rules['generalRules'].valueIsNotEmpty(primaryNetwork.value.trim()) === true
+            && rules['generalRules'].valueIsNotEmpty(constraintTypeRadioGroup.value.trim()) === true
 
         return !allValid;
     }
-}
+
+
 
 </script>
 

@@ -100,40 +100,39 @@
       </v-layout>
     </v-layout>
   </template>
-  <script lang="ts">
-    import Vue from 'vue';
-  import { Component, Watch} from 'vue-property-decorator';
-  import { Action, State } from 'vuex-class';
-  
-  @Component
-  export default class AdminSiteSettingsEditor extends Vue{
-      @State(state => state.siteAdminModule.implementationName) implementationName: string;
-      @State(state => state.siteAdminModule.agencyLogo) agencyLogo: string;
-      @State(state => state.siteAdminModule.implementationLogo) implementationLogo: string;
-       @Action('getImplementationName') getImplementationNameAction: string;
-       @Action('importImplementationName') importImplementationNameAction:(implementationName: string) => void;
-       @Action('importAgencyLogo') importAgencyLogoAction: any;
-       @Action('importProductLogo') importProductLogoAction: any;
-       ImplementationID: string = '';
-          
- onSaveImplementationName(){
-    this.importImplementationNameAction(this.ImplementationID);
+  <script lang="ts" setup>
+  import Vue from 'vue';
+  import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+  import { useStore } from 'vuex';
+  import { useRouter } from 'vue-router';
+
+  let store = useStore();
+  let implementationName = ref<string>(store.state.adminDataModule.implementationName);
+  let agencyLogo = ref<string>(store.state.adminDataModule.agencyLogo);
+  let implementationLogo = ref<string>(store.state.adminDataModule.implementationLogo);
+  let ImplementationID:string = '';
+  async function getImplementationNameAction(payload?: any): Promise<any> {await store.dispatch('getImplementationName');}
+  async function importImplementationNameAction(implementationName:string): Promise<any> {await store.dispatch('getImplementationName');}
+  async function importAgencyLogoAction(payload?: any): Promise<any> {await store.dispatch('importAgencyLogo');}
+  async function importProductLogoAction(payload?: any): Promise<any> {await store.dispatch('importProductLogo');}
+
+  function onSaveImplementationName(){
+    importImplementationNameAction(ImplementationID);
   }
-  onUploadImplementationLogo(){
+  function onUploadImplementationLogo(){
       document.getElementById("implementationImageUpload")?.click();
    }
 
-   onUploadAgencyLogo(){
+   function onUploadAgencyLogo(){
       document.getElementById("agencyImageUpload")?.click();
    }
-   handleImplementationLogoUpload(event: { target: { files: any[]; }; }){
-    const file = event.target.files[0];
-    this.importProductLogoAction(file);   
-  }
-  handleAgencyLogoUpload(event: { target: { files: any[]; }; }){
-    const file = event.target.files[0];
-    this.importAgencyLogoAction(file);
-  }
+   function handleImplementationLogoUpload(payload: any){
+    const file = payload.files[0];
+    importProductLogoAction(file);  
+}
+  function handleAgencyLogoUpload(payload: any){
+    const file = payload.files[0];
+    importAgencyLogoAction(file);
   }
   </script>
   

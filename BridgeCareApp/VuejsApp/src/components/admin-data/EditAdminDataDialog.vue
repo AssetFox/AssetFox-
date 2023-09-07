@@ -51,49 +51,50 @@
     </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
-import { EditAdminDataDialogData } from '@/shared/models/modals/edit-data-dialog-data';
-import { clone, isNil } from 'ramda';
+import { EditAdminDataDialogData, emptyEditAdminDataDialogData } from '@/shared/models/modals/edit-data-dialog-data';
+import { clone, empty, isNil } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class EditAdminDataDialog extends Vue {
-    @Prop() DialogData: EditAdminDataDialogData;
-        
-    rules: InputValidationRules = rules;
+    let InputRules: InputValidationRules = rules;
+    let DialogData: EditAdminDataDialogData = emptyEditAdminDataDialogData ;
+    
+    let selectedSettings: {value:string, networkType:string}[] = [];
+    let settingsList: string[] = [];
+    let settingItems: SelectItem[] = [];
+    const emit = defineEmits(['submit'])
+    let settingSelectItemValue: string | null = null;
+    let primarySuffix: string = "(P)"
+    let rawDataSuffix: string = "(R)"
+    let primaryType: string  = "PRIMARY"
+    let rawType: string = "RAW"
 
-    selectedSettings: {value:string, networkType:string}[] = [];
-    settingsList: string[] = [];
-    settingItems: SelectItem[] = [];
-    settingSelectItemValue: string | null = null;
-    primarySuffix: string = "(P)"
-    rawDataSuffix: string = "(R)"
-    primaryType: string  = "PRIMARY"
-    rawType: string = "RAW"
-
-    @Watch('DialogData', {deep:true})
-    onDialogDataChanged(){
-        this.selectedSettings = this.DialogData.selectedSettings.map(_ => {
+    //watchers
+    watch(DialogData, () => onDialogDataChanged)
+    function onDialogDataChanged() {
+        selectedSettings = DialogData.selectedSettings.map(_ => {
             let toReturn: {value: string, networkType: string} 
             let type = "";
             let value = "";
             const suffix = _.substring(_.length - 3);
-            if(this.DialogData.settingName == "InventoryReports"){
-                if(suffix === this.primarySuffix){
-                    type = this.primarySuffix;
+            if(DialogData.settingName == "InventoryReports"){
+                if(suffix === primarySuffix){
+                    type = primarySuffix;
                     value = _.substring(0, _.length - 3);
                 }
-                else if(suffix === this.rawDataSuffix){
-                    type = this.rawDataSuffix;
+                else if(suffix === rawDataSuffix){
+                    type = rawDataSuffix;
                     value = _.substring(0, _.length - 3);
                 }
                 else{
                     value = _;
-                    type = this.primarySuffix;
+                    type = primarySuffix;
                 }
             }
             else
@@ -103,43 +104,41 @@ export default class EditAdminDataDialog extends Vue {
                 
             return toReturn
         });
-        this.settingsList = clone(this.DialogData.settingsList);
-        this.settingSelectItemValue = null;
+        settingsList = clone(DialogData.settingsList);
+        settingSelectItemValue = null;
     }
-
-    @Watch('settingsList')
-    onSettingsListChanged(){
-        this.settingItems = this.settingsList.map(_ => {
+    watch(settingsList,() => onSettingsListChanged)
+    function onSettingsListChanged(){
+        settingItems = settingsList.map(_ => {
             return {text: _, value: _}
         });
     }
 
-    onDeleteSettingClick(setting:any){
-        this.selectedSettings = this.selectedSettings.filter(_ => _.value !== setting.value);
+    function onDeleteSettingClick(setting:any){
+        selectedSettings = selectedSettings.filter(_ => _.value !== setting.value);
     }
-
-    onAddClick(){
-        if(!isNil(this.settingSelectItemValue)){
-            this.selectedSettings.push({value: this.settingSelectItemValue, 
-            networkType: this.DialogData.settingName === "InventoryReports" ? this.primarySuffix : ""})
+    function onAddClick(){
+        if(!isNil(settingSelectItemValue)){
+            selectedSettings.push({value: settingSelectItemValue, 
+            networkType: DialogData.settingName === "InventoryReports" ? primarySuffix : ""})
         }            
     }
 
-    isAddDisabled(){
-        if(!isNil(this.settingSelectItemValue)){
-            return !isNil(this.selectedSettings.find(_ => _.value === this.settingSelectItemValue!));
+    function isAddDisabled(){
+        if(!isNil(settingSelectItemValue)){
+            return !isNil(selectedSettings.find(_ => _.value === settingSelectItemValue!));
         }
         return true;
     }
 
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-        this.$emit('submit', this.selectedSettings.map(_ => _.value + _.networkType));
+        emit('submit', selectedSettings.map(_ => _.value + _.networkType));
         } else {
-        this.$emit('submit', null);
+        emit('submit', null);
         }
     }
-}
+
 </script>
 
 <style>

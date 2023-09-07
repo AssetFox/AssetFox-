@@ -34,32 +34,31 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
 import {BudgetPriority, emptyBudgetPriority} from '@/shared/models/iAM/budget-priority';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
-@Component
-export default class CreatePriorityDialog extends Vue {
-  @Prop() showDialog: boolean;
+  const props = defineProps({
+    showDialog: Boolean
+  })
+  const emit = defineEmits(['submit'])
 
-  newBudgetPriority: BudgetPriority = {...emptyBudgetPriority, id: getNewGuid()};
-  rules: InputValidationRules = rules;
+  let newBudgetPriority: BudgetPriority = {...emptyBudgetPriority, id: getNewGuid()};
+  let rules: InputValidationRules = validationRules;
 
-  disableSubmitButton() {
-    return !(this.rules['generalRules'].valueIsNotEmpty(this.newBudgetPriority.priorityLevel) === true);
+  function disableSubmitButton() {
+    return !(rules['generalRules'].valueIsNotEmpty(newBudgetPriority.priorityLevel) === true);
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newBudgetPriority);
+      emit('submit', newBudgetPriority);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newBudgetPriority = {...emptyBudgetPriority, id: getNewGuid()};
+    newBudgetPriority = {...emptyBudgetPriority, id: getNewGuid()};
   }
-}
 </script>

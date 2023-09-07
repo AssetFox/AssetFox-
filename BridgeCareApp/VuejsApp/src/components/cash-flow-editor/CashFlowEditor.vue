@@ -249,9 +249,10 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, State, Getter, Mutation } from 'vuex-class';
+// import Component from 'vue-class-component';
+// import { Watch } from 'vue-property-decorator';
+// import { Action, State, Getter, Mutation } from 'vuex-class';
+import { ref, watch, Ref } from 'vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
     clone,
@@ -265,7 +266,6 @@ import {
     CashFlowRule,
     CashFlowRuleLibrary,
     CashFlowRuleLibraryUser,
-    emptyCashFlowDistributionRule,
     emptyCashFlowRule,
     emptyCashFlowRuleLibrary,
     emptyCashFlowRuleLibraryUsers
@@ -307,75 +307,74 @@ import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
 import { isNullOrUndefined } from 'util';
 import { LibraryUser } from '@/shared/models/iAM/user';
+import { useStore } from 'vuex';
 
-@Component({
-    components: {
-        CreateCashFlowRuleLibraryDialog,
-        GeneralCriterionEditorDialog,
-        ConfirmDeleteAlert: Alert,
-        CashFlowRuleEditDialog,
-        ShareCashFlowRuleLibraryDialog,
-        AddCashFlowRuleDialog
-    },
-})
-export default class CashFlowEditor extends Vue {
-    @State(state => state.cashFlowModule.cashFlowRuleLibraries)
-    stateCashFlowRuleLibraries: CashFlowRuleLibrary[];
-    @State(state => state.cashFlowModule.selectedCashFlowRuleLibrary)
-    stateSelectedCashRuleFlowLibrary: CashFlowRuleLibrary;
-    @State(state => state.cashFlowModule.scenarioCashFlowRules)
-    stateScenarioCashFlowRules: CashFlowRule[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
-    hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.cashFlowModule.hasPermittedAccess) hasPermittedAccess: boolean;
-    @State(state => state.cashFlowModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedCashFlowRuleLibrary') getIsSharedLibraryAction: any;
-    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
-    @Action('getCashFlowRuleLibraries') getCashFlowRuleLibrariesAction: any;
-    @Action('selectCashFlowRuleLibrary') selectCashFlowRuleLibraryAction: any;
-    @Action('upsertCashFlowRuleLibrary') upsertCashFlowRuleLibraryAction: any;
-    @Action('deleteCashFlowRuleLibrary') deleteCashFlowRuleLibraryAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('getScenarioCashFlowRules') getScenarioCashFlowRulesAction: any;
-    @Action('upsertScenarioCashFlowRules') upsertScenarioCashFlowRulesAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
+// @Component({
+//     components: {
+//         CreateCashFlowRuleLibraryDialog,
+//         GeneralCriterionEditorDialog,
+//         ConfirmDeleteAlert: Alert,
+//         CashFlowRuleEditDialog,
+//         ShareCashFlowRuleLibraryDialog,
+//         AddCashFlowRuleDialog
+//     },
+// })
 
-    @Mutation('cashFlowRuleLibraryMutator') cashFlowRuleLibraryMutator: any;
-    @Mutation('selectedCashFlowRuleLibraryMutator') selectedCashFlowRuleLibraryMutator: any;
+let store = useStore();
+let stateCashFlowRuleLibraries = ref<CashFlowRuleLibrary[]>(store.state.cashFlowModule.cashFlowRuleLibraries);
+let stateSelectedCashRuleFlowLibrary = ref<CashFlowRuleLibrary>(store.state.cashFlowModule.selectedCashFlowRuleLibrary);
+let stateScenarioCashFlowRules = ref<CashFlowRule[]>(store.state.cashFlowModule.scenarioCashFlowRules);
+let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
+let hasPermittedAccess = ref<boolean>(store.state.cashFlowModule.hasPermittedAccess);
+let isSharedLibrary = ref<boolean>(store.state.cashFlowModule.isSharedLibrary);
 
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
+async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedCashFlowRuleLibrary');}
+async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess');}
+async function getCashFlowRuleLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCashFlowRuleLibraries');}
+async function selectCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectCashFlowRuleLibrary');}
+async function upsertCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertCashFlowRuleLibrary');}
+async function deleteCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteCashFlowRuleLibrary');}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
+async function getScenarioCashFlowRulesAction(payload?: any): Promise<any> {await store.dispatch('getScenarioCashFlowRules');}
+async function upsertScenarioCashFlowRulesAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioCashFlowRules');}
+async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
+async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario');}
+async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario');}
 
-    addedRows: CashFlowRule[] = [];
-    updatedRowsMap:Map<string, [CashFlowRule, CashFlowRule]> = new Map<string, [CashFlowRule, CashFlowRule]>();//0: original value | 1: updated value
-    deletionIds: string[] = [];
-    rowCache: CashFlowRule[] = [];
-    gridSearchTerm = '';
-    currentSearch = '';
-    pagination: Pagination = clone(emptyPagination);
-    isPageInit = false;
-    totalItems = 0;
-    currentPage: CashFlowRule[] = [];
-    initializing: boolean = true;
-    isShared: boolean = false;
+//     @Mutation('cashFlowRuleLibraryMutator') cashFlowRuleLibraryMutator: any;
+//     @Mutation('selectedCashFlowRuleLibraryMutator') selectedCashFlowRuleLibraryMutator: any;
 
-    shareCashFlowRuleLibraryDialogData: ShareCashFlowRuleLibraryDialogData = clone(emptyShareCashFlowRuleLibraryDialogData);
+//     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
-    unsavedDialogAllowed: boolean = true;
-    trueLibrarySelectItemValue: string | null = ''
-    librarySelectItemValueAllowedChanged: boolean = true;
-    librarySelectItemValue: string | null = null;
-    
-    hasSelectedLibrary: boolean = false;
-    selectedScenarioId: string = getBlankGuid();
-    librarySelectItems: SelectItem[] = [];
-    selectedCashFlowRuleLibrary: CashFlowRuleLibrary = clone(
+    let addedRows: CashFlowRule[] = [];
+    let updatedRowsMap:Map<string, [CashFlowRule, CashFlowRule]> = new Map<string, [CashFlowRule, CashFlowRule]>();//0: original value | 1: updated value
+    let deletionIds: string[] = [];
+    let rowCache: CashFlowRule[] = [];
+    let gridSearchTerm = '';
+    let currentSearch = '';
+    let pagination: Pagination = clone(emptyPagination);
+    let isPageInit = false;
+    let totalItems = 0;
+    let currentPage: CashFlowRule[] = [];
+    let initializing: boolean = true;
+    let isShared: boolean = false;
+
+    let shareCashFlowRuleLibraryDialogData: ShareCashFlowRuleLibraryDialogData = clone(emptyShareCashFlowRuleLibraryDialogData);
+
+    let unsavedDialogAllowed: boolean = true;
+    let trueLibrarySelectItemValue: string | null = ''
+    let librarySelectItemValueAllowedChanged: boolean = true;
+    let librarySelectItemValue: string | null = null;
+
+    let hasSelectedLibrary: boolean = false;
+    let selectedScenarioId: string = getBlankGuid();
+    let librarySelectItems: SelectItem[] = [];
+    let selectedCashFlowRuleLibrary: CashFlowRuleLibrary = clone(
         emptyCashFlowRuleLibrary,
     );
-    cashFlowRuleGridHeaders: DataTableHeader[] = [
+    const cashFlowRuleGridHeaders: DataTableHeader[] = [
         {
             text: 'Rule Name',
             value: 'name',
@@ -401,14 +400,14 @@ export default class CashFlowEditor extends Vue {
             width: '10%',
         },
     ];
-    cashFlowRuleGridData: CashFlowRule[] = [];
-    selectedCashRuleGridRows: CashFlowRule[] = [];
-    cashFlowRuleRadioBtnValue: string = '';
-    selectedCashFlowRule: CashFlowRule = clone(emptyCashFlowRule);
-    selectedCashFlowRuleForCriteriaEdit: CashFlowRule = clone(
+    let cashFlowRuleGridData: CashFlowRule[] = [];
+    let selectedCashRuleGridRows: CashFlowRule[] = [];
+    let cashFlowRuleRadioBtnValue: string = '';
+    let selectedCashFlowRule: CashFlowRule = clone(emptyCashFlowRule);
+    let selectedCashFlowRuleForCriteriaEdit: CashFlowRule = clone(
         emptyCashFlowRule,
     );
-    cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
+    const cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
         {
             text: 'Duration (yr)',
             value: 'durationInYears',
@@ -442,30 +441,30 @@ export default class CashFlowEditor extends Vue {
             width: '4.2%',
         },
     ];
-    cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = [];
-    createCashFlowRuleLibraryDialogData: CreateCashFlowRuleLibraryDialogData = clone(
+    let cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = [];
+    let createCashFlowRuleLibraryDialogData: CreateCashFlowRuleLibraryDialogData = clone(
         emptyCreateCashFlowLibraryDialogData,
     );
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
         emptyGeneralCriterionEditorDialogData,
     );
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    rules: InputValidationRules = clone(rules);
-    uuidNIL: string = getBlankGuid();
-    hasScenario: boolean = false;
-    hasCreatedLibrary: boolean = false;
-    disableCrudButtonsResult: boolean = false;
-    hasLibraryEditPermission: boolean = false;
-    showRuleEditorDialog: boolean = false;
-    showAddCashFlowRuleDialog: boolean = false;
-    importLibraryDisabled: boolean = true;
-    scenarioHasCreatedNew: boolean = false;
-    loadedParentName: string = "";
-    loadedParentId: string = "";
-    parentLibraryName: string = "None";
-    parentLibraryId: string = "";
-    scenarioLibraryIsModified: boolean = false;
-    libraryImported: boolean = false;
+    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let rules: InputValidationRules = clone(rules);
+    let uuidNIL: string = getBlankGuid();
+    let hasScenario: boolean = false;
+    let hasCreatedLibrary: boolean = false;
+    let disableCrudButtonsResult: boolean = false;
+    let hasLibraryEditPermission: boolean = false;
+    let showRuleEditorDialog: boolean = false;
+    let showAddCashFlowRuleDialog: boolean = false;
+    let importLibraryDisabled: boolean = true;
+    let scenarioHasCreatedNew: boolean = false;
+    let loadedParentName: string = "";
+    let loadedParentId: string = "";
+    let parentLibraryName: string = "None";
+    let parentLibraryId: string = "";
+    let scenarioLibraryIsModified: boolean = false;
+    let libraryImported: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -497,15 +496,25 @@ export default class CashFlowEditor extends Vue {
         this.setHasUnsavedChangesAction({ value: false });
     }
 
-    @Watch('stateCashFlowRuleLibraries')
-    onStateCashFlowRuleLibrariesChanged() {
-        this.librarySelectItems = this.stateCashFlowRuleLibraries.map(
+
+    watch(alert, () => onStateCashFlowRuleLibrariesChanged)
+    function onStateCashFlowRuleLibrariesChanged(){
+        librarySelectItems = stateCashFlowRuleLibraries.map(
             (library: CashFlowRuleLibrary) => ({
                 text: library.name,
                 value: library.id,
             }),
         );
     }
+    // @Watch('stateCashFlowRuleLibraries')
+    // onStateCashFlowRuleLibrariesChanged() {
+    //     this.librarySelectItems = this.stateCashFlowRuleLibraries.map(
+    //         (library: CashFlowRuleLibrary) => ({
+    //             text: library.name,
+    //             value: library.id,
+    //         }),
+    //     );
+    // }
 
     @Watch('librarySelectItemValue')//import button might break something
     onLibrarySelectItemValueChangedCheckUnsaved(){

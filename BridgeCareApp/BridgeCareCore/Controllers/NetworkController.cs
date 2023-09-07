@@ -178,7 +178,7 @@ namespace BridgeCareCore.Controllers
                         }
 
                     }
-                */
+            */
 
                 return Ok(compatibleNetworks);
 

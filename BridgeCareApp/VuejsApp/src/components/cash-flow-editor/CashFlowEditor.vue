@@ -64,23 +64,23 @@
                     class="ghd-table v-table__overflow"
                     item-key="id"
                     select-all>
-                    <template slot="items" slot-scope="props">
+                    <template v-slot:item="{item}" slot="items" slot-scope="props">
                         <td>
-                            <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
+                            <v-checkbox hide-details primary v-model='item.selected'></v-checkbox>
                         </td>
                         <td>
                             <v-edit-dialog
-                                :return-value.sync="props.item.name"
+                                :return-value.sync="item.name"
                                 large
                                 lazy
-                                @save="onEditSelectedLibraryListData(props.item,'description')"
+                                @save="onEditSelectedLibraryListData(item,'description')"
                                 >
                                 <v-text-field
                                     id="CashFlowEditor-ruleName-text"
                                     readonly
                                     single-line
                                     class="sm-txt"
-                                    :value="props.item.name"
+                                    :value="item.name"
                                     :rules="[rules.generalRules.valueIsNotEmpty]"/>
                                 <template slot="input">
                                     <v-textarea
@@ -89,7 +89,7 @@
                                         outline
                                         rows="5"
                                         :rules="[rules.generalRules.valueIsNotEmpty]"
-                                        v-model="props.item.name"/>
+                                        v-model="item.name"/>
                                 </template>
                             </v-edit-dialog>
                         </td>
@@ -105,17 +105,13 @@
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value=" props.item
-                                                    .criterionLibrary
-                                                    .mergedCriteriaExpression"/>
+                                        :value="item.criterionLibrary.mergedCriteriaExpression"/>
                                 </template>
                                 <v-card>
                                     <v-card-text>
                                         <v-textarea
                                             :value="
-                                                props.item
-                                                    .criterionLibrary
-                                                    .mergedCriteriaExpression"
+                                                item.criterionLibrary.mergedCriteriaExpression"
                                             full-width
                                             no-resize
                                             outline
@@ -125,7 +121,7 @@
                                 </v-card>
                             </v-menu>
                             <v-btn
-                                @click="onEditCashFlowRuleCriterionLibrary(props.item)"
+                                @click="onEditCashFlowRuleCriterionLibrary(item)"
                                 id="CashFlowEditor-editCashFlowRule-btn"
                                 class="ghd-blue"
                                 icon>
@@ -137,14 +133,14 @@
                         <td>
                             <v-layout style='flex-wrap:nowrap'>
                                 <v-btn
-                                @click="onDeleteCashFlowRule(props.item.id)"
+                                @click="onDeleteCashFlowRule(item.id)"
                                 id="CashFlowEditor-deleteCashFlowRule-btn"
                                 class="ghd-blue"
                                 icon>
                                 <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>
                             <v-btn
-                                @click="onSelectCashFlowRule(props.item.id)"
+                                @click="onSelectCashFlowRule(item.id)"
                                 id="CashFlowEditor-editCashFlowRuleDistribution-btn"
                                 class="ghd-blue"
                                 icon>
@@ -257,6 +253,7 @@ import {
     isNil,
     propEq,
     any,
+props,
 } from 'ramda';
 import {
     CashFlowDistributionRule,

@@ -48,6 +48,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells["C2:J2"].Value = simulation.AnalysisMethod.Description;
             ExcelHelper.ApplyBorder(worksheet.Cells[2, 1, 2, 11]);
 
+            // Network Name
+            ExcelHelper.MergeCells(worksheet, 6, 1, 6, 2);
+            ExcelHelper.ApplyColor(worksheet.Cells[6, 1, 6, 2], Color.Gray);
+            ExcelHelper.SetTextColor(worksheet.Cells[6, 1, 6, 2], Color.White);
+            worksheet.Cells["A6:B6"].Value = "Network Name";
+
+            worksheet.Cells[currentCell.Row + 6, currentCell.Column].Value = "Network:";
+            worksheet.Cells[currentCell.Row + 6, currentCell.Column + 1].Value = simulation.Network?.Name;
+            ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 6, currentCell.Column, currentCell.Row + 6, currentCell.Column + 1]);
+
             var maxDataRow = FillData(worksheet, parametersModel, simulation.LastRun, currentCell, reportOutputData.LastModifiedDate, reportOutputData.InitialAssetSummaries, simulation.CommittedProjects, simulation.Treatments);
 
             currentCell = FillSimulationDetails(worksheet, simulationYearsCount, simulation, currentCell);
@@ -81,7 +91,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells[currentCell.Row + 2, currentCell.Column + 10].Value = lastRun.ToShortDateString();
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column + 9, currentCell.Row + 2, currentCell.Column + 10]);
 
-            currentCell.Row += 5; // moving on to the "NHS" block
+            currentCell.Row += 8; // moving on to the "NHS" block
 
             ExcelHelper.MergeCells(worksheet, currentCell.Row, currentCell.Column, currentCell.Row, currentCell.Column + 1);
             ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row, currentCell.Column + 1], Color.Gray);

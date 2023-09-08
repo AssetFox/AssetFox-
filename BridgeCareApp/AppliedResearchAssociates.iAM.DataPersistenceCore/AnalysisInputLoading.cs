@@ -80,7 +80,13 @@ public static class AnalysisInputLoading
         }
 
         // load
-        var network = unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, allowLoadingOfAssets);
+        var network = unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, allowLoadingOfAssets, simulationId);
+        if (!allowLoadingOfAssets && !network.Assets.Any())
+        {
+            var fakeAsset = network.AddAsset();
+            fakeAsset.AssetName = "Fake asset";
+            fakeAsset.SpatialWeighting.Expression = "0";
+        }
 
         // intermediate update/check
         if (!afterNetwork())

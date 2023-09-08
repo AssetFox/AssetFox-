@@ -713,7 +713,6 @@ export default class AppComponent extends Vue {
                     'http://www.bamssyst.penndot.gov/iAM?host=' +
                     encodeURI(window.location.host);
             } else {
-                alert(window.location.host);
                 this.onNavigate('/iAM/');
             }
         });

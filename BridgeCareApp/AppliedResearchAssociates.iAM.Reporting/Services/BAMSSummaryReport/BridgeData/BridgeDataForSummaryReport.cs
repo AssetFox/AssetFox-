@@ -109,15 +109,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BMSID"); //Bridge ID
                 
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "BRKEY_"); //BRKey
-                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LOCATION"); // Location / Structure Name
-
-                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: City/Town/Place data here
-
-                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_INTERSECTED"); //Feature Intersected
-
-                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_CARRIED"); //Feature Carried
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);                
 
                 //--------------------- Ownership ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT"); //District
@@ -134,15 +126,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_NAME"); // Planning Partner
 
-                worksheet.Cells[rowNo, columnNo++].Value = "";
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: City/Town/Place data here
 
-                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_INTERSECTED");
-                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_CARRIED");
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_INTERSECTED"); //Feature Intersected
 
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_CARRIED"); //Feature Carried
 
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LOCATION"); // Location / Structure Name
 
-                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CUSTODIAN"); // Maintenance Responsibility
-
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CUSTODIAN"); //Maintenance Responsibility                
 
                 //--------------------- Structure ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LENGTH"); //Structure Length
@@ -170,9 +162,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PARALLEL") > 0 ? "Y" : "N"; //Parallel Structure
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
-                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Leaking Joints data here
-                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Scour Critical data here
 
                 //--------------------- Network ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.FullFunctionalClassDescription(_reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FUNC_CLASS")); //Functional Class
@@ -224,6 +213,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
 
                 worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Leaking Joints data here
+
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Scour Critical data here
 
                 //--------------------- Funding ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "HBRR_ELIG"); //HBRR Elig
@@ -736,12 +727,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Internet\r\nReport",
                 "Bridge (B/C)",
                 "BridgeID\r\n(5A01)",
-                "BRKey\r\n(5A03)",
-                "Location / Structure Name\r\n(5A02)",
-                "City/Town/Place\r\n(5A06)",
-                "Feature Intersected\r\n(5A07)",
-                "Feature Carried\r\n(5A08)",
-
+                "BRKey\r\n(5A03)",               
 
 
                 //--------------------- Ownership ---------------------
@@ -756,7 +742,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Location / Structure Name\r\n(5A02)",
                 "Maintenance Responsibility\r\n(5A20)",
 
-
                 //--------------------- Structure ---------------------
                 "Structure Length\r\n(5B18)",
                 "Deck Area (5B19)",
@@ -765,9 +750,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Bridge Family",
                 "Struct Type\r\n(6A26-29)",
                 "Fractural Critical",
-                "Parallel Structure\r\n(5E02)",
-                "Leaking Joints\r\n",
-                "Scour Critical \r\n",
+                "Parallel Structure\r\n(5E02)",                
 
 
                 //--------------------- Network ---------------------
@@ -792,6 +775,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Posting Status\r\n(VP02)",
                 "Suff Rating\r\n(4A13)",
                 "Leaking Joints\r\n",
+                "Scour Critical",
 
                 //--------------------- Funding ---------------------
                 "HBRR Elig\r\n(6B41)",
@@ -829,7 +813,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 switch(headerNameFormatted)
                 {
                     case "ASSET_ID":
-                        totalNumOfColumns = 8; cellBGColor = ColorTranslator.FromHtml("#BDD7EE");
+                        totalNumOfColumns = 4; cellBGColor = ColorTranslator.FromHtml("#BDD7EE");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);                        
                         break;
 
@@ -839,7 +823,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         break;
 
                     case "STRUCTURE":
-                        totalNumOfColumns = 10; cellBGColor = ColorTranslator.FromHtml("#F8CBAD");
+                        totalNumOfColumns = 8; cellBGColor = ColorTranslator.FromHtml("#F8CBAD");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
                         break;
 
@@ -849,7 +833,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         break;
 
                     case "ASSET_ATTRIBUTES":
-                        totalNumOfColumns = 12; cellBGColor = ColorTranslator.FromHtml("#FFF2CC");
+                        totalNumOfColumns = 13; cellBGColor = ColorTranslator.FromHtml("#FFF2CC");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
                         break;
 

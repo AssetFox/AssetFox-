@@ -6,6 +6,7 @@
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
                     <v-select
+                        id="DeficientConditionGoalEditor-librarySelect-vselect"
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
                         outline
@@ -37,7 +38,7 @@
                         <span>Shared</span>
                         </template>
                         </v-badge>
-                        <v-btn @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn id="DeficientConditionGoalEditor-shareLibrary-vbtn" @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                             v-show='!hasScenario'>
                             Share Library
                     </v-btn>
@@ -54,7 +55,7 @@
                         outline>
                         Add Deficient Condition Goal
                     </v-btn>
-                    <v-btn @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
+                    <v-btn id="DeficientConditionGoalEditor-createNewLibrary-vbtn" @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
                         outline>    
@@ -231,6 +232,7 @@
                     Cancel
                 </v-btn>
                 <v-btn
+                    id="DeficientConditionGoalEditor-deleteLibrary-vbtn"
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
@@ -239,6 +241,7 @@
                     Delete Library
                 </v-btn>    
                 <v-btn
+                    id="DeficientConditionGoalEditor-createAsNewLibrary-vbtn"
                     @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     :disabled="disableCrudButtons()"
@@ -253,6 +256,7 @@
                     Save
                 </v-btn>
                 <v-btn
+                    id="DeficientConditionGoalEditor-updateLibrary-vbtn"
                     @click="onUpsertDeficientConditionGoalLibrary"
                     class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"

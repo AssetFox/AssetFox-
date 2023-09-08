@@ -124,7 +124,7 @@
                                             <v-text-field v-if="header.value === 'year'"
                                                 :value="props.item[header.value]"
                                                 :mask="'##########'"
-                                                :rules="[rules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"
+                                                :rules="[rules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty]"
                                                 :error-messages="props.item.yearErrors"/>
 
                                             <v-text-field v-if="header.value === 'cost'"
@@ -161,7 +161,7 @@
                                                     single-line
                                                     v-model="props.item[header.value]"
                                                     :mask="'##########'"
-                                                    :rules="[rules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"/>
+                                                    :rules="[rules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty]"/>
 
                                                 <v-text-field v-if="header.value === 'cost'"
                                                     label="Edit"
@@ -1069,10 +1069,7 @@ export default class CommittedProjectsEditor extends Vue  {
                     ) === true &&
                     this.rules['generalRules'].valueIsNotEmpty(
                         consequence.performanceFactor,
-                    ) === true ) &&
-                    this.rules['generalRules'].valueIsWithinRange(
-                        scp.year, [this.firstYear, this.lastYear],
-                    ) === true
+                    ) === true ) 
                 );
             },
         );
@@ -1220,8 +1217,8 @@ export default class CommittedProjectsEditor extends Vue  {
             scp.yearErrors = ['Value cannot be empty'];
         else if (this.investmentYears.length === 0)
             scp.yearErrors = ['There are no years in the investment settings']
-        else if(scp.year < this.firstYear )
-            scp.yearErrors = ['Year is outside of Analysis period'];      
+        else if(scp.year.toString().length < 4 || scp.year < 1900)
+            scp.yearErrors = ['Invalid Year value'];      
         else
             scp.yearErrors = [];
     }

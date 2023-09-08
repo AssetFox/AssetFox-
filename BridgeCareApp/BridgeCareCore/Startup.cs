@@ -86,8 +86,8 @@ namespace BridgeCareCore
             services.AddGraphQLServer()
                 .AddQueryType<QueryObjectType>()
                 .AddFiltering()
-                .AddSorting()
-                .AddAuthorization();
+                .AddSorting();
+                //.AddAuthorization();
 
             SetupReporting(services);
 

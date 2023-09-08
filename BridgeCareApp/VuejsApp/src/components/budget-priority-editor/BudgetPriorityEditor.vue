@@ -91,7 +91,7 @@
                                     <v-menu bottom min-height='500px' min-width='500px'>
                                         <template slot='activator'>
                                             <div v-if='stateScenarioSimpleBudgetDetails.length > 5'>
-                                                <v-btn  class='ara-blue ghd-button-text' icon>
+                                                <v-btn class='ara-blue ghd-button-text' icon>
                                                     <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
                                                 </v-btn>
                                             </div>

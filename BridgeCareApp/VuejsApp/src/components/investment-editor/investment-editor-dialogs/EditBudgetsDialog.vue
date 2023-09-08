@@ -49,7 +49,7 @@
                             </td>
                             <td>
                                 <v-text-field readonly single-line class='sm-txt'
-                                              :value='props.item.criterionLibrary.mergedCriteriaExpression'>
+                                              :value='props.criterionLibrary.mergedCriteriaExpression'>
                                     <template slot='append-outer'>
                                         <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" icon style="margin-top:-6px;">
                                             <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
@@ -88,11 +88,9 @@
     </v-layout>
 </template>
 
-<script lang='ts'>
+<script lang='ts' setup>
 import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { Action } from 'vuex-class';
 import { any, clone, isNil, update, findIndex, propEq, isEmpty } from 'ramda';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
@@ -101,287 +99,284 @@ import {
     EditBudgetsDialogData, EmitedBudgetChanges, emptyEmitBudgetChanges,
 } from '@/shared/models/modals/edit-budgets-dialog';
 import { Budget, emptyBudget } from '@/shared/models/iAM/investment';
-import { rules, InputValidationRules } from '@/shared/utils/input-validation-rules';
+import { rules as validationRules, InputValidationRules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
 import { isNull, isNullOrUndefined } from 'util';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-    components: {
-        GeneralCriterionEditorDialog,
-    },
-})
-export default class EditBudgetsDialog extends Vue {
-    @Prop() dialogData: EditBudgetsDialogData;
-
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-
-    editBudgetsDialogGridHeaders: DataTableHeader[] = [
+let store = useStore();
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+    dialogData: EditBudgetsDialogData
+}>()
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+let ditBudgetsDialogGridHeaders: DataTableHeader[] = [
         { text: 'Order', value: 'order', sortable: false, align: 'left', class: '', width: '' },
         { text: 'Budget', value: 'name', sortable: false, align: 'left', class: '', width: '' },
         { text: 'Criteria', value: 'criterionLibrary', sortable: false, align: 'left', class: '', width: '' },
         { text: 'Actions', value: 'actions', sortable: false, align: 'left', class: '', width: '' }
     ];
-    editBudgetsDialogGridData: Budget[] = [];
-    selectedGridRows: Budget[] = [];    
-    criterionLibraryEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
-    selectedBudgetForCriteriaEdit: Budget = clone(emptyBudget);
-    rules: InputValidationRules = rules;
-    uuidNIL: string = getBlankGuid();
-    Up: string = "up";
-    budgetChanges: EmitedBudgetChanges = clone(emptyEmitBudgetChanges);
+let editBudgetsDialogGridData: Budget[] = [];
+let selectedGridRows: Budget[] = [];    
+let criterionLibraryEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+let selectedBudgetForCriteriaEdit: Budget = clone(emptyBudget);
+let rules: InputValidationRules = validationRules;
+let uuidNIL: string = getBlankGuid();
+let Up: string = "up";
+let budgetChanges: EmitedBudgetChanges = clone(emptyEmitBudgetChanges);
     
-    originalOrder: number = 0;
-    currentSelectedBudget: Budget = emptyBudget;
+let originalOrder: number = 0;
+let currentSelectedBudget: Budget = emptyBudget;
 
-    @Watch('dialogData')
-    onDialogDataChanged() {
-        this.budgetChanges.addedBudgets = [];
-        this.budgetChanges.updatedBudgets = [];
-        this.budgetChanges.deletionIds = [];
+watch(props.dialogData,()=> onDialogDataChanged)
+    function onDialogDataChanged() {
+        budgetChanges.addedBudgets = [];
+        budgetChanges.updatedBudgets = [];
+        budgetChanges.deletionIds = [];
 
-        this.editBudgetsDialogGridData = this.setDefaultBudgetOrder(this.dialogData.budgets.sort(this.compareOrder));
+        editBudgetsDialogGridData = setDefaultBudgetOrder(props.dialogData.budgets.sort(compareOrder));
     }
-    setDefaultBudgetOrder(loadedBudgets: Budget[]): Budget[] {
+    function setDefaultBudgetOrder(loadedBudgets: Budget[]): Budget[] {
         let inc = 1;
         let cloneBudgets = clone(loadedBudgets);
         // If there is a 0 in the ordering, we need to reset the
         // ordering.
         const budgetCheck = cloneBudgets.find(b => b.budgetOrder === 0);
-        if(!isNil(budgetCheck) && this.budgetChanges.updatedBudgets.length === 0) {
+        if(!isNil(budgetCheck) && budgetChanges.updatedBudgets.length === 0) {
             cloneBudgets.forEach(b => {
                 b.budgetOrder = inc++;
                 // Update order
-                if(any(propEq('id', b.id), this.budgetChanges.updatedBudgets))
-                    this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((budget => budget.id == b.id))] = b;
+                if(any(propEq('id', b.id), budgetChanges.updatedBudgets))
+                    budgetChanges.updatedBudgets[budgetChanges.updatedBudgets.findIndex((budget => budget.id == b.id))] = b;
                 else
-                    this.budgetChanges.updatedBudgets.push(b);
+                    budgetChanges.updatedBudgets.push(b);
 
             });
         }
         return cloneBudgets;
     }
-    onAddBudget() {
-        const unnamedBudgets = this.editBudgetsDialogGridData
+    function onAddBudget() {
+        const unnamedBudgets = editBudgetsDialogGridData
             .filter((budget: Budget) => budget.name.match(/Unnamed Budget/));
     
         const budget: Budget = {
             ...emptyBudget,
             id: getNewGuid(),
-            budgetOrder: this.editBudgetsDialogGridData.length + 1,
-            name: `Unnamed Budget ${this.editBudgetsDialogGridData.length + 1}`,
+            budgetOrder: editBudgetsDialogGridData.length + 1,
+            name: `Unnamed Budget ${editBudgetsDialogGridData.length + 1}`,
             criterionLibrary: clone(emptyCriterionLibrary),
         }
-        this.editBudgetsDialogGridData.push(budget);
-        this.budgetChanges.addedBudgets.push(budget);
+        editBudgetsDialogGridData.push(budget);
+        budgetChanges.addedBudgets.push(budget);
     }
-
-    onEditBudgetName(budget: Budget) {
-        this.editBudgetsDialogGridData = update(
-            findIndex(propEq('id', budget.id), this.editBudgetsDialogGridData),
+    function onEditBudgetName(budget: Budget) {
+        editBudgetsDialogGridData = update(
+            findIndex(propEq('id', budget.id), editBudgetsDialogGridData),
             clone(budget),
-            this.editBudgetsDialogGridData,
+            editBudgetsDialogGridData,
         );
-        const origBudget = this.dialogData.budgets.find((b) => b.id == budget.id)
+        const origBudget = props.dialogData.budgets.find((b) => b.id == budget.id)
         if(!isNil(origBudget)){
             if(origBudget.name !== budget.name){
-                if(any(propEq('id', budget.id), this.budgetChanges.addedBudgets))
-                    this.budgetChanges.addedBudgets[this.budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
-                else if(any(propEq('id', budget.id), this.budgetChanges.updatedBudgets))
-                    this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                if(any(propEq('id', budget.id), budgetChanges.addedBudgets))
+                    budgetChanges.addedBudgets[budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                else if(any(propEq('id', budget.id), budgetChanges.updatedBudgets))
+                    budgetChanges.updatedBudgets[budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
                 else
-                    this.budgetChanges.updatedBudgets.push(budget);
+                    budgetChanges.updatedBudgets.push(budget);
             }
         }          
     }
-    onEditBudgetOrder(budget: Budget) {
-        this.editBudgetsDialogGridData = update(
-            findIndex(propEq('id', budget.id), this.editBudgetsDialogGridData),
+    function onEditBudgetOrder(budget: Budget) {
+        editBudgetsDialogGridData = update(
+            findIndex(propEq('id', budget.id), editBudgetsDialogGridData),
             clone(budget),
-            this.editBudgetsDialogGridData,
+            editBudgetsDialogGridData,
         );
-        if(any(propEq('id', budget.id), this.budgetChanges.updatedBudgets))
-            this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+        if(any(propEq('id', budget.id), budgetChanges.updatedBudgets))
+            budgetChanges.updatedBudgets[budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
         else
-            this.budgetChanges.updatedBudgets.push(budget);
+            budgetChanges.updatedBudgets.push(budget);
     }
-    disableDeleteButton() {
-        return !hasValue(this.selectedGridRows);
+    function disableDeleteButton() {
+        return !hasValue(selectedGridRows);
     }
 
-    onRemoveBudgets() {
-        this.editBudgetsDialogGridData = this.editBudgetsDialogGridData
-            .filter((budget: Budget) => !any(propEq('id', budget.id), this.selectedGridRows));
-        this.selectedGridRows.forEach(budget => {
-            this.removeBudget(budget.id)
+    function onRemoveBudgets() {
+        editBudgetsDialogGridData = editBudgetsDialogGridData
+            .filter((budget: Budget) => !any(propEq('id', budget.id), selectedGridRows));
+        selectedGridRows.forEach(budget => {
+            removeBudget(budget.id)
         })
-        this.selectedGridRows = [];
+        selectedGridRows = [];
     }
 
-    onRemoveBudget(id: string){
-        this.editBudgetsDialogGridData = this.editBudgetsDialogGridData
+    function onRemoveBudget(id: string){
+        editBudgetsDialogGridData = editBudgetsDialogGridData
             .filter((budget: Budget) => budget.id != id);
-        this.removeBudget(id);
-        this.cleanReorderList();
+        removeBudget(id);
+        cleanReorderList();
     }
 
-    removeBudget(id: string){
-        if(any(propEq('id', id), this.budgetChanges.addedBudgets)){
-            this.budgetChanges.addedBudgets = this.budgetChanges.addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
-            this.budgetChanges.deletionIds.push(id);
+    function removeBudget(id: string){
+        if(any(propEq('id', id), budgetChanges.addedBudgets)){
+            budgetChanges.addedBudgets = budgetChanges.addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
+            budgetChanges.deletionIds.push(id);
         }              
-        else if(any(propEq('id', id), this.budgetChanges.updatedBudgets)) {
-            this.budgetChanges.updatedBudgets = this.budgetChanges.updatedBudgets.filter((upBudge: Budget) => upBudge.id != id);
-            this.budgetChanges.deletionIds.push(id);
+        else if(any(propEq('id', id), budgetChanges.updatedBudgets)) {
+            budgetChanges.updatedBudgets = budgetChanges.updatedBudgets.filter((upBudge: Budget) => upBudge.id != id);
+            budgetChanges.deletionIds.push(id);
         }
         else
-            this.budgetChanges.deletionIds.push(id);
+            budgetChanges.deletionIds.push(id);
     }
 
-    onShowCriterionLibraryEditorDialog(budget: Budget) {
-        this.selectedBudgetForCriteriaEdit = clone(budget);
+    function onShowCriterionLibraryEditorDialog(budget: Budget) {
+        selectedBudgetForCriteriaEdit = clone(budget);
 
-        this.criterionLibraryEditorDialogData = {
+        criterionLibraryEditorDialogData = {
             showDialog: true,
             CriteriaExpression: budget.criterionLibrary.mergedCriteriaExpression
         };
     }
 
-    onSubmitCriterionLibraryEditorDialogResult(criterionExpression: string) {
-        this.criterionLibraryEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+    function onSubmitCriterionLibraryEditorDialogResult(criterionExpression: string) {
+        criterionLibraryEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionExpression) && this.selectedBudgetForCriteriaEdit.id !== this.uuidNIL) {
-            this.selectedBudgetForCriteriaEdit.criterionLibrary.mergedCriteriaExpression = criterionExpression;           
+        if (!isNil(criterionExpression) && selectedBudgetForCriteriaEdit.id !== uuidNIL) {
+            selectedBudgetForCriteriaEdit.criterionLibrary.mergedCriteriaExpression = criterionExpression;           
 
-            this.editBudgetsDialogGridData = update(
-                findIndex(propEq('id', this.selectedBudgetForCriteriaEdit.id), this.editBudgetsDialogGridData),
-                { ...this.selectedBudgetForCriteriaEdit, criterionLibrary: this.selectedBudgetForCriteriaEdit.criterionLibrary },
-                this.editBudgetsDialogGridData,
+            editBudgetsDialogGridData = update(
+                findIndex(propEq('id', selectedBudgetForCriteriaEdit.id), editBudgetsDialogGridData),
+                { ...selectedBudgetForCriteriaEdit, criterionLibrary: selectedBudgetForCriteriaEdit.criterionLibrary },
+                editBudgetsDialogGridData,
             );
 
-            const budget = this.selectedBudgetForCriteriaEdit;
-            const origBudget = this.dialogData.budgets.find((b) => b.id == budget.id);
+            const budget = selectedBudgetForCriteriaEdit;
+            const origBudget = props.dialogData.budgets.find((b) => b.id == budget.id);
 
             if(!isNil(origBudget)){
                 if(origBudget.criterionLibrary.mergedCriteriaExpression !== budget.criterionLibrary.mergedCriteriaExpression){                                                            
-                    if(this.budgetChanges.addedBudgets.length !== 0){
-                        this.budgetChanges.addedBudgets[this.budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                    if(budgetChanges.addedBudgets.length !== 0){
+                        budgetChanges.addedBudgets[budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
                     }
-                    else if(this.budgetChanges.updatedBudgets.length !== 0){                        
-                        this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                    else if(budgetChanges.updatedBudgets.length !== 0){                        
+                        budgetChanges.updatedBudgets[budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
                     }
                     else
                     {
-                        this.budgetChanges.updatedBudgets.push(budget);
+                        budgetChanges.updatedBudgets.push(budget);
                     }
                 }
             }
             else{
-                this.budgetChanges.addedBudgets[this.budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                budgetChanges.addedBudgets[budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
             }        
 
-            this.selectedBudgetForCriteriaEdit = clone(emptyBudget);
+            selectedBudgetForCriteriaEdit = clone(emptyBudget);
         }
     }
 
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-            this.$emit('submit', this.budgetChanges);
+            emit('submit', budgetChanges);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
 
-        this.editBudgetsDialogGridData = [];
-        this.selectedGridRows = [];
+        editBudgetsDialogGridData = [];
+        selectedGridRows = [];
     }
 
-    disableSubmitButton() {
-        const allDataIsValid: boolean = this.editBudgetsDialogGridData.every((budget: Budget) => {
-            return this.rules['generalRules'].valueIsNotEmpty(budget.name) === true &&
-                this.rules['investmentRules'].budgetNameIsUnique(budget, this.editBudgetsDialogGridData) === true;
+    function disableSubmitButton() {
+        const allDataIsValid: boolean = editBudgetsDialogGridData.every((budget: Budget) => {
+            return rules['generalRules'].valueIsNotEmpty(budget.name) === true &&
+                rules['investmentRules'].budgetNameIsUnique(budget, editBudgetsDialogGridData) === true;
         });
 
         return !allDataIsValid;
     }
-    compareOrder(b1: Budget, b2: Budget) {
+    function compareOrder(b1: Budget, b2: Budget) {
         return b1.budgetOrder - b2.budgetOrder;
     }
-    swapItemOrder(item:Budget, direction: string) {
+    function swapItemOrder(item:Budget, direction: string) {
         
         if (isNil(direction) || isNil(item)) return;
 
-        if (direction.toLowerCase() === this.Up) {    
+        if (direction.toLowerCase() === Up) {    
             if (item.budgetOrder <= 1) return;
-            this.editBudgetsDialogGridData.forEach(element => {
+            editBudgetsDialogGridData.forEach(element => {
                 if( element.budgetOrder === (item.budgetOrder-1)) {
                     element.budgetOrder = item.budgetOrder;
-                    this.onEditBudgetOrder(element);
+                    onEditBudgetOrder(element);
                 }
                 else if (element.budgetOrder === item.budgetOrder) {
                     element.budgetOrder = item.budgetOrder -1;
-                    this.onEditBudgetOrder(element);
+                    onEditBudgetOrder(element);
                 }
             });
         } else {
-            if (item.budgetOrder >= this.editBudgetsDialogGridData.length) return;
+            if (item.budgetOrder >= editBudgetsDialogGridData.length) return;
             let hold: number = item.budgetOrder;
             
-            this.editBudgetsDialogGridData.forEach(element => {
+            editBudgetsDialogGridData.forEach(element => {
                 if( element.budgetOrder === (hold)) {
                     element.budgetOrder = item.budgetOrder + 1;
-                    this.onEditBudgetOrder(element);
+                    onEditBudgetOrder(element);
                 }
                 else if (element.budgetOrder === (hold + 1)) {
                     element.budgetOrder = hold;
-                    this.onEditBudgetOrder(element);
+                    onEditBudgetOrder(element);
                 }
             });
         }
         // sort after the reorder
-        this.editBudgetsDialogGridData.sort(this.compareOrder);
-        this.originalOrder = 0;
-        this.currentSelectedBudget = emptyBudget;
+        editBudgetsDialogGridData.sort(compareOrder);
+        originalOrder = 0;
+        currentSelectedBudget = emptyBudget;
     }
-    reorderList(item: Budget) {
-        const original = this.originalOrder;
-        const replacement = this.currentSelectedBudget.budgetOrder;
+    function reorderList(item: Budget) {
+        const original = originalOrder;
+        const replacement = currentSelectedBudget.budgetOrder;
         if (isNil(replacement) || isEmpty(replacement) || original === 0) return;
 
         const diff = original - replacement;
         if (diff > 0) { // reorder up
-            this.editBudgetsDialogGridData.forEach(element => {
-                if (element === this.currentSelectedBudget) { this.onEditBudgetOrder(element); }
+            editBudgetsDialogGridData.forEach(element => {
+                if (element === currentSelectedBudget) { onEditBudgetOrder(element); }
                 else if (element.budgetOrder >=replacement && element.budgetOrder <= original) {
                     element.budgetOrder++;
-                    this.onEditBudgetOrder(element);
+                    onEditBudgetOrder(element);
                 }
             });
         } else { // reorder down
-            this.editBudgetsDialogGridData.forEach(element => {
-                if (element === this.currentSelectedBudget) { this.onEditBudgetOrder(element); }
+            editBudgetsDialogGridData.forEach(element => {
+                if (element === currentSelectedBudget) { onEditBudgetOrder(element); }
                 else if (element.budgetOrder >=original && element.budgetOrder <= replacement) {
                     element.budgetOrder--;
-                    this.onEditBudgetOrder(element);
+                    onEditBudgetOrder(element);
                 }
             });
         }
-        this.editBudgetsDialogGridData.sort(this.compareOrder);
-        this.originalOrder = 0;
-        this.currentSelectedBudget = emptyBudget;
+        editBudgetsDialogGridData.sort(compareOrder);
+        originalOrder = 0;
+        currentSelectedBudget = emptyBudget;
     }
-    cleanReorderList() {
+    function cleanReorderList() {
         let count: number = 1;
-        this.editBudgetsDialogGridData.forEach(element => {
+        editBudgetsDialogGridData.forEach(element => {
             element.budgetOrder = count;
-            this.onEditBudgetOrder(element);
+            onEditBudgetOrder(element);
             count++;
         });
     }
-    setCurrentOrder(item: Budget) {
-        this.originalOrder = item.budgetOrder;
-        this.currentSelectedBudget = item;
+    function setCurrentOrder(item: Budget) {
+        originalOrder = item.budgetOrder;
+        currentSelectedBudget = item;
     }
-}
 </script>
 <style>
 .order_input {

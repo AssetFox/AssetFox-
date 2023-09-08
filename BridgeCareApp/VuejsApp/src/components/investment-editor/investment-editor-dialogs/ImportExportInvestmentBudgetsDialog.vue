@@ -47,41 +47,38 @@
     </v-layout>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, Mutation, State } from 'vuex-class';
+<script lang='ts' setup>
 import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportInvestmentBudgetsDialogResult } from '@/shared/models/modals/import-export-investment-budgets-dialog-result';
 import {clone} from 'ramda';
 import InvestmentBudgetsFileSelector from '@/shared/components/FileSelector.vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref,shallowRef} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-    components: { InvestmentBudgetsFileSelector }
-})
-export default class ImportExportInvestmentBudgetsDialog extends Vue {
-    @Prop() showDialog: boolean;
+let store = useStore();
+const emit = defineEmits(['submit'])
+let showDialog=shallowRef<boolean>(false);
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
+async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
+function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator');}
+let isSuccessfulImport = ref<boolean>(store.state.investmentModule.isSuccessfulImport);
 
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setIsBusy') setIsBusyAction: any;
-    @Mutation('isSuccessfulImportMutator') isSuccessfulImportMutator: any;
-    @State(state => state.investmentModule.isSuccessfulImport) isSuccessfulImport: boolean
+let investmentBudgetsFile: File | null = null;
+let overwriteBudgets: boolean = true;
+let closed: boolean = false;
 
-    investmentBudgetsFile: File | null = null;
-    overwriteBudgets: boolean = true;
-    closed: boolean = false;
-
-    flipVisible(){
-        this.isSuccessfulImportMutator(!this.isSuccessfulImport)
+    function flipVisible(){
+        isSuccessfulImportMutator(!isSuccessfulImport.value)
     }
 
-    @Watch('showDialog')
-    onShowDialogChanged() {
-        if (this.showDialog) {
-            this.closed = false;
+    watch(showDialog,()=> onShowDialogChanged)
+    function onShowDialogChanged() {
+        if (showDialog) {
+            closed = false;
         } else {
-            this.investmentBudgetsFile = null;
-            this.closed = true;
+            investmentBudgetsFile = null;
+            closed = true;
         }
     }   
 
@@ -89,26 +86,26 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
      * FileSelector submit event handler
      */
 
-    onFileSelectorChange(file: File) {
-        this.investmentBudgetsFile = hasValue(file) ? clone(file) : null;
+    function onFileSelectorChange(file: File) {
+        investmentBudgetsFile = hasValue(file) ? clone(file) : null;
     }
 
     /**
      * Dialog submit event handler
      */
-    onSubmit(submit: boolean, isExport: boolean = false) {
+    function onSubmit(submit: boolean, isExport: boolean = false) {
         if (submit) {
             const result: ImportExportInvestmentBudgetsDialogResult = {
-                overwriteBudgets: this.overwriteBudgets,
-                file: this.investmentBudgetsFile as File,
+                overwriteBudgets: overwriteBudgets,
+                file: investmentBudgetsFile as File,
                 isExport: isExport
             };
-            this.$emit('submit', result);
+            emit('submit', result);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
     }
-}
+
 </script>
 <style>
     .title-padding{

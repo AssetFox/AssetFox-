@@ -31,45 +31,46 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+<script setup lang="ts">
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { clone } from 'ramda';
 import { AddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
+import { ref, Ref, watch } from 'vue';
 
-@Component
-export default class AddNetworkDialog extends Vue {
-  @Prop() dialogData: AddNetworkDialogData;
-
-  newNetwork: Network = clone(emptyNetwork);
-  rules: InputValidationRules = rules;
-  networkName: string = 'New Network';
+  const props = defineProps<{
+    dialogData: AddNetworkDialogData
+  }>()
+  const emit = defineEmits(['submit'])
 
 
-  @Watch('networkName')
-    onNetworkNameChanged() {
-        this.newNetwork.name = this.networkName;
-    }
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    this.newNetwork = {
-      ...this.newNetwork,
-      name: this.networkName,
+  let newNetwork: Network = clone(emptyNetwork);
+  let rules: InputValidationRules = validationRules;
+  let networkName: Ref<string> = ref('New Network');
+
+  watch(networkName, () => onNetworkNameChanged)
+  function onNetworkNameChanged() {
+      newNetwork.name = networkName.value;
+  }
+
+   watch(() => props.dialogData, () => onDialogDataChanged)
+  function onDialogDataChanged() {
+    newNetwork = {
+      ...newNetwork,
+      name: networkName.value,
     }
     
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newNetwork);
+      emit('submit', newNetwork);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newNetwork = clone(emptyNetwork);
-    this.dialogData.showDialog = false;
+    newNetwork = clone(emptyNetwork);
+    props.dialogData.showDialog = false;
   }
-}
+
 </script>

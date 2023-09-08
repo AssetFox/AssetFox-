@@ -195,7 +195,7 @@
 </template>
 
 <script setup lang='ts'>
-    import Vue, { Ref, ref, watch, onBeforeUnmount } from 'vue';
+    import Vue, { Ref, ref, watch, onBeforeUnmount, ShallowRef, shallowRef } from 'vue';
     import {
         BudgetPercentagePair,
         BudgetPriority,
@@ -249,14 +249,14 @@
     const ObjectID = require('bson-objectid');
     let store = useStore();
     const $router = useRouter();
-    let stateScenarioSimpleBudgetDetails = ref<SimpleBudgetDetail[]>(store.state.investmentModule.scenarioSimpleBudgetDetails);
-    let stateBudgetPriorityLibraries = ref<BudgetPriorityLibrary[]>(store.state.budgetPriorityModule.budgetPriorityLibraries);
-    let stateSelectedBudgetPriorityLibrary = ref<BudgetPriorityLibrary>(store.state.budgetPriorityModule.selectedBudgetPriorityLibrary);
-    let stateScenarioBudgetPriorities = ref<BudgetPriority[]>(store.state.budgetPriorityModule.scenarioBudgetPriorities);
-    let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
-    let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
-    let hasPermittedAccess = ref<boolean>(store.state.budgetPriorityModule.hasPermittedAccess);
-    let isSharedLibrary = ref<boolean>(store.state.budgetPriorityModule.isSharedLibrary);
+    let stateScenarioSimpleBudgetDetails = shallowRef<SimpleBudgetDetail[]>(store.state.investmentModule.scenarioSimpleBudgetDetails);
+    let stateBudgetPriorityLibraries = shallowRef<BudgetPriorityLibrary[]>(store.state.budgetPriorityModule.budgetPriorityLibraries);
+    let stateSelectedBudgetPriorityLibrary = shallowRef<BudgetPriorityLibrary>(store.state.budgetPriorityModule.selectedBudgetPriorityLibrary);
+    let stateScenarioBudgetPriorities = shallowRef<BudgetPriority[]>(store.state.budgetPriorityModule.scenarioBudgetPriorities);
+    let hasUnsavedChanges = shallowRef<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+    let hasAdminAccess = shallowRef<boolean>(store.state.authenticationModule.hasAdminAccess);
+    let hasPermittedAccess = shallowRef<boolean>(store.state.budgetPriorityModule.hasPermittedAccess);
+    let isSharedLibrary = shallowRef<boolean>(store.state.budgetPriorityModule.isSharedLibrary);
     async function getIsSharedLibraryAction(payload?: any): Promise<any>{await store.dispatch('getIsSharedBudgetPriorityLibrary')}
     async function getHasPermittedAccessAction(payload?: any): Promise<any>{await store.dispatch('getHasPermittedAccess')}
     async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification') }
@@ -275,23 +275,23 @@
     function budgetPriorityLibraryMutator(payload: any){store.commit('budgetPriorityLibraryMutator');}
     function selectedBudgetPriorityLibraryMutator(payload: any){store.commit('selectedBudgetPriorityLibraryMutator');}
     
-    let addedRows: Ref<BudgetPriority[]> = ref([]);
+    let addedRows: ShallowRef<BudgetPriority[]> = shallowRef([]);
     let updatedRowsMap:Map<string, [BudgetPriority, BudgetPriority]> = new Map<string, [BudgetPriority, BudgetPriority]>();//0: original value | 1: updated value
-    let deletionIds: Ref<string[]> = ref([]);
+    let deletionIds: ShallowRef<string[]> = shallowRef([]);
     let rowCache: BudgetPriority[] = [];
     let gridSearchTerm = '';
     let currentSearch = '';
-    let pagination: Ref<Pagination> = ref(clone(emptyPagination));
+    let pagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
     let isPageInit = false;
     let totalItems = 0;
-    let currentPage: Ref<BudgetPriority[]> = ref([]);
+    let currentPage: ShallowRef<BudgetPriority[]> = shallowRef([]);
     let initializing: boolean = true;
     let currentPriorityList: number[] = [];
 
     let unsavedDialogAllowed: boolean = true;
     let trueLibrarySelectItemValue: string | null = ''
     let librarySelectItemValueAllowedChanged: boolean = true;
-    let librarySelectItemValue: Ref<string | null> = ref(null);
+    let librarySelectItemValue: ShallowRef<string | null> = shallowRef(null);
 
     let selectedScenarioId: string = getBlankGuid();
     let hasSelectedLibrary: boolean = false;
@@ -308,7 +308,7 @@
         { text: 'Criteria', value: 'criteria', align: 'left', sortable: false, class: '', width: '' },
         actionHeader
     ];
-    let selectedBudgetPriorityGridRows: Ref<BudgetPriorityGridDatum[]> = ref([]);
+    let selectedBudgetPriorityGridRows: ShallowRef<BudgetPriorityGridDatum[]> = shallowRef([]);
     let selectedBudgetPriorityIds: string[] = [];
     let selectedBudgetPriorityForCriteriaEdit: BudgetPriority = clone(emptyBudgetPriority);
     let showCreateBudgetPriorityDialog: boolean = false;

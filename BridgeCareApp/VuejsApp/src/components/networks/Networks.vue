@@ -176,15 +176,12 @@
     </v-layout>
 </template>
 
-<script lang='ts'>
+<script setup lang='ts'>
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { SelectItem } from '@/shared/models/vue/select-item';
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, Getter, State } from 'vuex-class';
+import Vue, { inject, onBeforeUnmount, onMounted, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import {
     emptyEquationEditorDialogData,
@@ -195,270 +192,273 @@ import { Datasource } from '@/shared/models/iAM/data-source';
 import { clone, isNil, propEq, any } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
-import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import { InputValidationRules, rules as validationRules } from '@/shared/utils/input-validation-rules';
 import  AddNetworkDialog from '@/components/networks/networks-dialogs/AddNetworkDialog.vue';
 import { AddNetworkDialogData, emptyAddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
 import { Hub } from '@/connectionHub';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import { useStore } from 'vuex';
 
-@Component({
-    components: {
-        EquationEditorDialog,
-        AddNetworkDialog
-    },
-})
-export default class Networks extends Vue {
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
-    @State(state => state.networkModule.selectedNetwork) stateSelectedNetwork: Network;
-    @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
-    @State(state => state.datasourceModule.dataSources) stateDataSources: Datasource[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    let store = useStore();
+    let stateNetworks: ShallowRef<Network[]> = (store.state.networkModule.networks) ;
+    let stateSelectedNetwork: ShallowRef<Network> = (store.state.networkModule.selectedNetwork) ;
+    let stateAttributes: ShallowRef<Attribute[]> = (store.state.attributeModule.attributes) ;
+    let stateDataSources: ShallowRef<Datasource[]> = (store.state.datasourceModule.dataSources) ;
+    let hasUnsavedChanges: boolean = (store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+    let isAdmin: boolean = (store.state.authenticationModule.isAdmin) ;
     
-    @Action('getNetworks') getNetworks: any;
-    @Action('getDataSources') getDataSources: any;
-    @Action('getAttributes') getAttributes: any;
-    @Action('selectNetwork') selectNetworkAction: any;
-    @Action('createNetwork') createNetworkAction: any;
-    @Action('deleteNetwork') deleteNetworkAction: any;
-    @Action('aggregateNetworkData') aggregateNetworkAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
+    async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks');}
+    async function getDataSources(payload?: any): Promise<any> {await store.dispatch('getDataSources');}
+    async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
+    async function selectNetworkAction(payload?: any): Promise<any> {await store.dispatch('selectNetwork');}
+    async function createNetworkAction(payload?: any): Promise<any> {await store.dispatch('createNetwork');}
+    async function deleteNetworkAction(payload?: any): Promise<any> {await store.dispatch('deleteNetwork');}
+    async function aggregateNetworkAction(payload?: any): Promise<any> {await store.dispatch('aggregateNetworkData');}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
+    async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById');}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 
-    rules: InputValidationRules = rules;
+    let rules: InputValidationRules = validationRules;
 
-    dataSourceGridHeaders: DataTableHeader[] = [
+    let dataSourceGridHeaders: DataTableHeader[] = [
         { text: 'Name', value: 'name', align: 'left', sortable: true, class: '', width: '' },
         { text: 'Data Source', value: 'data source', align: 'left', sortable: true, class: '', width: '' },
     ];
 
-    addNetworkDialogData: AddNetworkDialogData = clone(emptyAddNetworkDialogData);
-    pagination: Pagination = emptyPagination;
-    selectNetworkItems: SelectItem[] = [];
-    selectKeyAttributeItems: SelectItem[] = [];
-    selectDataSourceItems: SelectItem[] = [];
-    attributeRows: Attribute[] =[];
-    cleanAttributes: Attribute[] = [];
-    attributes: Attribute[] = [];
-    selectedAttributeRows: Attribute[] = [];
-    dataSourceSelectValues: SelectItem[] = [
+    let addNetworkDialogData: AddNetworkDialogData = clone(emptyAddNetworkDialogData);
+    let pagination: Pagination = emptyPagination;
+    let selectNetworkItems: SelectItem[] = [];
+    let selectKeyAttributeItems: SelectItem[] = [];
+    let selectDataSourceItems: SelectItem[] = [];
+    let attributeRows: Attribute[] =[];
+    let cleanAttributes: Attribute[] = [];
+    let attributes: Attribute[] = [];
+    let selectedAttributeRows: ShallowRef<Attribute[]> = shallowRef([]);
+    let dataSourceSelectValues: SelectItem[] = [
         {text: 'SQL', value: 'SQL'},
         {text: 'Excel', value: 'Excel'},
         {text: 'None', value: 'None'}
     ]; 
 
-    networkDataAssignmentPercentage = 0;
-    networkDataAssignmentStatus: string = 'Waiting on server.';
+    let networkDataAssignmentPercentage = 0;
+    let networkDataAssignmentStatus: string = 'Waiting on server.';
 
-    selectedKeyAttributeItem: string = '';
-    selectedKeyAttribute: Attribute = clone(emptyAttribute);
-    selectedNetwork: Network = clone(emptyNetwork);
-    selectNetworkItemValue: string = '';
-    selectDataSourceId: string = '';
-    hasSelectedNetwork: boolean = false;
-    isNewNetwork: boolean = false;
-    hasStartedAggregation: boolean = false;
-    isKeyPropertySelectedAttribute: boolean = false;
-    spatialWeightingEquationValue: Equation = clone(emptyEquation); //placeholder until network dto and api changes
-    equationEditorDialogData: EquationEditorDialogData = clone(
+    let selectedKeyAttributeItem: Ref<string> = ref('');
+    let selectedKeyAttribute: Attribute = clone(emptyAttribute);
+    let selectedNetwork: Ref<Network> = ref(clone(emptyNetwork));
+    let selectNetworkItemValue: Ref<string> = ref('');
+    let selectDataSourceId: string = '';
+    let hasSelectedNetwork: boolean = false;
+    let isNewNetwork: boolean = false;
+    let hasStartedAggregation: boolean = false;
+    let isKeyPropertySelectedAttribute: boolean = false;
+    let spatialWeightingEquationValue: Equation = clone(emptyEquation); //placeholder until network dto and api changes
+    let equationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
     );
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.getAttributes();
-            vm.getNetworks();
-            vm.getDataSources();
-        });
+    const $statusHub = inject('$statusHub') as any
+
+    created();
+    function created() {
+        getAttributes();
+        getNetworks();
+        getDataSources();
+    }
+    onMounted(() => mounted); 
+    function mounted() {
+        $statusHub.$on(
+            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+            getDataAggregationStatus,
+        );
     }
 
-    mounted() {
-        this.$statusHub.$on(
+    onBeforeUnmount(() => beforeDestroy)
+    function beforeDestroy() {
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
+            getDataAggregationStatus,
         );
     }
     
-    @Watch('stateNetworks')
-    onStateNetworksChanged() {
-        this.selectNetworkItems = this.stateNetworks.map((network: Network) => ({
+    watch(stateNetworks, () => onStateNetworksChanged)
+    function onStateNetworksChanged() {
+        selectNetworkItems = stateNetworks.value.map((network: Network) => ({
             text: network.name,
             value: network.id,
         }));
     }
-    @Watch('stateAttributes')
-    onStateAttributesChanged() {
-        this.attributeRows = clone(this.stateAttributes);
-        this.selectKeyAttributeItems = this.stateAttributes.map((attribute: Attribute) => ({
+
+    watch(stateAttributes, () => onStateAttributesChanged)
+    function onStateAttributesChanged() {
+        attributeRows = clone(stateAttributes.value);
+        selectKeyAttributeItems = stateAttributes.value.map((attribute: Attribute) => ({
             text: attribute.name,
             value: attribute.id,
         }));
     }
-    @Watch('stateDataSources')
-    onStateDataSourcesChanges() {
-        this.selectDataSourceItems = this.stateDataSources.map((dataSource: Datasource) => ({
+
+    watch(stateDataSources, () => onStateDataSourcesChanges)
+    function onStateDataSourcesChanges() {
+        selectDataSourceItems = stateDataSources.value.map((dataSource: Datasource) => ({
             text: dataSource.name,
             value: dataSource.id,
         }));
     }
-    @Watch('selectNetworkItemValue')
-    onSelectNetworkItemValueChanged() {
-        this.selectNetworkAction(this.selectNetworkItemValue);
-        if(this.selectNetworkItemValue != getBlankGuid() || this.isNewNetwork)
-            this.hasSelectedNetwork = true;
+
+    watch(selectNetworkItemValue, () => onSelectNetworkItemValueChanged)
+    function onSelectNetworkItemValueChanged() {
+        selectNetworkAction(selectNetworkItemValue);
+        if(selectNetworkItemValue.value != getBlankGuid() || isNewNetwork)
+            hasSelectedNetwork = true;
         else
-            this.hasSelectedNetwork = false;
+            hasSelectedNetwork = false;
     }
-    @Watch('selectedAttributeRows')
-    onSelectedAttributeRowsChanged()
+
+    watch(selectedAttributeRows, () => onSelectedAttributeRowsChanged)
+    function onSelectedAttributeRowsChanged()
     {
-        if(any(propEq('id', this.selectedNetwork.keyAttribute), this.selectedAttributeRows)) {
-            this.isKeyPropertySelectedAttribute = true;
+        if(any(propEq('id', selectedNetwork.value.keyAttribute), selectedAttributeRows.value)) {
+            isKeyPropertySelectedAttribute = true;
         }
         else {
-            this.isKeyPropertySelectedAttribute = false;
+            isKeyPropertySelectedAttribute = false;
         }
     }
     
-    @Watch('stateSelectedNetwork')
-    onStateSelectedNetworkChanged() {
-        if (!this.isNewNetwork) {
-            this.selectedNetwork = clone(this.stateSelectedNetwork);
+    watch(stateSelectedNetwork, () => onStateSelectedNetworkChanged)
+    function onStateSelectedNetworkChanged() {
+        if (!isNewNetwork) {
+            selectedNetwork = clone(stateSelectedNetwork);
         }
     }
-    @Watch('selectedNetwork', {deep: true})
-    onSelectedNetworkChanged() {
-        this.selectedAttributeRows = [];
-        this.hasStartedAggregation = false;
-        this.selectNetworkItemValue = this.selectedNetwork.id;
-        this.selectedKeyAttributeItem = this.selectedNetwork.keyAttribute;
-        this.spatialWeightingEquationValue.expression = this.selectedNetwork.defaultSpatialWeighting;
 
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedNetwork, this.stateSelectedNetwork);
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    watch(selectedNetwork, () => onSelectedNetworkChanged)
+    function onSelectedNetworkChanged() {
+        selectedAttributeRows.value = [];
+        hasStartedAggregation = false;
+        selectNetworkItemValue.value = selectedNetwork.value.id;
+        selectedKeyAttributeItem.value = selectedNetwork.value.keyAttribute;
+        spatialWeightingEquationValue.expression = selectedNetwork.value.defaultSpatialWeighting;
+
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedNetwork, stateSelectedNetwork);
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
-    @Watch('selectedKeyAttributeItem')
-    onSelectedKeyAttributeItemChanged()
+
+    watch(selectedKeyAttributeItem, () => onSelectedKeyAttributeItemChanged)
+    function onSelectedKeyAttributeItemChanged()
     {
-        this.selectedKeyAttribute = this.attributeRows.find((attr: Attribute) => attr.id === this.selectedKeyAttributeItem) || clone(emptyAttribute);
+        selectedKeyAttribute = attributeRows.find((attr: Attribute) => attr.id === selectedKeyAttributeItem.value) || clone(emptyAttribute);
     }
-    onAddNetworkDialog() {
-        this.addNetworkDialogData = {
+
+    function onAddNetworkDialog() {
+        addNetworkDialogData = {
             showDialog: true,
         }
     }
 
-    addNetwork(network: Network)
+    function addNetwork(network: Network)
     {
-        this.selectNetworkItems.push({
+        selectNetworkItems.push({
             text: network.name,
             value: network.id
         });
         
-        this.isNewNetwork = true;
-        this.selectNetworkItemValue = network.id;
-        this.selectedNetwork = clone(network);
-        this.hasSelectedNetwork = true;
+        isNewNetwork = true;
+        selectNetworkItemValue.value = network.id;
+        selectedNetwork.value = clone(network);
+        hasSelectedNetwork = true;
     }
-    onDiscardChanges() {
-        this.selectedNetwork = clone(this.stateSelectedNetwork);
+    function onDiscardChanges() {
+        selectedNetwork = clone(stateSelectedNetwork);
     }
-    onSubmitEquationEditorDialogResult(equation: Equation) {
-        this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
+    function onSubmitEquationEditorDialogResult(equation: Equation) {
+        equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation)) {
-            this.spatialWeightingEquationValue = clone(equation)
+            spatialWeightingEquationValue = clone(equation)
         }
     }
-    onShowEquationEditorDialog() {
-        this.equationEditorDialogData = {
+    function onShowEquationEditorDialog() {
+        equationEditorDialogData = {
             showDialog: true,
-            equation: this.spatialWeightingEquationValue,
+            equation: spatialWeightingEquationValue,
         };      
     }
-    selectAllFromSource(){
-        this.selectedAttributeRows = clone(this.stateAttributes.filter((attr: Attribute) => attr.dataSource.id == this.selectDataSourceId));
+    function selectAllFromSource(){
+        selectedAttributeRows.value = clone(stateAttributes.value.filter((attr: Attribute) => attr.dataSource.id == selectDataSourceId));
     }
-    onAddAll(){
-        this.selectedAttributeRows = clone(this.attributeRows)
+    function onAddAll(){
+        selectedAttributeRows.value = clone(attributeRows)
     }
-    onRemoveAll(){
-        this.selectedAttributeRows = [];
+    function onRemoveAll(){
+        selectedAttributeRows.value = [];
     }
-    aggregateNetworkData(){
-        this.aggregateNetworkAction({
-            attributes: this.selectedAttributeRows,
-            networkId: this.selectNetworkItemValue
+    function aggregateNetworkData(){
+        aggregateNetworkAction({
+            attributes: selectedAttributeRows.value,
+            networkId: selectNetworkItemValue.value
         });
 
-        this.hasStartedAggregation = true;
+        hasStartedAggregation = true;
     }
 
-    onDeleteClick(){
-        this.deleteNetworkAction(this.selectedNetwork.id).then(() => {
-            this.hasSelectedNetwork = false;
-            this.selectNetworkItemValue = "";
-            this.selectedNetwork = clone(emptyNetwork)
+    function onDeleteClick(){
+        deleteNetworkAction(selectedNetwork.value.id).then(() => {
+            hasSelectedNetwork = false;
+            selectNetworkItemValue.value = "";
+            selectedNetwork.value = clone(emptyNetwork)
         })       
     }
-    disableCrudButtonsCreate() {
+    function disableCrudButtonsCreate() {
 
-        let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedNetwork.name) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.spatialWeightingEquationValue.expression) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedKeyAttributeItem) === true;
-
-
-        return !allValid;
-    }
-    disableCrudButtonsAggregate() {
-        let isKeyPropertySelectedAttribute: Boolean = any(propEq('id', this.selectedNetwork.KeyAttribute), this.selectedAttributeRows);
-
-        let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedNetwork.name) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttributeRows) === true
-            && this.isKeyPropertySelectedAttribute === true
-            && this.hasStartedAggregation === false;
+        let allValid = rules['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
+            && rules['generalRules'].valueIsNotEmpty(spatialWeightingEquationValue.expression) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedKeyAttributeItem) === true;
 
 
         return !allValid;
     }
-    createNetwork(){
-        this.isNewNetwork = false;
+    function disableCrudButtonsAggregate() {
+        let isKeyPropertySelectedAttribute: Boolean = any(propEq('id', selectedNetwork.value.KeyAttribute), selectedAttributeRows.value);
 
-        this.createNetworkAction({
-            network: this.selectedNetwork,
+        let allValid = rules['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedAttributeRows) === true
+            && isKeyPropertySelectedAttribute === true
+            && hasStartedAggregation === false;
+
+
+        return !allValid;
+    }
+    function createNetwork(){
+        isNewNetwork = false;
+
+        createNetworkAction({
+            network: selectedNetwork.value,
             parameters: {
-                defaultEquation: this.spatialWeightingEquationValue.expression,
-                networkDefinitionAttribute: this.selectedKeyAttribute
+                defaultEquation: spatialWeightingEquationValue.expression,
+                networkDefinitionAttribute: selectedKeyAttribute
             }
         })
 
     }
 
-    getDataAggregationStatus(data: any) {
+    function getDataAggregationStatus(data: any) {
         const networkRollupDetail: NetworkRollupDetail = data.networkRollupDetail as NetworkRollupDetail;
-        if (networkRollupDetail.networkId === this.selectedNetwork.id){
-            this.networkDataAssignmentStatus = networkRollupDetail.status;
-            this.networkDataAssignmentPercentage = data.percentage as number;
+        if (networkRollupDetail.networkId === selectedNetwork.value.id){
+            networkDataAssignmentStatus = networkRollupDetail.status;
+            networkDataAssignmentPercentage = data.percentage as number;
         }
     }
     
-    pages() {
-        this.pagination.totalItems = this.attributeRows.length
-        if (this.pagination.rowsPerPage == null || this.pagination.totalItems == null) 
+    function pages() {
+        pagination.totalItems = attributeRows.length
+        if (pagination.rowsPerPage == null || pagination.totalItems == null) 
             return 0
 
-        return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage)
-    }
-
-    beforeDestroy() {
-        this.$statusHub.$off(
-            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
-        );
-    }
-}
+        return Math.ceil(pagination.totalItems / pagination.rowsPerPage)
+    }  
 </script>
 
 <style>

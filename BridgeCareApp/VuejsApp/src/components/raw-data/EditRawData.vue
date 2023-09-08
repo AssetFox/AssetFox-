@@ -39,10 +39,8 @@
     </v-layout>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+<script setup lang="ts">
+import Vue, { ref } from 'vue';
 import { any, clone, isNil, propEq } from 'ramda';
 import { Network } from '@/shared/models/iAM/network';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
@@ -50,17 +48,15 @@ import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import AttributesSvg from '@/shared/icons/AttributesSvg.vue';
 import DataSourceSvg from '@/shared/icons/DataSourceSvg.vue';
 import NetworksSvg from '@/shared/icons/NetworksSvg.vue';
+import { useStore } from 'vuex';
 
-@Component({
-    components: { AttributesSvg, DataSourceSvg, NetworksSvg}
-})
-export default class EditRawData extends Vue {
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.authenticationModule.userId) userId: string;
+    let store = useStore();
+    let hasAdminAccess: boolean = store.state.authenticationModule.hasAdminAccess;
+    let userId: string = store.state.authenticationModule.userId;
 
-    networkId: string = getBlankGuid();
-    networkName: string = '';
-    navigationTabs: NavigationTab[] = [
+    let networkId: string = getBlankGuid();
+    let networkName: string = '';
+    let navigationTabs: NavigationTab[] = [
         {
             tabName: 'DataSource',
             tabIcon: "",
@@ -84,48 +80,49 @@ export default class EditRawData extends Vue {
         },
     ];
     
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-                vm.navigationTabs = vm.navigationTabs.map(
-                    (navTab: NavigationTab) => {
-                        const navigationTab = {
-                            ...navTab,
-                            navigation: {
-                                ...navTab.navigation,
-                                query: {
-                                },
-                            },
-                        };
+    beforeRouteEnter();
 
-                        if (navigationTab.tabName === 'DataSource' 
-                            || navigationTab.tabName === 'Networks' 
-                            || navigationTab.tabName === 'Attributes') {
-                            navigationTab['visible'] = vm.hasAdminAccess;
-                        }
-
-                        return navigationTab;
+    function beforeRouteEnter() {
+        navigationTabs = navigationTabs.map(
+            (navTab: NavigationTab) => {
+                const navigationTab = {
+                    ...navTab,
+                    navigation: {
+                        ...navTab.navigation,
+                        query: {
+                        },
                     },
-                );
+                };
 
-                // get the window href
-                const href = window.location.href;
-                // check each NavigationTab object to see if it has a matching navigation path with the href
-                const hasChildPath = any(
-                    (navigationTab: NavigationTab) =>
-                        href.indexOf(navigationTab.navigation.path) !== -1,
-                    vm.navigationTabs,
-                );
-        });
+                if (navigationTab.tabName === 'DataSource' 
+                    || navigationTab.tabName === 'Networks' 
+                    || navigationTab.tabName === 'Attributes') {
+                    navigationTab['visible'] = hasAdminAccess;
+                }
+
+                return navigationTab;
+            },
+        );
+
+        // get the window href
+        const href = window.location.href;
+        // check each NavigationTab object to see if it has a matching navigation path with the href
+        const hasChildPath = any(
+            (navigationTab: NavigationTab) =>
+                href.indexOf(navigationTab.navigation.path) !== -1,
+            navigationTabs,
+        );
+
     }
 
 
-    visibleNavigationTabs() {
-        return this.navigationTabs.filter(
+    function visibleNavigationTabs() {
+        return navigationTabs.filter(
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,
         );
     }
-}
+
 </script>
 
 <style>

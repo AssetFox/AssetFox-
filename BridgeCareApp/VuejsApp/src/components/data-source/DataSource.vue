@@ -119,12 +119,9 @@
     </v-layout>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
+<script setup lang='ts'>
+import Vue, { onMounted, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
 import { clone, isNil, prop } from 'ramda';
-import { Watch } from 'vue-property-decorator';
-import Component from 'vue-class-component';
-import { Action, State, Getter, Mutation } from 'vuex-class';
 import {
     Datasource, 
     emptyDatasource, 
@@ -148,361 +145,364 @@ import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper
 import DataSourceService from '@/services/data-source.service';
 import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
+import { useStore } from 'vuex';
 
-@Component({
-    components: {
-        CreateDataSourceDialog
-    },
-})
-export default class DataSource extends Vue {
+    let store = useStore();
+    const emit = defineEmits(['submit'])
+    let dataSources = shallowRef<Datasource[]>(store.state.datasourceModule.dataSources) ;
+    let dataSourceTypes = shallowRef<string[]>(store.state.datasourceModule.dataSourceTypes) ;
+    let excelColumns = shallowRef<RawDataColumns>(store.state.datasourceModule.excelColumns) ;
+    let sqlCommandResponse = shallowRef<SqlCommandResponse>(store.state.datasourceModule.sqlCommandResponse) ;
+    let hasUnsavedChanges = shallowRef<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges) ;
+
+    async function getDataSourcesAction(payload?: any): Promise<any> {await store.dispatch('getDataSources');}
+    async function getDataSourceTypesAction(payload?: any): Promise<any> {await store.dispatch('getDataSourceTypes');}
+    async function upsertSqlDataSourceAction(payload?: any): Promise<any> {await store.dispatch('upsertSqlDataSource');}
+    async function upsertExcelDataSourceAction(payload?: any): Promise<any> {await store.dispatch('upsertExcelDataSource');}
+    async function deleteDataSourceAction(payload?: any): Promise<any> {await store.dispatch('deleteDataSource');}
+    async function importExcelSpreadsheetFileAction(payload?: any): Promise<any> {await store.dispatch('importExcelSpreadsheetFile');}
+    async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders');}
+    async function checkSqlCommandAction(payload?: any): Promise<any> {await store.dispatch('checkSqlCommand');}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification');} 
+
+    let getUserNameByIdGetter: any = store.getters.getUserNameById;
+    let getIdByUserNameGetter: any = store.getters.getIdByUserName ;
+
+    let dsTypeItems: string[] = [];
+    let dsItems: any = [];
     
-    @State(state => state.datasourceModule.dataSources) dataSources: Datasource[];
-    @State(state => state.datasourceModule.dataSourceTypes) dataSourceTypes: string[];
-    @State(state => state.datasourceModule.excelColumns) excelColumns: RawDataColumns;
-    @State(state => state.datasourceModule.sqlCommandResponse) sqlCommandResponse: SqlCommandResponse;
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
+    let assetNumber: number = 0;
+    let invalidColumn: string = '';
+    let sqlResponse: string | null = '';
+    let sqlValid: boolean = false;
 
-    @Action('getDataSources') getDataSourcesAction: any;
-    @Action('getDataSourceTypes') getDataSourceTypesAction: any;
-    @Action('upsertSqlDataSource') upsertSqlDataSourceAction: any;
-    @Action('upsertExcelDataSource') upsertExcelDataSourceAction: any;
-    @Action('deleteDataSource') deleteDataSourceAction: any;
+    let sourceTypeItem: ShallowRef<string | null> = shallowRef('');
+    let dataSourceTypeItem: ShallowRef<string | null> = shallowRef('');
+    let datasourceNames: string[] = [];
+    let dataSourceExcelColumns: DataSourceExcelColumns = { locationColumn: [], dateColumn: []};
 
-    @Action('importExcelSpreadsheetFile') importExcelSpreadsheetFileAction: any;
-    @Action('getExcelSpreadsheetColumnHeaders') getExcelSpreadsheetColumnHeadersAction: any;
-    @Action('checkSqlCommand') checkSqlCommandAction: any;
+    let currentExcelLocationColumn: ShallowRef<string> = shallowRef('');
+    let currentExcelDateColumn: ShallowRef<string> = shallowRef('');
+    let currentDatasource: Ref<Datasource> = ref(clone(emptyDatasource));
+    let unmodifiedDatasource: Ref<Datasource> = ref(clone(emptyDatasource));
+    let createDataSourceDialogData: CreateDataSourceDialogData = clone(emptyCreateDataSourceDialogData);
 
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
-    @Getter('getIdByUserName') getIdByUserNameGetter: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-
-    dsTypeItems: string[] = [];
-    dsItems: any = [];
-    
-    assetNumber: number = 0;
-    invalidColumn: string = '';
-    sqlResponse: string | null = '';
-    sqlValid: boolean = false;
-
-    sourceTypeItem: string | null = '';
-    dataSourceTypeItem: string | null = '';
-    datasourceNames: string[] = [];
-    dataSourceExcelColumns: DataSourceExcelColumns = { locationColumn: [], dateColumn: []};
-
-    currentExcelLocationColumn: string = '';
-    currentExcelDateColumn: string = '';
-    currentDatasource: Datasource = clone(emptyDatasource);
-    unmodifiedDatasource: Datasource = clone(emptyDatasource)
-    createDataSourceDialogData: CreateDataSourceDialogData = clone(emptyCreateDataSourceDialogData);
-
-    selectedConnection: string = '';
-    showMssql: boolean = false;
-    showExcel: boolean = false;
-    showSqlMessage: boolean = false;
-    showSaveMessage: boolean = false;
-    isNewDataSource: boolean = false;
-    allowSaveData: boolean = false;
+    let selectedConnection: ShallowRef<string> = shallowRef('');
+    let showMssql: boolean = false;
+    let showExcel: boolean = false;
+    let showSqlMessage: boolean = false;
+    let showSaveMessage: boolean = false;
+    let isNewDataSource: boolean = false;
+    let allowSaveData: boolean = false;
         
-    fileName: string | null = '';
-    fileSelect: HTMLInputElement = {} as HTMLInputElement;
-    files: File[] = [];
-    file: File | null = null;   
+    let fileName: string | null = '';
+    let fileSelect: HTMLInputElement = {} as HTMLInputElement;
+    let files: File[] = [];
+    let file: ShallowRef<File | null> = shallowRef(null);   
 
-    locColumns: string[] =[];
-    datColumns: string[] =[];
+    let locColumns: string[] =[];
+    let datColumns: string[] =[];
 
-    connectionStringPlaceHolderMessage: string = '';    
+    let connectionStringPlaceHolderMessage: string = '';    
+    
+    onMounted(() => mounted)
+    function mounted() {
 
-    mounted() {
+        fileSelect = document.getElementById('file-select') as HTMLInputElement;   
 
-        this.fileSelect = document.getElementById('file-select') as HTMLInputElement;   
-
-        this.getDataSourcesAction();
-        this.getDataSourceTypesAction();
-        this.showSqlMessage = false;
+        getDataSourcesAction();
+        getDataSourceTypesAction();
+        showSqlMessage = false;
     }
-    @Watch('excelColumns')
-        onExcelColumnsChanged() {
-            this.dataSourceExcelColumns = {
-                locationColumn: this.excelColumns ? this.excelColumns.columnHeaders ? this.excelColumns.columnHeaders.length > 0 ? this.excelColumns.columnHeaders : [] : [] : [],
-                dateColumn: this.excelColumns ? this.excelColumns.columnHeaders ? this.excelColumns.columnHeaders.length > 0 ? this.excelColumns.columnHeaders : [] : [] : []
-            };
-            if (this.dataSourceExcelColumns.locationColumn.length > 0) {
-                this.locColumns = this.dataSourceExcelColumns.locationColumn;
-                this.currentExcelLocationColumn = this.currentDatasource ? this.currentDatasource.locationColumn : '';
-            }
-            if (this.dataSourceExcelColumns.dateColumn.length > 0) {
-                this.datColumns = this.dataSourceExcelColumns.dateColumn; 
-                this.currentExcelDateColumn = this.currentDatasource ? this.currentDatasource.dateColumn : '';
-            }
-        }
-    @Watch('dataSources')
-        onGetDataSources() {
-            if (this.dataSources != null || this.dataSources != undefined) {
-                let filteredSources = this.dataSources.filter((ds: Datasource) => ds.type != 'None');  
-                this.dsItems = this.dataSources.length > 0 ? filteredSources.map(
-                    (ds: Datasource) => ({
-                        text: ds.name,
-                        value: ds.name
-                    }),
-                ) : []
-            }
-        }
-    @Watch('dataSourceTypes')
-        onGetDataSourceTypes() {
-            this.dsTypeItems = clone(this.dataSourceTypes);
-        }
-    @Watch('dataSourceTypeItem')
-        onSourceTypeChanged() {
-            if (this.dataSourceTypeItem===DSSQL) {
-                this.showMssql = true;
-                this.showExcel = false;
-                this.currentDatasource.type = "SQL";
-            }
-            if (this.dataSourceTypeItem===DSEXCEL) {
-                this.showExcel = true;
-                this.showMssql = false;
-                this.currentDatasource.type = "Excel";
-                
-                if(!this.isNewDataSource) {
-                    this.getExcelSpreadsheetColumnHeadersAction(this.currentDatasource.id);
-                    this.currentExcelDateColumn = this.currentDatasource.dateColumn;
-                    this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
-                }
-                
-            }
-        }
-        @Watch('sourceTypeItem') 
-        onsourceTypeItemChanged() {
-            // get the current data source object
-            let currentDatasource = clone(this.dataSources.length>0 ? this.dataSources.find(f => f.name === this.sourceTypeItem) : clone(emptyDatasource));
-            currentDatasource ? this.currentDatasource = clone(currentDatasource) : this.currentDatasource = clone(emptyDatasource);
 
-            if(isNil(this.currentDatasource.connectionString)) {
-                this.currentDatasource.connectionString = '';
-            }
-
-            this.unmodifiedDatasource = clone(this.currentDatasource);
-
-            // update the source type droplist
-            this.dataSourceTypeItem = this.currentDatasource.type;
-            this.currentExcelDateColumn = this.currentDatasource.dateColumn;
-            this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
-            this.selectedConnection = this.isOwner() ? this.currentDatasource.connectionString : '';
-            this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
-            this.showSqlMessage = false; this.showSaveMessage = false;
-            if(!this.isNewDataSource) {
-                    this.getExcelSpreadsheetColumnHeadersAction(this.currentDatasource.id);
-                    this.currentExcelDateColumn = this.currentDatasource.dateColumn;
-                    this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
-                }
+    watch(excelColumns, () => onExcelColumnsChanged)
+    function onExcelColumnsChanged() {
+        dataSourceExcelColumns = {
+            locationColumn: excelColumns ? excelColumns.value.columnHeaders ? excelColumns.value.columnHeaders.length > 0 ? excelColumns.value.columnHeaders : [] : [] : [],
+            dateColumn: excelColumns ? excelColumns.value.columnHeaders ? excelColumns.value.columnHeaders.length > 0 ? excelColumns.value.columnHeaders : [] : [] : []
+        };
+        if (dataSourceExcelColumns.locationColumn.length > 0) {
+            locColumns = dataSourceExcelColumns.locationColumn;
+            currentExcelLocationColumn.value = currentDatasource ? currentDatasource.value.locationColumn : '';
         }
-        @Watch('selectedConnection')
-        onSelectedConnectionChanged() {
-            if(this.selectedConnection != '')
-            {
-                this.currentDatasource.connectionString = this.selectedConnection;
-            }
+        if (dataSourceExcelColumns.dateColumn.length > 0) {
+            datColumns = dataSourceExcelColumns.dateColumn; 
+            currentExcelDateColumn.value = currentDatasource ? currentDatasource.value.dateColumn : '';
         }
-        @Watch('sqlCommandResponse')
-        onSqlCommandResponseChanged() {
-            this.sqlCommandResponse ? this.sqlResponse = this.sqlCommandResponse.validationMessage : '';
+    }
+
+    watch(dataSources, () => onGetDataSources)
+    function onGetDataSources() {
+        if (dataSources != null || dataSources != undefined) {
+            let filteredSources = dataSources.value.filter((ds: Datasource) => ds.type != 'None');  
+            dsItems = dataSources.value.length > 0 ? filteredSources.map(
+                (ds: Datasource) => ({
+                    text: ds.name,
+                    value: ds.name
+                }),
+            ) : []
+        }
+    }
+
+    watch(dataSourceTypes, () => onGetDataSourceTypes)
+    function onGetDataSourceTypes() {
+        dsTypeItems = clone(dataSourceTypes.value);
+    }
+
+    watch(dataSourceTypeItem, () => onSourceTypeChanged)
+    function onSourceTypeChanged() {
+        if (dataSourceTypeItem.value===DSSQL) {
+            showMssql = true;
+            showExcel = false;
+            currentDatasource.value.type = "SQL";
+        }
+        if (dataSourceTypeItem.value===DSEXCEL) {
+            showExcel = true;
+            showMssql = false;
+            currentDatasource.value.type = "Excel";
+            
+            if(!isNewDataSource) {
+                getExcelSpreadsheetColumnHeadersAction(currentDatasource.value.id);
+                currentExcelDateColumn.value = currentDatasource.value.dateColumn;
+                currentExcelLocationColumn.value = currentDatasource.value.locationColumn;
+            }
+            
+        }
+    }
+
+    watch(sourceTypeItem, () => onsourceTypeItemChanged)
+    function onsourceTypeItemChanged() {
+        // get the current data source object
+        let currentDatasource = clone(dataSources.value.length>0 ? dataSources.value.find(f => f.name === sourceTypeItem.value) : clone(emptyDatasource));
+        currentDatasource ? currentDatasource = clone(currentDatasource) : currentDatasource = clone(emptyDatasource);
+
+        if(isNil(currentDatasource.connectionString)) {
+            currentDatasource.connectionString = '';
         }
 
-    @Watch('file')
-    onFileChanged() {
-        this.files = hasValue(this.file) ? [this.file as File] : [];                                   
-        this.$emit('submit', this.file);
-        this.file ? this.fileName = this.file.name : this.fileName = '';
+        unmodifiedDatasource.value = clone(currentDatasource);
+
+        // update the source type droplist
+        dataSourceTypeItem.value = currentDatasource.type;
+        currentExcelDateColumn.value = currentDatasource.dateColumn;
+        currentExcelLocationColumn.value = currentDatasource.locationColumn;
+        selectedConnection.value = isOwner() ? currentDatasource.connectionString : '';
+        connectionStringPlaceHolderMessage = currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
+        showSqlMessage = false; showSaveMessage = false;
+        if(!isNewDataSource) {
+                getExcelSpreadsheetColumnHeadersAction(currentDatasource.id);
+                currentExcelDateColumn.value = currentDatasource.dateColumn;
+                currentExcelLocationColumn.value = currentDatasource.locationColumn;
+            }
+    }
+
+    watch(selectedConnection, () => onSelectedConnectionChanged)
+    function onSelectedConnectionChanged() {
+        if(selectedConnection.value != '')
+        {
+            currentDatasource.value.connectionString = selectedConnection.value;
+        }
+    }
+
+    watch(sqlCommandResponse, () => onSqlCommandResponseChanged)
+    function onSqlCommandResponseChanged() {
+        sqlCommandResponse ? sqlResponse = sqlCommandResponse.value.validationMessage : '';
+    }
+
+    watch(file, () => onFileChanged)
+    function onFileChanged() {
+        files = hasValue(file.value) ? [file.value as File] : [];                                   
+        emit('submit', file.value);
+        file.value ? fileName = file.value.name : fileName = '';
 
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     }
 
-    @Watch('currentDatasource', {deep: true})
-    onCurrentDataSourceChanged() {
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.currentDatasource, this.unmodifiedDatasource);
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    watch(currentDatasource, () => onCurrentDataSourceChanged)
+    function onCurrentDataSourceChanged() {
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', currentDatasource, unmodifiedDatasource);
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    @Watch('unmodifiedDatasource', {deep: true})
-    onUnmodifiedDatasourceChanged(){
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.currentDatasource, this.unmodifiedDatasource);
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    watch(unmodifiedDatasource, () => onUnmodifiedDatasourceChanged)
+    function onUnmodifiedDatasourceChanged(){
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', currentDatasource, unmodifiedDatasource);
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    @Watch('currentExcelDateColumn')
-    onCurrentExcelDateColumnChanged() {
-        this.currentDatasource.dateColumn = this.currentExcelDateColumn;
+    watch(currentExcelDateColumn, () => onCurrentExcelDateColumnChanged)
+    function onCurrentExcelDateColumnChanged() {
+        currentDatasource.value.dateColumn = currentExcelDateColumn.value;
     }
 
-    @Watch('currentExcelLocationColumn')
-    onCurrentExcelLocationColumnChanged() {
-        this.currentDatasource.locationColumn = this.currentExcelLocationColumn;
+    watch(currentExcelLocationColumn, () => onCurrentExcelLocationColumnChanged)
+    function onCurrentExcelLocationColumnChanged() {
+        currentDatasource.value.locationColumn = currentExcelLocationColumn.value;
     }
 
-    onLoadExcel() {
-        if ( hasValue(this.file)) {
-            this.importExcelSpreadsheetFileAction({
-            file: this.file,
-            id: this.currentDatasource.id
+    function onLoadExcel() {
+        if ( hasValue(file.value)) {
+            importExcelSpreadsheetFileAction({
+            file: file.value,
+            id: currentDatasource.value.id
         }).then((response: any) => {
-            this.showImportMessage = true;
-            this.getExcelSpreadsheetColumnHeadersAction(this.currentDatasource.id);
+            getExcelSpreadsheetColumnHeadersAction(currentDatasource.value.id);
         });
         }
     }
-    onSaveDatasource() {
-        if (this.dataSourceTypeItem === DSSQL) {
+    function onSaveDatasource() {
+        if (dataSourceTypeItem.value === DSSQL) {
             let sqldat : SqlDataSource = {
-                    id: this.currentDatasource.id,
-                    name: this.currentDatasource.name,
-                    connectionString: this.currentDatasource.connectionString,
-                    type: this.currentDatasource.type,
-                    secure: this.currentDatasource.secure,
-                    createdBy: this.currentDatasource.createdBy
+                    id: currentDatasource.value.id,
+                    name: currentDatasource.value.name,
+                    connectionString: currentDatasource.value.connectionString,
+                    type: currentDatasource.value.type,
+                    secure: currentDatasource.value.secure,
+                    createdBy: currentDatasource.value.createdBy
             };
-            this.upsertSqlDataSourceAction(sqldat).then(() => {
-                this.showSqlMessage = false;
-                this.showSaveMessage = true;
-                if(this.isNewDataSource)
+            upsertSqlDataSourceAction(sqldat).then(() => {
+                showSqlMessage = false;
+                showSaveMessage = true;
+                if(isNewDataSource)
                 {
-                    this.currentDatasource.createdBy = this.getIdByUserNameGetter(getUserName());
-                    this.isNewDataSource = false;
+                    currentDatasource.value.createdBy = getIdByUserNameGetter(getUserName());
+                    isNewDataSource = false;
                 }
-                this.selectedConnection = this.isOwner() ? this.currentDatasource.connectionString : '';
-                this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString!='' ? 'Replacement connection string' : 'New connection string';
-                this.getDataSourcesAction();
-                this.unmodifiedDatasource = clone(this.currentDatasource);
+                selectedConnection.value = isOwner() ? currentDatasource.value.connectionString : '';
+                connectionStringPlaceHolderMessage = currentDatasource.value.connectionString!='' ? 'Replacement connection string' : 'New connection string';
+                getDataSourcesAction();
+                unmodifiedDatasource = clone(currentDatasource);
             });
         } else {
             let exldat : ExcelDataSource = {
-            id: this.currentDatasource.id,
-            name: this.currentDatasource.name,
-            locationColumn: this.currentExcelLocationColumn,
-            dateColumn: this.currentExcelDateColumn,
-            type: this.currentDatasource.type,
-            secure: this.currentDatasource.secure,
-            createdBy: this.currentDatasource.createdBy
+            id: currentDatasource.value.id,
+            name: currentDatasource.value.name,
+            locationColumn: currentExcelLocationColumn.value,
+            dateColumn: currentExcelDateColumn.value,
+            type: currentDatasource.value.type,
+            secure: currentDatasource.value.secure,
+            createdBy: currentDatasource.value.createdBy
             }
-            this.upsertExcelDataSourceAction(exldat).then(() => {
-                if (!this.isNewDataSource) {
-                    this.showSaveMessage = true;
+            upsertExcelDataSourceAction(exldat).then(() => {
+                if (!isNewDataSource) {
+                    showSaveMessage = true;
                 }
-                this.getDataSourcesAction().then(() => {
-                    this.isNewDataSource = false;
+                getDataSourcesAction().then(() => {
+                    isNewDataSource = false;
                 });
-                this.unmodifiedDatasource = clone(this.currentDatasource);
+                unmodifiedDatasource = clone(currentDatasource);
             });
         }
     }
 
-    onDeleteClick(){
-        this.deleteDataSourceAction(this.currentDatasource.id).then(() => {
-            this.resetDataSource();
+    function onDeleteClick(){
+        deleteDataSourceAction(currentDatasource.value.id).then(() => {
+            resetDataSource();
         })
     }
-    onShowCreateDataSourceDialog() {
-        this.createDataSourceDialogData = {
+    function onShowCreateDataSourceDialog() {
+        createDataSourceDialogData = {
             showDialog: true,
         }
     }
-    onCreateNewDataSource(datasource: Datasource) {
+    function onCreateNewDataSource(datasource: Datasource) {
         // add to the state
         if (datasource != null || datasource != undefined) {
-        this.dataSources.push(datasource);
-        this.currentDatasource = datasource;
-        this.isNewDataSource = true;
-        this.sourceTypeItem = datasource.name;
-        this.dataSourceTypeItem = datasource.type;
-        this.selectedConnection = datasource.connectionString;        
-        this.connectionStringPlaceHolderMessage = 'New connection string';
-        this.datColumns = [];
-        this.locColumns = [];       
+        dataSources.value.push(datasource);
+        currentDatasource.value = datasource;
+        isNewDataSource = true;
+        sourceTypeItem.value = datasource.name;
+        dataSourceTypeItem.value = datasource.type;
+        selectedConnection.value = datasource.connectionString;        
+        connectionStringPlaceHolderMessage = 'New connection string';
+        datColumns = [];
+        locColumns = [];       
         }
     }
-    allowSave(): boolean {
+    function allowSave(): boolean {
         let result: boolean = false;
-        if (this.dataSources == undefined) return false;
-        if (this.dataSourceTypeItem===DSEXCEL) {
-            if (this.currentExcelDateColumn !== '' || this.currentExcelLocationColumn !== '') {
+        if (dataSources == undefined) return false;
+        if (dataSourceTypeItem.value===DSEXCEL) {
+            if (currentExcelDateColumn.value !== '' || currentExcelLocationColumn.value !== '') {
                 return true;
             }
         }
         return result;
     }
-    resetDataSource() {
-        this.currentDatasource = emptyDatasource;
-        this.sourceTypeItem = '';
-        this.dataSourceTypeItem = '';
-        this.datColumns = [];
-        this.locColumns = [];
-        this.showMssql = false;
-        this.showExcel = false;
-        this.showSqlMessage = false;
-        this.showSaveMessage = false;
-        this.selectedConnection = '';
-        this.connectionStringPlaceHolderMessage = 'New connection string';        
+    function resetDataSource() {
+        currentDatasource.value = emptyDatasource;
+        sourceTypeItem.value = '';
+        dataSourceTypeItem.value = '';
+        datColumns = [];
+        locColumns = [];
+        showMssql = false;
+        showExcel = false;
+        showSqlMessage = false;
+        showSaveMessage = false;
+        selectedConnection.value = '';
+        connectionStringPlaceHolderMessage = 'New connection string';        
     }
-    chooseFiles(){
+    function chooseFiles(){
         if(document != null)
         {
             document.getElementById('file-select')!.click();
         }
     }
-    onSelect(fileList: FileList) {
+    function onSelect(fileList: FileList) {
         if (hasValue(fileList)) {
             const fileName: string = prop('name', fileList[0]) as string;
 
             if (fileName.indexOf('xlsx') === -1) {
-                this.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'Only .xlsx file types are allowed',
                 });
             }
 
-            this.file = clone(fileList[0]);
+            file.value = clone(fileList[0]);
         }
 
-        this.fileSelect.value = '';
+        fileSelect.value = '';
     }
-    checkSQLConnection() {
-        if (this.currentDatasource != undefined) {
-            this.showSqlMessage = false;
-            this.showSaveMessage = false;
-            let connStr: string = this.currentDatasource.connectionString;
+    function checkSQLConnection() {
+        if (currentDatasource != undefined) {
+            showSqlMessage = false;
+            showSaveMessage = false;
+            let connStr: string = currentDatasource.value.connectionString;
 
             let testConnection: TestStringData = {testString: connStr};
 
-            this.checkSqlCommandAction(testConnection).then(() => {
-                this.sqlValid = this.sqlCommandResponse.isValid;
-                this.sqlResponse = this.sqlCommandResponse.validationMessage;
-                this.showSqlMessage = true;
+            checkSqlCommandAction(testConnection).then(() => {
+                sqlValid = sqlCommandResponse.value.isValid;
+                sqlResponse = sqlCommandResponse.value.validationMessage;
+                showSqlMessage = true;
             });
         }
     }
-    getOwnerUserName(): string {
-        if(this.currentDatasource.createdBy != NIL && this.currentDatasource.createdBy != undefined)
+    function getOwnerUserName(): string {
+        if(currentDatasource.value.createdBy != NIL && currentDatasource.value.createdBy != undefined)
         {
-            return this.getUserNameByIdGetter(this.currentDatasource.createdBy);
+            return getUserNameByIdGetter(currentDatasource.value.createdBy);
         }
         return "Unknown";
     }
-    isOwner() {
-        return this.currentDatasource.createdBy == this.getIdByUserNameGetter(getUserName());
+    function isOwner() {
+        return currentDatasource.value.createdBy == getIdByUserNameGetter(getUserName());
     }
-    disableCrudButtons(): boolean {
-        if(this.currentDatasource.type == "SQL")
+    function disableCrudButtons(): boolean {
+        if(currentDatasource.value.type == "SQL")
         {
-            return !this.sqlValid;
+            return !sqlValid;
         }
 
-        if(this.currentDatasource.type == "Excel" && !this.isNewDataSource)
+        if(currentDatasource.value.type == "Excel" && !isNewDataSource)
         {
-            return !this.allowSave();
+            return !allowSave();
         }
 
         return false;
     }
-}
+
 </script>
 
 <style>

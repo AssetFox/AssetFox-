@@ -3,7 +3,7 @@
         <v-flex xs12>              
             <div class="costs-data-table">                
                 <v-data-table
-                    hide-default-header             
+                    hide-default-header id="CostsTab-vdatatable"
                     :headers="costsGridHeaders"
                     sort-icon=$vuetify.icons.ghd-table-sort
                     :items="costsGridData"
@@ -73,7 +73,7 @@
                             </td>     
                             <td xs2>
                                 <v-layout align-start>
-                                    <v-btn
+                                    <v-btn id="TreatmentCostsTab-DeleteCostBtn"
                                         @click="onRemoveCost(props.item.id)"
                                         icon
                                     >

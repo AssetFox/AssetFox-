@@ -30,37 +30,38 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+<script setup lang="ts">
+import Vue, { ref, Ref, shallowRef, ShallowRef, watch } from 'vue';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { Datasource, emptyDatasource, DSSQL } from '../../../shared/models/iAM/data-source';
 import { CreateDataSourceDialogData} from '@/shared/models/modals/data-source-dialog-data'
-import { Getter } from 'vuex-class';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateDataSourceDialog extends Vue {
-  @Prop() dialogData: CreateDataSourceDialogData;
-  
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+  let store = useStore();
+  let getIdByUserNameGetter: any = store.getters.getIdByUserName ;
 
-  newDataSource: Datasource = emptyDatasource;
-  rules: InputValidationRules = rules;
-  datasourceName: string = 'New Data Source';
+  const props = defineProps<{
+    dialogData: CreateDataSourceDialogData
+  }>()
+  const emit = defineEmits(['submit'])
 
+  let newDataSource: ShallowRef<Datasource> = shallowRef(emptyDatasource);
+  let rules: InputValidationRules = validationRules;
+  let datasourceName: Ref<string> = ref('New Data Source');
 
-  @Watch('datasourceName')
-    onDataSourceNameChanged() {
-        this.newDataSource.name = this.datasourceName;
-    }
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    this.newDataSource = {
+  watch(datasourceName, () => onDataSourceNameChanged)
+  function onDataSourceNameChanged() {
+      newDataSource.value.name = datasourceName.value;
+  }
+
+  watch(() => props.dialogData, () => onDialogDataChanged)
+  function onDialogDataChanged() {
+    newDataSource.value = {
         id: getNewGuid(),
-        createdBy: this.getIdByUserNameGetter(getUserName()),
-        name: this.datasourceName,
+        createdBy: getIdByUserNameGetter(getUserName()),
+        name: datasourceName.value,
         type: DSSQL,
         connectionString: '',
         dateColumn: '',
@@ -69,15 +70,15 @@ export default class CreateDataSourceDialog extends Vue {
     };
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newDataSource);
+      emit('submit', newDataSource);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newDataSource = emptyDatasource;
-    this.dialogData.showDialog = false;
+    newDataSource.value = emptyDatasource;
+    props.dialogData.showDialog = false;
   }
-}
+
 </script>

@@ -65,6 +65,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Suffix => throw new NotImplementedException();
 
         public BAMSSummaryReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
@@ -343,7 +344,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var workSummaryModel = _bridgeDataForSummaryReport.Fill(bridgeDataWorksheet, reportOutputData, treatmentCategoryLookup, allowFundingFromMultipleBudgets);
             checkCancelled(cancellationToken, simulationId);
             // Fill Simulation parameters TAB
-            reportDetailDto.Status = $"Creating Parameters TAB";
+            reportDetailDto.Status = $"Creating Parameters TAB";
+
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);

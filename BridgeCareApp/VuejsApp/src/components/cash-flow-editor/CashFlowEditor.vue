@@ -7,6 +7,7 @@
                     <v-select
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
+                        id="CashFlowEditor-SelectLibrary-vselect"
                         outline
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -41,6 +42,7 @@
                             Add Cash Flow Rule
                         </v-btn>
                         <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
+                            id="CashFlowEditor-addCashFlowLibrary-btn"
                             outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario">
                             Create New Library
@@ -183,6 +185,7 @@
                 v-show="hasSelectedLibrary || hasScenario">
                 <v-btn outline
                     @click="onDeleteCashFlowRuleLibrary"
+                    id="CashFlowEditor-deleteLibrary-btn"
                     flat class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission">

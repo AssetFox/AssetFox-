@@ -147,7 +147,7 @@
                         >
                             <template slot="items" slot-scope="props">
                                 <td>
-                                    <v-checkbox class="ghd-checkbox"
+                                    <v-checkbox id="PerformanceCurveEditor-deleteModel-vcheckbox" class="ghd-checkbox"
                                         hide-details
                                         primary
                                         v-model='props.selected'
@@ -240,13 +240,14 @@
                                         "
                                     >
                                         <template slot="activator">
-                                            <v-btn class="ghd-blue" icon>
+                                            <v-btn id="PerformanceCurveEditor-checkEquationEye-vbtn" class="ghd-blue" icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
+                                                    id="PerformanceCurveEditor-checkEquation-vtextarea"
                                                     class="sm-txt Montserrat-font-family"
                                                     :value="
                                                         props.item.equation
@@ -261,7 +262,7 @@
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn
+                                    <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
                                         @click="
                                             onShowEquationEditorDialog(
                                                 props.item.id,
@@ -284,13 +285,14 @@
                                         "
                                     >
                                         <template slot="activator">
-                                            <v-btn class="ghd-blue" flat icon>
+                                            <v-btn id="PerformanceCurveEditor-checkCriteriaEye-vbtn" class="ghd-blue" flat icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
+                                                    id="PerformanceCurveEditor-checkCriteria-vtextarea"
                                                     class="sm-txt Montserrat-font-family"
                                                     :value="
                                                         props.item
@@ -306,7 +308,7 @@
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn
+                                    <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
                                         @click="
                                             onEditPerformanceCurveCriterionLibrary(
                                                 props.item.id,
@@ -319,7 +321,7 @@
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
-                                    <v-btn
+                                    <v-btn id="PerformanceCurveEditor-deleteModel-vbtn"
                                         @click="
                                             onRemovePerformanceCurve(
                                                 props.item.id,
@@ -729,13 +731,15 @@ export default class PerformanceCurveEditor extends Vue {
                             if(response.data){
                                 vm.setAlertMessageAction("A performance curve import has been added to the work queue")
                             }
-                        })
-                        vm.initializePages();
-
-                        vm.hasScenario = true;
-                        vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                            vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                            vm.initializePages().then(() =>{
+                                vm.hasScenario = true;
+                                vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                                    vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                            });
                         });
+                            
+                        })
+
                     }
 
                     
@@ -1127,18 +1131,19 @@ export default class PerformanceCurveEditor extends Vue {
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
             addedRows: this.addedRows,
             isModified: this.scenarioLibraryIsModified
-        }, this.selectedScenarioId).then((response: AxiosResponse) => {
+        }, this.selectedScenarioId).then(async (response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.clearChanges()
-                this.resetPage();
+                this.performancePagination.page = 1;
+                await this.onPaginationChanged();
                 this.addSuccessNotificationAction({message: "Modified scenario's deterioration models"});
                 this.librarySelectItemValue = null
             }           
         });
     }
 
-    onUpsertPerformanceCurveLibrary() { // need to do upsert things
+    onUpsertPerformanceCurveLibrary() { 
         const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
                 library: this.selectedPerformanceCurveLibrary,
                 isNewLibrary: false,

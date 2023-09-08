@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
@@ -8,13 +7,8 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Common;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
-
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using OfficeOpenXml.Style;
-using Org.BouncyCastle.Utilities.Encoders;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData
 {
@@ -117,6 +111,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "BRKEY_"); //BRKey
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LOCATION"); // Location / Structure Name
+
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: City/Town/Place data here
+
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_INTERSECTED"); //Feature Intersected
+
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_CARRIED"); //Feature Carried
+
                 //--------------------- Ownership ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT"); //District
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
@@ -138,7 +140,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEATURE_CARRIED");
 
 
-                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LOCATION"); // Location / Structure Name
 
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CUSTODIAN"); // Maintenance Responsibility
 
@@ -169,6 +170,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PARALLEL") > 0 ? "Y" : "N"; //Parallel Structure
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Leaking Joints data here
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Scour Critical data here
 
                 //--------------------- Network ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.FullFunctionalClassDescription(_reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FUNC_CLASS")); //Functional Class
@@ -444,12 +448,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     setColor((int)_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "PARALLEL"), section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
                         yearlySectionData.Year, index, worksheet, row, column);
 
-                    // Work done in a year                    
-                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis 
-                    var range = worksheet.Cells[row, column];
+                    // Work done in a year                                        
+                    var appliedTreatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var cost = appliedTreatmentConsideration == null ? 0 : Math.Round(appliedTreatmentConsideration.BudgetUsages.Sum(b => b.CoveredCost), 0); // Rounded cost to whole number based on comments from Jeff Davis                    
+                    var workCell = worksheet.Cells[row, column];
                     if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
                     {
-                        range.Value = abbreviatedTreatmentNames[section.AppliedTreatment];
+                        workCell.Value = abbreviatedTreatmentNames[section.AppliedTreatment];
                         worksheet.Cells[row, column + 1].Value = cost;
 
                         if (!isInitialYear && section.TreatmentCause == TreatmentCause.CashFlowProject)
@@ -461,7 +466,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             }
                             if (prevYearSection.AppliedTreatment == section.AppliedTreatment)
                             {
-                                range.Value = "--";
+                                workCell.Value = "--";
                                 worksheet.Cells[row, column + 1].Value = cost;
                             }
                         }
@@ -471,13 +476,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     else
                     {
-                        range.Value = section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" :
+                        workCell.Value = section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" :
                             section.AppliedTreatment.ToLower();
 
                         worksheet.Cells[row, column + 1].Value = cost;
                         ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);
                     }
-                    if (!range.Value.Equals("--"))
+                    if (!workCell.Value.Equals("--"))
                     {
                         workDoneData[i]++;
                     }
@@ -732,6 +737,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Bridge (B/C)",
                 "BridgeID\r\n(5A01)",
                 "BRKey\r\n(5A03)",
+                "Location / Structure Name\r\n(5A02)",
+                "City/Town/Place\r\n(5A06)",
+                "Feature Intersected\r\n(5A07)",
+                "Feature Carried\r\n(5A08)",
+
+
 
                 //--------------------- Ownership ---------------------
                 "District\r\n(5A04)",
@@ -755,6 +766,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Struct Type\r\n(6A26-29)",
                 "Fractural Critical",
                 "Parallel Structure\r\n(5E02)",
+                "Leaking Joints\r\n",
+                "Scour Critical \r\n",
+
 
                 //--------------------- Network ---------------------
 
@@ -815,7 +829,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 switch(headerNameFormatted)
                 {
                     case "ASSET_ID":
-                        totalNumOfColumns = 4; cellBGColor = ColorTranslator.FromHtml("#BDD7EE");
+                        totalNumOfColumns = 8; cellBGColor = ColorTranslator.FromHtml("#BDD7EE");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);                        
                         break;
 
@@ -825,7 +839,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         break;
 
                     case "STRUCTURE":
-                        totalNumOfColumns = 8; cellBGColor = ColorTranslator.FromHtml("#F8CBAD");
+                        totalNumOfColumns = 10; cellBGColor = ColorTranslator.FromHtml("#F8CBAD");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
                         break;
 

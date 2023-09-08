@@ -11,12 +11,12 @@
       <v-card-text class="ghd-dialog">
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>             
-          <v-text-field class="ghd-control-text ghd-control-border"
+          <v-text-field id="CreatePerformanceCurveLibraryDialog-Name-vtextfield" class="ghd-control-text ghd-control-border"
                         v-model="newPerformanceCurveLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         outline/>
           <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>             
-          <v-textarea class="ghd-control-text ghd-control-border"
+          <v-textarea id="CreatePerformanceCurveLibraryDialog-Description-vtextfield" class="ghd-control-text ghd-control-border"
                       v-model="newPerformanceCurveLibrary.description"
                       no-resize
                       outline
@@ -25,13 +25,13 @@
       </v-card-text>
       <v-card-actions>
           <v-layout justify-center row>
-            <v-btn outline
+            <v-btn id="CreatePerformanceCurveLibraryDialog-Cancel-vbtn" outline
                    class="ghd-white-bg ghd-blue ghd-button-text"
                    depressed
                    @click="onSubmit(false)">
               Cancel
             </v-btn>
-            <v-btn :disabled="newPerformanceCurveLibrary.name === ''"
+            <v-btn id="CreatePerformanceCurveLibraryDialog-Save-vbtn" :disabled="newPerformanceCurveLibrary.name === ''"
                    class="ghd-blue-bg ghd-white ghd-button-text"
                    @click="onSubmit(true)"
                    depressed                   

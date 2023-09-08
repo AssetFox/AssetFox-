@@ -1026,24 +1026,25 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
         libraryImported = true;
     }
 
-    watch(librarySelectItemValue, () => onLibrarySelectItemValueChangedCheckUnsaved)
-    function onLibrarySelectItemValueChangedCheckUnsaved() {
-        if(hasScenario){
-            onLibrarySelectItemValueChanged();
-            unsavedDialogAllowed = false;
-        }           
-        else if(librarySelectItemValueAllowedChanged)
-            CheckUnsavedDialog(onLibrarySelectItemValueChanged, () => {
-                librarySelectItemValueAllowedChanged = false;
-                librarySelectItemValue = trueLibrarySelectItemValue;               
-            })
-        librarySelectItemValueAllowedChanged = true;
-        librarySelectItems.forEach(library => {
-            if (library.value === librarySelectItemValue) {
-                parentLibraryName = "Library Used: " + library.text;
-            }
-        });
-    }
+    // TODO: This doesn't work as a watch
+    // watch(librarySelectItemValue, () => onLibrarySelectItemValueChangedCheckUnsaved)
+    // function onLibrarySelectItemValueChangedCheckUnsaved() {
+    //     if(hasScenario){
+    //         onLibrarySelectItemValueChanged();
+    //         unsavedDialogAllowed = false;
+    //     }           
+    //     else if(librarySelectItemValueAllowedChanged)
+    //         CheckUnsavedDialog(onLibrarySelectItemValueChanged, () => {
+    //             librarySelectItemValueAllowedChanged = false;
+    //             librarySelectItemValue = trueLibrarySelectItemValue;               
+    //         })
+    //     librarySelectItemValueAllowedChanged = true;
+    //     librarySelectItems.forEach(library => {
+    //         if (library.value === librarySelectItemValue) {
+    //             parentLibraryName = "Library Used: " + library.text;
+    //         }
+    //     });
+    // }
 
     watch(selectedCashFlowRuleLibrary, () => onSelectedCashFlowRuleLibraryChanged)
     function onSelectedCashFlowRuleLibraryChanged() {

@@ -135,7 +135,7 @@ import {
 } from '@/shared/models/modals/create-criterion-library-dialog-data';
 import CreateCriterionLibraryDialog from '@/components/criteria-editor/criteria-editor-dialogs/CreateCriterionLibraryDialog.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import Alert from '@/shared/modals/Alert.vue';
+import ConfirmDeleteAlert from '@/shared/modals/Alert.vue';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { getUserName } from '@/shared/utils/get-user-info';
@@ -220,12 +220,16 @@ import { useRouter } from 'vue-router';
     let hasCreatedLibrary = shallowRef<boolean>(false);
     let hasLibraryEditPermission = shallowRef<boolean>(false);
     const emit = defineEmits(['submit'])
+    const $vuetify = inject('$vuetify') as any
+    const $router = useRouter();
+    const $statusHub = inject('$statusHub') as any
+    const $config = inject('$config') as any
 
-   function beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
+   created();
+   function created() {
+         ((vm: any) => {
             vm.getHasPermittedAccessAction();
-
-            if (to.path.indexOf('CriterionLibraryEditor/Library') !== -1) {
+            if ($router.currentRoute.value.path.indexOf('CriterionLibraryEditor/Library') !== -1) {
                 vm.librarySelectItemValue = null;
                 vm.getCriterionLibrariesAction();
             } else {
@@ -234,11 +238,13 @@ import { useRouter } from 'vue-router';
         });
     }
 
+    onBeforeUnmount(() => beforeDestroy());
     function beforeDestroy() {
         if (isLibraryContext) {
             setHasUnsavedChangesAction({ value: false });
         }
     }
+
 
     watch(stateCriterionLibraries, () => onStateCriterionLibrariesChanged)
     function onStateCriterionLibrariesChanged() {
@@ -341,6 +347,7 @@ import { useRouter } from 'vue-router';
         }
     }
 
+   onMounted(() => mounted());
    function mounted() {
         if (hasValue(stateCriterionLibraries)) {
             criterionLibrarySelectItems = stateCriterionLibraries.value

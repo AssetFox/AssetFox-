@@ -147,7 +147,7 @@
                         >
                             <template slot="items" slot-scope="props">
                                 <td>
-                                    <v-checkbox class="ghd-checkbox"
+                                    <v-checkbox id="PerformanceCurveEditor-deleteModel-vcheckbox" class="ghd-checkbox"
                                         hide-details
                                         primary
                                         v-model='props.selected'
@@ -240,13 +240,14 @@
                                         "
                                     >
                                         <template slot="activator">
-                                            <v-btn class="ghd-blue" icon>
+                                            <v-btn id="PerformanceCurveEditor-checkEquationEye-vbtn" class="ghd-blue" icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
+                                                    id="PerformanceCurveEditor-checkEquation-vtextarea"
                                                     class="sm-txt Montserrat-font-family"
                                                     :value="
                                                         props.item.equation
@@ -261,7 +262,7 @@
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn
+                                    <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
                                         @click="
                                             onShowEquationEditorDialog(
                                                 props.item.id,
@@ -284,13 +285,14 @@
                                         "
                                     >
                                         <template slot="activator">
-                                            <v-btn class="ghd-blue" flat icon>
+                                            <v-btn id="PerformanceCurveEditor-checkCriteriaEye-vbtn" class="ghd-blue" flat icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
+                                                    id="PerformanceCurveEditor-checkCriteria-vtextarea"
                                                     class="sm-txt Montserrat-font-family"
                                                     :value="
                                                         props.item
@@ -306,7 +308,7 @@
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn
+                                    <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
                                         @click="
                                             onEditPerformanceCurveCriterionLibrary(
                                                 props.item.id,
@@ -319,7 +321,7 @@
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
-                                    <v-btn
+                                    <v-btn id="PerformanceCurveEditor-deleteModel-vbtn"
                                         @click="
                                             onRemovePerformanceCurve(
                                                 props.item.id,

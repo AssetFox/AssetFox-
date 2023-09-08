@@ -46,7 +46,7 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Vue, { reactive, watch } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {BudgetPriorityLibraryUser } from '@/shared/models/iAM/budget-priority';

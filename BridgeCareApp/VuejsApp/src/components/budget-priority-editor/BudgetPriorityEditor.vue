@@ -195,7 +195,7 @@
 </template>
 
 <script setup lang='ts'>
-    import Vue, { reactive, Ref, ref, watch } from 'vue';
+    import Vue, { Ref, ref, watch, onBeforeUnmount } from 'vue';
     import {
         BudgetPercentagePair,
         BudgetPriority,
@@ -219,9 +219,9 @@
     import {
         ShareBudgetPriorityLibraryDialogData,
         emptyShareBudgetPriorityLibraryDialogData
-    } from '@/shared/models/modals/share-budget-priority-library-dialog-data';
+    } from '@/shared/models/modals/share-budget-priority-library-dialog-data';   
     import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-    import Alert from '@/shared/modals/Alert.vue';
+    import ConfirmDeleteAlert from '@/shared/modals/Alert.vue';
     import { hasUnsavedChangesCore, isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
     import { InputValidationRules, rules as validationRules } from '@/shared/utils/input-validation-rules';
     import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
@@ -241,10 +241,14 @@
     import {LibraryUser} from '@/shared/models/iAM/user'
     import { isNullOrUndefined } from 'util';
     import { useStore } from 'vuex';
-import { stat } from 'fs';
+    import { useRouter } from 'vue-router';
+    import CreatePriorityDialog from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityDialog.vue'
+    import CreatePriorityLibraryDialog  from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityLibraryDialog.vue'
+    import ShareBudgetPriorityLibraryDialog  from '@/components/budget-priority-editor/budget-priority-editor-dialogs/ShareBudgetPriorityLibraryDialog.vue'
 
     const ObjectID = require('bson-objectid');
     let store = useStore();
+    const $router = useRouter();
     let stateScenarioSimpleBudgetDetails = ref<SimpleBudgetDetail[]>(store.state.investmentModule.scenarioSimpleBudgetDetails);
     let stateBudgetPriorityLibraries = ref<BudgetPriorityLibrary[]>(store.state.budgetPriorityModule.budgetPriorityLibraries);
     let stateSelectedBudgetPriorityLibrary = ref<BudgetPriorityLibrary>(store.state.budgetPriorityModule.selectedBudgetPriorityLibrary);
@@ -325,34 +329,34 @@ import { stat } from 'fs';
     let loadedParentName: string = "";
     let loadedParentId: string = "";
     let newLibrarySelection: boolean = false;
+    
+    created()
+    function created() {
+        librarySelectItemValue.value = null;
+        getBudgetPriorityLibrariesAction();
+        getHasPermittedAccessAction();
 
-    function beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.librarySelectItemValue = null;
-            vm.getBudgetPriorityLibrariesAction();
-            vm.getHasPermittedAccessAction();
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.BudgetPriority) !== -1) {
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-            if (to.path.indexOf(ScenarioRoutePaths.BudgetPriority) !== -1) {
-                vm.selectedScenarioId = to.query.scenarioId;
-
-                if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.addErrorNotificationAction({
-                        message: 'Found no selected scenario for edit',
-                    });
-                    vm.$router.push('/Scenarios/');
-                }
-                vm.hasScenario = true;
-                vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId }).then(() => {
-                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
-                        vm.initializePages();
-                    });                                        
-                });             
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                $router.push('/Scenarios/');
             }
-        });
-    }
+            hasScenario = true;
+            getScenarioSimpleBudgetDetailsAction({ scenarioId: selectedScenarioId }).then(() => {
+                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+                    selectScenarioAction({ scenarioId: selectedScenarioId });        
+                    initializePages();
+                });                                        
+            });             
+        }
 
-    function beforeDestroy() {
+    }
+    onBeforeUnmount(() => onBeforeUnmountFunc)
+    function onBeforeUnmountFunc() {
         setHasUnsavedChangesAction({ value: false });
     }
     watch(stateBudgetPriorityLibraries, onStateBudgetPriorityLibrariesChanged)

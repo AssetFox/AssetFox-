@@ -35,7 +35,7 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Vue, { reactive, watch } from 'vue';
 import {CreateBudgetPriorityLibraryDialogData} from '@/shared/models/modals/create-budget-priority-library-dialog-data';
 import {

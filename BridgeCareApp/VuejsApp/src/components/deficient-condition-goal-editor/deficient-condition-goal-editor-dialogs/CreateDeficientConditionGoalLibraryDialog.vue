@@ -33,10 +33,8 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Getter} from 'vuex-class';
-import {Component, Prop, Watch} from 'vue-property-decorator';
+<script setup lang="ts">
+import Vue, { watch } from 'vue';
 import {CreateDeficientConditionGoalLibraryDialogData} from '@/shared/models/modals/create-deficient-condition-goal-library-dialog-data';
 import {
   DeficientConditionGoal,
@@ -44,46 +42,50 @@ import {
   emptyDeficientConditionGoalLibrary
 } from '@/shared/models/iAM/deficient-condition-goal';
 import {getUserName} from '@/shared/utils/get-user-info';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateDeficientConditionGoalLibraryDialog extends Vue {
-  @Prop() dialogData: CreateDeficientConditionGoalLibraryDialogData;
+  let store = useStore();
 
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+  const props = defineProps<{
+    dialogData: CreateDeficientConditionGoalLibraryDialogData
+  }>()
+  const emit = defineEmits(['submit'])
 
-  newDeficientConditionGoalLibrary: DeficientConditionGoalLibrary = {
+  let getIdByUserNameGetter: any = store.getters.getIdByUserName;
+
+  let newDeficientConditionGoalLibrary: DeficientConditionGoalLibrary = {
     ...emptyDeficientConditionGoalLibrary,
     id: getNewGuid()
   };
-  rules: InputValidationRules = rules;
+  let rules: InputValidationRules = validationRules;
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
+  watch(() => props.dialogData, () => onDialogDataChanged)
+  function onDialogDataChanged() {
     let currentUser: string = getUserName();
 
-    this.newDeficientConditionGoalLibrary = {
-      ...this.newDeficientConditionGoalLibrary,
-      deficientConditionGoals: hasValue(this.dialogData.deficientConditionGoals)
-          ? this.dialogData.deficientConditionGoals.map((deficientConditionGoal: DeficientConditionGoal) => ({
+    newDeficientConditionGoalLibrary = {
+      ...newDeficientConditionGoalLibrary,
+      deficientConditionGoals: hasValue(props.dialogData.deficientConditionGoals)
+          ? props.dialogData.deficientConditionGoals.map((deficientConditionGoal: DeficientConditionGoal) => ({
             ...deficientConditionGoal,
             id: getNewGuid()
           }))
           : [],
-        owner: this.getIdByUserNameGetter(currentUser),
+        owner: getIdByUserNameGetter(currentUser),
     };
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newDeficientConditionGoalLibrary);
+      emit('submit', newDeficientConditionGoalLibrary);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newDeficientConditionGoalLibrary = {...emptyDeficientConditionGoalLibrary, id: getNewGuid()};
+    newDeficientConditionGoalLibrary = {...emptyDeficientConditionGoalLibrary, id: getNewGuid()};
   }
-}
+
 </script>

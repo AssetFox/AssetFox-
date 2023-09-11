@@ -193,7 +193,6 @@
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
                         @click="onUpsertAnalysisMethod"
-                        :disabled="criteriaIsInvalid() || !valid"
                         depressed
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
                         >Save</v-btn
@@ -346,7 +345,6 @@ export default class EditAnalysisMethod extends Vue {
     onAnalysisChanged() {
         this.setHasUnsavedChangesAction({
             value:
-                !equals(this.analysisMethod, emptyAnalysisMethod) &&
                 !equals(this.analysisMethod, this.stateAnalysisMethod),
         });
 

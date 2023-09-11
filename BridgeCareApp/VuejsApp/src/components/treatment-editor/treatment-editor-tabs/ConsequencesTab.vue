@@ -59,7 +59,7 @@
                                     </v-card-text>
                                 </v-card>
                             </v-menu>     
-                             <v-btn v-if="header.value === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
+                             <v-btn id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.value === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
                                     icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                             </v-btn>                       
@@ -91,13 +91,13 @@
                                     </v-card-text>
                                 </v-card>
                             </v-menu>
-                            <v-btn v-if="header.value === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
+                            <v-btn id="TreatmentConsequencesTab-CriteriaEditorBtn" v-if="header.value === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
                                     class='edit-icon' icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                             </v-btn>
 
                             <v-layout v-if="header.value === ''" align-start>
-                                <v-btn @click='onRemoveConsequence(props.item.id)' icon>
+                                <v-btn id="TreatmentConquencesTab-DeleteCostBtn" @click='onRemoveConsequence(props.item.id)' icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </v-layout>
@@ -105,7 +105,7 @@
                     </template>
                 </v-data-table>
             </div>
-            <v-btn @click='onAddConsequence' class='ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding'>Add Consequence</v-btn>
+            <v-btn id="TreatmentConsequencesTab-AddConsequenceBtn" @click='onAddConsequence' class='ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding'>Add Consequence</v-btn>
         </v-flex>
 
         <ConsequenceEquationEditorDialog :dialogData='consequenceEquationEditorDialogData'

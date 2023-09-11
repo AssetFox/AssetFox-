@@ -342,7 +342,7 @@
         <CreateConsequenceDialog :showDialog='showCreateCommittedProjectConsequenceDialog' @submit='onAddCommittedProjectConsequenc' />
     </v-layout>
 </template>
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue'
 import Component from 'vue-class-component';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
@@ -383,39 +383,32 @@ import { stat } from 'fs';
 import { Hub } from '@/connectionHub';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
-@Component({
-    components: {
-        CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
-        CreateConsequenceDialog,
-        Alert
-    },
-})
-export default class CommittedProjectsEditor extends Vue  {
-    searchItems = '';
-    dataPerPage = 0;
-    totalDataFound = 0;
-    librarySelectItemValue: string | null = null;
-    hasSelectedLibrary: boolean = false;
-    librarySelectItems: SelectItem[] = [];
-    attributeSelectItems: SelectItem[] = [];
-    treatmentSelectItems: string[] = [];
-    budgetSelectItems: SelectItem[] = [];
-    categorySelectItems: SelectItem[] = [];
-    categories: string[] = [];
-    scenarioId: string = getBlankGuid();
-    networkId: string = getBlankGuid();
-    rules: InputValidationRules = rules;
-    network: Network = clone(emptyNetwork);
 
-    addedRows: SectionCommittedProject[] = [];
-    updatedRowsMap:Map<string, [SectionCommittedProject, SectionCommittedProject]> = new Map<string, [SectionCommittedProject, SectionCommittedProject]>();//0: original value | 1: updated value
-    deletionIds: string[] = [];
-    rowCache: SectionCommittedProject[] = [];
-    gridSearchTerm = '';
-    currentSearch = '';
-    totalItems = 0;
-    currentPage: SectionCommittedProjectTableData[] = [];
-    isRunning: boolean = true;
+    let searchItems = '';
+    let dataPerPage = 0;
+    let totalDataFound = 0;
+    let librarySelectItemValue: string | null = null;
+    let hasSelectedLibrary: boolean = false;
+    let librarySelectItems: SelectItem[] = [];
+    let attributeSelectItems: SelectItem[] = [];
+    let treatmentSelectItems: string[] = [];
+    let budgetSelectItems: SelectItem[] = [];
+    let categorySelectItems: SelectItem[] = [];
+    let categories: string[] = [];
+    let scenarioId: string = getBlankGuid();
+    let networkId: string = getBlankGuid();
+    let rules: InputValidationRules = rules;
+    let network: Network = clone(emptyNetwork);
+
+    let addedRows: SectionCommittedProject[] = [];
+    let updatedRowsMap:Map<string, [SectionCommittedProject, SectionCommittedProject]> = new Map<string, [SectionCommittedProject, SectionCommittedProject]>();//0: original value | 1: updated value
+    let deletionIds: string[] = [];
+    let rowCache: SectionCommittedProject[] = [];
+    let gridSearchTerm = '';
+    let currentSearch = '';
+    let totalItems = 0;
+    let currentPage: SectionCommittedProjectTableData[] = [];
+    let isRunning: boolean = true;
 
     isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
@@ -1366,7 +1359,6 @@ export default class CommittedProjectsEditor extends Vue  {
             }
         }); 
     }
-}
 </script>
 <style scoped>
 .sel-style {

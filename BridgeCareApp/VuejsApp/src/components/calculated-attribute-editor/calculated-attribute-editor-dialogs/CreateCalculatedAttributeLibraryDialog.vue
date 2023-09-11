@@ -51,7 +51,7 @@
 import Vue from 'vue';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import { clone } from 'ramda';
 import { getNewGuid } from '@/shared/utils/uuid-utils';
@@ -74,9 +74,9 @@ let newCalculatedAttributeLibrary: CalculatedAttributeLibrary = {
         ...emptyCalculatedAttributeLibrary,
         id: getNewGuid(),
     };
-    let InputRules: InputValidationRules = clone(rules);
+    let rules: InputValidationRules = validationRules;
     
-    watch(props.dialogData,() => onDialogDataChanged)
+    watch(()=>props.dialogData,() => onDialogDataChanged)
     function onDialogDataChanged() {
         newCalculatedAttributeLibrary = {
             ...newCalculatedAttributeLibrary,

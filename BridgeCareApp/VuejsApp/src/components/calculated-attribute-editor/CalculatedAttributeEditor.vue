@@ -488,28 +488,36 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     const $config = inject('$config') as any
     beforeRouteEnter();
     function beforeRouteEnter(){
-        ((vm: any) => {
-            vm.librarySelectItemValue = null;
-            vm.attributeSelectItemValue = null;
+        (() => {
+            librarySelectItemValue.value = '';
+            attributeSelectItemValue.value = '';
 
-            vm.getCalculatedAttributesAction().then( () => {
-                vm.getCalculatedAttributeLibrariesAction().then(() => {
-                    vm.setAttributeSelectItems()
-                    vm.setAttributeTimingSelectItems();
+            getCalculatedAttributesAction().then( () => {
+                getCalculatedAttributeLibrariesAction().then(() => {
+                    setAttributeSelectItems()
+                    setAttributeTimingSelectItems();
                     if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
-                        vm.selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+                        if ($router.currentRoute.value.query.scenarioId?.toString() == undefined)
+                        {
+                            selectedScenarioId = getBlankGuid();
+                        }
+                        else
+                        {
+                            selectedScenarioId = $router.currentRoute.value.query.scenarioId?.toString();
+                        }
+                        
 
-                        if (vm.selectedScenarioId === vm.uuidNIL) {
-                            vm.addErrorNotificationAction({
+                        if (selectedScenarioId === uuidNIL) {
+                            addErrorNotificationAction({
                                 message: 'Unable to identify selected scenario.',
                             });
-                            vm.$router.push('/Scenarios/');
+                            $router.push('/Scenarios/');
                         }
 
-                        vm.hasScenario = true;
-                        vm.getScenarioCalculatedAttributeAction(vm.selectedScenarioId).then(()=> {
-                            vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                                vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        hasScenario = true;
+                        getScenarioCalculatedAttributeAction(selectedScenarioId).then(()=> {
+                            getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+                                selectScenarioAction({ scenarioId: selectedScenarioId });        
                             });
                         });
                     }
@@ -517,6 +525,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
             });
         });
     }
+    onBeforeUnmount(()=>beforeDestroy())
     function beforeDestroy() {
         calculatedAttributeGridData.value = [] as CalculatedAttribute[];
         selectedAttribute = clone(emptyCalculatedAttribute);

@@ -46,7 +46,7 @@ import Vue from 'vue';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {hasValue} from '@/shared/utils/has-value-util';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {clone} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { CalculatedAttribute, emptyCalculatedAttribute } from '@/shared/models/iAM/calculated-attribute';
@@ -59,7 +59,7 @@ import { useRouter } from 'vue-router';
   let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributes);
   let attributeSelectItems: SelectItem[] = [];
   let newCalculatedAttribute: CalculatedAttribute[] = [];
-  let InputRules: InputValidationRules = clone(rules);
+  let rules: InputValidationRules = validationRules;
   const emit = defineEmits(['submit'])
   watch(stateNumericAttributes,() => onStateNumericAttributesChanged)
   function onStateNumericAttributesChanged() {

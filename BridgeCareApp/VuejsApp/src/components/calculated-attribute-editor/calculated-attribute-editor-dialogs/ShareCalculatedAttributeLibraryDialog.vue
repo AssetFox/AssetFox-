@@ -79,7 +79,7 @@ let shareCalculatedAttributeLibraryUserGridHeaders: DataTableHeader[] = [
   let currentUserAndOwner: CalculatedAttributeLibraryUser[] = [];
   let searchTerm: string = '';
 
-  watch(props.dialogData,() => onDialogDataChanged)
+  watch(()=>props.dialogData,() => onDialogDataChanged)
   function onDialogDataChanged() {
     if (props.dialogData.showDialog) {
       onSetGridData();

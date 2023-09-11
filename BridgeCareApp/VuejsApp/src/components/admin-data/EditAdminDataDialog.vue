@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { shallowRef } from 'vue';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
@@ -66,7 +66,7 @@ import { useRouter } from 'vue-router';
     let DialogData: EditAdminDataDialogData = emptyEditAdminDataDialogData ;
     
     let selectedSettings: {value:string, networkType:string}[] = [];
-    let settingsList: string[] = [];
+    let settingsList= shallowRef<string[]>([]);
     let settingItems: SelectItem[] = [];
     const emit = defineEmits(['submit'])
     let settingSelectItemValue: string | null = null;
@@ -104,12 +104,12 @@ import { useRouter } from 'vue-router';
                 
             return toReturn
         });
-        settingsList = clone(DialogData.settingsList);
+        settingsList.value = clone(DialogData.settingsList);
         settingSelectItemValue = null;
     }
     watch(settingsList,() => onSettingsListChanged)
     function onSettingsListChanged(){
-        settingItems = settingsList.map(_ => {
+        settingItems = settingsList.value.map(_ => {
             return {text: _, value: _}
         });
     }

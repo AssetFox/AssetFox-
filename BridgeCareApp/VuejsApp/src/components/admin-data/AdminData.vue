@@ -199,23 +199,23 @@ import { useRouter } from 'vue-router';
     created();
 
     function created() {
-        ((vm: any) => {
+        (() => {
             (async () => { 
-                await vm.getAttributes();
-                await vm.getNetworks();
-                await vm.getAvailableReportsAction();                
-                await vm.getSimulationReportsAction();
-                await vm.getInventoryReportsAction();
-                await vm.getPrimaryNetworkAction();
-                await vm.getRawdataNetworkAction();
-                if(vm.selectPrimaryNetworkItemValue === null)
-                    vm.onStatePrimaryNetworkChanged();
-                if(vm.selectRawdataNetworkItemValue === null)
-                    vm.onStateRawdataNetworkChanged();
-                await vm.getKeyFieldsAction();
-                await vm.getRawDataKeyFieldsAction();
-                await vm.getConstraintTypeAction();
-                vm.onStateConstraintTypeChanged();
+                await getAttributes();
+                await getNetworks();
+                await getAvailableReportsAction();                
+                await getSimulationReportsAction();
+                await getInventoryReportsAction();
+                await getPrimaryNetworkAction();
+                await getRawdataNetworkAction();
+                if(selectPrimaryNetworkItemValue === null)
+                    onStatePrimaryNetworkChanged();
+                if(selectRawdataNetworkItemValue === null)
+                    onStateRawdataNetworkChanged();
+                await getKeyFieldsAction();
+                await getRawDataKeyFieldsAction();
+                await getConstraintTypeAction();
+                onStateConstraintTypeChanged();
             })();
             
         });

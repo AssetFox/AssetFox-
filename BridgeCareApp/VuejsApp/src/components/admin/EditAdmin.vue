@@ -84,8 +84,8 @@ import { createDecipheriv } from 'crypto';
     ];
     created();
     function created(){
-        ((vm: any) => {
-                vm.navigationTabs = vm.navigationTabs.map(
+        (() => {
+                navigationTabs = navigationTabs.map(
                     (navTab: NavigationTab) => {
                         const navigationTab = {
                             ...navTab,
@@ -99,7 +99,7 @@ import { createDecipheriv } from 'crypto';
                         if (navigationTab.tabName === 'DataSource' 
                             || navigationTab.tabName === 'Networks' 
                             || navigationTab.tabName === 'Attributes') {
-                            navigationTab['visible'] = vm.hasAdminAccess;
+                            navigationTab['visible'] =hasAdminAccess.value;
                         }
 
                         return navigationTab;
@@ -112,7 +112,7 @@ import { createDecipheriv } from 'crypto';
                 const hasChildPath = any(
                     (navigationTab: NavigationTab) =>
                         href.indexOf(navigationTab.navigation.path) !== -1,
-                    vm.navigationTabs,
+                    navigationTabs,
                 );
         });
     }

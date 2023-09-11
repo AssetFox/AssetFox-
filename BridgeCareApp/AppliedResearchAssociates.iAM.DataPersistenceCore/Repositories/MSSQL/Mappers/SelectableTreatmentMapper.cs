@@ -156,9 +156,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new CriterionLibraryDTO(),
                 Category = (TreatmentCategory)entity.Category,
                 AssetType = (AssetCategories)entity.AssetType,
-                // TODO: Handle the "unselectable" flag when integrating with the simulation engine
-                IsUnselectable = entity.IsUnselectable
 
+                IsUnselectable = entity.IsUnselectable
             };
 
         public static TreatmentDTOWithSimulationId ToDtoWithSimulationId(this ScenarioSelectableTreatmentEntity entity)
@@ -241,7 +240,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 LibraryId = entity.LibraryId,
 
                 AssetType = (AssetCategories)entity.AssetType,
-                // TODO: Handle the "unselectable" flag when integrating with the simulation engine
+
                 IsUnselectable = entity.IsUnselectable
             };
     }

@@ -21,10 +21,10 @@ public sealed class CommittedProject : Treatment
 
     public double Cost { get; set; }
 
-    /// <summary>
+    /// <remarks>
     ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
     ///     types in this module.
-    /// </summary>
+    /// </remarks>
     public DateTime LastModifiedDate { get; set; }
 
     public override IReadOnlyDictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors => TemplateTreatment.PerformanceCurveAdjustmentFactors;
@@ -35,10 +35,10 @@ public sealed class CommittedProject : Treatment
 
     public SelectableTreatment TemplateTreatment { get; set; }
 
-    /// <summary>
+    /// <remarks>
     ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
     ///     types in this module.
-    /// </summary>
+    /// </remarks>
     public TreatmentCategory treatmentCategory { get; set; }
 
     public int Year { get; }

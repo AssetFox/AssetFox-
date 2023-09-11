@@ -11,18 +11,18 @@ public sealed class SelectableTreatment : Treatment
 {
     public SelectableTreatment(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
-    /// <summary>
+    /// <remarks>
     ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
     ///     types in this module.
-    /// </summary>
+    /// </remarks>
     public AssetCategory AssetCategory { get; set; }
 
     public ICollection<Budget> Budgets { get; } = new SetWithoutNulls<Budget>();
 
-    /// <summary>
+    /// <remarks>
     ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
     ///     types in this module.
-    /// </summary>
+    /// </remarks>
     public TreatmentCategory Category { get; set; }
 
     public IReadOnlyCollection<ConditionalTreatmentConsequence> Consequences => _Consequences;

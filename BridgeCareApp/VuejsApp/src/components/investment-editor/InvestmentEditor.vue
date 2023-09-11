@@ -460,31 +460,31 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         }
         beforeRouteEnter()
         function beforeRouteEnter() {
-            ((vm:any) => {
+            (() => {
                 (async () => { 
-                    vm.librarySelectItemValue = null;
-                    await vm.getHasPermittedAccessAction();
-                    await vm.getBudgetLibrariesAction()
+                    librarySelectItemValue.value = '';
+                    await getHasPermittedAccessAction();
+                    await getBudgetLibrariesAction()
                     if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
-                        vm.selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+                        selectedScenarioId = $router.currentRoute.value.query.scenarioId;
 
-                        if (vm.selectedScenarioId === vm.uuidNIL) {
-                            vm.addErrorNotificationAction({
+                        if (selectedScenarioId === uuidNIL) {
+                            addErrorNotificationAction({
                                 message: 'Found no selected scenario for edit',
                             });
-                            vm.$router.push('/Scenarios/');
+                            $router.push('/Scenarios/');
                         }
 
-                        vm.hasScenario = true;
-                        ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.scenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+                        hasScenario = true;
+                        ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
                             if(response.data){
-                                vm.setAlertMessageAction("An investment import has been added to the work queue")
+                                setAlertMessageAction("An investment import has been added to the work queue")
                             }
                         })
-                        await vm.initializePages();
+                        await initializePages();
                     }
                     else
-                        vm.initializing = false;               
+                        initializing = false;               
                 })();                    
             });
         }

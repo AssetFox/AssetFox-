@@ -131,7 +131,7 @@ let budgetChanges: EmitedBudgetChanges = clone(emptyEmitBudgetChanges);
 let originalOrder: number = 0;
 let currentSelectedBudget: Budget = emptyBudget;
 
-watch(props.dialogData,()=> onDialogDataChanged)
+watch(()=>props.dialogData,()=> onDialogDataChanged)
     function onDialogDataChanged() {
         budgetChanges.addedBudgets = [];
         budgetChanges.updatedBudgets = [];

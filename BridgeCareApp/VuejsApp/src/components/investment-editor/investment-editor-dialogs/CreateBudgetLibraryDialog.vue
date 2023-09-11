@@ -59,7 +59,7 @@ let getIdByUserNameGetter: any = store.getters.getIdByUserName
 let newBudgetLibrary: BudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};
 let rules: InputValidationRules = validationRules;
 
-watch(props.dialogData,()=> onDialogDataChanged)
+watch(()=>props.dialogData,()=> onDialogDataChanged)
   function onDialogDataChanged() {
     let currentUser: string = getUserName();
     newBudgetLibrary = {

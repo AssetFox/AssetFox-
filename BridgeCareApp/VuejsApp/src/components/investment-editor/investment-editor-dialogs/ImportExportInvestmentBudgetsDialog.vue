@@ -58,7 +58,10 @@ import { useRouter } from 'vue-router';
 
 let store = useStore();
 const emit = defineEmits(['submit'])
-let showDialog=shallowRef<boolean>(false);
+const props = defineProps<{
+    showDialog: boolean
+    }>()
+
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
 async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
 function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator');}
@@ -72,9 +75,9 @@ let closed: boolean = false;
         isSuccessfulImportMutator(!isSuccessfulImport.value)
     }
 
-    watch(showDialog,()=> onShowDialogChanged)
+    watch(()=>props.showDialog,()=> onShowDialogChanged)
     function onShowDialogChanged() {
-        if (showDialog) {
+        if (props.showDialog) {
             closed = false;
         } else {
             investmentBudgetsFile = null;

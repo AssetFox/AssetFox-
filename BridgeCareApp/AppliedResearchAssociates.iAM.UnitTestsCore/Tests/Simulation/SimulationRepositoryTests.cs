@@ -816,8 +816,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var createdDate = @"""CreatedDate""";
             var createdBy = @"""CreatedBy""";
             var lastModifiedBy = @"""LastModifiedBy""";
+            var category = @"""Category""";
             var id = @"Id""";
-            var ignoreProperties = new List<string> { createdDate, createdBy, lastModifiedDate, lastModifiedBy };
+            var ignoreProperties = new List<string> { createdDate, createdBy, lastModifiedDate, lastModifiedBy, category};
             var expectedCreatedBy = "";
             var expectedLastModifiedBy = "";
             var numberOfYearsOfTreatmentOutlook = @"""NumberOfYearsOfTreatmentOutlook""";

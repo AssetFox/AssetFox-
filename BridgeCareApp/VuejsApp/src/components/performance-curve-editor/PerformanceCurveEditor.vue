@@ -543,7 +543,7 @@ import { Hub } from '@/connectionHub';
 import ScenarioService from '@/services/scenario.service';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, shallowRef, ShallowRef} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -580,19 +580,19 @@ let getUserNameByIdGetter: any = store.getters.getUserNameById
 function performanceCurveLibraryMutator(payload:any){store.commit('performanceCurveLibraryMutator');}
 function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selectedPerformanceCurveLibraryMutator');}
 
-    let addedRows: PerformanceCurve[] = [];
+    let addedRows: ShallowRef<PerformanceCurve[]> = ref([]);
     let updatedRowsMap:Map<string, [PerformanceCurve, PerformanceCurve]> = new Map<string, [PerformanceCurve, PerformanceCurve]>();//0: original value | 1: updated value
-    let deletionIds: string[] = [];
+    let deletionIds: ShallowRef<string[]> = ref([]);
     let rowCache: PerformanceCurve[] = [];
     let gridSearchTerm = '';
     let currentSearch = '';
-    let selectedPerformanceCurveLibrary: PerformanceCurveLibrary = clone(
+    let selectedPerformanceCurveLibrary: ShallowRef<PerformanceCurveLibrary> = shallowRef(clone(
         emptyPerformanceCurveLibrary,
-    );
-    let performancePagination: Pagination = clone(emptyPagination);
+    ));
+    let performancePagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
     let isPageInit = false;
     let totalItems = 0;
-    let currentPage: PerformanceCurve[] = [];
+    let currentPage: ShallowRef<PerformanceCurve[]> = ref([]);
     let isRunning: boolean = true;
     let isShared: boolean = false;
     let selectedScenarioId: string = getBlankGuid();
@@ -653,7 +653,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let librarySelectItemValueAllowedChanged: boolean = true;
     let librarySelectItemValue: Ref<string | null> = ref(null);
 
-    let selectedPerformanceEquations: PerformanceCurve[] = [];
+    let selectedPerformanceEquations: ShallowRef<PerformanceCurve[]> = ref([]);
     let selectedPerformanceEquationIds: string[] = [];
 
     let createPerformanceCurveLibraryDialogData: CreatePerformanceCurveLibraryDialogData = clone(
@@ -746,15 +746,15 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         if(isRunning)
             return;
         checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = performancePagination;
+        const { sortBy, descending, page, rowsPerPage } = performancePagination.value;
         const request: PagingRequest<PerformanceCurve>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: selectedPerformanceCurveLibrary.id === uuidNIL ? null : selectedPerformanceCurveLibrary.id,
+                libraryId: selectedPerformanceCurveLibrary.value.id === uuidNIL ? null : selectedPerformanceCurveLibrary.value.id,
                 updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
-                rowsForDeletion: deletionIds,
-                addedRows: addedRows,
+                rowsForDeletion: deletionIds.value,
+                addedRows: addedRows.value,
                 isModified: scenarioLibraryIsModified
             },           
             sortColumn: sortBy != null ? sortBy : '',
@@ -766,8 +766,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
-                    currentPage = data.items;
-                    rowCache = clone(currentPage)
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
                     totalItems = data.totalItems;
                     isRunning = false;
                 }
@@ -778,11 +778,11 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             await PerformanceCurveService.GetLibraryPerformanceCurvePage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
-                    currentPage = data.items;
-                    rowCache = clone(currentPage)
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
                     totalItems = data.totalItems;
                     isRunning = false;
-                    if (!isNullOrUndefined(selectedPerformanceCurveLibrary.id) ) {
+                    if (!isNullOrUndefined(selectedPerformanceCurveLibrary.value.id) ) {
                         getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=>isShared = isSharedLibrary.value);
                     }
                 }
@@ -792,12 +792,12 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     watch(selectedPerformanceEquations,()=>onSelectedPerformanceEquationsChanged())
     function onSelectedPerformanceEquationsChanged() {
-        selectedPerformanceEquationIds = getPropertyValues('id', selectedPerformanceEquations) as string[];
+        selectedPerformanceEquationIds = getPropertyValues('id', selectedPerformanceEquations.value) as string[];
     } 
     
     function onRemovePerformanceEquations() {
-        deletionIds = deletionIds.concat(selectedPerformanceEquationIds);
-        selectedPerformanceEquations = [];
+        deletionIds.value = deletionIds.value.concat(selectedPerformanceEquationIds);
+        selectedPerformanceEquations.value = [];
         onPaginationChanged();
         modifiedStatus = " (Modified)";
     }    
@@ -836,7 +836,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     watch(stateSelectedPerformanceCurveLibrary,()=> onStateSelectedPerformanceCurveLibraryChanged())
     function onStateSelectedPerformanceCurveLibraryChanged() {
-        selectedPerformanceCurveLibrary = clone(
+        selectedPerformanceCurveLibrary.value = clone(
             stateSelectedPerformanceCurveLibrary.value,
         );
     }
@@ -844,12 +844,12 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     watch(selectedPerformanceCurveLibrary,()=> onSelectedPerformanceCurveLibraryChanged())
     function onSelectedPerformanceCurveLibraryChanged() { 
         hasSelectedLibrary =
-            selectedPerformanceCurveLibrary.id !== uuidNIL;
+            selectedPerformanceCurveLibrary.value.id !== uuidNIL;
 
         if (hasSelectedLibrary) {
             checkLibraryEditPermission();
             hasCreatedLibrary = false;
-            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedPerformanceCurveLibrary.id, workType: WorkType.ImportLibraryPerformanceCurve}).then(response => {
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedPerformanceCurveLibrary.value.id, workType: WorkType.ImportLibraryPerformanceCurve}).then(response => {
                 if(response.data){
                     setAlertMessageAction("A performance curve import has been added to the work queue")
                 }
@@ -859,8 +859,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         }
 
         updatedRowsMap.clear();
-        deletionIds = [];
-        addedRows = [];
+        deletionIds.value = [];
+        addedRows.value = [];
         isRunning = false;
         onPaginationChanged();
     }
@@ -906,8 +906,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
     function checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 
-            deletionIds.length > 0 || 
-            addedRows.length > 0 ||
+            deletionIds.value.length > 0 || 
+            addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || (hasScenario && hasSelectedLibrary) ||
             (hasSelectedLibrary && hasUnsavedChangesCore('', selectedPerformanceCurveLibrary, stateSelectedPerformanceCurveLibrary))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
@@ -929,12 +929,12 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function checkUserIsLibraryOwner() {
-        return getUserNameByIdGetter(selectedPerformanceCurveLibrary.owner) == getUserName();
+        return getUserNameByIdGetter(selectedPerformanceCurveLibrary.value.owner) == getUserName();
     }
 
     function getOwnerUserName(): string {
         if (!hasCreatedLibrary) {
-        return getUserNameByIdGetter(selectedPerformanceCurveLibrary.owner);
+        return getUserNameByIdGetter(selectedPerformanceCurveLibrary.value.owner);
         }
         return getUserName();
     }
@@ -943,7 +943,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         createPerformanceCurveLibraryDialogData = {
             showDialog: true,
             performanceCurves: createAsNewLibrary
-                ? currentPage
+                ? currentPage.value
                 : [],
         };
     }
@@ -960,10 +960,10 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 library: performanceCurveLibrary,    
                 isNewLibrary: true,           
                  syncModel: {
-                    libraryId: performanceCurveLibrary.performanceCurves.length == 0 || !hasSelectedLibrary ? null : selectedPerformanceCurveLibrary.id,
-                    rowsForDeletion: performanceCurveLibrary.performanceCurves.length == 0 ? [] : deletionIds,
+                    libraryId: performanceCurveLibrary.performanceCurves.length == 0 || !hasSelectedLibrary ? null : selectedPerformanceCurveLibrary.value.id,
+                    rowsForDeletion: performanceCurveLibrary.performanceCurves.length == 0 ? [] : deletionIds.value,
                     updateRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : addedRows,
+                    addedRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : addedRows.value,
                     isModified: scenarioLibraryIsModified
                  },
                 scenarioId: hasScenario ? selectedScenarioId : null
@@ -989,19 +989,19 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         showCreatePerformanceCurveDialog = false;
 
         if (!isNil(newPerformanceCurve)) {
-            addedRows = prepend(
+            addedRows.value = prepend(
                 newPerformanceCurve,
-                addedRows,
+                addedRows.value,
             );
             onPaginationChanged();
         }
     }
 
     function onEditPerformanceCurveProperty(id: string, property: string, value: any) {
-        if (any(propEq('id', id), currentPage)) { 
+        if (any(propEq('id', id), currentPage.value)) { 
             const performanceCurve: PerformanceCurve = find(
                 propEq('id', id),
-                currentPage,
+                currentPage.value,
             ) as PerformanceCurve;
             onUpdateRow(id, performanceCurve);
             onPaginationChanged();
@@ -1011,7 +1011,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function onShowEquationEditorDialog(performanceCurveId: string) {
         selectedPerformanceCurve = find(
             propEq('id', performanceCurveId),
-            currentPage,
+            currentPage.value,
         ) as PerformanceCurve;
 
         if (!isNil(selectedPerformanceCurve)) {
@@ -1029,13 +1029,13 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
         if (!isNil(equation) && hasSelectedPerformanceCurve) {
             onUpdateRow(selectedPerformanceCurve.id, { ...selectedPerformanceCurve, equation: equation })
-            currentPage = update(
+            currentPage.value = update(
                 findIndex(
                     propEq('id', selectedPerformanceCurve.id),
-                    currentPage,
+                    currentPage.value,
                 ),
                 { ...selectedPerformanceCurve, equation: equation },
-                currentPage,
+                currentPage.value,
             );
         }
 
@@ -1046,7 +1046,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function onEditPerformanceCurveCriterionLibrary(performanceCurveId: string) {
         selectedPerformanceCurve = find(
             propEq('id', performanceCurveId),
-            currentPage,
+            currentPage.value,
         ) as PerformanceCurve;
 
         if (!isNil(selectedPerformanceCurve)) {
@@ -1071,16 +1071,16 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 selectedPerformanceCurve.criterionLibrary.id = getNewGuid();
             onUpdateRow(selectedPerformanceCurve.id, { ...selectedPerformanceCurve, 
             criterionLibrary: {...selectedPerformanceCurve.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
-            currentPage = update(
+            currentPage.value = update(
                 findIndex(
                     propEq('id', selectedPerformanceCurve.id),
-                    currentPage,
+                    currentPage.value,
                 ),
                 {
                     ...selectedPerformanceCurve,
                     criterionLibrary: {...selectedPerformanceCurve.criterionLibrary, mergedCriteriaExpression: criterionExpression},
                 },
-                currentPage,
+                currentPage.value,
             );
         }
 
@@ -1089,20 +1089,20 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onRemovePerformanceCurve(performanceCurveId: string) {
-        deletionIds.push(performanceCurveId);
+        deletionIds.value.push(performanceCurveId);
         onPaginationChanged();
     }
 
     function onUpsertScenarioPerformanceCurves() {
 
-        if (selectedPerformanceCurveLibrary.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
+        if (selectedPerformanceCurveLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
         else { scenarioLibraryIsModified = false; }
 
         PerformanceCurveService.UpsertScenarioPerformanceCurves({
-            libraryId: selectedPerformanceCurveLibrary.id === uuidNIL ? null : selectedPerformanceCurveLibrary.id,
-            rowsForDeletion: deletionIds,
+            libraryId: selectedPerformanceCurveLibrary.value.id === uuidNIL ? null : selectedPerformanceCurveLibrary.value.id,
+            rowsForDeletion: deletionIds.value,
             updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
-            addedRows: addedRows,
+            addedRows: addedRows.value,
             isModified: scenarioLibraryIsModified
         }, selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -1117,13 +1117,13 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     function onUpsertPerformanceCurveLibrary() { // need to do upsert things
         const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
-                library: selectedPerformanceCurveLibrary,
+                library: selectedPerformanceCurveLibrary.value,
                 isNewLibrary: false,
                  syncModel: {
-                    libraryId: selectedPerformanceCurveLibrary.id === uuidNIL ? null : selectedPerformanceCurveLibrary.id,
-                    rowsForDeletion: deletionIds,
+                    libraryId: selectedPerformanceCurveLibrary.value.id === uuidNIL ? null : selectedPerformanceCurveLibrary.value.id,
+                    rowsForDeletion: deletionIds.value,
                     updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: addedRows,
+                    addedRows: addedRows.value,
                     isModified: scenarioLibraryIsModified
                  },
                  scenarioId: null
@@ -1132,7 +1132,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 clearChanges()
                 performanceCurveLibraryMutator(selectedPerformanceCurveLibrary);
-                selectedPerformanceCurveLibraryMutator(selectedPerformanceCurveLibrary.id);
+                selectedPerformanceCurveLibraryMutator(selectedPerformanceCurveLibrary.value.id);
                 addSuccessNotificationAction({message: "Updated deterioration model library",});
             }
         });
@@ -1142,8 +1142,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         librarySelectItemValue.value = null;
         setTimeout(() => {
             if (hasScenario) {
-                deletionIds = [];
-                addedRows = [];
+                deletionIds.value = [];
+                addedRows.value = [];
                 updatedRowsMap.clear();
                 resetPage();
             }
@@ -1167,13 +1167,13 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         if (submit) {
             librarySelectItemValue.value = null;
             deletePerformanceCurveLibraryAction(
-                selectedPerformanceCurveLibrary.id,
+                selectedPerformanceCurveLibrary.value.id,
             );
         }
     }
 
     function disableCrudButtons() {
-        const rowChanges = addedRows.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
+        const rowChanges = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
             (performanceCurve: PerformanceCurve) => {
                 return (
@@ -1190,7 +1190,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         if (hasSelectedLibrary) {
             return !(
                 rules['generalRules'].valueIsNotEmpty(
-                    selectedPerformanceCurveLibrary.name,
+                    selectedPerformanceCurveLibrary.value.name,
                 ) === true &&
                 dataIsValid);
         }
@@ -1211,7 +1211,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function exportPerformanceCurves() {
-        const id: string = hasScenario ? selectedScenarioId : selectedPerformanceCurveLibrary.id;
+        const id: string = hasScenario ? selectedScenarioId : selectedPerformanceCurveLibrary.value.id;
                 PerformanceCurveService.exportPerformanceCurves(id, hasScenario)
                     .then((response: AxiosResponse) => {
                         if (hasValue(response, 'data')) {
@@ -1244,7 +1244,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 } else {
                     importLibraryPerformanceCurvesFileAction({
                         ...data,
-                        id: selectedPerformanceCurveLibrary.id,
+                        id: selectedPerformanceCurveLibrary.value.id,
                         currentUserCriteriaFilter: currentUserCriteriaFilter
                     }).then(() => {
                     });
@@ -1264,7 +1264,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function onSharePerformanceCurveLibraryDialogSubmit(performanceCurveLibraryUsers: PerformanceCurveLibraryUser[]) {
         sharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
 
-        if (!isNil(performanceCurveLibraryUsers) && selectedPerformanceCurveLibrary.id !== getBlankGuid())
+        if (!isNil(performanceCurveLibraryUsers) && selectedPerformanceCurveLibrary.value.id !== getBlankGuid())
         {
             let libraryUserData: LibraryUser[] = [];
 
@@ -1286,11 +1286,11 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 //add library user to an array
                 libraryUserData.push(libraryUser);
             });
-            if (!isNullOrUndefined(selectedPerformanceCurveLibrary.id) ) {
+            if (!isNullOrUndefined(selectedPerformanceCurveLibrary.value.id) ) {
                 getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=> isShared = isSharedLibrary.value);
             }
             //update performance curve library sharing
-            PerformanceCurveService.upsertOrDeletePerformanceCurveLibraryUsers(selectedPerformanceCurveLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+            PerformanceCurveService.upsertOrDeletePerformanceCurveLibraryUsers(selectedPerformanceCurveLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                 {
                     resetPage();
@@ -1309,7 +1309,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onUpdateRow(rowId: string, updatedRow: PerformanceCurve){
-        if(any(propEq('id', rowId), addedRows))
+        if(any(propEq('id', rowId), addedRows.value))
             return;
 
         let mapEntry = updatedRowsMap.get(rowId)
@@ -1330,12 +1330,12 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     function clearChanges(){
         updatedRowsMap.clear();
-        addedRows = [];
-        deletionIds = [];
+        addedRows.value = [];
+        deletionIds.value = [];
     }
 
     function resetPage(){
-        performancePagination.page = 1;
+        performancePagination.value.page = 1;
         onPaginationChanged();
     }
 
@@ -1374,9 +1374,9 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
         if( importComp.workType === WorkType.ImportScenarioPerformanceCurve && importComp.id === selectedScenarioId ||
-            hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryPerformanceCurve && importComp.id === selectedPerformanceCurveLibrary.id){
+            hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryPerformanceCurve && importComp.id === selectedPerformanceCurveLibrary.value.id){
             clearChanges()
-            performancePagination.page = 1
+            performancePagination.value.page = 1
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');
             })
@@ -1403,13 +1403,13 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 isRunning = false
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
-                    currentPage = data.items;
-                    rowCache = clone(currentPage)
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
                     totalItems = data.totalItems;
-                    setParentLibraryName(currentPage.length > 0 ? currentPage[0].libraryId : "None");
-                    loadedParentId = currentPage.length > 0 ? currentPage[0].libraryId : "";
+                    setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
+                    loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
                     loadedParentName = parentLibraryName; //store original
-                    scenarioLibraryIsModified = currentPage.length > 0 ? currentPage[0].isModified : false;
+                    scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
 
                 }
             });

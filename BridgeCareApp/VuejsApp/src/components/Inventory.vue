@@ -277,12 +277,13 @@
                         data.keyProperties[i] = key;
                         continue;
                     }
-                    let inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: string | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
+                    if(this.constraintDetails == 'OR'){
+                    let inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: string | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0];
                     let otherKeyValue = inventoryItem.keyProperties[i]; 
                     this.selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
+                    }
                 }
-
                  //Create a dictionary of the selected key fields
                 let dictionary: Record<string, string> = {};
 
@@ -291,7 +292,7 @@
                     let dictValues: any = this.selectedKeys[i];
                     dictionary[dictNames] = dictValues;                     
                 }
-    
+
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 
@@ -314,7 +315,7 @@
                             }
                         }
                     }
-                    //Send to back end to recieve dropdown lists for the other key fields                     
+                    //Send to backend to recieve dropdown lists for the other key fields                     
                     this.getQueryAction({querySet: this.querySelectedData});           
             }
         }

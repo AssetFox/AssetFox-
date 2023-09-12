@@ -466,7 +466,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     await getHasPermittedAccessAction();
                     await getBudgetLibrariesAction()
                     if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
-                        selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+                        selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
                         if (selectedScenarioId === uuidNIL) {
                             addErrorNotificationAction({
@@ -654,7 +654,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         onPaginationChanged()
     }
 
-    watch(stateInvestmentPlan,onStateInvestmentPlanChanged)
+    watch(stateInvestmentPlan,()=>onStateInvestmentPlanChanged)
     function onStateInvestmentPlanChanged() {
         cloneStateInvestmentPlan();
         hasInvestmentPlanForScenario = true;

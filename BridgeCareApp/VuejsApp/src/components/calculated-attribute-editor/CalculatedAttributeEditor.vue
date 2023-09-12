@@ -497,16 +497,8 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                     setAttributeSelectItems()
                     setAttributeTimingSelectItems();
                     if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
-                        if ($router.currentRoute.value.query.scenarioId?.toString() == undefined)
-                        {
-                            selectedScenarioId = getBlankGuid();
-                        }
-                        else
-                        {
-                            selectedScenarioId = $router.currentRoute.value.query.scenarioId?.toString();
-                        }
                         
-
+                            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
                         if (selectedScenarioId === uuidNIL) {
                             addErrorNotificationAction({
                                 message: 'Unable to identify selected scenario.',

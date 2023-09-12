@@ -37,5 +37,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<TreatmentSchedulingEntity> TreatmentSchedulings { get; set; }
 
         public virtual ICollection<TreatmentSupersessionEntity> TreatmentSupersessions { get; set; }
+
+        public bool IsUnselectable { get; set; }
     }
 }

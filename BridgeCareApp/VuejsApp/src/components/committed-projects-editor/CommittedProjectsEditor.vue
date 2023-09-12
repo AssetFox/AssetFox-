@@ -379,11 +379,13 @@ import InvestmentService from '@/services/investment.service';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { isNullOrUndefined } from 'util';
 import { max } from 'moment';
-import { stat } from 'fs';
+import { stat, watch } from 'fs';
 import { Hub } from '@/connectionHub';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
+import { storeKey, useStore } from 'vuex';
 
+    let store = useStore();
     let searchItems = '';
     let dataPerPage = 0;
     let totalDataFound = 0;
@@ -410,64 +412,89 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
     let currentPage: SectionCommittedProjectTableData[] = [];
     let isRunning: boolean = true;
 
-    isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
+    let selectedLibraryTreatments: Treatment[];
+    let isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
-    projectPagination: Pagination = clone(emptyPagination);
+    let projectPagination: Pagination = clone(emptyPagination);
 
-    @State(state => state.committedProjectsModule.sectionCommittedProjects) stateSectionCommittedProjects: SectionCommittedProject[];
-    @State(state => state.treatmentModule.treatmentLibraries)stateTreatmentLibraries: TreatmentLibrary[];
-    selectedLibraryTreatments: Treatment[];
-    @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
-    @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
-    @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.networkModule.networks) networks: Network[];
+    let stateSectionCommittedProjects = ref<SectionCommittedProject[]>(store.state.committedProjectsModule.sectionCommittedProjects);
+    // @State(state => state.committedProjectsModule.sectionCommittedProjects) stateSectionCommittedProjects: SectionCommittedProject[];
+    let stateTreatmentLibraries = ref<TreatmentLibrary[]>(store.state.treatmentModule.treatmentLibraries);
+    // @State(state => state.treatmentModule.treatmentLibraries)stateTreatmentLibraries: TreatmentLibrary[];
+    let stateAttributes = ref<Attribute[]>(store.state.attributeModule.attributes);
+    // @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+    let stateInvestmentPlan = ref<InvestmentPlan>(store.state.investmentModule.investmentPlan);
+    // @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
+    let stateScenarioSimpleBudgetDetails = ref<SimpleBudgetDetail[]>(store.state.investmentModule.scenarioSimpleBudgetDetails);
+    // @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
+    let hasUnsavedChanges = ref<boolean>(state.unsavedChangesFlagModule.hasUnsavedChanges);
+    // @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
+    let networks = ref<Network[]>(store.state.networkModule.networks);
+    // @State(state => state.networkModule.networks) networks: Network[];
 
-    @Action('getCommittedProjects') getCommittedProjects: any;
-    @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
-    @Action('getScenarioSelectableTreatments') getScenarioSelectableTreatmentsAction: any;
-    @Action('getInvestmentPlan') getInvestmentPlanAction: any;
-    @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction:any;
-    @Action('getAttributes') getAttributesAction: any;
-    @Action('getNetworks') getNetworksAction: any;
-    @Action('deleteSpecificCommittedProjects') deleteSpecificCommittedProjectsAction: any;
-    @Action('deleteSimulationCommittedProjects') deleteSimulationCommittedProjectsAction: any;
-    @Action('upsertCommittedProjects') upsertCommittedProjectsAction: any;
+    // @Action('getCommittedProjects') getCommittedProjects: any;
+    async function getCommittedProjects(payload?: any): Promise<any> { await store.dispatch('getCommittedProjects'); }
+    // @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
+    async function getTreatmentLibrariesAction(payload?: any): Promise<any> { await store.dispatch('getTreatmentLibraries'); }
+    // @Action('getScenarioSelectableTreatments') getScenarioSelectableTreatmentsAction: any;
+    async function getScenarioSelectableTreatmentsAction(payload?: any): Promise<any> { await store.dispatch('getScenarioSelectableTreatments'); }
+    // @Action('getInvestmentPlan') getInvestmentPlanAction: any;
+    async function getInvestmentPlanAction(payload?: any): Promise<any> { await store.dispatch('getInvestmentPlan'); }
+    // @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction:any;
+    async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any> { await store.dispatch('getScenarioSimpleBudgetDetails'); }
+    // @Action('getAttributes') getAttributesAction: any;
+    async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes'); }
+    // @Action('getNetworks') getNetworksAction: any;
+    async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks'); }
+    // @Action('deleteSpecificCommittedProjects') deleteSpecificCommittedProjectsAction: any;
+    async function deleteSpecificCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('deleteSpecificCommittedProjects'); }
+    // @Action('deleteSimulationCommittedProjects') deleteSimulationCommittedProjectsAction: any;
+    async function deleteSimulationCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('deleteSimulationCommittedProjects'); }
+    // @Action('upsertCommittedProjects') upsertCommittedProjectsAction: any;
+    async function upsertCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('upsertCommittedProjects'); }
 
-    @Action('selectTreatmentLibrary') selectTreatmentLibraryAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
+    // @Action('selectTreatmentLibrary') selectTreatmentLibraryAction: any;
+    async function selectTreatmentLibraryAction(payload?: any): Promise<any> { await store.dispatch('selectTreatmentLibrary'); }
+    // @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> { await store.dispatch('setHasUnsavedChanges'); }
+    // @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification'); }
+    // @Action('addErrorNotification') addErrorNotificationAction: any;
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification'); } 
     @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
-    @Action('setAlertMessage') setAlertMessageAction: any;
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserOrSharedScenario'); }
+    // @Action('selectScenario') selectScenarioAction: any;
+    async function selectScenarioAction(payload?: any): Promise<any> { await store.dispatch('selectScenario'); }
+    // @Action('setAlertMessage') setAlertMessageAction: any;
+    async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage'); }
 
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
+    let getUserNameByIdGetter: any = store.getters.getUserNameByIdGetter;
+
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
-
-    cpItems: SectionCommittedProjectTableData[] = [];
-    selectedCpItems: SectionCommittedProjectTableData[] = [];
-    sectionCommittedProjects: SectionCommittedProject[] = [];
-    selectedConsequences: CommittedProjectConsequence[] = [];
-    committedProjectsCount: number = 0;
-    showImportExportCommittedProjectsDialog: boolean = false;
-    selectedCommittedProject: string  = '';
-    showCreateCommittedProjectConsequenceDialog: boolean = false;
-    disableCrudButtonsResult: boolean = true;
-    alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
-    reverseCatMap = clone(treatmentCategoryReverseMap);
-    catMap = clone(treatmentCategoryMap);
     
-    keyattr: string = '';
-
-    investmentYears: number[] = [];
-    lastYear: number = 0;
-    firstYear: number = 0;
-
-    isNoTreatmentBefore: boolean = true
-    isNoTreatmentBeforeCache: boolean = true
+    let cpItems: SectionCommittedProjectTableData[] = [];
+    let selectedCpItems: SectionCommittedProjectTableData[] = [];
+    let sectionCommittedProjects: SectionCommittedProject[] = [];
+    let selectedConsequences: CommittedProjectConsequence[] = [];
+    let committedProjectsCount: number = 0;
+    let showImportExportCommittedProjectsDialog: boolean = false;
+    let selectedCommittedProject: string  = '';
+    let showCreateCommittedProjectConsequenceDialog: boolean = false;
+    let disableCrudButtonsResult: boolean = true;
+    let alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
+    let reverseCatMap = clone(treatmentCategoryReverseMap);
+    let catMap = clone(treatmentCategoryMap);
     
-    cpGridHeaders: DataTableHeader[] = [
+    let keyattr: string = '';
+
+    let investmentYears: number[] = [];
+    let lastYear: number = 0;
+    let firstYear: number = 0;
+
+    let isNoTreatmentBefore: boolean = true
+    let isNoTreatmentBeforeCache: boolean = true
+    
+    const cpGridHeaders: DataTableHeader[] = [
         {
             text: '',
             value: 'keyAttr',
@@ -525,7 +552,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
             width: '10%',
         },
     ];
-    consequenceHeaders: DataTableHeader[] = [
+    const consequenceHeaders: DataTableHeader[] = [
         {
             text: 'Attribute',
             value: 'attribute',
@@ -620,8 +647,8 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
     }
 
     //Watch
-    @Watch('isNoTreatmentBefore')
-    onIsNoTreatmentBeforeChanged(){
+    watch(isNoTreatmentBefore, () =>onIsNoTreatmentBeforeChanged)
+    function onIsNoTreatmentBeforeChanged(){
         this.checkHasUnsavedChanges();
     }
 

@@ -9,6 +9,26 @@ namespace AppliedResearchAssociates.iAM.Analysis;
 
 public sealed class SelectableTreatment : Treatment
 {
+    private const int DEFAULT_SHADOW = 1;
+
+    private static readonly IComparer<ChangeApplicator> ChangeApplicatorComparer = SelectionComparer<ChangeApplicator>.Create(applicator => applicator.Number.Value);
+
+    private readonly List<ConditionalTreatmentConsequence> _Consequences = new();
+
+    private readonly List<TreatmentCost> _Costs = new();
+
+    private readonly List<Criterion> _FeasibilityCriteria = new();
+
+    private readonly List<TreatmentSupersession> _Supersessions = new();
+
+    private readonly Simulation Simulation;
+
+    private int _ShadowForAnyTreatment = DEFAULT_SHADOW;
+
+    private int _ShadowForSameTreatment = DEFAULT_SHADOW;
+
+    private ILookup<Attribute, ConditionalTreatmentConsequence> ConsequencesPerAttribute;
+
     public SelectableTreatment(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
     /// <remarks>
@@ -191,26 +211,6 @@ public sealed class SelectableTreatment : Treatment
     internal void SetConsequencesPerAttribute() => ConsequencesPerAttribute = Consequences.ToLookup(c => c.Attribute);
 
     internal void UnsetConsequencesPerAttribute() => ConsequencesPerAttribute = null;
-
-    private const int DEFAULT_SHADOW = 1;
-
-    private static readonly IComparer<ChangeApplicator> ChangeApplicatorComparer = SelectionComparer<ChangeApplicator>.Create(applicator => applicator.Number.Value);
-
-    private readonly List<ConditionalTreatmentConsequence> _Consequences = new();
-
-    private readonly List<TreatmentCost> _Costs = new();
-
-    private readonly List<Criterion> _FeasibilityCriteria = new();
-
-    private readonly List<TreatmentSupersession> _Supersessions = new();
-
-    private readonly Simulation Simulation;
-
-    private int _ShadowForAnyTreatment = DEFAULT_SHADOW;
-
-    private int _ShadowForSameTreatment = DEFAULT_SHADOW;
-
-    private ILookup<Attribute, ConditionalTreatmentConsequence> ConsequencesPerAttribute;
 
     private double getCost(TreatmentCost cost, AssetContext scope)
     {

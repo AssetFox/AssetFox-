@@ -14,16 +14,16 @@
                       :items="shareCashFlowRuleLibraryUserGridRows"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
-          <template slot="items" slot-scope="props">
+          <template v-slot:items="{item}" slot="items" slot-scope="props">
             <td>
-              {{ props.item.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="props.item.isShared"
-                          @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
+              <v-checkbox label="Is Shared" v-model="item.isShared"
+                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
             </td>
           </template>
           <v-alert :value="true"
@@ -46,10 +46,8 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+<script lang="ts" setup>
+import { watch, ref } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {CashFlowRuleLibraryUser } from '@/shared/models/iAM/cash-flow';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -61,34 +59,36 @@ import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {CashFlowRuleLibraryUserGridRow, ShareCashFlowRuleLibraryDialogData } from '@/shared/models/modals/share-cash-flow-rule-data';
 import CashFlowRuleService from '@/services/cash-flow.service';
 import { http2XX } from '@/shared/utils/http-utils';
+import { useStore } from 'vuex';
 
-@Component
-export default class ShareCashFlowRuleLibraryDialog extends Vue {
-  @Prop() dialogData: ShareCashFlowRuleLibraryDialogData;
+  let store = useStore();
 
-  @State(state => state.userModule.users) stateUsers: User[];
+  const props = defineProps<{dialogData: ShareCashFlowRuleLibraryDialogData}>()
+  const emit = defineEmits(['submit']);
 
-  shareCashFlowRuleLibraryUserGridHeaders: DataTableHeader[] = [
+  let stateUsers = ref<User[]>(store.state.userModule.users);
+
+  const shareCashFlowRuleLibraryUserGridHeaders: DataTableHeader[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  shareCashFlowRuleLibraryUserGridRows: CashFlowRuleLibraryUserGridRow[] = [];
-  currentUserAndOwner: CashFlowRuleLibraryUser[] = [];
-  searchTerm: string = '';
+  let shareCashFlowRuleLibraryUserGridRows: CashFlowRuleLibraryUserGridRow[] = [];
+  let currentUserAndOwner: CashFlowRuleLibraryUser[] = [];
+  let searchTerm: string = '';
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    if (this.dialogData.showDialog) {
-      this.onSetGridData();
-      this.onSetUsersSharedWith();
+  watch(props.dialogData, () => onDialogDataChanged)
+  function onDialogDataChanged() {
+    if (props.dialogData.showDialog) {
+      onSetGridData();
+      onSetUsersSharedWith();
     }
   }
 
-  onSetGridData() {
+  function onSetGridData() {
     const currentUser: string = getUserName();
 
-    this.shareCashFlowRuleLibraryUserGridRows = this.stateUsers
+    shareCashFlowRuleLibraryUserGridRows = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -98,10 +98,10 @@ export default class ShareCashFlowRuleLibraryDialog extends Vue {
         }));
   }
 
-    onSetUsersSharedWith() {
+    function onSetUsersSharedWith() {
         // Cash Flow Rule library users
         let cashFlowRuleLibraryUsers: CashFlowRuleLibraryUser[] = [];
-        CashFlowRuleService.getCashFlowRuleLibraryUsers(this.dialogData.cashFlowRuleLibrary.id).then(response => {
+        CashFlowRuleService.getCashFlowRuleLibraryUsers(props.dialogData.cashFlowRuleLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -124,24 +124,23 @@ export default class ShareCashFlowRuleLibraryDialog extends Vue {
                         cashFlowRuleLibraryUsers.push(cashFlowRuleLibraryUser);
                     });
                 }
-
                 //fill grid
                 const currentUser: string = getUserName();
                 const isCurrentUserOrOwner = (cashFlowRuleLibraryUser: CashFlowRuleLibraryUser) => cashFlowRuleLibraryUser.username === currentUser || cashFlowRuleLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (cashFlowRuleLibraryUser: CashFlowRuleLibraryUser) => cashFlowRuleLibraryUser.username !== currentUser && !cashFlowRuleLibraryUser.isOwner;
 
-                this.currentUserAndOwner = filter(isCurrentUserOrOwner, cashFlowRuleLibraryUsers) as CashFlowRuleLibraryUser[];
+                currentUserAndOwner = filter(isCurrentUserOrOwner, cashFlowRuleLibraryUsers) as CashFlowRuleLibraryUser[];
                 const otherUsers: CashFlowRuleLibraryUser[] = filter(isNotCurrentUserOrOwner, cashFlowRuleLibraryUsers) as CashFlowRuleLibraryUser[];
 
                 otherUsers.forEach((cashFlowRuleLibraryUser: CashFlowRuleLibraryUser) => {
-                    if (any(propEq('id', cashFlowRuleLibraryUser.userId), this.shareCashFlowRuleLibraryUserGridRows)) {
+                    if (any(propEq('id', cashFlowRuleLibraryUser.userId), shareCashFlowRuleLibraryUserGridRows)) {
                         const cashFlowRuleLibraryUserGridRow: CashFlowRuleLibraryUserGridRow = find(
-                            propEq('id', cashFlowRuleLibraryUser.userId), this.shareCashFlowRuleLibraryUserGridRows) as CashFlowRuleLibraryUserGridRow;
+                            propEq('id', cashFlowRuleLibraryUser.userId), shareCashFlowRuleLibraryUserGridRows) as CashFlowRuleLibraryUserGridRow;
 
-                        this.shareCashFlowRuleLibraryUserGridRows = update(
-                            findIndex(propEq('id', cashFlowRuleLibraryUser.userId), this.shareCashFlowRuleLibraryUserGridRows),
+                        shareCashFlowRuleLibraryUserGridRows = update(
+                            findIndex(propEq('id', cashFlowRuleLibraryUser.userId), shareCashFlowRuleLibraryUserGridRows),
                             { ...cashFlowRuleLibraryUserGridRow, isShared: true, canModify: cashFlowRuleLibraryUser.canModify },
-                            this.shareCashFlowRuleLibraryUserGridRows
+                            shareCashFlowRuleLibraryUserGridRows
                         );
                     }
                 });
@@ -149,26 +148,26 @@ export default class ShareCashFlowRuleLibraryDialog extends Vue {
         });
   }
 
-  removeUserModifyAccess(userId: string, isShared: boolean) {
+  function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      this.shareCashFlowRuleLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), this.shareCashFlowRuleLibraryUserGridRows),
-          'canModify', false, this.shareCashFlowRuleLibraryUserGridRows);
+      shareCashFlowRuleLibraryUserGridRows = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), shareCashFlowRuleLibraryUserGridRows),
+          'canModify', false, shareCashFlowRuleLibraryUserGridRows);
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.getCashFlowRuleLibraryUsers());
+      emit('submit', getCashFlowRuleLibraryUsers());
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.shareCashFlowRuleLibraryUserGridRows = [];
+    shareCashFlowRuleLibraryUserGridRows = [];
   }
 
-  getCashFlowRuleLibraryUsers() {
-    const usersSharedWith: CashFlowRuleLibraryUser[] = this.shareCashFlowRuleLibraryUserGridRows
+  function getCashFlowRuleLibraryUsers() {
+    const usersSharedWith: CashFlowRuleLibraryUser[] = shareCashFlowRuleLibraryUserGridRows
         .filter((cashFlowRuleLibraryUserGridRow: CashFlowRuleLibraryUserGridRow) => cashFlowRuleLibraryUserGridRow.isShared)
         .map((cashFlowRuleLibraryUserGridRow: CashFlowRuleLibraryUserGridRow) => ({
           userId: cashFlowRuleLibraryUserGridRow.id,
@@ -177,9 +176,8 @@ export default class ShareCashFlowRuleLibraryDialog extends Vue {
           isOwner: false
         }));
 
-    return [...this.currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner, ...usersSharedWith];
   }
-}
 </script>
 
 <style>

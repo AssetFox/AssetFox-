@@ -36,11 +36,8 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Getter} from 'vuex-class';
-import Component from 'vue-class-component';
-import {Prop, Watch} from 'vue-property-decorator';
+<script lang="ts" setup>
+import { watch } from 'vue';
 import {CreateCashFlowRuleLibraryDialogData} from '@/shared/models/modals/create-cash-flow-rule-library-dialog-data';
 import {
   CashFlowDistributionRule,
@@ -53,24 +50,26 @@ import {getUserName} from '@/shared/utils/get-user-info';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {clone} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateCashFlowRuleLibraryDialog extends Vue {
-  @Prop() dialogData: CreateCashFlowRuleLibraryDialogData;
-  
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+  let store = useStore();
 
-  newCashFlowRuleLibrary: CashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
-  rules: InputValidationRules = clone(rules);
+  let getIdByUserNameGetter: any = store.getters.getIdByUserName;
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
+  const props = defineProps<{dialogData: CreateCashFlowRuleLibraryDialogData}>()
+  const emit = defineEmits(['submit']);
+
+  let newCashFlowRuleLibrary: CashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
+  let inputRules: InputValidationRules = clone(rules);
+
+  watch(props.dialogData, () => onDialogDataChanged)
+  function onDialogDataChanged() {
     let currentUser: string = getUserName();
 
-    this.newCashFlowRuleLibrary = {
-      ...this.newCashFlowRuleLibrary,
-      cashFlowRules: hasValue(this.dialogData.cashFlowRules)
-          ? this.dialogData.cashFlowRules.map((cashFlowRule: CashFlowRule) => ({
+    newCashFlowRuleLibrary = {
+      ...newCashFlowRuleLibrary,
+      cashFlowRules: hasValue(props.dialogData.cashFlowRules)
+          ? props.dialogData.cashFlowRules.map((cashFlowRule: CashFlowRule) => ({
             ...cashFlowRule,
             id: getNewGuid(),
             cashFlowDistributionRules: hasValue(cashFlowRule.cashFlowDistributionRules)
@@ -81,18 +80,17 @@ export default class CreateCashFlowRuleLibraryDialog extends Vue {
                 : []
           }))
           : [],
-        owner: this.getIdByUserNameGetter(currentUser),
+        owner: getIdByUserNameGetter(currentUser),
     };
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newCashFlowRuleLibrary);
+      emit('submit', newCashFlowRuleLibrary);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newCashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
+    newCashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
   }
-}
 </script>

@@ -13,6 +13,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<TargetConditionGoalLibraryDTO> GetTargetConditionGoalLibrariesNoChildren();
 
+        DateTime GetLibraryModifiedDate(Guid targetLibraryId);
+
         void UpsertTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto);
 
         void UpsertOrDeleteTargetConditionGoals(List<TargetConditionGoalDTO> targetConditionGoals, Guid libraryId);

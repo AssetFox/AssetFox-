@@ -263,6 +263,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
+        public DateTime GetLibraryModifiedDate(Guid treatmentLibraryId)
+        {
+            var dtos = _unitOfWork.Context.TreatmentLibrary.Where(_ => _.Id == treatmentLibraryId).FirstOrDefault().LastModifiedDate;
+            return dtos;
+        }
+
         public List<TreatmentLibraryDTO> GetAllTreatmentLibrariesNoChildren()
         {
             if (!_unitOfWork.Context.SelectableTreatment.Any())

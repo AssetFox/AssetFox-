@@ -90,6 +90,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
+        public DateTime GetLibraryModifiedDate(Guid deficientLibraryId)
+        {
+            var dtos = _unitOfWork.Context.DeficientConditionGoalLibrary.Where(_ => _.Id == deficientLibraryId).FirstOrDefault().LastModifiedDate;
+            return dtos;
+        }
+
         public List<DeficientConditionGoalLibraryDTO> GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()
         {
             if (!_unitOfWork.Context.DeficientConditionGoalLibrary.Any())

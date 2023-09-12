@@ -18,6 +18,9 @@ export default class CalculatedAttributeService {
             `${API.CalculatedAttributes}/CalculatedAttrbiuteLibraries`,
         );
     }
+    static getCalculatedLibraryModifiedDate (libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.CalculatedAttributes}/GetCalculatedLibraryModifiedDate/${libraryId}`)
+    }
     static getScenarioCalculatedAttribute(scenarioId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.CalculatedAttributes}/ScenarioAttributes/${scenarioId}`,

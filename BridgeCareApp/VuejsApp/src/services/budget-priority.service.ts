@@ -14,6 +14,10 @@ export default class BudgetPriorityService {
         );
     }
 
+    static getBudgetPriorityLibraryDate(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.BudgetPriority}/GetBudgetPriorityLibraryModifiedDate/${libraryId}`);
+    }
+
     static getScenarioBudgetPriorityPage(scenarioId: string, data:PagingRequest<BudgetPriority>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.BudgetPriority}/GetScenarioBudgetPriorityPage/${scenarioId}`, data

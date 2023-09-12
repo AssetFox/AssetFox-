@@ -83,7 +83,7 @@
                                 v-if='hasSelectedLibrary && !hasScenario'
                                 class="ghd-control-label ghd-md-gray"
                             > 
-                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }} |
+                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                             <v-badge v-show="isShared">
                             <template v-slot: badge>
                                 <span>Shared</span>
@@ -626,6 +626,7 @@ export default class PerformanceCurveEditor extends Vue {
     hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
     librarySelectItems: SelectItem[] = [];
+    modifiedDate: string; 
     
     performanceCurveGridHeaders: DataTableHeader[] = [
         {
@@ -802,7 +803,16 @@ export default class PerformanceCurveEditor extends Vue {
         }          
         else if(this.hasSelectedLibrary){
             this.isRunning = true;
-            await PerformanceCurveService.GetLibraryPerformanceCurvePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+
+            await PerformanceCurveService.getPerformanceLibraryModifiedDate(this.selectedPerformanceCurveLibrary.id).then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.modifiedDate = data.slice(0, 10);
+                   }
+             });
+
+             await PerformanceCurveService.GetLibraryPerformanceCurvePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
                     this.currentPage = data.items;

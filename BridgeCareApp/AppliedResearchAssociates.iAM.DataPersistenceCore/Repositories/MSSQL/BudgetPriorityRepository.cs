@@ -172,6 +172,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteEntity<BudgetPriorityLibraryEntity>(_ => _.Id == libraryId);
         }
 
+        public DateTime GetLibraryModifiedDate(Guid budgetPriorityLibraryId)
+        {
+            var dtos = _unitOfWork.Context.BudgetPriorityLibrary.Where(_ => _.Id == budgetPriorityLibraryId).FirstOrDefault().LastModifiedDate;
+            return dtos;
+        }
+
         public List<BudgetPriorityDTO> GetScenarioBudgetPriorities(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

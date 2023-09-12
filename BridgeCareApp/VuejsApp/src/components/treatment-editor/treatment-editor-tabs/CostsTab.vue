@@ -30,6 +30,7 @@
                                 <v-layout xs6 align-center>  
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
+                                        id="TreatmentCostsTab-Equation-TextArea"
                                         full-width
                                         no-resize
                                         outline
@@ -58,6 +59,7 @@
                                 <v-layout xs6 align-center>              
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
+                                        id="TreatmentCostsTab-Criteria-TextArea"
                                         full-width
                                         no-resize
                                         outline

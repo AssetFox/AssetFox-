@@ -267,7 +267,7 @@
             <v-flex xs12>
               <div>
                  <v-layout justify-center row>
-                  <v-btn id="EquationEditor-checkEquation-btn" :disabled="disableEquationCheck()" @click="onCheckEquation" flat class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
+                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" flat id="EquationEditor-checkEquation-btn" class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
                 </v-layout>
                 <v-layout justify-center row>
                   <v-btn @click="onSubmit(false)" outline class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>

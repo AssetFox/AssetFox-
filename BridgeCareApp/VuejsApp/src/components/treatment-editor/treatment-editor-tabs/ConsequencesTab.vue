@@ -39,7 +39,9 @@
                                 v-show="header.value === 'equation'"
                             >
                                 <template slot="activator">
-                                    <v-btn class="ghd-blue" icon>
+                                    <v-btn 
+                                        id="TreatmentConsequencesTab-EquationView-btn"
+                                        class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
@@ -47,6 +49,7 @@
                                     <v-card-text>
                                         <v-textarea
                                             class="sm-txt"
+                                            id="TreatmentConsequencesTab-EquationView-textarea"
                                             :value="
                                                 props.item.equation.expression
                                             "
@@ -71,13 +74,14 @@
                                 v-show="header.value === 'criterionLibrary'"
                             >
                                 <template slot="activator">
-                                    <v-btn class="ghd-blue" icon>
+                                    <v-btn id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
                                 <v-card>
                                     <v-card-text>
                                         <v-textarea
+                                            id="TreatmentConsequencesTab-CriteriaView-textarea"
                                             class="sm-txt"
                                             :value="
                                                 props.item.criterionLibrary.mergedCriteriaExpression

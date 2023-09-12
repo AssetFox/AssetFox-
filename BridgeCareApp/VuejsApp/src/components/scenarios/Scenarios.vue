@@ -23,7 +23,7 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-layout>
+                                        <v-layout style = "margin-right: -100px;">
                                             <v-text-field
                                                 id="Scenarios-searchScenarios-textField"
                                                 type="text"
@@ -45,6 +45,30 @@
                                                 @click="onMineSearchClick()">
                                                 Search
                                             </v-btn>
+                                            <v-btn id="Scenarios-performFilter-button" 
+                                                style="margin-top: 2px;" 
+                                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                                outline 
+                                                @click="showFilterScenarioList = true">
+                                                Filter
+                                            </v-btn>
+                                            <span class="Scenario-status"  >
+                                                <div v-if = "(sortedMineCategory != '' && sortedMineValue!='')&&(sortedMineValue != undefined && sortedMineCategory != null)">
+                                                     Current Filter: 
+                                                     <v-chip
+                                                        class="ma-2"
+                                                        closeable
+                                                        color=primary
+                                                        text-color="white"
+                                                        :model-value="true"
+                                                        icon
+                                                        >
+                                                        {{sortedMineCategory}} by {{ sortedMineValue }}
+                                                        
+                                                        <img class='img-general' :src="require('@/assets/icons/x-circle.svg')" @click="onMineFilterClearClick()"  >
+                                                </v-chip>
+                                                </div>
+                                            </span>
                                         </v-layout>
                                     </v-flex>
                                     <v-flex xs4></v-flex>
@@ -67,11 +91,12 @@
                                     :pagination.sync="userScenariosPagination"
                                     :headers="scenarioGridHeaders"
                                     sort-icon=$vuetify.icons.ghd-table-sort
-
+                                    
                                     calculate-widths
                                 >
                                     <template slot="items" slot-scope="props">
                                         <td>
+                                        
                                             <v-edit-dialog
                                                 large
                                                 lazy
@@ -204,7 +229,7 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-layout>
+                                        <v-layout style = "margin-right:-200px">
                                             <v-text-field
                                                 id="Scenarios-shared-searchScenarios-textField"
                                                 label="Search"
@@ -226,7 +251,32 @@
                                                 @click="onSharedSearchClick()">
                                                 Search
                                             </v-btn>
+                                            <v-btn id="Scenarios-performFilter-button" 
+                                                style="margin-top: 2px;" 
+                                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                                outline 
+                                                @click="showSharedFilterScenarioList = true">
+                                                Filter
+                                            </v-btn>
+                                            <span class="Scenario-status"  >
+                                                <div v-if = "(sortedCategory != '' && sortedValue!='')&&(sortedValue != undefined && sortedCategory != null)">
+                                                     Current Filter: 
+                                                     <v-chip
+                                                        class="ma-2"
+                                                        closeable
+                                                        color=primary
+                                                        text-color="white"
+                                                        :model-value="true"
+                                                        icon
+                                                        >
+                                                        {{sortedCategory}} by {{ sortedValue }}
+                                                        
+                                                        <img class='img-general' :src="require('@/assets/icons/x-circle.svg')" @click="onSharedFilterClearClick()"  >
+                                                </v-chip>
+                                                </div>
+                                            </span>
                                         </v-layout>
+                                        
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
@@ -237,6 +287,7 @@
                                     sort-icon=$vuetify.icons.ghd-table-sort
                                 >
                                     <template slot="items" slot-scope="props">
+
                                         <td>
                                             <v-edit-dialog
                                                 large
@@ -547,6 +598,14 @@
             :showDialog="showCreateScenarioDialog"
             @submit="onCreateScenarioDialogSubmit"
         />
+        <FilterScenarioList
+            :showDialog="showSharedFilterScenarioList"
+            @submit="onFilterSharedScenarioListSubmit"
+        />
+        <FilterScenarioList
+            :showDialog="showFilterScenarioList"
+            @submit="onFilterScenarioListSubmit"
+        />
 
         <CloneScenarioDialog
             :dialogData="cloneScenarioDialogData"
@@ -598,6 +657,7 @@ import {
 import CloneScenarioDialog from '@/components/scenarios/scenarios-dialogs/CloneScenarioDialog.vue'
 import { CloneScenarioDialogData, emptyCloneScenarioDialogData } from '@/shared/models/modals/clone-scenario-dialog-data'
 import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
+import FilterScenarioList from '@/components/scenarios/scenarios-dialogs/FilterScenarioList.vue';
 import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
 import { Network } from '@/shared/models/iAM/network';
 import { any, clone, isNil } from 'ramda';
@@ -642,6 +702,7 @@ import ScenarioService from '@/services/scenario.service';
         ConfirmConvertToRelationalAlert: Alert,
         ReportsDownloaderDialog,
         CreateScenarioDialog,
+        FilterScenarioList,
         CloneScenarioDialog,
         CreateNetworkDialog,
         ShareScenarioDialog,
@@ -720,7 +781,7 @@ export default class Scenarios extends Vue {
             text: 'Creator',
             value: 'creator',
             align: 'left',
-            sortable: false,
+            sortable: true,
             class: 'header-border',
             width: '',
         },
@@ -728,7 +789,7 @@ export default class Scenarios extends Vue {
             text: 'Owner',
             value: 'owner',
             align: 'left',
-            sortable: false,
+            sortable: true,
             class: 'header-border',
             width: '',
         },
@@ -736,7 +797,7 @@ export default class Scenarios extends Vue {
             text: 'Network',
             value: 'network',
             align: 'left',
-            sortable: false,
+            sortable: true,
             class: 'header-border',
             width: '',
         },
@@ -905,7 +966,10 @@ export default class Scenarios extends Vue {
     availableActions: any;
     availableSimulationActions: any;
     nameUpdate: string = '';
-
+    sortedMineCategory: string = '';
+    sortedMineValue: string = '';
+    sortedCategory: string = '';
+    sortedValue: string = '';
     scenarios: Scenario[] = [];
 
     userScenarios: Scenario[] = [];
@@ -939,6 +1003,8 @@ export default class Scenarios extends Vue {
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     confirmCancelAlertData: AlertData = clone(emptyAlertData);
     showCreateScenarioDialog: boolean = false;
+    showFilterScenarioList: boolean = false;
+    showSharedFilterScenarioList: boolean = false;
     selectedScenario: Scenario = clone(emptyScenario);   
     networkDataAssignmentStatus: string = '';
     rules: InputValidationRules = rules;
@@ -1712,7 +1778,42 @@ export default class Scenarios extends Vue {
             });
         }
     }
-
+    onFilterScenarioListSubmit(filterCategory:string, FilterValue:string) {
+        this.showFilterScenarioList = false;
+        this.sortedMineCategory = filterCategory;
+        this.sortedMineValue = FilterValue;
+        if ((filterCategory !=''&&!isNil(filterCategory)) && (FilterValue !=''&&!isNil(FilterValue)))
+        {
+            this.currentSearchMine = FilterValue;
+            this.resetPageMine();
+        }
+        else if(!isNil(filterCategory)||!isNil(FilterValue))
+        {
+            this.sortedMineCategory = '';
+            this.sortedMineValue = '';
+            this.currentSearchMine = '';
+            this.resetPageMine();
+        }
+    }
+    onFilterSharedScenarioListSubmit(filterCategory:string, FilterValue:string) {
+        this.showSharedFilterScenarioList = false;
+        this.sortedCategory = filterCategory;
+        this.sortedValue = FilterValue;
+        if ((filterCategory !=''&&!isNil(filterCategory)) && (FilterValue !=''&&!isNil(FilterValue)))
+        {
+            this.currentSearchShared = FilterValue;
+            this.resetPageShared();
+        }
+        else if(!isNil(filterCategory)||!isNil(FilterValue))
+        {
+            this.sortedCategory = ''
+            this.sortedValue = ''
+            this.currentSearchShared = '';
+            this.resetPageShared();
+        }
+        
+    }
+    
     onMigrateLegacySimulationSubmit(legacySimulationId: number) {
         this.showMigrateLegacySimulationDialog = false;
 
@@ -1871,6 +1972,12 @@ export default class Scenarios extends Vue {
         this.searchMine = '';
         this.onMineSearchClick();
     }
+    onMineFilterClearClick(){
+        this.sortedMineCategory = '';
+        this.sortedMineValue = '';
+        this.currentSearchMine= '';
+        this.resetPageMine()
+    }
 
     resetPageMine(){
         this.userScenariosPagination.page = 1;
@@ -1879,6 +1986,12 @@ export default class Scenarios extends Vue {
 
     onSharedSearchClick(){
         this.currentSearchShared = this.searchShared;
+        this.resetPageShared()
+    }
+    onSharedFilterClearClick(){
+        this.sortedCategory = '';
+        this.sortedValue = '';
+        this.currentSearchShared = '';
         this.resetPageShared()
     }
 
@@ -1964,4 +2077,11 @@ export default class Scenarios extends Vue {
 .icon-selected-tab{
     fill:#2A578D
 }
+.theme--light.v-datatable thead th.column.sortable.active {
+    color: rgba(0,0,0,0.87);
+    border-top:2px solid rgba(0,0,0,0.54);
+    border-left:2px solid rgba(0,0,0,0.54);
+    border-right:2px solid rgba(0,0,0,0.54);
+}
+
 </style>

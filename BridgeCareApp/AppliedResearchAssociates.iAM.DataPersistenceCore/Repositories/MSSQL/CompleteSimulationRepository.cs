@@ -32,8 +32,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 Name = coreSimulation.Name,
                 NetworkId = coreSimulation.NetworkId,
-                ReportStatus = coreSimulation.ReportStatus,
+                ReportStatus = coreSimulation.ReportStatus,                
                 Id = simulationGuid,
+                
+             
             };
 
             fullSimulation.AnalysisMethod = _unitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationGuid);
@@ -82,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId, ownerName);
 
             // save it
-            var network = _unitOfWork.Context.Network.First(n => n.Id == dto.NetworkId);
+            var network = _unitOfWork.Context.Network.First(n => n.Id == dto.NetworkId);            
             var clone = CreateNewSimulation(cloneSimulation, network.KeyAttributeId, simulationCloningCommittedProjectErrors, baseEntityProperties);
             return clone;
         }

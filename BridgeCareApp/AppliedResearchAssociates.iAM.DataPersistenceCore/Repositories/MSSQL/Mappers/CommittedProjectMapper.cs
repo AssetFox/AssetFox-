@@ -95,8 +95,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
             foreach (var consequence in dto.Consequences)
             {
-                result.CommittedProjectConsequences.Add(consequence.ToEntity(attributes));
+                result.CommittedProjectConsequences.Add(consequence.ToEntity(attributes, baseEntityProperties));
             }
+           
                         
             if (dto is SectionCommittedProjectDTO)
             {                

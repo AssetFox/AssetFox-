@@ -75,6 +75,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var costEntity = cost.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, baseEntityProperties);
                 costEntities.Add(costEntity);
             }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             entity.ScenarioTreatmentCosts = costEntities;
 
             var consequencetEntities = new List<ScenarioConditionalTreatmentConsequenceEntity>();
@@ -85,6 +86,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var consequenceEntity = consequence.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, attribute.Id, baseEntityProperties);
                 consequencetEntities.Add(consequenceEntity);
             }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             entity.ScenarioTreatmentConsequences = consequencetEntities;
             return entity;
         }

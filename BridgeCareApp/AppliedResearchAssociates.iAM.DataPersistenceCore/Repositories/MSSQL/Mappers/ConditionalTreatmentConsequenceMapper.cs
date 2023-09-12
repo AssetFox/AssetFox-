@@ -30,20 +30,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ChangeValue = dto.ChangeValue
             };
 
-        public static ScenarioConditionalTreatmentConsequenceEntity ToScenarioEntity(this TreatmentConsequenceDTO dto, Guid treatmentId,
-            Guid attributeId) =>
-            new ScenarioConditionalTreatmentConsequenceEntity
+        public static ScenarioConditionalTreatmentConsequenceEntity ToScenarioEntity(this TreatmentConsequenceDTO dto, Guid treatmentId, Guid attributeId, BaseEntityProperties baseEntityProperties = null)
+        {
+            var entity = new ScenarioConditionalTreatmentConsequenceEntity
             {
                 Id = dto.Id,
                 ScenarioSelectableTreatmentId = treatmentId,
                 AttributeId = attributeId,
                 ChangeValue = dto.ChangeValue
             };
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
 
         public static ScenarioConditionalTreatmentConsequenceEntity ToScenarioEntityWithCriterionLibraryJoin(this TreatmentConsequenceDTO dto, Guid treatmentId, Guid attributeId, BaseEntityProperties baseEntityProperties)
         {
 
-            var entity = ToScenarioEntity(dto, treatmentId, attributeId);
+            var entity = ToScenarioEntity(dto, treatmentId, attributeId, baseEntityProperties);
             var criterionLibraryDto = dto.CriterionLibrary;
             var isvalid = criterionLibraryDto.IsValid();
             if (isvalid)
@@ -66,8 +69,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     Equation = equationEntity,
                     ScenarioConditionalTreatmentConsequenceId = entity.Id,
                 };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(equationJoin, baseEntityProperties);
                 entity.ScenarioConditionalTreatmentConsequenceEquationJoin = equationJoin;
             }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             return entity;
         }
 

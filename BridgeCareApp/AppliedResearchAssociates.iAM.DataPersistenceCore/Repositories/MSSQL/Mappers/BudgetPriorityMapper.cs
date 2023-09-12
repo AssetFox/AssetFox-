@@ -61,6 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 budgetPercentagePairEntities.Add(budgetPercentagePairEntity);
             }
             entity.BudgetPercentagePairs = budgetPercentagePairEntities;
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             return entity;
 
         }

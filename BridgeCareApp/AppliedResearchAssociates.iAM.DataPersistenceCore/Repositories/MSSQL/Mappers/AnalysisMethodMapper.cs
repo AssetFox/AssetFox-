@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class AnalysisMethodMapper
     {
-        public static AnalysisMethodEntity ToEntity(this AnalysisMethod domain, Guid simulationId, Guid? attributeId) =>
+        public static AnalysisMethodEntity ToEntity(this AnalysisMethod domain, Guid simulationId, Guid? attributeId, BaseEntityProperties baseEntityProperties = null) =>
             new AnalysisMethodEntity
             {
                 Id = domain.Id,
@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldUseExtraFundsAcrossBudgets = domain.AllowFundingFromMultipleBudgets
             };
 
-        public static void FillSimulationAnalysisMethod(this AnalysisMethodEntity entity, Simulation simulation, string userCriteria)
+        public static void FillSimulationAnalysisMethod(this AnalysisMethodEntity entity, Simulation simulation, string userCriteria, BaseEntityProperties baseEntityProperties = null)
         {
             simulation.AnalysisMethod.Id = entity.Id;
             simulation.AnalysisMethod.Description = entity.Description;
@@ -70,8 +70,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 .ForEach(_ => _.CreateRemainingLifeLimit(simulation));
         }
 
-        public static AnalysisMethodEntity ToEntity(this AnalysisMethodDTO dto, Guid simulationId, Guid? attributeId = null) =>
-            new AnalysisMethodEntity
+        public static AnalysisMethodEntity ToEntity(this AnalysisMethodDTO dto, Guid simulationId, Guid? attributeId = null, BaseEntityProperties baseEntityProperties = null)
+        {
+            var entity = new AnalysisMethodEntity
             {
                 Id = dto.Id,
                 SimulationId = simulationId,
@@ -82,19 +83,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldDeteriorateDuringCashFlow = dto.ShouldDeteriorateDuringCashFlow,
                 ShouldUseExtraFundsAcrossBudgets = dto.ShouldUseExtraFundsAcrossBudgets,
                 AttributeId = attributeId,
-               
-            };
 
-        public static AnalysisMethodEntity ToEntityWithBenefit(this AnalysisMethodDTO dto, Guid simulationId, List<AttributeEntity> attributes, Guid? attributeId = null)
+            };            
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
+            
+
+        public static AnalysisMethodEntity ToEntityWithBenefit(this AnalysisMethodDTO dto, Guid simulationId, List<AttributeEntity> attributes, Guid? attributeId = null, BaseEntityProperties baseEntityProperties = null)
         {
-            var entity = dto.ToEntity(simulationId, attributeId);
+            var entity = dto.ToEntity(simulationId, attributeId, baseEntityProperties);
             var benefit = dto.Benefit;
             if (benefit != null&&benefit.Id!=Guid.Empty)
             {
                 var benefitAttribute = attributes.First(a => a.Name == benefit.Attribute);
-                var benefitEntity = benefit.ToEntity(dto.Id, benefitAttribute.Id);
+                var benefitEntity = benefit.ToEntity(dto.Id, benefitAttribute.Id, baseEntityProperties);
                 entity.Benefit = benefitEntity;                
             }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             return entity;
          }
 

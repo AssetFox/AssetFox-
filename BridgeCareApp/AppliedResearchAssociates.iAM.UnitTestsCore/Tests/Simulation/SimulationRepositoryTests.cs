@@ -142,6 +142,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 };
                 _testSimulationToClone = new SimulationEntity
                 {
+                    
                     Id = Guid.NewGuid(),
                     Name = SimulationName,
                     NumberOfYearsOfTreatmentOutlook = 1,

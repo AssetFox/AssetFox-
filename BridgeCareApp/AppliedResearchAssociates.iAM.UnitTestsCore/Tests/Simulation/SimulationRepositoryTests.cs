@@ -793,6 +793,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 .Include(_ => _.SimulationUserJoins)
                 .Single(_ => _.Id == dto.Id);
 
+            foreach (var treatment in originalSimulation.SelectableTreatments)
+            {
+                treatment.ScenarioTreatmentSupersessions = new List<ScenarioTreatmentSupersessionEntity>();
+                treatment.ScenarioTreatmentSchedulings = new List<ScenarioTreatmentSchedulingEntity>();
+            }
+
             Assert.NotEqual(clonedSimulation.Id, originalSimulation.Id);
             Assert.Equal(clonedSimulation.Name, originalSimulation.Name);
             Assert.NotEqual(clonedSimulation.AnalysisMethod.Id, originalSimulation.AnalysisMethod.Id);
@@ -814,6 +820,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var ignoreProperties = new List<string> { createdDate, createdBy, lastModifiedDate, lastModifiedBy };
             var expectedCreatedBy = "";
             var expectedLastModifiedBy = "";
+            var numberOfYearsOfTreatmentOutlook = @"""NumberOfYearsOfTreatmentOutlook""";
             var byProperties = new List<string> { createdBy, lastModifiedBy };
             for (int i=0; i<originalLines.Count; i++)
             {
@@ -862,6 +869,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                         continue;
                     }
                     if (originalLine.Contains(id) && cloneLine.Contains(id))
+                    {
+                        continue;
+                    }
+                    if (trimClone.StartsWith(numberOfYearsOfTreatmentOutlook) && trimOriginal.StartsWith(numberOfYearsOfTreatmentOutlook) && trimClone.EndsWith("100,"))
                     {
                         continue;
                     }

@@ -359,7 +359,7 @@ export default class CriteriaEditor extends Vue {
         if (hasValue(this.stateAttributes)) {
             this.setQueryBuilderRules();
             
-        }      
+        }     
     }
 
     @Watch('criteriaEditorData')
@@ -375,7 +375,6 @@ export default class CriteriaEditor extends Vue {
                 : '',
             this.addErrorNotificationAction,
         ) as Criteria;
-
         const parsedSubCriteria:
             | string[]
             | null = convertCriteriaObjectToCriteriaExpression(
@@ -400,6 +399,9 @@ export default class CriteriaEditor extends Vue {
 
             this.selectedConjunction = mainCriteria.logicalOperator;
 
+            this.andArray = this.criteriaEditorData.mergedCriteriaExpression ? this.criteriaEditorData.mergedCriteriaExpression.split(' AND ') : [];
+            this.orArray  = this.criteriaEditorData.mergedCriteriaExpression ? this.criteriaEditorData.mergedCriteriaExpression.split(' OR ') : [];
+
             this.setSubCriteriaClauses(mainCriteria);
         }
     }
@@ -419,7 +421,6 @@ export default class CriteriaEditor extends Vue {
     @Watch('selectedSubCriteriaClause')
     onSelectedClauseChanged() {
         this.resetSubCriteriaValidationProperties();
-
         if (
             hasValue(this.selectedSubCriteriaClause) &&
             hasValue(this.selectedSubCriteriaClause!.children)

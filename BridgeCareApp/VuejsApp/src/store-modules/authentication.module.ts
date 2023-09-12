@@ -92,12 +92,12 @@ const actions = {
             currentDateTime,
             'minutes',
         );
-
+        
         if (differenceInMinutes > 2) {
             return;
         }
 
-        dispatch('refreshTokens');
+       await dispatch('refreshTokens');
     },
 
     async refreshTokens({ commit }: any) {
@@ -107,7 +107,7 @@ const actions = {
             commit('refreshingMutator', true);
             const userTokens: UserTokens = JSON.parse(
                 localStorage.getItem('UserTokens') as string,
-            ) as UserTokens;
+            ) as UserTokens;            
             await AuthenticationService.refreshTokens(
                 userTokens.refresh_token,
             ).then((response: AxiosResponse) => {
@@ -149,7 +149,7 @@ const actions = {
                     localStorage.setItem('UserInfo', JSON.stringify(userInfo));
                     commit('usernameMutator', parseLDAP(userInfo.sub)[0]);
 
-                    const hasRole: boolean = userInfo.internalRoles != null && userInfo.internalRoles.length > 0;
+                    const hasRole: boolean = true; //we can set it to true as at least default role is assigned to user
 
                     commit('checkedForRoleMutator', hasRole);
                     commit('hasRoleMutator', hasRole);

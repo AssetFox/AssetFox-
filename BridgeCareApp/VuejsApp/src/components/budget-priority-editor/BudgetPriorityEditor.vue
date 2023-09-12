@@ -5,7 +5,8 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Select Budget Priority Library</v-subheader>
-                            <v-select :items='librarySelectItems' 
+                            <v-select id="BudgetPriorityEditor-library-vselect"
+                                :items='librarySelectItems' 
                                 append-icon=$vuetify.icons.ghd-down
                                 outline                           
                                 v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
@@ -26,7 +27,7 @@
                                 <span>Shared</span>
                             </template>
                         </v-badge>
-                        <v-btn @click='onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn id="BudgetPriorityEditor-shareLibrary-vbtn" @click='onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -35,10 +36,10 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout row align-end class="left-buttons-padding">
                         <v-spacer></v-spacer>
-                        <v-btn @click='showCreateBudgetPriorityDialog = true' outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        <v-btn id="BudgetPriorityEditor-addBudgetPriority-vbtn" @click='showCreateBudgetPriorityDialog = true' outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show='hasSelectedLibrary || hasScenario'>Add Budget Priority</v-btn>
                         
-                        <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(false)' outline
+                        <v-btn id="BudgetPriorityEditor-createNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(false)' outline
                             v-show='!hasScenario' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' > 
                             Create New Library
                         </v-btn>
@@ -61,7 +62,7 @@
                               v-model='selectedBudgetPriorityGridRows' >
                     <template slot='items' slot-scope='props'>
                         <td>
-                            <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
+                            <v-checkbox id="BudgetPriorityEditor-deleteBudgetPriority-vcheckbox" hide-details primary v-model='props.selected'></v-checkbox>
                         </td>
                         <td v-for='header in budgetPriorityGridHeaders'>
                             <div v-if="header.value === 'priorityLevel' || header.value === 'year'">
@@ -106,7 +107,7 @@
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn @click='onShowCriterionLibraryEditorDialog(props.item)' class='ghd-blue'
+                                    <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(props.item)' class='ghd-blue'
                                            icon>
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
@@ -158,7 +159,7 @@
                        v-show='hasScenario' :disabled='!hasUnsavedChanges' class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                <v-btn id="BudgetPriorityEditor-createAsNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                        :disabled='disableCrudButtons()'>
                     Create as New Library
                 </v-btn>
@@ -167,11 +168,11 @@
                        v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
-                <v-btn @click='onShowConfirmDeleteAlert' outline
+                <v-btn id="BudgetPriorityEditor-deleteLibrary-vbtn"  @click='onShowConfirmDeleteAlert' outline
                        v-show='!hasScenario' :disabled='!hasSelectedLibrary' class='ghd-blue ghd-button-text ghd-button'>
                     Delete Library
                 </v-btn>             
-                <v-btn @click='onUpsertBudgetPriorityLibrary'
+                <v-btn id="BudgetPriorityEditor-updateLibrary-vbtn" @click='onUpsertBudgetPriorityLibrary'
                        class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                        v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Update Library
@@ -282,7 +283,7 @@ export default class BudgetPriorityEditor extends Vue {
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @Mutation('budgetPriorityLibraryMutator') budgetPriorityLibraryMutator: any;
     @Mutation('selectedBudgetPriorityLibraryMutator') selectedBudgetPriorityLibraryMutator: any;
-
+    
     addedRows: BudgetPriority[] = [];
     updatedRowsMap:Map<string, [BudgetPriority, BudgetPriority]> = new Map<string, [BudgetPriority, BudgetPriority]>();//0: original value | 1: updated value
     deletionIds: string[] = [];
@@ -412,7 +413,6 @@ export default class BudgetPriorityEditor extends Vue {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
         }
-        
         this.updatedRowsMap.clear();
         this.deletionIds = [];
         this.addedRows = [];
@@ -480,6 +480,7 @@ export default class BudgetPriorityEditor extends Vue {
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+                    this.populateEmptyBudgetPercentagePairs(this.currentPage);
                 }
             });
         else if(this.hasSelectedLibrary)
@@ -655,7 +656,7 @@ export default class BudgetPriorityEditor extends Vue {
                 }
 
                 this.budgetPriorityLibraryMutator(budgetPriorityLibrary);
-                this.selectedBudgetPriorityLibraryMutator(budgetPriorityLibrary.id);
+                this.selectedBudgetPriorityLibraryMutator(budgetPriorityLibrary.id);                
                 this.addSuccessNotificationAction({message:'Added budget priority library'})
             })
         }
@@ -755,6 +756,7 @@ export default class BudgetPriorityEditor extends Vue {
                 this.librarySelectItemValue = null;
                 this.addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
                 this.currentPage = sortByProperty("priorityLevel", this.currentPage);
+                this.onPaginationChanged();
             }           
         });
     }
@@ -782,7 +784,7 @@ export default class BudgetPriorityEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()               
                 this.budgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary);
-                this.selectedBudgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary.id);
+                this.selectedBudgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary.id);                
                 this.addSuccessNotificationAction({message: "Updated budget priority library",});
             }
         });
@@ -985,7 +987,13 @@ export default class BudgetPriorityEditor extends Vue {
         this.parentLibraryId = foundLibrary.id;
         this.parentLibraryName = foundLibrary.name;
     }
-
+    populateEmptyBudgetPercentagePairs(budgetPriorites: BudgetPriority[]) {
+        budgetPriorites.forEach(item => {
+            if (item.budgetPercentagePairs.length === 0) {
+                item.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
+            }
+        });
+    }
     initializePages(){
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
         const request: PagingRequest<BudgetPriority>= {
@@ -1010,6 +1018,8 @@ export default class BudgetPriorityEditor extends Vue {
                     this.currentPage = sortByProperty("priorityLevel", data.items);
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
+
+                    this.populateEmptyBudgetPercentagePairs(this.currentPage);
                 }
                 this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
                 this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";

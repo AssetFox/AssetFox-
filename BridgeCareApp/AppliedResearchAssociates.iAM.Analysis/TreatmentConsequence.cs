@@ -3,36 +3,35 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.Validation;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public class TreatmentConsequence : WeakEntity, IValidator
 {
-    public class TreatmentConsequence : WeakEntity, IValidator
+    public Attribute Attribute { get => Change.Attribute; set => Change.Attribute = value; }
+
+    public AttributeValueChange Change { get; } = new AttributeValueChange();
+
+    public virtual ValidatorBag Subvalidators => new ValidatorBag { Change };
+
+    public virtual ValidationResultBag GetDirectValidationResults()
     {
-        public Attribute Attribute { get => Change.Attribute; set => Change.Attribute = value; }
+        var results = new ValidationResultBag();
 
-        public AttributeValueChange Change { get; } = new AttributeValueChange();
-
-        public virtual ValidatorBag Subvalidators => new ValidatorBag { Change };
-
-        public virtual ValidationResultBag GetDirectValidationResults()
+        if (Attribute == null)
         {
-            var results = new ValidationResultBag();
-
-            if (Attribute == null)
-            {
-                results.Add(ValidationStatus.Error, "Attribute is unset.", this, nameof(Attribute));
-            }
-
-            return results;
+            results.Add(ValidationStatus.Error, "Attribute is unset.", this, nameof(Attribute));
         }
 
-        public string ShortDescription => nameof(TreatmentConsequence);
+        return results;
+    }
 
-        internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(AssetContext scope, Treatment treatment)
-        {
-            var changeApplicator = Change.GetApplicator(scope);
-            return changeApplicator is null
-                ? Array.Empty<ChangeApplicator>()
-                : (new[] { changeApplicator });
-        }
+    public string ShortDescription => nameof(TreatmentConsequence);
+
+    internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(AssetContext scope, Treatment treatment)
+    {
+        var changeApplicator = Change.GetApplicator(scope);
+        return changeApplicator is null
+            ? Array.Empty<ChangeApplicator>()
+            : (new[] { changeApplicator });
     }
 }

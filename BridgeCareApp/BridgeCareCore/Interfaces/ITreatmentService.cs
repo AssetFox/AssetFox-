@@ -16,6 +16,14 @@ namespace BridgeCareCore.Interfaces
             Guid treatmentLibraryId,
             ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
 
+        void ImportLibraryTreatmentsFileSingle(
+            Guid treatmentLibraryId,
+            ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
+
+        void ImportScenarioTreatmentsFileSingle(
+           Guid treatmentLibraryId,
+           ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
+
         ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(
             Guid simulationId,
             ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);

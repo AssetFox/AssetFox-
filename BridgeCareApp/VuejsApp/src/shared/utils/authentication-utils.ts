@@ -7,7 +7,7 @@ import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 const isAuthenticatedEsecUser = () => {
     return store
         .dispatch('checkBrowserTokens')
-        .then(() =>
+        .then(() => 
             store.dispatch('getUserInfo').then(() =>
                 store.dispatch('getUserCriteriaFilter').then(() => {
                     // @ts-ignore
@@ -17,17 +17,17 @@ const isAuthenticatedEsecUser = () => {
                         throw new Error('Failed to authenticate');
                     }
                 })
-               ),
+            ),
         )
         .catch((error: any) => {
             store
-                .dispatch('addErrorNotification', {
-                    message: 'Authentication Error.',
-                    longMessage: error,
-                })
-                .then(() => {
-                    return false;
-                });
+            .dispatch('addErrorNotification', {
+                message: 'Authentication Error.',
+                longMessage: error,
+            })
+            .then(() => {
+                return false;
+            });
         });
 };
 
@@ -68,7 +68,8 @@ export const isAuthenticatedUser = () => {
 const onLogout = () => {
     store.dispatch('logOut').then(() => {
         clearRefreshIntervalID(); 
-        if (window.location.host.toLowerCase().indexOf('penndot.gov') === -1) {
+        // @ts-ignore
+        if (window.location.host.toLowerCase().indexOf('penndot.gov') === -1 && store.state.authenticationModule.securityType === SecurityTypes.esec) {
             /*
              * In order to log out properly, the browser must visit the /iAM page of a penndot deployment, as iam-deploy.com cannot
              * modify browser cookies for penndot.gov. So, the current host is sent as part of the query to the penndot site

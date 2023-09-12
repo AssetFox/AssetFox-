@@ -104,7 +104,9 @@ export default class CriterionFilterEditorDialog extends Vue {
 
         var tempL : UserCriteriaFilter = {userId : this.dialogData.userId, 
                 userName: this.dialogData.userName, 
+                description: this.dialogData.description,
                 hasAccess: true, 
+                name: this.dialogData.name,
                 hasCriteria: true, 
                 criteria: result.criteria, 
                 criteriaId: this.dialogData.criteriaId}; 

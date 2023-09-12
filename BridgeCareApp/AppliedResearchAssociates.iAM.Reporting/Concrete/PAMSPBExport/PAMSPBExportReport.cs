@@ -30,9 +30,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
-            _reportHelper = new ReportHelper();
-            _treatmentTab = new TreatmentTab();
-            _masTab = new MASTab();
+            _reportHelper = new ReportHelper(_unitOfWork);
+            _treatmentTab = new TreatmentTab(_unitOfWork);
+            _masTab = new MASTab(_unitOfWork);
 
             // Check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -64,6 +64,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Suffix => throw new NotImplementedException();
+        
+        public string Criteria { get; set; }
+
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
@@ -76,6 +80,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Set simulation id
+            string simulationId = ReportHelper.GetSimulationId(parameters);
             if (!Guid.TryParse(parameters, out Guid _simulationId))
             {
                 Errors.Add("Provided simulation ID is not a GUID");

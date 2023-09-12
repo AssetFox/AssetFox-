@@ -4,17 +4,23 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
 public sealed class SelectableTreatment : Treatment
 {
-    public List<ConditionalTreatmentConsequence> Consequences { get; set; }
+    public List<ConditionalTreatmentConsequence> Consequences { get; init; } = new();
 
-    public List<CriterionEquationPair> Costs { get; set; }
+    public List<CriterionEquationPair> Costs { get; init; } = new();
 
-    public List<string> FeasibilityCriterionExpressions { get; set; }
+    public List<string> FeasibilityCriterionExpressions { get; init; } = new();
 
-    public List<string> NamesOfUsableBudgets { get; set; }
+    public bool ForCommittedProjectsOnly { get; set; }
 
-    public List<PerformanceCurveAdjustmentFactor> PerformanceCurveAdjustmentFactors { get; set; }
+    public List<string> NamesOfUsableBudgets { get; init; } = new();
 
-    public List<TreatmentScheduling> Schedulings { get; set; }
+    public List<PerformanceCurveAdjustmentFactor> PerformanceCurveAdjustmentFactors { get; init; } = new();
 
-    public List<TreatmentSupersession> Supersessions { get; set; }
+    public List<TreatmentScheduling> Schedulings { get; init; } = new();
+
+    public int ShadowForAnyTreatment { get; set; }
+
+    public int ShadowForSameTreatment { get; set; }
+
+    public List<TreatmentSupersession> Supersessions { get; init; } = new();
 }

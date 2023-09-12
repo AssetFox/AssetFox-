@@ -29,17 +29,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             SimulationOutput reportOutputData,
             List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
-            IReadOnlyCollection<SelectableTreatment> selectableTreatments)
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments,
+            ICollection<CommittedProject> committedProjects)
         {
             var workSummaryByBudgetModels = CreateWorkSummaryByBudgetModels(reportOutputData);
             var committedTreatments = new HashSet<string>();
 
             SetupBudgetModelsAndCommittedTreatments(reportOutputData, selectableTreatments, workSummaryByBudgetModels, committedTreatments);
 
-            var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
+            var simulationTreatments = new List<(string Name, AssetCategories AssetType, TreatmentCategory Category)>();
             foreach (var item in selectableTreatments)
             {
-                simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
+                simulationTreatments.Add((item.Name, (AssetCategories)item.AssetCategory, item.Category));
             }
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
 
@@ -112,11 +113,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     costAndLengthPerTreatmentPerYear,
                     costAndLengthPerTreatmentGroupPerYear, // We only care about cost here
                     simulationTreatments, // This should be filtered by budget/year; do we already have this by this point?
-                    workTypeTotals);
+                    workTypeTotals,
+                    committedProjects);
 
                 // Finally, advance for next budget label
                 currentCell.Row++;
             }
+            worksheet.Cells.AutoFitColumns();
         }
 
         private static void SetupBudgetModelsAndCommittedTreatments(SimulationOutput reportOutputData, IReadOnlyCollection<SelectableTreatment> selectableTreatments, List<WorkSummaryByBudgetModel> workSummaryByBudgetModels, HashSet<string> committedTreatments)
@@ -166,7 +169,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                 Amount = budgetAmount,
                                 //costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
                                 TreatmentCategory = treatmentData.Category,
-                                AssetType = treatmentData.AssetCategory,
+                                AssetType = (AssetCategories)treatmentData.AssetCategory,
                                 SurfaceId = (int)section.ValuePerNumericAttribute["SURFACEID"]
                             });
                         }

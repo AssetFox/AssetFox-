@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public const string ActionType = "ACTIONTYPE";
         public const string AdtTotal = "ADTTOTAL";
         public const string Age = "AGE";
+        public const string BrKey = "BRKEY_";
         public const string CulvDurationN = "CULV_DURATION_N";
         public const string CulvSeeded = "CULV_SEEDED";
         public const string DeckDurationN = "DECK_DURATION_N";

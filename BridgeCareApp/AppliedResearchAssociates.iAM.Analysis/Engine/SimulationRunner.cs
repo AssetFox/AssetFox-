@@ -175,9 +175,11 @@ public sealed class SimulationRunner
             var logMessage = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
             Send(logMessage);
         }
+
+        var rollForwardEvents = new ConcurrentBag<RollForwardEventDetail>();
         InParallel(AssetContexts, context =>
         {
-            context.RollForward();
+            context.RollForward(rollForwardEvents);
             context.Asset.HistoryProvider.ClearHistory();
         });
 
@@ -199,19 +201,10 @@ public sealed class SimulationRunner
         Simulation.ClearResults();
 
         SimulationOutput output = new();
+        output.RollForwardEvents.AddRange(rollForwardEvents.OrderBy(e => e.Year).ThenBy(e => e.AssetId));
+
         output.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
         output.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
-
-        output.AssetTreatmentCategories = new();
-        foreach (var assetContext in AssetContexts)
-        {
-            var committedProject = Simulation.CommittedProjects.FirstOrDefault(c => c.Asset.Id == assetContext.Asset.Id);
-            if (committedProject != null)
-            {
-                var assetTreatmentCategoryDetail = new AssetTreatmentCategoryDetail(committedProject.Asset.Id, committedProject.Asset.AssetName, committedProject.treatmentCategory);
-                output.AssetTreatmentCategories.Add(assetTreatmentCategoryDetail);
-            }
-        }
 
         Simulation.ResultsOnDisk.Initialize(output);
         output = null;
@@ -427,22 +420,7 @@ public sealed class SimulationRunner
             }
             else
             {
-                context.FixCalculatedFieldValuesWithPreDeteriorationTiming();
-
-                if (Simulation.ShouldPreapplyPassiveTreatment)
-                {
-                    context.FixCalculatedFieldValuesWithoutPreDeteriorationTiming();
-                }
-
-                context.ApplyPerformanceCurves();
-
-                if (Simulation.ShouldPreapplyPassiveTreatment)
-                {
-                    context.PreapplyPassiveTreatment();
-                    context.UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming();
-                }
-
-                context.FixCalculatedFieldValuesWithPostDeteriorationTiming();
+                context.PrepareForTreatment();
 
                 if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                 {

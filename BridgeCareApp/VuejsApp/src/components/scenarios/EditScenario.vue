@@ -5,7 +5,7 @@
                 class="mx-auto ghd-sidebar-scenario"
                 height="100%"
                 elevation="0"
-                style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #999999;"
+                style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border: 1px solid #999999;"
             >
                 <v-list 
                     id = "EditScenario-navigation-vList"
@@ -30,6 +30,7 @@
                                     <AnalysisMethodSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Analysis Method'"/>  
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
                                     <CommittedProjectSvg style="height: 32px; width: 24px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
+                                    <ReportsSvg style="height: 38px; width: 30px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-content>
@@ -102,6 +103,7 @@ import TargetConditionGoalSvg from '@/shared/icons/TargetConditionGoalSvg.vue';
 import TreatmentSvg from '@/shared/icons/TreatmentSvg.vue';
 import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
 import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
+import ReportsSvg from '@/shared/icons/ReportsSvg.vue';
 
 @Component({
     components: {
@@ -117,7 +119,8 @@ import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
         BudgetPrioritySvg,
         AnalysisMethodSvg,
         CalculatedAttributeSvg,
-        CommittedProjectSvg
+        CommittedProjectSvg,
+        ReportsSvg
     },
 })
 export default class EditScenario extends Vue {
@@ -178,7 +181,7 @@ export default class EditScenario extends Vue {
         },
         {
             tabName: 'Budget Priority',
-            tabIcon: 'fas fa-copy',
+            tabIcon: 'fas fa-balance-scale',
             navigation: {
                 path: '/BudgetPriorityEditor/Scenario/',
             },
@@ -216,6 +219,13 @@ export default class EditScenario extends Vue {
             tabIcon: 'fas fa-clipboard',
             navigation: {
                 path: '/CommittedProjectsEditor/Scenario/',
+            },
+        },
+        {
+            tabName: 'Reports & Outputs',
+            tabIcon: 'fas fa-clipboard,',
+            navigation: {
+                path: '/ReportsAndOutputs/Scenario/',
             },
         },
     ];

@@ -10,7 +10,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             string reportName,
             DataPersistenceCore.UnitOfWork.UnitOfDataPersistenceWork _dataRepository,
             DTOs.ReportIndexDTO results,
-            Hubs.Interfaces.IHubService _hubService);
+            Hubs.Interfaces.IHubService _hubService,
+            string suffix = "");
         IList<IReportFactory> ReportList { get; }
     }
 }

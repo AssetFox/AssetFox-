@@ -24,8 +24,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ScenarioBudgetEntity ScenarioBudget { get; set; }
 
-        public virtual ICollection<CommittedProjectConsequenceEntity> CommittedProjectConsequences { get; set; }
-
         public virtual CommittedProjectLocationEntity CommittedProjectLocation { get; set; }
     }
 }

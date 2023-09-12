@@ -29,14 +29,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return factory;
         }
 
-        public IReport GetReport(string reportName, DataPersistenceCore.UnitOfWork.UnitOfDataPersistenceWork uow, DTOs.ReportIndexDTO results, Hubs.Interfaces.IHubService hubService)
+        public IReport GetReport(string reportName, DataPersistenceCore.UnitOfWork.UnitOfDataPersistenceWork uow, DTOs.ReportIndexDTO results, Hubs.Interfaces.IHubService hubService, string suffix = "")
         {
             var factory = GetReportFactory(reportName);
             if (factory == null)
             {
                 return new FailureReport();
             }
-            var report = factory.Create(uow, results, hubService);
+            var report = factory.Create(uow, results, hubService, suffix);
             return report;
         }
         public bool CanGenerateReport(string type) {

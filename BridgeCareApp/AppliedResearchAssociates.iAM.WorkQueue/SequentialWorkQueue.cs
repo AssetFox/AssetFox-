@@ -40,9 +40,9 @@ public class SequentialWorkQueue<T>
         }
     }
 
-    public bool Cancel(Guid workId)
+    public bool Cancel(string workId)
     {
-        IQueuedWorkHandle<T>? queuedWorkHandle = IncompleteElements.Values.SingleOrDefault(_ => Guid.Parse(_.WorkId) == workId);
+        IQueuedWorkHandle<T>? queuedWorkHandle = IncompleteElements.Values.SingleOrDefault(_ => _.WorkId == workId);
 
         if (queuedWorkHandle != null)
         {
@@ -137,6 +137,7 @@ public class SequentialWorkQueue<T>
                 if (!WorkCompletion.IsFaulted)
                 {
                     WorkCompletionSource.SetResult();
+                    WorkSpec.OnCompletion(serviceProvider);
                 }
                 else
                 {
@@ -150,7 +151,7 @@ public class SequentialWorkQueue<T>
                     var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
                     if (isCanceled)
                         _hubService.SendRealTimeMessage(WorkSpec.UserId, HubConstant.BroadcastTaskCompleted, $"Work queue operation '{WorkSpec.WorkDescription}' canceled");
-                    _hubService.SendRealTimeMessage(WorkSpec.UserId, HubConstant.BroadcastWorkQueueUpdate, WorkSpec.WorkId);
+                    WorkSpec.OnUpdate(serviceProvider);
                 }             
             }
             else
@@ -158,6 +159,8 @@ public class SequentialWorkQueue<T>
                 WorkCompletionSource.SetCanceled();
             }
         }
+
+        
 
         public void RemoveFromQueue(bool setCanceled)
         {

@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     {
         public string Name => "Test Report File";
 
-        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService, string suffix = "")
         {
             return new TestReportFile(uow, Name, results);
         }
@@ -106,6 +106,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public string Status => "Report finished running";
 
+        public string Criteria { get; set; }
+
+        public string Suffix => throw new NotImplementedException();
+
         public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }
 
@@ -113,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     {
         public string Name => "Test HTML File";
 
-        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService, string suffix = "")
         {
             return new TestHTMLFile(uow, Name, results);
         }
@@ -157,6 +161,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public string Status => "Report finished running";
 
+        public string Criteria { get ; set ; }
+
+        public string Suffix => throw new NotImplementedException();
+
         public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }
 
@@ -164,7 +172,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     {
         public string Name => "Bad Report";
 
-        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService, string suffix = "")
         {
             var report = new TestBadReport(uow);
             return report;
@@ -197,6 +205,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public bool IsComplete => true;
 
         public string Status => "Report finished running";
+
+        public string Criteria { get; set; }
+
+        public string Suffix => throw new NotImplementedException();
 
         public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }

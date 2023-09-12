@@ -1474,7 +1474,18 @@ export default class Scenarios extends Vue {
             },
         });
     }
-
+    onNavigateToReportsView(localScenario: Scenario) {
+        this.selectScenarioAction({scenarioId: localScenario.id });
+        this.$router.push({
+            path: '/ReportsAndOutputs/Scenario/',
+            query: {
+                scenarioId: localScenario.id,
+                networkId: localScenario.networkId,
+                scenarioName: localScenario.name,
+                networkName: localScenario.networkName,
+            }
+        });
+    }
     onShowShareScenarioDialog(scenario: Scenario) {
         this.shareScenarioDialogData = {
             showDialog: true,
@@ -1804,7 +1815,7 @@ export default class Scenarios extends Vue {
                 }
                 break;
             case this.availableActions.reports:
-                this.onShowReportsDownloaderDialog(scenario);
+                this.onNavigateToReportsView(scenario);
                 break;
             case this.availableActions.settings:
                 if (this.canModifySharedScenario(scenarioUsers) || isOwner) {

@@ -300,6 +300,7 @@ export default class EditAnalysisMethod extends Vue {
             vm.selectedScenarioId = to.query.scenarioId;
             vm.simulationName = to.query.simulationName;
             vm.networkName = to.query.networkName;
+            console.log("check it!");
             if (vm.selectedScenarioId === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
                 vm.addErrorNotificationAction({

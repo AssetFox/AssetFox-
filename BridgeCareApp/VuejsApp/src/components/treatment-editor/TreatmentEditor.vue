@@ -188,14 +188,14 @@
                                                 <v-card-text
                                                     class='card-tab-content'
                                                 >
-                                                    <PerformanceFactorTab
-                                                        :selectedTreatment='selectedTreatment'
-                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
-                                                        :scenarioId='loadedScenarioId'
+                                                    <ConsequencesTab
+                                                        :selectedTreatmentConsequences='selectedTreatment.consequences'
                                                         :rules='rules'
                                                         :callFromScenario='hasScenario'
                                                         :callFromLibrary='!hasScenario'
-                                                        @onModifyPerformanceFactor='modifySelectedTreatmentPerformanceFactor'
+                                                        @onAddConsequence='addSelectedTreatmentConsequence'
+                                                        @onModifyConsequence='modifySelectedTreatmentConsequence'
+                                                        @onRemoveConsequence='removeSelectedTreatmentConsequence'
                                                     />
                                                 </v-card-text>
                                             </v-card>
@@ -205,14 +205,14 @@
                                                 <v-card-text
                                                     class='card-tab-content'
                                                 >
-                                                    <ConsequencesTab
-                                                        :selectedTreatmentConsequences='selectedTreatment.consequences'
+                                                    <PerformanceFactorTab
+                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
+                                                        :selectedTreatment='selectedTreatment'
+                                                        :scenarioId='loadedScenarioId'
                                                         :rules='rules'
                                                         :callFromScenario='hasScenario'
                                                         :callFromLibrary='!hasScenario'
-                                                        @onAddConsequence='addSelectedTreatmentConsequence'
-                                                        @onModifyConsequence='modifySelectedTreatmentConsequence'
-                                                        @onRemoveConsequence='removeSelectedTreatmentConsequence'
+                                                        @onModifyPerformanceFactor='modifySelectedTreatmentPerformanceFactor'
                                                     />
                                                 </v-card-text>
                                             </v-card>
@@ -497,7 +497,7 @@ export default class TreatmentEditor extends Vue {
     selectedTreatment: Treatment = clone(emptyTreatment);
     selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     activeTab: number = 0;
-    treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Performance Factor', 'Consequences'];
+    treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences'];
     createTreatmentLibraryDialogData: CreateTreatmentLibraryDialogData = clone(
         emptyCreateTreatmentLibraryDialogData,
     );
@@ -565,7 +565,7 @@ export default class TreatmentEditor extends Vue {
                 vm.getSimpleScenarioSelectableTreatmentsAction(vm.selectedScenarioId);
                 vm.getTreatmentLibraryBySimulationIdAction(vm.selectedScenarioId);
                 vm.getScenarioPerformanceCurvesAction(vm.selectedScenarioId);
-                vm.treatmentTabs = [...vm.treatmentTabs, 'Budgets'];
+                vm.treatmentTabs = [...vm.treatmentTabs, 'Performance Factor', 'Budgets'];
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId, }).then(()=> {
                     vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
                         vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });   

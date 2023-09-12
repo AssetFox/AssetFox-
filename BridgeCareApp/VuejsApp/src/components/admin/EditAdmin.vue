@@ -40,10 +40,11 @@
     </v-layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { any, clone, isNil, propEq } from 'ramda';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
@@ -51,16 +52,14 @@ import AttributesSvg from '@/shared/icons/AttributesSvg.vue';
 import DataSourceSvg from '@/shared/icons/DataSourceSvg.vue';
 import NetworksSvg from '@/shared/icons/NetworksSvg.vue';
 
-@Component({
-    components: { AttributesSvg, DataSourceSvg, NetworksSvg}
-})
-export default class EditAdmin extends Vue {
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.authenticationModule.userId) userId: string;
+import { createDecipheriv } from 'crypto';
 
-    networkId: string = getBlankGuid();
-    networkName: string = '';
-    navigationTabs: NavigationTab[] = [
+    let store = useStore();
+    let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
+    let userID = ref<string>(store.state.authenticationModule.userID);
+    let networkId: string = getBlankGuid();
+    let networkName: string = '';
+    let navigationTabs: NavigationTab[] = [
         {
             tabName: 'Security',
             tabIcon: "",
@@ -83,10 +82,10 @@ export default class EditAdmin extends Vue {
             },
         },
     ];
-    
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-                vm.navigationTabs = vm.navigationTabs.map(
+    created();
+    function created(){
+        (() => {
+                navigationTabs = navigationTabs.map(
                     (navTab: NavigationTab) => {
                         const navigationTab = {
                             ...navTab,
@@ -100,7 +99,7 @@ export default class EditAdmin extends Vue {
                         if (navigationTab.tabName === 'DataSource' 
                             || navigationTab.tabName === 'Networks' 
                             || navigationTab.tabName === 'Attributes') {
-                            navigationTab['visible'] = vm.hasAdminAccess;
+                            navigationTab['visible'] =hasAdminAccess.value;
                         }
 
                         return navigationTab;
@@ -113,19 +112,16 @@ export default class EditAdmin extends Vue {
                 const hasChildPath = any(
                     (navigationTab: NavigationTab) =>
                         href.indexOf(navigationTab.navigation.path) !== -1,
-                    vm.navigationTabs,
+                    navigationTabs,
                 );
         });
     }
-
-
-    visibleNavigationTabs() {
-        return this.navigationTabs.filter(
+     function visibleNavigationTabs() {
+        return navigationTabs.filter(
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,
         );
     }
-}
 </script>
 
 <style>

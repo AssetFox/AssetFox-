@@ -72,7 +72,7 @@ namespace BridgeCareCore.Services
             // Handle an incomplete run without errors
             if (!report.IsComplete)
             {
-                throw new Exception(($"{reportName} on simulation '{scenarioName}' ran but never completed");
+                throw new Exception($"{reportName} on simulation '{scenarioName}' ran but never completed");
             }
 
             //create report index repository        

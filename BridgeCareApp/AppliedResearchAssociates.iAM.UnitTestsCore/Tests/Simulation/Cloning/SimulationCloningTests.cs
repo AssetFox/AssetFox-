@@ -580,7 +580,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
 
             var clonedProjects = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(clonedSimulationId);
             var clonedProject = clonedProjects.Single();
-            ObjectAssertions.EquivalentExcluding(sectionCommittedProject, clonedProject, x => x.SimulationId, cp => cp.ScenarioBudgetId, cp => cp.Consequences, cp => cp.Id, cp => cp.LocationKeys);
+            ObjectAssertions.EquivalentExcluding(sectionCommittedProject, clonedProject, x => x.SimulationId, cp => cp.ScenarioBudgetId, cp => cp.Id, cp => cp.LocationKeys);
             Assert.NotEqual(sectionCommittedProjectId, clonedProject.Id);
             var clonedBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(cloningResult.Simulation.Id);
             var clonedBudget = clonedBudgets.Single();

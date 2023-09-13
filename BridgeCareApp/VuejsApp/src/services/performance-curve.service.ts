@@ -21,6 +21,11 @@ export default class PerformanceCurveService {
         );
     }
 
+    static getPerformanceLibraryModifiedDate (libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.PerformanceCurve}/GetPerformanceLibraryModifiedDate/${libraryId}`)
+    }
+
+
     static GetLibraryPerformanceCurvePage(library: string, data:PagingRequest<PerformanceCurve>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.PerformanceCurve}/GetLibraryPerformanceCurvePage/${library}`, data

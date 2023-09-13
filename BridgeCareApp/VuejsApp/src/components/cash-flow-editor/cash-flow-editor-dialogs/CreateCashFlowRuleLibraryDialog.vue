@@ -4,7 +4,9 @@
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-layout justify-space-between align-center>
           <div class="ghd-control-dialog-header">New Cash Flow Rule Library</div>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn @click="onSubmit(false)" flat 
+              id="CreateCashFlowRuleLibraryDialog-Close-vbtn"
+              class="ghd-close-button">
               X
             </v-btn>
         </v-layout>
@@ -12,22 +14,28 @@
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-layout column>
           <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
-          <v-text-field outline v-model="newCashFlowRuleLibrary.name"
+          <v-text-field outline 
+                        id="CreateCashFlowRuleLibraryDialog-Name-vTextField"
+                        v-model="newCashFlowRuleLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>
           <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
           <v-textarea no-resize outline rows="3"
+                      id="CreateCashFlowRuleLibraryDialog-Description-vtextarea"
                       v-model="newCashFlowRuleLibrary.description"
                       class="ghd-text-field-border"/>
         </v-layout>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-space-between row>
-          <v-btn @click="onSubmit(false)" outline class='ghd-blue ghd-button-text ghd-button'>
+          <v-btn @click="onSubmit(false)" outline 
+                 id="CreateCashFlowRuleLibraryDialog-Cancel-vbtn"
+                 class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn>
           <v-btn :disabled="newCashFlowRuleLibrary.name === ''" @click="onSubmit(true)"
-                 outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                 outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                 id="CreateCashFlowRuleLibraryDialog-Create-vbtn">
             Submit
           </v-btn>        
         </v-layout>

@@ -44,6 +44,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertOrDeleteUsers(Guid budgetLibraryId, IList<LibraryUserDTO> libraryUsers);
         List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId);
 
+        DateTime GetLibraryModifiedDate(Guid budgetLibraryId);
+
         List<int> GetBudgetYearsBySimulationId(Guid simulationId);
         Dictionary<string, string> GetCriteriaPerBudgetNameForSimulation(Guid simulationId);
         Dictionary<string, string> GetCriteriaPerBudgetNameForBudgetLibrary(Guid budgetLibraryId);

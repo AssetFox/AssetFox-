@@ -49,7 +49,7 @@
         <v-flex xs6 class="ghd-constant-header" style="margin-bottom: 15px">
             <v-layout v-if='hasSelectedLibrary && !hasScenario' align-center>
                 <div class="header-text-content owner-padding">
-                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                 </div>
                 <v-divider class="owner-shared-divider" inset vertical></v-divider>
                 <v-badge v-show="isShared" style="padding: 10px">
@@ -406,6 +406,7 @@ export default class CalculatedAttributeEditor extends Vue {
     initializing: boolean = true;
     uuidNIL: string = getBlankGuid();
     isShared: boolean = false;
+    modifiedDate: string;
 
     shareCalculatedAttributeLibraryDialogData: ShareCalculatedAttributeLibraryDialogData = clone(emptyShareCalculatedAttributeLibraryDialogData);
 
@@ -534,7 +535,7 @@ export default class CalculatedAttributeEditor extends Vue {
 
     // Watchers
     @Watch('pagination')
-    onPaginationChanged() {
+    async onPaginationChanged() {
         if(this.initializing)
             return;
         this.checkHasUnsavedChanges();
@@ -558,7 +559,7 @@ export default class CalculatedAttributeEditor extends Vue {
             attributeId: this.stateCalculatedAttributes.find(_ => _.name === this.selectedAttribute.attribute)!.id
         };
         if((!this.hasSelectedLibrary && this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
-            CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage(this.selectedScenarioId, request).then(response => {
+           await CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
                     this.currentPage.equations = data.items;
@@ -571,7 +572,16 @@ export default class CalculatedAttributeEditor extends Vue {
             });
         }            
         else if(this.hasSelectedLibrary)
-             CalculatedAttributeService.getLibraryCalculatedAttributePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+        this.initializing = true;
+        await CalculatedAttributeService.getCalculatedLibraryModifiedDate(this.selectedCalculatedAttributeLibrary.id).then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.modifiedDate = data.slice(0, 10);
+                   }
+             });
+
+             await CalculatedAttributeService.getLibraryCalculatedAttributePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
                     this.currentPage.equations = data.items;

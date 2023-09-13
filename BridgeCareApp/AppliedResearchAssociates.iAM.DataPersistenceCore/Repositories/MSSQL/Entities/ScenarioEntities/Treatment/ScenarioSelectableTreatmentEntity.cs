@@ -30,6 +30,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual SimulationEntity Simulation { get; set; }
 
+        public bool IsUnselectable { get; set; }
+
         public virtual CriterionLibraryScenarioSelectableTreatmentEntity CriterionLibraryScenarioSelectableTreatmentJoin { get; set; }
         public virtual ICollection<ScenarioSelectableTreatmentScenarioBudgetEntity> ScenarioSelectableTreatmentScenarioBudgetJoins { get; set; }
         public virtual ICollection<ScenarioConditionalTreatmentConsequenceEntity> ScenarioTreatmentConsequences { get; set; }

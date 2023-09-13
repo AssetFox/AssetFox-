@@ -98,7 +98,10 @@
          */
         @Watch('inventoryItems')
         async onInventoryItemsChanged() {
+            console.log("before keyattribute");
             this.keyAttributeValues = await this.setupSelectLists();
+            console.log(this.keyAttributeValues);
+            console.log("after keyattribute");
         }
 
         @Watch('staticHTMLForInventory')
@@ -185,9 +188,16 @@
                 inventoryDetails: this.inventoryDetails
             };
             let toReturn: string[][] = [];
+            console.log("here");
             let result = await this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])  
-            if(result.keys.length > 0){
+            console.log(result);
+            if(result.keys.length > 0 && this.reportType === 'P'){
                 for(let i = 0; i < this.inventoryDetails.length; i++){
+                    toReturn[i] = clone(result.keys[i]);
+                }
+            }
+            else{
+                for(let i = 0; i < 1; i++){
                     toReturn[i] = clone(result.keys[i]);
                 }
             }
@@ -206,13 +216,13 @@
                                 const keys: any[][] = []
                                 inventoryItems.forEach((item: InventoryItem, index: number) => {
                                     if (index === 0) { 
-                                        for(let i = 0; i < data.inventoryDetails.length; i++){
+                                        for(let i = 0; i < 1; i++){
                                             keys.push([])
                                             keys[i].push({header: `${data.inventoryDetails[i]}'s`})
                                         }
-                                    }                              
+                                    }                           
                                     
-                                    for(let i = 0; i < data.inventoryDetails.length; i++){
+                                    for(let i = 0; i < 1; i++){
                                         keys[i].push({
                                             identifier: item.keyProperties[i],
                                             group: data.inventoryDetails[i]

@@ -106,7 +106,10 @@ namespace BridgeCareCore.Controllers
             List<InventoryItem> inventoryItems = new List<InventoryItem>();
             foreach(var assetKeyDataValue in  assetKeyData.Values)
             {
-                inventoryItems.Add(new InventoryItem { keyProperties = assetKeyDataValue });
+                //if (!inventoryItems.Contains(assetKeyDataValue))
+                //{
+                    inventoryItems.Add(new InventoryItem { keyProperties = assetKeyDataValue });
+                //}
             }
 
             return Ok(inventoryItems);

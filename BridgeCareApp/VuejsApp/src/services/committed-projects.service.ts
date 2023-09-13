@@ -10,6 +10,11 @@ export default class CommittedProjectsService {
             `${API.CommittedProject}/CommittedProjectTemplate/${networkId}`,
         );
     }
+    static getUploadedCommittedProjectTemplate(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.CommittedProject}/DownloadCommittedProjectTemplate`,
+        );
+    }
     static exportCommittedProjects(scenarioId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.CommittedProject}/ExportCommittedProjects/${scenarioId}`,
@@ -18,6 +23,17 @@ export default class CommittedProjectsService {
     static getCommittedProjects(scenarioId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.CommittedProject}/GetSectionCommittedProjects/${scenarioId}`,
+        );
+    }
+    static importCommittedProjectTemplate(file: File): AxiosPromise {
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        let formData = new FormData();
+        formData.append('file', file);
+        return coreAxiosInstance.post(
+            `${API.CommittedProject}/SetCommittedProjectTemplate`,
+            formData,
+            {headers: {'Content-Type': 'multipart/form-data'}},
         );
     }
     static getCommittedProjectsPage(scenarioId: string, data:PagingRequest<SectionCommittedProject>): AxiosPromise {

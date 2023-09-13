@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Common.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -39,11 +40,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public string Status => String.Empty;
 
         public string Suffix => throw new NotImplementedException();
+                
+        public string Criteria { get => null; set { } }
 
-        public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
+        public async Task Run(string errorMessage, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
-            _isComplete = false;
-            string errorMessage = parameters;
+            _isComplete = false;            
             _errorList.Add(errorMessage);
             _isComplete = true;
         }

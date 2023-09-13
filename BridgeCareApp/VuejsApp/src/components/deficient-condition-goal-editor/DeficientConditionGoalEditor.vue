@@ -6,6 +6,7 @@
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
                     <v-select
+                        id="DeficientConditionGoalEditor-librarySelect-vselect"
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
                         outline
@@ -27,7 +28,7 @@
                 
                 <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 11px; padding-left: 10px">
                     <div class="header-text-content owner-padding" style="padding-top: 7px;">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                     </div>
                     <v-divider class="owner-shared-divider" vertical
                         v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
@@ -37,7 +38,7 @@
                         <span>Shared</span>
                         </template>
                         </v-badge>
-                        <v-btn @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn id="DeficientConditionGoalEditor-shareLibrary-vbtn" @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                             v-show='!hasScenario'>
                             Share Library
                     </v-btn>
@@ -54,7 +55,7 @@
                         outline>
                         Add Deficient Condition Goal
                     </v-btn>
-                    <v-btn @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
+                    <v-btn id="DeficientConditionGoalEditor-createNewLibrary-vbtn" @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
                         outline>    
@@ -231,6 +232,7 @@
                     Cancel
                 </v-btn>
                 <v-btn
+                    id="DeficientConditionGoalEditor-deleteLibrary-vbtn"
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
@@ -239,6 +241,7 @@
                     Delete Library
                 </v-btn>    
                 <v-btn
+                    id="DeficientConditionGoalEditor-createAsNewLibrary-vbtn"
                     @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     :disabled="disableCrudButtons()"
@@ -253,6 +256,7 @@
                     Save
                 </v-btn>
                 <v-btn
+                    id="DeficientConditionGoalEditor-updateLibrary-vbtn"
                     @click="onUpsertDeficientConditionGoalLibrary"
                     class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"
@@ -404,6 +408,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     @Getter('getNumericAttributes') getNumericAttributesGetter: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
+    dateModified: string;
     selectedScenarioId: string = getBlankGuid();
     librarySelectItems: SelectItem[] = [];
     selectedDeficientConditionGoalLibrary: DeficientConditionGoalLibrary = clone(
@@ -643,7 +648,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     @Watch('pagination')
-    onPaginationChanged() {
+    async onPaginationChanged() {
         if(this.initializing)
             return;
         this.checkHasUnsavedChanges();
@@ -663,7 +668,7 @@ export default class DeficientConditionGoalEditor extends Vue {
             search: this.currentSearch
         };
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(this.selectedScenarioId, request).then(response => {
+            await DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<DeficientConditionGoal>;
                     this.currentPage = data.items;
@@ -672,7 +677,14 @@ export default class DeficientConditionGoalEditor extends Vue {
                 }
             });
         else if(this.hasSelectedLibrary)
-             DeficientConditionGoalService.getLibraryDeficientConditionGoalPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+            await DeficientConditionGoalService.getDeficientLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.dateModified = data.slice(0, 10);
+                   }
+             }),    
+             await DeficientConditionGoalService.getLibraryDeficientConditionGoalPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<DeficientConditionGoal>;
                     this.currentPage = data.items;

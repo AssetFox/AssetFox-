@@ -10,7 +10,6 @@ export interface BaseCommittedProject {
     cost: number;
     shadowForAnyTreatment: number;
     shadowForSameTreatment: number;
-    consequences: CommittedProjectConsequence[];
     locationKeys: { [key: string]: string; }; 
     category: TreatmentCategory
 }
@@ -49,7 +48,6 @@ export const emptySectionCommittedProject = {
     cost: 0,
     shadowForAnyTreatment: 0,
     shadowForSameTreatment: 0,
-    consequences: [],
     locationKeys: {},
     name: '',
     category: TreatmentCategory.other
@@ -64,7 +62,6 @@ export const emptyCommittedProjectConsequence ={
 }
 
 export interface CommittedProjectFillTreatmentReturnValues {
-    validTreatmentConsequences: CommittedProjectConsequence[];
     treatmentCost: number;
     treatmentCategory: TreatmentCategory;
 }

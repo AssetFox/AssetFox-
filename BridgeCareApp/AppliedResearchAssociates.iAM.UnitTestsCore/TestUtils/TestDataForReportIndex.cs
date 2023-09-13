@@ -111,6 +111,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public string Status => "Report finished running";
 
+        public string Criteria { get; set; }
+
         public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }
 
@@ -166,6 +168,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public string Status => "Report finished running";
 
+        public string Criteria { get ; set ; }
+
         public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }
 
@@ -210,6 +214,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public bool IsComplete => true;
 
         public string Status => "Report finished running";
+
+        public string Criteria { get; set; }
 
         public Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null) => throw new NotImplementedException();
     }

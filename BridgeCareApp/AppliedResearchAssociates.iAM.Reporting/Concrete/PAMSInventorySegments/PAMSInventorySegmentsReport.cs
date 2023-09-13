@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public List<string> Errors { get; private set; }
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
-
+        public string Criteria { get; set; }
         private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", Routenum = 0, Segment = 0 };
 
         private List<SegmentAttributeDatum> _sectionData;
@@ -89,7 +89,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             if (Errors.Count > 0) return; // Errors occured in the GetAsset method
 
-            var sectionIds = JsonConvert.DeserializeObject<PAMSParameters>(parameters);
+            var sectionIds = JsonConvert.DeserializeObject<PAMSParameters>(parameters);            
             _sectionData = GetAsset(sectionIds);
             if (Errors.Count > 0) return; // Errors occured in the GetAsset method
 

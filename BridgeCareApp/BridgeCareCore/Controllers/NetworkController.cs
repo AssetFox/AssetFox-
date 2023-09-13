@@ -155,14 +155,16 @@ namespace BridgeCareCore.Controllers
         [ClaimAuthorize("NetworkViewAccess")]
         public async Task<IActionResult> GetCompatibleNetworks(Guid networkId)
         {
-
+             
             try
             {
-                var attributesForOriginalNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
+                // var attributesForOriginalNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
                 var networks = await UnitOfWork.NetworkRepo.Networks();
                 var originalNetwork = networks.First(_ => _.Id == networkId);
                 var compatibleNetworks = new List<NetworkDTO>();
                 compatibleNetworks.Add(originalNetwork);
+
+            /* TODO: Support cross network cloning. Disabling check until implemented.
                 foreach (var network in networks)
                 {
                     if(network.Id == networkId)
@@ -171,12 +173,13 @@ namespace BridgeCareCore.Controllers
                         continue;
                     var attributesForNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(network.Id);
 
-                    if (attributesForOriginalNetwork.TrueForAll(_ => attributesForNetwork.Any(__ => _ == __))) {
-                        compatibleNetworks.Add(network);
+                        if (attributesForOriginalNetwork.TrueForAll(_ => attributesForNetwork.Any(__ => _ == __))) {
+                            compatibleNetworks.Add(network);
+                        }
+
                     }
-                    
-                }
-                
+            */
+
                 return Ok(compatibleNetworks);
 
             }

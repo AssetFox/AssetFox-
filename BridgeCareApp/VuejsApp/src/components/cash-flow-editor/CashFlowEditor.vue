@@ -7,6 +7,7 @@
                     <v-select
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
+                        id="CashFlowEditor-SelectLibrary-vselect"
                         outline
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -16,7 +17,7 @@
                 <v-flex xs4 class="ghd-constant-header">    
                     <v-layout row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 28px !important">
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content" style="padding-top: 7px !important">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
                         <v-divider class="owner-shared-divider" inset vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
@@ -41,6 +42,7 @@
                             Add Cash Flow Rule
                         </v-btn>
                         <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
+                            id="CashFlowEditor-addCashFlowLibrary-btn"
                             outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario">
                             Create New Library
@@ -183,6 +185,7 @@
                 v-show="hasSelectedLibrary || hasScenario">
                 <v-btn outline
                     @click="onDeleteCashFlowRuleLibrary"
+                    id="CashFlowEditor-deleteLibrary-btn"
                     flat class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission">
@@ -368,6 +371,7 @@ export default class CashFlowEditor extends Vue {
     trueLibrarySelectItemValue: string | null = ''
     librarySelectItemValueAllowedChanged: boolean = true;
     librarySelectItemValue: string | null = null;
+    dateModified: string;
     
     hasSelectedLibrary: boolean = false;
     selectedScenarioId: string = getBlankGuid();
@@ -598,7 +602,7 @@ export default class CashFlowEditor extends Vue {
         } 
     }
     @Watch('pagination')
-    onPaginationChanged() {
+    async onPaginationChanged() {
         if(this.initializing)
             return;
         this.checkHasUnsavedChanges();
@@ -618,7 +622,7 @@ export default class CashFlowEditor extends Vue {
             search: this.currentSearch
         };
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            CashFlowService.getScenarioCashFlowRulePage(this.selectedScenarioId, request).then(response => {
+            await CashFlowService.getScenarioCashFlowRulePage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<CashFlowRule>;
                     this.currentPage = data.items;
@@ -627,7 +631,15 @@ export default class CashFlowEditor extends Vue {
                 }
             });
         else if(this.hasSelectedLibrary)
-             CashFlowService.getLibraryCashFlowRulePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+             await CashFlowService.getCashLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.dateModified = data.slice(0, 10);
+                   }
+             }),
+            
+             await CashFlowService.getLibraryCashFlowRulePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<CashFlowRule>;
                     this.currentPage = data.items;

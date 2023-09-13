@@ -85,7 +85,7 @@
                     </template>
                 </v-data-table>
             </div>
-            <v-btn @click="onAddCost" class="ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border" >Add Cost</v-btn>
+            <v-btn @click="onAddCost" class="ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border" id="TreatmentCostsTab-AddCostBtn" >Add Cost</v-btn>
             <v-chip class="ma-2 ara-blue" @click="showExampleFunction">
                 Equation - Use Max(,) to enforce minimum costs
             </v-chip>            

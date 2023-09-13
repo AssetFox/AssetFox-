@@ -399,7 +399,7 @@ import { storeKey, useStore } from 'vuex';
     let categories: string[] = [];
     let scenarioId: string = getBlankGuid();
     let networkId: string = getBlankGuid();
-    let rules: InputValidationRules = rules;
+    let inputRules: InputValidationRules = rules;
     let network: Network = clone(emptyNetwork);
 
     let addedRows: SectionCommittedProject[] = [];
@@ -756,80 +756,80 @@ import { storeKey, useStore } from 'vuex';
             this.selectedCommittedProject = this.selectedCpItems[0].id;
     }
 
-    @Watch('projectPagination')
-    async onPaginationChanged() {
-        if(this.isRunning)
+    watch(projectPagination, () => onPaginationChanged)
+    async function onPaginationChanged() {
+        if(isRunning)
             return;
-        this.isRunning = true
-        this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.projectPagination;
+        isRunning = true
+        checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = projectPagination;
 
         const request: PagingRequest<SectionCommittedProject>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
                 libraryId: null,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                rowsForDeletion: this.deletionIds,
-                addedRows: this.addedRows,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: deletionIds,
+                addedRows: addedRows,
                 isModified: false
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
-            search: this.currentSearch
+            search: currentSearch
         };
-        if(this.scenarioId !== this.uuidNIL)
-            CommittedProjectsService.getCommittedProjectsPage(this.scenarioId, request).then(response => {
+        if(scenarioId !== uuidNIL)
+            CommittedProjectsService.getCommittedProjectsPage(scenarioId, request).then(response => {
                 if(response.data){
-                    this.isRunning = false;
+                    isRunning = false;
                     let data = response.data as PagingPage<SectionCommittedProject>;
-                    this.sectionCommittedProjects = data.items;
-                    this.rowCache = clone(this.sectionCommittedProjects)
-                    this.totalItems = data.totalItems;
-                    const row = data.items.find(scp => scp.id == this.selectedCommittedProject);
+                    sectionCommittedProjects = data.items;
+                    rowCache = clone(sectionCommittedProjects)
+                    totalItems = data.totalItems;
+                    const row = data.items.find(scp => scp.id == selectedCommittedProject);
 
                     // Updated existing data with no factor set to 1.2
-                    this.sectionCommittedProjects.forEach(element => {
+                    sectionCommittedProjects.forEach(element => {
                         if (element.consequences !=null){
                             element.consequences.forEach(consequence => {
                             if (consequence.performanceFactor === 0) {
                                 consequence.performanceFactor = 1.2;
-                                this.updateCommittedProject(row ? row : emptySectionCommittedProject, "1.2", "performanceFactor");
+                                updateCommittedProject(row ? row : emptySectionCommittedProject, "1.2", "performanceFactor");
                             }
                         });
                         }
                         
                     });
                     if(isNil(row)) {
-                        this.selectedCommittedProject = '';
+                        selectedCommittedProject = '';
                     }
                 } 
             }); 
         else
-            this.isRunning = false;
+            isRunning = false;
     }
 
-     @Watch('deletionIds')
-    onDeletionIdsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(deletionIds, () => onDeletionIdsChanged)
+    function onDeletionIdsChanged(){
+        checkHasUnsavedChanges();
     }
 
-    @Watch('addedRows')
-    onAddedRowsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(addedRows, () => onAddedRowsChanged)
+    function onAddedRowsChanged(){
+        checkHasUnsavedChanges();
     }
 
     //Events
-    onCancelClick() {
-        this.clearChanges()
-        this.selectedCommittedProject = '';
-        this.selectedCpItems = [];
-        this.isNoTreatmentBefore = this.isNoTreatmentBeforeCache
-        this.resetPage();
+    function onCancelClick() {
+        clearChanges()
+        selectedCommittedProject = '';
+        selectedCpItems = [];
+        isNoTreatmentBefore = isNoTreatmentBeforeCache
+        resetPage();
     }
 
-    OnExportProjectsClick(){
-        CommittedProjectsService.exportCommittedProjects(this.scenarioId)
+    function OnExportProjectsClick(){
+        CommittedProjectsService.exportCommittedProjects(scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;
@@ -838,8 +838,8 @@ import { storeKey, useStore } from 'vuex';
             });
      }
 
-     OnGetTemplateClick(){
-        CommittedProjectsService.getCommittedProjectTemplate(this.networkId)
+     function OnGetTemplateClick(){
+        CommittedProjectsService.getCommittedProjectTemplate(networkId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;  
@@ -848,91 +848,91 @@ import { storeKey, useStore } from 'vuex';
             });
      }
 
-     OnAddCommittedProjectClick(){
+     function OnAddCommittedProjectClick(){
         const newRow: SectionCommittedProject = clone(emptySectionCommittedProject)
         newRow.id = getNewGuid();
         newRow.name = '';
-        newRow.locationKeys[this.keyattr] = '';
+        newRow.locationKeys[keyattr] = '';
         newRow.locationKeys['ID'] = getNewGuid();
-        newRow.simulationId = this.scenarioId;
-        this.addedRows.push(newRow)
-        this.onPaginationChanged();
+        newRow.simulationId = scenarioId;
+        addedRows.push(newRow)
+        onPaginationChanged();
      }
      
-     OnAddConsequenceClick(){
+     function OnAddConsequenceClick(){
         const newRow: CommittedProjectConsequence = clone(emptyCommittedProjectConsequence)
         newRow.id = getNewGuid();
-        newRow.committedProjectId = this.selectedCommittedProject;
+        newRow.committedProjectId = selectedCommittedProject;
         newRow.attribute = '';
         newRow.changeValue = '';
         newRow.performanceFactor = 1.2;
-        this.selectedConsequences.push(newRow);
+        selectedConsequences.push(newRow);
      }
 
-     OnSaveClick(){
+     function OnSaveClick(){
         const upsertRequest = {
                     libraryId: null,
-                    rowsForDeletion: this.deletionIds,
-                    updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: this.addedRows,
+                    rowsForDeletion: deletionIds,
+                    updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: addedRows,
                     isModified: false    
                 }
-        if(!this.committedProjectsAreChanged())
+        if(!committedProjectsAreChanged())
         {
-            this.updateNoTreatment();
+            updateNoTreatment();
         }
-        else if(this.deletionIds.length > 0){
-            CommittedProjectsService.deleteSpecificCommittedProjects(this.deletionIds).then((response: AxiosResponse) => {
+        else if(deletionIds.length > 0){
+            CommittedProjectsService.deleteSpecificCommittedProjects(deletionIds).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.deletionIds = [];
-                    this.addSuccessNotificationAction({message:'Deleted committed projects'})              
+                    deletionIds = [];
+                    addSuccessNotificationAction({message:'Deleted committed projects'})              
                 }
-                CommittedProjectsService.upsertCommittedProjects(this.scenarioId, upsertRequest).then((response: AxiosResponse) => {
+                CommittedProjectsService.upsertCommittedProjects(scenarioId, upsertRequest).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        this.addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
-                        this.addedRows = [];
-                        this.updatedRowsMap.clear();
+                        addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
+                        addedRows = [];
+                        updatedRowsMap.clear();
                     }
-                    if(this.isNoTreatmentBefore != this.isNoTreatmentBeforeCache)
-                        this.updateNoTreatment()
+                    if(isNoTreatmentBefore != isNoTreatmentBeforeCache)
+                        updateNoTreatment()
                     else
-                        this.resetPage()
+                        resetPage()
                 })
             })         
         }
         else
-            CommittedProjectsService.upsertCommittedProjects(this.scenarioId, upsertRequest).then((response: AxiosResponse) => {
+            CommittedProjectsService.upsertCommittedProjects(scenarioId, upsertRequest).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
-                    this.addedRows = [];
-                    this.updatedRowsMap.clear();
+                    addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
+                    addedRows = [];
+                    updatedRowsMap.clear();
                 }
-                if(this.isNoTreatmentBefore != this.isNoTreatmentBeforeCache)
-                        this.updateNoTreatment()
+                if(isNoTreatmentBefore != isNoTreatmentBeforeCache)
+                    updateNoTreatment()
                 else
-                    this.resetPage()
+                    resetPage()
             })   
      }
 
-     updateNoTreatment(){
-        if(this.isNoTreatmentBefore)
-                ScenarioService.setNoTreatmentBeforeCommitted(this.scenarioId).then((response: AxiosResponse) => {
+     function updateNoTreatment(){
+        if(isNoTreatmentBefore)
+                ScenarioService.setNoTreatmentBeforeCommitted(scenarioId).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        this.isNoTreatmentBeforeCache = this.isNoTreatmentBefore
+                        isNoTreatmentBeforeCache = isNoTreatmentBefore
                     }
-                    this.resetPage()
+                    resetPage()
                 })
             else
-                ScenarioService.removeNoTreatmentBeforeCommitted(this.scenarioId).then((response: AxiosResponse) => {
+                ScenarioService.removeNoTreatmentBeforeCommitted(scenarioId).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        this.isNoTreatmentBeforeCache = this.isNoTreatmentBefore
+                        isNoTreatmentBeforeCache = isNoTreatmentBefore
                     }
-                    this.resetPage()
+                    resetPage()
                 })
      }
 
-     OnDeleteAllClick(){
-        this.alertDataForDeletingCommittedProjects = {
+     function OnDeleteAllClick(){
+        alertDataForDeletingCommittedProjects = {
             showDialog: true,
             heading: 'Are you sure?',
             message:
@@ -941,81 +941,81 @@ import { storeKey, useStore } from 'vuex';
         };
      }
 
-     OnDeleteClick(id: string){
-        if(isNil(this.addedRows.find(_ => _.id === id)))
-            this.deletionIds.push(id);
+     function OnDeleteClick(id: string){
+        if(isNil(addedRows.find(_ => _.id === id)))
+            deletionIds.push(id);
         else
-            this.addedRows = this.addedRows.filter((scp: SectionCommittedProject) => scp.id !== id)
+            addedRows = addedRows.filter((scp: SectionCommittedProject) => scp.id !== id)
 
-        this.onPaginationChanged();
+        onPaginationChanged();
      }
 
-      onEditCommittedProjectProperty(scp: SectionCommittedProjectTableData, property: string, value: any) {
-       let row = this.sectionCommittedProjects.find(o => o.id === scp.id)
+      function onEditCommittedProjectProperty(scp: SectionCommittedProjectTableData, property: string, value: any) {
+       let row = sectionCommittedProjects.find(o => o.id === scp.id)
         if(!isNil(row))
         {
             if(property === 'treatment'){
-                this.handleTreatmentChange(scp, value, row)             
+                handleTreatmentChange(scp, value, row)             
             }
             else if(property === 'keyAttr'){
-                this.handleKeyAttrChange(row, scp, value);               
+                handleKeyAttrChange(row, scp, value);               
             }
             else if(property === 'performanceFactor') {
-                this.handleFactorChange(row, scp, value);
+                handleFactorChange(row, scp, value);
             }
             else if(property === 'budget'){
-                this.handleBudgetChange(row, scp, value)
+                handleBudgetChange(row, scp, value)
             }
             else{
                 if(property === 'category')
-                    value = this.catMap.get(value);
-                this.updateCommittedProject(row, value, property)
-                this.onPaginationChanged()
+                    value = catMap.get(value);
+                updateCommittedProject(row, value, property)
+                onPaginationChanged()
             }
         }
     }
 
     //Consequence Funtions
-    OnDeleteConsequence(id: string){
-        this.selectedConsequences = this.selectedConsequences.filter((cpc: CommittedProjectConsequence) => cpc.id !== id)
-        this.updateSelectedProjectConsequences()
+    function OnDeleteConsequence(id: string){
+        selectedConsequences = selectedConsequences.filter((cpc: CommittedProjectConsequence) => cpc.id !== id)
+        updateSelectedProjectConsequences()
     }
 
-     onAddCommittedProjectConsequenc(newConsequence: CommittedProjectConsequence) {
-        this.showCreateCommittedProjectConsequenceDialog = false;     
+     function onAddCommittedProjectConsequenc(newConsequence: CommittedProjectConsequence) {
+        showCreateCommittedProjectConsequenceDialog = false;     
         if (!isNil(newConsequence)) {
-            newConsequence.committedProjectId = this.selectedCommittedProject;
-            this.selectedConsequences.push(newConsequence);
-            this.updateSelectedProjectConsequences();  
+            newConsequence.committedProjectId = selectedCommittedProject;
+            selectedConsequences.push(newConsequence);
+            updateSelectedProjectConsequences();  
         }
     }
 
-    onEditConsequenceProperty(consequence: CommittedProjectConsequence, property: string, value: any) {
-        this.selectedConsequences = update(
-            findIndex(propEq('id', consequence.id), this.selectedConsequences),
+    function onEditConsequenceProperty(consequence: CommittedProjectConsequence, property: string, value: any) {
+        selectedConsequences = update(
+            findIndex(propEq('id', consequence.id), selectedConsequences),
             setItemPropertyValue(property, value, consequence),
-            this.selectedConsequences,
+            selectedConsequences,
         );
-        this.updateSelectedProjectConsequences()
+        updateSelectedProjectConsequences()
     }
 
     //Dialog functions
-    onSubmitImportExportCommittedProjectsDialogResult(
+    function onSubmitImportExportCommittedProjectsDialogResult(
         result: ImportExportCommittedProjectsDialogResult,
     ) {
-        this.showImportExportCommittedProjectsDialog = false;
+        showImportExportCommittedProjectsDialog = false;
 
         if (hasValue(result)) {         
             if (hasValue(result.file)) {
                 CommittedProjectsService.importCommittedProjects(
                     result.file,
                     result.applyNoTreatment,
-                    this.scenarioId,
+                    scenarioId,
                 ).then((response: any) =>{
-                    this.setAlertMessageAction("Committed project import has been added to the work queue")
+                    setAlertMessageAction("Committed project import has been added to the work queue")
                 })
             } else {
-                this.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'No file selected.',
                     longMessage:
                         'No file selected to upload the committed projects.',
@@ -1024,8 +1024,8 @@ import { storeKey, useStore } from 'vuex';
         }
     }
 
-    onDeleteCommittedProjects() {
-        this.alertDataForDeletingCommittedProjects = {
+    function onDeleteCommittedProjects() {
+        alertDataForDeletingCommittedProjects = {
             showDialog: true,
             heading: 'Are you sure?',
             message:
@@ -1034,100 +1034,100 @@ import { storeKey, useStore } from 'vuex';
         };
     }   
 
-    onDeleteCommittedProjectsSubmit(doDelete: boolean) {
-        this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
+    function onDeleteCommittedProjectsSubmit(doDelete: boolean) {
+        alertDataForDeletingCommittedProjects = { ...emptyAlertData };
 
         if (doDelete) {
-            this.deleteSimulationCommittedProjectsAction(this.scenarioId);
-            CommittedProjectsService.deleteSimulationCommittedProjects(this.scenarioId).then((response: AxiosResponse) => {
+            deleteSimulationCommittedProjectsAction(scenarioId);
+            CommittedProjectsService.deleteSimulationCommittedProjects(scenarioId).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.onCancelClick();
+                    onCancelClick();
                 }
             })
         }
     }
 
-    onSelectCommittedProject(id: string){
-        this.selectedCommittedProject = id;
+    function onSelectCommittedProject(id: string){
+        selectedCommittedProject = id;
     }
 
     //Subroutines
-    formatAsCurrency(value: any) {
+    function formatAsCurrency(value: any) {
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }
 
         return null;
     }
-    disableCrudButtons() {
-        const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+    function disableCrudButtons() {
+        const rowChanges = addedRows.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
             (scp: SectionCommittedProject) => {
-                if (isNullOrUndefined( scp.consequences )) scp.consequences = [];
+                if (isNil( scp.consequences )) scp.consequences = [];
                 return (
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    inputRules['generalRules'].valueIsNotEmpty(
                         scp.simulationId,
                     ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    inputRules['generalRules'].valueIsNotEmpty(
                         scp.year,
                     ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    inputRules['generalRules'].valueIsNotEmpty(
                         scp.cost,
                     ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    inputRules['generalRules'].valueIsNotEmpty(
                         scp.treatment
                     ) == true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.locationKeys[this.keyattr]
+                    inputRules['generalRules'].valueIsNotEmpty(
+                        scp.locationKeys[keyattr]
                     ) == true &&
                     scp.consequences.every(consequence => 
-                        this.rules['generalRules'].valueIsNotEmpty(
+                        inputRules['generalRules'].valueIsNotEmpty(
                         consequence.attribute,
                     ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    inputRules['generalRules'].valueIsNotEmpty(
                         consequence.changeValue,
                     ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    inputRules['generalRules'].valueIsNotEmpty(
                         consequence.performanceFactor,
                     ) === true ) &&
-                    this.rules['generalRules'].valueIsWithinRange(
-                        scp.year, [this.firstYear, this.lastYear],
+                    inputRules['generalRules'].valueIsWithinRange(
+                        scp.year, [firstYear, lastYear],
                     ) === true
                 );
             },
         );
-        this.disableCrudButtonsResult = !dataIsValid;
+        disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
 
-    updateSelectedProjectConsequences(){
-        let row = this.sectionCommittedProjects.find(o => o.id == this.selectedCommittedProject)
+    function updateSelectedProjectConsequences(){
+        let row = sectionCommittedProjects.find(o => o.id == selectedCommittedProject)
         if(!isNil(row)){
-            row.consequences = this.selectedConsequences;
-            this.updateCommittedProjects(row, this.selectedConsequences, 'consequences')
+            row.consequences = selectedConsequences;
+            updateCommittedProjects(row, selectedConsequences, 'consequences')
         }
     }
 
-    setCpItems(){
-        this.currentPage = this.sectionCommittedProjects.map(o => 
+    function setCpItems(){
+        currentPage = sectionCommittedProjects.map(o => 
         {          
-            const row: SectionCommittedProjectTableData = this.cpItemFactory(o);
+            const row: SectionCommittedProjectTableData = cpItemFactory(o);
             return row
         })
-        this.checkExistenceOfAssets();
-        this.checkYears();
+        checkExistenceOfAssets();
+        checkYears();
     }
 
-    cpItemFactory(scp: SectionCommittedProject): SectionCommittedProjectTableData {
+    function cpItemFactory(scp: SectionCommittedProject): SectionCommittedProjectTableData {
         const budget: SimpleBudgetDetail = find(
-            propEq('id', scp.scenarioBudgetId), this.stateScenarioSimpleBudgetDetails,
+            propEq('id', scp.scenarioBudgetId), stateScenarioSimpleBudgetDetails,
         ) as SimpleBudgetDetail;
-        let cat = this.reverseCatMap.get(scp.category);
+        let cat = reverseCatMap.get(scp.category);
         let value = '';
         if(!isNil(cat))
             value = cat;
         const row: SectionCommittedProjectTableData = {
-            keyAttr: scp.locationKeys[this.keyattr],
+            keyAttr: scp.locationKeys[keyattr],
             year: scp.year,
             cost: scp.cost,
             scenarioBudgetId: scp.scenarioBudgetId? scp.scenarioBudgetId : '',
@@ -1142,15 +1142,15 @@ import { storeKey, useStore } from 'vuex';
         return row
     }
 
-    handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
+    function handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
         row.treatment = treatmentName;
-        this.updateCommittedProject(row, treatmentName, 'treatment')  
+        updateCommittedProject(row, treatmentName, 'treatment')  
         CommittedProjectsService.FillTreatmentValues({
             committedProjectId: row.id,
-            treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : getBlankGuid(),
+            treatmentLibraryId: librarySelectItemValue ? librarySelectItemValue : getBlankGuid(),
             treatmentName: treatmentName,
-            KeyAttributeValue: row.locationKeys[this.keyattr],
-            networkId: this.networkId
+            KeyAttributeValue: row.locationKeys[keyattr],
+            networkId: networkId
         })
         .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
@@ -1159,19 +1159,19 @@ import { storeKey, useStore } from 'vuex';
                 row.consequences = values.validTreatmentConsequences;
                 row.category = values.treatmentCategory;
                 scp.cost = row.cost;
-                let cat = this.reverseCatMap.get(row.category);
+                let cat = reverseCatMap.get(row.category);
                 if(!isNil(cat))
                     scp.category = cat;           
-                this.updateCommittedProject(row, row.cost, 'cost')  
-                this.updateCommittedProject(row, row.consequences, 'consequences')  
-                this.onSelectedCommittedProject();
-                this.onPaginationChanged();
+                updateCommittedProject(row, row.cost, 'cost')  
+                updateCommittedProject(row, row.consequences, 'consequences')  
+                onSelectedCommittedProject();
+                onPaginationChanged();
             }                            
         });                                                
     }
-    handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, budgetName: string){
+    function handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, budgetName: string){
         const budget: SimpleBudgetDetail = find(
-            propEq('name', budgetName), this.stateScenarioSimpleBudgetDetails,
+            propEq('name', budgetName), stateScenarioSimpleBudgetDetails,
         ) as SimpleBudgetDetail;
         if(!isNil(budget)){
             row.scenarioBudgetId = budget.id;
@@ -1179,189 +1179,189 @@ import { storeKey, useStore } from 'vuex';
         }  
         else
             row.scenarioBudgetId = null;
-        this.updateCommittedProject(row, row.scenarioBudgetId, 'scenarioBudgetId') 
-        this.onPaginationChanged();       
+        updateCommittedProject(row, row.scenarioBudgetId, 'scenarioBudgetId') 
+        onPaginationChanged();       
     }
 
-    handleKeyAttrChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, keyAttr: string){
-        row.locationKeys[this.keyattr] = keyAttr;
-        this.updateCommittedProject(row, keyAttr, 'keyAttr');
-        this.onPaginationChanged();
+    function handleKeyAttrChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, keyAttr: string){
+        row.locationKeys[keyattr] = keyAttr;
+        updateCommittedProject(row, keyAttr, 'keyAttr');
+        onPaginationChanged();
     }
 
-    handleFactorChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, factor: number) {
-        this.updateCommittedProject(row, factor, 'performanceFactor');
-        this.onPaginationChanged();
+    function handleFactorChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, factor: number) {
+        updateCommittedProject(row, factor, 'performanceFactor');
+        onPaginationChanged();
     }
 
-    checkAssetExistence(scp: SectionCommittedProjectTableData, keyAttr: string){
-        CommittedProjectsService.validateAssetExistence(this.network, keyAttr).then((response: AxiosResponse) => {
+    function checkAssetExistence(scp: SectionCommittedProjectTableData, keyAttr: string){
+        CommittedProjectsService.validateAssetExistence(network, keyAttr).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
                 if(!response.data)
-                    scp.errors = [this.keyattr + ' does not exist'];
+                    scp.errors = [keyattr + ' does not exist'];
                 else
                     scp.errors = [];
             }
         });
     }
 
-    checkExistenceOfAssets(){//todo: refine this
-        const uncheckKeys = this.currentPage.map(scp => scp.keyAttr).filter(key => isNil(this.isKeyAttributeValidMap.get(key)))
+    function checkExistenceOfAssets(){//todo: refine this
+        const uncheckKeys = currentPage.map(scp => scp.keyAttr).filter(key => isNil(isKeyAttributeValidMap.get(key)))
         if(uncheckKeys.length > 0){
-            CommittedProjectsService.validateExistenceOfAssets(uncheckKeys, this.network.id).then((response: AxiosResponse) => {
+            CommittedProjectsService.validateExistenceOfAssets(uncheckKeys, network.id).then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    for(let i = 0; i < this.currentPage.length; i++)
+                    for(let i = 0; i < currentPage.length; i++)
                     {
-                        const check = response.data[this.currentPage[i].keyAttr]
+                        const check = response.data[currentPage[i].keyAttr]
                         if(!isNil(check)){
-                            if(!response.data[this.currentPage[i].keyAttr])
-                                this.currentPage[i].errors = [this.keyattr + ' does not exist'];
+                            if(!response.data[currentPage[i].keyAttr])
+                                currentPage[i].errors = [keyattr + ' does not exist'];
                             else
-                                this.currentPage[i].errors = [];
+                                currentPage[i].errors = [];
 
-                            this.isKeyAttributeValidMap.set(this.currentPage[i].keyAttr,response.data[this.currentPage[i].keyAttr] )
+                            isKeyAttributeValidMap.set(currentPage[i].keyAttr,response.data[currentPage[i].keyAttr] )
                         }
                     }                  
                 }
             }); 
         }
-        for(let i = 0; i < this.currentPage.length; i++)
+        for(let i = 0; i < currentPage.length; i++)
         {
-            if(!this.isKeyAttributeValidMap.get(this.currentPage[i].keyAttr))
-                this.currentPage[i].errors = [this.keyattr + ' does not exist'];
+            if(!isKeyAttributeValidMap.get(currentPage[i].keyAttr))
+                currentPage[i].errors = [keyattr + ' does not exist'];
             else
-                this.currentPage[i].errors = [];
+                currentPage[i].errors = [];
         }
                           
     }
 
-    checkYear(scp:SectionCommittedProjectTableData){
+    function checkYear(scp:SectionCommittedProjectTableData){
         if(!hasValue(scp.year))
             scp.yearErrors = ['Value cannot be empty'];
-        else if (this.investmentYears.length === 0)
+        else if (investmentYears.length === 0)
             scp.yearErrors = ['There are no years in the investment settings']
-        else if(scp.year < this.firstYear )
+        else if(scp.year < firstYear )
             scp.yearErrors = ['Year is outside of Analysis period'];      
         else
             scp.yearErrors = [];
     }
 
-    checkYears()
+    function checkYears()
     {
-        this.currentPage.forEach(scp => {
-            this.checkYear(scp);
+        currentPage.forEach(scp => {
+            checkYear(scp);
         })
     }
 
-    updateCommittedProject(row: SectionCommittedProject, value: any, property: string){
+    function updateCommittedProject(row: SectionCommittedProject, value: any, property: string){
         const updatedRow = setItemPropertyValue(
                     property,
                     value,
                     row
                 ) as SectionCommittedProject
-        this.onUpdateRow(row.id, updatedRow);
+        onUpdateRow(row.id, updatedRow);
     }
 
-    updateCommittedProjects(row: SectionCommittedProject, value: any, property: string){
+    function updateCommittedProjects(row: SectionCommittedProject, value: any, property: string){
         const updatedRow = setItemPropertyValue(
                     property,
                     value,
                     row
                 ) as SectionCommittedProject
-        this.onUpdateRow(row.id, updatedRow);
-        this.sectionCommittedProjects = update(
+        onUpdateRow(row.id, updatedRow);
+        sectionCommittedProjects = update(
             findIndex(
                 propEq('id', row.id),
-                this.sectionCommittedProjects,
+                sectionCommittedProjects,
             ),
             updatedRow,
-            this.sectionCommittedProjects,
+            sectionCommittedProjects,
         );
     }
 
-    updateCommittedProjectTableData(row: SectionCommittedProjectTableData, value: any, property: string ){
-        this.currentPage = update(
+    function updateCommittedProjectTableData(row: SectionCommittedProjectTableData, value: any, property: string ){
+        currentPage = update(
             findIndex(
                 propEq('id', row.id),
-                this.currentPage,
+                currentPage,
             ),
             setItemPropertyValue(
                 property,
                 value,
                 row,
             ) as SectionCommittedProjectTableData,
-            this.currentPage,
+            currentPage,
         );
     }
 
-    onSearchClick(){
-        this.currentSearch = this.gridSearchTerm;
-        this.resetPage();
+    function onSearchClick(){
+        currentSearch = gridSearchTerm;
+        resetPage();
     }
 
-    onClearClick(){
-        this.gridSearchTerm = '';
-        this.onSearchClick();
+    function onClearClick(){
+        gridSearchTerm = '';
+        onSearchClick();
     }
 
-    onUpdateRow(rowId: string, updatedRow: SectionCommittedProject){
+    function onUpdateRow(rowId: string, updatedRow: SectionCommittedProject){
         updatedRow.cost = +updatedRow.cost.toString().replace(/(\$*)(\,*)/g, '')
-        if(any(propEq('id', rowId), this.addedRows)){
-            const index = this.addedRows.findIndex(item => item.id == updatedRow.id)
-            this.addedRows[index] = updatedRow;
+        if(any(propEq('id', rowId), addedRows)){
+            const index = addedRows.findIndex(item => item.id == updatedRow.id)
+            addedRows[index] = updatedRow;
             return;
         }
 
-        let mapEntry = this.updatedRowsMap.get(rowId)
+        let mapEntry = updatedRowsMap.get(rowId)
 
         if(isNil(mapEntry)){
-            const row = this.rowCache.find(r => r.id === rowId);
+            const row = rowCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
-                this.updatedRowsMap.set(rowId, [row , updatedRow])
+                updatedRowsMap.set(rowId, [row , updatedRow])
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
             mapEntry[1] = updatedRow;
         }
         else
-            this.updatedRowsMap.delete(rowId)
+            updatedRowsMap.delete(rowId)
 
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    clearChanges(){
-        this.updatedRowsMap.clear();
-        this.addedRows = [];
-        this.deletionIds = [];
+    function clearChanges(){
+        updatedRowsMap.clear();
+        addedRows = [];
+        deletionIds = [];
     }
 
-    resetPage(){
-        this.projectPagination.page = 1;
-        this.onPaginationChanged();
+    function resetPage(){
+        projectPagination.page = 1;
+        onPaginationChanged();
     }
 
-    checkHasUnsavedChanges(){
-        const hasUnsavedChanges: boolean = this.committedProjectsAreChanged() || this.isNoTreatmentBeforeCache != this.isNoTreatmentBefore
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    function checkHasUnsavedChanges(){
+        const hasUnsavedChanges: boolean = committedProjectsAreChanged() || isNoTreatmentBeforeCache != isNoTreatmentBefore
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    committedProjectsAreChanged() : boolean{
-        return  this.deletionIds.length > 0 || 
-            this.addedRows.length > 0 ||
-            this.updatedRowsMap.size > 0 || (this.hasScenario && this.hasSelectedLibrary)
+    function committedProjectsAreChanged() : boolean{
+        return  deletionIds.length > 0 || 
+            addedRows.length > 0 ||
+            updatedRowsMap.size > 0 || (hasScenario && hasSelectedLibrary)
     }
 
-    importCompleted(data: any){
+    function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
-        if(importComp.id === this.scenarioId && importComp.workType == WorkType.ImportCommittedProject){
-            this.projectPagination.page = 1
-            this.clearChanges();
-            this.onPaginationChanged().then(() => {
-                this.setAlertMessageAction('');
+        if(importComp.id === scenarioId && importComp.workType == WorkType.ImportCommittedProject){
+            projectPagination.page = 1
+            clearChanges();
+            onPaginationChanged().then(() => {
+                setAlertMessageAction('');
             })
         }        
     }
 
-    async initializePages(){
+    async function initializePages(){
         const request: PagingRequest<SectionCommittedProject>= {
             page: 1,
             rowsPerPage: 5,
@@ -1376,13 +1376,13 @@ import { storeKey, useStore } from 'vuex';
             isDescending: false,
             search: ''
         };
-        await CommittedProjectsService.getCommittedProjectsPage(this.scenarioId,request).then(response => {
-            this.isRunning = false
+        await CommittedProjectsService.getCommittedProjectsPage(scenarioId,request).then(response => {
+            isRunning = false
             if(response.data){
                 let data = response.data as PagingPage<SectionCommittedProject>;
-                this.sectionCommittedProjects = data.items;
-                this.rowCache = clone(this.sectionCommittedProjects)
-                this.totalItems = data.totalItems;
+                sectionCommittedProjects = data.items;
+                rowCache = clone(sectionCommittedProjects)
+                totalItems = data.totalItems;
             }
         }); 
     }

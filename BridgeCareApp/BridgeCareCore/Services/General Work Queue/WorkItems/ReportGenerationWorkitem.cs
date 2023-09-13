@@ -14,6 +14,7 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Controllers;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Services
 {
@@ -46,35 +47,35 @@ namespace BridgeCareCore.Services
 
             if (report == null)
             {
-                SendRealTimeMessage($"Failed to generate report object for '{reportName}' on simulation '{scenarioName}'");
+                throw new Exception($"Failed to generate report object for '{reportName}' on simulation '{scenarioName}'");
             }
 
-            // Handle a completed run with errors
-            if (report.Errors.Any())
-            {                 
-                SendRealTimeMessage($"Failed to generate '{reportName}' on simulation '{scenarioName}':: {report.Status}");
-
-                _log.Information($"Failed to generate '{reportName}'");
-
-                foreach (string message in report.Errors)
-                {
-                    _log.Information($"Message: {message}");
-                }
-            }
-
-            // Handle an incomplete run without errors
-            if (!report.IsComplete)
-            {
-                SendRealTimeMessage($"{reportName} on simulation '{scenarioName}' ran but never completed");
-            }
-
-            //create report index repository
             var reportIndexID = createReportIndexRepository(report);
 
             if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
             {
                 SendRealTimeMessage($"Failed to create report repository index on {reportName}");
             }
+
+            // Handle a completed run with errors
+            if (report.Errors.Any())
+            {               
+                _log.Information($"Failed to generate '{reportName}'");
+
+                foreach (string message in report.Errors)
+                {
+                    _log.Information($"Message: {message}");
+                }
+                throw new Exception($"Failed to generate '{reportName}' on simulation '{scenarioName}':: {report.Status}");
+            }
+
+            // Handle an incomplete run without errors
+            if (!report.IsComplete)
+            {
+                throw new Exception(($"{reportName} on simulation '{scenarioName}' ran but never completed");
+            }
+
+            //create report index repository        
 
             IReport GenerateReport(string reportName, ReportType expectedReportType, string parameters)
             {

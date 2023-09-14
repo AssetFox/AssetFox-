@@ -24,35 +24,36 @@
     </v-dialog>
 </template>
 
-<script lang='ts'>
+<script lang='ts' setup>
 import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action } from 'vuex-class';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportPerformanceCurvesDialogResult } from '@/shared/models/modals/import-export-performance-curves-dialog-result';
 import {clone} from 'ramda';
 import PerformanceCurvesFileSelector from '@/shared/components/FileSelector.vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-    components: { PerformanceCurvesFileSelector }
-})
-export default class ImportExportPerformanceCurvesDialog extends Vue {
-    @Prop() showDialog: boolean;
+const emit = defineEmits(['submit'])
+let store = useStore();
+const props = defineProps<{
+    showDialog: boolean
+    }>()
 
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setIsBusy') setIsBusyAction: any;
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy');}
 
-    PerformanceCurvesFile: File | null = null;
-    overwriteBudgets: boolean = true;
-    closed: boolean = false;
+    let PerformanceCurvesFile: File | null = null;
+    let overwriteBudgets: boolean = true;
+    let closed: boolean = false;
 
-    @Watch('showDialog')
-    onShowDialogChanged() {
-        if (this.showDialog) {
-            this.closed = false;
+    watch(()=>props.showDialog,()=>onShowDialogChanged())
+    function onShowDialogChanged() {
+        if (props.showDialog) {
+            closed = false;
         } else {
-            this.PerformanceCurvesFile = null;
-            this.closed = true;
+            PerformanceCurvesFile = null;
+            closed = true;
         }
     }
 
@@ -60,25 +61,25 @@ export default class ImportExportPerformanceCurvesDialog extends Vue {
      * FileSelector submit event handler
      */
 
-    onFileSelectorChange(file: File) {
-        this.PerformanceCurvesFile = hasValue(file) ? clone(file) : null;
+    function onFileSelectorChange(file: File) {
+        PerformanceCurvesFile = hasValue(file) ? clone(file) : null;
     }
 
     /**
      * Dialog submit event handler
      */
-    onSubmit(submit: boolean, isExport: boolean = false) {
+    function onSubmit(submit: boolean, isExport: boolean = false) {
         if (submit) {
             const result: ImportExportPerformanceCurvesDialogResult = {
-                file: this.PerformanceCurvesFile as File,
+                file: PerformanceCurvesFile as File,
                 isExport: isExport
             };
-            this.$emit('submit', result);
+            emit('submit', result);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
     }
-}
+
 </script>
 <style scoped>
 .div-padding {

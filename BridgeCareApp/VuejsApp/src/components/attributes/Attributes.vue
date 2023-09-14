@@ -157,7 +157,7 @@
     </v-layout>
 </template>
 
-<script lang='ts'>
+<script setup lang='ts'>
 import AttributeService from '@/services/attribute.service';
 import { Attribute, emptyAttribute, RuleDefinition } from '@/shared/models/iAM/attribute';
 import { Datasource, emptyDatasource, RawDataColumns, noneDatasource } from '@/shared/models/iAM/data-source';
@@ -165,234 +165,231 @@ import { ValidationResult } from '@/shared/models/iAM/expression-validation';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import { InputValidationRules, rules as validationRules } from '@/shared/utils/input-validation-rules';
 import { TestStringData } from '@/shared/models/iAM/test-string';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { AxiosResponse } from 'axios';
 import { any, clone, find, isNil, propEq } from 'ramda';
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, Getter, State } from 'vuex-class';
+import Vue, { onBeforeMount, onBeforeUnmount, Ref, ref, shallowRef, ShallowRef, watch } from 'vue';
 import { Console } from 'console';
+import { useStore } from 'vuex';
 
-@Component({
-    
-})
-export default class Attributes extends Vue {
-    hasSelectedAttribute: boolean = false;
-    hasEmptyDataSource: boolean = true;
-    selectAttributeItemValue: string | null = null;
-    selectDatasourceItemValue: string | null = null;
-    selectAttributeItems: SelectItem[] = [];
-    selectDatasourceItems: SelectItem[] = [];
-    selectAggregationRuleTypeItems: SelectItem[] = [];
-    selectExcelColumns: SelectItem[] = [];
-    selectedAttribute: Attribute = clone(emptyAttribute);
-    selectedDataSource: Datasource | undefined = clone(emptyDatasource);
-    rules: InputValidationRules = rules;
-    validationErrorMessage: string = '';
-    ValidationSuccessMessage: string = '';
-    commandIsValid: boolean = true;
-    checkedCommand = '';
+    let store = useStore();
+    let hasSelectedAttribute: boolean = false;
+    let hasEmptyDataSource: boolean = true;
+    let selectAttributeItemValue: ShallowRef<string | null> = shallowRef(null);
+    let selectDatasourceItemValue: ShallowRef<string | null> = shallowRef(null);
+    let selectAttributeItems: SelectItem[] = [];
+    let selectDatasourceItems: SelectItem[] = [];
+    let selectAggregationRuleTypeItems: SelectItem[] = [];
+    let selectExcelColumns: SelectItem[] = [];
+    let selectedAttribute: Ref<Attribute> = ref(clone(emptyAttribute));
+    let selectedDataSource: Datasource | undefined = clone(emptyDatasource);
+    let rules: InputValidationRules = validationRules;
+    let validationErrorMessage: string = '';
+    let ValidationSuccessMessage: string = '';
+    let commandIsValid: boolean = true;
+    let checkedCommand = '';
 
-    aggregationRuleSelectValues: SelectItem[] = []    
-    typeSelectValues: SelectItem[] = [
+    let aggregationRuleSelectValues: SelectItem[] = []    
+    let typeSelectValues: SelectItem[] = [
         {text: 'STRING', value: 'STRING'},
         {text: 'NUMBER', value: 'NUMBER'}
     ];
 
-    @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
-    @State(state => state.datasourceModule.dataSources) stateDataSources: Datasource[];    
-    @State(state => state.attributeModule.aggregationRules) stateAggregationRules: RuleDefinition[];
-    @State(state => state.attributeModule.aggregationRulesForType) stateAggregationRulesForType: string[];
-    @State(state => state.attributeModule.attributeDataSourceTypes) stateAttributeDataSourceTypes: string[];
-    @State(state => state.datasourceModule.excelColumns) excelColumns: RawDataColumns;
-    @State(state => state.attributeModule.selectedAttribute) stateSelectedAttribute: Attribute;
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
+    let stateAttributes = shallowRef<Attribute[]>(store.state.attributeModule.attributes) ;
+    let stateDataSources = shallowRef<Datasource[]>(store.state.datasourceModule.dataSources) ;    
+    let stateAggregationRules = shallowRef<RuleDefinition[]>(store.state.attributeModule.aggregationRules) ;
+    let stateAggregationRulesForType = shallowRef<string[]>(store.state.attributeModule.aggregationRulesForType) ;
+    let stateAttributeDataSourceTypes = shallowRef<string[]>(store.state.attributeModule.attributeDataSourceTypes) ;
+    let excelColumns = shallowRef<RawDataColumns>(store.state.datasourceModule.excelColumns) ;
+    let stateSelectedAttribute = shallowRef<Attribute>(store.state.attributeModule.selectedAttribute) ;
+    let hasUnsavedChanges = shallowRef<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges) ;
+    let hasAdminAccess = shallowRef<boolean>(store.state.authenticationModule.hasAdminAccess) ;
     
-    @Action('getAttributes') getAttributes: any;
-    @Action('getDataSources') getDataSourcesAction: any;    
-    @Action('getAttributeAggregationRules') getAttributeAggregationRulesAction: any;    
-    @Action('getAggregationRulesForType') getAggregationRulesForTypeAction: any;    
-    @Action('getAttributeDataSourceTypes') getAttributeDataSourceTypes: any;
-    @Action('getExcelSpreadsheetColumnHeaders') getExcelSpreadsheetColumnHeadersAction: any;
-    @Action('selectAttribute') selectAttributeAction: any;
-    @Action('upsertAttribute') upsertAttributeAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
+    async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut');}
+    async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
+    async function getDataSourcesAction(payload?: any): Promise<any> {await store.dispatch('getDataSources');}
+    async function getAttributeAggregationRulesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeAggregationRules');}
+    async function getAggregationRulesForTypeAction(payload?: any): Promise<any> {await store.dispatch('getAggregationRulesForType');}
+    async function getAttributeDataSourceTypes(payload?: any): Promise<any> {await store.dispatch('getAttributeDataSourceTypes');}
+    async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders');}
+    async function selectAttributeAction(payload?: any): Promise<any> {await store.dispatch('selectAttribute');}
+    async function upsertAttributeAction(payload?: any): Promise<any> {await store.dispatch('upsertAttribute');}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
+    async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById');}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.getAttributes();
-            vm.getAttributeAggregationRulesAction();
-            vm.getAttributeDataSourceTypes();
-            vm.getDataSourcesAction();
-        });
+    created()
+    function created() {
+        getAttributes();
+        getAttributeAggregationRulesAction();
+        getAttributeDataSourceTypes();
+        getDataSourcesAction();
     }
 
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
+    onBeforeUnmount(() => beforeDestroy)
+    function beforeDestroy() {
+        setHasUnsavedChangesAction({ value: false });
     }
 
-    @Watch('stateAttributes')
-    onStateAttributesChanged() {
-        this.selectAttributeItems = this.stateAttributes.map((attribute: Attribute) => ({
+    watch(stateAttributes, () => onStateAttributesChanged)
+    function onStateAttributesChanged() {
+        selectAttributeItems = stateAttributes.value.map((attribute: Attribute) => ({
             text: attribute.name,
             value: attribute.id,
         }));
     }
 
-    @Watch('stateDataSources')
-    onStateDataSourcesChanged() {
-        this.selectDatasourceItems = this.stateDataSources.map((datasource: Datasource) => ({
+    watch(stateDataSources, () => onStateDataSourcesChanged)
+    function onStateDataSourcesChanged() {
+        selectDatasourceItems = stateDataSources.value.map((datasource: Datasource) => ({
             text: datasource.name + ' (' + datasource.type + ')',
             value: datasource.id,
         }));
     }
 
-    @Watch('selectAttributeItemValue')
-    onSelectAttributeItemValueChanged() {
-        this.selectAttributeAction(this.selectAttributeItemValue);
-        this.hasSelectedAttribute = true;
-        this.checkedCommand = "";
-        this.commandIsValid = false;
-        this.getAggregationRulesForTypeAction(this.selectedAttribute.type)
-        this.aggregationRuleSelectValues = this.stateAggregationRulesForType.map((rule: string) => ({
+    watch(selectAttributeItemValue, () => onSelectAttributeItemValueChanged)
+    function onSelectAttributeItemValueChanged() {
+        selectAttributeAction(selectAttributeItemValue);
+        hasSelectedAttribute = true;
+        checkedCommand = "";
+        commandIsValid = false;
+        getAggregationRulesForTypeAction(selectedAttribute.value.type)
+        aggregationRuleSelectValues = stateAggregationRulesForType.value.map((rule: string) => ({
             text: rule,
             value: rule,
         }));
     }
     
-    @Watch('selectedAttribute.type')
-    onSelectedAttributeTypeChanged() {
-        this.getAggregationRulesForTypeAction(this.selectedAttribute.type)
-        this.aggregationRuleSelectValues = this.stateAggregationRulesForType.map((rule: string) => ({
+    watch(() => selectedAttribute.value.type, () => onSelectedAttributeTypeChanged)
+    function onSelectedAttributeTypeChanged() {
+        getAggregationRulesForTypeAction(selectedAttribute.value.type)
+        aggregationRuleSelectValues = stateAggregationRulesForType.value.map((rule: string) => ({
             text: rule,
             value: rule,
         }));
     }
-    @Watch('selectDatasourceItemValue')
-    onSelectDatasourceItemValue(){
-        if (any(propEq('id', this.selectDatasourceItemValue), this.stateDataSources)) {
+
+    watch(selectDatasourceItemValue, () => onSelectDatasourceItemValue)
+    function onSelectDatasourceItemValue(){
+        if (any(propEq('id', selectDatasourceItemValue), stateDataSources.value)) {
             let ds = find(
-                propEq('id', this.selectDatasourceItemValue),
-                this.stateDataSources,
+                propEq('id', selectDatasourceItemValue),
+                stateDataSources.value,
             )
             if(!isNil(ds))
             {
-                this.selectedAttribute.dataSource = ds
-                if(this.selectedAttribute.dataSource.type === "Excel"){
-                    this.getExcelSpreadsheetColumnHeadersAction(this.selectedAttribute.dataSource.id)
+                selectedAttribute.value.dataSource = ds
+                if(selectedAttribute.value.dataSource.type === "Excel"){
+                    getExcelSpreadsheetColumnHeadersAction(selectedAttribute.value.dataSource.id)
                 } 
             }
             else
-                this.selectedAttribute.dataSource = clone(emptyDatasource)
+                selectedAttribute.value.dataSource = clone(emptyDatasource)
         } else {
-            this.selectedAttribute.dataSource = clone(emptyDatasource)
+            selectedAttribute.value.dataSource = clone(emptyDatasource)
         }
     }
 
-    @Watch('excelColumns')
-    onExcelColumnsChanged(){
-        this.selectExcelColumns = this.excelColumns.columnHeaders.map((header: string) => ({
+    watch(excelColumns, () => onExcelColumnsChanged)
+    function onExcelColumnsChanged(){
+        selectExcelColumns = excelColumns.value.columnHeaders.map((header: string) => ({
             text: header,
             value: header,
         }));
     }
 
-    @Watch('stateSelectedAttribute')
-    onStateSelectedAttributeChanged() {
-        this.selectedAttribute = clone(this.stateSelectedAttribute);
-        if(isNil(this.selectedAttribute.dataSource)) {
-            this.selectedAttribute.dataSource = clone(emptyDatasource);
+    watch(stateSelectedAttribute, () => onStateSelectedAttributeChanged)
+    function onStateSelectedAttributeChanged() {
+        selectedAttribute = clone(stateSelectedAttribute);
+        if(isNil(selectedAttribute.value.dataSource)) {
+            selectedAttribute.value.dataSource = clone(emptyDatasource);
         }
-        this.selectDatasourceItemValue = this.selectedAttribute.dataSource.id;
+        selectDatasourceItemValue.value = selectedAttribute.value.dataSource.id;
     }
 
-    @Watch('selectedAttribute', {deep: true})
-    onSelectedAttributeChanged() {
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedAttribute, this.stateSelectedAttribute);
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    watch(selectedAttribute, () =>onSelectedAttributeChanged )
+    function onSelectedAttributeChanged() {
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedAttribute, stateSelectedAttribute);
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    addAttribute()
+    function addAttribute()
     {
-        this.selectAttributeItemValue = getBlankGuid()
+        selectAttributeItemValue.value = getBlankGuid()
     }
 
-    onDiscardChanges() {
-        this.selectedAttribute = clone(this.stateSelectedAttribute);
+    function onDiscardChanges() {
+        selectedAttribute = clone(stateSelectedAttribute);
     }
 
-    saveAttribute(){
+    function saveAttribute(){
         let isInsert = false;
-        if(this.selectedAttribute.id === getBlankGuid()){
-            this.selectedAttribute.id = getNewGuid();
+        if(selectedAttribute.value.id === getBlankGuid()){
+            selectedAttribute.value.id = getNewGuid();
             isInsert = true;
         }
             
-        this.upsertAttributeAction(this.selectedAttribute)
+        upsertAttributeAction(selectedAttribute)
         
         if(isInsert)
-            this.selectAttributeItemValue = this.selectedAttribute.id;
+            selectAttributeItemValue.value = selectedAttribute.value.id;
     }
 
-    disableCrudButtons() {
-        let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.name) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.type) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.aggregationRuleType) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.defaultValue) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isCalculated) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isAscending) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.dataSource.type) === true
-            if(this.selectedAttribute.type === 'NUMBER'){
-                if(isNaN(+this.selectedAttribute.defaultValue)){
+    function disableCrudButtons() {
+        let allValid = rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.name) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.type) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.aggregationRuleType) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.defaultValue) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.isCalculated) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.isAscending) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.dataSource.type) === true
+            if(selectedAttribute.value.type === 'NUMBER'){
+                if(isNaN(+selectedAttribute.value.defaultValue)){
                     allValid = false;
-                    this.selectedAttribute.defaultValue = '';
+                    selectedAttribute.value.defaultValue = '';
                 }               
             }
             //when the parameter and ui sync an empty string is assigned to the parameter instead of null if the text box is empty
-            if(!isNil(this.selectedAttribute.maximum))  
-                this.selectedAttribute.maximum = null;
-            if(!isNil(this.selectedAttribute.minimum))  
-                this.selectedAttribute.minimum = null;
+            if(!isNil(selectedAttribute.value.maximum))  
+                selectedAttribute.value.maximum = null;
+            if(!isNil(selectedAttribute.value.minimum))  
+                selectedAttribute.value.minimum = null;
 
-            if(this.selectedAttribute.dataSource.type === 'SQL'){
+            if(selectedAttribute.value.dataSource.type === 'SQL'){
                 allValid = allValid &&
-                this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true &&
-                this.checkedCommand === this.selectedAttribute.command &&
-                this.commandIsValid;
+                rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.command) === true &&
+                checkedCommand === selectedAttribute.value.command &&
+                commandIsValid;
             }
-            else if(this.selectedAttribute.dataSource.type === 'Excel'){
+            else if(selectedAttribute.value.dataSource.type === 'Excel'){
                 allValid = allValid &&
-                this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true;
+                rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.command) === true;
             }
 
         return !allValid;
     }
 
-    CheckSqlCommand(){
-        let commandData: TestStringData = {testString: this.selectedAttribute.command};
+    function CheckSqlCommand(){
+        let commandData: TestStringData = {testString: selectedAttribute.value.command};
         AttributeService.CheckCommand(commandData)
             .then((response: AxiosResponse) => {
           if (hasValue(response, 'data')) {
             const result: ValidationResult = response.data as ValidationResult;
-            this.commandIsValid = result.isValid;
-            this.checkedCommand = this.selectedAttribute.command;
+            commandIsValid = result.isValid;
+            checkedCommand = selectedAttribute.value.command;
             if (result.isValid) {
-              this.ValidationSuccessMessage = result.validationMessage;
-              this.validationErrorMessage = '';
+              ValidationSuccessMessage = result.validationMessage;
+              validationErrorMessage = '';
             } else {
-              this.validationErrorMessage = result.validationMessage;
-              this.ValidationSuccessMessage = '';            
+              validationErrorMessage = result.validationMessage;
+              ValidationSuccessMessage = '';            
             }
           }
         });
     }
-}
+
 
 </script>
 

@@ -41,56 +41,55 @@
   </v-layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {State} from 'vuex-class';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {hasValue} from '@/shared/utils/has-value-util';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {clone} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { CalculatedAttribute, emptyCalculatedAttribute } from '@/shared/models/iAM/calculated-attribute';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class CreateCalculatedAttributeDialog extends Vue {
-@Prop() showDialog: boolean;
-
-  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
-
-  attributeSelectItems: SelectItem[] = [];
-  newCalculatedAttribute: CalculatedAttribute[] = [];
-  rules: InputValidationRules = clone(rules);
-
-  mounted() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.setAttributeSelectItems();
+  let showDialog : boolean = false;
+  let store = useStore();
+  let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributes);
+  let attributeSelectItems: SelectItem[] = [];
+  let newCalculatedAttribute: CalculatedAttribute[] = [];
+  let rules: InputValidationRules = validationRules;
+  const emit = defineEmits(['submit'])
+  watch(stateNumericAttributes,() => onStateNumericAttributesChanged)
+  function onStateNumericAttributesChanged() {
+    if (hasValue(stateNumericAttributes)) {
+      setAttributeSelectItems();
     }
   }
 
-  @Watch('stateNumericAttributes')
-  onStateNumericAttributesChanged() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.setAttributeSelectItems();
+  onMounted(() => mounted());
+    function mounted() {
+      if (hasValue(stateNumericAttributes)) {
+      setAttributeSelectItems();
+      }
     }
-  }
 
-  setAttributeSelectItems() {
-    this.attributeSelectItems = this.stateNumericAttributes.map((attribute: Attribute) => ({
+
+    function setAttributeSelectItems() {
+    attributeSelectItems = stateNumericAttributes.value.map((attribute: Attribute) => ({
       text: attribute.name,
       value: attribute.name
     }));
   }
-
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newCalculatedAttribute);
+      emit('submit', newCalculatedAttribute);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newCalculatedAttribute = [] as CalculatedAttribute[];
+    newCalculatedAttribute = [] as CalculatedAttribute[];
   }
-}
+
 </script>

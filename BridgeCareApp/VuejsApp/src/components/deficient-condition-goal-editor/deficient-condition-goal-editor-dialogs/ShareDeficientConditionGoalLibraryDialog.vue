@@ -46,10 +46,8 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+<script setup lang="ts">
+import Vue, { watch } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {DeficientConditionGoalLibraryUser } from '@/shared/models/iAM/deficient-condition-goal';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -61,34 +59,38 @@ import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {DeficientConditionGoalLibraryUserGridRow, ShareDeficientConditionGoalLibraryDialogData } from '@/shared/models/modals/share-deficient-condition-goal-data';
 import DeficientConditionGoalService from '@/services/deficient-condition-goal.service';
 import { http2XX } from '@/shared/utils/http-utils';
+import { useStore } from 'vuex';
 
-@Component
-export default class ShareDeficientConditionGoalLibraryDialog extends Vue {
-  @Prop() dialogData: ShareDeficientConditionGoalLibraryDialogData;
+let store = useStore();
 
-  @State(state => state.userModule.users) stateUsers: User[];
+const props = defineProps<{
+  dialogData: ShareDeficientConditionGoalLibraryDialogData
+}>()
+const emit = defineEmits(['submit']);
 
-  deficientConditionGoalLibraryUserGridHeaders: DataTableHeader[] = [
+let stateUsers = store.state.userModule.users as User[];
+
+  let deficientConditionGoalLibraryUserGridHeaders: DataTableHeader[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  deficientConditionGoalLibraryUserGridRows: DeficientConditionGoalLibraryUserGridRow[] = [];
-  currentUserAndOwner: DeficientConditionGoalLibraryUser[] = [];
-  searchTerm: string = '';
+  let deficientConditionGoalLibraryUserGridRows: DeficientConditionGoalLibraryUserGridRow[] = [];
+  let currentUserAndOwner: DeficientConditionGoalLibraryUser[] = [];
+  let searchTerm: string = '';
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    if (this.dialogData.showDialog) {
-      this.onSetGridData();
-      this.onSetUsersSharedWith();
+  watch(() => props.dialogData, () => onDialogDataChanged)
+  function onDialogDataChanged() {
+    if (props.dialogData.showDialog) {
+      onSetGridData();
+      onSetUsersSharedWith();
     }
   }
 
-  onSetGridData() {
+  function onSetGridData() {
     const currentUser: string = getUserName();
 
-    this.deficientConditionGoalLibraryUserGridRows = this.stateUsers
+    deficientConditionGoalLibraryUserGridRows = stateUsers
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -98,10 +100,10 @@ export default class ShareDeficientConditionGoalLibraryDialog extends Vue {
         }));
   }
 
-    onSetUsersSharedWith() {
+  function onSetUsersSharedWith() {
         // Deficient Condition Goal library users
         let deficientConditionGoalLibraryUsers: DeficientConditionGoalLibraryUser[] = [];
-        DeficientConditionGoalService.getDeficientConditionGaolLibraryUsers(this.dialogData.deficientConditionGoalLibrary.id).then(response => {
+        DeficientConditionGoalService.getDeficientConditionGaolLibraryUsers(props.dialogData.deficientConditionGoalLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -130,18 +132,18 @@ export default class ShareDeficientConditionGoalLibraryDialog extends Vue {
                 const isCurrentUserOrOwner = (deficientConditionGoalLibraryUser: DeficientConditionGoalLibraryUser) => deficientConditionGoalLibraryUser.username === currentUser || deficientConditionGoalLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (deficientConditionGoalLibraryUser: DeficientConditionGoalLibraryUser) => deficientConditionGoalLibraryUser.username !== currentUser && !deficientConditionGoalLibraryUser.isOwner;
 
-                this.currentUserAndOwner = filter(isCurrentUserOrOwner, deficientConditionGoalLibraryUsers) as DeficientConditionGoalLibraryUser[];
+                currentUserAndOwner = filter(isCurrentUserOrOwner, deficientConditionGoalLibraryUsers) as DeficientConditionGoalLibraryUser[];
                 const otherUsers: DeficientConditionGoalLibraryUser[] = filter(isNotCurrentUserOrOwner, deficientConditionGoalLibraryUsers) as DeficientConditionGoalLibraryUser[];
 
                 otherUsers.forEach((deficientConditionGoalLibraryUser: DeficientConditionGoalLibraryUser) => {
-                    if (any(propEq('id', deficientConditionGoalLibraryUser.userId), this.deficientConditionGoalLibraryUserGridRows)) {
+                    if (any(propEq('id', deficientConditionGoalLibraryUser.userId), deficientConditionGoalLibraryUserGridRows)) {
                         const deficientConditionGoalLibraryUserGridRow: DeficientConditionGoalLibraryUserGridRow = find(
-                            propEq('id', deficientConditionGoalLibraryUser.userId), this.deficientConditionGoalLibraryUserGridRows) as DeficientConditionGoalLibraryUserGridRow;
+                            propEq('id', deficientConditionGoalLibraryUser.userId), deficientConditionGoalLibraryUserGridRows) as DeficientConditionGoalLibraryUserGridRow;
 
-                        this.deficientConditionGoalLibraryUserGridRows = update(
-                            findIndex(propEq('id', deficientConditionGoalLibraryUser.userId), this.deficientConditionGoalLibraryUserGridRows),
+                        deficientConditionGoalLibraryUserGridRows = update(
+                            findIndex(propEq('id', deficientConditionGoalLibraryUser.userId), deficientConditionGoalLibraryUserGridRows),
                             { ...deficientConditionGoalLibraryUserGridRow, isShared: true, canModify: deficientConditionGoalLibraryUser.canModify },
-                            this.deficientConditionGoalLibraryUserGridRows
+                            deficientConditionGoalLibraryUserGridRows
                         );
                     }
                 });
@@ -149,26 +151,26 @@ export default class ShareDeficientConditionGoalLibraryDialog extends Vue {
         });
   }
 
-  removeUserModifyAccess(userId: string, isShared: boolean) {
+  function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      this.deficientConditionGoalLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), this.deficientConditionGoalLibraryUserGridRows),
-          'canModify', false, this.deficientConditionGoalLibraryUserGridRows);
+      deficientConditionGoalLibraryUserGridRows = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), deficientConditionGoalLibraryUserGridRows),
+          'canModify', false, deficientConditionGoalLibraryUserGridRows);
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.getDeficientConditionGoalLibraryUsers());
+      emit('submit', getDeficientConditionGoalLibraryUsers());
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.deficientConditionGoalLibraryUserGridRows = [];
+    deficientConditionGoalLibraryUserGridRows = [];
   }
 
-  getDeficientConditionGoalLibraryUsers() {
-    const usersSharedWith: DeficientConditionGoalLibraryUser[] = this.deficientConditionGoalLibraryUserGridRows
+  function getDeficientConditionGoalLibraryUsers() {
+    const usersSharedWith: DeficientConditionGoalLibraryUser[] = deficientConditionGoalLibraryUserGridRows
         .filter((deficientConditionGoalLibraryUserGridRow: DeficientConditionGoalLibraryUserGridRow) => deficientConditionGoalLibraryUserGridRow.isShared)
         .map((deficientConditionGoalLibraryUserGridRow: DeficientConditionGoalLibraryUserGridRow) => ({
           userId: deficientConditionGoalLibraryUserGridRow.id,
@@ -177,9 +179,9 @@ export default class ShareDeficientConditionGoalLibraryDialog extends Vue {
           isOwner: false
         }));
 
-    return [...this.currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner, ...usersSharedWith];
   }
-}
+
 </script>
 
 <style>

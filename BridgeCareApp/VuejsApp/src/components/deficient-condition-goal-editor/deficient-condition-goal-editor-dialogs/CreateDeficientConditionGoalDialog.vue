@@ -65,87 +65,89 @@
   </v-layout>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {State} from 'vuex-class';
+<script setup lang="ts">
+import Vue, { onMounted, shallowRef, watch } from 'vue';
 import {DeficientConditionGoal, emptyDeficientConditionGoal} from '@/shared/models/iAM/deficient-condition-goal';
 import {clone} from 'ramda';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateDeficientConditionGoalDialog extends Vue {
-  @Prop() showDialog: boolean;
-  @Prop() currentNumberOfDeficientConditionGoals: number;
+  let store = useStore();
 
-  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
+  const props = defineProps<{
+    currentNumberOfDeficientConditionGoals: number,
+    showDialog: boolean
+  }>()
+  const emit = defineEmits(['submit'])
 
-  newDeficientConditionGoal: DeficientConditionGoal = clone({...emptyDeficientConditionGoal, id: getNewGuid()});
-  numericAttributeNames: string[] = [];
-  rules: InputValidationRules = rules;
+  let stateNumericAttributes = shallowRef<Attribute[]>(store.state.attributeModule.numericAttributes);
 
-  mounted() {
-    this.setNumericAttributeNames();
+  let  newDeficientConditionGoal: DeficientConditionGoal = clone({...emptyDeficientConditionGoal, id: getNewGuid()});
+  let numericAttributeNames: string[] = [];
+  let rules: InputValidationRules = validationRules;
+
+  onMounted(() => mounted); 
+  function mounted() {
+    setNumericAttributeNames();
   }
 
-  @Watch('stateNumericAttributes')
-  onStateNumericAttributesChanged() {
-    this.setNumericAttributeNames();
+  watch(stateNumericAttributes, () => onStateNumericAttributesChanged)
+  function onStateNumericAttributesChanged() {
+    setNumericAttributeNames();
   }
 
-  @Watch('showDialog')
-  onShowDialogChanged() {
-    if (this.showDialog) {
-      this.setNewDeficientConditionGoalDefaultValues();
+  watch(() => props.showDialog, () => onShowDialogChanged)
+  function onShowDialogChanged() {
+    if (props.showDialog) {
+      setNewDeficientConditionGoalDefaultValues();
     }
   }
 
-  @Watch('currentNumberOfDeficientConditionGoals')
-  onCurrentNumberOfDeficientConditionGoalsChanged() {
-    if (this.showDialog) {
-      this.setNewDeficientConditionGoalDefaultValues();
+  watch(() => props.currentNumberOfDeficientConditionGoals, () => onCurrentNumberOfDeficientConditionGoalsChanged)
+  function onCurrentNumberOfDeficientConditionGoalsChanged() {
+    if (props.showDialog) {
+      setNewDeficientConditionGoalDefaultValues();
     }
   }
 
-  setNewDeficientConditionGoalDefaultValues() {
-    this.newDeficientConditionGoal = {
-      ...this.newDeficientConditionGoal,
-      attribute: hasValue(this.numericAttributeNames) ? this.numericAttributeNames[0] : '',
-      name: `Unnamed Deficient Condition Goal ${this.currentNumberOfDeficientConditionGoals + 1}`,
-      deficientLimit: this.currentNumberOfDeficientConditionGoals > 0 ? this.currentNumberOfDeficientConditionGoals + 1 : 1
+  function setNewDeficientConditionGoalDefaultValues() {
+    newDeficientConditionGoal = {
+      ...newDeficientConditionGoal,
+      attribute: hasValue(numericAttributeNames) ? numericAttributeNames[0] : '',
+      name: `Unnamed Deficient Condition Goal ${props.currentNumberOfDeficientConditionGoals + 1}`,
+      deficientLimit: props.currentNumberOfDeficientConditionGoals > 0 ? props.currentNumberOfDeficientConditionGoals + 1 : 1
     };
   }
 
-  setNumericAttributeNames() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.numericAttributeNames = getPropertyValues('name', this.stateNumericAttributes);
+  function setNumericAttributeNames() {
+    if (hasValue(stateNumericAttributes)) {
+      numericAttributeNames = getPropertyValues('name', stateNumericAttributes.value);
 
-      if (this.showDialog) {
-        this.setNewDeficientConditionGoalDefaultValues();
+      if (props.showDialog) {
+        setNewDeficientConditionGoalDefaultValues();
       }
     }
   }
 
-  disableSubmitBtn() {
-    return !(this.rules['generalRules'].valueIsNotEmpty(this.newDeficientConditionGoal.name) === true &&
-        this.rules['generalRules'].valueIsNotEmpty(this.newDeficientConditionGoal.attribute) &&
-        this.rules['generalRules'].valueIsNotEmpty(this.newDeficientConditionGoal.deficientLimit) &&
-        this.rules['generalRules'].valueIsNotEmpty(this.newDeficientConditionGoal.allowedDeficientPercentage) &&
-        this.rules['generalRules'].valueIsWithinRange(this.newDeficientConditionGoal.allowedDeficientPercentage, [0, 100]));
+  function disableSubmitBtn() {
+    return !(rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.name) === true &&
+        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.attribute) &&
+        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.deficientLimit) &&
+        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.allowedDeficientPercentage) &&
+        rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.allowedDeficientPercentage, [0, 100]));
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newDeficientConditionGoal);
+      emit('submit', newDeficientConditionGoal);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newDeficientConditionGoal = {...emptyDeficientConditionGoal, id: getNewGuid()};
+    newDeficientConditionGoal = {...emptyDeficientConditionGoal, id: getNewGuid()};
   }
-}
 </script>

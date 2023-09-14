@@ -14,7 +14,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
                     <v-text-field
                         v-model="newCalculatedAttributeLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        :rules="InputRules['generalRules'].valueIsNotEmpty"
                         outline
                         class="ghd-text-field-border ghd-text-field"/>
                     <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
@@ -47,49 +47,54 @@
     </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import { clone } from 'ramda';
 import { getNewGuid } from '@/shared/utils/uuid-utils';
-import { CreateCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/create-calculated-attribute-library-dialog-data';
+import { CreateCalculatedAttributeLibraryDialogData, emptyCreateCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/create-calculated-attribute-library-dialog-data';
 import {
     CalculatedAttributeLibrary,
     emptyCalculatedAttributeLibrary,
 } from '@/shared/models/iAM/calculated-attribute';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class CreateCalculatedAttributeLibraryDialog extends Vue {
-    @Prop() dialogData: CreateCalculatedAttributeLibraryDialogData;
+const emit = defineEmits(['submit'])
+const props = defineProps<{
 
-    newCalculatedAttributeLibrary: CalculatedAttributeLibrary = {
+    dialogData: CreateCalculatedAttributeLibraryDialogData
+
+}>()
+let newCalculatedAttributeLibrary: CalculatedAttributeLibrary = {
         ...emptyCalculatedAttributeLibrary,
         id: getNewGuid(),
     };
-    rules: InputValidationRules = clone(rules);
-
-    @Watch('dialogData')
-    onDialogDataChanged() {
-        this.newCalculatedAttributeLibrary = {
-            ...this.newCalculatedAttributeLibrary,
-            calculatedAttributes: this.dialogData.calculatedAttributes,
+    let rules: InputValidationRules = validationRules;
+    
+    watch(()=>props.dialogData,() => onDialogDataChanged)
+    function onDialogDataChanged() {
+        newCalculatedAttributeLibrary = {
+            ...newCalculatedAttributeLibrary,
+            calculatedAttributes: props.dialogData.calculatedAttributes,
         };
     }
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-            this.$emit('submit', this.newCalculatedAttributeLibrary);
+            emit('submit', newCalculatedAttributeLibrary);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
 
-        this.newCalculatedAttributeLibrary = {
+        newCalculatedAttributeLibrary = {
             ...emptyCalculatedAttributeLibrary,
             id: getNewGuid(),
         };
     }
-}
+    
+
 </script>

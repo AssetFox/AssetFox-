@@ -206,21 +206,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     { "CULV_DURATION_N", "Y" },
                     { "BRKEY_", "2" },
                     { "BMSID", "9876543" }
-                },
-            Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "9"
-                    },
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_DURATION_N",
-                        ChangeValue = "1"
-                    }
                 }
         };
         private static SectionCommittedProjectDTO SomethingSectionCommittedProjectDTO() => new SectionCommittedProjectDTO()
@@ -240,21 +225,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     { "BRKEY_", "1" },
                     { "BMSID", "12345678" }
                 },
-            Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "+3"
-                    },
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_DURATION_N",
-                        ChangeValue = "1"
-                    }
-                }
         };
 
 
@@ -275,21 +245,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 {
                     { "BRKEY_", "9" },
                     { "BMSID", "0876500" }
-                },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "9"
-                    },
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_DURATION_N",
-                        ChangeValue = "1"
-                    }
                 }
             });
             return returnData;
@@ -312,15 +267,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 {
                     { "BRKEY_", "3" },
                     { "BMSID", "11122233" }
-                },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "+4"
-                    }
                 }
             });
             return returnData;

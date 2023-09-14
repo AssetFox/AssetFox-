@@ -14,15 +14,7 @@
     </svg>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
-@Component({
-
-})
-export default class InvestmentSvg extends Vue {
-    
-}
+<script setup lang='ts'>
 </script>
 
 <style >

@@ -6,11 +6,7 @@
 
 </template>
 
-<script lang='ts'>
-
-export default class GhdTableSortSvg{
-    
-}
+<script setup lang='ts'>
 </script>
 
 <style >

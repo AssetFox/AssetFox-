@@ -5,7 +5,7 @@
                 <v-flex xs12>
                     <v-layout>
                         <v-btn @click='OnGetTemplateClick' 
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Get Template</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Get Default Template</v-btn>
                             <input
                             id="committedProjectTemplateUpload"
                             type="file"
@@ -13,8 +13,8 @@
                             ref="committedProjectTemplateInput"
                             @change="handleCommittedProjectTemplateUpload"
                             hidden/>
-                        <v-btn @click="onUploadCommittedProjectTemplate"
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Upload Committed Project Template</v-btn>
+                        <v-btn @click="onUploadCommittedProjectTemplate" style="margin-right: auto;"
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Change Default Template</v-btn>
                         <v-btn @click='showImportExportCommittedProjectsDialog = true' 
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Import Projects</v-btn>
                         <v-btn @click='OnExportProjectsClick' 
@@ -23,7 +23,22 @@
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Delete All</v-btn>
                     </v-layout>
                 </v-flex>
-
+                <v-flex xs12>
+                    <vlayout>
+                             <v-select
+                                :items= "Test"
+                                append-icon=$vuetify.icons.ghd-down
+                                class='ghd-control-border ghd-control-text ghd-select'
+                                label='Select a Template'
+                                style="width: 20% !important;"
+                                outline>
+                             </v-select>
+                             <v-btn @click='' 
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Download Selected Template</v-btn>
+                            <v-btn @click=''  
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Upload New Template</v-btn>
+                    </vlayout>
+                </v-flex>
                 <v-flex xs12>
                     <v-checkbox 
                     id="CommittedProjectsEditor-noTreatmentsBeforeCommittedProjects-ghdcheckbox"

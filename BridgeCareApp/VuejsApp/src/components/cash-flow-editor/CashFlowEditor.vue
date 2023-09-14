@@ -325,16 +325,16 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
 
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
 
-    let addedRows: CashFlowRule[] = [];
-    let updatedRowsMap:Map<string, [CashFlowRule, CashFlowRule]> = new Map<string, [CashFlowRule, CashFlowRule]>();//0: original value | 1: updated value
-    let deletionIds: string[] = [];
-    let rowCache: CashFlowRule[] = [];
     let gridSearchTerm = '';
     let currentSearch = '';
-    let pagination: Pagination = clone(emptyPagination);
+    let updatedRowsMap:Map<string, [CashFlowRule, CashFlowRule]> = new Map<string, [CashFlowRule, CashFlowRule]>();//0: original value | 1: updated value
+    let addedRows = ref<CashFlowRule[]>([]);
+    let deletionIds = ref<string[]>([]);
+    let rowCache: CashFlowRule[] = [];
+    let pagination = ref<Pagination>(clone(emptyPagination));
+    let currentPage = ref<CashFlowRule[]>([]);
     let isPageInit = false;
     let totalItems = 0;
-    let currentPage: CashFlowRule[] = [];
     let initializing: boolean = true;
     let isShared: boolean = false;
 
@@ -381,7 +381,8 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     let cashFlowRuleGridData = ref<CashFlowRule[]>([]);
     let selectedCashRuleGridRows: CashFlowRule[] = [];
     let cashFlowRuleRadioBtnValue: string = '';
-    let selectedCashFlowRule: CashFlowRule = clone(emptyCashFlowRule);
+    let selectedCashFlowRule  = ref<CashFlowRule>(clone(emptyCashFlowRule));
+
     let selectedCashFlowRuleForCriteriaEdit: CashFlowRule = clone(
         emptyCashFlowRule,
     );
@@ -500,9 +501,9 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     watch(selectedCashFlowRule, () => onSelectedSplitTreatmentIdChanged)
     function onSelectedSplitTreatmentIdChanged() {
         cashFlowDistributionRuleGridData = hasValue(
-        selectedCashFlowRule.cashFlowDistributionRules,
+        selectedCashFlowRule.value.cashFlowDistributionRules,
     )
-        ? clone(selectedCashFlowRule.cashFlowDistributionRules)
+        ? clone(selectedCashFlowRule.value.cashFlowDistributionRules)
         : [];
     }
 
@@ -511,15 +512,15 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
         if(initializing)
         return;
     checkHasUnsavedChanges();
-    const { sortBy, descending, page, rowsPerPage } = pagination;
+    const { sortBy, descending, page, rowsPerPage } = pagination.value;
     const request: PagingRequest<CashFlowRule>= {
         page: page,
         rowsPerPage: rowsPerPage,
         syncModel: {
             libraryId: librarySelectItemValue.value,
             updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
-            rowsForDeletion: deletionIds,
-            addedRows: addedRows,
+            rowsForDeletion: deletionIds.value,
+            addedRows: addedRows.value,
             isModified: scenarioLibraryIsModified
         },           
         sortColumn: sortBy,
@@ -530,8 +531,8 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
         CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
             if(response.data){
                 let data = response.data as PagingPage<CashFlowRule>;
-                currentPage = data.items;
-                rowCache = clone(currentPage)
+                currentPage.value = data.items;
+                rowCache = clone(currentPage.value)
                 totalItems = data.totalItems;
             }
         });
@@ -539,8 +540,8 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
          CashFlowService.getLibraryCashFlowRulePage(librarySelectItemValue.value, request).then(response => {
             if(response.data){
                 let data = response.data as PagingPage<CashFlowRule>;
-                currentPage = data.items;
-                rowCache = clone(currentPage)
+                currentPage.value = data.items;
+                rowCache = clone(currentPage.value)
                 totalItems = data.totalItems;
                 if (!isNil(selectedCashFlowRuleLibrary.value.id) ) {
                     getIsSharedLibraryAction(selectedCashFlowRuleLibrary).then(() => isShared = isSharedLibrary.value);
@@ -573,13 +574,13 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     function onSelectCashFlowRule(id:string) {
         const cashFlowRule: CashFlowRule = find(
             propEq('id', id),
-            currentPage,
+            currentPage.value,
         ) as CashFlowRule;
 
         if (hasValue(cashFlowRule)) {
-            selectedCashFlowRule = clone(cashFlowRule);
+            selectedCashFlowRule.value = clone(cashFlowRule);
         } else {
-            selectedCashFlowRule = clone(emptyCashFlowRule);
+            selectedCashFlowRule.value = clone(emptyCashFlowRule);
         }
 
         showRuleEditorDialog = true;
@@ -588,7 +589,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     function onShowCreateCashFlowRuleLibraryDialog(createAsNewLibrary: boolean) {
         createCashFlowRuleLibraryDialogData = {
             showDialog: true,
-            cashFlowRules: createAsNewLibrary ? currentPage : [],
+            cashFlowRules: createAsNewLibrary ? currentPage.value : [],
         };
     }
 
@@ -605,9 +606,9 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
                 isNewLibrary: true,           
                  syncModel: {
                     libraryId: cashFlowRuleLibrary.cashFlowRules.length == 0 || !hasSelectedLibrary ? null : selectedCashFlowRuleLibrary.value.id,
-                    rowsForDeletion: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : deletionIds,
+                    rowsForDeletion: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : deletionIds.value,
                     updateRows: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : addedRows,
+                    addedRows: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : addedRows.value,
                     isModified: false
                  },
                  scenarioId: hasScenario ? selectedScenarioId : null
@@ -638,7 +639,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
         showRuleEditorDialog = false;
         if(!isNil(CashFlowDistributionRules))
         {
-            let selectedRule = currentPage.find(o => o.id == selectedCashFlowRule.id) 
+            let selectedRule = currentPage.value.find(o => o.id == selectedCashFlowRule.value.id) 
             if(!isNil(selectedRule))
             {
                 selectedRule.cashFlowDistributionRules = hasValue(CashFlowDistributionRules) ? clone(CashFlowDistributionRules) : [];  
@@ -654,14 +655,14 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
             name: `Unnamed Rule ${totalItems + 1}`,
             id: getNewGuid(),
         };
-        addedRows.push(newCashFlowRule);
+        addedRows.value.push(newCashFlowRule);
         onPaginationChanged()
     }
 
     function onSubmitAddCashFlowRule(newCashFlowRule: CashFlowRule){
         if(!isNil(newCashFlowRule))
         {
-            addedRows.push(newCashFlowRule);
+            addedRows.value.push(newCashFlowRule);
             onPaginationChanged()
         }
         showAddCashFlowRuleDialog = false;
@@ -680,13 +681,13 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     }
 
     function removeRowLogic(id: string){
-        if(isNil(find(propEq('id', id), addedRows))){
-            deletionIds.push(id);
+        if(isNil(find(propEq('id', id), addedRows.value))){
+            deletionIds.value.push(id);
             if(!isNil(updatedRowsMap.get(id)))
                 updatedRowsMap.delete(id)
         }           
         else{          
-            addedRows = addedRows.filter((row) => row.id !== id)
+            addedRows.value = addedRows.value.filter((row) => row.id !== id)
         }  
     }
 
@@ -766,9 +767,9 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
 
         CashFlowService.upsertScenarioCashFlowRules({
             libraryId: selectedCashFlowRuleLibrary.value.id === uuidNIL ? null : selectedCashFlowRuleLibrary.value.id,
-            rowsForDeletion: deletionIds,
+            rowsForDeletion: deletionIds.value,
             updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
-            addedRows: addedRows,
+            addedRows: addedRows.value,
             isModified: scenarioLibraryIsModified
         }, selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -794,9 +795,9 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
                 isNewLibrary: false,
                 syncModel: {
                 libraryId: selectedCashFlowRuleLibrary.value.id === uuidNIL ? null : selectedCashFlowRuleLibrary.value.id,
-                rowsForDeletion: deletionIds,
+                rowsForDeletion: deletionIds.value,
                 updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
-                addedRows: addedRows,
+                addedRows: addedRows.value,
                 isModified: false
                 },
                 scenarioId: null
@@ -833,7 +834,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     }
 
     function disableCrudButtons() {
-        const rows = addedRows.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
+        const rows = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const allDataIsValid = rows.every(
             (rule: CashFlowRule) => {
                 const allSubDataIsValid = rule.cashFlowDistributionRules.every(
@@ -919,9 +920,9 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     //paging
 
     function onUpdateRow(rowId: string, updatedRow: CashFlowRule){
-        if(any(propEq('id', rowId), addedRows)){
-            const index = addedRows.findIndex(item => item.id == updatedRow.id)
-            addedRows[index] = updatedRow;
+        if(any(propEq('id', rowId), addedRows.value)){
+            const index = addedRows.value.findIndex(item => item.id == updatedRow.id)
+            addedRows.value[index] = updatedRow;
             return;
         }
 
@@ -943,19 +944,19 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
 
     function clearChanges(){
         updatedRowsMap.clear();
-        addedRows = [];
-        deletionIds = [];
+        addedRows.value = [];
+        deletionIds.value = [];
     }
 
     function resetPage(){
-        pagination.page = 1;
+        pagination.value.page = 1;
         onPaginationChanged();
     }
 
     function checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 
-            deletionIds.length > 0 || 
-            addedRows.length > 0 ||
+            deletionIds.value.length > 0 || 
+            addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || 
             (hasScenario && hasSelectedLibrary) ||
             (hasSelectedLibrary && hasUnsavedChangesCore('', stateSelectedCashRuleFlowLibrary, selectedCashFlowRuleLibrary))
@@ -1079,13 +1080,13 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<CashFlowRule>;
-                    currentPage = data.items;
-                    rowCache = clone(currentPage)
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value);
                     totalItems = data.totalItems;
-                    setParentLibraryName(currentPage.length > 0 ? currentPage[0].libraryId : "None");
-                    loadedParentId = currentPage.length > 0 ? currentPage[0].libraryId : "";
+                    setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
+                    loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
                     loadedParentName = parentLibraryName; //store original
-                    scenarioLibraryIsModified = currentPage.length > 0 ? currentPage[0].isModified : false;
+                    scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
                 }
             });
     }

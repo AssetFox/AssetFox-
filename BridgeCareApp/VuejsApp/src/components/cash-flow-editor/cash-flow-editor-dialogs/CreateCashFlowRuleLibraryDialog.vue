@@ -13,7 +13,7 @@
         <v-layout column>
           <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
           <v-text-field outline v-model="newCashFlowRuleLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        :rules="[inputRules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>
           <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
           <v-textarea no-resize outline rows="3"
@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch } from 'vue';
+import { reactive, watch } from 'vue';
 import {CreateCashFlowRuleLibraryDialogData} from '@/shared/models/modals/create-cash-flow-rule-library-dialog-data';
 import {
   CashFlowDistributionRule,
@@ -61,15 +61,16 @@ import { useStore } from 'vuex';
 
   let newCashFlowRuleLibrary: CashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
   let inputRules: InputValidationRules = clone(rules);
+  const dialogData = reactive(props.dialogData);
 
-  watch(props.dialogData, () => onDialogDataChanged)
+  watch(dialogData, () => onDialogDataChanged)
   function onDialogDataChanged() {
     let currentUser: string = getUserName();
 
     newCashFlowRuleLibrary = {
       ...newCashFlowRuleLibrary,
-      cashFlowRules: hasValue(props.dialogData.cashFlowRules)
-          ? props.dialogData.cashFlowRules.map((cashFlowRule: CashFlowRule) => ({
+      cashFlowRules: hasValue(dialogData.cashFlowRules)
+          ? dialogData.cashFlowRules.map((cashFlowRule: CashFlowRule) => ({
             ...cashFlowRule,
             id: getNewGuid(),
             cashFlowDistributionRules: hasValue(cashFlowRule.cashFlowDistributionRules)

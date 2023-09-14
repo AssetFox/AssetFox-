@@ -81,14 +81,14 @@
                                     single-line
                                     class="sm-txt"
                                     :value="item.name"
-                                    :rules="[rules.generalRules.valueIsNotEmpty]"/>
+                                    :rules="[inputRules.generalRules.valueIsNotEmpty]"/>
                                 <template slot="input">
                                     <v-textarea
                                         label="Description"
                                         no-resize
                                         outline
                                         rows="5"
-                                        :rules="[rules.generalRules.valueIsNotEmpty]"
+                                        :rules="[inputRules.generalRules.valueIsNotEmpty]"
                                         v-model="item.name"/>
                                 </template>
                             </v-edit-dialog>

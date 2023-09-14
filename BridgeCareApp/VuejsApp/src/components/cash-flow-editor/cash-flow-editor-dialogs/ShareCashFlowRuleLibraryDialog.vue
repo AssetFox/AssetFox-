@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, ref } from 'vue';
+import { reactive, watch, ref } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {CashFlowRuleLibraryUser } from '@/shared/models/iAM/cash-flow';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -76,10 +76,11 @@ import { useStore } from 'vuex';
   let shareCashFlowRuleLibraryUserGridRows: CashFlowRuleLibraryUserGridRow[] = [];
   let currentUserAndOwner: CashFlowRuleLibraryUser[] = [];
   let searchTerm: string = '';
+  const dialogData = reactive(props.dialogData);
 
-  watch(props.dialogData, () => onDialogDataChanged)
+  watch(dialogData, () => onDialogDataChanged)
   function onDialogDataChanged() {
-    if (props.dialogData.showDialog) {
+    if (dialogData.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }
@@ -101,7 +102,7 @@ import { useStore } from 'vuex';
     function onSetUsersSharedWith() {
         // Cash Flow Rule library users
         let cashFlowRuleLibraryUsers: CashFlowRuleLibraryUser[] = [];
-        CashFlowRuleService.getCashFlowRuleLibraryUsers(props.dialogData.cashFlowRuleLibrary.id).then(response => {
+        CashFlowRuleService.getCashFlowRuleLibraryUsers(dialogData.cashFlowRuleLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];

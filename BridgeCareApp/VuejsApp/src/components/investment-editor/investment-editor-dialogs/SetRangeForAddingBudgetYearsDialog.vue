@@ -18,29 +18,29 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts"setup>
 import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class SetRangeForAddingBudgetYearsDialog extends Vue {
-  @Prop() showDialog: boolean;
-  @Prop() startYear : number;  
-
-  range: number = 1;
-
-  get rangeLabel() {
-    return 'Year Range: ' + (this.range <= 1 ? this.startYear : this.startYear + '-' + (this.startYear + this.range - 1));
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+  showDialog: boolean,
+  startYear: number
+}>()
+let range: number = 1;
+function rangeLabel() {
+    return 'Year Range: ' + (range <= 1 ? props.startYear : props.startYear + '-' + (props.startYear + range - 1));
   }
-
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.range);
+      emit('submit', range);
     } else {
-      this.$emit('submit', 0);
+      emit('submit', 0);
     }
 
-    this.range = 1;
-  }
+    range = 1;
 }
+
 </script>

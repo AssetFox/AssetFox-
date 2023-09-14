@@ -471,11 +471,7 @@
     </v-layout>
 </template>
 
-<script setup lang="ts">
-import { reactive } from 'vue'
-import { Watch } from 'vue-property-decorator';
-import Component from 'vue-class-component';
-import { Action, State, Getter, Mutation } from 'vuex-class';
+<script  lang="ts" setup>
 import CreatePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
 import CreatePerformanceCurveDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
@@ -519,7 +515,7 @@ import Alert from '@/shared/modals/Alert.vue';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
@@ -547,85 +543,64 @@ import { Hub } from '@/connectionHub';
 import ScenarioService from '@/services/scenario.service';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, shallowRef, ShallowRef} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-    components: {
-        ImportExportPerformanceCurvesDialog,
-        CreatePerformanceCurveLibraryDialog,
-        CreatePerformanceCurveDialog,
-        EquationEditorDialog,
-        GeneralCriterionEditorDialog,
-        ConfirmDeleteAlert: Alert,
-        SharePerformanceCurveLibraryDialog,
-    },
-})
-export default class PerformanceCurveEditor extends Vue {
-    @State(state => state.performanceCurveModule.performanceCurveLibraries)
-    statePerformanceCurveLibraries: PerformanceCurveLibrary[];
-    @State(
-        state => state.performanceCurveModule.selectedPerformanceCurveLibrary,
-    )
-    stateSelectedPerformanceCurveLibrary: PerformanceCurveLibrary;
-    @State(state => state.performanceCurveModule.scenarioPerformanceCurves)
-    stateScenarioPerformanceCurves: PerformanceCurve[];
-    @State(state => state.attributeModule.numericAttributes)
-    stateNumericAttributes: Attribute[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
-    hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
-    @State(state => state.performanceCurveModule.hasPermittedAccess) hasPermittedAccess: boolean;
-    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
-    @State(state => state.performanceCurveModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedPerformanceCurveLibrary') getIsSharedLibraryAction: any;
-    
-    @Action('getPerformanceCurveLibraries')
-    getPerformanceCurveLibrariesAction: any;
-    @Action('selectPerformanceCurveLibrary')
-    selectPerformanceCurveLibraryAction: any;
-    @Action('deletePerformanceCurveLibrary')
-    deletePerformanceCurveLibraryAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('updatePerformanceCurvesCriterionLibraries')
-    updatePerformanceCurveCriterionLibrariesAction: any;
-    
-    @Action('upsertOrDeletePerformanceCurveLibraryUsers') upsertOrDeletePerformanceCurveLibraryUsersAction: any;
+const emit = defineEmits(['submit'])
+let store = useStore();
 
-    @Action('importScenarioPerformanceCurvesFile')
-    importScenarioPerformanceCurvesFileAction: any;
-    @Action('importLibraryPerformanceCurvesFile')
-    importLibraryPerformanceCurvesFileAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
-    @Action('setAlertMessage') setAlertMessageAction: any;
-    
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
+let statePerformanceCurveLibraries = ref<PerformanceCurveLibrary[]>(store.state.performanceCurveModule.performanceCurveLibraries);
+let stateSelectedPerformanceCurveLibrary = ref<PerformanceCurveLibrary>(store.state.performanceCurveModule.selectedPerformanceCurveLibrary);
+let stateScenarioPerformanceCurves = ref<PerformanceCurveLibrary[]>(store.state.performanceCurveModule.scenarioPerformanceCurves);
+let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributes);
+let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
+let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
+let hasPermittedAccess = ref<boolean>(store.state.performanceCurveModule.hasPermittedAccess);
+let isSharedLibrary = ref<boolean>(store.state.performanceCurveModule.isSharedLibrary);
 
-    @Mutation('performanceCurveLibraryMutator') performanceCurveLibraryMutator: any;
-    @Mutation('selectedPerformanceCurveLibraryMutator') selectedPerformanceCurveLibraryMutator: any;
+async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess');}
+async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedPerformanceCurveLibrary');}
+async function getPerformanceCurveLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getPerformanceCurveLibraries');}
+async function selectPerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectPerformanceCurveLibrary');}
+async function deletePerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('deletePerformanceCurveLibrary');}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
+async function updatePerformanceCurveCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('updatePerformanceCurvesCriterionLibraries');}
+async function upsertOrDeletePerformanceCurveLibraryUsersAction(payload?: any): Promise<any> {await store.dispatch('upsertOrDeletePerformanceCurveLibraryUsers');}
+async function importScenarioPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioPerformanceCurvesFile');}
+async function importLibraryPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryPerformanceCurvesFileAction');}
+async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
+async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario');}
+async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario');}
+async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage');}
 
-    addedRows: PerformanceCurve[] = [];
-    updatedRowsMap:Map<string, [PerformanceCurve, PerformanceCurve]> = new Map<string, [PerformanceCurve, PerformanceCurve]>();//0: original value | 1: updated value
-    deletionIds: string[] = [];
-    rowCache: PerformanceCurve[] = [];
-    gridSearchTerm = '';
-    currentSearch = '';
-    selectedPerformanceCurveLibrary: PerformanceCurveLibrary = clone(
+let getUserNameByIdGetter: any = store.getters.getUserNameById
+function performanceCurveLibraryMutator(payload:any){store.commit('performanceCurveLibraryMutator');}
+function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selectedPerformanceCurveLibraryMutator');}
+
+    let addedRows: ShallowRef<PerformanceCurve[]> = ref([]);
+    let updatedRowsMap:Map<string, [PerformanceCurve, PerformanceCurve]> = new Map<string, [PerformanceCurve, PerformanceCurve]>();//0: original value | 1: updated value
+    let deletionIds: ShallowRef<string[]> = ref([]);
+    let rowCache: PerformanceCurve[] = [];
+    let gridSearchTerm = '';
+    let currentSearch = '';
+    let selectedPerformanceCurveLibrary: ShallowRef<PerformanceCurveLibrary> = shallowRef(clone(
         emptyPerformanceCurveLibrary,
-    );
-    performancePagination: Pagination = clone(emptyPagination);
-    isPageInit = false;
-    totalItems = 0;
-    currentPage: PerformanceCurve[] = [];
-    isRunning: boolean = true;
-    isShared: boolean = false;
-    selectedScenarioId: string = getBlankGuid();
-    hasSelectedLibrary: boolean = false;
-    hasScenario: boolean = false;
-    librarySelectItems: SelectItem[] = [];
+    ));
+    let performancePagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    let isPageInit = false;
+    let totalItems = 0;
+    let currentPage: ShallowRef<PerformanceCurve[]> = ref([]);
+    let isRunning: boolean = true;
+    let isShared: boolean = false;
+    let selectedScenarioId: string = getBlankGuid();
+    let hasSelectedLibrary: boolean = false;
+    let hasScenario: boolean = false;
+    let librarySelectItems: SelectItem[] = [];
     
-    performanceCurveGridHeaders: DataTableHeader[] = [
+    let performanceCurveGridHeaders: DataTableHeader[] = [
         {
             text: 'Name',
             value: 'name',
@@ -667,74 +642,76 @@ export default class PerformanceCurveEditor extends Vue {
             width: '',
         },
     ];
-    performanceCurveGridData: PerformanceCurve[] = [];
-    attributeSelectItems: SelectItem[] = [];
-    selectedPerformanceCurve: PerformanceCurve = clone(emptyPerformanceCurve);
-    hasSelectedPerformanceCurve: boolean = false;
+    let performanceCurveGridData: PerformanceCurve[] = [];
+    let attributeSelectItems: SelectItem[] = [];
+    let selectedPerformanceCurve: PerformanceCurve = clone(emptyPerformanceCurve);
+    let hasSelectedPerformanceCurve: boolean = false;
+    const $router = useRouter();
+    const $statusHub = inject('$statusHub') as any
+    let unsavedDialogAllowed: boolean = true;
+    let trueLibrarySelectItemValue: string | null = ''
+    let librarySelectItemValueAllowedChanged: boolean = true;
+    let librarySelectItemValue: Ref<string | null> = ref(null);
 
-    unsavedDialogAllowed: boolean = true;
-    trueLibrarySelectItemValue: string | null = ''
-    librarySelectItemValueAllowedChanged: boolean = true;
-    librarySelectItemValue: string | null = '';
+    let selectedPerformanceEquations: ShallowRef<PerformanceCurve[]> = ref([]);
+    let selectedPerformanceEquationIds: string[] = [];
 
-    selectedPerformanceEquations: PerformanceCurve[] = [];
-    selectedPerformanceEquationIds: string[] = [];
-
-    createPerformanceCurveLibraryDialogData: CreatePerformanceCurveLibraryDialogData = clone(
+    let createPerformanceCurveLibraryDialogData: CreatePerformanceCurveLibraryDialogData = clone(
         emptyCreatePerformanceLibraryDialogData,
     );
-    equationEditorDialogData: EquationEditorDialogData = clone(
+    let equationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
     );
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
         emptyGeneralCriterionEditorDialogData,
     );
-    showCreatePerformanceCurveDialog = false;
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    rules: InputValidationRules = clone(rules);
-    uuidNIL: string = getBlankGuid();
-    currentUrl: string = window.location.href;
-    hasCreatedLibrary: boolean = false;
-    disableCrudButtonsResult: boolean = false;
-    hasLibraryEditPermission: boolean = false;
-    showImportExportPerformanceCurvesDialog: boolean = false;    
+    let showCreatePerformanceCurveDialog = false;
+    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let rules: InputValidationRules = validationRules;
+    let uuidNIL: string = getBlankGuid();
+    let currentUrl: string = window.location.href;
+    let hasCreatedLibrary: boolean = false;
+    let disableCrudButtonsResult: boolean = false;
+    let hasLibraryEditPermission: boolean = false;
+    let showImportExportPerformanceCurvesDialog: boolean = false;    
 
-    sharePerformanceCurveLibraryDialogData: SharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
+    let sharePerformanceCurveLibraryDialogData: SharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
 
-    parentLibraryName: string = "None";
-    parentLibraryId: string = "";
-    scenarioLibraryIsModified: boolean = false;
-    loadedParentName: string = "";
-    loadedParentId: string = "";
-    newLibrarySelection: boolean = false;
-    modifiedStatus : string = "";
+    let parentLibraryName: string = "None";
+    let parentLibraryId: string = "";
+    let scenarioLibraryIsModified: boolean = false;
+    let loadedParentName: string = "";
+    let loadedParentId: string = "";
+    let newLibrarySelection: boolean = false;
+    let modifiedStatus : string = "";
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.librarySelectItemValue = null;           
-            vm.getPerformanceCurveLibrariesAction().then(() => {
-                vm.getHasPermittedAccessAction().then(() => {
-                    if (to.path.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1) {
-                        vm.selectedScenarioId = to.query.scenarioId;
+    beforeRouteEnter();
+    function beforeRouteEnter() {
+        (() => {
+            librarySelectItemValue.value= null;           
+            getPerformanceCurveLibrariesAction().then(() => {
+                getHasPermittedAccessAction().then(() => {
+                    if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1) {
+                        selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-                        if (vm.selectedScenarioId === vm.uuidNIL) {
-                            vm.addErrorNotificationAction({
+                        if (selectedScenarioId === uuidNIL) {
+                            addErrorNotificationAction({
                                 message: 'Unable to identify selected scenario.',
                             });
-                            vm.$router.push('/Scenarios/');
+                            $router.push('/Scenarios/');
                         }
 
-                        vm.hasScenario = true;
-                        ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.selectedScenarioId, workType: WorkType.ImportScenarioPerformanceCurve}).then(response => {
+                        hasScenario = true;
+                        ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioPerformanceCurve}).then(response => {
                             if(response.data){
-                                vm.setAlertMessageAction("A performance curve import has been added to the work queue")
+                                setAlertMessageAction("A performance curve import has been added to the work queue")
                             }
                         })
-                        vm.initializePages();
+                        initializePages();
 
-                        vm.hasScenario = true;
-                        vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                            vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        hasScenario = true;
+                        getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+                            selectScenarioAction({ scenarioId: selectedScenarioId });        
                         });
                     }
 
@@ -743,91 +720,91 @@ export default class PerformanceCurveEditor extends Vue {
             });          
         });
     }
-
-    mounted() {
-        this.setAttributeSelectItems();
+    onMounted(()=>mounted())
+    function mounted() {
+        setAttributeSelectItems();
         
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
-            this.importCompleted,
+            importCompleted,
         );
     }
+    onBeforeUnmount(()=>beforeDestroy())
+    function beforeDestroy() {
+        setHasUnsavedChangesAction({ value: false });
 
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
-
-        this.$statusHub.$off(
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
-            this.importCompleted,
+            importCompleted,
         );
 
-        this.setAlertMessageAction('');
+        setAlertMessageAction('');
     }
 
-    @Watch('performancePagination')
-    async onPaginationChanged() {
-        if(this.isRunning)
+    watch(performancePagination,()=> onPaginationChanged())
+    async function onPaginationChanged() {
+        if(isRunning)
             return;
-        this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.performancePagination;
+        checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = performancePagination.value;
         const request: PagingRequest<PerformanceCurve>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                rowsForDeletion: this.deletionIds,
-                addedRows: this.addedRows,
-                isModified: this.scenarioLibraryIsModified
+                libraryId: selectedPerformanceCurveLibrary.value.id === uuidNIL ? null : selectedPerformanceCurveLibrary.value.id,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: deletionIds.value,
+                addedRows: addedRows.value,
+                isModified: scenarioLibraryIsModified
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
-            search: this.currentSearch
+            search: currentSearch
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
-            this.isRunning = true;
-            await PerformanceCurveService.getPerformanceCurvePage(this.selectedScenarioId, request).then(response => {
+        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL){
+            isRunning = true;
+            await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    this.isRunning = false;
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
+                    isRunning = false;
                 }
             });
         }          
-        else if(this.hasSelectedLibrary){
-            this.isRunning = true;
-            await PerformanceCurveService.GetLibraryPerformanceCurvePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+        else if(hasSelectedLibrary){
+            isRunning = true;
+            await PerformanceCurveService.GetLibraryPerformanceCurvePage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    this.isRunning = false;
-                    if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
+                    isRunning = false;
+                    if (!isNullOrUndefined(selectedPerformanceCurveLibrary.value.id) ) {
+                        getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=>isShared = isSharedLibrary.value);
                     }
                 }
             });  
         }
     }
 
-    @Watch('selectedPerformanceEquations')
-    onSelectedPerformanceEquationsChanged() {
-        this.selectedPerformanceEquationIds = getPropertyValues('id', this.selectedPerformanceEquations) as string[];
+    watch(selectedPerformanceEquations,()=>onSelectedPerformanceEquationsChanged())
+    function onSelectedPerformanceEquationsChanged() {
+        selectedPerformanceEquationIds = getPropertyValues('id', selectedPerformanceEquations.value) as string[];
     } 
     
-    onRemovePerformanceEquations() {
-        this.deletionIds = this.deletionIds.concat(this.selectedPerformanceEquationIds);
-        this.selectedPerformanceEquations = [];
-        this.onPaginationChanged();
-        this.modifiedStatus = " (Modified)";
+    function onRemovePerformanceEquations() {
+        deletionIds.value = deletionIds.value.concat(selectedPerformanceEquationIds);
+        selectedPerformanceEquations.value = [];
+        onPaginationChanged();
+        modifiedStatus = " (Modified)";
     }    
 
-    @Watch('statePerformanceCurveLibraries')
-    onStatePerformanceCurveLibrariesChanged() {
-        this.librarySelectItems = this.statePerformanceCurveLibraries.map(
+    watch(statePerformanceCurveLibraries,()=>onStatePerformanceCurveLibrariesChanged())
+    function onStatePerformanceCurveLibrariesChanged() {
+        librarySelectItems = statePerformanceCurveLibraries.value.map(
             (library: PerformanceCurveLibrary) => ({
                 text: library.name,
                 value: library.id,
@@ -835,110 +812,110 @@ export default class PerformanceCurveEditor extends Vue {
         );
     }
 
-   @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(this.hasScenario){
-            this.onSelectItemValueChanged();
-            this.unsavedDialogAllowed = false;
+   watch(librarySelectItemValue,()=>onLibrarySelectItemValueChangedCheckUnsaved())
+    function onLibrarySelectItemValueChangedCheckUnsaved(){
+        if(hasScenario){
+            onSelectItemValueChanged();
+            unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged) {
-            this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
-                this.librarySelectItemValueAllowedChanged = false;
-                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+        else if(librarySelectItemValueAllowedChanged) {
+            CheckUnsavedDialog(onSelectItemValueChanged, () => {
+                librarySelectItemValueAllowedChanged = false;
+                librarySelectItemValue.value = trueLibrarySelectItemValue;               
             });
         }
-        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-        this.newLibrarySelection = true;
-        this.scenarioLibraryIsModified = false;
-        this.librarySelectItemValueAllowedChanged = true;
+        parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+        newLibrarySelection = true;
+        scenarioLibraryIsModified = false;
+        librarySelectItemValueAllowedChanged = true;
     }
-    onSelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue
-        this.selectPerformanceCurveLibraryAction(this.librarySelectItemValue);
+    function onSelectItemValueChanged() {
+        trueLibrarySelectItemValue = librarySelectItemValue.value
+        selectPerformanceCurveLibraryAction(librarySelectItemValue);
     }
 
-    @Watch('stateSelectedPerformanceCurveLibrary')
-    onStateSelectedPerformanceCurveLibraryChanged() {
-        this.selectedPerformanceCurveLibrary = clone(
-            this.stateSelectedPerformanceCurveLibrary,
+    watch(stateSelectedPerformanceCurveLibrary,()=> onStateSelectedPerformanceCurveLibraryChanged())
+    function onStateSelectedPerformanceCurveLibraryChanged() {
+        selectedPerformanceCurveLibrary.value = clone(
+            stateSelectedPerformanceCurveLibrary.value,
         );
     }
 
-    @Watch('selectedPerformanceCurveLibrary')
-    onSelectedPerformanceCurveLibraryChanged() { 
-        this.hasSelectedLibrary =
-            this.selectedPerformanceCurveLibrary.id !== this.uuidNIL;
+    watch(selectedPerformanceCurveLibrary,()=> onSelectedPerformanceCurveLibraryChanged())
+    function onSelectedPerformanceCurveLibraryChanged() { 
+        hasSelectedLibrary =
+            selectedPerformanceCurveLibrary.value.id !== uuidNIL;
 
-        if (this.hasSelectedLibrary) {
-            this.checkLibraryEditPermission();
-            this.hasCreatedLibrary = false;
-            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: this.selectedPerformanceCurveLibrary.id, workType: WorkType.ImportLibraryPerformanceCurve}).then(response => {
+        if (hasSelectedLibrary) {
+            checkLibraryEditPermission();
+            hasCreatedLibrary = false;
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedPerformanceCurveLibrary.value.id, workType: WorkType.ImportLibraryPerformanceCurve}).then(response => {
                 if(response.data){
-                    this.setAlertMessageAction("A performance curve import has been added to the work queue")
+                    setAlertMessageAction("A performance curve import has been added to the work queue")
                 }
                 else
-                    this.setAlertMessageAction("");
+                    setAlertMessageAction("");
             })
         }
 
-        this.updatedRowsMap.clear();
-        this.deletionIds = [];
-        this.addedRows = [];
-        this.isRunning = false;
-        this.onPaginationChanged();
+        updatedRowsMap.clear();
+        deletionIds.value = [];
+        addedRows.value = [];
+        isRunning = false;
+        onPaginationChanged();
     }
 
-    @Watch('stateNumericAttributes')
-    onStateNumericAttributesChanged() {
-        this.setAttributeSelectItems();
+    watch(stateNumericAttributes,()=>onStateNumericAttributesChanged())
+    function onStateNumericAttributesChanged() {
+        setAttributeSelectItems();
     }
 
-    @Watch('stateScenarioPerformanceCurves')
-    onStateScenarioPerformanceCurvesChanged() {
+    watch(stateScenarioPerformanceCurves,()=> onStateScenarioPerformanceCurvesChanged())
+    function onStateScenarioPerformanceCurvesChanged() {
         if (
-            this.hasScenario
+            hasScenario
         ) {
-            this.onPaginationChanged();
+            onPaginationChanged();
         }
     }
 
-    @Watch('deletionIds')
-    onDeletionIdsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(deletionIds,()=>onDeletionIdsChanged())
+    function onDeletionIdsChanged(){
+        checkHasUnsavedChanges();
     }
 
-    @Watch('addedRows')
-    onAddedRowsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(addedRows,()=>onAddedRowsChanged())
+    function onAddedRowsChanged(){
+        checkHasUnsavedChanges();
     }
-    @Watch('currentPage')
-    onCurrentPageChanged() {
+    watch(currentPage,()=>onCurrentPageChanged())
+    function onCurrentPageChanged() {
         // Get parent name from library id
-        this.librarySelectItems.forEach(library => {
-            if (library.value === this.parentLibraryId) {
-                this.parentLibraryName = library.text;
+        librarySelectItems.forEach(library => {
+            if (library.value === parentLibraryId) {
+                parentLibraryName = library.text;
             }
-            if(this.parentLibraryName == ""){
-                this.parentLibraryName = "None";
+            if(parentLibraryName == ""){
+                parentLibraryName = "None";
             }
         });
     }
-    @Watch('isSharedLibrary')
-    onStateSharedAccessChanged() {
-        this.isShared = this.isSharedLibrary;
+    watch(isSharedLibrary,()=>onStateSharedAccessChanged())
+    function onStateSharedAccessChanged() {
+        isShared = isSharedLibrary.value;
     }
-    checkHasUnsavedChanges(){
+    function checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 
-            this.deletionIds.length > 0 || 
-            this.addedRows.length > 0 ||
-            this.updatedRowsMap.size > 0 || (this.hasScenario && this.hasSelectedLibrary) ||
-            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedPerformanceCurveLibrary, this.stateSelectedPerformanceCurveLibrary))
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+            deletionIds.value.length > 0 || 
+            addedRows.value.length > 0 ||
+            updatedRowsMap.size > 0 || (hasScenario && hasSelectedLibrary) ||
+            (hasSelectedLibrary && hasUnsavedChangesCore('', selectedPerformanceCurveLibrary, stateSelectedPerformanceCurveLibrary))
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    setAttributeSelectItems() {
-        if (hasValue(this.stateNumericAttributes)) {
-            this.attributeSelectItems = this.stateNumericAttributes.map(
+    function setAttributeSelectItems() {
+        if (hasValue(stateNumericAttributes)) {
+            attributeSelectItems = stateNumericAttributes.value.map(
                 (attribute: Attribute) => ({
                     text: attribute.name,
                     value: attribute.name,
@@ -947,34 +924,34 @@ export default class PerformanceCurveEditor extends Vue {
         }
     }
 
-    checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
+    function checkLibraryEditPermission() {
+        hasLibraryEditPermission = hasAdminAccess.value || (hasPermittedAccess && checkUserIsLibraryOwner());
     }
 
-    checkUserIsLibraryOwner() {
-        return this.getUserNameByIdGetter(this.selectedPerformanceCurveLibrary.owner) == getUserName();
+    function checkUserIsLibraryOwner() {
+        return getUserNameByIdGetter(selectedPerformanceCurveLibrary.value.owner) == getUserName();
     }
 
-    getOwnerUserName(): string {
-        if (!this.hasCreatedLibrary) {
-        return this.getUserNameByIdGetter(this.selectedPerformanceCurveLibrary.owner);
+    function getOwnerUserName(): string {
+        if (!hasCreatedLibrary) {
+        return getUserNameByIdGetter(selectedPerformanceCurveLibrary.value.owner);
         }
         return getUserName();
     }
 
-    onShowCreatePerformanceCurveLibraryDialog(createAsNewLibrary: boolean) { 
-        this.createPerformanceCurveLibraryDialogData = {
+    function onShowCreatePerformanceCurveLibraryDialog(createAsNewLibrary: boolean) { 
+        createPerformanceCurveLibraryDialogData = {
             showDialog: true,
             performanceCurves: createAsNewLibrary
-                ? this.currentPage
+                ? currentPage.value
                 : [],
         };
     }
 
-    onSubmitCreatePerformanceCurveLibraryDialogResult(
+    function onSubmitCreatePerformanceCurveLibraryDialogResult(
         performanceCurveLibrary: PerformanceCurveLibrary,
     ) {
-        this.createPerformanceCurveLibraryDialogData = clone(
+        createPerformanceCurveLibraryDialogData = clone(
             emptyCreatePerformanceLibraryDialogData,
         );
 
@@ -983,200 +960,200 @@ export default class PerformanceCurveEditor extends Vue {
                 library: performanceCurveLibrary,    
                 isNewLibrary: true,           
                  syncModel: {
-                    libraryId: performanceCurveLibrary.performanceCurves.length == 0 || !this.hasSelectedLibrary ? null : this.selectedPerformanceCurveLibrary.id,
-                    rowsForDeletion: performanceCurveLibrary.performanceCurves.length == 0 ? [] : this.deletionIds,
-                    updateRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : this.addedRows,
-                    isModified: this.scenarioLibraryIsModified
+                    libraryId: performanceCurveLibrary.performanceCurves.length == 0 || !hasSelectedLibrary ? null : selectedPerformanceCurveLibrary.value.id,
+                    rowsForDeletion: performanceCurveLibrary.performanceCurves.length == 0 ? [] : deletionIds.value,
+                    updateRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : addedRows.value,
+                    isModified: scenarioLibraryIsModified
                  },
-                scenarioId: this.hasScenario ? this.selectedScenarioId : null
+                scenarioId: hasScenario ? selectedScenarioId : null
             }
             PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then(() => {
-                this.hasCreatedLibrary = true;
-                this.librarySelectItemValue = performanceCurveLibrary.id;
+                hasCreatedLibrary = true;
+                librarySelectItemValue.value = performanceCurveLibrary.id;
                 
                 if(performanceCurveLibrary.performanceCurves.length == 0){
-                    this.clearChanges();
+                    clearChanges();
                 }
 
-                this.performanceCurveLibraryMutator(performanceCurveLibrary);
-                this.selectedPerformanceCurveLibraryMutator(performanceCurveLibrary.id);
-                this.addSuccessNotificationAction({message:'Added deterioration model library'})
+                performanceCurveLibraryMutator(performanceCurveLibrary);
+                selectedPerformanceCurveLibraryMutator(performanceCurveLibrary.id);
+                addSuccessNotificationAction({message:'Added deterioration model library'})
             })
         }
     }
 
-    onSubmitCreatePerformanceCurveDialogResult( 
+    function onSubmitCreatePerformanceCurveDialogResult( 
         newPerformanceCurve: PerformanceCurve,
     ) {
-        this.showCreatePerformanceCurveDialog = false;
+        showCreatePerformanceCurveDialog = false;
 
         if (!isNil(newPerformanceCurve)) {
-            this.addedRows = prepend(
+            addedRows.value = prepend(
                 newPerformanceCurve,
-                this.addedRows,
+                addedRows.value,
             );
-            this.onPaginationChanged();
+            onPaginationChanged();
         }
     }
 
-    onEditPerformanceCurveProperty(id: string, property: string, value: any) {
-        if (any(propEq('id', id), this.currentPage)) { 
+    function onEditPerformanceCurveProperty(id: string, property: string, value: any) {
+        if (any(propEq('id', id), currentPage.value)) { 
             const performanceCurve: PerformanceCurve = find(
                 propEq('id', id),
-                this.currentPage,
+                currentPage.value,
             ) as PerformanceCurve;
-            this.onUpdateRow(id, performanceCurve);
-            this.onPaginationChanged();
+            onUpdateRow(id, performanceCurve);
+            onPaginationChanged();
         }
     }
 
-    onShowEquationEditorDialog(performanceCurveId: string) {
-        this.selectedPerformanceCurve = find(
+    function onShowEquationEditorDialog(performanceCurveId: string) {
+        selectedPerformanceCurve = find(
             propEq('id', performanceCurveId),
-            this.currentPage,
+            currentPage.value,
         ) as PerformanceCurve;
 
-        if (!isNil(this.selectedPerformanceCurve)) {
-            this.hasSelectedPerformanceCurve = true;
+        if (!isNil(selectedPerformanceCurve)) {
+            hasSelectedPerformanceCurve = true;
 
-            this.equationEditorDialogData = {
+            equationEditorDialogData = {
                 showDialog: true,
-                equation: this.selectedPerformanceCurve.equation,
+                equation: selectedPerformanceCurve.equation,
             };
         }
     }
 
-    onSubmitEquationEditorDialogResult(equation: Equation) {
-        this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
+    function onSubmitEquationEditorDialogResult(equation: Equation) {
+        equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
-        if (!isNil(equation) && this.hasSelectedPerformanceCurve) {
-            this.onUpdateRow(this.selectedPerformanceCurve.id, { ...this.selectedPerformanceCurve, equation: equation })
-            this.currentPage = update(
+        if (!isNil(equation) && hasSelectedPerformanceCurve) {
+            onUpdateRow(selectedPerformanceCurve.id, { ...selectedPerformanceCurve, equation: equation })
+            currentPage.value = update(
                 findIndex(
-                    propEq('id', this.selectedPerformanceCurve.id),
-                    this.currentPage,
+                    propEq('id', selectedPerformanceCurve.id),
+                    currentPage.value,
                 ),
-                { ...this.selectedPerformanceCurve, equation: equation },
-                this.currentPage,
+                { ...selectedPerformanceCurve, equation: equation },
+                currentPage.value,
             );
         }
 
-        this.selectedPerformanceCurve = clone(emptyPerformanceCurve);
-        this.hasSelectedPerformanceCurve = false;
+        selectedPerformanceCurve = clone(emptyPerformanceCurve);
+        hasSelectedPerformanceCurve = false;
     }
 
-    onEditPerformanceCurveCriterionLibrary(performanceCurveId: string) {
-        this.selectedPerformanceCurve = find(
+    function onEditPerformanceCurveCriterionLibrary(performanceCurveId: string) {
+        selectedPerformanceCurve = find(
             propEq('id', performanceCurveId),
-            this.currentPage,
+            currentPage.value,
         ) as PerformanceCurve;
 
-        if (!isNil(this.selectedPerformanceCurve)) {
-            this.hasSelectedPerformanceCurve = true;
+        if (!isNil(selectedPerformanceCurve)) {
+            hasSelectedPerformanceCurve = true;
 
-            this.criterionEditorDialogData = {
+            criterionEditorDialogData = {
                 showDialog: true,
-                CriteriaExpression: this.selectedPerformanceCurve.criterionLibrary.mergedCriteriaExpression
+                CriteriaExpression: selectedPerformanceCurve.criterionLibrary.mergedCriteriaExpression
             };
         }
     }
 
-    onSubmitCriterionEditorDialogResult(
+    function onSubmitCriterionEditorDialogResult(
         criterionExpression: string,
     ) {
-        this.criterionEditorDialogData = clone(
+        criterionEditorDialogData = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
-        if (!isNil(criterionExpression) && this.hasSelectedPerformanceCurve) {
-            if(this.selectedPerformanceCurve.criterionLibrary.id === getBlankGuid())
-                this.selectedPerformanceCurve.criterionLibrary.id = getNewGuid();
-            this.onUpdateRow(this.selectedPerformanceCurve.id, { ...this.selectedPerformanceCurve, 
-            criterionLibrary: {...this.selectedPerformanceCurve.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
-            this.currentPage = update(
+        if (!isNil(criterionExpression) && hasSelectedPerformanceCurve) {
+            if(selectedPerformanceCurve.criterionLibrary.id === getBlankGuid())
+                selectedPerformanceCurve.criterionLibrary.id = getNewGuid();
+            onUpdateRow(selectedPerformanceCurve.id, { ...selectedPerformanceCurve, 
+            criterionLibrary: {...selectedPerformanceCurve.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
+            currentPage.value = update(
                 findIndex(
-                    propEq('id', this.selectedPerformanceCurve.id),
-                    this.currentPage,
+                    propEq('id', selectedPerformanceCurve.id),
+                    currentPage.value,
                 ),
                 {
-                    ...this.selectedPerformanceCurve,
-                    criterionLibrary: {...this.selectedPerformanceCurve.criterionLibrary, mergedCriteriaExpression: criterionExpression},
+                    ...selectedPerformanceCurve,
+                    criterionLibrary: {...selectedPerformanceCurve.criterionLibrary, mergedCriteriaExpression: criterionExpression},
                 },
-                this.currentPage,
+                currentPage.value,
             );
         }
 
-        this.selectedPerformanceCurve = clone(emptyPerformanceCurve);
-        this.hasSelectedPerformanceCurve = false;
+        selectedPerformanceCurve = clone(emptyPerformanceCurve);
+        hasSelectedPerformanceCurve = false;
     }
 
-    onRemovePerformanceCurve(performanceCurveId: string) {
-        this.deletionIds.push(performanceCurveId);
-        this.onPaginationChanged();
+    function onRemovePerformanceCurve(performanceCurveId: string) {
+        deletionIds.value.push(performanceCurveId);
+        onPaginationChanged();
     }
 
-    onUpsertScenarioPerformanceCurves() {
+    function onUpsertScenarioPerformanceCurves() {
 
-        if (this.selectedPerformanceCurveLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
-        else { this.scenarioLibraryIsModified = false; }
+        if (selectedPerformanceCurveLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
+        else { scenarioLibraryIsModified = false; }
 
         PerformanceCurveService.UpsertScenarioPerformanceCurves({
-            libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
-            rowsForDeletion: this.deletionIds,
-            updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows,
-            isModified: this.scenarioLibraryIsModified
-        }, this.selectedScenarioId).then((response: AxiosResponse) => {
+            libraryId: selectedPerformanceCurveLibrary.value.id === uuidNIL ? null : selectedPerformanceCurveLibrary.value.id,
+            rowsForDeletion: deletionIds.value,
+            updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+            addedRows: addedRows.value,
+            isModified: scenarioLibraryIsModified
+        }, selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-                this.clearChanges()
-                this.resetPage();
-                this.addSuccessNotificationAction({message: "Modified scenario's deterioration models"});
-                this.librarySelectItemValue = null
+                parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+                clearChanges()
+                resetPage();
+                addSuccessNotificationAction({message: "Modified scenario's deterioration models"});
+                librarySelectItemValue.value = null
             }           
         });
     }
 
-    onUpsertPerformanceCurveLibrary() { // need to do upsert things
+    function onUpsertPerformanceCurveLibrary() { // need to do upsert things
         const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
-                library: this.selectedPerformanceCurveLibrary,
+                library: selectedPerformanceCurveLibrary.value,
                 isNewLibrary: false,
                  syncModel: {
-                    libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
-                    rowsForDeletion: this.deletionIds,
-                    updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: this.addedRows,
-                    isModified: this.scenarioLibraryIsModified
+                    libraryId: selectedPerformanceCurveLibrary.value.id === uuidNIL ? null : selectedPerformanceCurveLibrary.value.id,
+                    rowsForDeletion: deletionIds.value,
+                    updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: addedRows.value,
+                    isModified: scenarioLibraryIsModified
                  },
                  scenarioId: null
         }
         PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
-                this.performanceCurveLibraryMutator(this.selectedPerformanceCurveLibrary);
-                this.selectedPerformanceCurveLibraryMutator(this.selectedPerformanceCurveLibrary.id);
-                this.addSuccessNotificationAction({message: "Updated deterioration model library",});
+                clearChanges()
+                performanceCurveLibraryMutator(selectedPerformanceCurveLibrary);
+                selectedPerformanceCurveLibraryMutator(selectedPerformanceCurveLibrary.value.id);
+                addSuccessNotificationAction({message: "Updated deterioration model library",});
             }
         });
     }
 
-    onDiscardChanges() {
-        this.librarySelectItemValue = null;
+    function onDiscardChanges() {
+        librarySelectItemValue.value = null;
         setTimeout(() => {
-            if (this.hasScenario) {
-                this.deletionIds = [];
-                this.addedRows = [];
-                this.updatedRowsMap.clear();
-                this.resetPage();
+            if (hasScenario) {
+                deletionIds.value = [];
+                addedRows.value = [];
+                updatedRowsMap.clear();
+                resetPage();
             }
         });
-        this.parentLibraryName = this.loadedParentName;
-        this.parentLibraryId = this.loadedParentId;
+        parentLibraryName = loadedParentName;
+        parentLibraryId = loadedParentId;
     }
 
-    onShowConfirmDeleteAlert() {
-        this.confirmDeleteAlertData = {
+    function onShowConfirmDeleteAlert() {
+        confirmDeleteAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1184,45 +1161,45 @@ export default class PerformanceCurveEditor extends Vue {
         };
     }
 
-    onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        this.confirmDeleteAlertData = clone(emptyAlertData);
+    function onSubmitConfirmDeleteAlertResult(submit: boolean) {
+        confirmDeleteAlertData = clone(emptyAlertData);
 
         if (submit) {
-            this.librarySelectItemValue = null;
-            this.deletePerformanceCurveLibraryAction(
-                this.selectedPerformanceCurveLibrary.id,
+            librarySelectItemValue.value = null;
+            deletePerformanceCurveLibraryAction(
+                selectedPerformanceCurveLibrary.value.id,
             );
         }
     }
 
-    disableCrudButtons() {
-        const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+    function disableCrudButtons() {
+        const rowChanges = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
             (performanceCurve: PerformanceCurve) => {
                 return (
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    rules['generalRules'].valueIsNotEmpty(
                         performanceCurve.name,
                     ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    rules['generalRules'].valueIsNotEmpty(
                         performanceCurve.attribute,
                     ) === true
                 );
             },
         );
 
-        if (this.hasSelectedLibrary) {
+        if (hasSelectedLibrary) {
             return !(
-                this.rules['generalRules'].valueIsNotEmpty(
-                    this.selectedPerformanceCurveLibrary.name,
+                rules['generalRules'].valueIsNotEmpty(
+                    selectedPerformanceCurveLibrary.value.name,
                 ) === true &&
                 dataIsValid);
         }
 
-        this.disableCrudButtonsResult = !dataIsValid;
+        disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
 
-    OnDownloadTemplateClick()
+    function OnDownloadTemplateClick()
     {
         PerformanceCurveService.downloadPerformanceCurvesTemplate()
             .then((response: AxiosResponse) => {
@@ -1233,9 +1210,9 @@ export default class PerformanceCurveEditor extends Vue {
             });
     }
 
-    exportPerformanceCurves() {
-        const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
-                PerformanceCurveService.exportPerformanceCurves(id, this.hasScenario)
+    function exportPerformanceCurves() {
+        const id: string = hasScenario ? selectedScenarioId : selectedPerformanceCurveLibrary.value.id;
+                PerformanceCurveService.exportPerformanceCurves(id, hasScenario)
                     .then((response: AxiosResponse) => {
                         if (hasValue(response, 'data')) {
                             const fileInfo: FileInfo = response.data as FileInfo;
@@ -1244,8 +1221,8 @@ export default class PerformanceCurveEditor extends Vue {
                     });
     }
 
-    onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
-        this.showImportExportPerformanceCurvesDialog = false;
+    function onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
+        showImportExportPerformanceCurvesDialog = false;
 
         if (hasValue(result)) {
             if (result.isExport) {
@@ -1257,18 +1234,18 @@ export default class PerformanceCurveEditor extends Vue {
                     file: result.file
                 };
 
-                if (this.hasScenario) {
-                    this.importScenarioPerformanceCurvesFileAction({
+                if (hasScenario) {
+                    importScenarioPerformanceCurvesFileAction({
                         ...data,
-                        id: this.selectedScenarioId,
-                        currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                        id: selectedScenarioId,
+                        currentUserCriteriaFilter: currentUserCriteriaFilter
                     }).then(() => {
                     });
                 } else {
-                    this.importLibraryPerformanceCurvesFileAction({
+                    importLibraryPerformanceCurvesFileAction({
                         ...data,
-                        id: this.selectedPerformanceCurveLibrary.id,
-                        currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                        id: selectedPerformanceCurveLibrary.value.id,
+                        currentUserCriteriaFilter: currentUserCriteriaFilter
                     }).then(() => {
                     });
                 }
@@ -1276,18 +1253,18 @@ export default class PerformanceCurveEditor extends Vue {
             }
         }
     }
-    onShowSharePerformanceCurveLibraryDialog(performanceCurveLibrary: PerformanceCurveLibrary)
+    function onShowSharePerformanceCurveLibraryDialog(performanceCurveLibrary: PerformanceCurveLibrary)
     {
-        this.sharePerformanceCurveLibraryDialogData =
+        sharePerformanceCurveLibraryDialogData =
         {
             showDialog: true,
             performanceCurveLibrary: clone(performanceCurveLibrary),
         };
     }
-    onSharePerformanceCurveLibraryDialogSubmit(performanceCurveLibraryUsers: PerformanceCurveLibraryUser[]) {
-        this.sharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
+    function onSharePerformanceCurveLibraryDialogSubmit(performanceCurveLibraryUsers: PerformanceCurveLibraryUser[]) {
+        sharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
 
-        if (!isNil(performanceCurveLibraryUsers) && this.selectedPerformanceCurveLibrary.id !== getBlankGuid())
+        if (!isNil(performanceCurveLibraryUsers) && selectedPerformanceCurveLibrary.value.id !== getBlankGuid())
         {
             let libraryUserData: LibraryUser[] = [];
 
@@ -1309,61 +1286,61 @@ export default class PerformanceCurveEditor extends Vue {
                 //add library user to an array
                 libraryUserData.push(libraryUser);
             });
-            if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
-                this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
+            if (!isNullOrUndefined(selectedPerformanceCurveLibrary.value.id) ) {
+                getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=> isShared = isSharedLibrary.value);
             }
             //update performance curve library sharing
-            PerformanceCurveService.upsertOrDeletePerformanceCurveLibraryUsers(this.selectedPerformanceCurveLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+            PerformanceCurveService.upsertOrDeletePerformanceCurveLibraryUsers(selectedPerformanceCurveLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                 {
-                    this.resetPage();
+                    resetPage();
                 }
             });
         }
     }
-    onSearchClick(){
-        this.currentSearch = this.gridSearchTerm;
-        this.resetPage();
+    function onSearchClick(){
+        currentSearch = gridSearchTerm;
+        resetPage();
     }
 
-    onClearClick(){
-        this.gridSearchTerm = '';
-        this.onSearchClick();
+    function onClearClick(){
+        gridSearchTerm = '';
+        onSearchClick();
     }
 
-    onUpdateRow(rowId: string, updatedRow: PerformanceCurve){
-        if(any(propEq('id', rowId), this.addedRows))
+    function onUpdateRow(rowId: string, updatedRow: PerformanceCurve){
+        if(any(propEq('id', rowId), addedRows.value))
             return;
 
-        let mapEntry = this.updatedRowsMap.get(rowId)
+        let mapEntry = updatedRowsMap.get(rowId)
 
         if(isNil(mapEntry)){
-            const row = this.rowCache.find(r => r.id === rowId);
+            const row = rowCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
-                this.updatedRowsMap.set(rowId, [row , updatedRow])
+                updatedRowsMap.set(rowId, [row , updatedRow])
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
             mapEntry[1] = updatedRow;
         }
         else
-            this.updatedRowsMap.delete(rowId)
+            updatedRowsMap.delete(rowId)
 
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    clearChanges(){
-        this.updatedRowsMap.clear();
-        this.addedRows = [];
-        this.deletionIds = [];
+    function clearChanges(){
+        updatedRowsMap.clear();
+        addedRows.value = [];
+        deletionIds.value = [];
     }
 
-    resetPage(){
-        this.performancePagination.page = 1;
-        this.onPaginationChanged();
+    function resetPage(){
+        performancePagination.value.page = 1;
+        onPaginationChanged();
     }
 
-    CheckUnsavedDialog(next: any, otherwise: any) {
-        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
+    function CheckUnsavedDialog(next: any, otherwise: any) {
+        if (hasUnsavedChanges && unsavedDialogAllowed) {
             // @ts-ignore
             Vue.dialog
                 .confirm(
@@ -1374,39 +1351,39 @@ export default class PerformanceCurveEditor extends Vue {
                 .catch(() => otherwise())
         } 
         else {
-            this.unsavedDialogAllowed = true;
+            unsavedDialogAllowed = true;
             next();
         }
     };
 
-    setParentLibraryName(libraryId: string) {
+    function setParentLibraryName(libraryId: string) {
          if (libraryId === "None") {
-            this.parentLibraryName = "None";
+            parentLibraryName = "None";
             return;
         }
         let foundLibrary: PerformanceCurveLibrary = emptyPerformanceCurveLibrary;
-        this.statePerformanceCurveLibraries.forEach(library => {
+        statePerformanceCurveLibraries.value.forEach(library => {
             if (library.id === libraryId ) {
                 foundLibrary = clone(library);
             }
         });
-        this.parentLibraryId = foundLibrary.id;
-        this.parentLibraryName = foundLibrary.name;
+        parentLibraryId = foundLibrary.id;
+        parentLibraryName = foundLibrary.name;
     }
 
-    importCompleted(data: any){
+    function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
-        if( importComp.workType === WorkType.ImportScenarioPerformanceCurve && importComp.id === this.selectedScenarioId ||
-            this.hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryPerformanceCurve && importComp.id === this.selectedPerformanceCurveLibrary.id){
-            this.clearChanges()
-            this.performancePagination.page = 1
-            this.onPaginationChanged().then(() => {
-                this.setAlertMessageAction('');
+        if( importComp.workType === WorkType.ImportScenarioPerformanceCurve && importComp.id === selectedScenarioId ||
+            hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryPerformanceCurve && importComp.id === selectedPerformanceCurveLibrary.value.id){
+            clearChanges()
+            performancePagination.value.page = 1
+            onPaginationChanged().then(() => {
+                setAlertMessageAction('');
             })
         }        
     }
 
-    async initializePages(){
+    async function initializePages(){
         const request: PagingRequest<PerformanceCurve>= {
             page: 1,
             rowsPerPage: 5,
@@ -1421,23 +1398,22 @@ export default class PerformanceCurveEditor extends Vue {
             isDescending: false,
             search: ''
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            await PerformanceCurveService.getPerformanceCurvePage(this.selectedScenarioId, request).then(response => {
-                this.isRunning = false
+        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+            await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request).then(response => {
+                isRunning = false
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
-                    this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
-                    this.loadedParentName = this.parentLibraryName; //store original
-                    this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
+                    setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
+                    loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
+                    loadedParentName = parentLibraryName; //store original
+                    scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
 
                 }
             });
     }
-}
 </script>
 
 <style>

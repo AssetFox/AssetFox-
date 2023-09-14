@@ -44,51 +44,52 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Getter} from 'vuex-class';
-import {Component, Prop, Watch} from 'vue-property-decorator';
 import {emptyPerformanceCurveLibrary, PerformanceCurve, PerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {CreatePerformanceCurveLibraryDialogData} from '@/shared/models/modals/create-performance-curve-library-dialog-data';
 import {getUserName} from '@/shared/utils/get-user-info';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {clone} from 'ramda';
 import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class CreatePerformanceCurveLibraryDialog extends Vue {
-  @Prop() dialogData: CreatePerformanceCurveLibraryDialogData;
+const emit = defineEmits(['submit'])
+let store = useStore();
+const props = defineProps<{
+  dialogData: CreatePerformanceCurveLibraryDialogData
+    }>()
 
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+    let getIdByUserNameGetter: any = store.getters.getIdByUserName
+    let newPerformanceCurveLibrary: PerformanceCurveLibrary = {...emptyPerformanceCurveLibrary, id: getNewGuid()};
+    let rules: InputValidationRules = validationRules;
 
-  newPerformanceCurveLibrary: PerformanceCurveLibrary = {...emptyPerformanceCurveLibrary, id: getNewGuid()};
-  rules: InputValidationRules = clone(rules);
-
-  @Watch('dialogData')
-  onDialogDataChanged() {
+  watch(()=>props.dialogData,()=>onDialogDataChanged)
+  function onDialogDataChanged() {
     let currentUser: string = getUserName();
 
-    this.newPerformanceCurveLibrary = {
-      ...this.newPerformanceCurveLibrary,
-      performanceCurves: this.dialogData.performanceCurves.map((performanceCurve: PerformanceCurve) => {
+    newPerformanceCurveLibrary = {
+      ...newPerformanceCurveLibrary,
+      performanceCurves: props.dialogData.performanceCurves.map((performanceCurve: PerformanceCurve) => {
         performanceCurve.id = getNewGuid();
         if (performanceCurve.equation.id !== getBlankGuid()) {
           performanceCurve.equation.id = getNewGuid();
         }
         return performanceCurve;
       }),
-      owner: this.getIdByUserNameGetter(currentUser),
+      owner: getIdByUserNameGetter(currentUser),
     };
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newPerformanceCurveLibrary);
+      emit('submit', newPerformanceCurveLibrary);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newPerformanceCurveLibrary = {...emptyPerformanceCurveLibrary, id: getNewGuid()};
+    newPerformanceCurveLibrary = {...emptyPerformanceCurveLibrary, id: getNewGuid()};
   }
-}
 </script>

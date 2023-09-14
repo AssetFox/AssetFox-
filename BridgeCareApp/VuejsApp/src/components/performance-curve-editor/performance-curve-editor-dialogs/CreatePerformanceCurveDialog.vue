@@ -69,56 +69,58 @@
   </v-layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {State} from 'vuex-class';
 import {emptyPerformanceCurve, PerformanceCurve} from '@/shared/models/iAM/performance';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {hasValue} from '@/shared/utils/has-value-util';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {clone} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class CreatePerformanceCurveDialog extends Vue {
-  @Prop() showDialog: boolean;
+let store = useStore();
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+    showDialog: boolean
+    }>()
 
-  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
+    let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributes);
+    let attributeSelectItems: SelectItem[] = [];
+    let newPerformanceCurve: PerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};
+    let rules: InputValidationRules = validationRules;
 
-  attributeSelectItems: SelectItem[] = [];
-  newPerformanceCurve: PerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};
-  rules: InputValidationRules = clone(rules);
-
-  mounted() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.setAttributeSelectItems();
+  onMounted(()=>mounted())
+  function mounted() {
+    if (hasValue(stateNumericAttributes.value)) {
+      setAttributeSelectItems();
     }
   }
 
-  @Watch('stateNumericAttributes')
-  onStateNumericAttributesChanged() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.setAttributeSelectItems();
+  watch(stateNumericAttributes,()=>onStateNumericAttributesChanged)
+  function onStateNumericAttributesChanged() {
+    if (hasValue(stateNumericAttributes.value)) {
+      setAttributeSelectItems();
     }
   }
 
-  setAttributeSelectItems() {
-    this.attributeSelectItems = this.stateNumericAttributes.map((attribute: Attribute) => ({
+  function setAttributeSelectItems() {
+    attributeSelectItems = stateNumericAttributes.value.map((attribute: Attribute) => ({
       text: attribute.name,
       value: attribute.name
     }));
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newPerformanceCurve);
+      emit('submit', newPerformanceCurve);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newPerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};
+    newPerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};
   }
-}
 </script>

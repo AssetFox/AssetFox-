@@ -22,33 +22,33 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup >
 import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class SetRangeForDeletingBudgetYearsDialog extends Vue {
-  @Prop() showDialog: boolean;
-  @Prop() endYear : number;  
-  @Prop() maxRange : number;  
-
-  range: number = 1;
-
-  rules: InputValidationRules = rules;
-
-  get rangeLabel() {
-    return 'Year Range: ' + (this.range <= 1 ? this.endYear : (this.endYear - this.range + 1) + '-' + this.endYear);
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+  showDialog: boolean,
+  endYear: number,
+  maxRange : number
+}>()
+let range : number =1;
+let rules: InputValidationRules = validationRules;
+function rangeLabel() {
+    return 'Year Range: ' + (range <= 1 ? props.endYear : (props.endYear - range + 1) + '-' + props.endYear);
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.range);
+      emit('submit', range);
     } else {
-      this.$emit('submit', 0);
+      emit('submit', 0);
     }
 
-    this.range = 1;
+    range = 1;
   }
-}
+
 </script>

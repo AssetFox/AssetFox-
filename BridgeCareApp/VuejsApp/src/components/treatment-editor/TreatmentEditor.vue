@@ -732,15 +732,15 @@ export default class TreatmentEditor extends Vue {
             else if(!isNil(addedRow)){
                 this.selectedTreatment = clone(addedRow);
             }               
-            else if(this.hasSelectedLibrary)
-
-            TreatmentService.getTreatmentLibraryModifiedDate(this.librarySelectItemValue).then(response => {
-                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
-                   {
-                      var data = response.data as string;
-                      this.modifiedDate = data.slice(0, 10);
-                   }
-             }),
+            else if(this.hasSelectedLibrary){
+                if(!isNil(this.librarySelectItemValue))
+                    TreatmentService.getTreatmentLibraryModifiedDate(this.librarySelectItemValue).then(response => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                        {
+                            var data = response.data as string;
+                            this.modifiedDate = data.slice(0, 10);
+                        }
+                    })
 
                 TreatmentService.getSelectedTreatmentById(this.treatmentSelectItemValue).then((response: AxiosResponse) => {
                     if(hasValue(response, 'data')) {
@@ -750,6 +750,9 @@ export default class TreatmentEditor extends Vue {
                             this.treatmentCache.push(data)
                     }
                 })
+            }
+
+            
             else if(!isNil(treatment))
                 this.selectedTreatment = clone(treatment);
             else

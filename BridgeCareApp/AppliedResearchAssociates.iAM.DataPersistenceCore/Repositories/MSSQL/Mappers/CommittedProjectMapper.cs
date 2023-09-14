@@ -269,11 +269,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 
             }
         }
-       
-        private static SelectableTreatment MapNoTreatmentToDomain(Simulation simulation, SelectableTreatmentEntity noTreatmentEntity)
-        {
-            var domain = simulation.AddTreatment();
-            throw new NotImplementedException();
-        }
     }
 }

@@ -35,10 +35,9 @@
   </v-dialog>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import {Getter} from 'vuex-class';
-import {Component, Prop, Watch} from 'vue-property-decorator';
+<script lang='ts' setup>
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+
 import {CreateTargetConditionGoalLibraryDialogData} from '@/shared/models/modals/create-target-condition-goal-library-dialog-data';
 import {
   emptyTargetConditionGoalLibrary,
@@ -46,43 +45,43 @@ import {
   TargetConditionGoalLibrary
 } from '@/shared/models/iAM/target-condition-goal';
 import {getUserName} from '@/shared/utils/get-user-info';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules,} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class CreateTargetConditionGoalLibraryDialog extends Vue {
-  @Prop() dialogData: CreateTargetConditionGoalLibraryDialogData;
+  let store = useStore();
+  const emit = defineEmits(['submit'])
+  const props = defineProps<{dialogData: CreateTargetConditionGoalLibraryDialogData}>()
+  let getIdByUserNameGetter = store.getters.getIdByUserName;
 
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+  let newTargetConditionGoalLibrary: TargetConditionGoalLibrary = {...emptyTargetConditionGoalLibrary, id: getNewGuid()};
+  let rules: InputValidationRules = validationRules;
 
-  newTargetConditionGoalLibrary: TargetConditionGoalLibrary = {...emptyTargetConditionGoalLibrary, id: getNewGuid()};
-  rules: InputValidationRules = rules;
-
-  @Watch('dialogData')
-  onDialogDataChanged() {
+  watch(props.dialogData,()=>onDialogDataChanged)
+  function onDialogDataChanged() {
     let currentUser: string = getUserName();
 
-    this.newTargetConditionGoalLibrary = {
-      ...this.newTargetConditionGoalLibrary,
-      targetConditionGoals: hasValue(this.dialogData.targetConditionGoals)
-          ? this.dialogData.targetConditionGoals.map((targetConditionGoal: TargetConditionGoal) => ({
+     newTargetConditionGoalLibrary = {
+      ...newTargetConditionGoalLibrary,
+      targetConditionGoals: hasValue(props.dialogData.targetConditionGoals)
+          ? props.dialogData.targetConditionGoals.map((targetConditionGoal: TargetConditionGoal) => ({
             ...targetConditionGoal,
             id: getNewGuid()
           }))
           : [],
-        owner: this.getIdByUserNameGetter(currentUser),
+        owner: getIdByUserNameGetter(currentUser),
     };
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newTargetConditionGoalLibrary);
+      emit('submit', newTargetConditionGoalLibrary);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newTargetConditionGoalLibrary = {...emptyTargetConditionGoalLibrary, id: getNewGuid()};
+    newTargetConditionGoalLibrary = {...emptyTargetConditionGoalLibrary, id: getNewGuid()};
   }
-}
 </script>

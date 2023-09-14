@@ -343,12 +343,9 @@
     </v-layout>
 </template>
 <script lang="ts" setup>
-import Vue from 'vue'
-import Component from 'vue-class-component';
+import { watch, ref, inject, onBeforeUnmount } from 'vue'
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { CommittedProjectConsequence, CommittedProjectFillTreatmentReturnValues, emptyCommittedProjectConsequence, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
-import { Action, Getter, State } from 'vuex-class';
-import { Watch } from 'vue-property-decorator';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
 import { Treatment, treatmentCategoryMap, treatmentCategoryReverseMap, TreatmentLibrary } from '@/shared/models/iAM/treatment';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -376,16 +373,17 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import InvestmentService from '@/services/investment.service';
-import { formatAsCurrency } from '@/shared/utils/currency-formatter';
-import { isNullOrUndefined } from 'util';
+// import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { max } from 'moment';
-import { stat, watch } from 'fs';
 import { Hub } from '@/connectionHub';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import { storeKey, useStore } from 'vuex';
+import { createDecipheriv } from 'crypto';
 
     let store = useStore();
+    const $statusHub = inject('$statusHub') as any
+    created();
     let searchItems = '';
     let dataPerPage = 0;
     let totalDataFound = 0;
@@ -418,54 +416,30 @@ import { storeKey, useStore } from 'vuex';
     let projectPagination: Pagination = clone(emptyPagination);
 
     let stateSectionCommittedProjects = ref<SectionCommittedProject[]>(store.state.committedProjectsModule.sectionCommittedProjects);
-    // @State(state => state.committedProjectsModule.sectionCommittedProjects) stateSectionCommittedProjects: SectionCommittedProject[];
     let stateTreatmentLibraries = ref<TreatmentLibrary[]>(store.state.treatmentModule.treatmentLibraries);
-    // @State(state => state.treatmentModule.treatmentLibraries)stateTreatmentLibraries: TreatmentLibrary[];
     let stateAttributes = ref<Attribute[]>(store.state.attributeModule.attributes);
-    // @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
     let stateInvestmentPlan = ref<InvestmentPlan>(store.state.investmentModule.investmentPlan);
-    // @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
     let stateScenarioSimpleBudgetDetails = ref<SimpleBudgetDetail[]>(store.state.investmentModule.scenarioSimpleBudgetDetails);
-    // @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
-    let hasUnsavedChanges = ref<boolean>(state.unsavedChangesFlagModule.hasUnsavedChanges);
-    // @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
+    let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
     let networks = ref<Network[]>(store.state.networkModule.networks);
-    // @State(state => state.networkModule.networks) networks: Network[];
 
-    // @Action('getCommittedProjects') getCommittedProjects: any;
     async function getCommittedProjects(payload?: any): Promise<any> { await store.dispatch('getCommittedProjects'); }
-    // @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
     async function getTreatmentLibrariesAction(payload?: any): Promise<any> { await store.dispatch('getTreatmentLibraries'); }
-    // @Action('getScenarioSelectableTreatments') getScenarioSelectableTreatmentsAction: any;
     async function getScenarioSelectableTreatmentsAction(payload?: any): Promise<any> { await store.dispatch('getScenarioSelectableTreatments'); }
-    // @Action('getInvestmentPlan') getInvestmentPlanAction: any;
     async function getInvestmentPlanAction(payload?: any): Promise<any> { await store.dispatch('getInvestmentPlan'); }
-    // @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction:any;
     async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any> { await store.dispatch('getScenarioSimpleBudgetDetails'); }
-    // @Action('getAttributes') getAttributesAction: any;
     async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes'); }
-    // @Action('getNetworks') getNetworksAction: any;
     async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks'); }
-    // @Action('deleteSpecificCommittedProjects') deleteSpecificCommittedProjectsAction: any;
     async function deleteSpecificCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('deleteSpecificCommittedProjects'); }
-    // @Action('deleteSimulationCommittedProjects') deleteSimulationCommittedProjectsAction: any;
     async function deleteSimulationCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('deleteSimulationCommittedProjects'); }
-    // @Action('upsertCommittedProjects') upsertCommittedProjectsAction: any;
     async function upsertCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('upsertCommittedProjects'); }
 
-    // @Action('selectTreatmentLibrary') selectTreatmentLibraryAction: any;
     async function selectTreatmentLibraryAction(payload?: any): Promise<any> { await store.dispatch('selectTreatmentLibrary'); }
-    // @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     async function setHasUnsavedChangesAction(payload?: any): Promise<any> { await store.dispatch('setHasUnsavedChanges'); }
-    // @Action('addSuccessNotification') addSuccessNotificationAction: any;
     async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification'); }
-    // @Action('addErrorNotification') addErrorNotificationAction: any;
     async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification'); } 
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserOrSharedScenario'); }
-    // @Action('selectScenario') selectScenarioAction: any;
     async function selectScenarioAction(payload?: any): Promise<any> { await store.dispatch('selectScenario'); }
-    // @Action('setAlertMessage') setAlertMessageAction: any;
     async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage'); }
 
     let getUserNameByIdGetter: any = store.getters.getUserNameByIdGetter;
@@ -586,27 +560,49 @@ import { storeKey, useStore } from 'vuex';
             width: '20%',
         }
     ];
-    
-    mounted() {
-        this.reverseCatMap.forEach(cat => {
-            this.categorySelectItems.push({text: cat, value: cat})        
+
+    function created() {
+        reverseCatMap.forEach(cat => {
+            categorySelectItems.push({text: cat, value: cat})        
         })
 
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
-            this.importCompleted,
+            importCompleted,
         );
-    }   
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
-
-        this.$statusHub.$off(
-            Hub.BroadcastEventType.BroadcastImportCompletionEvent,
-            this.importCompleted,
-        );
-
-        this.setAlertMessageAction('');
     }
+    // mounted() {
+    //     this.reverseCatMap.forEach(cat => {
+    //         this.categorySelectItems.push({text: cat, value: cat})        
+    //     })
+
+    //     this.$statusHub.$on(
+    //         Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+    //         this.importCompleted,
+    //     );
+    // }   
+
+    onBeforeUnmount(() => beforeDestroy())
+    function beforeDestroy() {
+        setHasUnsavedChangesAction({ value: false });
+
+        $statusHub.$off(
+            Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+            importCompleted,
+        );
+        setAlertMessageAction('');
+    }
+
+    // beforeDestroy() {
+    //     this.setHasUnsavedChangesAction({ value: false });
+
+    //     this.$statusHub.$off(
+    //         Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+    //         this.importCompleted,
+    //     );
+
+    //     this.setAlertMessageAction('');
+    // }
     beforeRouteEnter(to: any, from: any, next:any) {
         next((vm:any) => {
             vm.scenarioId = to.query.scenarioId;
@@ -649,29 +645,29 @@ import { storeKey, useStore } from 'vuex';
     //Watch
     watch(isNoTreatmentBefore, () =>onIsNoTreatmentBeforeChanged)
     function onIsNoTreatmentBeforeChanged(){
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    @Watch('investmentYears')
-    onInvestmentYearsChanged(){
+    watch(investmentYears, () => onInvestmentYearsChanged)
+    function onInvestmentYearsChanged(){
         //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/min
-        if (this.investmentYears.length > 0) {
-            this.lastYear = Math.max(...this.investmentYears);
-            this.firstYear = Math.min(...this.investmentYears);
+        if (investmentYears.length > 0) {
+            lastYear = Math.max(...investmentYears);
+            firstYear = Math.min(...investmentYears);
         }
     }
 
-    @Watch('networks')
-    onStateNetworksChanged(){
-        const network = this.networks.find(o => o.id == this.networkId)
+    watch(networks, () => onStateNetworksChanged)
+    function onStateNetworksChanged(){
+        const network = networks.find(o => o.id == networkId)
         if(!isNil(network)){
-            this.network = network;
+            network = network;
         }           
     }
 
-    @Watch('stateTreatmentLibraries')
-    onStateTreatmentLibrariesChanged() {
-        this.librarySelectItems = this.stateTreatmentLibraries.map(
+    watch(stateTreatmentLibraries, () => onStateTreatmentLibrariesChanged)
+    function onStateTreatmentLibrariesChanged() {
+        librarySelectItems = stateTreatmentLibraries.map(
             (library: TreatmentLibrary) => ({
                 text: library.name,
                 value: library.id
@@ -679,81 +675,82 @@ import { storeKey, useStore } from 'vuex';
         );
     }
 
-    @Watch('selectedLibraryTreatments', {deep: true})
-    onSelectedLibraryTreatmentsChanged(){
-        this.treatmentSelectItems = this.selectedLibraryTreatments.map(
+    //@Watch('selectedLibraryTreatments', {deep: true})
+    watch(selectedLibraryTreatments, () => onSelectedLibraryTreatmentsChanged)
+    function onSelectedLibraryTreatmentsChanged(){
+        treatmentSelectItems = selectedLibraryTreatments.map(
             (treatment: Treatment) => (treatment.name)
         );
     }
 
-    @Watch('stateAttributes')
-    onStateAttributesChanged(){
-        this.attributeSelectItems = this.stateAttributes.map(
+    watch(stateAttributes, () => onStateAttributesChanged)
+    function onStateAttributesChanged(){
+        attributeSelectItems = stateAttributes.map(
             (attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name
             }),
         );
-        let keyAttr = this.stateAttributes.find(_ => _.id == this.network.keyAttribute)
+        let keyAttr = stateAttributes.find(_ => _.id == network.keyAttribute)
         if(!isNil(keyAttr)){
-            this.keyattr = keyAttr.name;
-            this.cpGridHeaders[0].text = this.keyattr;
+            keyattr = keyAttr.name;
+            cpGridHeaders[0].text = keyattr;
         }
             
     }
 
-    @Watch('stateScenarioSimpleBudgetDetails')
-    onStateScenarioSimpleBudgetDetailsChanged(){
-        this.budgetSelectItems = this.stateScenarioSimpleBudgetDetails.map(
+    watch(stateScenarioSimpleBudgetDetails, () => onStateScenarioSimpleBudgetDetailsChanged)
+    function onStateScenarioSimpleBudgetDetailsChanged(){
+        budgetSelectItems = stateScenarioSimpleBudgetDetails.map(
             (budget: SimpleBudgetDetail) => ({
                 text: budget.name,
                 value: budget.name
             }),
         );
-        this.budgetSelectItems.push({
+        budgetSelectItems.push({
             text: 'None',
             value: ''
         });
     }
 
-    @Watch('stateSectionCommittedProjects')
-        onStateSectionCommittedProjectsChanged(){
-            this.sectionCommittedProjects = clone(this.stateSectionCommittedProjects);
-            this.setCpItems();
+    watch(stateSectionCommittedProjects, () => onStateSectionCommittedProjectsChanged)
+    function onStateSectionCommittedProjectsChanged(){
+            sectionCommittedProjects = clone(stateSectionCommittedProjects);
+            setCpItems();
     }
 
-    @Watch('librarySelectItemValue')
-    onSelectAttributeItemValueChanged() {
-        this.selectTreatmentLibraryAction(this.librarySelectItemValue);
-        this.hasSelectedLibrary = true;
-        const library = this.stateTreatmentLibraries.find(o => o.id == this.librarySelectItemValue)
+    watch(librarySelectItemValue, () => onSelectAttributeItemValueChanged)
+    function onSelectAttributeItemValueChanged() {
+        selectTreatmentLibraryAction(librarySelectItemValue);
+        hasSelectedLibrary = true;
+        const library = stateTreatmentLibraries.find(o => o.id == librarySelectItemValue)
         if(!isNil(library)){
-            this.selectedLibraryTreatments = library.treatments;
-            this.onSelectedLibraryTreatmentsChanged()
+            selectedLibraryTreatments = library.treatments;
+            onSelectedLibraryTreatmentsChanged()
         }        
     }
 
-    @Watch('selectedCommittedProject')
-    onSelectedCommittedProject(){
-        if(!isNil(this.selectedCommittedProject)){
-            const selectedProject = find(propEq('id', this.selectedCommittedProject), this.sectionCommittedProjects);
+    watch(selectedCommittedProject, () => onSelectedCommittedProject)
+    function onSelectedCommittedProject(){
+        if(!isNil(selectedCommittedProject)){
+            const selectedProject = find(propEq('id', selectedCommittedProject), sectionCommittedProjects);
             if(!isNil(selectedProject)){
-                this.selectedConsequences = selectedProject.consequences;
+                selectedConsequences = selectedProject.consequences;
             }             
         }
     }
 
-    @Watch('sectionCommittedProjects')
-    onSectionCommittedProjectsChanged() {  
-        this.setCpItems();  
+    watch(sectionCommittedProjects, () => onSectionCommittedProjectsChanged)
+    function onSectionCommittedProjectsChanged() {  
+        setCpItems();  
     }
 
-    @Watch('selectedCpItems')
-    onSelectedCpItemsChanged(){
-        if(this.selectedCpItems.length > 1)
-            this.selectedCpItems.splice(0,1);
-        if(this.selectedCpItems.length === 1)
-            this.selectedCommittedProject = this.selectedCpItems[0].id;
+    watch(selectedCpItems, () => onSelectedCpItemsChanged)
+    function onSelectedCpItemsChanged(){
+        if(selectedCpItems.length > 1)
+            selectedCpItems.splice(0,1);
+        if(selectedCpItems.length === 1)
+            selectedCommittedProject = selectedCpItems[0].id;
     }
 
     watch(projectPagination, () => onPaginationChanged)

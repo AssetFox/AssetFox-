@@ -15,15 +15,8 @@
     </svg>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
-@Component({
+<script setup lang='ts'>
 
-})
-export default class TreatmentSvg extends Vue {
-    
-}
 </script>
 
 <style >

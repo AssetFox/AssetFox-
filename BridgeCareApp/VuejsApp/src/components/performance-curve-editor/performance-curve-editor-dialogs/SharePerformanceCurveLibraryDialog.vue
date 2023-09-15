@@ -46,10 +46,8 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {PerformanceCurveLibraryUser } from '@/shared/models/iAM/performance';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -61,34 +59,38 @@ import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {PerformanceCurveLibraryUserGridRow, SharePerformanceCurveLibraryDialogData } from '@/shared/models/modals/share-performance-curve-library-dialog-data';
 import PerformanceCurveService from '@/services/performance-curve.service';
 import { http2XX } from '@/shared/utils/http-utils';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class SharePerformanceCurveLibraryDialog extends Vue {
-  @Prop() dialogData: SharePerformanceCurveLibraryDialogData;
+const emit = defineEmits(['submit'])
+let store = useStore();
+const props = defineProps<{
+  dialogData: SharePerformanceCurveLibraryDialogData
+    }>()
 
-  @State(state => state.userModule.users) stateUsers: User[];
-
-  performanceCurveLibraryUserGridHeaders: DataTableHeader[] = [
+let stateUsers = ref<User[]>(store.state.userModule.users);
+let performanceCurveLibraryUserGridHeaders: DataTableHeader[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  performanceCurveLibraryUserGridRows: PerformanceCurveLibraryUserGridRow[] = [];
-  currentUserAndOwner: PerformanceCurveLibraryUser[] = [];
-  searchTerm: string = '';
+let performanceCurveLibraryUserGridRows: PerformanceCurveLibraryUserGridRow[] = [];
+let currentUserAndOwner: PerformanceCurveLibraryUser[] = [];
+let searchTerm: string = '';
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    if (this.dialogData.showDialog) {
-      this.onSetGridData();
-      this.onSetUsersSharedWith();
+watch(()=>props.dialogData,()=>onDialogDataChanged())
+  function onDialogDataChanged() {
+    if (props.dialogData.showDialog) {
+      onSetGridData();
+      onSetUsersSharedWith();
     }
   }
 
-  onSetGridData() {
+  function onSetGridData() {
     const currentUser: string = getUserName();
 
-    this.performanceCurveLibraryUserGridRows = this.stateUsers
+    performanceCurveLibraryUserGridRows = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -98,10 +100,10 @@ export default class SharePerformanceCurveLibraryDialog extends Vue {
         }));
   }
 
-    onSetUsersSharedWith() {
+    function onSetUsersSharedWith() {
         //performance curve library users
         let performanceCurveLibraryUsers: PerformanceCurveLibraryUser[] = [];
-        PerformanceCurveService.GetPerformanceCurveLibraryUsers(this.dialogData.performanceCurveLibrary.id).then(response => {
+        PerformanceCurveService.GetPerformanceCurveLibraryUsers(props.dialogData.performanceCurveLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -130,18 +132,18 @@ export default class SharePerformanceCurveLibraryDialog extends Vue {
                 const isCurrentUserOrOwner = (performanceCurveLibraryUser: PerformanceCurveLibraryUser) => performanceCurveLibraryUser.username === currentUser || performanceCurveLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (performanceCurveLibraryUser: PerformanceCurveLibraryUser) => performanceCurveLibraryUser.username !== currentUser && !performanceCurveLibraryUser.isOwner;
 
-                this.currentUserAndOwner = filter(isCurrentUserOrOwner, performanceCurveLibraryUsers) as PerformanceCurveLibraryUser[];
+                currentUserAndOwner = filter(isCurrentUserOrOwner, performanceCurveLibraryUsers) as PerformanceCurveLibraryUser[];
                 const otherUsers: PerformanceCurveLibraryUser[] = filter(isNotCurrentUserOrOwner, performanceCurveLibraryUsers) as PerformanceCurveLibraryUser[];
 
                 otherUsers.forEach((performanceCurveLibraryUser: PerformanceCurveLibraryUser) => {
-                    if (any(propEq('id', performanceCurveLibraryUser.userId), this.performanceCurveLibraryUserGridRows)) {
+                    if (any(propEq('id', performanceCurveLibraryUser.userId), performanceCurveLibraryUserGridRows)) {
                         const performanceCurveLibraryUserGridRow: PerformanceCurveLibraryUserGridRow = find(
-                            propEq('id', performanceCurveLibraryUser.userId), this.performanceCurveLibraryUserGridRows) as PerformanceCurveLibraryUserGridRow;
+                            propEq('id', performanceCurveLibraryUser.userId), performanceCurveLibraryUserGridRows) as PerformanceCurveLibraryUserGridRow;
 
-                        this.performanceCurveLibraryUserGridRows = update(
-                            findIndex(propEq('id', performanceCurveLibraryUser.userId), this.performanceCurveLibraryUserGridRows),
+                        performanceCurveLibraryUserGridRows = update(
+                            findIndex(propEq('id', performanceCurveLibraryUser.userId), performanceCurveLibraryUserGridRows),
                             { ...performanceCurveLibraryUserGridRow, isShared: true, canModify: performanceCurveLibraryUser.canModify },
-                            this.performanceCurveLibraryUserGridRows
+                            performanceCurveLibraryUserGridRows
                         );
                     }
                 });
@@ -149,26 +151,26 @@ export default class SharePerformanceCurveLibraryDialog extends Vue {
         });
   }
 
-  removeUserModifyAccess(userId: string, isShared: boolean) {
+  function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      this.performanceCurveLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), this.performanceCurveLibraryUserGridRows),
-          'canModify', false, this.performanceCurveLibraryUserGridRows);
+      performanceCurveLibraryUserGridRows = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), performanceCurveLibraryUserGridRows),
+          'canModify', false, performanceCurveLibraryUserGridRows);
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.getPerformanceCurveLibraryUsers());
+      emit('submit', getPerformanceCurveLibraryUsers());
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.performanceCurveLibraryUserGridRows = [];
+    performanceCurveLibraryUserGridRows = [];
   }
 
-  getPerformanceCurveLibraryUsers() {
-    const usersSharedWith: PerformanceCurveLibraryUser[] = this.performanceCurveLibraryUserGridRows
+  function getPerformanceCurveLibraryUsers() {
+    const usersSharedWith: PerformanceCurveLibraryUser[] = performanceCurveLibraryUserGridRows
         .filter((performanceCurveLibraryUserGridRow: PerformanceCurveLibraryUserGridRow) => performanceCurveLibraryUserGridRow.isShared)
         .map((performanceCurveLibraryUserGridRow: PerformanceCurveLibraryUserGridRow) => ({
           userId: performanceCurveLibraryUserGridRow.id,
@@ -177,9 +179,9 @@ export default class SharePerformanceCurveLibraryDialog extends Vue {
           isOwner: false
         }));
 
-    return [...this.currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner, ...usersSharedWith];
   }
-}
+
 </script>
 
 <style>

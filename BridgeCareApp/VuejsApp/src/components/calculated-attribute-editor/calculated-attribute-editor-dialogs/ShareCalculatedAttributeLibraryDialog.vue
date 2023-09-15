@@ -23,7 +23,7 @@
                           @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox :disabled="!props.dialogData.isShared" label="Can Modify" v-model="props.item.canModify"/>
             </td>
           </template>
           <v-alert :value="true"
@@ -46,10 +46,8 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {CalculatedAttributeLibraryUser } from '@/shared/models/iAM/calculated-attribute';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -58,37 +56,41 @@ import {hasValue} from '@/shared/utils/has-value-util';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
-import {CalculatedAttributeLibraryUserGridRow, ShareCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/share-calculated-attribute-data';
+import {CalculatedAttributeLibraryUserGridRow, ShareCalculatedAttributeLibraryDialogData, emptyShareCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/share-calculated-attribute-data';
 import CalculatedAttributeService from '@/services/calculated-attribute.service';
 import { http2XX } from '@/shared/utils/http-utils';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { CreateCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/create-calculated-attribute-library-dialog-data';
 
-@Component
-export default class ShareCalculatedAttributeLibraryDialog extends Vue {
-  @Prop() dialogData: ShareCalculatedAttributeLibraryDialogData;
-
-  @State(state => state.userModule.users) stateUsers: User[];
-
-  shareCalculatedAttributeLibraryUserGridHeaders: DataTableHeader[] = [
+const emit = defineEmits(['submit'])
+let store = useStore();
+const props = defineProps<{
+    dialogData: ShareCalculatedAttributeLibraryDialogData
+  }>()
+let stateUsers = ref<User[]>(store.state.userModule.users);
+let shareCalculatedAttributeLibraryUserGridHeaders: DataTableHeader[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  shareCalculatedAttributeLibraryUserGridRows: CalculatedAttributeLibraryUserGridRow[] = [];
-  currentUserAndOwner: CalculatedAttributeLibraryUser[] = [];
-  searchTerm: string = '';
+  let shareCalculatedAttributeLibraryUserGridRows: CalculatedAttributeLibraryUserGridRow[] = [];
+  let currentUserAndOwner: CalculatedAttributeLibraryUser[] = [];
+  let searchTerm: string = '';
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    if (this.dialogData.showDialog) {
-      this.onSetGridData();
-      this.onSetUsersSharedWith();
+  watch(()=>props.dialogData,() => onDialogDataChanged)
+  function onDialogDataChanged() {
+    if (props.dialogData.showDialog) {
+      onSetGridData();
+      onSetUsersSharedWith();
     }
   }
 
-  onSetGridData() {
+  function onSetGridData() {
     const currentUser: string = getUserName();
 
-    this.shareCalculatedAttributeLibraryUserGridRows = this.stateUsers
+    shareCalculatedAttributeLibraryUserGridRows = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -98,10 +100,10 @@ export default class ShareCalculatedAttributeLibraryDialog extends Vue {
         }));
   }
 
-    onSetUsersSharedWith() {
+    function onSetUsersSharedWith() {
         // Calculated Attribute library users
         let calculatedAttributeLibraryUsers: CalculatedAttributeLibraryUser[] = [];
-        CalculatedAttributeService.getCalculatedAttributeLibraryUsers(this.dialogData.calculatedAttributeLibrary.id).then(response => {
+        CalculatedAttributeService.getCalculatedAttributeLibraryUsers(props.dialogData.calculatedAttributeLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -130,18 +132,18 @@ export default class ShareCalculatedAttributeLibraryDialog extends Vue {
                 const isCurrentUserOrOwner = (calculatedAttributeLibraryUser: CalculatedAttributeLibraryUser) => calculatedAttributeLibraryUser.username === currentUser || calculatedAttributeLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (calculatedAttributeLibraryUser: CalculatedAttributeLibraryUser) => calculatedAttributeLibraryUser.username !== currentUser && !calculatedAttributeLibraryUser.isOwner;
 
-                this.currentUserAndOwner = filter(isCurrentUserOrOwner, calculatedAttributeLibraryUsers) as CalculatedAttributeLibraryUser[];
+                currentUserAndOwner = filter(isCurrentUserOrOwner, calculatedAttributeLibraryUsers) as CalculatedAttributeLibraryUser[];
                 const otherUsers: CalculatedAttributeLibraryUser[] = filter(isNotCurrentUserOrOwner, calculatedAttributeLibraryUsers) as CalculatedAttributeLibraryUser[];
 
                 otherUsers.forEach((calculatedAttributeLibraryUser: CalculatedAttributeLibraryUser) => {
-                    if (any(propEq('id', calculatedAttributeLibraryUser.userId), this.shareCalculatedAttributeLibraryUserGridRows)) {
+                    if (any(propEq('id', calculatedAttributeLibraryUser.userId), shareCalculatedAttributeLibraryUserGridRows)) {
                         const calculatedAttributeLibraryUserGridRow: CalculatedAttributeLibraryUserGridRow = find(
-                            propEq('id', calculatedAttributeLibraryUser.userId), this.shareCalculatedAttributeLibraryUserGridRows) as CalculatedAttributeLibraryUserGridRow;
+                            propEq('id', calculatedAttributeLibraryUser.userId), shareCalculatedAttributeLibraryUserGridRows) as CalculatedAttributeLibraryUserGridRow;
 
-                        this.shareCalculatedAttributeLibraryUserGridRows = update(
-                            findIndex(propEq('id', calculatedAttributeLibraryUser.userId), this.shareCalculatedAttributeLibraryUserGridRows),
+                        shareCalculatedAttributeLibraryUserGridRows = update(
+                            findIndex(propEq('id', calculatedAttributeLibraryUser.userId), shareCalculatedAttributeLibraryUserGridRows),
                             { ...calculatedAttributeLibraryUserGridRow, isShared: true, canModify: calculatedAttributeLibraryUser.canModify },
-                            this.shareCalculatedAttributeLibraryUserGridRows
+                            shareCalculatedAttributeLibraryUserGridRows
                         );
                     }
                 });
@@ -149,26 +151,26 @@ export default class ShareCalculatedAttributeLibraryDialog extends Vue {
         });
   }
 
-  removeUserModifyAccess(userId: string, isShared: boolean) {
+  function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      this.shareCalculatedAttributeLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), this.shareCalculatedAttributeLibraryUserGridRows),
-          'canModify', false, this.shareCalculatedAttributeLibraryUserGridRows);
+      shareCalculatedAttributeLibraryUserGridRows = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), shareCalculatedAttributeLibraryUserGridRows),
+          'canModify', false, shareCalculatedAttributeLibraryUserGridRows);
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.getCalculatedAttributeLibraryUsers());
+      emit('submit', getCalculatedAttributeLibraryUsers());
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.shareCalculatedAttributeLibraryUserGridRows = [];
+    shareCalculatedAttributeLibraryUserGridRows = [];
   }
 
-  getCalculatedAttributeLibraryUsers() {
-    const usersSharedWith: CalculatedAttributeLibraryUser[] = this.shareCalculatedAttributeLibraryUserGridRows
+  function getCalculatedAttributeLibraryUsers() {
+    const usersSharedWith: CalculatedAttributeLibraryUser[] = shareCalculatedAttributeLibraryUserGridRows
         .filter((calculatedAttributeLibraryUserGridRow: CalculatedAttributeLibraryUserGridRow) => calculatedAttributeLibraryUserGridRow.isShared)
         .map((calculatedAttributeLibraryUserGridRow: CalculatedAttributeLibraryUserGridRow) => ({
           userId: calculatedAttributeLibraryUserGridRow.id,
@@ -177,9 +179,8 @@ export default class ShareCalculatedAttributeLibraryDialog extends Vue {
           isOwner: false
         }));
 
-    return [...this.currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner, ...usersSharedWith];
   }
-}
 </script>
 
 <style>

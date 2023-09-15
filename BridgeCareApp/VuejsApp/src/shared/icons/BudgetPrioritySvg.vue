@@ -8,15 +8,8 @@
 </svg>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
-@Component({
+<script setup lang='ts'>
 
-})
-export default class BudgetPrioritySvg extends Vue {
-    
-}
 </script>
 
 <style >

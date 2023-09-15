@@ -50,53 +50,56 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
+<script lang="ts" setup>
+import {watch, ref, onMounted, reactive} from 'vue';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { CommittedProjectConsequence, emptyCommittedProjectConsequence } from '@/shared/models/iAM/committed-projects';
-import { State } from 'vuex-class';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
+import { createDecipheriv } from 'crypto';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateConsequenceDialog extends Vue {
-  @Prop() showDialog: boolean;
+  let store = useStore();
+  const emit = defineEmits(['submit']);
+  const props = defineProps({showDialog: Boolean});
+  let showDialog = ref<boolean>(props.showDialog);
 
-  mounted() {
-    this.setAttributes();
+  onMounted(() => mounted())
+  function mounted() {
+    setAttributes();
   }
 
-  newConsequence: CommittedProjectConsequence = {...emptyCommittedProjectConsequence, id: getNewGuid()};
-  rules: InputValidationRules = rules;
-  attributeNames: string[] = [];
+  let newConsequence: CommittedProjectConsequence = {...emptyCommittedProjectConsequence, id: getNewGuid()};
+  let inputRules: InputValidationRules = rules;
+  let attributeNames: string[] = [];
 
-  @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+  // @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+  // async function stateAttributes(payload?: any): Promise<any>{ await store.dispatch('');}
+  const stateAttributes = reactive<Attribute[]>(store.state.attributeModule.attributes);
 
-  disableSubmitButton() {
-    return !(this.rules['generalRules'].valueIsNotEmpty(this.newConsequence.changeValue) === true);
+  function disableSubmitButton() {
+    return !(inputRules['generalRules'].valueIsNotEmpty(newConsequence.changeValue) === true);
   }
 
-  setAttributes() {
-    if (hasValue(this.stateAttributes)) {
-      this.attributeNames = getPropertyValues('name', this.stateAttributes);
+  function setAttributes() {
+    if (hasValue(stateAttributes)) {
+      attributeNames = getPropertyValues('name', stateAttributes);
 
-      if (this.showDialog) {
-        this.setNewDeficientConditionGoalDefaultValues();
+      if (showDialog) {
+        setNewDeficientConditionGoalDefaultValues();
       }
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newConsequence);
+      emit('submit', newConsequence);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newConsequence = {...emptyCommittedProjectConsequence, id: getNewGuid()};
+    newConsequence = {...emptyCommittedProjectConsequence, id: getNewGuid()};
   }
-}
 </script>

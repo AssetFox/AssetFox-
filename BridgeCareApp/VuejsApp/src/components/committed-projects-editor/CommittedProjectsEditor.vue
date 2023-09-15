@@ -1,4 +1,4 @@
-<template>
+<template></template>
     <v-layout class="Montserrat-font-family">
         <v-flex xs12>
             <v-layout column >
@@ -89,7 +89,7 @@
                                                     class="ghd-down-small"
                                                     label="Select a Treatment"
                                                     v-model="props.item.treatment"
-                                                    :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                                    :rules="[inputRules['generalRules'].valueIsNotEmpty]"
                                                     @change="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])">
                                             
                                         </v-combobox>
@@ -108,7 +108,7 @@
                                                 readonly
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                                :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
                                             <v-text-field v-if="header.value === 'budget'"
                                                 readonly
                                                 class="sm-txt"
@@ -118,29 +118,29 @@
                                                 readonly
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                                :rules="[inputRules['generalRules'].valueIsNotEmpty]"
                                                 :error-messages="props.item.errors"/>
 
                                             <v-text-field v-if="header.value === 'year'"
                                                 :value="props.item[header.value]"
                                                 :mask="'##########'"
-                                                :rules="[rules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"
+                                                :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"
                                                 :error-messages="props.item.yearErrors"/>
 
                                             <v-text-field v-if="header.value === 'cost'"
                                                 :value='formatAsCurrency(props.item[header.value])'
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                                :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             <v-text-field v-if="header.value === 'performanceFactor'"
                                                 :value='parseFloat(props.item[header.value])'
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                                :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'keyAttr'"
                                                     label="Edit"
                                                     single-line
                                                     v-model="props.item[header.value]"
-                                                    :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                                    :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                                 <v-select v-if="header.value === 'budget'"
                                                     :items="budgetSelectItems"
@@ -161,14 +161,14 @@
                                                     single-line
                                                     v-model="props.item[header.value]"
                                                     :mask="'##########'"
-                                                    :rules="[rules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"/>
+                                                    :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"/>
 
                                                 <v-text-field v-if="header.value === 'cost'"
                                                     label="Edit"
                                                     single-line
                                                     v-model.number="props.item[header.value]"
                                                     v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
-                                                    :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                                    :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             </template>
                                         </v-edit-dialog>
@@ -254,7 +254,7 @@
                                     class="sm-txt"
                                     :value="props.item.attribute"
                                     :rules="[
-                                        rules['generalRules'].valueIsNotEmpty,
+                                        inputRules['generalRules'].valueIsNotEmpty,
                                     ]"/>
                                 <template slot="input">
                                     <v-select
@@ -264,7 +264,7 @@
                                         outline
                                         v-model="props.item.attribute"
                                         :rules="[
-                                            rules['generalRules']
+                                            inputRules['generalRules']
                                                 .valueIsNotEmpty,
                                         ]" />
                                 </template>
@@ -283,14 +283,14 @@
                                     class="sm-txt"
                                     :value="props.item.changeValue"
                                     :rules="[
-                                        rules['generalRules'].valueIsNotEmpty,
+                                        inputRules['generalRules'].valueIsNotEmpty,
                                     ]"/>
                                     <template slot="input">
                                         <v-text-field
                                             label="Change value"
                                             single-line
                                             v-model="props.item.changeValue"
-                                            :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                            :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
                                     </template>
                                 </v-edit-dialog>
                             </td>
@@ -306,14 +306,14 @@
                                     single-line
                                     class="sm-text"
                                     :value='props.item.performanceFactor'
-                                    :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                    :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
                                 <template slot="input">
                                     <v-text-field
                                         label=""
                                         single-line
                                         maxlength="5"
                                         v-model="props.item.performanceFactor"
-                                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                        :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
                                 </template>    
                                 </v-edit-dialog>
                             </td>
@@ -343,6 +343,7 @@
     </v-layout>
 </template>
 <script lang="ts" setup>
+import { useRouter } from 'vue-router';
 import { watch, ref, inject, onBeforeUnmount } from 'vue'
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { CommittedProjectConsequence, CommittedProjectFillTreatmentReturnValues, emptyCommittedProjectConsequence, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
@@ -382,12 +383,14 @@ import { storeKey, useStore } from 'vuex';
 import { createDecipheriv } from 'crypto';
 
     let store = useStore();
+    const $router = useRouter();
     const $statusHub = inject('$statusHub') as any
     created();
     let searchItems = '';
     let dataPerPage = 0;
     let totalDataFound = 0;
-    let librarySelectItemValue: string | null = null;
+    let hasScenario: boolean = false;
+    let librarySelectItemValue = ref<string>('');
     let hasSelectedLibrary: boolean = false;
     let librarySelectItems: SelectItem[] = [];
     let attributeSelectItems: SelectItem[] = [];
@@ -399,6 +402,8 @@ import { createDecipheriv } from 'crypto';
     let networkId: string = getBlankGuid();
     let inputRules: InputValidationRules = rules;
     let network: Network = clone(emptyNetwork);
+    
+    const uuidNIL: string = getBlankGuid();
 
     let addedRows: SectionCommittedProject[] = [];
     let updatedRowsMap:Map<string, [SectionCommittedProject, SectionCommittedProject]> = new Map<string, [SectionCommittedProject, SectionCommittedProject]>();//0: original value | 1: updated value
@@ -410,7 +415,7 @@ import { createDecipheriv } from 'crypto';
     let currentPage: SectionCommittedProjectTableData[] = [];
     let isRunning: boolean = true;
 
-    let selectedLibraryTreatments: Treatment[];
+    let selectedLibraryTreatments = ref<Treatment[]>([]);
     let isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
     let projectPagination: Pagination = clone(emptyPagination);
@@ -441,18 +446,17 @@ import { createDecipheriv } from 'crypto';
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserOrSharedScenario'); }
     async function selectScenarioAction(payload?: any): Promise<any> { await store.dispatch('selectScenario'); }
     async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage'); }
+    async function currentUserCriteriaFilter(payload?: any): Promise<any> { await store.dispatch('store.state.userModule.currentUserCriteriaFilter'); }
 
     let getUserNameByIdGetter: any = store.getters.getUserNameByIdGetter;
-
-    @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
     
     let cpItems: SectionCommittedProjectTableData[] = [];
-    let selectedCpItems: SectionCommittedProjectTableData[] = [];
+    let selectedCpItems = ref<SectionCommittedProjectTableData[]>([]);
     let sectionCommittedProjects: SectionCommittedProject[] = [];
     let selectedConsequences: CommittedProjectConsequence[] = [];
     let committedProjectsCount: number = 0;
     let showImportExportCommittedProjectsDialog: boolean = false;
-    let selectedCommittedProject: string  = '';
+    let selectedCommittedProject = ref<string>('');
     let showCreateCommittedProjectConsequenceDialog: boolean = false;
     let disableCrudButtonsResult: boolean = true;
     let alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
@@ -461,12 +465,12 @@ import { createDecipheriv } from 'crypto';
     
     let keyattr: string = '';
 
-    let investmentYears: number[] = [];
     let lastYear: number = 0;
     let firstYear: number = 0;
 
-    let isNoTreatmentBefore: boolean = true
-    let isNoTreatmentBeforeCache: boolean = true
+    let investmentYears = ref<number[]>([]);
+    let isNoTreatmentBefore = ref<boolean>(true);
+    let isNoTreatmentBeforeCache = ref<boolean>(true);
     
     const cpGridHeaders: DataTableHeader[] = [
         {
@@ -570,17 +574,41 @@ import { createDecipheriv } from 'crypto';
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             importCompleted,
         );
+        scenarioId = $router.currentRoute.value.query.scenarioId as string;
+        networkId = $router.currentRoute.value.query.networkId as string;
+        
+        if (scenarioId === uuidNIL || networkId == uuidNIL) {
+            addErrorNotificationAction({
+               message: 'Found no selected scenario for edit',
+            });
+            $router.push('/Scenarios/');
+        }
+        (async () => { 
+            hasScenario = true;
+            await getNetworksAction();
+            await InvestmentService.getScenarioBudgetYears(scenarioId).then(response => {  
+                if(response.data)
+                    investmentYears = response.data;
+            });
+            await ScenarioService.getNoTreatmentBeforeCommitted(scenarioId).then(response => {
+                    if(!isNil(response.data)){
+                        isNoTreatmentBeforeCache = response.data;
+                        isNoTreatmentBefore = response.data;
+                    }
+            });
+            await getScenarioSimpleBudgetDetailsAction({scenarioId: scenarioId});
+            await getAttributesAction();
+            await getTreatmentLibrariesAction();
+            await getCurrentUserOrSharedScenarioAction({simulationId: scenarioId});
+            await selectScenarioAction({ scenarioId: scenarioId });
+            await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
+                if(response.data){
+                    setAlertMessageAction("Committed project import has been added to the work queue")
+                }
+            })
+            await initializePages()
+        })();                    
     }
-    // mounted() {
-    //     this.reverseCatMap.forEach(cat => {
-    //         this.categorySelectItems.push({text: cat, value: cat})        
-    //     })
-
-    //     this.$statusHub.$on(
-    //         Hub.BroadcastEventType.BroadcastImportCompletionEvent,
-    //         this.importCompleted,
-    //     );
-    // }   
 
     onBeforeUnmount(() => beforeDestroy())
     function beforeDestroy() {
@@ -593,55 +621,6 @@ import { createDecipheriv } from 'crypto';
         setAlertMessageAction('');
     }
 
-    // beforeDestroy() {
-    //     this.setHasUnsavedChangesAction({ value: false });
-
-    //     this.$statusHub.$off(
-    //         Hub.BroadcastEventType.BroadcastImportCompletionEvent,
-    //         this.importCompleted,
-    //     );
-
-    //     this.setAlertMessageAction('');
-    // }
-    beforeRouteEnter(to: any, from: any, next:any) {
-        next((vm:any) => {
-            vm.scenarioId = to.query.scenarioId;
-            vm.networkId = to.query.networkId;
-            vm.librarySelectItemValue = null;
-            
-            if (vm.scenarioId === vm.uuidNIL || vm.networkId == vm.uuidNIL) {
-                vm.addErrorNotificationAction({
-                   message: 'Found no selected scenario for edit',
-                });
-                vm.$router.push('/Scenarios/');
-            }
-            (async () => { 
-                await vm.getNetworksAction();
-                await InvestmentService.getScenarioBudgetYears(vm.scenarioId).then(response => {  
-                    if(response.data)
-                        vm.investmentYears = response.data;
-                });
-                await ScenarioService.getNoTreatmentBeforeCommitted(vm.scenarioId).then(response => {
-                        if(!isNil(response.data)){
-                            vm.isNoTreatmentBeforeCache = response.data;
-                            vm.isNoTreatmentBefore = response.data;
-                        }
-                });
-                await vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId});
-                await vm.getAttributesAction();
-                await vm.getTreatmentLibrariesAction();
-                await vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.scenarioId});
-                await vm.selectScenarioAction({ scenarioId: vm.scenarioId });
-                await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
-                    if(response.data){
-                        vm.setAlertMessageAction("Committed project import has been added to the work queue")
-                    }
-                })
-                await vm.initializePages()
-            })();                    
-        });
-    }
-
     //Watch
     watch(isNoTreatmentBefore, () =>onIsNoTreatmentBeforeChanged)
     function onIsNoTreatmentBeforeChanged(){
@@ -651,23 +630,23 @@ import { createDecipheriv } from 'crypto';
     watch(investmentYears, () => onInvestmentYearsChanged)
     function onInvestmentYearsChanged(){
         //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/min
-        if (investmentYears.length > 0) {
-            lastYear = Math.max(...investmentYears);
-            firstYear = Math.min(...investmentYears);
+        if (investmentYears.value.length > 0) {
+            lastYear = Math.max(...investmentYears.value);
+            firstYear = Math.min(...investmentYears.value);
         }
     }
 
     watch(networks, () => onStateNetworksChanged)
     function onStateNetworksChanged(){
-        const network = networks.find(o => o.id == networkId)
-        if(!isNil(network)){
-            network = network;
+        const net = networks.value.find(o => o.id == networkId)
+        if(!isNil(net)){
+            network = net;
         }           
     }
 
     watch(stateTreatmentLibraries, () => onStateTreatmentLibrariesChanged)
     function onStateTreatmentLibrariesChanged() {
-        librarySelectItems = stateTreatmentLibraries.map(
+        librarySelectItems = stateTreatmentLibraries.value.map(
             (library: TreatmentLibrary) => ({
                 text: library.name,
                 value: library.id
@@ -675,23 +654,22 @@ import { createDecipheriv } from 'crypto';
         );
     }
 
-    //@Watch('selectedLibraryTreatments', {deep: true})
     watch(selectedLibraryTreatments, () => onSelectedLibraryTreatmentsChanged)
     function onSelectedLibraryTreatmentsChanged(){
-        treatmentSelectItems = selectedLibraryTreatments.map(
+        treatmentSelectItems = selectedLibraryTreatments.value.map(
             (treatment: Treatment) => (treatment.name)
         );
     }
 
     watch(stateAttributes, () => onStateAttributesChanged)
     function onStateAttributesChanged(){
-        attributeSelectItems = stateAttributes.map(
+        attributeSelectItems = stateAttributes.value.map(
             (attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name
             }),
         );
-        let keyAttr = stateAttributes.find(_ => _.id == network.keyAttribute)
+        let keyAttr = stateAttributes.value.find(_ => _.id == network.keyAttribute)
         if(!isNil(keyAttr)){
             keyattr = keyAttr.name;
             cpGridHeaders[0].text = keyattr;
@@ -701,7 +679,7 @@ import { createDecipheriv } from 'crypto';
 
     watch(stateScenarioSimpleBudgetDetails, () => onStateScenarioSimpleBudgetDetailsChanged)
     function onStateScenarioSimpleBudgetDetailsChanged(){
-        budgetSelectItems = stateScenarioSimpleBudgetDetails.map(
+        budgetSelectItems = stateScenarioSimpleBudgetDetails.value.map(
             (budget: SimpleBudgetDetail) => ({
                 text: budget.name,
                 value: budget.name
@@ -715,7 +693,7 @@ import { createDecipheriv } from 'crypto';
 
     watch(stateSectionCommittedProjects, () => onStateSectionCommittedProjectsChanged)
     function onStateSectionCommittedProjectsChanged(){
-            sectionCommittedProjects = clone(stateSectionCommittedProjects);
+            sectionCommittedProjects = clone(stateSectionCommittedProjects.value);
             setCpItems();
     }
 
@@ -723,9 +701,9 @@ import { createDecipheriv } from 'crypto';
     function onSelectAttributeItemValueChanged() {
         selectTreatmentLibraryAction(librarySelectItemValue);
         hasSelectedLibrary = true;
-        const library = stateTreatmentLibraries.find(o => o.id == librarySelectItemValue)
+        const library = stateTreatmentLibraries.value.find(o => o.id == librarySelectItemValue.value)
         if(!isNil(library)){
-            selectedLibraryTreatments = library.treatments;
+            selectedLibraryTreatments.value = library.treatments;
             onSelectedLibraryTreatmentsChanged()
         }        
     }
@@ -747,10 +725,10 @@ import { createDecipheriv } from 'crypto';
 
     watch(selectedCpItems, () => onSelectedCpItemsChanged)
     function onSelectedCpItemsChanged(){
-        if(selectedCpItems.length > 1)
-            selectedCpItems.splice(0,1);
-        if(selectedCpItems.length === 1)
-            selectedCommittedProject = selectedCpItems[0].id;
+        if(selectedCpItems.value.length > 1)
+            selectedCpItems.value.splice(0,1);
+        if(selectedCpItems.value.length === 1)
+            selectedCommittedProject.value = selectedCpItems.value[0].id;
     }
 
     watch(projectPagination, () => onPaginationChanged)
@@ -783,7 +761,7 @@ import { createDecipheriv } from 'crypto';
                     sectionCommittedProjects = data.items;
                     rowCache = clone(sectionCommittedProjects)
                     totalItems = data.totalItems;
-                    const row = data.items.find(scp => scp.id == selectedCommittedProject);
+                    const row = data.items.find(scp => scp.id == selectedCommittedProject.value);
 
                     // Updated existing data with no factor set to 1.2
                     sectionCommittedProjects.forEach(element => {
@@ -798,7 +776,7 @@ import { createDecipheriv } from 'crypto';
                         
                     });
                     if(isNil(row)) {
-                        selectedCommittedProject = '';
+                        selectedCommittedProject.value = '';
                     }
                 } 
             }); 
@@ -819,8 +797,8 @@ import { createDecipheriv } from 'crypto';
     //Events
     function onCancelClick() {
         clearChanges()
-        selectedCommittedProject = '';
-        selectedCpItems = [];
+        selectedCommittedProject.value = '';
+        selectedCpItems.value = [];
         isNoTreatmentBefore = isNoTreatmentBeforeCache
         resetPage();
     }
@@ -859,7 +837,7 @@ import { createDecipheriv } from 'crypto';
      function OnAddConsequenceClick(){
         const newRow: CommittedProjectConsequence = clone(emptyCommittedProjectConsequence)
         newRow.id = getNewGuid();
-        newRow.committedProjectId = selectedCommittedProject;
+        newRow.committedProjectId = selectedCommittedProject.value;
         newRow.attribute = '';
         newRow.changeValue = '';
         newRow.performanceFactor = 1.2;
@@ -981,7 +959,7 @@ import { createDecipheriv } from 'crypto';
      function onAddCommittedProjectConsequenc(newConsequence: CommittedProjectConsequence) {
         showCreateCommittedProjectConsequenceDialog = false;     
         if (!isNil(newConsequence)) {
-            newConsequence.committedProjectId = selectedCommittedProject;
+            newConsequence.committedProjectId = selectedCommittedProject.value;
             selectedConsequences.push(newConsequence);
             updateSelectedProjectConsequences();  
         }
@@ -1045,7 +1023,7 @@ import { createDecipheriv } from 'crypto';
     }
 
     function onSelectCommittedProject(id: string){
-        selectedCommittedProject = id;
+        selectedCommittedProject.value = id;
     }
 
     //Subroutines
@@ -1098,7 +1076,7 @@ import { createDecipheriv } from 'crypto';
     }
 
     function updateSelectedProjectConsequences(){
-        let row = sectionCommittedProjects.find(o => o.id == selectedCommittedProject)
+        let row = sectionCommittedProjects.find(o => o.id == selectedCommittedProject.value)
         if(!isNil(row)){
             row.consequences = selectedConsequences;
             updateCommittedProjects(row, selectedConsequences, 'consequences')
@@ -1117,7 +1095,7 @@ import { createDecipheriv } from 'crypto';
 
     function cpItemFactory(scp: SectionCommittedProject): SectionCommittedProjectTableData {
         const budget: SimpleBudgetDetail = find(
-            propEq('id', scp.scenarioBudgetId), stateScenarioSimpleBudgetDetails,
+            propEq('id', scp.scenarioBudgetId), stateScenarioSimpleBudgetDetails.value,
         ) as SimpleBudgetDetail;
         let cat = reverseCatMap.get(scp.category);
         let value = '';
@@ -1144,7 +1122,7 @@ import { createDecipheriv } from 'crypto';
         updateCommittedProject(row, treatmentName, 'treatment')  
         CommittedProjectsService.FillTreatmentValues({
             committedProjectId: row.id,
-            treatmentLibraryId: librarySelectItemValue ? librarySelectItemValue : getBlankGuid(),
+            treatmentLibraryId: librarySelectItemValue ? librarySelectItemValue.value : getBlankGuid(),
             treatmentName: treatmentName,
             KeyAttributeValue: row.locationKeys[keyattr],
             networkId: networkId
@@ -1168,7 +1146,7 @@ import { createDecipheriv } from 'crypto';
     }
     function handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, budgetName: string){
         const budget: SimpleBudgetDetail = find(
-            propEq('name', budgetName), stateScenarioSimpleBudgetDetails,
+            propEq('name', budgetName), stateScenarioSimpleBudgetDetails.value,
         ) as SimpleBudgetDetail;
         if(!isNil(budget)){
             row.scenarioBudgetId = budget.id;
@@ -1235,7 +1213,7 @@ import { createDecipheriv } from 'crypto';
     function checkYear(scp:SectionCommittedProjectTableData){
         if(!hasValue(scp.year))
             scp.yearErrors = ['Value cannot be empty'];
-        else if (investmentYears.length === 0)
+        else if (investmentYears.value.length === 0)
             scp.yearErrors = ['There are no years in the investment settings']
         else if(scp.year < firstYear )
             scp.yearErrors = ['Year is outside of Analysis period'];      

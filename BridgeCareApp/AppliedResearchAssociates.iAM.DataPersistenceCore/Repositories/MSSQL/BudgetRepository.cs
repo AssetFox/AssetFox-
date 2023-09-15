@@ -159,6 +159,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return dtos;
         }
 
+        public DateTime GetLibraryModifiedDate(Guid budgetLibraryId)
+        {
+            var dtos = _unitOfWork.Context.BudgetLibrary.Where(_ => _.Id == budgetLibraryId).FirstOrDefault().LastModifiedDate;
+            return dtos;
+        }
 
         public void UpsertBudgetLibrary(BudgetLibraryDTO dto) {
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
@@ -228,7 +233,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var criterionJoins = new List<CriterionLibraryBudgetEntity>();
 
                 var criteria = budgets
-                    .Where(budget => budget.CriterionLibrary.IsValid())
+                    .Where(budget => budget.CriterionLibrary?.Id != null && budget.CriterionLibrary?.Id != Guid.Empty &&
+                                     !string.IsNullOrEmpty(budget.CriterionLibrary.MergedCriteriaExpression))
                     .Select(budget =>
                     {
                         var criterion = new CriterionLibraryEntity

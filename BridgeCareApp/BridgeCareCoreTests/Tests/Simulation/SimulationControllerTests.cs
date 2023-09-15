@@ -234,7 +234,8 @@ namespace BridgeCareCoreTests.Tests
         public async Task CloneSimulation_CallsCloneSimulationOnRepo()
         {
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var completeSimulationRepo = CompleteSimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
             var controller = CreateController(unitOfWork);
             var simulationId = Guid.NewGuid();
             var networkId = Guid.NewGuid();
@@ -245,15 +246,14 @@ namespace BridgeCareCoreTests.Tests
             {
                 Simulation = simulationDto,
                 WarningMessage = null,
-            };
-            repo.Setup(r => r.CloneSimulation(simulationId, networkId, SimulationName)).Returns(cloneResult);
+            };           
             var cloneSimulationDto = new CloneSimulationDTO
             {
                 SourceScenarioId = simulationId,
                 NetworkId = networkId,
                 ScenarioName = SimulationName,
             };
-
+            completeSimulationRepo.Setup(r => r.Clone(cloneSimulationDto)).Returns(cloneResult);
             var result = await controller.CloneSimulation(cloneSimulationDto);
 
             var value = ActionResultAssertions.OkObject(result);

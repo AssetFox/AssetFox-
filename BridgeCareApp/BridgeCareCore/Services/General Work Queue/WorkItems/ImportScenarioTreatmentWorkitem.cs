@@ -12,22 +12,23 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Controllers;
 using AppliedResearchAssociates.iAM.Hubs.Services;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportScenarioTreatmentWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, string UserId, string NetworkName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportScenarioTreatmentWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, string UserId, string treratmentName) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => SimulationId.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(SimulationId, WorkType.ImportScenarioTreatment);
 
         public DateTime StartTime { get; set; }
 
         public string WorkDescription => "Import Scenario Treatment";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioTreatment, DomainType = DomainType.Treatment };
+            new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioTreatment, DomainType = DomainType.Simulation, DomainId = SimulationId };
 
-        public string WorkName => NetworkName;
+        public string WorkName => treratmentName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -36,7 +37,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _treatmentService = scope.ServiceProvider.GetRequiredService<ITreatmentService>();
-            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, SimulationId);
+            var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             var importResult = _treatmentService.ImportScenarioTreatmentsFile(SimulationId, ExcelPackage, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null && importResult.WarningMessage.Trim() != "")
             {
@@ -57,6 +58,11 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Successfully imported treatment: {WorkName}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
+            {
+                Id = Metadata.DomainId,
+                WorkType = Metadata.WorkType
+            });
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

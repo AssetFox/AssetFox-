@@ -15,11 +15,15 @@ export default class TreatmentService {
             data,
         );
     }
-
+    
     static deleteTreatmentLibrary(libraryId: string): AxiosPromise {
         return coreAxiosInstance.delete(
             `${API.Treatment}/DeleteTreatmentLibrary/${libraryId}`,
         );
+    }
+
+    static getTreatmentLibraryModifiedDate (libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Treatment}/GetTreatmentLibraryModifiedDate/${libraryId}`)
     }
 
     static getScenarioSelectedTreatments(scenarioId: string): AxiosPromise {
@@ -62,6 +66,41 @@ export default class TreatmentService {
         return coreAxiosInstance.post(
             `${API.Treatment}/UpsertScenarioSelectedTreatments/${scenarioId}`,
             data,
+        );
+    }
+
+
+    static importLibraryTreatments(
+        file: File,
+        id: string,
+        forScenario: boolean
+    ){
+        let formData = new FormData();
+
+        formData.append('file', file);
+        formData.append(forScenario ? 'simulationId' : 'libraryId', id);
+
+        coreAxiosInstance.post(
+            `${API.Treatment}/ImportLibraryTreatmentsFileSingle`,
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } },
+        );
+    }
+
+    static importScenarioTreatments(
+        file: File,
+        id: string,
+        forScenario: boolean
+    ){
+        let formData = new FormData();
+
+        formData.append('file', file);
+        formData.append(forScenario ? 'simulationId' : 'libraryId', id);
+
+        coreAxiosInstance.post(
+            `${API.Treatment}/ImportScenarioTreatmentsFileSingle`,
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } },
         );
     }
 

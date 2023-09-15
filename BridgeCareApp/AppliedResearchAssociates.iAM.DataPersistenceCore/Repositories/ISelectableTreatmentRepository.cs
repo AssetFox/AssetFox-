@@ -12,6 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void GetScenarioSelectableTreatments(Simulation simulation);
 
+        DateTime GetLibraryModifiedDate(Guid treatmentLibraryId);
+
         List<TreatmentLibraryDTO> GetAllTreatmentLibraries();
 
         void UpsertTreatmentLibrary(TreatmentLibraryDTO dto);
@@ -19,6 +21,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId);
 
         void DeleteTreatmentLibrary(Guid libraryId);
+
+        void AddLibraryTreatments(List<TreatmentDTO> treatments, Guid libraryId);
+        void AddScenarioSelectableTreatment(List<TreatmentDTO> scenarioSelectableTreatments,
+           Guid simulationId);
 
         List<TreatmentDTO> GetScenarioSelectableTreatments(Guid simulationId);
         List<TreatmentDTO> GetSelectableTreatments(Guid libraryId);
@@ -51,5 +57,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(TreatmentLibraryDTO dto, bool isNewLibrary, Guid userId);
         public void AddLibraryIdToScenarioSelectableTreatments(List<TreatmentDTO> treatmentDTOs, Guid? libraryId);
         public void AddModifiedToScenarioSelectableTreatments(List<TreatmentDTO> treatmentDTOs, bool IsModified);
+        void AddDefaultPerformanceFactors(Guid scenarioId, List<TreatmentDTO> treatments);
     }
 }

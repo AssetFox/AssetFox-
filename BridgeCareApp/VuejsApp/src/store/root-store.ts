@@ -28,6 +28,7 @@ import datasourceModule from '@/store-modules/data-source.module';
 import committedProjectsModule from '@/store-modules/committed-project.module';
 import adminDataModule from '@/store-modules/admin-data.module';
 import adminSiteSettingsModule from '@/store-modules/admin-site-settings.module';
+import alertModule from '@/store-modules/alert.module';
 
 Vue.use(Vuex);
 
@@ -59,6 +60,7 @@ export default new Vuex.Store({
         datasourceModule,
         committedProjectsModule,
         adminDataModule,
-        adminSiteSettingsModule
+        adminSiteSettingsModule,
+        alertModule,
     },
 });

@@ -4,14 +4,15 @@
             <v-flex xs8 class="ghd-constant-header">
                 <v-layout>
                     <v-layout column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
+                        <v-subheader id="Attributes-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                         <v-select :items='selectAttributeItems'
+                            id="Attributes-selectAttribute-vselect"
                             outline
                             append-icon=$vuetify.icons.ghd-down                           
                             v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
                     </v-layout>
-                    <v-btn style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                    <v-btn id="Attributes-addAttribute-vbtn" style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
                         Add Attribute
                     </v-btn>
                 </v-layout>
@@ -22,12 +23,13 @@
             <v-layout>
                 <v-flex xs2> 
                     <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
-                    <v-text-field outline class="ghd-text-field-border ghd-text-field"
+                    <v-text-field id="Attributes-attributeName-vtextfield" outline class="ghd-text-field-border ghd-text-field"
                         placeholder="Name" v-model='selectedAttribute.name'/>
                 </v-flex>
                 <v-flex xs2>
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Type</v-subheader>
                     <v-select
+                        id="Attributes-attributeDataType-vselect"
                         outline
                         append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
@@ -40,6 +42,7 @@
                         Aggregation Rule
                     </v-subheader>
                     <v-select
+                        id="Attributes-attributeAggregationRule-vselect"
                         outline
                         append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
@@ -54,29 +57,29 @@
                 <v-layout>
                     <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Default Value</v-subheader>
-                        <v-text-field v-if="selectedAttribute.type == 'STRING'" outline class="ghd-text-field-border ghd-text-field"
+                        <v-text-field id="Attributes-attributeDefaultString-vtextfield" v-if="selectedAttribute.type == 'STRING'" outline class="ghd-text-field-border ghd-text-field"
                             v-model='selectedAttribute.defaultValue'/>
-                        <v-text-field v-if="selectedAttribute.type != 'STRING'" outline class="ghd-text-field-border ghd-text-field"
+                        <v-text-field id="Attributes-attributeDefaultNumber-vtextfield" v-if="selectedAttribute.type != 'STRING'" outline class="ghd-text-field-border ghd-text-field"
                             v-model.number='selectedAttribute.defaultValue'
                             :mask="'#############'"/>
                     </v-flex>
                     <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Minimum Value</v-subheader>
-                        <v-text-field outline class="ghd-text-field-border ghd-text-field"                            
+                        <v-text-field id="Attributes-attributeMinimumValue-vtextfield" outline class="ghd-text-field-border ghd-text-field"                            
                             v-model.number='selectedAttribute.minimum'
                             :mask="'#############'"/>
                     </v-flex>
                     <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Maximum Value</v-subheader>
-                        <v-text-field outline class="ghd-text-field-border ghd-text-field"
+                        <v-text-field id="Attributes-attributeMaximumValue-vtextfield" outline class="ghd-text-field-border ghd-text-field"
                             v-model.number='selectedAttribute.maximum'
                             :mask="'#############'"/>
                     </v-flex>
                     <v-flex xs4 style="padding-top:50px;">
                         <v-layout>
-                        <v-switch class='sharing header-text-content' label='Calculated' 
+                        <v-switch id="Attributes-attributeCalculated-vswitch" class='sharing header-text-content' label='Calculated' 
                             v-model='selectedAttribute.isCalculated'/>
-                        <v-switch class='sharing header-text-content' label='Ascending' 
+                        <v-switch id="Attributes-attributeAscending-vswitch" class='sharing header-text-content' label='Ascending' 
                             v-model='selectedAttribute.isAscending'/>
                         </v-layout>
                     </v-flex>
@@ -89,6 +92,7 @@
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
                     <v-select
+                        id="Attributes-attributeDataSource-vselect"
                         outline
                         append-icon=$vuetify.icons.ghd-down  
                         v-model='selectDatasourceItemValue'
@@ -124,6 +128,7 @@
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Column Name</v-subheader>
                     <v-select
+                        id="Attributes-attributeColumnName-vselect"
                         outline
                         append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
@@ -136,7 +141,7 @@
         <!-- The Buttons  -->
         <v-flex xs12 v-if="hasSelectedAttribute">        
             <v-layout justify-center>
-                <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'>
+                <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
                 <v-btn v-if="selectedAttribute.dataSource.type == 'SQL'" :disabled="selectedAttribute.dataSource.type != 'SQL'" 
@@ -144,7 +149,7 @@
                     @click="CheckSqlCommand">
                     Test
                 </v-btn>
-                <v-btn @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Save
                 </v-btn>               
             </v-layout>

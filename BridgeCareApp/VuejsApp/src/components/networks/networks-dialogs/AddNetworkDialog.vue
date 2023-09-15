@@ -13,14 +13,15 @@
         <v-layout column>
           <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
           <v-text-field outline 
+            id="AddNetworkDialog-NetworkName-vtextfield"
             v-model="networkName"
             class="ghd-text-field-border ghd-text-field"/>
         </v-layout>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row>
-          <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' flat>Cancel</v-btn>
-          <v-btn @click="onSubmit(true)"
+          <v-btn id="AddNetworkDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' flat>Cancel</v-btn>
+          <v-btn id="AddNetworkDialog-Save-vbtn" @click="onSubmit(true)"
                  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
             Save
           </v-btn>          

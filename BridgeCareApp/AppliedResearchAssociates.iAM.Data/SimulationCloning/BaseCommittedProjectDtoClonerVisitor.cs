@@ -20,8 +20,6 @@ namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
 
         private void CopyAbstractFields(BaseCommittedProjectDTO dto, BaseCommittedProjectDTO clone, Dictionary<Guid, Guid> budgetIdMap)
         {
-            var cloneConsequences = CommittedProjectConsequenceCloner.CloneList(dto.Consequences);
-            clone.Consequences = cloneConsequences;
             clone.Cost = dto.Cost;
             clone.Treatment = dto.Treatment;
             clone.ShadowForAnyTreatment = dto.ShadowForAnyTreatment;

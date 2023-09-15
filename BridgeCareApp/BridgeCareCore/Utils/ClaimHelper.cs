@@ -18,8 +18,7 @@ namespace BridgeCareCore.Utils
     public class ClaimHelper: IClaimHelper
     {
         private readonly IUnitOfWork UnitOfWork;
-        private readonly IHttpContextAccessor ContextAccessor;
-        private readonly IWorkQueueService _simulationQueueService;
+        private readonly IHttpContextAccessor ContextAccessor;
 
         public const string LibraryModifyUnauthorizedMessage = "You are not authorized to modify this library's data.";
         public const string LibraryDeleteUnauthorizedMessage = "You are not authorized to delete this library.";
@@ -33,11 +32,10 @@ namespace BridgeCareCore.Utils
         public const string AddingOwnersIsNotAllowedMessage = "Adding owners to a library is not allowed.";
         public const string RemovingOwnersIsNotAllowedMessage = "Removing owners of a library is not allowed.";
 
-        public ClaimHelper(IUnitOfWork unitOfWork, IWorkQueueService simulationQueueService, IHttpContextAccessor contextAccessor)
+        public ClaimHelper(IUnitOfWork unitOfWork, IHttpContextAccessor contextAccessor)
         {
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-            _simulationQueueService = simulationQueueService ?? throw new ArgumentNullException(nameof(simulationQueueService));
+            ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
         }
 
         /// <summary>

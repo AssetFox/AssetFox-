@@ -30,7 +30,7 @@ namespace BridgeCareCore.Services
                     _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId) :
                     _unitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(request.LibraryId.Value);
             rows = SyncDataset(rows, request);
-
+            _unitOfWork.SelectableTreatmentRepo.AddDefaultPerformanceFactors(simulationId, rows);
             if (request.LibraryId != null)
             {
                 var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
@@ -72,8 +72,9 @@ namespace BridgeCareCore.Services
                     {
                         _.BudgetIds = budgetIds;
                     }
-                });
-            }
+                    
+                });               
+            }           
             return rows;
         }
 

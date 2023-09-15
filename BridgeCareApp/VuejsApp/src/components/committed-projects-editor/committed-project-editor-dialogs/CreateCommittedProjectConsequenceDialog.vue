@@ -4,14 +4,21 @@
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-layout justify-space-between align-center>
           <div class="ghd-control-dialog-header">Add Consequence</div>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn 
+              id="CreateCommittedProjectConsequenceDialog-close-vbtn"
+              @click="onSubmit(false)" flat class="ghd-close-button">
               X
-            </v-btn>
+          </v-btn>
         </v-layout>
       </v-card-title>
-      <v-card-text class="ghd-dialog-box-padding-center">
-        <v-layout column>
-          <v-flex>
+      <v-card-text class="ghd-dialog-box-padding-center"
+        id="CreateCommittedProjectConsequenceDialog-content-vCardText"
+      >
+        <v-layout column
+          id="CreateCommittedProjectConsequenceDialog-content-vLayout"
+          >
+          <v-flex
+            id="CreateCommittedProjectConsequenceDialog-attribute-vFlex">
             <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
             <v-select :items="attributeNames"
               append-icon=$vuetify.icons.ghd-down
@@ -20,7 +27,8 @@
               class="ghd-select ghd-text-field ghd-text-field-border">
             </v-select>
           </v-flex>
-          <v-flex>
+          <v-flex
+            id="CreateCommittedProjectConsequenceDialog-changeValue-vFlex">
             <v-subheader class="ghd-md-gray ghd-control-label">Change Value</v-subheader>
             <v-text-field outline v-model="newConsequence.changeValue"
               :rules="[rules['generalRules'].valueIsNotEmpty]"

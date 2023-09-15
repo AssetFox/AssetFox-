@@ -51,7 +51,7 @@ public sealed class Simulation : WeakEntity, IValidator
     /// </summary>
     public bool ShouldPreapplyPassiveTreatment { get; set; } = true;
 
-    public ValidatorBag Subvalidators => new ValidatorBag { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
+    public ValidatorBag Subvalidators => new() { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
 
     public IReadOnlyCollection<SelectableTreatment> Treatments => _Treatments;
 
@@ -63,7 +63,7 @@ public sealed class Simulation : WeakEntity, IValidator
 
     public IReadOnlyCollection<SelectableTreatment> GetActiveTreatments()
     {
-        var result = Treatments.ToList();
+        var result = Treatments.Where(treatment => !treatment.ForCommittedProjectsOnly).ToList();
         _ = result.Remove(DesignatedPassiveTreatment);
         result.Sort(TreatmentComparer);
         return result;
@@ -73,7 +73,7 @@ public sealed class Simulation : WeakEntity, IValidator
     {
         var results = new ValidationResultBag();
 
-        var treatmentsWithEmptyFeasibility = Treatments.Where(treatment => treatment.FeasibilityCriteria.Count == 0).ToList();
+        var treatmentsWithEmptyFeasibility = Treatments.Where(treatment => treatment.FeasibilityCriteria.All(criterion => criterion.ExpressionIsBlank)).ToList();
         if (treatmentsWithEmptyFeasibility.Count != 1)
         {
             results.Add(ValidationStatus.Error, $"There are {treatmentsWithEmptyFeasibility.Count} treatments with empty feasibility.", this, nameof(Treatments));

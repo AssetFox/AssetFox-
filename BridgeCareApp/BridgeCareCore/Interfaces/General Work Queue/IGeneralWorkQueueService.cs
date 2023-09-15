@@ -9,7 +9,7 @@ namespace BridgeCareCore.Interfaces
         IQueuedWorkHandle<WorkQueueMetadata> CreateAndRun(IWorkSpecification<WorkQueueMetadata> workItem);
         IQueuedWorkHandle<WorkQueueMetadata> CreateAndRunInFastQueue(IWorkSpecification<WorkQueueMetadata> workItem);
 
-        bool Cancel(Guid simulationId);
-        bool CancelInFastQueue(Guid workId);
+        bool Cancel(string simulationId);
+        bool CancelInFastQueue(string workId);
     }
 }

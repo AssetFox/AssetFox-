@@ -23,7 +23,7 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-layout>
+                                        <v-layout style = "margin-right: -100px;">
                                             <v-text-field
                                                 id="Scenarios-searchScenarios-textField"
                                                 type="text"
@@ -45,6 +45,30 @@
                                                 @click="onMineSearchClick()">
                                                 Search
                                             </v-btn>
+                                            <v-btn id="Scenarios-performFilter-button" 
+                                                style="margin-top: 2px;" 
+                                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                                outline 
+                                                @click="showFilterScenarioList = true">
+                                                Filter
+                                            </v-btn>
+                                            <span class="Scenario-status"  >
+                                                <div v-if = "(sortedMineCategory != '' && sortedMineValue!='')&&(sortedMineValue != undefined && sortedMineCategory != null)">
+                                                     Current Filter: 
+                                                     <v-chip
+                                                        class="ma-2"
+                                                        closeable
+                                                        color=primary
+                                                        text-color="white"
+                                                        :model-value="true"
+                                                        icon
+                                                        >
+                                                        {{sortedMineCategory}} by {{ sortedMineValue }}
+                                                        
+                                                        <img class='img-general' :src="require('@/assets/icons/x-circle.svg')" @click="onMineFilterClearClick()"  >
+                                                </v-chip>
+                                                </div>
+                                            </span>
                                         </v-layout>
                                     </v-flex>
                                     <v-flex xs4></v-flex>
@@ -67,11 +91,12 @@
                                     :pagination.sync="userScenariosPagination"
                                     :headers="scenarioGridHeaders"
                                     sort-icon=$vuetify.icons.ghd-table-sort
-
+                                    
                                     calculate-widths
                                 >
                                     <template slot="items" slot-scope="props">
                                         <td>
+                                        
                                             <v-edit-dialog
                                                 large
                                                 lazy
@@ -204,7 +229,7 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-layout>
+                                        <v-layout style = "margin-right:-200px">
                                             <v-text-field
                                                 id="Scenarios-shared-searchScenarios-textField"
                                                 label="Search"
@@ -226,7 +251,32 @@
                                                 @click="onSharedSearchClick()">
                                                 Search
                                             </v-btn>
+                                            <v-btn id="Scenarios-performFilter-button" 
+                                                style="margin-top: 2px;" 
+                                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                                outline 
+                                                @click="showSharedFilterScenarioList = true">
+                                                Filter
+                                            </v-btn>
+                                            <span class="Scenario-status"  >
+                                                <div v-if = "(sortedCategory != '' && sortedValue!='')&&(sortedValue != undefined && sortedCategory != null)">
+                                                     Current Filter: 
+                                                     <v-chip
+                                                        class="ma-2"
+                                                        closeable
+                                                        color=primary
+                                                        text-color="white"
+                                                        :model-value="true"
+                                                        icon
+                                                        >
+                                                        {{sortedCategory}} by {{ sortedValue }}
+                                                        
+                                                        <img class='img-general' :src="require('@/assets/icons/x-circle.svg')" @click="onSharedFilterClearClick()"  >
+                                                </v-chip>
+                                                </div>
+                                            </span>
                                         </v-layout>
+                                        
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
@@ -237,6 +287,7 @@
                                     sort-icon=$vuetify.icons.ghd-table-sort
                                 >
                                     <template slot="items" slot-scope="props">
+
                                         <td>
                                             <v-edit-dialog
                                                 large
@@ -511,10 +562,14 @@
                 </v-tabs-items>
             </v-card>
         </v-flex>
-        <ConfirmAnalysisRunAlert
-            :dialogData="confirmAnalysisRunAlertData"
-            @submit="onConfirmAnalysisRunAlertSubmit"
+         <ConfirmAnalysisRunAlertPrehecks
+            :dialogDataPreChecks="onSecondConfirmAnalysisRunAlertData"
+            @submit="onSecondConfirmAnalysisRunAlertSubmit"
         />
+         <ConfirmAnalysisRunAlertWithButtons
+            :dialogDataWithButtons="confirmAnalysisRunAlertData"
+            @submit="onConfirmAnalysisRunAlertSubmit"
+            />
 
         <ConfirmConvertToRelationalAlert
             :dialogData="ConfirmConvertJsonToRelationalData"
@@ -547,6 +602,14 @@
             :showDialog="showCreateScenarioDialog"
             @submit="onCreateScenarioDialogSubmit"
         />
+        <FilterScenarioList
+            :showDialog="showSharedFilterScenarioList"
+            @submit="onFilterSharedScenarioListSubmit"
+        />
+        <FilterScenarioList
+            :showDialog="showFilterScenarioList"
+            @submit="onFilterScenarioListSubmit"
+        />
 
         <CloneScenarioDialog
             :dialogData="cloneScenarioDialogData"
@@ -562,7 +625,6 @@
             :dialogData="alertDataForDeletingCommittedProjects"
             @submit="onDeleteCommittedProjectsSubmit"
         />
-
         <CommittedProjectsFileUploaderDialog
             :showDialog="showImportExportCommittedProjectsDialog"
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
@@ -584,10 +646,14 @@ import {
     ScenarioUser,
     emptyQueuedWork,
     QueuedWork,
+    WorkType,
 } from '@/shared/models/iAM/scenario';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import { AlertData, AlertDataWithButtons, AlertPreChecksData, emptyAlertData, emptyAlertDataWithButtons, emptyAlertPreChecksData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
+import AlertWithButtons from '@/shared/modals/AlertWithButtons.vue';
+import AlertPreChecks from '@/shared/modals/AlertPreChecks.vue';
+import { emptyAlertButton } from '@/shared/models/modals/alert-data';
 import ReportsDownloaderDialog from '@/components/scenarios/scenarios-dialogs/ReportsDownloaderDialog.vue';
 import ShowAggregationDialog from '@/components/scenarios/scenarios-dialogs/ShowAggregationDialog.vue';
 import {
@@ -597,6 +663,7 @@ import {
 import CloneScenarioDialog from '@/components/scenarios/scenarios-dialogs/CloneScenarioDialog.vue'
 import { CloneScenarioDialogData, emptyCloneScenarioDialogData } from '@/shared/models/modals/clone-scenario-dialog-data'
 import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
+import FilterScenarioList from '@/components/scenarios/scenarios-dialogs/FilterScenarioList.vue';
 import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
 import { Network } from '@/shared/models/iAM/network';
 import { any, clone, isNil } from 'ramda';
@@ -638,15 +705,20 @@ import ScenarioService from '@/services/scenario.service';
         ConfirmCancelAlert: Alert,
         ConfirmRollupAlert: Alert,
         ConfirmAnalysisRunAlert: Alert,
+        ConfirmAnalysisRunAlertWithButtons: AlertWithButtons,
+        ConfirmAnalysisRunAlertPrehecks: AlertPreChecks,
         ConfirmConvertToRelationalAlert: Alert,
         ReportsDownloaderDialog,
         CreateScenarioDialog,
+        FilterScenarioList,
         CloneScenarioDialog,
         CreateNetworkDialog,
         ShareScenarioDialog,
         ShowAggregationDialog,
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
         Alert,
+        AlertWithButtons,
+        AlertPreChecks,
         GhdShareSvg,
         GhdStarSvg,
         GhdQueueSvg
@@ -685,9 +757,10 @@ export default class Scenarios extends Vue {
     @Action('cloneScenario') cloneScenarioAction: any;
     @Action('updateScenario') updateScenarioAction: any;
     @Action('deleteScenario') deleteScenarioAction: any;
-    @Action('cancelSimulation') cancelSimulationAction: any;
+    @Action('cancelWorkQueueItem') cancelWorkQueueItemAction: any;
     @Action('cancelFastQueueItem') cancelFastQueueItemAction: any;
     @Action('runSimulation') runSimulationAction: any;
+    @Action('validateSimulation') validateSimulationAction: any;
     @Action('migrateLegacySimulationData')
     migrateLegacySimulationDataAction: any;
     @Action('updateSimulationAnalysisDetail')
@@ -719,7 +792,7 @@ export default class Scenarios extends Vue {
             text: 'Creator',
             value: 'creator',
             align: 'left',
-            sortable: false,
+            sortable: true,
             class: 'header-border',
             width: '',
         },
@@ -727,7 +800,7 @@ export default class Scenarios extends Vue {
             text: 'Owner',
             value: 'owner',
             align: 'left',
-            sortable: false,
+            sortable: true,
             class: 'header-border',
             width: '',
         },
@@ -735,7 +808,7 @@ export default class Scenarios extends Vue {
             text: 'Network',
             value: 'network',
             align: 'left',
-            sortable: false,
+            sortable: true,
             class: 'header-border',
             width: '',
         },
@@ -904,8 +977,15 @@ export default class Scenarios extends Vue {
     availableActions: any;
     availableSimulationActions: any;
     nameUpdate: string = '';
-
+    sortedMineCategory: string = '';
+    sortedMineValue: string = '';
+    sortedCategory: string = '';
+    sortedValue: string = '';
     scenarios: Scenario[] = [];
+
+    preCheckStatus: any;
+    preCheckMessage: any;
+    runAnalysisScenario: Scenario = clone(emptyScenario);
 
     userScenarios: Scenario[] = [];
     currentUserScenariosPage: Scenario[] = []
@@ -927,7 +1007,8 @@ export default class Scenarios extends Vue {
     reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(
         emptyReportsDownloadDialogData,
     );
-    confirmAnalysisRunAlertData: AlertData = clone(emptyAlertData);
+    confirmAnalysisRunAlertData: AlertDataWithButtons = clone(emptyAlertDataWithButtons);
+    onSecondConfirmAnalysisRunAlertData: AlertPreChecksData = clone(emptyAlertPreChecksData);
     shareScenarioDialogData: ShareScenarioDialogData = clone(
         emptyShareScenarioDialogData,
     );
@@ -938,6 +1019,8 @@ export default class Scenarios extends Vue {
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     confirmCancelAlertData: AlertData = clone(emptyAlertData);
     showCreateScenarioDialog: boolean = false;
+    showFilterScenarioList: boolean = false;
+    showSharedFilterScenarioList: boolean = false;
     selectedScenario: Scenario = clone(emptyScenario);   
     networkDataAssignmentStatus: string = '';
     rules: InputValidationRules = rules;
@@ -1186,7 +1269,7 @@ export default class Scenarios extends Vue {
         };
         this.availableSimulationActions = {
             cancel: 'cancel',
-            fastCancel: 'cancel'
+            fastCancel: 'fastCancel'
         }
         this.actionItemsForSharedScenario = [
             {
@@ -1395,7 +1478,9 @@ export default class Scenarios extends Vue {
 
     onShowConfirmAnalysisRunAlert(scenario: Scenario) {
         this.selectedScenario = clone(scenario);
-
+        let AlertButton = emptyAlertButton;
+        
+        AlertButton.label  = "Run Pre-Checks" + "Cancel" + "Continue";
         this.confirmAnalysisRunAlertData = {
             showDialog: true,
             heading: 'Warning',
@@ -1403,18 +1488,86 @@ export default class Scenarios extends Vue {
             message:
                 'Only one simulation can be run at a time. The model run you are about to queue will be ' +
                 'executed in the order in which it was received.',
+            buttons: [AlertButton.label]
         };
     }
 
-    onConfirmAnalysisRunAlertSubmit(submit: boolean) {
-        this.confirmAnalysisRunAlertData = clone(emptyAlertData);
+    async onConfirmAnalysisRunAlertSubmit(submit: string) {
+        this.confirmAnalysisRunAlertData = clone(emptyAlertDataWithButtons);
+        this.runAnalysisScenario = this.selectedScenario;
+
+        if(submit == "pre-checks"){
+                if (submit && this.selectedScenario.id !== getBlankGuid()) 
+                {
+                        await ScenarioService.upsertValidateSimulation(this.selectedScenario.networkId, this.selectedScenario.id).then((response: AxiosResponse) => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                            this.addSuccessNotificationAction({message: "Simulation pre-checks completed",});
+                            if(this.preCheckStatus != undefined && this.preCheckMessage != undefined)
+                            this.preCheckStatus = response.data[0].status;
+                            this.preCheckMessage = response.data[0].message;
+                        }
+                    });
+                }
+                this.secondRunAnalysisModal();
+             }
+        else if(submit == "continue") {
+            if (submit && this.selectedScenario.id !== getBlankGuid()) {
+                this.runSimulationAction({
+                    networkId: this.selectedScenario.networkId,
+                    scenarioId: this.selectedScenario.id,
+                }).then(() => (this.selectedScenario = clone(emptyScenario)));
+            }
+        }
+    }
+
+    onSecondConfirmAnalysisRunAlertSubmit(submit: string) {
+        this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertPreChecksData);
+        
+        this.selectedScenario = this.runAnalysisScenario;
 
         if (submit && this.selectedScenario.id !== getBlankGuid()) {
-            this.runSimulationAction({
-                networkId: this.selectedScenario.networkId,
-                scenarioId: this.selectedScenario.id,
-            }).then(() => (this.selectedScenario = clone(emptyScenario)));
-        }
+                this.runSimulationAction({
+                    networkId: this.selectedScenario.networkId,
+                    scenarioId: this.selectedScenario.id,
+                }).then(() => (this.selectedScenario = clone(emptyScenario)));
+            }
+    }
+
+    secondRunAnalysisModal() {
+            this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertPreChecksData);
+            this.preCheckMessage = this.preCheckMessage.split('.');
+            this.preCheckMessage.pop();
+
+            if(this.preCheckStatus = 0) 
+            {
+                (this.selectedScenario = clone(emptyScenario));
+                this.onSecondConfirmAnalysisRunAlertData = {
+                showDialog: true,
+                heading: 'Error',
+                choice: false,
+                message:(this.preCheckMessage),
+                }
+            }
+            else if(this.preCheckStatus = 1)
+            {
+                (this.selectedScenario = clone(emptyScenario));
+                this.onSecondConfirmAnalysisRunAlertData = {
+                showDialog: true,
+                heading: 'Warnings',
+                choice: true,
+                message:(this.preCheckMessage),
+                }
+            }
+            else if(this.preCheckStatus = 2)
+            {
+                (this.selectedScenario = clone(emptyScenario));
+                this.onSecondConfirmAnalysisRunAlertData = {
+                showDialog: true,
+                heading: 'Information',
+                choice: true,
+                message:(this.preCheckMessage),
+                }
+            }
     }
 
     onShowConfirmConvertJsonToRelationalAlert(scenario: Scenario) {
@@ -1473,7 +1626,18 @@ export default class Scenarios extends Vue {
             },
         });
     }
-
+    onNavigateToReportsView(localScenario: Scenario) {
+        this.selectScenarioAction({scenarioId: localScenario.id });
+        this.$router.push({
+            path: '/ReportsAndOutputs/Scenario/',
+            query: {
+                scenarioId: localScenario.id,
+                networkId: localScenario.networkId,
+                scenarioName: localScenario.name,
+                networkName: localScenario.networkName,
+            }
+        });
+    }
     onShowShareScenarioDialog(scenario: Scenario) {
         this.shareScenarioDialogData = {
             showDialog: true,
@@ -1597,14 +1761,14 @@ export default class Scenarios extends Vue {
     onConfirmCancelAlertSubmit(submit: boolean) {
         this.confirmCancelAlertData = clone(emptyAlertData);
 
-        if (submit && this.selectedQueuedWork.id !== getBlankGuid()) {
-            this.cancelSimulationAction({
+        if (submit && this.selectedQueuedWork.id !== getBlankGuid() && this.selectedQueuedWork.id.trim() != '') {
+            this.cancelWorkQueueItem({
                 simulationId: this.selectedQueuedWork.id,
             }).then(() => {
                 this.selectedQueuedWork = clone(emptyQueuedWork);
             });
         }
-        else if(submit && this.selectedFastQueuedWork.id !== getBlankGuid()) {
+        else if(submit && this.selectedFastQueuedWork.id !== getBlankGuid() && this.selectedFastQueuedWork.id.trim() != '') {
             this.cancelFastQueueItemAction(this.selectedFastQueuedWork.id).then(() => {
                 this.selectedFastQueuedWork = clone(emptyQueuedWork);
             });
@@ -1636,7 +1800,7 @@ export default class Scenarios extends Vue {
             simulationAnalysisDetail: data.simulationAnalysisDetail,
         });
         const updatedQueueItem: queuedWorkStatusUpdate = {
-            id: data.simulationAnalysisDetail.simulationId,
+            id: data.simulationAnalysisDetail.simulationId as string + WorkType[WorkType.SimulationAnalysis] ,
             status: data.simulationAnalysisDetail.status
         }
         this.updateQueuedWorkStatusAction({
@@ -1700,7 +1864,42 @@ export default class Scenarios extends Vue {
             });
         }
     }
-
+    onFilterScenarioListSubmit(filterCategory:string, FilterValue:string) {
+        this.showFilterScenarioList = false;
+        this.sortedMineCategory = filterCategory;
+        this.sortedMineValue = FilterValue;
+        if ((filterCategory !=''&&!isNil(filterCategory)) && (FilterValue !=''&&!isNil(FilterValue)))
+        {
+            this.currentSearchMine = FilterValue;
+            this.resetPageMine();
+        }
+        else if(!isNil(filterCategory)||!isNil(FilterValue))
+        {
+            this.sortedMineCategory = '';
+            this.sortedMineValue = '';
+            this.currentSearchMine = '';
+            this.resetPageMine();
+        }
+    }
+    onFilterSharedScenarioListSubmit(filterCategory:string, FilterValue:string) {
+        this.showSharedFilterScenarioList = false;
+        this.sortedCategory = filterCategory;
+        this.sortedValue = FilterValue;
+        if ((filterCategory !=''&&!isNil(filterCategory)) && (FilterValue !=''&&!isNil(FilterValue)))
+        {
+            this.currentSearchShared = FilterValue;
+            this.resetPageShared();
+        }
+        else if(!isNil(filterCategory)||!isNil(FilterValue))
+        {
+            this.sortedCategory = ''
+            this.sortedValue = ''
+            this.currentSearchShared = '';
+            this.resetPageShared();
+        }
+        
+    }
+    
     onMigrateLegacySimulationSubmit(legacySimulationId: number) {
         this.showMigrateLegacySimulationDialog = false;
 
@@ -1803,7 +2002,7 @@ export default class Scenarios extends Vue {
                 }
                 break;
             case this.availableActions.reports:
-                this.onShowReportsDownloaderDialog(scenario);
+                this.onNavigateToReportsView(scenario);
                 break;
             case this.availableActions.settings:
                 if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
@@ -1859,6 +2058,12 @@ export default class Scenarios extends Vue {
         this.searchMine = '';
         this.onMineSearchClick();
     }
+    onMineFilterClearClick(){
+        this.sortedMineCategory = '';
+        this.sortedMineValue = '';
+        this.currentSearchMine= '';
+        this.resetPageMine()
+    }
 
     resetPageMine(){
         this.userScenariosPagination.page = 1;
@@ -1867,6 +2072,12 @@ export default class Scenarios extends Vue {
 
     onSharedSearchClick(){
         this.currentSearchShared = this.searchShared;
+        this.resetPageShared()
+    }
+    onSharedFilterClearClick(){
+        this.sortedCategory = '';
+        this.sortedValue = '';
+        this.currentSearchShared = '';
         this.resetPageShared()
     }
 
@@ -1952,4 +2163,11 @@ export default class Scenarios extends Vue {
 .icon-selected-tab{
     fill:#2A578D
 }
+.theme--light.v-datatable thead th.column.sortable.active {
+    color: rgba(0,0,0,0.87);
+    border-top:2px solid rgba(0,0,0,0.54);
+    border-left:2px solid rgba(0,0,0,0.54);
+    border-right:2px solid rgba(0,0,0,0.54);
+}
+
 </style>

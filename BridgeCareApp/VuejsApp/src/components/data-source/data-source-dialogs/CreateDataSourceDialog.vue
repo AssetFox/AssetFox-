@@ -12,15 +12,15 @@
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-layout column>
           <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
-          <v-text-field outline 
+          <v-text-field outline id="CreateDataSourceDialog-Name-vtextField"
             v-model="datasourceName"
             class="ghd-text-field-border ghd-text-field"/>
         </v-layout>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row>
-          <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' flat>Cancel</v-btn>
-          <v-btn @click="onSubmit(true)"
+          <v-btn id="CreateDataSourceDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' flat>Cancel</v-btn>
+          <v-btn id="CreateDataSourceDialog-Save-vbtn" @click="onSubmit(true)"
                  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
             Save
           </v-btn>          

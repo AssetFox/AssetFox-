@@ -66,7 +66,7 @@ namespace BridgeCareCore.Services
                 {
                     _log.Information($"Message: {message}");
                 }
-                throw new Exception($"Failed to generate '{reportName}' on simulation '{scenarioName}':: {report.Status}");
+                throw new Exception($"Failed to generate '{reportName}' on simulation '{scenarioName}': {report.Status}");
             }
 
             // Handle an incomplete run without errors

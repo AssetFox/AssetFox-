@@ -261,10 +261,8 @@
     </v-layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
 import VueQueryBuilder from "vue-query-builder/src/VueQueryBuilder.vue";
 import {
     Criteria,
@@ -310,7 +308,8 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 let store = useStore();
-const emit = defineEmits(['submit'])
+const $router = useRouter();
+const emit = defineEmits(['submit','submitCriteriaEditorResult'])
 const props = defineProps<{
     criteriaEditorData: CriteriaEditorData
     }>()
@@ -414,13 +413,13 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         }
     }
 
-    @Watch('subCriteriaClauses')
-    onSubCriteriaClausesChanged() {
+    watch(subCriteriaClauses,()=>onSubCriteriaClausesChanged())
+    function onSubCriteriaClausesChanged() {
         resetCriteriaValidationProperties();
     }
 
-    @Watch('selectedSubCriteriaClause')
-    onSelectedClauseChanged() {
+    watch(()=>selectedSubCriteriaClause,()=>onSelectedClauseChanged())
+    function onSelectedClauseChanged() {
         resetSubCriteriaValidationProperties();
         if (
             hasValue(selectedSubCriteriaClause) &&
@@ -447,18 +446,18 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         }
     }
 
-    @Watch('selectedRawSubCriteriaClause')
-    onSelectedClauseRawChanged() {
+    watch(()=>selectedRawSubCriteriaClause,()=>onSelectedClauseRawChanged())
+    function onSelectedClauseRawChanged() {
         resetSubCriteriaValidationProperties();
     }
 
-    @Watch('stateAttributesSelectValues')
-    onStateAttributesSelectValuesChanged() {
+    watch(stateAttributesSelectValues,()=> onStateAttributesSelectValuesChanged())
+    function onStateAttributesSelectValuesChanged() {
         if (
             hasValue(queryBuilderRules) &&
             hasValue(stateAttributesSelectValues)
         ) {
-            const filteredAttributesSelectValues: AttributeSelectValues[] = stateAttributesSelectValues.filter(
+            const filteredAttributesSelectValues: AttributeSelectValues[] = stateAttributesSelectValues.value.filter(
                 (asv: AttributeSelectValues) => hasValue(asv.values),
             );
             if (hasValue(filteredAttributesSelectValues)) {
@@ -486,23 +485,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
             }
         }
     }
-@Component({
-    components: { VueQueryBuilder },
-})
-export default class CriteriaEditor extends Vue {
-    @Prop() criteriaEditorData: CriteriaEditorData;
-
-
-    @Action('getAttributes') getAttributesAction: any;
-    @Action('getAttributeSelectValues') getAttributeSelectValuesAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-
-    
-
-    
-
-    setQueryBuilderRules() {
-        queryBuilderRules = stateAttributes.map(
+    function setQueryBuilderRules() {
+        queryBuilderRules = stateAttributes.value.map(
             (attribute: Attribute) => ({
                 type: 'text',
                 label: attribute.name,
@@ -512,7 +496,7 @@ export default class CriteriaEditor extends Vue {
         );
     }
 
-    setSubCriteriaClauses(mainCriteria: Criteria) {
+    function setSubCriteriaClauses(mainCriteria: Criteria) {
         subCriteriaClauses = [];
         if (hasValue(mainCriteria) && hasValue(mainCriteria.children)) {
             mainCriteria.children!.forEach((criteriaType: CriteriaType) => {
@@ -526,7 +510,7 @@ export default class CriteriaEditor extends Vue {
         }
     }
 
-    resetCriteriaValidationProperties() {
+    function resetCriteriaValidationProperties() {
         validCriteriaMessage = null;
         invalidCriteriaMessage = null;
         cannotSubmit = !isEmpty(
@@ -534,19 +518,19 @@ export default class CriteriaEditor extends Vue {
         );
     }
 
-    resetSubCriteriaValidationProperties() {
+    function resetSubCriteriaValidationProperties() {
         validSubCriteriaMessage = null;
         invalidSubCriteriaMessage = null;
         checkOutput = false;
     }
 
-    resetSubCriteriaSelectedProperties() {
+    function resetSubCriteriaSelectedProperties() {
         selectedSubCriteriaClauseIndex = -1;
         selectedSubCriteriaClause = null;
         selectedRawSubCriteriaClause = '';
     }
 
-    onAddSubCriteria() {
+    function onAddSubCriteria() {
         resetSubCriteriaSelectedProperties();
         setTimeout(() => {
             onClickSubCriteriaClauseTextarea(
@@ -561,7 +545,7 @@ export default class CriteriaEditor extends Vue {
         });
     }
 
-    onClickSubCriteriaClauseTextarea(
+    function onClickSubCriteriaClauseTextarea(
         subCriteriaClause: string,
         subCriteriaClauseIndex: number,
     ) {
@@ -585,7 +569,7 @@ export default class CriteriaEditor extends Vue {
         });
     }
 
-    onRemoveSubCriteria(subCriteriaClauseIndex: number) {
+    function onRemoveSubCriteria(subCriteriaClauseIndex: number) {
         const subCriteriaClause: string = subCriteriaClauses[
             subCriteriaClauseIndex
         ];
@@ -619,14 +603,14 @@ export default class CriteriaEditor extends Vue {
 
         resetCriteriaValidationProperties();
 
-        if (criteriaEditorData.isLibraryContext) {
+        if (props.criteriaEditorData.isLibraryContext) {
             if (!hasValue(subCriteriaClauses)) {
-                $emit('submitCriteriaEditorResult', {
+                emit('submitCriteriaEditorResult', {
                     validated: true,
                     criteria: '',
                 });
             } else if (hasValue(subCriteriaClause)) {
-                $emit('submitCriteriaEditorResult', {
+                emit('submitCriteriaEditorResult', {
                     validated: false,
                     criteria: null,
                 });
@@ -634,7 +618,7 @@ export default class CriteriaEditor extends Vue {
         }
     }
 
-    onParseRawSubCriteria() {
+    function onParseRawSubCriteria() {
         activeTab = 'tree-view';
         resetSubCriteriaValidationProperties();
         //TODO
@@ -654,7 +638,7 @@ export default class CriteriaEditor extends Vue {
         }
     }
 
-    onParseSubCriteriaJson() {
+    function onParseSubCriteriaJson() {
         activeTab = 'raw-criteria';
         resetSubCriteriaValidationProperties();
         const parsedSubCriteria = convertCriteriaObjectToCriteriaExpression(
@@ -667,7 +651,7 @@ export default class CriteriaEditor extends Vue {
         }
     }
 
-    onCheckCriteria() {
+    function onCheckCriteria() {
         checkOutput = false;
         resetSubCriteriaSelectedProperties();
 
@@ -675,7 +659,7 @@ export default class CriteriaEditor extends Vue {
             getMainCriteria(),
         );
         if (parsedCriteria) {
-            if(!isNil($router.currentRoute.query['networkId']))
+            if(!isNil($router.currentRoute.value.query['networkId']))
                 criteriaValidationWithCount(parsedCriteria)
             else
                 criteriaValidationNoCount(parsedCriteria)
@@ -684,13 +668,13 @@ export default class CriteriaEditor extends Vue {
         }
     }
 
-    private criteriaValidationWithCount(parsedCriteria: string[])
+    function  criteriaValidationWithCount(parsedCriteria: string[])
     {
         let networkId = ''
-        networkId = $router.currentRoute.query['networkId'].toString()
+        networkId = $router.currentRoute.value.query['networkId'] as string
         const validationParameter = {
                 expression: parsedCriteria.join(''),
-                currentUserCriteriaFilter: currentUserCriteriaFilter,
+                currentUserCriteriaFilter: currentUserCriteriaFilter.value,
                 networkId:networkId
             } as ValidationParameter;
         ValidationService.getCriterionValidationResult(
@@ -703,12 +687,12 @@ export default class CriteriaEditor extends Vue {
                         validCriteriaMessage = message;
                         cannotSubmit = false;
 
-                        if (criteriaEditorData.isLibraryContext) {
+                        if (props.criteriaEditorData.isLibraryContext) {
                             const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
                                 getMainCriteria(),
                             );
                             if (parsedCriteria) {
-                                $emit('submitCriteriaEditorResult', {
+                                emit('submitCriteriaEditorResult', {
                                     validated: true,
                                     criteria: parsedCriteria.join(''),
                                 });
@@ -729,8 +713,8 @@ export default class CriteriaEditor extends Vue {
                             }
                         });
 
-                        if (criteriaEditorData.isLibraryContext) {
-                            $emit('submitCriteriaEditorResult', {
+                        if (props.criteriaEditorData.isLibraryContext) {
+                            emit('submitCriteriaEditorResult', {
                                 validated: false,
                                 criteria: null,
                             });
@@ -740,11 +724,11 @@ export default class CriteriaEditor extends Vue {
             });
     }
 
-     private criteriaValidationNoCount(parsedCriteria: string[])
+     function criteriaValidationNoCount(parsedCriteria: string[])
     {
         const validationParameter = {
                 expression: parsedCriteria.join(''),
-                currentUserCriteriaFilter: currentUserCriteriaFilter,
+                currentUserCriteriaFilter: currentUserCriteriaFilter.value,
                 networkId:getBlankGuid()
             } as ValidationParameter;
         ValidationService.getCriterionValidationResultNoCount(
@@ -757,12 +741,12 @@ export default class CriteriaEditor extends Vue {
                         validCriteriaMessage = message;
                         cannotSubmit = false;
 
-                        if (criteriaEditorData.isLibraryContext) {
+                        if (props.criteriaEditorData.isLibraryContext) {
                             const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
                                 getMainCriteria(),
                             );
                             if (parsedCriteria) {
-                                $emit('submitCriteriaEditorResult', {
+                                emit('submitCriteriaEditorResult', {
                                     validated: true,
                                     criteria: parsedCriteria.join(''),
                                 });
@@ -783,8 +767,8 @@ export default class CriteriaEditor extends Vue {
                             }
                         });
 
-                        if (criteriaEditorData.isLibraryContext) {
-                            $emit('submitCriteriaEditorResult', {
+                        if (props.criteriaEditorData.isLibraryContext) {
+                            emit('submitCriteriaEditorResult', {
                                 validated: false,
                                 criteria: null,
                             });
@@ -794,7 +778,7 @@ export default class CriteriaEditor extends Vue {
             });
     }
 
-    onCheckSubCriteria() {
+    function onCheckSubCriteria() {
         const criteria = getSubCriteriaValueToCheck();
 
         if (isNil(criteria)) {
@@ -815,15 +799,15 @@ export default class CriteriaEditor extends Vue {
         checkOutput = true;
         resetSubCriteriaValidationProperties();
 
-        if (criteriaEditorData.isLibraryContext) {
-            $emit('submitCriteriaEditorResult', {
+        if (props.criteriaEditorData.isLibraryContext) {
+            emit('submitCriteriaEditorResult', {
                 validated: false,
                 criteria: null,
             });
         }
     }
 
-    getSubCriteriaValueToCheck() {
+    function getSubCriteriaValueToCheck() {
         if (activeTab === 'tree-view') {
             const parsedCriteriaJson = convertCriteriaObjectToCriteriaExpression(
                 selectedSubCriteriaClause as Criteria,
@@ -836,7 +820,7 @@ export default class CriteriaEditor extends Vue {
         return selectedRawSubCriteriaClause;
     }
 
-    onSubmitCriteriaEditorResult(submit: boolean) {
+    function onSubmitCriteriaEditorResult(submit: boolean) {
         resetSubCriteriaSelectedProperties();
         resetCriteriaValidationProperties();
 
@@ -846,7 +830,7 @@ export default class CriteriaEditor extends Vue {
             );
             if (parsedCriteria) {
                 selectedConjunction = 'OR';
-                $emit(
+                emit(
                     'submitCriteriaEditorResult',
                     parsedCriteria.join(''),
                 );
@@ -855,11 +839,11 @@ export default class CriteriaEditor extends Vue {
             }
         } else {
             selectedConjunction = 'OR';
-            $emit('submitCriteriaEditorResult', null);
+            emit('submitCriteriaEditorResult', null);
         }
     }
 
-    onDisableCheckOutputButton() {
+    function onDisableCheckOutputButton() {
         const mainCriteria: Criteria = getMainCriteria();
         const subCriteriaClausesAreEmpty = subCriteriaClauses.every(
             (subCriteriaClause: string) => isEmpty(subCriteriaClause),
@@ -875,7 +859,7 @@ export default class CriteriaEditor extends Vue {
         return disable;
     }
 
-    onDisableCheckCriteriaButton() {
+    function onDisableCheckCriteriaButton() {
         const parsedSelectedSubCriteriaClause = convertCriteriaObjectToCriteriaExpression(
             selectedSubCriteriaClause as Criteria,
         );
@@ -904,7 +888,7 @@ export default class CriteriaEditor extends Vue {
         return disable;
     }
 
-    getMainCriteria() {
+    function getMainCriteria() {
         const filteredSubCriteria: string[] = subCriteriaClauses.filter(
             (subCriteriaClause: string) => !isEmpty(subCriteriaClause),
         );
@@ -945,7 +929,7 @@ export default class CriteriaEditor extends Vue {
         return clone(emptyCriteria);
     }
 
-    getMissingAttribute(query: any, missingAttributes: string[]) {
+    function getMissingAttribute(query: any, missingAttributes: string[]) {
         if (query.hasOwnProperty('children')) {
             const criteria: Criteria = query as Criteria;
             if (hasValue(criteria.children)) {
@@ -961,7 +945,7 @@ export default class CriteriaEditor extends Vue {
             if (
                 !any(
                     propEq('attribute', criteriaRule.rule),
-                    stateAttributesSelectValues,
+                    stateAttributesSelectValues.value,
                 ) &&
                 missingAttributes.indexOf(criteriaRule.rule) === -1
             ) {
@@ -971,7 +955,7 @@ export default class CriteriaEditor extends Vue {
 
         return missingAttributes;
     }
-}
+
 </script>
 
 <style>

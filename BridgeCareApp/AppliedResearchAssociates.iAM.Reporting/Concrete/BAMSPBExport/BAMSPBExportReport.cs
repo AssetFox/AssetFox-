@@ -4,10 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Common.Logging;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -24,8 +21,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         protected readonly IHubService _hubService;
         private readonly IUnitOfWork _unitOfWork;
-        private Guid _networkId;        
-        private readonly ReportHelper _reportHelper;
+        private Guid _networkId;                
 
         private readonly TreatmentForPBExportReport _treatmentForPBExportReportReport;
 
@@ -34,10 +30,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
-            _reportHelper = new ReportHelper();
 
             //create summary report objects
-            _treatmentForPBExportReportReport = new TreatmentForPBExportReport();
+            _treatmentForPBExportReportReport = new TreatmentForPBExportReport(_unitOfWork);
             if (_treatmentForPBExportReportReport == null) { throw new ArgumentNullException(nameof(_treatmentForPBExportReportReport)); }
 
             // Check for existing report id
@@ -70,6 +65,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Suffix => throw new NotImplementedException();
+                
+        public string Criteria { get; set; }
+
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
@@ -82,7 +81,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Set simulation id
-            if (!Guid.TryParse(parameters, out Guid _simulationId))
+            string simulationId = ReportHelper.GetSimulationId(parameters);
+            if (!Guid.TryParse(simulationId, out Guid _simulationId))
             {
                 Errors.Add("Provided simulation ID is not a GUID");
                 IndicateError();

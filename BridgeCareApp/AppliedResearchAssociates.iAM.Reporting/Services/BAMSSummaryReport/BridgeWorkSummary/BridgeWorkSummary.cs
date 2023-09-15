@@ -7,6 +7,7 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -20,18 +21,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private PostedClosedBridgeWorkSummary _postedClosedBridgeWorkSummary;
         private ProjectsCompletedCount _projectsCompletedCount;
         private ReportHelper _reportHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public BridgeWorkSummary(IList<string> Warnings)
+        public BridgeWorkSummary(IList<string> Warnings, IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _bridgesCulvertsWorkSummary = new BridgesCulvertsWorkSummary(Warnings);
             var workSummaryModel = new WorkSummaryModel();
             _costBudgetsWorkSummary = new CostBudgetsWorkSummary(workSummaryModel);
-            _bridgeRateDeckAreaWorkSummary = new BridgeRateDeckAreaWorkSummary();
-            _nhsBridgeDeckAreaWorkSummary = new NHSBridgeDeckAreaWorkSummary();
-            _deckAreaBridgeWorkSummary = new DeckAreaBridgeWorkSummary();
-            _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel);
-            _projectsCompletedCount = new ProjectsCompletedCount(Warnings);
-            _reportHelper = new ReportHelper();
+            _bridgeRateDeckAreaWorkSummary = new BridgeRateDeckAreaWorkSummary(_unitOfWork);
+            _nhsBridgeDeckAreaWorkSummary = new NHSBridgeDeckAreaWorkSummary(_unitOfWork);
+            _deckAreaBridgeWorkSummary = new DeckAreaBridgeWorkSummary(_unitOfWork);
+            _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel, _unitOfWork);
+            _projectsCompletedCount = new ProjectsCompletedCount(Warnings);            
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
@@ -43,13 +46,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             #region Initial work to set some data, which will be used throughout the Work summary TAB
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
-            var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
-            simulationTreatments.Add((BAMSConstants.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Add((BAMSConstants.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
+            var simulationTreatments = new List<(string Name, AssetCategories AssetType, TreatmentCategory Category)>();
+            simulationTreatments.Add((BAMSConstants.CulvertNoTreatment, AssetCategories.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Add((BAMSConstants.NonCulvertNoTreatment, AssetCategories.Bridge, TreatmentCategory.Other));
             foreach (var item in selectableTreatments)
             {
                 if (item.Name.ToLower() == BAMSConstants.NoTreatment) continue;
-                simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
+                simulationTreatments.Add((item.Name, (AssetCategories)item.AssetCategory, item.Category));
             }
             simulationTreatments.Sort((a, b) => a.Item1.CompareTo(b.Item1));
 

@@ -194,17 +194,7 @@ const actions = {
             true,
             payload.currentUserCriteriaFilter,
         ).then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                const budgets: Budget[] = response.data as Budget[];
-                commit('scenarioBudgetsMutator', budgets);
-                commit('isSuccessfulImportMutator', true);
-                dispatch('addSuccessNotification', {
-                    message: 'Investment budgets file imported',
-                });
-            }
-            else {
-                commit('isSuccessfulImportMutator', false);
-            }
+            dispatch('setAlertMessage', "Investment Budgets import has been added to the work queue.");
         });
     },
     async importLibraryInvestmentBudgetsFile(
@@ -218,18 +208,7 @@ const actions = {
             false,
             payload.currentUserCriteriaFilter,
         ).then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                const library: BudgetLibrary = response.data as BudgetLibrary;
-                commit('budgetLibraryMutator', library);
-                commit('selectedBudgetLibraryMutator', library.id);
-                commit('isSuccessfulImportMutator', true);
-                dispatch('addSuccessNotification', {
-                    message: 'Investment budgets file imported',
-                });
-            }
-            else {
-                commit('isSuccessfulImportMutator', false);
-            }
+            dispatch('setAlertMessage', "Investment Budgets import has been added to the work queue.");
         });
     },
     async getHasPermittedAccess({ commit }: any)

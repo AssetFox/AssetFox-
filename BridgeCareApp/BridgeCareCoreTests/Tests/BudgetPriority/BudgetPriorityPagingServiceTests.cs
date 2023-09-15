@@ -159,7 +159,7 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             var budgetPriorityDto = BudgetPriorityDtos.New(scenarioBudgetPriorityId);
             var criterionLibraryId = Guid.NewGuid();
             var criterionLibraryDto = CriterionLibraryDtos.Dto(criterionLibraryId, "mergedExpression");
-            var criterionLibraryDtoClone = CriterionLibraryDtos.Dto(criterionLibraryId, "mergedExpression");
+            var criterionLibraryDtoClone = CriterionLibraryDtos.Dto(criterionLibraryId, "mergedExpression", criterionLibraryDto.Name);
             var criterionLibraryDto2 = CriterionLibraryDtos.Dto(null, "not found");
             var budgetPriorityDto2 = BudgetPriorityDtos.New();
             budgetPriorityDto.CriterionLibrary = criterionLibraryDto;
@@ -394,7 +394,7 @@ namespace BridgeCareCoreTests.Tests.BudgetPriority
             var budgetPriorityDto = BudgetPriorityDtos.New(scenarioBudgetPriorityId);
             var criterionLibraryId = Guid.NewGuid();
             var criterionLibraryDto = CriterionLibraryDtos.Dto(criterionLibraryId, "mergedExpression");
-            var criterionLibraryDtoClone = CriterionLibraryDtos.Dto(criterionLibraryId, "mergedExpression");
+            var criterionLibraryDtoClone = CriterionLibraryDtos.Dto(criterionLibraryId, "mergedExpression", criterionLibraryDto.Name);
             var criterionLibraryDto2 = CriterionLibraryDtos.Dto(null, "not found");
             var budgetPriorityDto2 = BudgetPriorityDtos.New();
             budgetPriorityDto.CriterionLibrary = criterionLibraryDto;

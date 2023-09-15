@@ -7,7 +7,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using MoreLinq;
 using OfficeOpenXml;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment
 {
@@ -15,17 +15,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
     {
         private TreatmentCommon _treatmentCommon;
         private ReportHelper _reportHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public FundedTreatmentList()
+        public FundedTreatmentList(IUnitOfWork unitOfWork)
         {
-            _treatmentCommon = new TreatmentCommon();
-            _reportHelper = new ReportHelper();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _treatmentCommon = new TreatmentCommon(_unitOfWork);
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public void Fill(ExcelWorksheet fundedTreatmentWorksheet, SimulationOutput simulationOutput)
         {
             var currentCell = AddHeadersCells(fundedTreatmentWorksheet);
-
+            
             // Add row next to headers for filters and year numbers for dynamic data. Cover from
             // top, left to right, and bottom set of data.
             using (var autoFilterCells = fundedTreatmentWorksheet.Cells[3, 1, currentCell.Row, currentCell.Column - 1])

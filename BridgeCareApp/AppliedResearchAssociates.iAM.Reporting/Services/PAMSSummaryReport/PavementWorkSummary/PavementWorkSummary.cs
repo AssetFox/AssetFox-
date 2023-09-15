@@ -34,16 +34,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             List<int> simulationYears,
             WorkSummaryModel workSummaryModel,
             Dictionary<string, Budget> yearlyBudgetAmount,
-            IReadOnlyCollection<SelectableTreatment> selectableTreatments)
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments,
+            ICollection<CommittedProject> committedProjects)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
-            var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
+            var simulationTreatments = new List<(string Name, AssetCategories AssetType, TreatmentCategory Category)>();
 
             foreach (var item in selectableTreatments)
             {
-                simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
+                simulationTreatments.Add((item.Name, (AssetCategories)item.AssetCategory, item.Category));
             }
 
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
@@ -55,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(reportOutputData, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear);
             var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
 
-            var chartRowsModel = _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals);
+            var chartRowsModel = _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals, committedProjects);
             chartRowsModel = _treatmentsWorkSummary.FillTreatmentsWorkSummarySections(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals, chartRowsModel);
             chartRowsModel = _iriConditionSummary.FillIriConditionSummarySection(worksheet, currentCell, reportOutputData, chartRowsModel);
             chartRowsModel = _opiConditionSummary.FillOpiConditionSummarySection(worksheet, currentCell, reportOutputData, chartRowsModel);

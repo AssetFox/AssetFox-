@@ -21,6 +21,8 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
+using System.IO;
+using Org.BouncyCastle.Utilities;
 
 namespace BridgeCareCore.Controllers
 {
@@ -87,9 +89,9 @@ namespace BridgeCareCore.Controllers
                     siulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 });
                 ImportCommittedProjectWorkItem workItem = new ImportCommittedProjectWorkItem(simulationId, excelPackage, filename,applyNoTreatment, UserInfo.Name, siulationName);
-                var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
+                var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, simulationId.ToString());
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, simulationId.ToString());
 
                 return Ok();
             }
@@ -130,6 +132,23 @@ namespace BridgeCareCore.Controllers
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ExportCommittedProjects for {simulationName} - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("DownloadCommittedProjectTemplate")]
+        [Authorize]
+        public async Task<IActionResult> DownloadCommittedProjectTemplate()
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.CommittedProjectRepo.DownloadCommittedProjectTemplate());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"::Unable to DownloadedTemplate - {e.Message}");
                 throw;
             }
         }
@@ -216,6 +235,29 @@ namespace BridgeCareCore.Controllers
         {
             var result = await Task.Factory.StartNew(() => _committedProjectService.CreateCommittedProjectTemplate(networkId));
             return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("SetCommittedProjectTemplate")]
+        [Authorize(Policy = Policy.ModifyCommittedProjects)]
+        public async Task<IActionResult> SetCommittedProjectTemplate()
+        {
+            Stream stream = ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream();
+
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.CommittedProjectRepo.SetCommittedProjectTemplate(stream);
+                });
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, "Successfully Updated Implementation Name");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"::Unable to Upload Template - {e.Message}");
+                throw;
+            }
         }
 
         [HttpDelete]

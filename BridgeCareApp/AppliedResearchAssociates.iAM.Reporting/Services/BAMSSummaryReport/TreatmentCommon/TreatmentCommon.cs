@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
@@ -12,10 +12,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
     public class TreatmentCommon
     {
         private ReportHelper _reportHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TreatmentCommon()
+        public TreatmentCommon(IUnitOfWork unitOfWork)
         {
-            _reportHelper = new ReportHelper();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet)
@@ -39,6 +41,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             worksheet.Row(row + 1).Height = 15;
             // Autofit before the merges
             worksheet.Cells.AutoFitColumns(0);
+            worksheet.Cells.AutoFitColumns(5);
 
             // Merge rows for columns
             for (int cellColumn = 1; cellColumn <= headersRow.Count; cellColumn++)
@@ -97,6 +100,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "COUNTY");
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "MPO_NAME");
 
+            worksheet.Cells[row, columnNo++].Value = "";
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FEATURE_INTERSECTED");
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FEATURE_CARRIED");
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "LOCATION");
+
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "###,###,###,###,##0";
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "LENGTH");
 
@@ -151,6 +159,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 "District",
                 "County",
                 "MPO/RPO",
+                "City/Town/Place",
+                "Feature\r\nintersected",
+                "Facility\r\nCarried",
+                "Location/StructureName",
                 "Bridge\r\nLength",
                 "Deck\r\nArea",
                 "Large\r\nBridge",

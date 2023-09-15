@@ -7,6 +7,8 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeW
 using System.Linq;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using System;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -14,11 +16,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
     {
         private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
         private BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public BridgeRateDeckAreaWorkSummary()
+        public BridgeRateDeckAreaWorkSummary(IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
-            _bridgeWorkSummaryComputationHelper = new BridgeWorkSummaryComputationHelper();
+            _bridgeWorkSummaryComputationHelper = new BridgeWorkSummaryComputationHelper(_unitOfWork);
         }
 
         public ChartRowsModel FillBridgeRateDeckAreaWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,

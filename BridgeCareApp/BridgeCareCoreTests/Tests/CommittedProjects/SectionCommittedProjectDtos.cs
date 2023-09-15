@@ -9,7 +9,7 @@ namespace BridgeCareCoreTests.Tests
 {
     public static class SectionCommittedProjectDtos
     {
-        public static SectionCommittedProjectDTO Dto(Guid? id = null, Guid? scenarioBudgetId = null)
+        public static SectionCommittedProjectDTO Dto(Guid? id = null, Guid? scenarioBudgetId = null, Guid simulationId = new Guid())
         {
             var resolveId = id ?? Guid.NewGuid();
             var resolveScenarioBudgetId = scenarioBudgetId ?? Guid.NewGuid();
@@ -17,6 +17,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 Id = resolveId,
                 ScenarioBudgetId = resolveScenarioBudgetId,
+                SimulationId = simulationId,
             };
             return dto;
         }

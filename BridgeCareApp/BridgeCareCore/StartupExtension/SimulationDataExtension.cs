@@ -20,7 +20,9 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
 
             services.AddSingleton<SequentialWorkQueue<WorkQueueMetadata>>();
+            services.AddSingleton<FastSequentialworkQueue<WorkQueueMetadata>>();
             services.AddHostedService<SequentialWorkBackgroundService>();
+            services.AddHostedService<FastSequentialWorkBackgroundService>();
             services.AddScoped<IGeneralWorkQueueService, GeneralWorkQueueService>();
             services.AddScoped<AttributeService>();
             services.AddScoped<IExcelRawDataImportService, ExcelRawDataImportService>();

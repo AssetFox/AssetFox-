@@ -3,6 +3,7 @@
         <v-flex xs12>            
             <div class='consequences-data-table'>
                 <v-data-table :headers='consequencesGridHeaders' :items='consequencesGridData'
+                              id="ConsequencesTab-Consequences-vDataTable"
                               class='elevation-1 fixed-header v-table__overflow'
                               sort-icon=$vuetify.icons.ghd-table-sort
                               hide-actions>

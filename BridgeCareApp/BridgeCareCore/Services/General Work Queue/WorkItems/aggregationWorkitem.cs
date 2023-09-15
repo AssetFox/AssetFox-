@@ -1,4 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using Microsoft.SqlServer.Dac.Model;
@@ -17,13 +17,14 @@ using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs.Services;
+using Microsoft.CodeAnalysis;
 
 namespace BridgeCareCore.Services
 {
     public record AggregationWorkitem(Guid NetworkId, string UserId, string NetworkName, List<AttributeDTO> Attributes) : IWorkSpecification<WorkQueueMetadata>
 
     {
-        public string WorkId => NetworkId.ToString();
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(NetworkId, WorkType.Aggregation);
 
         public DateTime StartTime { get; set; }
 
@@ -31,7 +32,7 @@ namespace BridgeCareCore.Services
 
         public string WorkName => NetworkName;
 
-        public WorkQueueMetadata Metadata => new WorkQueueMetadata() { DomainType = DomainType.Network, WorkType = WorkType.Aggregation };
+        public WorkQueueMetadata Metadata => new WorkQueueMetadata() { DomainType = DomainType.Network, WorkType = WorkType.Aggregation, DomainId = NetworkId };
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -43,7 +44,7 @@ namespace BridgeCareCore.Services
             var _log = scope.ServiceProvider.GetRequiredService<ILog>();
             var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
             var state = new AggregationState();
-            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, NetworkId);
+            var _queueLogger = new GeneralWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
             var timer = KeepUserInformedOfState(state);
             var readTask = Task.Run(() => ReadMessages(channel.Reader));
                  
@@ -149,6 +150,21 @@ namespace BridgeCareCore.Services
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{AggregationError}::NetworkAggregateAccess - {errorMessage}");
+        }
+
+        public void OnCompletion(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Network aggregation on {NetworkName} has completed");
+        }
+
+        public void OnUpdate(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWorkQueueUpdate, WorkId);
         }
     }
 }

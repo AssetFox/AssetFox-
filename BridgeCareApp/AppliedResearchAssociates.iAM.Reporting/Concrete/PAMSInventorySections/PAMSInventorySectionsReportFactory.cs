@@ -10,9 +10,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         public string Name => "PAMSInventoryLookupSections";
 
-        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService, string suffix = "")
         {
-            return new PAMSInventorySectionsReport(uow, Name, results);
+            return new PAMSInventorySectionsReport(uow, Name, results, suffix);
         }
     }
 }

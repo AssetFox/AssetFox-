@@ -55,7 +55,73 @@ namespace BridgeCareCore.Services
             {
                 return null;
             }
-        }        
+        }
+
+        public void ImportScenarioTreatmentsFileSingle(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        {
+            queueLog ??= new DoNothingWorkQueueLog();
+            var validationMessages = new List<string>();
+            var scenarioTreatments = new List<TreatmentDTO>();
+            var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            queueLog.UpdateWorkQueueStatus("Loading Excel");
+            foreach (var worksheet in excelPackage.Workbook.Worksheets)
+            {
+                var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
+                scenarioTreatments.Add(treatmentLoadResult.Treatment);
+                validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
+            }
+            var combinedValidationMessage = string.Empty;
+            if (validationMessages.Any())
+            {
+                var combinedValidationMessageBuilder = new StringBuilder();
+                foreach (var message in validationMessages)
+                {
+                    combinedValidationMessageBuilder.AppendLine(message);
+                }
+                combinedValidationMessage = combinedValidationMessageBuilder.ToString();
+            }
+
+            var scenarioTreatmentImportResult = new ScenarioTreatmentImportResultDTO
+            {
+                Treatments = scenarioTreatments,
+                WarningMessage = combinedValidationMessage,
+            };
+            if (combinedValidationMessage.Length == 0)
+            {
+                queueLog.UpdateWorkQueueStatus("Upserting Treatments");
+                _unitOfWork.SelectableTreatmentRepo.AddScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
+            }
+        }
+
+        public void ImportLibraryTreatmentsFileSingle(
+            Guid treatmentLibraryId,
+            ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        {
+            queueLog ??= new DoNothingWorkQueueLog();
+            queueLog.UpdateWorkQueueStatus("Starting Import");
+            var validationMessages = new List<string>();            //if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                //return new TreatmentImportResultDTO();
+            var treatmentLibrary = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+            var library = new TreatmentLibraryDTO
+            {
+                Treatments = new List<TreatmentDTO>(),
+                Id = treatmentLibraryId,
+                Name = treatmentLibrary.Name,
+                Owner = treatmentLibrary.Owner,
+                Description = treatmentLibrary.Description
+            };
+            foreach (var worksheet in excelPackage.Workbook.Worksheets)
+            {
+                //if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                    //return new TreatmentImportResultDTO();
+                var loadTreatment = _treatmentLoader.LoadTreatment(worksheet);
+                library.Treatments.Add(loadTreatment.Treatment);
+                validationMessages.AddRange(loadTreatment.ValidationMessages);
+            }
+
+            _unitOfWork.SelectableTreatmentRepo.AddLibraryTreatments(library.Treatments, library.Id);
+      
+        }
         public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
             ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
@@ -103,6 +169,7 @@ namespace BridgeCareCore.Services
             }
             return returnValue;
         }
+
         public ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();

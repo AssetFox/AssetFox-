@@ -10,6 +10,7 @@ using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.Extensions.DependencyModel;
 using MathNet.Numerics.Statistics.Mcmc;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -25,7 +26,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Description = dto.Description,
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
-                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType
+                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
+                IsUnselectable = dto.IsUnselectable
             };
 
         public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this TreatmentDTO dto, Guid simulationId) =>
@@ -40,6 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 IsModified = dto.IsModified,
                 LibraryId = dto.LibraryId,
+                IsUnselectable = dto.IsUnselectable,
 
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
                 AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
@@ -82,11 +85,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             selectableTreatment.Id = entity.Id;
             selectableTreatment.Name = entity.Name;
-            selectableTreatment.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
-            selectableTreatment.ShadowForSameTreatment = entity.ShadowForSameTreatment;
+            selectableTreatment.SetShadowForAnyTreatment(entity.ShadowForAnyTreatment);
+            selectableTreatment.SetShadowForSameTreatment(entity.ShadowForSameTreatment);
             selectableTreatment.Description = entity.Description;
             selectableTreatment.Category = (TreatmentCategory)entity.Category;
-            selectableTreatment.AssetCategory = (AssetCategory)entity.AssetType;
+            selectableTreatment.AssetCategory = (AssetCategory)(AssetCategories)entity.AssetType;
             if (entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
             {
                 var budgetIds = entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Select(_ => _.ScenarioBudget.Id).ToList();
@@ -151,8 +154,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CriterionLibrary = entity.CriterionLibrarySelectableTreatmentJoin != null
                     ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),
-                Category = (TreatmentDTOEnum.TreatmentType)entity.Category,
-                AssetType = (TreatmentDTOEnum.AssetType)entity.AssetType
+                Category = (TreatmentCategory)entity.Category,
+                AssetType = (AssetCategories)entity.AssetType,
+
+                IsUnselectable = entity.IsUnselectable
             };
 
         public static TreatmentDTOWithSimulationId ToDtoWithSimulationId(this ScenarioSelectableTreatmentEntity entity)
@@ -229,12 +234,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         : new CriterionLibraryDTO(),
                 ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                 ShadowForSameTreatment = entity.ShadowForSameTreatment,
-                Category = (TreatmentDTOEnum.TreatmentType)entity.Category,
+                Category = (TreatmentCategory)entity.Category,
 
                 IsModified = entity.IsModified,
                 LibraryId = entity.LibraryId,
 
-                AssetType = (TreatmentDTOEnum.AssetType)entity.AssetType
+                AssetType = (AssetCategories)entity.AssetType,
+
+                IsUnselectable = entity.IsUnselectable
             };
     }
 }

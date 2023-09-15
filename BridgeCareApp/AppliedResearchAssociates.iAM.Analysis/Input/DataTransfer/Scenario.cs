@@ -6,23 +6,23 @@ namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
 public sealed class Scenario
 {
-    public AnalysisMethod AnalysisMethod { get; set; }
+    public AnalysisMethod AnalysisMethod { get; init; } = new();
 
-    public List<CommittedProject> CommittedProjects { get; set; }
+    public List<CommittedProject> CommittedProjects { get; init; } = new();
 
-    public InvestmentPlan InvestmentPlan { get; set; }
+    public InvestmentPlan InvestmentPlan { get; init; } = new();
 
     public string Name { get; set; }
 
     public string NameOfPassiveTreatment { get; set; }
 
-    public Network Network { get; set; }
+    public Network Network { get; init; } = new();
 
     public int NumberOfYearsOfTreatmentOutlook { get; set; }
 
-    public List<PerformanceCurve> PerformanceCurves { get; set; }
+    public List<PerformanceCurve> PerformanceCurves { get; init; } = new();
 
-    public List<SelectableTreatment> SelectableTreatments { get; set; }
+    public List<SelectableTreatment> SelectableTreatments { get; init; } = new();
 
     public bool ShouldPreapplyPassiveTreatment { get; set; }
 
@@ -141,12 +141,10 @@ public sealed class Scenario
     private static CommittedProject Convert(Analysis.CommittedProject source) => new()
     {
         AssetID = source.Asset.Id,
-        Consequences = source.Consequences.Select(Convert).ToList(),
         Cost = source.Cost,
         Name = source.Name,
-        ShadowForAnyTreatment = source.ShadowForAnyTreatment,
-        ShadowForSameTreatment = source.ShadowForSameTreatment,
         NameOfUsableBudget = source.Budget.Name,
+        NameOfTemplateTreatment = source.TemplateTreatment.Name,
         Year = source.Year,
     };
 
@@ -240,6 +238,7 @@ public sealed class Scenario
         Consequences = source.Consequences.Select(Convert).ToList(),
         Costs = source.Costs.Select(Convert).ToList(),
         FeasibilityCriterionExpressions = source.FeasibilityCriteria.Select(criterion => criterion.Expression).ToList(),
+        ForCommittedProjectsOnly = source.ForCommittedProjectsOnly,
         Name = source.Name,
         PerformanceCurveAdjustmentFactors = source.PerformanceCurveAdjustmentFactors.Select(Convert).ToList(),
         Schedulings = source.Schedulings.Select(Convert).ToList(),
@@ -262,12 +261,6 @@ public sealed class Scenario
     {
         DefaultValue = source.DefaultValue,
         Name = source.Name,
-    };
-
-    private static TreatmentConsequence Convert(Analysis.TreatmentConsequence source) => new()
-    {
-        AttributeName = source.Attribute.Name,
-        ChangeExpression = source.Change.Expression,
     };
 
     private static TreatmentScheduling Convert(Analysis.TreatmentScheduling source) => new()
@@ -342,8 +335,9 @@ public sealed class Scenario
 
             result.Category = source.Category;
             result.Name = source.Name;
-            result.ShadowForAnyTreatment = source.ShadowForAnyTreatment;
-            result.ShadowForSameTreatment = source.ShadowForSameTreatment;
+            result.SetShadowForAnyTreatment(source.ShadowForAnyTreatment);
+            result.SetShadowForSameTreatment(source.ShadowForSameTreatment);
+            result.ForCommittedProjectsOnly = source.ForCommittedProjectsOnly;
 
             foreach (var item in source.NamesOfUsableBudgets)
             {
@@ -570,24 +564,12 @@ public sealed class Scenario
                 Budget = BudgetByName[source.NameOfUsableBudget],
                 Cost = source.Cost,
                 Name = source.Name,
-                ShadowForAnyTreatment = source.ShadowForAnyTreatment,
-                ShadowForSameTreatment = source.ShadowForSameTreatment,
                 treatmentCategory = source.Category,
+                TemplateTreatment = TreatmentByName[source.NameOfTemplateTreatment],
             };
-
-            foreach (var item in source.Consequences)
-            {
-                result.Consequences.Add(Convert(item));
-            }
 
             return result;
         }
-
-        private Analysis.TreatmentConsequence Convert(TreatmentConsequence source) => new()
-        {
-            Attribute = AttributeByName[source.AttributeName],
-            Change = { Expression = source.ChangeExpression },
-        };
 
         private void Convert(AnalysisMethod source, Analysis.AnalysisMethod target)
         {
@@ -600,7 +582,11 @@ public sealed class Scenario
             target.ShouldDeteriorateDuringCashFlow = source.ShouldDeteriorateDuringCashFlow;
             target.ShouldRestrictCashFlowToFirstYearBudgets = source.ShouldRestrictCashFlowToFirstYearBudgets;
             target.SpendingStrategy = source.SpendingStrategy;
-            target.Weighting = NumericAttributeByName[source.BenefitWeightAttributeName];
+
+            if (source.BenefitWeightAttributeName != null)
+            {
+                target.Weighting = NumericAttributeByName[source.BenefitWeightAttributeName];
+            }
 
             foreach (var item in source.BudgetPriorities)
             {
@@ -656,7 +642,9 @@ public sealed class Scenario
 
         private Explorer Convert(AttributeSystem source)
         {
-            var result = new Explorer(source.AgeAttributeName);
+            var result = source.AgeAttributeName is null
+                ? new Explorer()
+                : new Explorer(source.AgeAttributeName);
 
             foreach (var item in source.CalculatedFields)
             {

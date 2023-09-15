@@ -3,8 +3,9 @@
             <v-layout align-center class="vl-style">
                 <v-flex xs12>
                 <v-layout column>
-                    <v-subheader class="ghd-control-label ghd-md-gray Montserrat-font-family">Data Source</v-subheader>
+                    <v-subheader id="DataSource-headerText-vsubheader" class="ghd-control-label ghd-md-gray Montserrat-font-family">Data Source</v-subheader>
                     <v-select
+                      id="DataSource-DataSourceSelect-vselect"
                       class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family"
                       :items="dsItems"
                       append-icon=$vuetify.icons.ghd-down
@@ -15,7 +16,7 @@
                     </v-select>
                 </v-layout>
                 </v-flex>
-                <v-btn class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" outline>Add Data Source</v-btn>
+                <v-btn id="DataSource-AddDataSource-vbtn" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" outline>Add Data Source</v-btn>
             </v-layout>
             <v-divider v-show="showMssql || showExcel"></v-divider>
             <v-layout column>
@@ -27,6 +28,7 @@
         <v-layout column>
             <v-subheader v-show="showMssql || showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Source Type</v-subheader>
             <v-select
+              id="DataSource-SourceType-vselect"
               v-show="showMssql || showExcel"
               class="ghd-select ghd-text-field ghd-text-field-border ds-style Montserrat-font-family"
               :items="dsTypeItems"
@@ -42,17 +44,19 @@
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">FileName</v-subheader>
                 <v-layout class="txt-style" row>
                     <v-text-field
+                        id="DataSource-fileName-vtextfield"
                         v-show="showExcel"
                         class="ghd-control-text ghd-control-border Montserrat-font-family"
                         v-model="fileName"
                         outline
                         outlined
                     ></v-text-field>
-                    <v-btn v-show="showExcel" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="chooseFiles()">Add File</v-btn>
+                    <v-btn id="DataSource-AddFile-vbtn" v-show="showExcel" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="chooseFiles()">Add File</v-btn>
                     <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
                 </v-layout>
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
                 <v-select
+                id="DataSource-Location-vselect"
                 :items="locColumns"
                 append-icon=$vuetify.icons.ghd-down
                 v-model="currentExcelLocationColumn"
@@ -64,6 +68,7 @@
                 </v-select>
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
                 <v-select
+                id="DataSource-Date-vselect"
                 :items="datColumns"
                 append-icon=$vuetify.icons.ghd-down
                 v-show="showExcel"
@@ -81,6 +86,7 @@
             <v-layout justify-start>
                     <v-flex xs8>
                         <v-textarea
+                          id="DataSource-ConnectionString-vtextarea"
                           class="ghd-control-border Montserrat-font-family"
                           :placeholder=connectionStringPlaceHolderMessage
                           v-show="showMssql"
@@ -99,11 +105,11 @@
         </v-layout>
         <v-layout justify-center> 
             <v-flex xs6>
-                <v-btn v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
-                <v-btn v-show="showMssql" @click="checkSQLConnection" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
-                <v-btn v-show="showMssql || showExcel" :disabled="disableCrudButtons() || !hasUnsavedChanges" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
-                <v-btn v-show="showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
-                <v-btn v-show="showMssql || showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onDeleteClick">Delete</v-btn>
+                <v-btn id="DataSource-Cancel-vbtn" v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
+                <v-btn id="DataSource-Test-vbtn" v-show="showMssql" @click="checkSQLConnection" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
+                <v-btn id="DataSource-Save-vbtn" v-show="showMssql || showExcel" :disabled="disableCrudButtons() || !hasUnsavedChanges" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
+                <v-btn id="DataSource-Load-vbtn" v-show="showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
+                <v-btn id="DataSource-Delete-vbtn" v-show="showMssql || showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onDeleteClick">Delete</v-btn>
 
             </v-flex>
         </v-layout>
@@ -285,6 +291,11 @@ export default class DataSource extends Vue {
             this.selectedConnection = this.isOwner() ? this.currentDatasource.connectionString : '';
             this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
             this.showSqlMessage = false; this.showSaveMessage = false;
+            if(!this.isNewDataSource) {
+                    this.getExcelSpreadsheetColumnHeadersAction(this.currentDatasource.id);
+                    this.currentExcelDateColumn = this.currentDatasource.dateColumn;
+                    this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
+                }
         }
         @Watch('selectedConnection')
         onSelectedConnectionChanged() {
@@ -309,6 +320,12 @@ export default class DataSource extends Vue {
 
     @Watch('currentDatasource', {deep: true})
     onCurrentDataSourceChanged() {
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.currentDatasource, this.unmodifiedDatasource);
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    @Watch('unmodifiedDatasource', {deep: true})
+    onUnmodifiedDatasourceChanged(){
         const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.currentDatasource, this.unmodifiedDatasource);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
@@ -355,6 +372,7 @@ export default class DataSource extends Vue {
                 this.selectedConnection = this.isOwner() ? this.currentDatasource.connectionString : '';
                 this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString!='' ? 'Replacement connection string' : 'New connection string';
                 this.getDataSourcesAction();
+                this.unmodifiedDatasource = clone(this.currentDatasource);
             });
         } else {
             let exldat : ExcelDataSource = {
@@ -373,6 +391,7 @@ export default class DataSource extends Vue {
                 this.getDataSourcesAction().then(() => {
                     this.isNewDataSource = false;
                 });
+                this.unmodifiedDatasource = clone(this.currentDatasource);
             });
         }
     }
@@ -392,20 +411,20 @@ export default class DataSource extends Vue {
         if (datasource != null || datasource != undefined) {
         this.dataSources.push(datasource);
         this.currentDatasource = datasource;
+        this.isNewDataSource = true;
         this.sourceTypeItem = datasource.name;
         this.dataSourceTypeItem = datasource.type;
         this.selectedConnection = datasource.connectionString;        
         this.connectionStringPlaceHolderMessage = 'New connection string';
         this.datColumns = [];
-        this.locColumns = [];
-        this.isNewDataSource = true;
+        this.locColumns = [];       
         }
     }
     allowSave(): boolean {
         let result: boolean = false;
         if (this.dataSources == undefined) return false;
         if (this.dataSourceTypeItem===DSEXCEL) {
-            if (this.datColumns.length === 0 && this.locColumns.length === 0) {
+            if (this.currentExcelDateColumn !== '' || this.currentExcelLocationColumn !== '') {
                 return true;
             }
         }
@@ -474,6 +493,11 @@ export default class DataSource extends Vue {
         if(this.currentDatasource.type == "SQL")
         {
             return !this.sqlValid;
+        }
+
+        if(this.currentDatasource.type == "Excel" && !this.isNewDataSource)
+        {
+            return !this.allowSave();
         }
 
         return false;

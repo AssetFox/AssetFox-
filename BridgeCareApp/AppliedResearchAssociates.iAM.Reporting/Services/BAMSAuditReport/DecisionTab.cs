@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
@@ -17,10 +18,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         private const int headerRow1 = 1;
         private const int headerRow2 = 2;
         private List<int> columnNumbersBudgetsUsed;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public DecisionTab()
+        public DecisionTab(IUnitOfWork unitOfWork)
         {
-            _reportHelper = new ReportHelper();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation, HashSet<string> performanceCurvesAttributes)
@@ -113,14 +116,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 decisionsTreatment.CIImprovement = treatmentOption?.ConditionChange;
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
+                decisionsTreatment.Benefit = treatmentOption != null ? decisionsTreatment.BCRatio * decisionsTreatment.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? BAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);
                 var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
+                var budgetPriorityLevel = treatmentConsideration != null && treatmentConsideration.BudgetPriorityLevel != null ? treatmentConsideration.BudgetPriorityLevel.Value.ToString() : string.Empty;
                 decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.BudgetUsages.Sum(_ => _.CoveredCost) : 0;
                 var budgetsUsed = treatmentConsideration?.BudgetUsages.Where(_ => _.CoveredCost > 0);
                 var budgetsUsedValue = budgetsUsed != null && budgetsUsed.Any() ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName)) : string.Empty; // currently this will be single value
                 decisionsTreatment.BudgetsUsed = budgetsUsedValue;
                 decisionsTreatment.RejectionReason = treatmentConsideration == null ? string.Empty : (budgetsUsed != null && budgetsUsed.Any() ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName + ": " + _.Status)) : string.Join(", ", treatmentConsideration.BudgetUsages.Where(_ => _.Status != BudgetUsageStatus.ConditionNotMet).Select(_ => _.BudgetName + ": " + _.Status)));
-
+                decisionsTreatment.BudgetPriorityLevel = budgetPriorityLevel;
                 decisionsTreatments.Add(decisionsTreatment);
             }
             decisionDataModel.DecisionsTreatments = decisionsTreatments;
@@ -176,10 +181,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Feasiable;
                 SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.CIImprovement;
+                ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BudgetPriorityLevel;
                 SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Cost;
                 SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BCRatio;
+                SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Benefit;               
                 ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Selected;
                 SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
@@ -324,12 +333,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
         {
             return new List<string>
             {
-                "Feasiable?",
+                "Feasible?",
                 "CI\r\nImprovement",
+                "Priority Level",
                 "Cost",
                 "B/C\r\nRatio",
+                "Benefit",
                 "Selected?",
-                "Amount\r\nSpent",
+                "Amount\r\nAvailable",
                 "Budget(s)\r\nUsed",
                 "Rejection Reason"
             };

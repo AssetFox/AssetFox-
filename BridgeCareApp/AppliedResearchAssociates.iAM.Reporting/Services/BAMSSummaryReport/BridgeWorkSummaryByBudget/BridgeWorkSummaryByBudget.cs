@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeW
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -21,14 +22,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private BridgeWorkCost _bridgeWorkCost;
         private CommittedProjectCost _committedProjectCost;
         private ReportHelper _reportHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public BridgeWorkSummaryByBudget()
+        public BridgeWorkSummaryByBudget(IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
             _culvertCost = new CulvertCost();
             _bridgeWorkCost = new BridgeWorkCost();
             _committedProjectCost = new CommittedProjectCost();
-            _reportHelper = new ReportHelper();
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
@@ -102,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             Amount = budgetAmount,
                             costPerBPN = (bpnName, budgetAmount),
                             TreatmentCategory = treatmentData.Category,
-                            AssetType = treatmentData.AssetCategory
+                            AssetType = (AssetCategories)treatmentData.AssetCategory
                         });
                     }
                 }
@@ -112,10 +115,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 //Filtering treatments for the given budget             
                 var costForCulvertBudget = summaryData.YearlyData
-                                            .Where(_ => _.AssetType == AssetCategory.Culvert && !_.isCommitted);
+                                            .Where(_ => _.AssetType == AssetCategories.Culvert && !_.isCommitted);
 
                 var costForBridgeBudgets = summaryData.YearlyData
-                                                .Where(_ => _.AssetType == AssetCategory.Bridge && !_.isCommitted);
+                                                .Where(_ => _.AssetType == AssetCategories.Bridge && !_.isCommitted);
 
                 var costForCommittedBudgets = summaryData.YearlyData
                                                     .Where(_ => _.isCommitted && _.Treatment.ToLower() != BAMSConstants.NoTreatment);

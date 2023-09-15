@@ -1,32 +1,31 @@
 ﻿using System;
 using AppliedResearchAssociates.Validation;
 
-namespace AppliedResearchAssociates.iAM.Analysis
+namespace AppliedResearchAssociates.iAM.Analysis;
+
+public sealed class RemainingLifeLimit : WeakEntity, IValidator
 {
-    public sealed class RemainingLifeLimit : WeakEntity, IValidator
+    internal RemainingLifeLimit(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+
+    public INumericAttribute Attribute { get; set; }
+
+    public Criterion Criterion { get; }
+
+    public ValidatorBag Subvalidators => new ValidatorBag { Criterion };
+
+    public double Value { get; set; }
+
+    public ValidationResultBag GetDirectValidationResults()
     {
-        internal RemainingLifeLimit(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+        var results = new ValidationResultBag();
 
-        public INumericAttribute Attribute { get; set; }
-
-        public Criterion Criterion { get; }
-
-        public ValidatorBag Subvalidators => new ValidatorBag { Criterion };
-
-        public double Value { get; set; }
-
-        public ValidationResultBag GetDirectValidationResults()
+        if (Attribute == null)
         {
-            var results = new ValidationResultBag();
-
-            if (Attribute == null)
-            {
-                results.Add(ValidationStatus.Error, "Attribute is unset.", this, nameof(Attribute));
-            }
-
-            return results;
+            results.Add(ValidationStatus.Error, "Attribute is unset.", this, nameof(Attribute));
         }
 
-        public string ShortDescription => $"{nameof(RemainingLifeLimit)} {Value}";
+        return results;
     }
+
+    public string ShortDescription => $"{nameof(RemainingLifeLimit)} {Value}";
 }

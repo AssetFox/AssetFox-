@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using static AppliedResearchAssociates.iAM.DTOs.Enums.TreatmentDTOEnum;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
@@ -36,14 +36,14 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// <summary>
         /// Category of treatment
         /// </summary>
-        public TreatmentType Category { get; set; }
+        public TreatmentCategory Category { get; set; }
 
         /// <summary>
         /// General types of assets this treatment is applied to.  Note this is
         /// used in reporting - the user must still define the logic for this
         /// treatment using a criterion library
         /// </summary>
-        public AssetType AssetType { get; set; }
+        public AssetCategories AssetType { get; set; }
 
         /// <summary>
         /// Has this setting been modified from the associated library?
@@ -89,5 +89,11 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// the asset must meet the critiera specified at the budget level
         /// </summary>
         public List<TreatmentBudgetDTO> Budgets { get; set; }
+
+        /// <summary>
+        /// Indicates whether this treatment is unselectable. 
+        /// </summary>
+        public bool IsUnselectable { get; set; }
+
     }
 }

@@ -416,45 +416,45 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
             TestHelper.UnitOfWork.Context.AddEntity(scenarioBudget);
             TestHelper.UnitOfWork.Context.SaveChanges();
 
-            var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo
+            var dtos = TestHelper.UnitOfWork.SelectableTreatmentRepo
                 .GetScenarioSelectableTreatments(simulation.Id);
 
-            dto[0].Description = "Updated Description";
-            dto[0].Name = "Updated Name";
-            dto[0].CriterionLibrary = new CriterionLibraryDTO
+            dtos[0].Description = "Updated Description";
+            dtos[0].Name = "Updated Name";
+            dtos[0].CriterionLibrary = new CriterionLibraryDTO
             {
                 Id = Guid.NewGuid(),
                 Name = "",
                 MergedCriteriaExpression = "",
                 IsSingleUse = true
             };
-            dto[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
+            dtos[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
             {
                 Id = Guid.NewGuid(),
                 Name = "",
                 MergedCriteriaExpression = "",
                 IsSingleUse = true
             };
-            dto[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
-            dto[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
+            dtos[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            dtos[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
             {
                 Id = Guid.NewGuid(),
                 Name = "",
                 MergedCriteriaExpression = "",
                 IsSingleUse = true
             };
-            dto[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
-            dto[0].BudgetIds.Add(scenarioBudget.Id);
+            dtos[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            dtos[0].BudgetIds.Add(scenarioBudget.Id);
 
             // Act
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dto, simulation.Id);
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulation.Id);
 
             // Assert
             var modifiedDto = TestHelper.UnitOfWork.SelectableTreatmentRepo
                 .GetScenarioSelectableTreatments(simulation.Id);
-            Assert.Equal(dto[0].Description, modifiedDto[0].Description);
-            Assert.Equal(dto[0].Name, modifiedDto[0].Name);
-            Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
+            Assert.Equal(dtos[0].Description, modifiedDto[0].Description);
+            Assert.Equal(dtos[0].Name, modifiedDto[0].Name);
+            Assert.Equal(dtos[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
             Assert.Contains(scenarioBudget.Id, modifiedDto[0].BudgetIds);
         }
 

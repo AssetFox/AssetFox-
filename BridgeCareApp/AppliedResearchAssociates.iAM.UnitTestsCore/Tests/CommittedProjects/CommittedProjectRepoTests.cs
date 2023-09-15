@@ -86,11 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             simulation.NetworkId = network.Id;
 
             // Set up a selectable treatment for the test with sample budgets
-            var testBudget = new TreatmentBudgetDTO
-            {
-                Id = Guid.NewGuid(),
-                Name = "Budget Test 1"
-            };
+            var treatmentbudget = TreatmentBudgetDtos.Dto();
             var libraryId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
             var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(treatmentId);
@@ -99,8 +95,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var insertCostEquationId = Guid.NewGuid();
             var cost = TreatmentCostDtos.WithEquationAndCriterionLibrary(costId, insertCostEquationId, costLibraryId, "equation", "mergedCriteriaExpression");
             treatment.Costs.Add(cost);
-            treatment.Budgets = new List<TreatmentBudgetDTO>() { testBudget };
-            treatment.BudgetIds = new List<Guid> { libraryId, treatmentId };
+            treatment.Budgets = new List<TreatmentBudgetDTO>() { treatmentbudget };
+            treatment.BudgetIds = new List<Guid> {  };
             var treatments = new List<TreatmentDTO> { treatment };
             TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulation.Id);
 
@@ -223,7 +219,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.Equal(2, result.Count);
             Assert.Equal(210000, result.Sum(_ => _.Cost));
             Assert.True(result.First() is SectionCommittedProjectDTO);
-            Assert.Equal(2, result.First().Consequences.Count);
             Assert.Equal(2, result.First().LocationKeys.Count);
         }
 
@@ -366,7 +361,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Assert
             Assert.Equal(2, result.Count);
             Assert.Equal(210000, result.Sum(_ => _.Cost));
-            Assert.Equal(2, result.First().Consequences.Count);
             Assert.Equal(2, result.First().LocationKeys.Count);
         }
 
@@ -453,21 +447,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                     { "CULV_DURATION_N", "3"},
                     { "BRKEY_", "2" },
                     { "BMSID", "9876543" }
-                },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "9"
-                    },
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_DURATION_N",
-                        ChangeValue = "1"
-                    }
                 }
             };
             var committedProject2 = new SectionCommittedProjectDTO
@@ -487,21 +466,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                     { "BRKEY_", "2" },
                     { "BMSID", "9876543" }
                 },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "9"
-                    },
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_DURATION_N",
-                        ChangeValue = "1"
-                    }
-                }
             };
             testCommittedProjects.Add(committedProject);
             testCommittedProjects.Add(committedProject2);

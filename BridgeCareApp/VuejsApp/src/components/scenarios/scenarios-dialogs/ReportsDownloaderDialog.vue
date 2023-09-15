@@ -43,7 +43,7 @@
           <v-chip
                  @click="onDownloadReport()"
                  class="green darken-2 white--text">
-            Download summary report
+            Download report
           </v-chip>
       </v-card-actions>
     </v-card>
@@ -114,7 +114,7 @@ export default class ReportsDownloaderDialog extends Vue {
                     this.addErrorNotificationAction({
                         message: 'Failed to generate apricot for ' + this.dialogData.name + '.',
                         longMessage:
-                            'Failed to generate the summary report. Make sure the scenario has been run',
+                            'Failed to generate the report. Make sure the scenario has been run',
                     });
                 }
             });

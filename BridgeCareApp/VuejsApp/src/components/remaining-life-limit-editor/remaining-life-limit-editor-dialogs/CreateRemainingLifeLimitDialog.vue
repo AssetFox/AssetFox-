@@ -38,43 +38,42 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
+<script setup lang="ts">
+import Vue, { computed, toRef, watch } from 'vue';
 import {emptyRemainingLifeLimit, RemainingLifeLimit} from '@/shared/models/iAM/remaining-life-limit';
 import {CreateRemainingLifeLimitDialogData} from '@/shared/models/modals/create-remaining-life-limit-dialog-data';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {clone} from 'ramda';
 
+  const props = defineProps<{
+    dialogData: CreateRemainingLifeLimitDialogData
+  }>();
+  const emit = defineEmits(['submit']);
 
-@Component
-export default class CreateRemainingLifeLimitDialog extends Vue {
-  @Prop() dialogData: CreateRemainingLifeLimitDialogData;
-
-  newRemainingLifeLimit: RemainingLifeLimit = {...emptyRemainingLifeLimit, id: getNewGuid()};
-  rules: InputValidationRules = clone(rules);
-
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    this.newRemainingLifeLimit.attribute = hasValue(this.dialogData.numericAttributeSelectItems)
-        ? this.dialogData.numericAttributeSelectItems[0].value.toString() : '';
+  let newRemainingLifeLimit: RemainingLifeLimit = {...emptyRemainingLifeLimit, id: getNewGuid()};
+  let rules: InputValidationRules = clone(validationRules);
+  
+  watch((() => props.dialogData), onDialogDataChanged )
+  function onDialogDataChanged() {
+    newRemainingLifeLimit.attribute = hasValue(props.dialogData.numericAttributeSelectItems)
+        ? props.dialogData.numericAttributeSelectItems[0].value.toString() : '';
   }
 
-  disableSubmitAction() {
-    return this.rules['generalRules'].valueIsNotEmpty(this.newRemainingLifeLimit.attribute) !== true ||
-        this.rules['generalRules'].valueIsNotEmpty(this.newRemainingLifeLimit.value) !== true;
+  function disableSubmitAction() {
+    return rules['generalRules'].valueIsNotEmpty(newRemainingLifeLimit.attribute) !== true ||
+        rules['generalRules'].valueIsNotEmpty(newRemainingLifeLimit.value) !== true;
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newRemainingLifeLimit);
+      emit('submit', newRemainingLifeLimit);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newRemainingLifeLimit = {...emptyRemainingLifeLimit, id: getNewGuid()};
+    newRemainingLifeLimit = {...emptyRemainingLifeLimit, id: getNewGuid()};
   }
-}
+
 </script>

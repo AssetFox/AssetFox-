@@ -101,16 +101,32 @@ namespace BridgeCareCore.Controllers
                         assetKeyData[assetId].Add(value);
                     }
                 }
-            }            
+            }
 
+            var temp = new List<string>(); 
             List<InventoryItem> inventoryItems = new List<InventoryItem>();
             foreach(var assetKeyDataValue in  assetKeyData.Values)
             {
-                //if (!inventoryItems.Contains(assetKeyDataValue))
-                //{
+                if(temp != assetKeyDataValue)
+                {
                     inventoryItems.Add(new InventoryItem { keyProperties = assetKeyDataValue });
-                //}
+                }
+                temp = assetKeyDataValue;
             }
+
+            // Remove the duplicates
+            //for (int i = 0; i < inventoryItems.Count - 1; i++)
+            //{
+            //    for (int j = i + 1; j < inventoryItems.Count; j++)
+            //    {
+            //        if (inventoryItems[i].keyProperties[0] == inventoryItems[j].keyProperties[0])
+            //        {
+            //            inventoryItems.RemoveAt(j);
+
+            //            j--;
+            //        }
+            //    }
+            //}
 
             return Ok(inventoryItems);
         }

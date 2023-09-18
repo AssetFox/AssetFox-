@@ -98,10 +98,7 @@
          */
         @Watch('inventoryItems')
         async onInventoryItemsChanged() {
-            console.log("before keyattribute");
             this.keyAttributeValues = await this.setupSelectLists();
-            console.log(this.keyAttributeValues);
-            console.log("after keyattribute");
         }
 
         @Watch('staticHTMLForInventory')
@@ -188,9 +185,7 @@
                 inventoryDetails: this.inventoryDetails
             };
             let toReturn: string[][] = [];
-            console.log("here");
             let result = await this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])  
-            console.log(result);
             if(result.keys.length > 0 && this.reportType === 'P'){
                 for(let i = 0; i < this.inventoryDetails.length; i++){
                     toReturn[i] = clone(result.keys[i]);
@@ -205,6 +200,47 @@
         }
 
         initializeLists() {
+            if(this.reportType === 'P') {
+
+            this.inventorySelectListsWorker = this.$worker.create(
+                [
+                    {
+                        message: 'setInventorySelectLists', func: (data: any) => {
+                            if (data) {
+                                
+                                const inventoryItems = data.inventoryItems;
+
+                                const keys: any[][] = []
+                                inventoryItems.forEach((item: InventoryItem, index: number) => {
+                                    if (index === 0) { 
+                                        for(let i = 0; i < data.inventoryDetails.length; i++){
+                                            keys.push([])
+                                            keys[i].push({header: `${data.inventoryDetails[i]}'s`})
+                                        }
+                                    }                           
+                                    
+                                    for(let i = 0; i < data.inventoryDetails.length; i++){
+                                        keys[i].push({
+                                            identifier: item.keyProperties[i],
+                                            group: data.inventoryDetails[i]
+                                        })
+                                    }
+                                });
+                           
+                                return {keys: keys};
+                            }
+                            return  {keys: []};
+                        }
+                    }
+                ]
+            );
+        }
+        else
+        this.initializeRawLists();
+    }
+
+
+        initializeRawLists() {
             this.inventorySelectListsWorker = this.$worker.create(
                 [
                     {
@@ -238,6 +274,7 @@
                 ]
             );
         }
+
 
         async resetDropdowns() {
             this.keyAttributeValues = [];

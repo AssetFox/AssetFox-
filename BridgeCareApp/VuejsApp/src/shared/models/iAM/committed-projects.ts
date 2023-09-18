@@ -61,6 +61,11 @@ export const emptyCommittedProjectConsequence ={
     changeValue: ''
 }
 
+export interface CommittedProjectTemplates{
+    templateName: string;
+    templateData: string;
+}
+
 export interface CommittedProjectFillTreatmentReturnValues {
     treatmentCost: number;
     treatmentCategory: TreatmentCategory;

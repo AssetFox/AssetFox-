@@ -26,16 +26,24 @@
                 <v-flex xs12>
                     <vlayout>
                              <v-select
-                                :items= "Test"
+                                :items= 'templateSelectItems'
                                 append-icon=$vuetify.icons.ghd-down
                                 class='ghd-control-border ghd-control-text ghd-select'
                                 label='Select a Template'
                                 style="width: 20% !important;"
+                                v-model="templateItemSelected"
                                 outline>
                              </v-select>
-                             <v-btn @click='' 
+                             <v-btn @click='onDownloadSelectedTemplate' 
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Download Selected Template</v-btn>
-                            <v-btn @click=''  
+                            <input
+                            id="addCommittedProjectTemplate"
+                            type="file"
+                            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                            ref="committedProjectTemplateInput"
+                            @change="handleAddCommittedProjectTemplateUpload"
+                            hidden/>
+                            <v-btn @click='onAddSelectedTemplate'  
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Upload New Template</v-btn>
                     </vlayout>
                 </v-flex>
@@ -240,7 +248,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
+import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, CommittedProjectTemplates, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { Action, Getter, State } from 'vuex-class';
 import { Watch } from 'vue-property-decorator';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
@@ -289,6 +297,8 @@ export default class CommittedProjectsEditor extends Vue  {
     librarySelectItemValue: string | null = null;
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
+    templateSelectItems: string[] = [];
+    templateItemSelected: string = "";
     attributeSelectItems: SelectItem[] = [];
     budgetSelectItems: SelectItem[] = [];
     categorySelectItems: SelectItem[] = [];
@@ -450,6 +460,7 @@ export default class CommittedProjectsEditor extends Vue  {
             vm.scenarioId = to.query.scenarioId;
             vm.networkId = to.query.networkId;
             vm.librarySelectItemValue = null;
+            vm.templateSelectItems = null;
             
             if (vm.scenarioId === vm.uuidNIL || vm.networkId == vm.uuidNIL) {
                 vm.addErrorNotificationAction({
@@ -480,6 +491,11 @@ export default class CommittedProjectsEditor extends Vue  {
                     }
                 })
                 await vm.initializePages()
+                await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
+                    if(!isNil(response.data)){
+                            vm.templateSelectItems = response.data;
+                        }
+           });
             })();                    
         });
     }
@@ -795,7 +811,30 @@ export default class CommittedProjectsEditor extends Vue  {
                 "You are about to delete all of this scenario's committed projects.",
             choice: true,
         };
-    }   
+    }
+
+    handleAddCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
+             const file = event.target.files[0];
+             CommittedProjectsService.addCommittedProjectTemplate(file).then((response: AxiosResponse) => {
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    this.addSuccessNotificationAction({message:'Uploaded Template'})      
+                }
+            });
+    }
+
+    onAddSelectedTemplate(){
+        document.getElementById("addCommittedProjectTemplate")?.click();
+    }
+    
+    onDownloadSelectedTemplate(){
+        CommittedProjectsService.getSelectedCommittedProjectTemplate(this.templateItemSelected)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    FileDownload(convertBase64ToArrayBuffer(response.data), this.templateItemSelected, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                    this.isAdminTemplateUploaded = true;
+                }
+            });
+    }
 
     onDeleteCommittedProjectsSubmit(doDelete: boolean) {
         this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };

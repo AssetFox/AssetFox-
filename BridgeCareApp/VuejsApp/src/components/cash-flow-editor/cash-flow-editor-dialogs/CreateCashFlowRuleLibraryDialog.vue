@@ -63,7 +63,7 @@ import { useStore } from 'vuex';
   let inputRules: InputValidationRules = clone(rules);
   const dialogData = reactive(props.dialogData);
 
-  watch(dialogData, () => onDialogDataChanged)
+  watch(() => props.dialogData, () => onDialogDataChanged)
   function onDialogDataChanged() {
     let currentUser: string = getUserName();
 

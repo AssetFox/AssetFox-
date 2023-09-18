@@ -78,7 +78,7 @@ import { useStore } from 'vuex';
   let searchTerm: string = '';
   const dialogData = reactive(props.dialogData);
 
-  watch(dialogData, () => onDialogDataChanged)
+  watch(() => props.dialogData, () => onDialogDataChanged)
   function onDialogDataChanged() {
     if (dialogData.showDialog) {
       onSetGridData();

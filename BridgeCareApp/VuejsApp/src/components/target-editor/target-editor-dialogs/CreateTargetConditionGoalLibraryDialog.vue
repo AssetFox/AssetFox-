@@ -54,12 +54,13 @@ import { useRouter } from 'vue-router';
   let store = useStore();
   const emit = defineEmits(['submit'])
   const props = defineProps<{dialogData: CreateTargetConditionGoalLibraryDialogData}>()
+
   let getIdByUserNameGetter = store.getters.getIdByUserName;
 
   let newTargetConditionGoalLibrary: TargetConditionGoalLibrary = {...emptyTargetConditionGoalLibrary, id: getNewGuid()};
   let rules: InputValidationRules = validationRules;
 
-  watch(props.dialogData,()=>onDialogDataChanged)
+  watch(()=> props.dialogData, ()=> onDialogDataChanged)
   function onDialogDataChanged() {
     let currentUser: string = getUserName();
 

@@ -58,18 +58,20 @@ import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
-  const pshowDialog = defineProps<{showDialog: boolean}>();
-  const pcurrentNumberOfTargetConditionGoals = defineProps<{currentNumberOfTargetConditionGoals:number}>();
+  const props = defineProps<{
+          showDialog: boolean,
+          currentNumberOfTargetConditionGoals:number
+        }>();
 
   let store = useStore();
   const emit = defineEmits(['submit'])
   let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributes);
 
   let newTargetConditionGoal: TargetConditionGoal = {...emptyTargetConditionGoal, id: getNewGuid()};
-  let numericAttributeNames: string[] = [];
+  let numericAttributeNames = ref<string[]>([]);
   let rules: InputValidationRules = validationRules;
 
-  mounted();
+  onMounted(() => mounted);
   function mounted() {
     setNumericAttributeNames();
   }
@@ -84,30 +86,30 @@ import { useRouter } from 'vue-router';
     setNewTargetConditionGoalDefaultValues();
   }
 
-  watch(pshowDialog,()=> onShowDialogChanged)
+  watch(() => props.showDialog,()=> onShowDialogChanged)
   function onShowDialogChanged() {
     setNewTargetConditionGoalDefaultValues();
   }
 
-  watch(pcurrentNumberOfTargetConditionGoals,()=> onCurrentNumberOfDeficientConditionGoalsChanged)
+  watch(() => props.currentNumberOfTargetConditionGoals,()=> onCurrentNumberOfDeficientConditionGoalsChanged)
   function onCurrentNumberOfDeficientConditionGoalsChanged() {
     setNewTargetConditionGoalDefaultValues();
   }
 
   function setNewTargetConditionGoalDefaultValues() {
-    if (pshowDialog) {
+    if (props.showDialog) {
       newTargetConditionGoal = {
         ...newTargetConditionGoal,
-        attribute: hasValue(numericAttributeNames) ? numericAttributeNames[0] : '',
-        name: `Unnamed Target Condition Goal ${pcurrentNumberOfTargetConditionGoals.currentNumberOfTargetConditionGoals + 1}`,
-        target: pcurrentNumberOfTargetConditionGoals.currentNumberOfTargetConditionGoals > 0 ? pcurrentNumberOfTargetConditionGoals.currentNumberOfTargetConditionGoals + 1 : 1
+        attribute: hasValue(numericAttributeNames.value) ? numericAttributeNames.value[0] : '',
+        name: `Unnamed Target Condition Goal ${props.currentNumberOfTargetConditionGoals + 1}`,
+        target: props.currentNumberOfTargetConditionGoals > 0 ? props.currentNumberOfTargetConditionGoals + 1 : 1
       };
     }
   }
 
   function setNumericAttributeNames() {
-    if (hasValue(stateNumericAttributes) && !isEqual(numericAttributeNames, stateNumericAttributes)) {
-      numericAttributeNames = getPropertyValues('name', stateNumericAttributes.value);
+    if (hasValue(stateNumericAttributes) && !isEqual(numericAttributeNames.value, stateNumericAttributes)) {
+      numericAttributeNames.value = getPropertyValues('name', stateNumericAttributes.value);
     }
   }
 

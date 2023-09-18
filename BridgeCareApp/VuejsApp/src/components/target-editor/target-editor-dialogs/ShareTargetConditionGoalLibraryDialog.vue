@@ -66,6 +66,7 @@ import { useRouter } from 'vue-router';
   let store = useStore();
   const emit = defineEmits(['submit'])
   const props = defineProps<{dialogData: ShareTargetConditionGoalLibraryDialogData}>()
+
   let stateUsers = ref<User[]>(store.state.userModule.users);
 
   let targetConditionGoalLibraryUserGridHeaders: DataTableHeader[] = [
@@ -78,7 +79,7 @@ import { useRouter } from 'vue-router';
   let searchTerm: string = '';
   
 
-  watch(props.dialogData,()=>onDialogDataChanged)
+  watch(()=> props.dialogData, () => onDialogDataChanged)
   function onDialogDataChanged() {
     if (props.dialogData.showDialog) {
       onSetGridData();

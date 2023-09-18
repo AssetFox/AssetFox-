@@ -33,32 +33,32 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
+<script setup lang="ts">
+import Vue, { watch } from 'vue';
 import {CreateRemainingLifeLimitLibraryDialogData} from '@/shared/models/modals/create-remaining-life-limit-library-dialog-data';
 import {
   emptyRemainingLifeLimitLibrary,
   RemainingLifeLimit,
   RemainingLifeLimitLibrary
 } from '@/shared/models/iAM/remaining-life-limit';
-import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
+import {rules as validationRules, InputValidationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
 
-@Component
-export default class CreateRemainingLifeLimitLibraryDialog extends Vue {
-  @Prop() dialogData: CreateRemainingLifeLimitLibraryDialogData;
+  const props = defineProps<{
+    dialogData: CreateRemainingLifeLimitLibraryDialogData
+  }>();
+  const emit = defineEmits(['submit']);
 
-  newRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = {...emptyRemainingLifeLimitLibrary, id: getNewGuid()};
-  rules: InputValidationRules = {...rules};
+  let newRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = {...emptyRemainingLifeLimitLibrary, id: getNewGuid()};
+  let rules: InputValidationRules = {...validationRules};
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    this.newRemainingLifeLimitLibrary = {
-      ...this.newRemainingLifeLimitLibrary,
-      remainingLifeLimits: hasValue(this.dialogData.remainingLifeLimits)
-          ? this.dialogData.remainingLifeLimits.map((remainingLifeLimit: RemainingLifeLimit) => ({
+  watch((() => props.dialogData), onDialogDataChanged )
+  function onDialogDataChanged() {
+    newRemainingLifeLimitLibrary = {
+      ...newRemainingLifeLimitLibrary,
+      remainingLifeLimits: hasValue(props.dialogData.remainingLifeLimits)
+          ? props.dialogData.remainingLifeLimits.map((remainingLifeLimit: RemainingLifeLimit) => ({
             ...remainingLifeLimit,
             id: getNewGuid()
           }))
@@ -66,14 +66,13 @@ export default class CreateRemainingLifeLimitLibraryDialog extends Vue {
     };
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newRemainingLifeLimitLibrary);
+      emit('submit', newRemainingLifeLimitLibrary);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newRemainingLifeLimitLibrary = {...emptyRemainingLifeLimitLibrary, id: getNewGuid()};
+    newRemainingLifeLimitLibrary = {...emptyRemainingLifeLimitLibrary, id: getNewGuid()};
   }
-}
 </script>

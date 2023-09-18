@@ -205,11 +205,8 @@
     </v-layout>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Action, State, Getter, Mutation } from 'vuex-class';
-import { Watch } from 'vue-property-decorator';
+<script setup lang="ts">
+import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch } from 'vue';
 import {
     emptyRemainingLifeLimit,
     emptyRemainingLifeLimitLibrary,
@@ -238,7 +235,7 @@ import Alert from '@/shared/modals/Alert.vue';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
@@ -254,67 +251,48 @@ import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
 import { isNullOrUndefined } from 'util';
 import { LibraryUser } from '@/shared/models/iAM/user';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-    components: {
-        CreateRemainingLifeLimitLibraryDialog,
-        CreateRemainingLifeLimitDialog,
-        GeneralCriterionEditorDialog,
-        ConfirmDeleteAlert: Alert,
-        ShareRemainingLifeLimitLibraryDialog
-    },
-})
-export default class RemainingLifeLimitEditor extends Vue {
-    @State(state => state.remainingLifeLimitModule.remainingLifeLimitLibraries)
-    stateRemainingLifeLimitLibraries: RemainingLifeLimitLibrary[];
-    @State(
-        state =>
-            state.remainingLifeLimitModule.selectedRemainingLifeLimitLibrary,
-    )
-    stateSelectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary;
-    @State(state => state.attributeModule.numericAttributes)
-    stateNumericAttributes: Attribute[];
-    @State(state => state.remainingLifeLimitModule.scenarioRemainingLifeLimits)
-    stateScenarioRemainingLifeLimits: RemainingLifeLimit[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
-    hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.remainingLifeLimitModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedRemainingLifeLimitLibrary') getIsSharedLibraryAction: any;
+    let store = useStore();
+    const $router = useRouter();
 
-    @Action('getRemainingLifeLimitLibraries')
-    getRemainingLifeLimitLibrariesAction: any;
-    @Action('upsertRemainingLifeLimitLibrary')
-    upsertRemainingLifeLimitLibraryAction: any;
-    @Action('deleteRemainingLifeLimitLibrary')
-    deleteRemainingLifeLimitLibraryAction: any;
-    @Action('selectRemainingLifeLimitLibrary')
-    selectRemainingLifeLimitLibraryAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('getScenarioRemainingLifeLimits')
-    getScenarioRemainingLifeLimitsAction: any;
-    @Action('upsertScenarioRemainingLifeLimits')
-    upsertScenarioRemainingLifeLimitsAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
+    const stateRemainingLifeLimitLibraries: RemainingLifeLimitLibrary[] = shallowReactive(store.state.remainingLifeLimitModule.remainingLifeLimitLibraries);
+    const stateSelectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = shallowReactive(store.state.remainingLifeLimitModule.selectedRemainingLifeLimitLibrary);
+    let stateNumericAttributes: Attribute[] = shallowReactive(store.state.attributeModule.numericAttributes);
+    let stateScenarioRemainingLifeLimits: RemainingLifeLimit[] = shallowReactive(store.state.remainingLifeLimitModule.scenarioRemainingLifeLimits);
+    let hasUnsavedChanges: boolean = (store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+    let hasAdminAccess: boolean = (store.state.authenticationModule.hasAdminAccess) ;
+    let isSharedLibrary: Ref<boolean> = ref(store.state.remainingLifeLimitModule.isSharedLibrary);
+
+    async function getIsSharedLibraryAction(payload?: any): Promise<any>{await store.dispatch('getIsSharedRemainingLifeLimitLibrary')}
+    async function getRemainingLifeLimitLibrariesAction(payload?: any): Promise<any>{await store.dispatch('getRemainingLifeLimitLibraries')}
+    async function upsertRemainingLifeLimitLibraryAction(payload?: any): Promise<any>{await store.dispatch('upsertRemainingLifeLimitLibrary')}
+    async function deleteRemainingLifeLimitLibraryAction(payload?: any): Promise<any>{await store.dispatch('deleteRemainingLifeLimitLibrary')}
+    async function selectRemainingLifeLimitLibraryAction(payload?: any): Promise<any>{await store.dispatch('selectRemainingLifeLimitLibrary')}
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges')}
+    async function getScenarioRemainingLifeLimitsAction(payload?: any): Promise<any>{await store.dispatch('getScenarioRemainingLifeLimits')}
+    async function upsertScenarioRemainingLifeLimitsAction(payload?: any): Promise<any>{await store.dispatch('upsertScenarioRemainingLifeLimits')}
+    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification')}
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch('getCurrentUserOrSharedScenario')}
+    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario')}
     
-    @Mutation('addedOrUpdatedRemainingLifeLimitLibraryMutator') addedOrUpdatedRemainingLifeLimitLibraryMutator: any;
-    @Mutation('selectedRemainingLifeLimitLibraryMutator') selectedRemainingLifeLimitLibraryMutator: any;
+    function addedOrUpdatedRemainingLifeLimitLibraryMutator(payload: any){store.commit('addedOrUpdatedRemainingLifeLimitLibraryMutator');}
+    function selectedRemainingLifeLimitLibraryMutator(payload: any){store.commit('selectedRemainingLifeLimitLibraryMutator');}
 
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
+    let getUserNameByIdGetter: any = store.getters.getUserNameById;
 
-    remainingLifeLimitLibraries: RemainingLifeLimitLibrary[] = [];
-    selectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = clone(
+    let remainingLifeLimitLibraries: RemainingLifeLimitLibrary[] = [];
+    let selectedRemainingLifeLimitLibrary: ShallowRef<RemainingLifeLimitLibrary> = shallowRef(clone(
         emptyRemainingLifeLimitLibrary,
-    );
-    selectedGridRows: RemainingLifeLimit[] = [];
-    selectedRemainingLifeIds: string[] = [];
-    selectedScenarioId: string = getBlankGuid();
-    selectListItems: SelectItem[] = [];
-    hasSelectedLibrary: boolean = false;
-    gridHeaders: DataTableHeader[] = [
+    ));
+    let selectedGridRows: ShallowRef<RemainingLifeLimit[]> = shallowRef([]);
+    let selectedRemainingLifeIds: string[] = [];
+    let selectedScenarioId: string = getBlankGuid();
+    let selectListItems: SelectItem[] = [];
+    let hasSelectedLibrary: boolean = false;
+    let gridHeaders: DataTableHeader[] = [
         {
             text: 'Remaining Life Attribute',
             value: 'attribute',
@@ -357,57 +335,57 @@ export default class RemainingLifeLimitEditor extends Vue {
         }
     ];
 
-    addedRows: RemainingLifeLimit[] = [];
-    updatedRowsMap:Map<string, [RemainingLifeLimit, RemainingLifeLimit]> = new Map<string, [RemainingLifeLimit, RemainingLifeLimit]>();//0: original value | 1: updated value
-    deletionIds: string[] = [];
-    rowCache: RemainingLifeLimit[] = [];
-    gridSearchTerm = '';
-    currentSearch = '';
-    pagination: Pagination = clone(emptyPagination);
-    isPageInit = false;
-    totalItems = 0;
-    currentPage: RemainingLifeLimit[] = [];
-    initializing: boolean = true;
+    let addedRows: ShallowRef<RemainingLifeLimit[]> = shallowRef([]);
+    let updatedRowsMap:Map<string, [RemainingLifeLimit, RemainingLifeLimit]> = new Map<string, [RemainingLifeLimit, RemainingLifeLimit]>();//0: original value | 1: updated value
+    let deletionIds: ShallowRef<string[]> = shallowRef([]);
+    let rowCache: RemainingLifeLimit[] = [];
+    let gridSearchTerm = '';
+    let currentSearch = '';
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
+    let isPageInit = false;
+    let totalItems = 0;
+    let currentPage: ShallowRef<RemainingLifeLimit[]> = shallowRef([]);
+    let initializing: boolean = true;
 
-    unsavedDialogAllowed: boolean = true;
-    trueLibrarySelectItemValue: string | null = ''
-    librarySelectItemValueAllowedChanged: boolean = true;
-    librarySelectItemValue: string | null = null;
-    isShared: boolean = false;
+    let unsavedDialogAllowed: boolean = true;
+    let trueLibrarySelectItemValue: string | null = ''
+    let librarySelectItemValueAllowedChanged: boolean = true;
+    let librarySelectItemValue: Ref<string | null> = ref(null);
+    let isShared: boolean = false;
 
-    shareRemainingLifeLimitLibraryDialogData: ShareRemainingLifeLimitLibraryDialogData = clone(emptyShareRemainingLifeLimitLibraryDialogData);
+    let shareRemainingLifeLimitLibraryDialogData: ShareRemainingLifeLimitLibraryDialogData = clone(emptyShareRemainingLifeLimitLibraryDialogData);
 
-    itemsPerPage:number = 5;
-    dataPerPage: number = 0;
-    totalDataFound: number = 5;
-    remainingLifeLimits: RemainingLifeLimit[] = [];
-    numericAttributeSelectItems: SelectItem[] = [];
-    createRemainingLifeLimitDialogData: CreateRemainingLifeLimitDialogData = clone(
+    let itemsPerPage:number = 5;
+    let dataPerPage: number = 0;
+    let totalDataFound: number = 5;
+    let remainingLifeLimits: RemainingLifeLimit[] = [];
+    let numericAttributeSelectItems: SelectItem[] = [];
+    let createRemainingLifeLimitDialogData: CreateRemainingLifeLimitDialogData = clone(
         emptyCreateRemainingLifeLimitDialogData,
     );
-    selectedRemainingLifeLimit: RemainingLifeLimit = clone(
+    let selectedRemainingLifeLimit: RemainingLifeLimit = clone(
         emptyRemainingLifeLimit,
     );
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
         emptyGeneralCriterionEditorDialogData,
     );
-    createRemainingLifeLimitLibraryDialogData: CreateRemainingLifeLimitLibraryDialogData = clone(
+    let createRemainingLifeLimitLibraryDialogData: CreateRemainingLifeLimitLibraryDialogData = clone(
         emptyCreateRemainingLifeLimitLibraryDialogData,
     );
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    rules: InputValidationRules = rules;
-    uuidNIL: string = getBlankGuid();
-    hasScenario: boolean = false;
-    currentUrl: string = window.location.href;
-    hasCreatedLibrary: boolean = false;
-    parentLibraryName: string = "None";
-    parentLibraryId: string = "";
-    scenarioLibraryIsModified: boolean = false;
-    loadedParentName: string = "";
-    loadedParentId: string = "";
-    newLibrarySelection: boolean = false;
+    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let rules: InputValidationRules = validationRules;
+    let uuidNIL: string = getBlankGuid();
+    let hasScenario: boolean = false;
+    let currentUrl: string = window.location.href;
+    let hasCreatedLibrary: boolean = false;
+    let parentLibraryName: string = "None";
+    let parentLibraryId: string = "";
+    let scenarioLibraryIsModified: boolean = false;
+    let loadedParentName: string = "";
+    let loadedParentId: string = "";
+    let newLibrarySelection: boolean = false;
 
-    beforeRouteEnter(to: any, from: any, next: any) {
+    function beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getRemainingLifeLimitLibrariesAction().then(() => {
@@ -430,17 +408,18 @@ export default class RemainingLifeLimitEditor extends Vue {
         });
     }
 
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
+    function beforeDestroy() {
+        setHasUnsavedChangesAction({ value: false });
     }
-    @Watch('selectedGridRows')
-        onSelectedGridRowsChanged() {
-            this.selectedRemainingLifeIds = getPropertyValues('id', this.selectedGridRows,) as string[];
+
+    watch(selectedGridRows, onSelectedGridRowsChanged )
+    function onSelectedGridRowsChanged() {
+            selectedRemainingLifeIds = getPropertyValues('id', selectedGridRows.value,) as string[];
         }
 
-    @Watch('stateRemainingLifeLimitLibraries')
-    onStateRemainingLifeLimitLibrariesChanged() {
-        this.selectListItems = this.stateRemainingLifeLimitLibraries.map(
+    watch(stateRemainingLifeLimitLibraries, onStateRemainingLifeLimitLibrariesChanged )
+    function onStateRemainingLifeLimitLibrariesChanged() {
+        selectListItems = stateRemainingLifeLimitLibraries.map(
             (remainingLifeLimitLibrary: RemainingLifeLimitLibrary) => ({
                 text: remainingLifeLimitLibrary.name,
                 value: remainingLifeLimitLibrary.id,
@@ -448,131 +427,132 @@ export default class RemainingLifeLimitEditor extends Vue {
         );
     }
 
-    @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(this.hasScenario){
-            this.onLibrarySelectItemValueChanged();
-            this.unsavedDialogAllowed = false;
+    watch(librarySelectItemValue, onLibrarySelectItemValueChangedCheckUnsaved )
+    function onLibrarySelectItemValueChangedCheckUnsaved(){
+        if(hasScenario){
+            onLibrarySelectItemValueChanged();
+            unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged)
-            this.CheckUnsavedDialog(this.onLibrarySelectItemValueChanged, () => {
-                this.librarySelectItemValueAllowedChanged = false;
-                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+        else if(librarySelectItemValueAllowedChanged)
+            CheckUnsavedDialog(onLibrarySelectItemValueChanged, () => {
+                librarySelectItemValueAllowedChanged = false;
+                librarySelectItemValue.value = trueLibrarySelectItemValue;               
             })
-        this.librarySelectItemValueAllowedChanged = true;
-        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-        this.newLibrarySelection = true;
+        librarySelectItemValueAllowedChanged = true;
+        parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+        newLibrarySelection = true;
 
     }
-    onLibrarySelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue
-        this.selectRemainingLifeLimitLibraryAction({
-            libraryId: this.librarySelectItemValue,
+    function onLibrarySelectItemValueChanged() {
+        trueLibrarySelectItemValue = librarySelectItemValue.value
+        selectRemainingLifeLimitLibraryAction({
+            libraryId: librarySelectItemValue.value,
         });
     }
 
-    @Watch('stateSelectedRemainingLifeLimitLibrary')
-    onStateSelectedRemainingLifeLimitLibraryChanged() {
-        this.selectedRemainingLifeLimitLibrary = clone(
-            this.stateSelectedRemainingLifeLimitLibrary,
+    watch(stateSelectedRemainingLifeLimitLibrary,  onStateSelectedRemainingLifeLimitLibraryChanged)
+    function onStateSelectedRemainingLifeLimitLibraryChanged() {
+        selectedRemainingLifeLimitLibrary.value = clone(
+            stateSelectedRemainingLifeLimitLibrary,
         );
     }
 
-    @Watch('selectedRemainingLifeLimitLibrary')
-    onSelectedRemainingLifeLimitLibraryChanged() {
-        this.hasSelectedLibrary =  this.selectedRemainingLifeLimitLibrary.id !== this.uuidNIL;
-        this.clearChanges();
-        this.initializing = false;
-        if(this.hasSelectedLibrary)
-            this.onPaginationChanged();
+    watch(selectedRemainingLifeLimitLibrary,  onSelectedRemainingLifeLimitLibraryChanged)
+    function onSelectedRemainingLifeLimitLibraryChanged() {
+        hasSelectedLibrary =  selectedRemainingLifeLimitLibrary.value.id !== uuidNIL;
+        clearChanges();
+        initializing = false;
+        if(hasSelectedLibrary)
+            onPaginationChanged();
     }
 
-    @Watch('stateScenarioRemainingLifeLimits')
-    onStateScenarioRemainingLifeLimitsChanged() {
-        if (this.hasScenario) {
-            this.currentPage = clone(this.stateScenarioRemainingLifeLimits);
+    watch(stateScenarioRemainingLifeLimits, onStateScenarioRemainingLifeLimitsChanged )
+    function onStateScenarioRemainingLifeLimitsChanged() {
+        if (hasScenario) {
+            currentPage.value = clone(stateScenarioRemainingLifeLimits);
         }
     }
-    @Watch('currentPage')
-    onGridDataChanged() {
+
+    watch(currentPage,  onGridDataChanged)
+    function onGridDataChanged() {
            // Get parent name from library id
-        this.selectListItems.forEach(library => {
-            if (library.value === this.parentLibraryId) {
-                this.parentLibraryName = library.text;
+        selectListItems.forEach(library => {
+            if (library.value === parentLibraryId) {
+                parentLibraryName = library.text;
             }
         });
     }
     
-    @Watch('isSharedLibrary')
-    onStateSharedAccessChanged() {
-        this.isShared = this.isSharedLibrary;
+    watch(isSharedLibrary, onStateSharedAccessChanged)
+    function onStateSharedAccessChanged() {
+        isShared = isSharedLibrary.value;
     }
     
-    @Watch('stateNumericAttributes')
-    onStateNumericAttributesChanged() {
-        this.setAttributesSelectListItems();
+    watch(stateNumericAttributes, onStateNumericAttributesChanged )
+    function onStateNumericAttributesChanged() {
+        setAttributesSelectListItems();
     }
 
-    @Watch('pagination')
-    onPaginationChanged() {
-        if(this.initializing)
+    watch(pagination, onPaginationChanged )
+    function onPaginationChanged() {
+        if(initializing)
             return;
-        this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+        checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<RemainingLifeLimit>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: this.librarySelectItemValue !== null ? this.librarySelectItemValue : null,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                rowsForDeletion: this.deletionIds,
-                addedRows: this.addedRows,
-                isModified: this.scenarioLibraryIsModified
+                libraryId: librarySelectItemValue.value !== null ? librarySelectItemValue.value : null,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: deletionIds.value,
+                addedRows: addedRows.value,
+                isModified: scenarioLibraryIsModified
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
-            search: this.currentSearch
+            search: currentSearch
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            RemainingLifeLimitService.getScenarioRemainingLifeLimitPage(this.selectedScenarioId, request).then(response => {
+        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+            RemainingLifeLimitService.getScenarioRemainingLifeLimitPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<RemainingLifeLimit>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
                 }
             });
-        else if(this.hasSelectedLibrary)
-             RemainingLifeLimitService.getLibraryRemainingLifeLimitPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+        else if(hasSelectedLibrary)
+             RemainingLifeLimitService.getLibraryRemainingLifeLimitPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<RemainingLifeLimit>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    if (!isNullOrUndefined(this.selectedRemainingLifeLimitLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedRemainingLifeLimitLibrary).then(this.isShared = this.isSharedLibrary);
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
+                    if (!isNullOrUndefined(selectedRemainingLifeLimitLibrary.value.id) ) {
+                        getIsSharedLibraryAction(selectedRemainingLifeLimitLibrary.value).then(() => isShared = isSharedLibrary.value);
                     }
                 }
             });     
     }
 
-    @Watch('deletionIds')
-    onDeletionIdsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(deletionIds,onDeletionIdsChanged  )
+    function onDeletionIdsChanged(){
+        checkHasUnsavedChanges();
     }
 
-    @Watch('addedRows')
-    onAddedRowsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(addedRows, onAddedRowsChanged )
+    function onAddedRowsChanged(){
+        checkHasUnsavedChanges();
     }
 
-    mounted() {
-        this.setAttributesSelectListItems();
+    function mounted() {
+        setAttributesSelectListItems();
     }
 
-    setAttributesSelectListItems() {
-        if (hasValue(this.stateNumericAttributes)) {
-            this.numericAttributeSelectItems = this.stateNumericAttributes.map(
+    function setAttributesSelectListItems() {
+        if (hasValue(stateNumericAttributes)) {
+            numericAttributeSelectItems = stateNumericAttributes.map(
                 (attribute: Attribute) => ({
                     text: attribute.name,
                     value: attribute.name,
@@ -581,193 +561,193 @@ export default class RemainingLifeLimitEditor extends Vue {
         }
     }
 
-    getOwnerUserName(): string {
+    function getOwnerUserName(): string {
 
-        if (!this.hasCreatedLibrary) {
-        return this.getUserNameByIdGetter(this.selectedRemainingLifeLimitLibrary.owner);
+        if (!hasCreatedLibrary) {
+        return getUserNameByIdGetter(selectedRemainingLifeLimitLibrary.value.owner);
         }
         
         return getUserName();
     }
-    onRemoveRemainingLifeLimitIcon(remainingLifeLimit: RemainingLifeLimit) {
-        this.removeRowLogic(remainingLifeLimit.id);
-        this.onPaginationChanged();
+    function onRemoveRemainingLifeLimitIcon(remainingLifeLimit: RemainingLifeLimit) {
+        removeRowLogic(remainingLifeLimit.id);
+        onPaginationChanged();
     }
 
-    onRemoveRemainingLifeLimit() {
-        this.selectedRemainingLifeIds.forEach(_ => {
-            this.removeRowLogic(_);
+    function onRemoveRemainingLifeLimit() {
+        selectedRemainingLifeIds.forEach(_ => {
+            removeRowLogic(_);
         });
 
-        this.selectedRemainingLifeIds = [];
-        this.onPaginationChanged();
+        selectedRemainingLifeIds = [];
+        onPaginationChanged();
     }
 
-    removeRowLogic(id: string){
-        if(isNil(find(propEq('id', id), this.addedRows))){
-            this.deletionIds.push(id);
-            if(!isNil(this.updatedRowsMap.get(id)))
-                this.updatedRowsMap.delete(id)
+    function removeRowLogic(id: string){
+        if(isNil(find(propEq('id', id), addedRows.value))){
+            deletionIds.value.push(id);
+            if(!isNil(updatedRowsMap.get(id)))
+                updatedRowsMap.delete(id)
         }           
         else{          
-            this.addedRows = this.addedRows.filter((row) => row.id !== id)
+            addedRows.value = addedRows.value.filter((row) => row.id !== id)
         }  
     }
 
-    onShowCreateRemainingLifeLimitLibraryDialog(createAsNewLibrary: boolean) {
-        this.createRemainingLifeLimitLibraryDialogData = {
+    function onShowCreateRemainingLifeLimitLibraryDialog(createAsNewLibrary: boolean) {
+        createRemainingLifeLimitLibraryDialogData = {
             showDialog: true,
             remainingLifeLimits: createAsNewLibrary
-                ? this.currentPage
+                ? currentPage.value
                 : [],
         };
     }
 
-    onSubmitCreateRemainingLifeLimitLibraryDialogResult(library: RemainingLifeLimitLibrary) {
-        this.createRemainingLifeLimitLibraryDialogData = clone(emptyCreateRemainingLifeLimitLibraryDialogData);
+    function onSubmitCreateRemainingLifeLimitLibraryDialogResult(library: RemainingLifeLimitLibrary) {
+        createRemainingLifeLimitLibraryDialogData = clone(emptyCreateRemainingLifeLimitLibraryDialogData);
 
         if (!isNil(library)) {
             const upsertRequest: LibraryUpsertPagingRequest<RemainingLifeLimitLibrary, RemainingLifeLimit> = {
                 library: library,    
                 isNewLibrary: true,           
                  syncModel: {
-                    libraryId: library.remainingLifeLimits.length == 0 || !this.hasSelectedLibrary ? null : this.selectedRemainingLifeLimitLibrary.id,
-                    rowsForDeletion: library.remainingLifeLimits.length == 0 ? [] : this.deletionIds,
-                    updateRows: library.remainingLifeLimits.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: library.remainingLifeLimits.length == 0 ? [] : this.addedRows,
+                    libraryId: library.remainingLifeLimits.length == 0 || !hasSelectedLibrary ? null : selectedRemainingLifeLimitLibrary.value.id,
+                    rowsForDeletion: library.remainingLifeLimits.length == 0 ? [] : deletionIds.value,
+                    updateRows: library.remainingLifeLimits.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: library.remainingLifeLimits.length == 0 ? [] : addedRows.value,
                     isModified: false
                  },
-                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
+                 scenarioId: hasScenario ? selectedScenarioId : null
             }
             RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.hasCreatedLibrary = true;
-                    this.librarySelectItemValue = library.id;
+                    hasCreatedLibrary = true;
+                    librarySelectItemValue.value = library.id;
                     
                     if(library.remainingLifeLimits.length == 0){
-                        this.clearChanges();
+                        clearChanges();
                     }
 
-                    this.addedOrUpdatedRemainingLifeLimitLibraryMutator(library);
-                    this.selectedRemainingLifeLimitLibraryMutator(library.id);
-                    this.addSuccessNotificationAction({message:'Added remaining life limit library'})
+                    addedOrUpdatedRemainingLifeLimitLibraryMutator(library);
+                    selectedRemainingLifeLimitLibraryMutator(library.id);
+                    addSuccessNotificationAction({message:'Added remaining life limit library'})
                 }               
             })
         }
     }
 
-    onShowCreateRemainingLifeLimitDialog() {
-        this.createRemainingLifeLimitDialogData = {
+    function onShowCreateRemainingLifeLimitDialog() {
+        createRemainingLifeLimitDialogData = {
             showDialog: true,
-            numericAttributeSelectItems: this.numericAttributeSelectItems,
+            numericAttributeSelectItems: numericAttributeSelectItems,
         };
     }
 
-    onAddRemainingLifeLimit(newRemainingLifeLimit: RemainingLifeLimit) {
-        this.createRemainingLifeLimitDialogData = clone(emptyCreateRemainingLifeLimitDialogData);
+    function onAddRemainingLifeLimit(newRemainingLifeLimit: RemainingLifeLimit) {
+        createRemainingLifeLimitDialogData = clone(emptyCreateRemainingLifeLimitDialogData);
         if (!isNil(newRemainingLifeLimit)) {
-            this.addedRows.push(newRemainingLifeLimit);
-            this.onPaginationChanged()
+            addedRows.value.push(newRemainingLifeLimit);
+            onPaginationChanged()
         }
     }
 
-    onEditRemainingLifeLimitProperty(remainingLifeLimit: RemainingLifeLimit, property: string, value: any) {
-        this.onUpdateRow(remainingLifeLimit.id, clone(remainingLifeLimit))
-        this.onPaginationChanged();
+    function onEditRemainingLifeLimitProperty(remainingLifeLimit: RemainingLifeLimit, property: string, value: any) {
+        onUpdateRow(remainingLifeLimit.id, clone(remainingLifeLimit))
+        onPaginationChanged();
     }
 
-    onShowCriterionLibraryEditorDialog(remainingLifeLimit: RemainingLifeLimit) {
-        this.selectedRemainingLifeLimit = remainingLifeLimit;
+    function onShowCriterionLibraryEditorDialog(remainingLifeLimit: RemainingLifeLimit) {
+        selectedRemainingLifeLimit = remainingLifeLimit;
 
-        this.criterionEditorDialogData = {
+        criterionEditorDialogData = {
             showDialog: true,
             CriteriaExpression: remainingLifeLimit.criterionLibrary.mergedCriteriaExpression,           
         };
     }
 
-    onEditRemainingLifeLimitCriterionLibrary(
+    function onEditRemainingLifeLimitCriterionLibrary(
         criteriaExpression: string | null,
     ) {
-        this.criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+        criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criteriaExpression) && this.selectedRemainingLifeLimit.id !== this.uuidNIL) {
-            if(this.selectedRemainingLifeLimit.criterionLibrary.id === getBlankGuid())
-                this.selectedRemainingLifeLimit.criterionLibrary.id = getNewGuid();
+        if (!isNil(criteriaExpression) && selectedRemainingLifeLimit.id !== uuidNIL) {
+            if(selectedRemainingLifeLimit.criterionLibrary.id === getBlankGuid())
+                selectedRemainingLifeLimit.criterionLibrary.id = getNewGuid();
 
-            this.onUpdateRow(this.selectedRemainingLifeLimit.id, 
+            onUpdateRow(selectedRemainingLifeLimit.id, 
             {
-                ...this.selectedRemainingLifeLimit,
-                criterionLibrary: {...this.selectedRemainingLifeLimit.criterionLibrary, mergedCriteriaExpression: criteriaExpression}
+                ...selectedRemainingLifeLimit,
+                criterionLibrary: {...selectedRemainingLifeLimit.criterionLibrary, mergedCriteriaExpression: criteriaExpression}
             })
                 
-            this.onPaginationChanged();
+            onPaginationChanged();
         }
 
-        this.selectedRemainingLifeLimit = clone(emptyRemainingLifeLimit);
+        selectedRemainingLifeLimit = clone(emptyRemainingLifeLimit);
     }
 
-    onUpsertRemainingLifeLimitLibrary() {
+    function onUpsertRemainingLifeLimitLibrary() {
         const library: RemainingLifeLimitLibrary = {
-            ...clone(this.selectedRemainingLifeLimitLibrary),
-            remainingLifeLimits: clone(this.currentPage)
+            ...clone(selectedRemainingLifeLimitLibrary.value),
+            remainingLifeLimits: clone(currentPage.value)
         };
         const upsertRequest: LibraryUpsertPagingRequest<RemainingLifeLimitLibrary, RemainingLifeLimit> = {
-                library: this.selectedRemainingLifeLimitLibrary,
+                library: selectedRemainingLifeLimitLibrary.value,
                 isNewLibrary: false,
                 syncModel: {
-                libraryId: this.selectedRemainingLifeLimitLibrary.id === this.uuidNIL ? null : this.selectedRemainingLifeLimitLibrary.id,
-                rowsForDeletion: this.deletionIds,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                addedRows: this.addedRows,
+                libraryId: selectedRemainingLifeLimitLibrary.value.id === uuidNIL ? null : selectedRemainingLifeLimitLibrary.value.id,
+                rowsForDeletion: deletionIds.value,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                addedRows: addedRows.value,
                 isModified: false
                 },
                 scenarioId: null
         }
         RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
-                this.addedOrUpdatedRemainingLifeLimitLibraryMutator(this.selectedRemainingLifeLimitLibrary);
-                this.selectedRemainingLifeLimitLibraryMutator(this.selectedRemainingLifeLimitLibrary.id)
-                this.addSuccessNotificationAction({message: "Updated remaining life limit library",});               
+                clearChanges()
+                addedOrUpdatedRemainingLifeLimitLibraryMutator(selectedRemainingLifeLimitLibrary.value);
+                selectedRemainingLifeLimitLibraryMutator(selectedRemainingLifeLimitLibrary.value.id)
+                addSuccessNotificationAction({message: "Updated remaining life limit library",});               
             }
         });
     }
 
-    onUpsertScenarioRemainingLifeLimits() {
-        if (this.selectedRemainingLifeLimitLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
-        else { this.scenarioLibraryIsModified = false; }
+    function onUpsertScenarioRemainingLifeLimits() {
+        if (selectedRemainingLifeLimitLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
+        else { scenarioLibraryIsModified = false; }
 
         RemainingLifeLimitService.upsertScenarioRemainingLifeLimits({
-            libraryId: this.selectedRemainingLifeLimitLibrary.id === this.uuidNIL ? null : this.selectedRemainingLifeLimitLibrary.id,
-            rowsForDeletion: this.deletionIds,
-            updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows,
-            isModified: this.scenarioLibraryIsModified
-        }, this.selectedScenarioId).then((response: AxiosResponse) => {
+            libraryId: selectedRemainingLifeLimitLibrary.value.id === uuidNIL ? null : selectedRemainingLifeLimitLibrary.value.id,
+            rowsForDeletion: deletionIds.value,
+            updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+            addedRows: addedRows.value,
+            isModified: scenarioLibraryIsModified
+        }, selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-                this.clearChanges();
-                this.librarySelectItemValue = null;
-                this.resetPage();
-                this.addSuccessNotificationAction({message: "Modified scenario's remaining life limits"});
+                parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+                clearChanges();
+                librarySelectItemValue.value = null;
+                resetPage();
+                addSuccessNotificationAction({message: "Modified scenario's remaining life limits"});
             }           
         });
     } 
 
-    onDiscardChanges() {
-        this.librarySelectItemValue = null;
+    function onDiscardChanges() {
+        librarySelectItemValue.value = null;
         setTimeout(() => {
-            if (this.hasScenario) {
-                this.clearChanges();
-                this.resetPage();
+            if (hasScenario) {
+                clearChanges();
+                resetPage();
             }
         });
-        this.parentLibraryName = this.loadedParentName;
-        this.parentLibraryId = this.loadedParentId;
+        parentLibraryName = loadedParentName;
+        parentLibraryId = loadedParentId;
     }
 
-    onShowConfirmDeleteAlert() {
-        this.confirmDeleteAlertData = {
+    function onShowConfirmDeleteAlert() {
+        confirmDeleteAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -775,36 +755,36 @@ export default class RemainingLifeLimitEditor extends Vue {
         };
     }
 
-    onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        this.confirmDeleteAlertData = clone(emptyAlertData);
+    function onSubmitConfirmDeleteAlertResult(submit: boolean) {
+        confirmDeleteAlertData = clone(emptyAlertData);
 
         if (submit) {
-            this.librarySelectItemValue = null;
-            this.deleteRemainingLifeLimitLibraryAction({
-                libraryId: this.selectedRemainingLifeLimitLibrary.id,
+            librarySelectItemValue.value = null;
+            deleteRemainingLifeLimitLibraryAction({
+                libraryId: selectedRemainingLifeLimitLibrary.value.id,
             });
         }
     }
 
-    disableCrudButton() {
-        const rows = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+    function disableCrudButton() {
+        const rows = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rows.every(
             (remainingLife: RemainingLifeLimit) => {
                 return (
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    rules['generalRules'].valueIsNotEmpty(
                         remainingLife.value,
                     ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    rules['generalRules'].valueIsNotEmpty(
                         remainingLife.attribute,
                     ) === true
                 );
             },
         );
 
-        if (this.hasSelectedLibrary) {
+        if (hasSelectedLibrary) {
             return !(
-                this.rules['generalRules'].valueIsNotEmpty(
-                    this.selectedRemainingLifeLimitLibrary.name,
+                rules['generalRules'].valueIsNotEmpty(
+                    selectedRemainingLifeLimitLibrary.value.name,
                 ) === true &&
                 dataIsValid);
         }
@@ -814,52 +794,52 @@ export default class RemainingLifeLimitEditor extends Vue {
 
     //paging
 
-    onUpdateRow(rowId: string, updatedRow: RemainingLifeLimit){
-        if(any(propEq('id', rowId), this.addedRows)){
-            const index = this.addedRows.findIndex(item => item.id == updatedRow.id)
-            this.addedRows[index] = updatedRow;
+    function onUpdateRow(rowId: string, updatedRow: RemainingLifeLimit){
+        if(any(propEq('id', rowId), addedRows.value)){
+            const index = addedRows.value.findIndex(item => item.id == updatedRow.id)
+            addedRows.value[index] = updatedRow;
             return;
         }
 
-        let mapEntry = this.updatedRowsMap.get(rowId)
+        let mapEntry = updatedRowsMap.get(rowId)
 
         if(isNil(mapEntry)){
-            const row = this.rowCache.find(r => r.id === rowId);
+            const row = rowCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
-                this.updatedRowsMap.set(rowId, [row , updatedRow])
+                updatedRowsMap.set(rowId, [row , updatedRow])
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
             mapEntry[1] = updatedRow;
         }
         else
-            this.updatedRowsMap.delete(rowId)
+            updatedRowsMap.delete(rowId)
 
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    clearChanges(){
-        this.updatedRowsMap.clear();
-        this.addedRows = [];
-        this.deletionIds = [];
+    function clearChanges(){
+        updatedRowsMap.clear();
+        addedRows.value = [];
+        deletionIds.value = [];
     }
 
-    resetPage(){
-        this.pagination.page = 1;
-        this.onPaginationChanged();
+    function resetPage(){
+        pagination.page = 1;
+        onPaginationChanged();
     }
 
-    checkHasUnsavedChanges(){
+    function checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 
-            this.deletionIds.length > 0 || 
-            this.addedRows.length > 0 ||
-            this.updatedRowsMap.size > 0 || 
-            (this.hasScenario && this.hasSelectedLibrary) ||
-            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.stateSelectedRemainingLifeLimitLibrary, this.selectedRemainingLifeLimitLibrary))
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+            deletionIds.value.length > 0 || 
+            addedRows.value.length > 0 ||
+            updatedRowsMap.size > 0 || 
+            (hasScenario && hasSelectedLibrary) ||
+            (hasSelectedLibrary && hasUnsavedChangesCore('', stateSelectedRemainingLifeLimitLibrary, selectedRemainingLifeLimitLibrary))
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    CheckUnsavedDialog(next: any, otherwise: any) {
-        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
+    function CheckUnsavedDialog(next: any, otherwise: any) {
+        if (hasUnsavedChanges && unsavedDialogAllowed) {
             // @ts-ignore
             Vue.dialog
                 .confirm(
@@ -870,22 +850,22 @@ export default class RemainingLifeLimitEditor extends Vue {
                 .catch(() => otherwise())
         } 
         else {
-            this.unsavedDialogAllowed = true;
+            unsavedDialogAllowed = true;
             next();
         }
     };
 
-    onShowShareRemainingLifeLimitLibraryDialog(remainingLifeLimitLibrary: RemainingLifeLimitLibrary) {
-        this.shareRemainingLifeLimitLibraryDialogData = {
+    function onShowShareRemainingLifeLimitLibraryDialog(remainingLifeLimitLibrary: RemainingLifeLimitLibrary) {
+        shareRemainingLifeLimitLibraryDialogData = {
             showDialog:true,
             remainingLifeLimitLibrary: clone(remainingLifeLimitLibrary)
         }
     }
 
-    onShareRemainingLifeLimitDialogSubmit(remainingLifeLimitLibraryUsers: RemainingLifeLimitLibraryUser[]) {
-        this.shareRemainingLifeLimitLibraryDialogData = clone(emptyShareRemainingLifeLimitLibraryDialogData);
+    function onShareRemainingLifeLimitDialogSubmit(remainingLifeLimitLibraryUsers: RemainingLifeLimitLibraryUser[]) {
+        shareRemainingLifeLimitLibraryDialogData = clone(emptyShareRemainingLifeLimitLibraryDialogData);
 
-                if (!isNil(remainingLifeLimitLibraryUsers) && this.selectedRemainingLifeLimitLibrary.id !== getBlankGuid())
+                if (!isNil(remainingLifeLimitLibraryUsers) && selectedRemainingLifeLimitLibrary.value.id !== getBlankGuid())
                 {
                     let libraryUserData: LibraryUser[] = [];
 
@@ -907,35 +887,35 @@ export default class RemainingLifeLimitEditor extends Vue {
                         //add library user to an array
                         libraryUserData.push(libraryUser);
                     });
-                    if (!isNullOrUndefined(this.selectedRemainingLifeLimitLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedRemainingLifeLimitLibrary).then(this.isShared = this.isSharedLibrary);
+                    if (!isNullOrUndefined(selectedRemainingLifeLimitLibrary.value.id) ) {
+                        getIsSharedLibraryAction(selectedRemainingLifeLimitLibrary).then(() => isShared = isSharedLibrary.value);
                     }
                     //update budget library sharing
-                    RemainingLifeLimitService.upsertOrDeleteRemainingLifeLimitLibraryUsers(this.selectedRemainingLifeLimitLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                    RemainingLifeLimitService.upsertOrDeleteRemainingLifeLimitLibraryUsers(selectedRemainingLifeLimitLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
                         if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                         {
-                            this.resetPage();
+                            resetPage();
                         }
                     });
                 }
     }
 
-    setParentLibraryName(libraryId: string) {
+    function setParentLibraryName(libraryId: string) {
         if (libraryId === "") {
-            this.parentLibraryName = "None";
+            parentLibraryName = "None";
             return;
         }
         let foundLibrary: RemainingLifeLimitLibrary = emptyRemainingLifeLimitLibrary;
-        this.stateRemainingLifeLimitLibraries.forEach(library => {
+        stateRemainingLifeLimitLibraries.forEach(library => {
             if (library.id === libraryId ) {
                 foundLibrary = clone(library);
             }
         });
-        this.parentLibraryId = foundLibrary.id;
-        this.parentLibraryName = foundLibrary.name;
+        parentLibraryId = foundLibrary.id;
+        parentLibraryName = foundLibrary.name;
     }
 
-    initializePages(){
+    function initializePages(){
         const request: PagingRequest<RemainingLifeLimit>= {
             page: 1,
             rowsPerPage: 5,
@@ -950,22 +930,21 @@ export default class RemainingLifeLimitEditor extends Vue {
             isDescending: false,
             search: ''
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            RemainingLifeLimitService.getScenarioRemainingLifeLimitPage(this.selectedScenarioId, request).then(response => {
-                this.initializing = false
+        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+            RemainingLifeLimitService.getScenarioRemainingLifeLimitPage(selectedScenarioId, request).then(response => {
+                initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<RemainingLifeLimit>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
-                    this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
-                    this.loadedParentName = this.parentLibraryName; //store original
-                    this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
+                    setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
+                    loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
+                    loadedParentName = parentLibraryName; //store original
+                    scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
                 }
             });
     }
-}
 </script>
 <style scoped>
 .vs-style {

@@ -19,6 +19,7 @@ using AppliedResearchAssociates.iAM.Hubs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using Microsoft.Extensions.DependencyModel;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -143,6 +144,50 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw;
             }
+        }
+
+        public string DownloadSelectedCommittedProjectTemplate(string filename)
+        {
+            try
+            {
+                return _unitOfWork.Context.CommittedProjectTemplates.Where(_ => _.Key == filename).FirstOrDefault().Value;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
+
+        public List<String> getUploadedCommittedProjectTemplates()
+        {
+            var names = _unitOfWork.Context.CommittedProjectTemplates
+                .Select(t => t.Key)
+                .ToList();
+
+            return names;
+        }
+
+        public void AddCommittedProjectTemplate(Stream name, string filename)
+        {
+            BinaryReader br = new BinaryReader(name);
+            var fileSize = name.Length;
+            var bytes = br.ReadBytes(Convert.ToInt32(fileSize));
+            br.Close();
+            name.Close();
+
+            var existingComittedProjectTemplate = _unitOfWork.Context.CommittedProjectTemplates.Where(_ => _.Key == filename).FirstOrDefault();
+            if (existingComittedProjectTemplate == null)
+                _unitOfWork.Context.CommittedProjectTemplates.Add(new CommittedProjectTreatmentEntity
+                {
+                    Key = filename,
+                    Value = string.Format(Convert.ToBase64String(bytes))
+                });
+            else
+            {
+                existingComittedProjectTemplate.Value = string.Format(Convert.ToBase64String(bytes));
+                _unitOfWork.Context.CommittedProjectTemplates.Update(existingComittedProjectTemplate);
+            }
+            _unitOfWork.Context.SaveChanges();
         }
 
         private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)

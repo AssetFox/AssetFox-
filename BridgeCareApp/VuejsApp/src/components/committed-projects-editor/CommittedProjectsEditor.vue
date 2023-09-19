@@ -1,4 +1,4 @@
-<template></template>
+<template>
     <v-layout class="Montserrat-font-family">
         <v-flex xs12>
             <v-layout column >
@@ -329,7 +329,7 @@
                 </v-flex>
             </v-layout>
         </v-flex>
-        <CommittedProjectsFileUploaderDialog
+        <CommittedProjectsFileUploaderDialog :is="ImportExportCommittedProjectsDialog"
             :showDialog="showImportExportCommittedProjectsDialog"
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
             @delete="onDeleteCommittedProjects"
@@ -344,7 +344,7 @@
 </template>
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
-import { watch, ref, inject, onBeforeUnmount } from 'vue'
+import { watch, ref, inject, onBeforeUnmount, shallowRef } from 'vue'
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { CommittedProjectConsequence, CommittedProjectFillTreatmentReturnValues, emptyCommittedProjectConsequence, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
@@ -405,9 +405,9 @@ import { createDecipheriv } from 'crypto';
     
     const uuidNIL: string = getBlankGuid();
 
-    let addedRows: SectionCommittedProject[] = [];
+    let addedRows = shallowRef<SectionCommittedProject[]>([]);
     let updatedRowsMap:Map<string, [SectionCommittedProject, SectionCommittedProject]> = new Map<string, [SectionCommittedProject, SectionCommittedProject]>();//0: original value | 1: updated value
-    let deletionIds: string[] = [];
+    let deletionIds = shallowRef<string[]>([]);
     let rowCache: SectionCommittedProject[] = [];
     let gridSearchTerm = '';
     let currentSearch = '';
@@ -418,7 +418,7 @@ import { createDecipheriv } from 'crypto';
     let selectedLibraryTreatments = ref<Treatment[]>([]);
     let isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
-    let projectPagination: Pagination = clone(emptyPagination);
+    let projectPagination = shallowRef<Pagination>(clone(emptyPagination));
 
     let stateSectionCommittedProjects = ref<SectionCommittedProject[]>(store.state.committedProjectsModule.sectionCommittedProjects);
     let stateTreatmentLibraries = ref<TreatmentLibrary[]>(store.state.treatmentModule.treatmentLibraries);
@@ -452,7 +452,7 @@ import { createDecipheriv } from 'crypto';
     
     let cpItems: SectionCommittedProjectTableData[] = [];
     let selectedCpItems = ref<SectionCommittedProjectTableData[]>([]);
-    let sectionCommittedProjects: SectionCommittedProject[] = [];
+    let sectionCommittedProjects = shallowRef<SectionCommittedProject[]>([]);
     let selectedConsequences: CommittedProjectConsequence[] = [];
     let committedProjectsCount: number = 0;
     let showImportExportCommittedProjectsDialog: boolean = false;
@@ -693,7 +693,7 @@ import { createDecipheriv } from 'crypto';
 
     watch(stateSectionCommittedProjects, () => onStateSectionCommittedProjectsChanged)
     function onStateSectionCommittedProjectsChanged(){
-            sectionCommittedProjects = clone(stateSectionCommittedProjects.value);
+            sectionCommittedProjects.value = clone(stateSectionCommittedProjects.value);
             setCpItems();
     }
 
@@ -711,7 +711,7 @@ import { createDecipheriv } from 'crypto';
     watch(selectedCommittedProject, () => onSelectedCommittedProject)
     function onSelectedCommittedProject(){
         if(!isNil(selectedCommittedProject)){
-            const selectedProject = find(propEq('id', selectedCommittedProject), sectionCommittedProjects);
+            const selectedProject = find(propEq('id', selectedCommittedProject), sectionCommittedProjects.value);
             if(!isNil(selectedProject)){
                 selectedConsequences = selectedProject.consequences;
             }             
@@ -737,7 +737,7 @@ import { createDecipheriv } from 'crypto';
             return;
         isRunning = true
         checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = projectPagination;
+        const { sortBy, descending, page, rowsPerPage } = projectPagination.value;
 
         const request: PagingRequest<SectionCommittedProject>= {
             page: page,
@@ -745,8 +745,8 @@ import { createDecipheriv } from 'crypto';
             syncModel: {
                 libraryId: null,
                 updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
-                rowsForDeletion: deletionIds,
-                addedRows: addedRows,
+                rowsForDeletion: deletionIds.value,
+                addedRows: addedRows.value,
                 isModified: false
             },           
             sortColumn: sortBy,
@@ -758,13 +758,13 @@ import { createDecipheriv } from 'crypto';
                 if(response.data){
                     isRunning = false;
                     let data = response.data as PagingPage<SectionCommittedProject>;
-                    sectionCommittedProjects = data.items;
-                    rowCache = clone(sectionCommittedProjects)
+                    sectionCommittedProjects.value = data.items;
+                    rowCache = clone(sectionCommittedProjects.value)
                     totalItems = data.totalItems;
                     const row = data.items.find(scp => scp.id == selectedCommittedProject.value);
 
                     // Updated existing data with no factor set to 1.2
-                    sectionCommittedProjects.forEach(element => {
+                    sectionCommittedProjects.value.forEach(element => {
                         if (element.consequences !=null){
                             element.consequences.forEach(consequence => {
                             if (consequence.performanceFactor === 0) {
@@ -830,7 +830,7 @@ import { createDecipheriv } from 'crypto';
         newRow.locationKeys[keyattr] = '';
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = scenarioId;
-        addedRows.push(newRow)
+        addedRows.value.push(newRow)
         onPaginationChanged();
      }
      
@@ -847,25 +847,25 @@ import { createDecipheriv } from 'crypto';
      function OnSaveClick(){
         const upsertRequest = {
                     libraryId: null,
-                    rowsForDeletion: deletionIds,
+                    rowsForDeletion: deletionIds.value,
                     updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: addedRows,
+                    addedRows: addedRows.value,
                     isModified: false    
                 }
         if(!committedProjectsAreChanged())
         {
             updateNoTreatment();
         }
-        else if(deletionIds.length > 0){
-            CommittedProjectsService.deleteSpecificCommittedProjects(deletionIds).then((response: AxiosResponse) => {
+        else if(deletionIds.value.length > 0){
+            CommittedProjectsService.deleteSpecificCommittedProjects(deletionIds.value).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    deletionIds = [];
+                    deletionIds.value = [];
                     addSuccessNotificationAction({message:'Deleted committed projects'})              
                 }
                 CommittedProjectsService.upsertCommittedProjects(scenarioId, upsertRequest).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                         addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
-                        addedRows = [];
+                        addedRows.value = [];
                         updatedRowsMap.clear();
                     }
                     if(isNoTreatmentBefore != isNoTreatmentBeforeCache)
@@ -879,7 +879,7 @@ import { createDecipheriv } from 'crypto';
             CommittedProjectsService.upsertCommittedProjects(scenarioId, upsertRequest).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
-                    addedRows = [];
+                    addedRows.value = [];
                     updatedRowsMap.clear();
                 }
                 if(isNoTreatmentBefore != isNoTreatmentBeforeCache)
@@ -917,16 +917,16 @@ import { createDecipheriv } from 'crypto';
      }
 
      function OnDeleteClick(id: string){
-        if(isNil(addedRows.find(_ => _.id === id)))
-            deletionIds.push(id);
+        if(isNil(addedRows.value.find(_ => _.id === id)))
+            deletionIds.value.push(id);
         else
-            addedRows = addedRows.filter((scp: SectionCommittedProject) => scp.id !== id)
+            addedRows.value = addedRows.value.filter((scp: SectionCommittedProject) => scp.id !== id)
 
         onPaginationChanged();
      }
 
       function onEditCommittedProjectProperty(scp: SectionCommittedProjectTableData, property: string, value: any) {
-       let row = sectionCommittedProjects.find(o => o.id === scp.id)
+       let row = sectionCommittedProjects.value.find(o => o.id === scp.id)
         if(!isNil(row))
         {
             if(property === 'treatment'){
@@ -1027,7 +1027,7 @@ import { createDecipheriv } from 'crypto';
     }
 
     //Subroutines
-    function formatAsCurrency(value: any) {
+    function formatAsCurrency(value: any): any {
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }
@@ -1035,7 +1035,7 @@ import { createDecipheriv } from 'crypto';
         return null;
     }
     function disableCrudButtons() {
-        const rowChanges = addedRows.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
+        const rowChanges = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
             (scp: SectionCommittedProject) => {
                 if (isNil( scp.consequences )) scp.consequences = [];
@@ -1076,7 +1076,7 @@ import { createDecipheriv } from 'crypto';
     }
 
     function updateSelectedProjectConsequences(){
-        let row = sectionCommittedProjects.find(o => o.id == selectedCommittedProject.value)
+        let row = sectionCommittedProjects.value.find(o => o.id == selectedCommittedProject.value)
         if(!isNil(row)){
             row.consequences = selectedConsequences;
             updateCommittedProjects(row, selectedConsequences, 'consequences')
@@ -1084,7 +1084,7 @@ import { createDecipheriv } from 'crypto';
     }
 
     function setCpItems(){
-        currentPage = sectionCommittedProjects.map(o => 
+        currentPage = sectionCommittedProjects.value.map(o => 
         {          
             const row: SectionCommittedProjectTableData = cpItemFactory(o);
             return row
@@ -1244,13 +1244,13 @@ import { createDecipheriv } from 'crypto';
                     row
                 ) as SectionCommittedProject
         onUpdateRow(row.id, updatedRow);
-        sectionCommittedProjects = update(
+        sectionCommittedProjects.value = update(
             findIndex(
                 propEq('id', row.id),
-                sectionCommittedProjects,
+                sectionCommittedProjects.value,
             ),
             updatedRow,
-            sectionCommittedProjects,
+            sectionCommittedProjects.value,
         );
     }
 
@@ -1281,9 +1281,9 @@ import { createDecipheriv } from 'crypto';
 
     function onUpdateRow(rowId: string, updatedRow: SectionCommittedProject){
         updatedRow.cost = +updatedRow.cost.toString().replace(/(\$*)(\,*)/g, '')
-        if(any(propEq('id', rowId), addedRows)){
-            const index = addedRows.findIndex(item => item.id == updatedRow.id)
-            addedRows[index] = updatedRow;
+        if(any(propEq('id', rowId), addedRows.value)){
+            const index = addedRows.value.findIndex(item => item.id == updatedRow.id)
+            addedRows.value[index] = updatedRow;
             return;
         }
 
@@ -1305,12 +1305,12 @@ import { createDecipheriv } from 'crypto';
 
     function clearChanges(){
         updatedRowsMap.clear();
-        addedRows = [];
-        deletionIds = [];
+        addedRows.value = [];
+        deletionIds.value = [];
     }
 
     function resetPage(){
-        projectPagination.page = 1;
+        projectPagination.value.page = 1;
         onPaginationChanged();
     }
 
@@ -1320,15 +1320,15 @@ import { createDecipheriv } from 'crypto';
     }
 
     function committedProjectsAreChanged() : boolean{
-        return  deletionIds.length > 0 || 
-            addedRows.length > 0 ||
+        return  deletionIds.value.length > 0 || 
+            addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || (hasScenario && hasSelectedLibrary)
     }
 
     function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
         if(importComp.id === scenarioId && importComp.workType == WorkType.ImportCommittedProject){
-            projectPagination.page = 1
+            projectPagination.value.page = 1
             clearChanges();
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');
@@ -1355,8 +1355,8 @@ import { createDecipheriv } from 'crypto';
             isRunning = false
             if(response.data){
                 let data = response.data as PagingPage<SectionCommittedProject>;
-                sectionCommittedProjects = data.items;
-                rowCache = clone(sectionCommittedProjects)
+                sectionCommittedProjects.value = data.items;
+                rowCache = clone(sectionCommittedProjects.value)
                 totalItems = data.totalItems;
             }
         }); 

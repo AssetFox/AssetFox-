@@ -87,9 +87,9 @@ import { useStore } from 'vuex';
     if (hasValue(stateAttributes)) {
       attributeNames = getPropertyValues('name', stateAttributes);
 
-      if (showDialog) {
-        setNewDeficientConditionGoalDefaultValues();
-      }
+      // if (showDialog) {
+      //   setNewDeficientConditionGoalDefaultValues();
+      // }
     }
   }
 

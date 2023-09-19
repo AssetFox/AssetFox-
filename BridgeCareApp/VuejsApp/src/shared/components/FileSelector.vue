@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { shallowRef } from 'vue';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {clone, prop} from 'ramda';
@@ -74,7 +74,7 @@ const props = defineProps<{
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy');}
 
-    let applyNoTreatment: boolean = true;
+    let applyNoTreatment= shallowRef<boolean>(true);
     let fileSelect: HTMLInputElement = {} as HTMLInputElement;
     let tableHeaders: DataTableHeader[] = [
         {text: 'Name', value: 'name', align: 'left', sortable: false, class: '', width: '50%'},
@@ -82,7 +82,8 @@ async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatc
         {text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: ''}
     ];
     let files: File[] = [];
-    let file: File | null = null;   
+    let file= shallowRef<File|null>(null);   
+    let closed = shallowRef<boolean>(true);
 
     function chooseFiles(){
         if(document != null)
@@ -91,23 +92,23 @@ async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatc
         }
     }
 
-    watch(()=>file,()=>onFileChanged())
+    watch(file,()=>onFileChanged())
     function onFileChanged() {        
-        files = hasValue(file) ? [file as File] : [];                                   
+        files = hasValue(file.value) ? [file.value as File] : [];                                   
         emit('submit', file);
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     }
 
-    watch(()=>closed,()=>onClose())
+    watch(closed,()=>onClose())
     function onClose() {
         if (closed) {
             files = [];
-            file = null;
+            file.value = null;
             fileSelect.value = '';
             (<HTMLInputElement>document.getElementById('file-select')!).value = '';
         }
     }
-    watch(()=>applyNoTreatment,()=>onTreatmentChanged())
+    watch(applyNoTreatment,()=>onTreatmentChanged())
     function onTreatmentChanged() {
         emit('treatment', applyNoTreatment);
     }
@@ -130,7 +131,7 @@ async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatc
                 });
             }
 
-            file = clone(fileList[0]);
+            file.value = clone(fileList[0]);
         }
 
         fileSelect.value = '';

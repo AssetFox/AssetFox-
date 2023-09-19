@@ -183,7 +183,7 @@ const emit = defineEmits(['submit'])
     }
     const lowerCaseSearch = search.toLowerCase();
     
-    return assignedUsersCriteriaFilter.value.filter((item: { [s: string]: unknown; } | ArrayLike<unknown>) => {
+    return assignedUsersCriteriaFilter.filter((item: { [s: string]: any; } | ArrayLike<unknown>) => {
       return Object.values(item).some(val => String(val).toLowerCase().includes(lowerCaseSearch));
     });
   }
@@ -209,7 +209,7 @@ const emit = defineEmits(['submit'])
   let unassignedUsers: User[] = [];
   let assignedUsers: User[] = [];
 
-  let assignedUsersCriteriaFilter= ref<UserCriteriaFilter[]>([]) ;
+  let assignedUsersCriteriaFilter: UserCriteriaFilter[]=[] ;
   let unassignedUsersCriteriaFilter: UserCriteriaFilter[] = [];
   
   let criteriaFilterEditorDialogData: CriterionFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
@@ -226,14 +226,14 @@ const emit = defineEmits(['submit'])
   function created() {
   criteriaFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
   unassignedUsersCriteriaFilter = [];
-  assignedUsersCriteriaFilter.value = [];
+  assignedUsersCriteriaFilter = [];
 
   getAllUserCriteriaAction().then(() => {
     loading = false;
   });
 
   watch(stateUsersCriteriaFilter, () => {
-    assignedUsersCriteriaFilter.value.forEach((userCriteriaFilter: UserCriteriaFilter) => {
+    assignedUsersCriteriaFilter.forEach((userCriteriaFilter: UserCriteriaFilter) => {
       if (userCriteriaFilter.hasCriteria) {
         nameValue = userCriteriaFilter.name;
         descriptionValue = userCriteriaFilter.description;
@@ -267,7 +267,7 @@ watch(stateUsers,()=>onUserCriteriaChanged())
 
   watch(stateUsersCriteriaFilter,()=>onUserCriteriaFilterChanged())
   function onUserCriteriaFilterChanged() {
-    assignedUsersCriteriaFilter.value = stateUsersCriteriaFilter.value;
+    assignedUsersCriteriaFilter = stateUsersCriteriaFilter.value;
     $forceUpdate();
   }
 

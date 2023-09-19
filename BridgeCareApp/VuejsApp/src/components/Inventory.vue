@@ -104,7 +104,7 @@ let inventoryReportName: string = '';
 
         watch(staticHTMLForInventory,()=>onStaticHTMLForInventory())
         function onStaticHTMLForInventory(){
-            sanitizedHTML = $sanitize(staticHTMLForInventory);
+            sanitizedHTML = $sanitize(staticHTMLForInventory.value);
         }
         
         watch(stateKeyFields,()=>onStateKeyFieldsChanged())

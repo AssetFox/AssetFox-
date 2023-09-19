@@ -262,7 +262,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { shallowRef } from 'vue';
 import VueQueryBuilder from "vue-query-builder/src/VueQueryBuilder.vue";
 import {
     Criteria,
@@ -347,10 +347,10 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         { text: 'AND', value: 'AND' },
     ];
     let selectedConjunction: string = 'OR';
-    let subCriteriaClauses: string[] = [];
+    let subCriteriaClauses= shallowRef<string[]>([]);
     let selectedSubCriteriaClauseIndex: number = -1;
-    let selectedSubCriteriaClause: Criteria | null = null;
-    let selectedRawSubCriteriaClause: string = '';
+    let selectedSubCriteriaClause= shallowRef<Criteria |null>(null);
+    let selectedRawSubCriteriaClause = shallowRef<string>('');
     let activeTab = 'tree-view';
     let checkOutput: boolean = false;
 
@@ -418,22 +418,22 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         resetCriteriaValidationProperties();
     }
 
-    watch(()=>selectedSubCriteriaClause,()=>onSelectedClauseChanged())
+    watch(selectedSubCriteriaClause,()=>onSelectedClauseChanged())
     function onSelectedClauseChanged() {
         resetSubCriteriaValidationProperties();
         if (
             hasValue(selectedSubCriteriaClause) &&
-            hasValue(selectedSubCriteriaClause!.children)
+            hasValue(selectedSubCriteriaClause.value!.children)
         ) {
             let missingAttributes: string[] = [];
 
             for (
                 let index = 0;
-                index < selectedSubCriteriaClause!.children!.length;
+                index < selectedSubCriteriaClause.value!.children!.length;
                 index++
             ) {
                 missingAttributes = getMissingAttribute(
-                    selectedSubCriteriaClause!.children![index].query,
+                    selectedSubCriteriaClause.value!.children![index].query,
                     missingAttributes,
                 );
             }
@@ -446,7 +446,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         }
     }
 
-    watch(()=>selectedRawSubCriteriaClause,()=>onSelectedClauseRawChanged())
+    watch(selectedRawSubCriteriaClause,()=>onSelectedClauseRawChanged())
     function onSelectedClauseRawChanged() {
         resetSubCriteriaValidationProperties();
     }
@@ -497,14 +497,14 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     }
 
     function setSubCriteriaClauses(mainCriteria: Criteria) {
-        subCriteriaClauses = [];
+        subCriteriaClauses.value = [];
         if (hasValue(mainCriteria) && hasValue(mainCriteria.children)) {
             mainCriteria.children!.forEach((criteriaType: CriteriaType) => {
                 const clause: string = convertCriteriaTypeObjectToCriteriaExpression(
                     criteriaType,
                 );
                 if (hasValue(clause)) {
-                    subCriteriaClauses.push(clause);
+                    subCriteriaClauses.value.push(clause);
                 }
             });
         }
@@ -526,8 +526,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
 
     function resetSubCriteriaSelectedProperties() {
         selectedSubCriteriaClauseIndex = -1;
-        selectedSubCriteriaClause = null;
-        selectedRawSubCriteriaClause = '';
+        selectedSubCriteriaClause.value = null;
+        selectedRawSubCriteriaClause.value = '';
     }
 
     function onAddSubCriteria() {
@@ -535,12 +535,12 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         setTimeout(() => {
             onClickSubCriteriaClauseTextarea(
                 '',
-                subCriteriaClauses.length,
+                subCriteriaClauses.value.length,
             );
-            subCriteriaClauses.push('');
+            subCriteriaClauses.value.push('');
             selectedSubCriteriaClauseIndex =
-                subCriteriaClauses.length - 1;
-            selectedSubCriteriaClause = clone(emptyCriteria);
+                subCriteriaClauses.value.length - 1;
+            selectedSubCriteriaClause.value = clone(emptyCriteria);
             resetCriteriaValidationProperties();
         });
     }
@@ -554,13 +554,13 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
             selectedSubCriteriaClauseIndex = subCriteriaClauseIndex;
             // TODO
             //selectedSubCriteriaClause = parseCriteriaString(subCriteriaClause);
-            selectedSubCriteriaClause = convertCriteriaExpressionToCriteriaObject(
+            selectedSubCriteriaClause.value = convertCriteriaExpressionToCriteriaObject(
                 subCriteriaClause,
                 addErrorNotificationAction,
             );
             if (selectedSubCriteriaClause) {
-                if (!hasValue(selectedSubCriteriaClause.logicalOperator)) {
-                    selectedSubCriteriaClause.logicalOperator = 'AND';
+                if (!hasValue(selectedSubCriteriaClause.value?.logicalOperator)) {
+                    selectedSubCriteriaClause.value!.logicalOperator = 'AND';
                 }
             } else {
                 invalidSubCriteriaMessage =
@@ -570,14 +570,14 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     }
 
     function onRemoveSubCriteria(subCriteriaClauseIndex: number) {
-        const subCriteriaClause: string = subCriteriaClauses[
+        const subCriteriaClause: string = subCriteriaClauses.value[
             subCriteriaClauseIndex
         ];
 
-        subCriteriaClauses = remove(
+        subCriteriaClauses.value = remove(
             subCriteriaClauseIndex,
             1,
-            subCriteriaClauses,
+            subCriteriaClauses.value,
         );
 
         if (selectedSubCriteriaClauseIndex === subCriteriaClauseIndex) {
@@ -586,7 +586,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
             selectedSubCriteriaClauseIndex = findIndex(
                 (subCriteriaClause: string) => {
                     const parsedCriteriaJson = convertCriteriaObjectToCriteriaExpression(
-                        selectedSubCriteriaClause as Criteria,
+                        selectedSubCriteriaClause.value as Criteria,
                     );
                     if (parsedCriteriaJson) {
                         return (
@@ -594,10 +594,10 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                         );
                     }
                     return (
-                        subCriteriaClause === selectedRawSubCriteriaClause
+                        subCriteriaClause === selectedRawSubCriteriaClause.value
                     );
                 },
-                subCriteriaClauses,
+                subCriteriaClauses.value,
             );
         }
 
@@ -624,13 +624,13 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         //TODO
         //const parsedRawSubCriteria = parseCriteriaString(selectedRawSubCriteriaClause);
         const parsedRawSubCriteria = convertCriteriaExpressionToCriteriaObject(
-            selectedRawSubCriteriaClause,
+            selectedRawSubCriteriaClause.value,
             addErrorNotificationAction,
         );
         if (parsedRawSubCriteria) {
-            selectedSubCriteriaClause = parsedRawSubCriteria;
-            if (!hasValue(selectedSubCriteriaClause.logicalOperator)) {
-                selectedSubCriteriaClause.logicalOperator = 'OR';
+            selectedSubCriteriaClause.value = parsedRawSubCriteria;
+            if (!hasValue(selectedSubCriteriaClause.value.logicalOperator)) {
+                selectedSubCriteriaClause.value.logicalOperator = 'OR';
             }
         } else {
             invalidSubCriteriaMessage =
@@ -642,10 +642,10 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         activeTab = 'raw-criteria';
         resetSubCriteriaValidationProperties();
         const parsedSubCriteria = convertCriteriaObjectToCriteriaExpression(
-            selectedSubCriteriaClause as Criteria,
+            selectedSubCriteriaClause.value as Criteria,
         );
         if (parsedSubCriteria) {
-            selectedRawSubCriteriaClause = parsedSubCriteria.join('');
+            selectedRawSubCriteriaClause.value = parsedSubCriteria.join('');
         } else {
             invalidSubCriteriaMessage = 'The criteria json is invalid';
         }
@@ -790,10 +790,10 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
             return;
         }
 
-        subCriteriaClauses = update(
+        subCriteriaClauses.value= update(
             selectedSubCriteriaClauseIndex,
-            criteria,
-            subCriteriaClauses,
+            criteria as any,
+            subCriteriaClauses.value,
         );
         resetCriteriaValidationProperties();
         checkOutput = true;
@@ -810,7 +810,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     function getSubCriteriaValueToCheck() {
         if (activeTab === 'tree-view') {
             const parsedCriteriaJson = convertCriteriaObjectToCriteriaExpression(
-                selectedSubCriteriaClause as Criteria,
+                selectedSubCriteriaClause.value as Criteria,
             );
             if (parsedCriteriaJson) {
                 return parsedCriteriaJson.join('');
@@ -845,7 +845,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
 
     function onDisableCheckOutputButton() {
         const mainCriteria: Criteria = getMainCriteria();
-        const subCriteriaClausesAreEmpty = subCriteriaClauses.every(
+        const subCriteriaClausesAreEmpty = subCriteriaClauses.value.every(
             (subCriteriaClause: string) => isEmpty(subCriteriaClause),
         );
 
@@ -861,13 +861,13 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
 
     function onDisableCheckCriteriaButton() {
         const parsedSelectedSubCriteriaClause = convertCriteriaObjectToCriteriaExpression(
-            selectedSubCriteriaClause as Criteria,
+            selectedSubCriteriaClause.value as Criteria,
         );
         //TODO
         //const parsedSelectedRawSubCriteriaClause = convertCriteriaObjectToCriteriaExpression(parseCriteriaString(selectedRawSubCriteriaClause) as Criteria);
         const parsedSelectedRawSubCriteriaClause = convertCriteriaObjectToCriteriaExpression(
             convertCriteriaExpressionToCriteriaObject(
-                selectedRawSubCriteriaClause,
+                selectedRawSubCriteriaClause.value,
                 addErrorNotificationAction,
             ) as Criteria,
         );
@@ -876,7 +876,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
             selectedSubCriteriaClauseIndex === -1 ||
             (activeTab === 'tree-view' &&
                 (parsedSelectedSubCriteriaClause === null ||
-                    equals(selectedSubCriteriaClause, emptyCriteria))) ||
+                    equals(selectedSubCriteriaClause.value, emptyCriteria))) ||
             (parsedSelectedSubCriteriaClause &&
                 isEmpty(parsedSelectedSubCriteriaClause.join(''))) ||
             (activeTab === 'raw-criteria' &&
@@ -889,14 +889,14 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     }
 
     function getMainCriteria() {
-        const filteredSubCriteria: string[] = subCriteriaClauses.filter(
+        const filteredSubCriteria: string[] = subCriteriaClauses.value.filter(
             (subCriteriaClause: string) => !isEmpty(subCriteriaClause),
         );
 
         if (hasValue(filteredSubCriteria)) {
             return {
                 logicalOperator: selectedConjunction,
-                children: subCriteriaClauses
+                children: subCriteriaClauses.value
                     .filter(
                         (subCriteriaClause: string) =>
                             !isEmpty(subCriteriaClause),

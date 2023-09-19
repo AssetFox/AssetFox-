@@ -6,19 +6,23 @@ using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport;
 using System;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
 {
     public class PavementUnfundedTreatments
     {
         private ReportHelper _reportHelper;
-        private PavementTreatments _bridgesTreatments;
+        private PavementTreatments _pavementTreatments;
         private const string BRIDGE_FUNDING = "Pavement Funding";
+        private readonly IUnitOfWork _unitOfWork;
 
-        public PavementUnfundedTreatments()
+        public PavementUnfundedTreatments(IUnitOfWork unitOfWork)
         {
-            _reportHelper = new ReportHelper();
-            _bridgesTreatments = new PavementTreatments();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _reportHelper = new ReportHelper(_unitOfWork);
+            _pavementTreatments = new PavementTreatments(_unitOfWork);
         }
 
         public void FillDataInWorksheet(ExcelWorksheet worksheet, CurrentCell currentCell, PavementDataModel bridgeDataModel)
@@ -26,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             currentCell.Row++;
             currentCell.Column = 1;
 
-            _bridgesTreatments.FillDataInWorksheet(worksheet, currentCell, bridgeDataModel);
+            _pavementTreatments.FillDataInWorksheet(worksheet, currentCell, bridgeDataModel);
 
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
@@ -119,7 +123,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
 
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet)
         {
-            var currentCell = _bridgesTreatments.AddHeadersCells(worksheet);
+            var currentCell = _pavementTreatments.AddHeadersCells(worksheet);
             var columnNo = currentCell.Column;
 
             // Row 1
@@ -207,7 +211,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
 
         public void PerformPostAutofitAdjustments(ExcelWorksheet worksheet)
         {
-            _bridgesTreatments.PerformPostAutofitAdjustments(worksheet);
+            _pavementTreatments.PerformPostAutofitAdjustments(worksheet);
         }
     }
 }

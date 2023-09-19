@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         public string Name => "PAMSAuditReport";
 
-        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService)
+        public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService, string suffix = "")
         {
             var report = new PAMSAuditReport(uow, Name, results, hubService);
             return report;

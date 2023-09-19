@@ -34,9 +34,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
-            _dataTab = new PAMSDataTab();
-            _decisionTab = new PAMSDecisionTab();
-            _reportHelper = new ReportHelper();
+            _dataTab = new PAMSDataTab(_unitOfWork);
+            _decisionTab = new PAMSDecisionTab(_unitOfWork);
+            _reportHelper = new ReportHelper(_unitOfWork);
 
             // check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -67,6 +67,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public bool IsComplete { get; private set; }
 
         public string Status { get; private set; }
+        public string Suffix => throw new NotImplementedException();
+
+        public string Criteria { get; set; }
 
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport;
 using OfficeOpenXml;
@@ -12,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
     {
         private PavementUnfundedTreatments _pavementUnfundedTreatments;
         private ReportHelper _reportHelper;
-
+        private readonly IUnitOfWork _unitOfWork;
         public static HashSet<string> GetRequiredAttributes() => new()
         {
             $"{PAMSAuditReportConstants.OPI}",
@@ -21,10 +22,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             $"{PAMSAuditReportConstants.FAULT}"
         };
 
-        public PAMSDataTab()
+        public PAMSDataTab(IUnitOfWork unitOfWork)
         {
-            _reportHelper = new ReportHelper();
-            _pavementUnfundedTreatments = new PavementUnfundedTreatments();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _reportHelper = new ReportHelper(_unitOfWork);
+            _pavementUnfundedTreatments = new PavementUnfundedTreatments(_unitOfWork);
         }
 
         public void Fill(ExcelWorksheet pavementWorksheet, SimulationOutput simulationOutput)

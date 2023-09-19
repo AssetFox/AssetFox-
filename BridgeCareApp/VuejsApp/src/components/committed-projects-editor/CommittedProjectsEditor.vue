@@ -5,13 +5,22 @@
                 <v-flex xs12>
                     <v-layout>
                         <v-btn @click='OnGetTemplateClick' 
-                            class="ghd-white-bg ghd-blue ghd-button" outline>Get Template</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Get Template</v-btn>
+                            <input
+                            id="committedProjectTemplateUpload"
+                            type="file"
+                            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                            ref="committedProjectTemplateInput"
+                            @change="handleCommittedProjectTemplateUpload"
+                            hidden/>
+                        <v-btn @click="onUploadCommittedProjectTemplate"
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Upload Committed Project Template</v-btn>
                         <v-btn @click='showImportExportCommittedProjectsDialog = true' 
-                            class="ghd-white-bg ghd-blue ghd-button" outline>Import Projects</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Import Projects</v-btn>
                         <v-btn @click='OnExportProjectsClick' 
-                            class="ghd-white-bg ghd-blue ghd-button" outline>Export Projects</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Export Projects</v-btn>
                         <v-btn @click='OnDeleteAllClick' 
-                            class="ghd-white-bg ghd-blue ghd-button" outline>Delete All</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Delete All</v-btn>
                     </v-layout>
                 </v-flex>
 
@@ -23,19 +32,6 @@
 
                 <v-flex xs12 class="ghd-constant-header">
                     <v-layout>
-                        <v-flex xs6>
-                            <v-layout column>
-                                <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
-                                <v-select
-                                    id="CommittedProjectsEditor-treatmentLibrary-vSelect"
-                                    outline
-                                    append-icon=$vuetify.icons.ghd-down
-                                    class="ghd-select ghd-text-field ghd-text-field-border pa-0"
-                                    :items='librarySelectItems' 
-                                    v-model='librarySelectItemValue'>
-                                </v-select>                       
-                            </v-layout>
-                        </v-flex>
                         <v-flex xs6 style="margin-left: 5px">
                             <v-subheader class="ghd-control-label ghd-md-gray"></v-subheader>
                             <v-layout>                                
@@ -103,7 +99,6 @@
                                                 && header.value !== 'year' 
                                                 && header.value !== 'keyAttr' 
                                                 && header.value !== 'treatment'
-                                                && header.value !== 'performanceFactor'
                                                 && header.value !== 'cost'"
                                                 readonly
                                                 class="sm-txt"
@@ -129,10 +124,6 @@
 
                                             <v-text-field v-if="header.value === 'cost'"
                                                 :value='formatAsCurrency(props.item[header.value])'
-                                                :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
-
-                                            <v-text-field v-if="header.value === 'performanceFactor'"
-                                                :value='parseFloat(props.item[header.value])'
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template slot="input">
@@ -180,13 +171,6 @@
                                                     @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
                                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
-                                                <v-btn
-                                                    id="CommittedProjectsEditor-editCommittedProject-vbtn"
-                                                    @click="onSelectCommittedProject(props.item.id)"
-                                                    class="ghd-blue"
-                                                    icon>
-                                                    <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
-                                                </v-btn>
                                             </v-layout>
                                         </div>                            
                                     </div>
@@ -222,111 +206,7 @@
                         X
                     </v-btn>
                 </v-flex>
-                <v-flex xs12>
-                    <v-layout justify-center>
-                        <v-btn 
-                            id="CommittedProjectsEditor-addConsequence-vbtn"
-                            @click="showCreateCommittedProjectConsequenceDialog = true" 
-                            class="ghd-white-bg ghd-blue ghd-button btn-style" outline>Add Conseqence
-                        </v-btn> 
-                    </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                    <v-data-table
-                    id="CommittedProjectsEditor-consequences-vDataTable"
-                    :headers="consequenceHeaders"
-                    :items="selectedConsequences"
-                    item-key='id'
-                    sort-icon=$vuetify.icons.ghd-table-sort
-                    class=" fixed-header v-table__overflow">
-                        <template slot="items" slot-scope="props">
-                            <td>
-                                
-                                <v-edit-dialog
-                                :return-value.sync="props.item.attribute"
-                                large
-                                lazy
-                                persistent
-                                @save="onEditConsequenceProperty(props.item,'attribute',props.item.attribute) ">
-                                <v-text-field
-                                    readonly
-                                    single-line
-                                    class="sm-txt"
-                                    :value="props.item.attribute"
-                                    :rules="[
-                                        inputRules['generalRules'].valueIsNotEmpty,
-                                    ]"/>
-                                <template slot="input">
-                                    <v-select
-                                        :items="attributeSelectItems"
-                                        append-icon=$vuetify.icons.ghd-down
-                                        label="Select an Attribute"
-                                        outline
-                                        v-model="props.item.attribute"
-                                        :rules="[
-                                            inputRules['generalRules']
-                                                .valueIsNotEmpty,
-                                        ]" />
-                                </template>
-                            </v-edit-dialog>
-                            </td>
-                            <td>
-                                <v-edit-dialog
-                                    :return-value.sync="props.item.changeValue"
-                                    @save="onEditConsequenceProperty(props.item,'changeValue',props.item.changeValue) "
-                                    large
-                                    lazy
-                                    persistent>
-                                    <v-text-field
-                                    readonly
-                                    single-line
-                                    class="sm-txt"
-                                    :value="props.item.changeValue"
-                                    :rules="[
-                                        inputRules['generalRules'].valueIsNotEmpty,
-                                    ]"/>
-                                    <template slot="input">
-                                        <v-text-field
-                                            label="Change value"
-                                            single-line
-                                            v-model="props.item.changeValue"
-                                            :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
-                                    </template>
-                                </v-edit-dialog>
-                            </td>
-                            <td>
-                                <v-edit-dialog
-                                :return-value.sync="props.item.performanceFactor"
-                                large
-                                lazy
-                                persistent
-                                @save="onEditConsequenceProperty(props.item,'performanceFactor',props.item.performanceFactor)">
-                                <v-text-field
-                                    readonly 
-                                    single-line
-                                    class="sm-text"
-                                    :value='props.item.performanceFactor'
-                                    :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
-                                <template slot="input">
-                                    <v-text-field
-                                        label=""
-                                        single-line
-                                        maxlength="5"
-                                        v-model="props.item.performanceFactor"
-                                        :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
-                                </template>    
-                                </v-edit-dialog>
-                            </td>
-                            <td>
-                                <v-btn 
-                                    id="CommittedProjectsEditor-deleteConsequence-vbtn"
-                                    @click="OnDeleteConsequence(props.item.id)"  class="ghd-blue" icon>
-                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                                </v-btn>
-                            </td>
-                        </template>
-                    </v-data-table>    
-                </v-flex>
+              
             </v-layout>
         </v-flex>
         <CommittedProjectsFileUploaderDialog :is="ImportExportCommittedProjectsDialog"
@@ -339,14 +219,13 @@
             @submit="onDeleteCommittedProjectsSubmit"
         />
 
-        <CreateConsequenceDialog :showDialog='showCreateCommittedProjectConsequenceDialog' @submit='onAddCommittedProjectConsequenc' />
     </v-layout>
 </template>
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
 import { watch, ref, inject, onBeforeUnmount, shallowRef } from 'vue'
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import { CommittedProjectConsequence, CommittedProjectFillTreatmentReturnValues, emptyCommittedProjectConsequence, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
+import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
 import { Treatment, treatmentCategoryMap, treatmentCategoryReverseMap, TreatmentLibrary } from '@/shared/models/iAM/treatment';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -362,7 +241,6 @@ import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper
 import { http2XX } from '@/shared/utils/http-utils';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
 import ImportExportCommittedProjectsDialog from './committed-project-editor-dialogs/CommittedProjectsImportDialog.vue';
-import CreateConsequenceDialog from './committed-project-editor-dialogs/CreateCommittedProjectConsequenceDialog.vue';
 import { InvestmentPlan, SimpleBudgetDetail } from '@/shared/models/iAM/investment';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
@@ -386,6 +264,7 @@ import { createDecipheriv } from 'crypto';
     const $router = useRouter();
     const $statusHub = inject('$statusHub') as any
     created();
+
     let searchItems = '';
     let dataPerPage = 0;
     let totalDataFound = 0;
@@ -402,9 +281,9 @@ import { createDecipheriv } from 'crypto';
     let networkId: string = getBlankGuid();
     let inputRules: InputValidationRules = rules;
     let network: Network = clone(emptyNetwork);
-    
-    const uuidNIL: string = getBlankGuid();
+    let isAdminTemplateUploaded: Boolean;
 
+    const uuidNIL: string = getBlankGuid();
     let addedRows = shallowRef<SectionCommittedProject[]>([]);
     let updatedRowsMap:Map<string, [SectionCommittedProject, SectionCommittedProject]> = new Map<string, [SectionCommittedProject, SectionCommittedProject]>();//0: original value | 1: updated value
     let deletionIds = shallowRef<string[]>([]);
@@ -420,7 +299,9 @@ import { createDecipheriv } from 'crypto';
 
     let projectPagination = shallowRef<Pagination>(clone(emptyPagination));
 
+    let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
     let stateSectionCommittedProjects = ref<SectionCommittedProject[]>(store.state.committedProjectsModule.sectionCommittedProjects);
+    let committedProjectTemplate = ref<string>(store.state.committedProjectsModule.committedProjectTemplate);
     let stateTreatmentLibraries = ref<TreatmentLibrary[]>(store.state.treatmentModule.treatmentLibraries);
     let stateAttributes = ref<Attribute[]>(store.state.attributeModule.attributes);
     let stateInvestmentPlan = ref<InvestmentPlan>(store.state.investmentModule.investmentPlan);
@@ -438,7 +319,7 @@ import { createDecipheriv } from 'crypto';
     async function deleteSpecificCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('deleteSpecificCommittedProjects'); }
     async function deleteSimulationCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('deleteSimulationCommittedProjects'); }
     async function upsertCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('upsertCommittedProjects'); }
-
+    async function importCommittedProjectTemplate(payload?: any): Promise<any> { await store.dispatch('importComittedProjectTemplate');}
     async function selectTreatmentLibraryAction(payload?: any): Promise<any> { await store.dispatch('selectTreatmentLibrary'); }
     async function setHasUnsavedChangesAction(payload?: any): Promise<any> { await store.dispatch('setHasUnsavedChanges'); }
     async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification'); }
@@ -446,14 +327,12 @@ import { createDecipheriv } from 'crypto';
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserOrSharedScenario'); }
     async function selectScenarioAction(payload?: any): Promise<any> { await store.dispatch('selectScenario'); }
     async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage'); }
-    async function currentUserCriteriaFilter(payload?: any): Promise<any> { await store.dispatch('store.state.userModule.currentUserCriteriaFilter'); }
 
     let getUserNameByIdGetter: any = store.getters.getUserNameByIdGetter;
     
     let cpItems: SectionCommittedProjectTableData[] = [];
     let selectedCpItems = ref<SectionCommittedProjectTableData[]>([]);
     let sectionCommittedProjects = shallowRef<SectionCommittedProject[]>([]);
-    let selectedConsequences: CommittedProjectConsequence[] = [];
     let committedProjectsCount: number = 0;
     let showImportExportCommittedProjectsDialog: boolean = false;
     let selectedCommittedProject = ref<string>('');
@@ -530,45 +409,11 @@ import { createDecipheriv } from 'crypto';
             width: '10%',
         },
     ];
-    const consequenceHeaders: DataTableHeader[] = [
-        {
-            text: 'Attribute',
-            value: 'attribute',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '40%',
-        },
-        {
-            text: 'Change',
-            value: 'changeValue',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '40%',
-        },
-        {
-            text: 'Factor',
-            value: 'performanceFactor',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '15%',
-        },
-        {
-            text: '',
-            value: 'actions',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '20%',
-        }
-    ];
 
     function created() {
         reverseCatMap.forEach(cat => {
             categorySelectItems.push({text: cat, value: cat})        
-        })
+        });    
 
         $statusHub.$on(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
@@ -697,26 +542,27 @@ import { createDecipheriv } from 'crypto';
             setCpItems();
     }
 
-    watch(librarySelectItemValue, () => onSelectAttributeItemValueChanged)
-    function onSelectAttributeItemValueChanged() {
-        selectTreatmentLibraryAction(librarySelectItemValue);
-        hasSelectedLibrary = true;
-        const library = stateTreatmentLibraries.value.find(o => o.id == librarySelectItemValue.value)
-        if(!isNil(library)){
-            selectedLibraryTreatments.value = library.treatments;
-            onSelectedLibraryTreatmentsChanged()
-        }        
-    }
+    // watch(librarySelectItemValue, () => onSelectAttributeItemValueChanged)
+    // function onSelectAttributeItemValueChanged() {
+    //     selectTreatmentLibraryAction(librarySelectItemValue);
+    //     hasSelectedLibrary = true;
+    //     const library = stateTreatmentLibraries.value.find(o => o.id == librarySelectItemValue.value)
+    //     if(!isNil(library)){
+    //         selectedLibraryTreatments.value = library.treatments;
+    //         onSelectedLibraryTreatmentsChanged()
+    //     }        
+    // }
 
-    watch(selectedCommittedProject, () => onSelectedCommittedProject)
-    function onSelectedCommittedProject(){
-        if(!isNil(selectedCommittedProject)){
-            const selectedProject = find(propEq('id', selectedCommittedProject), sectionCommittedProjects.value);
-            if(!isNil(selectedProject)){
-                selectedConsequences = selectedProject.consequences;
-            }             
-        }
-    }
+    // watch(selectedCommittedProject, () => onSelectedCommittedProject)
+    // function onSelectedCommittedProject(){
+    //     if(!isNil(selectedCommittedProject)){
+    //         const selectedProject = find(propEq('id', selectedCommittedProject), sectionCommittedProjects.value);
+    //         if(!isNil(selectedProject)){
+    //             selectedConsequences = selectedProject.consequences;
+    //         }             
+    //     }
+    // }
+
 
     watch(sectionCommittedProjects, () => onSectionCommittedProjectsChanged)
     function onSectionCommittedProjectsChanged() {  
@@ -763,18 +609,6 @@ import { createDecipheriv } from 'crypto';
                     totalItems = data.totalItems;
                     const row = data.items.find(scp => scp.id == selectedCommittedProject.value);
 
-                    // Updated existing data with no factor set to 1.2
-                    sectionCommittedProjects.value.forEach(element => {
-                        if (element.consequences !=null){
-                            element.consequences.forEach(consequence => {
-                            if (consequence.performanceFactor === 0) {
-                                consequence.performanceFactor = 1.2;
-                                updateCommittedProject(row ? row : emptySectionCommittedProject, "1.2", "performanceFactor");
-                            }
-                        });
-                        }
-                        
-                    });
                     if(isNil(row)) {
                         selectedCommittedProject.value = '';
                     }
@@ -814,13 +648,23 @@ import { createDecipheriv } from 'crypto';
      }
 
      function OnGetTemplateClick(){
-        CommittedProjectsService.getCommittedProjectTemplate(networkId)
+        CommittedProjectsService.getUploadedCommittedProjectTemplate()
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    const fileInfo: FileInfo = response.data as FileInfo;  
-                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                    FileDownload(convertBase64ToArrayBuffer(response.data), 'Committed Project Template', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                    isAdminTemplateUploaded = true;
                 }
             });
+
+            if(isAdminTemplateUploaded = false){
+                 CommittedProjectsService.getCommittedProjectTemplate(networkId)
+                 .then((response: AxiosResponse) => {
+                        if (hasValue(response, 'data')) {
+                          const fileInfo: FileInfo = response.data as FileInfo;  
+                          FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                        }
+                });
+            }
      }
 
      function OnAddCommittedProjectClick(){
@@ -832,16 +676,6 @@ import { createDecipheriv } from 'crypto';
         newRow.simulationId = scenarioId;
         addedRows.value.push(newRow)
         onPaginationChanged();
-     }
-     
-     function OnAddConsequenceClick(){
-        const newRow: CommittedProjectConsequence = clone(emptyCommittedProjectConsequence)
-        newRow.id = getNewGuid();
-        newRow.committedProjectId = selectedCommittedProject.value;
-        newRow.attribute = '';
-        newRow.changeValue = '';
-        newRow.performanceFactor = 1.2;
-        selectedConsequences.push(newRow);
      }
 
      function OnSaveClick(){
@@ -935,9 +769,6 @@ import { createDecipheriv } from 'crypto';
             else if(property === 'keyAttr'){
                 handleKeyAttrChange(row, scp, value);               
             }
-            else if(property === 'performanceFactor') {
-                handleFactorChange(row, scp, value);
-            }
             else if(property === 'budget'){
                 handleBudgetChange(row, scp, value)
             }
@@ -948,30 +779,6 @@ import { createDecipheriv } from 'crypto';
                 onPaginationChanged()
             }
         }
-    }
-
-    //Consequence Funtions
-    function OnDeleteConsequence(id: string){
-        selectedConsequences = selectedConsequences.filter((cpc: CommittedProjectConsequence) => cpc.id !== id)
-        updateSelectedProjectConsequences()
-    }
-
-     function onAddCommittedProjectConsequenc(newConsequence: CommittedProjectConsequence) {
-        showCreateCommittedProjectConsequenceDialog = false;     
-        if (!isNil(newConsequence)) {
-            newConsequence.committedProjectId = selectedCommittedProject.value;
-            selectedConsequences.push(newConsequence);
-            updateSelectedProjectConsequences();  
-        }
-    }
-
-    function onEditConsequenceProperty(consequence: CommittedProjectConsequence, property: string, value: any) {
-        selectedConsequences = update(
-            findIndex(propEq('id', consequence.id), selectedConsequences),
-            setItemPropertyValue(property, value, consequence),
-            selectedConsequences,
-        );
-        updateSelectedProjectConsequences()
     }
 
     //Dialog functions
@@ -1022,10 +829,6 @@ import { createDecipheriv } from 'crypto';
         }
     }
 
-    function onSelectCommittedProject(id: string){
-        selectedCommittedProject.value = id;
-    }
-
     //Subroutines
     function formatAsCurrency(value: any): any {
         if (hasValue(value)) {
@@ -1038,7 +841,6 @@ import { createDecipheriv } from 'crypto';
         const rowChanges = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
             (scp: SectionCommittedProject) => {
-                if (isNil( scp.consequences )) scp.consequences = [];
                 return (
                     inputRules['generalRules'].valueIsNotEmpty(
                         scp.simulationId,
@@ -1055,16 +857,6 @@ import { createDecipheriv } from 'crypto';
                     inputRules['generalRules'].valueIsNotEmpty(
                         scp.locationKeys[keyattr]
                     ) == true &&
-                    scp.consequences.every(consequence => 
-                        inputRules['generalRules'].valueIsNotEmpty(
-                        consequence.attribute,
-                    ) === true &&
-                    inputRules['generalRules'].valueIsNotEmpty(
-                        consequence.changeValue,
-                    ) === true &&
-                    inputRules['generalRules'].valueIsNotEmpty(
-                        consequence.performanceFactor,
-                    ) === true ) &&
                     inputRules['generalRules'].valueIsWithinRange(
                         scp.year, [firstYear, lastYear],
                     ) === true
@@ -1073,14 +865,6 @@ import { createDecipheriv } from 'crypto';
         );
         disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
-    }
-
-    function updateSelectedProjectConsequences(){
-        let row = sectionCommittedProjects.value.find(o => o.id == selectedCommittedProject.value)
-        if(!isNil(row)){
-            row.consequences = selectedConsequences;
-            updateCommittedProjects(row, selectedConsequences, 'consequences')
-        }
     }
 
     function setCpItems(){
@@ -1117,33 +901,6 @@ import { createDecipheriv } from 'crypto';
         return row
     }
 
-    function handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
-        row.treatment = treatmentName;
-        updateCommittedProject(row, treatmentName, 'treatment')  
-        CommittedProjectsService.FillTreatmentValues({
-            committedProjectId: row.id,
-            treatmentLibraryId: librarySelectItemValue ? librarySelectItemValue.value : getBlankGuid(),
-            treatmentName: treatmentName,
-            KeyAttributeValue: row.locationKeys[keyattr],
-            networkId: networkId
-        })
-        .then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                var values = response.data as CommittedProjectFillTreatmentReturnValues
-                row.cost = values.treatmentCost;
-                row.consequences = values.validTreatmentConsequences;
-                row.category = values.treatmentCategory;
-                scp.cost = row.cost;
-                let cat = reverseCatMap.get(row.category);
-                if(!isNil(cat))
-                    scp.category = cat;           
-                updateCommittedProject(row, row.cost, 'cost')  
-                updateCommittedProject(row, row.consequences, 'consequences')  
-                onSelectedCommittedProject();
-                onPaginationChanged();
-            }                            
-        });                                                
-    }
     function handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, budgetName: string){
         const budget: SimpleBudgetDetail = find(
             propEq('name', budgetName), stateScenarioSimpleBudgetDetails.value,
@@ -1168,6 +925,19 @@ import { createDecipheriv } from 'crypto';
         updateCommittedProject(row, factor, 'performanceFactor');
         onPaginationChanged();
     }
+
+    function onUploadCommittedProjectTemplate(){
+      document.getElementById("committedProjectTemplateUpload")?.click();
+   }
+
+    function handleCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
+      const file = event.target.files[0];
+      CommittedProjectsService.importCommittedProjectTemplate(file).then((response: AxiosResponse) => {
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    addSuccessNotificationAction({message:'Updated Default Template'})      
+                }
+            });
+        }
 
     function checkAssetExistence(scp: SectionCommittedProjectTableData, keyAttr: string){
         CommittedProjectsService.validateAssetExistence(network, keyAttr).then((response: AxiosResponse) => {
@@ -1215,8 +985,8 @@ import { createDecipheriv } from 'crypto';
             scp.yearErrors = ['Value cannot be empty'];
         else if (investmentYears.value.length === 0)
             scp.yearErrors = ['There are no years in the investment settings']
-        else if(scp.year < firstYear )
-            scp.yearErrors = ['Year is outside of Analysis period'];      
+        else if(scp.year.toString().length < 4 || scp.year < 1900)
+            scp.yearErrors = ['Invalid Year value'];      
         else
             scp.yearErrors = [];
     }

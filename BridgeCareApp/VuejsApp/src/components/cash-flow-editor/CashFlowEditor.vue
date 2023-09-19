@@ -7,6 +7,7 @@
                     <v-select
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
+                        id="CashFlowEditor-SelectLibrary-vselect"
                         outline
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -16,7 +17,7 @@
                 <v-flex xs4 class="ghd-constant-header">    
                     <v-layout row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 28px !important">
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content" style="padding-top: 7px !important">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
                         <v-divider class="owner-shared-divider" inset vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
@@ -41,6 +42,7 @@
                             Add Cash Flow Rule
                         </v-btn>
                         <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
+                            id="CashFlowEditor-addCashFlowLibrary-btn"
                             outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario">
                             Create New Library
@@ -64,32 +66,32 @@
                     class="ghd-table v-table__overflow"
                     item-key="id"
                     select-all>
-                    <template slot="items" slot-scope="props">
+                    <template v-slot:item="{item}" slot="items" slot-scope="props">
                         <td>
-                            <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
+                            <v-checkbox hide-details primary v-model='item.selected'></v-checkbox>
                         </td>
                         <td>
                             <v-edit-dialog
-                                :return-value.sync="props.item.name"
+                                :return-value.sync="item.name"
                                 large
                                 lazy
-                                @save="onEditSelectedLibraryListData(props.item,'description')"
+                                @save="onEditSelectedLibraryListData(item,'description')"
                                 >
                                 <v-text-field
                                     id="CashFlowEditor-ruleName-text"
                                     readonly
                                     single-line
                                     class="sm-txt"
-                                    :value="props.item.name"
-                                    :rules="[rules.generalRules.valueIsNotEmpty]"/>
+                                    :value="item.name"
+                                    :rules="[inputRules.generalRules.valueIsNotEmpty]"/>
                                 <template slot="input">
                                     <v-textarea
                                         label="Description"
                                         no-resize
                                         outline
                                         rows="5"
-                                        :rules="[rules.generalRules.valueIsNotEmpty]"
-                                        v-model="props.item.name"/>
+                                        :rules="[inputRules.generalRules.valueIsNotEmpty]"
+                                        v-model="item.name"/>
                                 </template>
                             </v-edit-dialog>
                         </td>
@@ -105,17 +107,13 @@
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value=" props.item
-                                                    .criterionLibrary
-                                                    .mergedCriteriaExpression"/>
+                                        :value="item.criterionLibrary.mergedCriteriaExpression"/>
                                 </template>
                                 <v-card>
                                     <v-card-text>
                                         <v-textarea
                                             :value="
-                                                props.item
-                                                    .criterionLibrary
-                                                    .mergedCriteriaExpression"
+                                                item.criterionLibrary.mergedCriteriaExpression"
                                             full-width
                                             no-resize
                                             outline
@@ -125,7 +123,7 @@
                                 </v-card>
                             </v-menu>
                             <v-btn
-                                @click="onEditCashFlowRuleCriterionLibrary(props.item)"
+                                @click="onEditCashFlowRuleCriterionLibrary(item)"
                                 id="CashFlowEditor-editCashFlowRule-btn"
                                 class="ghd-blue"
                                 icon>
@@ -137,14 +135,14 @@
                         <td>
                             <v-layout style='flex-wrap:nowrap'>
                                 <v-btn
-                                @click="onDeleteCashFlowRule(props.item.id)"
+                                @click="onDeleteCashFlowRule(item.id)"
                                 id="CashFlowEditor-deleteCashFlowRule-btn"
                                 class="ghd-blue"
                                 icon>
                                 <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>
                             <v-btn
-                                @click="onSelectCashFlowRule(props.item.id)"
+                                @click="onSelectCashFlowRule(item.id)"
                                 id="CashFlowEditor-editCashFlowRuleDistribution-btn"
                                 class="ghd-blue"
                                 icon>
@@ -183,6 +181,7 @@
                 v-show="hasSelectedLibrary || hasScenario">
                 <v-btn outline
                     @click="onDeleteCashFlowRuleLibrary"
+                    id="CashFlowEditor-deleteLibrary-btn"
                     flat class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission">
@@ -247,11 +246,9 @@
     </v-layout>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, State, Getter, Mutation } from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { onBeforeUnmount } from 'vue';
+import { ref, watch, nextTick, shallowRef, Ref } from 'vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
     clone,
@@ -259,23 +256,18 @@ import {
     isNil,
     propEq,
     any,
+props,
 } from 'ramda';
 import {
     CashFlowDistributionRule,
     CashFlowRule,
     CashFlowRuleLibrary,
     CashFlowRuleLibraryUser,
-    emptyCashFlowDistributionRule,
     emptyCashFlowRule,
     emptyCashFlowRuleLibrary,
     emptyCashFlowRuleLibraryUsers
 } from '@/shared/models/iAM/cash-flow';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import { emptyShareCashFlowRuleLibraryDialogData, ShareCashFlowRuleLibraryDialogData } from '@/shared/models/modals/share-cash-flow-rule-data';
 import {
     CreateCashFlowRuleLibraryDialogData,
@@ -284,9 +276,7 @@ import {
 import CreateCashFlowRuleLibraryDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/CreateCashFlowRuleLibraryDialog.vue';
 import CashFlowRuleEditDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/CashFlowRuleEditDialog.vue';
 import AddCashFlowRuleDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/AddCashFlowRuleDialog.vue';
-import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { getLastPropertyValue } from '@/shared/utils/getter-utils';
 import ShareCashFlowRuleLibraryDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/ShareCashFlowRuleLibraryDialog.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
@@ -305,77 +295,68 @@ import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/
 import CashFlowService from '@/services/cash-flow.service';
 import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
-import { isNullOrUndefined } from 'util';
 import { LibraryUser } from '@/shared/models/iAM/user';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-    components: {
-        CreateCashFlowRuleLibraryDialog,
-        GeneralCriterionEditorDialog,
-        ConfirmDeleteAlert: Alert,
-        CashFlowRuleEditDialog,
-        ShareCashFlowRuleLibraryDialog,
-        AddCashFlowRuleDialog
-    },
-})
-export default class CashFlowEditor extends Vue {
-    @State(state => state.cashFlowModule.cashFlowRuleLibraries)
-    stateCashFlowRuleLibraries: CashFlowRuleLibrary[];
-    @State(state => state.cashFlowModule.selectedCashFlowRuleLibrary)
-    stateSelectedCashRuleFlowLibrary: CashFlowRuleLibrary;
-    @State(state => state.cashFlowModule.scenarioCashFlowRules)
-    stateScenarioCashFlowRules: CashFlowRule[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
-    hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.cashFlowModule.hasPermittedAccess) hasPermittedAccess: boolean;
-    @State(state => state.cashFlowModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedCashFlowRuleLibrary') getIsSharedLibraryAction: any;
-    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
-    @Action('getCashFlowRuleLibraries') getCashFlowRuleLibrariesAction: any;
-    @Action('selectCashFlowRuleLibrary') selectCashFlowRuleLibraryAction: any;
-    @Action('upsertCashFlowRuleLibrary') upsertCashFlowRuleLibraryAction: any;
-    @Action('deleteCashFlowRuleLibrary') deleteCashFlowRuleLibraryAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('getScenarioCashFlowRules') getScenarioCashFlowRulesAction: any;
-    @Action('upsertScenarioCashFlowRules') upsertScenarioCashFlowRulesAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
 
-    @Mutation('cashFlowRuleLibraryMutator') cashFlowRuleLibraryMutator: any;
-    @Mutation('selectedCashFlowRuleLibraryMutator') selectedCashFlowRuleLibraryMutator: any;
+let store = useStore();
+let stateCashFlowRuleLibraries = ref<CashFlowRuleLibrary[]>(store.state.cashFlowModule.cashFlowRuleLibraries);
+let stateSelectedCashRuleFlowLibrary = ref<CashFlowRuleLibrary>(store.state.cashFlowModule.selectedCashFlowRuleLibrary);
+let stateScenarioCashFlowRules = ref<CashFlowRule[]>(store.state.cashFlowModule.scenarioCashFlowRules);
+let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
+let hasPermittedAccess = ref<boolean>(store.state.cashFlowModule.hasPermittedAccess);
+let isSharedLibrary = ref<boolean>(store.state.cashFlowModule.isSharedLibrary);
 
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
+async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedCashFlowRuleLibrary');}
+async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess');}
+async function getCashFlowRuleLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCashFlowRuleLibraries');}
+async function selectedCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectedCashFlowRuleLibrary');}
+async function upsertCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertCashFlowRuleLibrary');}
+async function deleteCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteCashFlowRuleLibrary');}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
+async function getScenarioCashFlowRulesAction(payload?: any): Promise<any> {await store.dispatch('getScenarioCashFlowRules');}
+async function upsertScenarioCashFlowRulesAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioCashFlowRules');}
+async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
+async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario');}
+async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario');}
 
-    addedRows: CashFlowRule[] = [];
-    updatedRowsMap:Map<string, [CashFlowRule, CashFlowRule]> = new Map<string, [CashFlowRule, CashFlowRule]>();//0: original value | 1: updated value
-    deletionIds: string[] = [];
-    rowCache: CashFlowRule[] = [];
-    gridSearchTerm = '';
-    currentSearch = '';
-    pagination: Pagination = clone(emptyPagination);
-    isPageInit = false;
-    totalItems = 0;
-    currentPage: CashFlowRule[] = [];
-    initializing: boolean = true;
-    isShared: boolean = false;
+function cashFlowRuleLibraryMutator(payload: any){store.commit('');}
+function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
 
-    shareCashFlowRuleLibraryDialogData: ShareCashFlowRuleLibraryDialogData = clone(emptyShareCashFlowRuleLibraryDialogData);
+    let getUserNameByIdGetter: any = store.getters.getUserNameById;
 
-    unsavedDialogAllowed: boolean = true;
-    trueLibrarySelectItemValue: string | null = ''
-    librarySelectItemValueAllowedChanged: boolean = true;
-    librarySelectItemValue: string | null = null;
-    
-    hasSelectedLibrary: boolean = false;
-    selectedScenarioId: string = getBlankGuid();
-    librarySelectItems: SelectItem[] = [];
-    selectedCashFlowRuleLibrary: CashFlowRuleLibrary = clone(
-        emptyCashFlowRuleLibrary,
-    );
-    cashFlowRuleGridHeaders: DataTableHeader[] = [
+    let gridSearchTerm = '';
+    let currentSearch = '';
+    let updatedRowsMap:Map<string, [CashFlowRule, CashFlowRule]> = new Map<string, [CashFlowRule, CashFlowRule]>();//0: original value | 1: updated value
+    let addedRows = ref<CashFlowRule[]>([]);
+    let deletionIds = ref<string[]>([]);
+    let rowCache: CashFlowRule[] = [];
+    let pagination = ref<Pagination>(clone(emptyPagination));
+    let currentPage = ref<CashFlowRule[]>([]);
+    let isPageInit = false;
+    let totalItems = 0;
+    let initializing: boolean = true;
+    let isShared: boolean = false;
+
+    let shareCashFlowRuleLibraryDialogData: ShareCashFlowRuleLibraryDialogData = clone(emptyShareCashFlowRuleLibraryDialogData);
+
+    let unsavedDialogAllowed: boolean = true;
+    let trueLibrarySelectItemValue = shallowRef<string>('');
+    let librarySelectItemValueAllowedChanged: boolean = true;
+    let librarySelectItemValue = shallowRef<string>('');
+
+    let hasSelectedLibrary: boolean = false;
+    let selectedScenarioId: any = getBlankGuid();
+    let librarySelectItems: SelectItem[] = [];
+    let selectedCashFlowRuleLibrary = ref<CashFlowRuleLibrary>(clone(emptyCashFlowRuleLibrary));
+    let dateModified: string;
+
+    const $router = useRouter();
+
+    const cashFlowRuleGridHeaders: DataTableHeader[] = [
         {
             text: 'Rule Name',
             value: 'name',
@@ -401,14 +382,15 @@ export default class CashFlowEditor extends Vue {
             width: '10%',
         },
     ];
-    cashFlowRuleGridData: CashFlowRule[] = [];
-    selectedCashRuleGridRows: CashFlowRule[] = [];
-    cashFlowRuleRadioBtnValue: string = '';
-    selectedCashFlowRule: CashFlowRule = clone(emptyCashFlowRule);
-    selectedCashFlowRuleForCriteriaEdit: CashFlowRule = clone(
+    let cashFlowRuleGridData = ref<CashFlowRule[]>([]);
+    let selectedCashRuleGridRows: CashFlowRule[] = [];
+    let cashFlowRuleRadioBtnValue: string = '';
+    let selectedCashFlowRule  = ref<CashFlowRule>(clone(emptyCashFlowRule));
+
+    let selectedCashFlowRuleForCriteriaEdit: CashFlowRule = clone(
         emptyCashFlowRule,
     );
-    cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
+    const cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
         {
             text: 'Duration (yr)',
             value: 'durationInYears',
@@ -442,64 +424,63 @@ export default class CashFlowEditor extends Vue {
             width: '4.2%',
         },
     ];
-    cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = [];
-    createCashFlowRuleLibraryDialogData: CreateCashFlowRuleLibraryDialogData = clone(
+    let cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = [];
+    let createCashFlowRuleLibraryDialogData: CreateCashFlowRuleLibraryDialogData = clone(
         emptyCreateCashFlowLibraryDialogData,
     );
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
         emptyGeneralCriterionEditorDialogData,
     );
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    rules: InputValidationRules = clone(rules);
-    uuidNIL: string = getBlankGuid();
-    hasScenario: boolean = false;
-    hasCreatedLibrary: boolean = false;
-    disableCrudButtonsResult: boolean = false;
-    hasLibraryEditPermission: boolean = false;
-    showRuleEditorDialog: boolean = false;
-    showAddCashFlowRuleDialog: boolean = false;
-    importLibraryDisabled: boolean = true;
-    scenarioHasCreatedNew: boolean = false;
-    loadedParentName: string = "";
-    loadedParentId: string = "";
-    parentLibraryName: string = "None";
-    parentLibraryId: string = "";
-    scenarioLibraryIsModified: boolean = false;
-    libraryImported: boolean = false;
+    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let inputRules: InputValidationRules = clone(rules);
+    let uuidNIL: string = getBlankGuid();
+    let hasScenario: boolean = false;
+    let hasCreatedLibrary: boolean = false;
+    let disableCrudButtonsResult: boolean = false;
+    let hasLibraryEditPermission: boolean = false;
+    let showRuleEditorDialog: boolean = false;
+    let showAddCashFlowRuleDialog: boolean = false;
+    let importLibraryDisabled: boolean = true;
+    let scenarioHasCreatedNew: boolean = false;
+    let loadedParentName: string = "";
+    let loadedParentId: string = "";
+    let parentLibraryName: string = "None";
+    let parentLibraryId: string = "";
+    let scenarioLibraryIsModified: boolean = false;
+    let libraryImported: boolean = false;
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.librarySelectItemValue = null;
-            vm.getCashFlowRuleLibrariesAction().then(() => {
-                vm.getHasPermittedAccessAction().then(() => {
-                    if (to.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
-                        vm.selectedScenarioId = to.query.scenarioId;
-
-                        if (vm.selectedScenarioId === vm.uuidNIL) {
-                            vm.addErrorNotificationAction({
-                                message: 'Unable to identify selected scenario.',
-                            });
-                            vm.$router.push('/Scenarios/');
-                        }
-
-                        vm.hasScenario = true;
-                        vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                            vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
-                            vm.initializePages();
-                        });                                                
+    created();
+    function created() {
+        librarySelectItemValue.value = "";
+        getCashFlowRuleLibrariesAction().then(() => {
+            getHasPermittedAccessAction().then(() => {
+                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
+                    selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+                    if (selectedScenarioId === uuidNIL) {
+                        addErrorNotificationAction({
+                            message: 'Unable to identify selected scenario.',
+                        });
+                        $router.push('/Scenarios/');
                     }
-                });
-            })  
+
+                    hasScenario = true;
+                    getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+                        selectScenarioAction({ scenarioId: selectedScenarioId });        
+                        initializePages();
+                    });                                                
+                }
+            });
         });
     }
 
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
+    onBeforeUnmount(() => beforeDestroy());
+    function beforeDestroy() {
+        setHasUnsavedChangesAction({ value: false });
     }
 
-    @Watch('stateCashFlowRuleLibraries')
-    onStateCashFlowRuleLibrariesChanged() {
-        this.librarySelectItems = this.stateCashFlowRuleLibraries.map(
+    watch(stateCashFlowRuleLibraries, () => onStateCashFlowRuleLibrariesChanged)
+    function onStateCashFlowRuleLibrariesChanged(){
+        librarySelectItems = stateCashFlowRuleLibraries.value.map(
             (library: CashFlowRuleLibrary) => ({
                 text: library.name,
                 value: library.id,
@@ -507,185 +488,118 @@ export default class CashFlowEditor extends Vue {
         );
     }
 
-    @Watch('librarySelectItemValue')//import button might break something
-    onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(this.hasScenario){
-            this.onLibrarySelectItemValueChanged();
-            this.unsavedDialogAllowed = false;
-        }           
-        else if(this.librarySelectItemValueAllowedChanged)
-            this.CheckUnsavedDialog(this.onLibrarySelectItemValueChanged, () => {
-                this.librarySelectItemValueAllowedChanged = false;
-                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
-            })
-        this.librarySelectItemValueAllowedChanged = true;
-        this.librarySelectItems.forEach(library => {
-            if (library.value === this.librarySelectItemValue) {
-                this.parentLibraryName = "Library Used: " + library.text;
-            }
-        });
-    }
-    onLibrarySelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue;
-        if(!this.hasScenario || isNil(this.librarySelectItemValue))
-        {    
-            this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
-        }
-        else
-        {
-            if(!isNil(this.librarySelectItemValue) && !this.scenarioHasCreatedNew)
-            {
-                this.importLibraryDisabled = false;
-            }
-
-            this.scenarioHasCreatedNew = false;
-        }
-
-        this.setParentLibraryName(this.librarySelectItemValue ? this.librarySelectItemValue : "");
-        this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
-        this.importLibraryDisabled = true;
-        this.scenarioLibraryIsModified = false;
-        this.libraryImported = true;
-    }
-
-    @Watch('stateSelectedCashRuleFlowLibrary')
-    onStateSelectedCashFlowRuleLibraryChanged() {
-        this.selectedCashFlowRuleLibrary = clone(
-            this.stateSelectedCashRuleFlowLibrary,
+    watch(stateSelectedCashRuleFlowLibrary, () => onStateSelectedCashFlowRuleLibraryChanged)
+    function onStateSelectedCashFlowRuleLibraryChanged(){
+        selectedCashFlowRuleLibrary = clone(
+            stateSelectedCashRuleFlowLibrary,
         );
     }
 
-    @Watch('selectedCashFlowRuleLibrary')
-    onSelectedCashFlowRuleLibraryChanged() {
-        this.hasSelectedLibrary =
-            this.selectedCashFlowRuleLibrary.id !== this.uuidNIL;
-
-        if (this.hasSelectedLibrary) {
-            this.checkLibraryEditPermission();
-            this.hasCreatedLibrary = false;
-        }
-        this.initializing = false;
-
-        if(this.hasSelectedLibrary)
-            this.onPaginationChanged();
-    }
-
-    @Watch('stateScenarioCashFlowRules')
-    onStateScenarioCashFlowRulesChanged() {
-        if (this.hasScenario) {
-            this.cashFlowRuleGridData = clone(this.stateScenarioCashFlowRules);
+    watch(stateScenarioCashFlowRules, () => onStateScenarioCashFlowRulesChanged)
+    function onStateScenarioCashFlowRulesChanged() {
+        if (hasScenario) {
+            cashFlowRuleGridData = clone(stateScenarioCashFlowRules);
         }
     }
 
-    @Watch('cashFlowRuleGridData')
-    onCashFlowRuleGridDataChanged() {
-
+    watch(selectedCashFlowRule, () => onSelectedSplitTreatmentIdChanged)
+    function onSelectedSplitTreatmentIdChanged() {
+        cashFlowDistributionRuleGridData = hasValue(
+        selectedCashFlowRule.value.cashFlowDistributionRules,
+    )
+        ? clone(selectedCashFlowRule.value.cashFlowDistributionRules)
+        : [];
     }
-
-    @Watch('selectedCashFlowRule')
-    onSelectedSplitTreatmentIdChanged() {
-        this.cashFlowDistributionRuleGridData = hasValue(
-            this.selectedCashFlowRule.cashFlowDistributionRules,
-        )
-            ? clone(this.selectedCashFlowRule.cashFlowDistributionRules)
-            : [];
-    }
-    @Watch('isSharedLibrary')
-    onStateSharedAccessChanged() {
-        this.isShared = this.isSharedLibrary;
-        if (!isNullOrUndefined(this.selectCashFlowRuleLibrary)) {
-            this.selectCashFlowRuleLibrary.isShared = this.isShared;
-        } 
-    }
-    @Watch('pagination')
-    onPaginationChanged() {
-        if(this.initializing)
+    watch(pagination, () => onPaginationChanged)
+    async function onPaginationChanged() {
+        if(initializing)
             return;
-        this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+        checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = pagination.value;
         const request: PagingRequest<CashFlowRule>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: this.librarySelectItemValue !== null && this.importLibraryDisabled ? this.librarySelectItemValue : null,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                rowsForDeletion: this.deletionIds,
-                addedRows: this.addedRows,
-                isModified: this.scenarioLibraryIsModified
+                libraryId: librarySelectItemValue.value !== null && importLibraryDisabled ? librarySelectItemValue.value : null,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: deletionIds.value,
+                addedRows: addedRows.value,
+                isModified: scenarioLibraryIsModified
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
-            search: this.currentSearch
+            search: currentSearch
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            CashFlowService.getScenarioCashFlowRulePage(this.selectedScenarioId, request).then(response => {
+        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+            await CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<CashFlowRule>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
                 }
             });
-        else if(this.hasSelectedLibrary)
-             CashFlowService.getLibraryCashFlowRulePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+        else if(hasSelectedLibrary)
+             CashFlowService.getLibraryCashFlowRulePage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<CashFlowRule>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    if (!isNullOrUndefined(this.selectedCashFlowRuleLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedCashFlowRuleLibrary).then(this.isShared = this.isSharedLibrary);
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
+                    if (!isNil(selectedCashFlowRuleLibrary.value.id) ) {
+                        getIsSharedLibraryAction(selectedCashFlowRuleLibrary).then(() =>isShared = isSharedLibrary.value);
                     }
 
-                }
-            });     
+            }
+        });     
     }
 
-    @Watch('currentPage')
-    onCurrentPageChanged() {
+    watch(currentPage, () => onCurrentPageChanged)
+    function onCurrentPageChanged() {
         // Get parent name from library id
-        this.librarySelectItems.forEach(library => {
-            if (library.value === this.parentLibraryId) {
-                this.parentLibraryName = "Library Used: " + library.text;
+        librarySelectItems.forEach(library => {
+            if (library.value === parentLibraryId) {
+                parentLibraryName = "Library Used: " + library.text;
             }
         });
     }
-    @Watch('deletionIds')
-    onDeletionIdsChanged(){
-        this.checkHasUnsavedChanges();
+
+    watch(deletionIds, () => onDeletionIdsChanged)
+    function onDeletionIdsChanged() {
+        checkHasUnsavedChanges();
     }
 
-    @Watch('addedRows')
-    onAddedRowsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(addedRows, () => onAddedRowsChanged)
+    function onAddedRowsChanged() {
+        checkHasUnsavedChanges();
     }
 
-    onSelectCashFlowRule(id:string) {
+    function onSelectCashFlowRule(id:string) {
         const cashFlowRule: CashFlowRule = find(
             propEq('id', id),
-            this.currentPage,
+            currentPage.value,
         ) as CashFlowRule;
 
         if (hasValue(cashFlowRule)) {
-            this.selectedCashFlowRule = clone(cashFlowRule);
+            selectedCashFlowRule.value = clone(cashFlowRule);
         } else {
-            this.selectedCashFlowRule = clone(emptyCashFlowRule);
+            selectedCashFlowRule.value = clone(emptyCashFlowRule);
         }
 
-        this.showRuleEditorDialog = true;
+        showRuleEditorDialog = true;
     }
 
-    onShowCreateCashFlowRuleLibraryDialog(createAsNewLibrary: boolean) {
-        this.createCashFlowRuleLibraryDialogData = {
+    function onShowCreateCashFlowRuleLibraryDialog(createAsNewLibrary: boolean) {
+        createCashFlowRuleLibraryDialogData = {
             showDialog: true,
-            cashFlowRules: createAsNewLibrary ? this.currentPage : [],
+            cashFlowRules: createAsNewLibrary ? currentPage.value : [],
         };
     }
 
-    onSubmitCreateCashFlowRuleLibraryDialogResult(
+    function onSubmitCreateCashFlowRuleLibraryDialogResult(
         cashFlowRuleLibrary: CashFlowRuleLibrary,
     ) {
-        this.createCashFlowRuleLibraryDialogData = clone(
+        createCashFlowRuleLibraryDialogData = clone(
             emptyCreateCashFlowLibraryDialogData,
         );
 
@@ -694,155 +608,150 @@ export default class CashFlowEditor extends Vue {
                 library: cashFlowRuleLibrary,    
                 isNewLibrary: true,           
                  syncModel: {
-                    libraryId: cashFlowRuleLibrary.cashFlowRules.length == 0 || !this.hasSelectedLibrary ? null : this.selectedCashFlowRuleLibrary.id,
-                    rowsForDeletion: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : this.deletionIds,
-                    updateRows: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : this.addedRows,
+                    libraryId: cashFlowRuleLibrary.cashFlowRules.length == 0 || !hasSelectedLibrary ? null : selectedCashFlowRuleLibrary.value.id,
+                    rowsForDeletion: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : deletionIds.value,
+                    updateRows: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: cashFlowRuleLibrary.cashFlowRules.length == 0 ? [] : addedRows.value,
                     isModified: false
                  },
-                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
+                 scenarioId: hasScenario ? selectedScenarioId : null
             }
             CashFlowService.upsertCashFlowRuleLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.hasCreatedLibrary = true;
-                    this.librarySelectItemValue = cashFlowRuleLibrary.id;
+                    hasCreatedLibrary = true;
+                    librarySelectItemValue.value = cashFlowRuleLibrary.id;
                     
                     if(cashFlowRuleLibrary.cashFlowRules.length == 0){
-                        this.clearChanges();
+                        clearChanges();
                     }
 
-                    if(this.hasScenario){
-                        this.scenarioHasCreatedNew = true;
-                        this.importLibraryDisabled = true;
+                    if(hasScenario){
+                        scenarioHasCreatedNew = true;
+                        importLibraryDisabled = true;
                     }
-
-                    this.cashFlowRuleLibraryMutator(cashFlowRuleLibrary);
-                    this.selectedCashFlowRuleLibraryMutator(cashFlowRuleLibrary.id);
-                    this.addSuccessNotificationAction({message:'Added cash flow rule library'})
+                    cashFlowRuleLibraryMutator(cashFlowRuleLibrary);
+                    selectedCashFlowRuleLibraryMutator(cashFlowRuleLibrary.id);
+                    addSuccessNotificationAction({message:'Added cash flow rule library'})
                 }               
-            })
+            });
         }
     }
 
-    onSubmitCashFlowRuleEdit(CashFlowDistributionRules:CashFlowDistributionRule[])
+    function onSubmitCashFlowRuleEdit(CashFlowDistributionRules:CashFlowDistributionRule[])
     {
-        this.showRuleEditorDialog = false;
+        showRuleEditorDialog = false;
         if(!isNil(CashFlowDistributionRules))
         {
-            let selectedRule = this.currentPage.find(o => o.id == this.selectedCashFlowRule.id) 
+            let selectedRule = currentPage.value.find(o => o.id == selectedCashFlowRule.value.id) 
             if(!isNil(selectedRule))
             {
                 selectedRule.cashFlowDistributionRules = hasValue(CashFlowDistributionRules) ? clone(CashFlowDistributionRules) : [];  
-                this.onUpdateRow(selectedRule.id, clone(selectedRule))
-                this.onPaginationChanged();
+                onUpdateRow(selectedRule.id, clone(selectedRule))
+                onPaginationChanged();
             }                
         }              
     }
 
-    onAddCashFlowRule() {
+    function onAddCashFlowRule() {
         const newCashFlowRule: CashFlowRule = {
             ...emptyCashFlowRule,
-            name: `Unnamed Rule ${this.totalItems + 1}`,
+            name: `Unnamed Rule ${totalItems + 1}`,
             id: getNewGuid(),
         };
-
-        this.addedRows.push(newCashFlowRule);
-        this.onPaginationChanged()
+        addedRows.value.push(newCashFlowRule);
+        onPaginationChanged()
     }
 
-    onSubmitAddCashFlowRule(newCashFlowRule: CashFlowRule){
+    function onSubmitAddCashFlowRule(newCashFlowRule: CashFlowRule){
         if(!isNil(newCashFlowRule))
         {
-            this.addedRows.push(newCashFlowRule);
-            this.onPaginationChanged()
+            addedRows.value.push(newCashFlowRule);
+            onPaginationChanged()
         }
-        this.showAddCashFlowRuleDialog = false;
+        showAddCashFlowRuleDialog = false;
     }
 
-    onDeleteCashFlowRule(cashFlowRuleId: string) {
-        this.removeRowLogic(cashFlowRuleId);
-        this.onPaginationChanged();
+    function onDeleteCashFlowRule(cashFlowRuleId: string) {
+        removeRowLogic(cashFlowRuleId);
+        onPaginationChanged();
     }
 
-    onDeleteSelectedCashFlowRules() {
-        this.selectedCashRuleGridRows.forEach(_ => {
-            this.removeRowLogic(_.id);
+    function onDeleteSelectedCashFlowRules() {
+        selectedCashRuleGridRows.forEach(_ => {
+            removeRowLogic(_.id);
         });
-
-        this.selectedTargetConditionGoalIds = [];
-        this.onPaginationChanged();
+        onPaginationChanged();
     }
 
-    removeRowLogic(id: string){
-        if(isNil(find(propEq('id', id), this.addedRows))){
-            this.deletionIds.push(id);
-            if(!isNil(this.updatedRowsMap.get(id)))
-                this.updatedRowsMap.delete(id)
+    function removeRowLogic(id: string){
+        if(isNil(find(propEq('id', id), addedRows.value))){
+            deletionIds.value.push(id);
+            if(!isNil(updatedRowsMap.get(id)))
+                updatedRowsMap.delete(id)
         }           
         else{          
-            this.addedRows = this.addedRows.filter((row) => row.id !== id)
+            addedRows.value = addedRows.value.filter((row) => row.id !== id)
         }  
     }
 
-    checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
+    function checkLibraryEditPermission() {
+        hasLibraryEditPermission = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
     }
 
-    checkUserIsLibraryOwner() {
-        return this.getUserNameByIdGetter(this.selectedCashFlowRuleLibrary.owner) == getUserName();
+    function checkUserIsLibraryOwner() {
+        return getUserNameByIdGetter(selectedCashFlowRuleLibrary.value.owner) == getUserName();
     }
 
-    getOwnerUserName(): string {
+    function getOwnerUserName(): string {
 
-        if (!this.hasCreatedLibrary) {
-        return this.getUserNameByIdGetter(this.selectedCashFlowRuleLibrary.owner);
+        if (!hasCreatedLibrary) {
+            return getUserNameByIdGetter(selectedCashFlowRuleLibrary.value.owner);
         }
-        
         return getUserName();
     }
 
 
-    onEditCashFlowRuleCriterionLibrary(cashFlowRule: CashFlowRule) {
-        this.selectedCashFlowRuleForCriteriaEdit = clone(cashFlowRule);
+    function onEditCashFlowRuleCriterionLibrary(cashFlowRule: CashFlowRule) {
+        selectedCashFlowRuleForCriteriaEdit = clone(cashFlowRule);
 
-        this.criterionEditorDialogData = {
+        criterionEditorDialogData = {
             showDialog: true,
-            CriteriaExpression: this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.mergedCriteriaExpression,
+            CriteriaExpression: selectedCashFlowRuleForCriteriaEdit.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onSubmitCriterionLibraryEditorDialogResult(
+    function onSubmitCriterionLibraryEditorDialogResult(
         criterionExpression: string,
     ) {
-        this.criterionEditorDialogData = clone(
+        criterionEditorDialogData = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
-        if (!isNil(criterionExpression) && this.selectedCashFlowRuleForCriteriaEdit.id !== this.uuidNIL) {
-            if(this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id === getBlankGuid())
-                this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id = getNewGuid();
-            this.onUpdateRow(this.selectedCashFlowRuleForCriteriaEdit.id, 
+        if (!isNil(criterionExpression) && selectedCashFlowRuleForCriteriaEdit.id !== uuidNIL) {
+            if(selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id = getNewGuid();
+            onUpdateRow(selectedCashFlowRuleForCriteriaEdit.id, 
             {
-                ...this.selectedCashFlowRuleForCriteriaEdit,
-                criterionLibrary: {...this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression},
+                ...selectedCashFlowRuleForCriteriaEdit,
+                criterionLibrary: {...selectedCashFlowRuleForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression},
             })
-            this.onPaginationChanged();
+            onPaginationChanged();
 
-            this.selectedCashFlowRuleForCriteriaEdit = clone(emptyCashFlowRule);
+            selectedCashFlowRuleForCriteriaEdit = clone(emptyCashFlowRule);
         }
     }
 
-    onEditSelectedLibraryListData(data: any, property: string) {
+    function onEditSelectedLibraryListData(data: any, property: string) {
         switch (property) {
             case 'description':
-                this.onUpdateRow(data.id, clone(data))
-                this.onPaginationChanged();
+                onUpdateRow(data.id, clone(data))
+                onPaginationChanged();
                 break;
         }
     }
 
-    onOpenCostCeilingEditDialog(distributionRuleId: string) {
-        this.$nextTick(() => {
+    function onOpenCostCeilingEditDialog(distributionRuleId: string) {
+        nextTick(() => {
             const editDialogInputElement: HTMLElement = document.getElementById(
                 distributionRuleId,
             ) as HTMLElement;
@@ -855,80 +764,80 @@ export default class CashFlowEditor extends Vue {
         });
     }
 
-    onUpsertScenarioCashFlowRules() {
-        if (this.selectedCashFlowRuleLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.libraryImported === false) {this.scenarioLibraryIsModified = true;}
-        else { this.scenarioLibraryIsModified = false; }
+    function onUpsertScenarioCashFlowRules() {
+        if (selectedCashFlowRuleLibrary.value.id === uuidNIL || hasUnsavedChanges && libraryImported === false) {scenarioLibraryIsModified = true;}
+        else { scenarioLibraryIsModified = false; }
 
         CashFlowService.upsertScenarioCashFlowRules({
-            libraryId: this.selectedCashFlowRuleLibrary.id === this.uuidNIL ? null : this.selectedCashFlowRuleLibrary.id,
-            rowsForDeletion: this.deletionIds,
-            updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows,
-            isModified: this.scenarioLibraryIsModified
-        }, this.selectedScenarioId).then((response: AxiosResponse) => {
+            libraryId: selectedCashFlowRuleLibrary.value.id === uuidNIL ? null : selectedCashFlowRuleLibrary.value.id,
+            rowsForDeletion: deletionIds.value,
+            updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+            addedRows: addedRows.value,
+            isModified: scenarioLibraryIsModified
+        }, selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-                this.clearChanges();
-                this.librarySelectItemValue = null;
-                this.resetPage();
-                this.addSuccessNotificationAction({message: "Modified scenario's cash flow rules"});
-                this.importLibraryDisabled = true;
-                this.libraryImported = false;
+                parentLibraryId = librarySelectItemValue.value;
+                clearChanges();
+                librarySelectItemValue.value = "";
+                resetPage();
+                addSuccessNotificationAction({message: "Modified scenario's cash flow rules"});
+                importLibraryDisabled = true;
+                libraryImported = false;
             }           
         });
     }
 
-    onUpsertCashFlowRuleLibrary() {
-        const cashFlowRuleLibrary: CashFlowRuleLibrary = {
-            ...clone(this.selectedCashFlowRuleLibrary),
-            cashFlowRules: clone(this.currentPage),
-        };
+    function onUpsertCashFlowRuleLibrary() {
+        // const cashFlowRuleLibrary: CashFlowRuleLibrary = {
+        //     ...clone(selectedCashFlowRuleLibrary),
+        //     cashFlowRules: clone(currentPage),
+        // };
 
         const upsertRequest: LibraryUpsertPagingRequest<CashFlowRuleLibrary, CashFlowRule> = {
-                library: this.selectedCashFlowRuleLibrary,
+                library: selectedCashFlowRuleLibrary.value,
                 isNewLibrary: false,
                 syncModel: {
-                libraryId: this.selectedCashFlowRuleLibrary.id === this.uuidNIL ? null : this.selectedCashFlowRuleLibrary.id,
-                rowsForDeletion: this.deletionIds,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                addedRows: this.addedRows,
+                libraryId: selectedCashFlowRuleLibrary.value.id === uuidNIL ? null : selectedCashFlowRuleLibrary.value.id,
+                rowsForDeletion: deletionIds.value,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                addedRows: addedRows.value,
                 isModified: false
                 },
                 scenarioId: null
         }
         CashFlowService.upsertCashFlowRuleLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges();
-                this.cashFlowRuleLibraryMutator(this.selectedCashFlowRuleLibrary);
-                this.selectedCashFlowRuleLibraryMutator(this.selectedCashFlowRuleLibrary.id);
-                this.addSuccessNotificationAction({message: "Updated cash flow rule library",});
+                clearChanges();
+                cashFlowRuleLibraryMutator(selectedCashFlowRuleLibrary);
+                selectedCashFlowRuleLibraryMutator(selectedCashFlowRuleLibrary.value.id);
+                addSuccessNotificationAction({message: "Updated cash flow rule library",});
             }
         });
     }
 
-    onDiscardChanges() {
-        this.librarySelectItemValue = null;
-        this.parentLibraryName = this.loadedParentName;
-        this.parentLibraryId = this.loadedParentId;
+    function onDiscardChanges() {
+        librarySelectItemValue.value = '';
+        parentLibraryName = loadedParentName;
+        parentLibraryId = loadedParentId;
 
         setTimeout(() => {
-            if (this.hasScenario) {
-                this.clearChanges();
-                this.resetPage();
-                this.importLibraryDisabled = true;
+            if (hasScenario) {
+                clearChanges();
+                resetPage();
+                importLibraryDisabled = true;
             }
         });
     }
 
-    formatAsCurrency(value: any) {
+    function formatAsCurrency(value: any): any {
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }
         return null;
     }
 
-    disableCrudButtons() {
-        const rows = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+    function disableCrudButtons() {
+        const rows = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const allDataIsValid = rows.every(
             (rule: CashFlowRule) => {
                 const allSubDataIsValid = rule.cashFlowDistributionRules.every(
@@ -937,16 +846,16 @@ export default class CashFlowEditor extends Vue {
                         index: number,
                     ) => {
                         let isValid: boolean =
-                            this.rules['generalRules'].valueIsNotEmpty(
+                            inputRules['generalRules'].valueIsNotEmpty(
                                 distributionRule.durationInYears,
                             ) === true &&
-                            this.rules['generalRules'].valueIsNotEmpty(
+                            inputRules['generalRules'].valueIsNotEmpty(
                                 distributionRule.costCeiling,
                             ) === true &&
-                            this.rules['generalRules'].valueIsNotEmpty(
+                            inputRules['generalRules'].valueIsNotEmpty(
                                 distributionRule.yearlyPercentages,
                             ) === true &&
-                            this.rules[
+                            inputRules[
                                 'cashFlowRules'
                             ].doesTotalOfPercentsEqualOneHundred(
                                 distributionRule.yearlyPercentages,
@@ -955,13 +864,13 @@ export default class CashFlowEditor extends Vue {
                         if (index !== 0) {
                             isValid =
                                 isValid &&
-                                this.rules[
+                                inputRules[
                                     'cashFlowRules'
                                 ].isDurationGreaterThanPreviousDuration(
                                     distributionRule,
                                     rule,
                                 ) === true &&
-                                this.rules[
+                                inputRules[
                                     'cashFlowRules'
                                 ].isAmountGreaterThanOrEqualToPreviousAmount(
                                     distributionRule,
@@ -974,25 +883,25 @@ export default class CashFlowEditor extends Vue {
                 );
 
                 return (
-                    this.rules['generalRules'].valueIsNotEmpty(rule.name) ===
+                    inputRules['generalRules'].valueIsNotEmpty(rule.name) ===
                         true && allSubDataIsValid
                 );
             },
         );
 
-        if (!this.hasScenario && this.hasSelectedLibrary) {
+        if (!hasScenario && hasSelectedLibrary) {
             return !(
-                this.rules['generalRules'].valueIsNotEmpty(
-                    this.selectedCashFlowRuleLibrary.name,
+                inputRules['generalRules'].valueIsNotEmpty(
+                    selectedCashFlowRuleLibrary.value.name,
                 ) === true && allDataIsValid
             );
         }
-        this.disableCrudButtonsResult = !allDataIsValid;
+        disableCrudButtonsResult = !allDataIsValid;
         return !allDataIsValid;
     }
 
-    onDeleteCashFlowRuleLibrary() {
-        this.confirmDeleteAlertData = {
+    function onDeleteCashFlowRuleLibrary() {
+        confirmDeleteAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1000,65 +909,65 @@ export default class CashFlowEditor extends Vue {
         };
     }
 
-    onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        this.confirmDeleteAlertData = clone(emptyAlertData);
+    function onSubmitConfirmDeleteAlertResult(submit: boolean) {
+        confirmDeleteAlertData = clone(emptyAlertData);
 
         if (submit) {
-            this.librarySelectItemValue = null;
-            this.deleteCashFlowRuleLibraryAction(
-                this.selectedCashFlowRuleLibrary.id,
+            librarySelectItemValue.value = '';
+            deleteCashFlowRuleLibraryAction(
+                selectedCashFlowRuleLibrary.value.id,
             );
         }
     }
 
     //paging
 
-    onUpdateRow(rowId: string, updatedRow: CashFlowRule){
-        if(any(propEq('id', rowId), this.addedRows)){
-            const index = this.addedRows.findIndex(item => item.id == updatedRow.id)
-            this.addedRows[index] = updatedRow;
+    function onUpdateRow(rowId: string, updatedRow: CashFlowRule){
+        if(any(propEq('id', rowId), addedRows.value)){
+            const index = addedRows.value.findIndex(item => item.id == updatedRow.id)
+            addedRows.value[index] = updatedRow;
             return;
         }
 
-        let mapEntry = this.updatedRowsMap.get(rowId)
+        let mapEntry = updatedRowsMap.get(rowId)
 
         if(isNil(mapEntry)){
-            const row = this.rowCache.find(r => r.id === rowId);
+            const row = rowCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
-                this.updatedRowsMap.set(rowId, [row , updatedRow])
+                updatedRowsMap.set(rowId, [row , updatedRow])
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
             mapEntry[1] = updatedRow;
         }
         else
-            this.updatedRowsMap.delete(rowId)
+            updatedRowsMap.delete(rowId)
 
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    clearChanges(){
-        this.updatedRowsMap.clear();
-        this.addedRows = [];
-        this.deletionIds = [];
+    function clearChanges(){
+        updatedRowsMap.clear();
+        addedRows.value = [];
+        deletionIds.value = [];
     }
 
-    resetPage(){
-        this.pagination.page = 1;
-        this.onPaginationChanged();
+    function resetPage(){
+        pagination.value.page = 1;
+        onPaginationChanged();
     }
 
-    checkHasUnsavedChanges(){
+    function checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 
-            this.deletionIds.length > 0 || 
-            this.addedRows.length > 0 ||
-            this.updatedRowsMap.size > 0 || 
-            (this.hasScenario && this.hasSelectedLibrary) ||
-            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.stateSelectedCashRuleFlowLibrary, this.selectedCashFlowRuleLibrary))
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+            deletionIds.value.length > 0 || 
+            addedRows.value.length > 0 ||
+            updatedRowsMap.size > 0 || 
+            (hasScenario && hasSelectedLibrary) ||
+            (hasSelectedLibrary && hasUnsavedChangesCore('', stateSelectedCashRuleFlowLibrary, selectedCashFlowRuleLibrary))
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    CheckUnsavedDialog(next: any, otherwise: any) {
-        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
+    function CheckUnsavedDialog(next: any, otherwise: any) {
+        if (hasUnsavedChanges && unsavedDialogAllowed) {
             // @ts-ignore
             Vue.dialog
                 .confirm(
@@ -1069,27 +978,92 @@ export default class CashFlowEditor extends Vue {
                 .catch(() => otherwise())
         } 
         else {
-            this.unsavedDialogAllowed = true;
+            unsavedDialogAllowed = true;
             next();
         }
     };
 
-    setParentLibraryName(libraryId: string) {
+    function setParentLibraryName(libraryId: string) {
         if (libraryId === "") {
-            this.parentLibraryName = "None";
+            parentLibraryName = "None";
             return;
         }
         let foundLibrary: CashFlowRuleLibrary = emptyCashFlowRuleLibrary;
-        this.stateCashFlowRuleLibraries.forEach(library => {
+        stateCashFlowRuleLibraries.value.forEach(library => {
             if (library.id === libraryId ) {
                 foundLibrary = clone(library);
             }
         });
-        this.parentLibraryId = foundLibrary.id;
-        this.parentLibraryName = foundLibrary.name;
+        parentLibraryId = foundLibrary.id;
+        parentLibraryName = foundLibrary.name;
     }
 
-    initializePages(){
+    function onLibrarySelectItemValueChanged() {
+        trueLibrarySelectItemValue = librarySelectItemValue;
+        if(!hasScenario || isNil(librarySelectItemValue))
+        {    
+            selectedCashFlowRuleLibraryAction(librarySelectItemValue);
+        }
+        else
+        {
+            if(!isNil(librarySelectItemValue) && !scenarioHasCreatedNew)
+            {
+                importLibraryDisabled = false;
+            }
+
+            scenarioHasCreatedNew = false;
+        }
+
+        setParentLibraryName(librarySelectItemValue.value);
+        selectedCashFlowRuleLibraryAction(librarySelectItemValue);
+        importLibraryDisabled = true;
+        scenarioLibraryIsModified = false;
+        libraryImported = true;
+    }
+
+    watch(librarySelectItemValue, () => onLibrarySelectItemValueChangedCheckUnsaved)
+    function onLibrarySelectItemValueChangedCheckUnsaved() {
+        if(hasScenario){
+            onLibrarySelectItemValueChanged();
+            unsavedDialogAllowed = false;
+        }           
+        else if(librarySelectItemValueAllowedChanged)
+            CheckUnsavedDialog(onLibrarySelectItemValueChanged, () => {
+                librarySelectItemValueAllowedChanged = false;
+                librarySelectItemValue = trueLibrarySelectItemValue;               
+            })
+        librarySelectItemValueAllowedChanged = true;
+        librarySelectItems.forEach(library => {
+            if (library.value === librarySelectItemValue.value) {
+                parentLibraryName = "Library Used: " + library.text;
+            }
+        });
+    }
+
+    watch(selectedCashFlowRuleLibrary, () => onSelectedCashFlowRuleLibraryChanged)
+    function onSelectedCashFlowRuleLibraryChanged() {
+        hasSelectedLibrary =
+            selectedCashFlowRuleLibrary.value.id !== uuidNIL;
+
+        if (hasSelectedLibrary) {
+            checkLibraryEditPermission();
+            hasCreatedLibrary = false;
+        }
+        initializing = false;
+
+        if(hasSelectedLibrary)
+            onPaginationChanged();
+    }
+
+    watch(isSharedLibrary, () => onStateSharedAccessChanged)
+    function onStateSharedAccessChanged() {
+        isShared = isSharedLibrary.value;
+        if (!isNil(selectedCashFlowRuleLibrary)) {
+            selectedCashFlowRuleLibrary.value.isShared = isShared;
+        } 
+    }
+
+    function initializePages(){
         const request: PagingRequest<CashFlowRule>= {
             page: 1,
             rowsPerPage: 5,
@@ -1104,67 +1078,66 @@ export default class CashFlowEditor extends Vue {
             isDescending: false,
             search: ''
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            CashFlowService.getScenarioCashFlowRulePage(this.selectedScenarioId, request).then(response => {
-                this.initializing = false
+        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+            CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
+                initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<CashFlowRule>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
-                    this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
-                    this.loadedParentName = this.parentLibraryName; //store original
-                    this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value);
+                    totalItems = data.totalItems;
+                    setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
+                    loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
+                    loadedParentName = parentLibraryName; //store original
+                    scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
                 }
             });
     }
 
-    onShowShareCashFlowRuleLibraryDialog(cashFlowRuleLibrary: CashFlowRuleLibrary) {
-        this.shareCashFlowRuleLibraryDialogData = {
+    function onShowShareCashFlowRuleLibraryDialog(cashFlowRuleLibrary: CashFlowRuleLibrary) {
+        shareCashFlowRuleLibraryDialogData = {
             showDialog:true,
             cashFlowRuleLibrary: clone(cashFlowRuleLibrary)
         }
     }
 
-    onShareCashFlowRuleDialogSubmit(cashFlowRuleLibraryUsers: CashFlowRuleLibraryUser[]) {
-        this.shareCashFlowRuleLibraryDialogData = clone(emptyShareCashFlowRuleLibraryDialogData);
+    function onShareCashFlowRuleDialogSubmit(cashFlowRuleLibraryUsers: CashFlowRuleLibraryUser[]) {
+        shareCashFlowRuleLibraryDialogData = clone(emptyShareCashFlowRuleLibraryDialogData);
 
-                if (!isNil(cashFlowRuleLibraryUsers) && this.selectedCashFlowRuleLibrary.id !== getBlankGuid())
-                {
-                    let libraryUserData: LibraryUser[] = [];
+        if (!isNil(cashFlowRuleLibraryUsers) && selectedCashFlowRuleLibrary.value.id !== getBlankGuid())
+        {
+            let libraryUserData: LibraryUser[] = [];
 
-                    //create library users
-                    cashFlowRuleLibraryUsers.forEach((cashFlowRuleLibraryUser, index) =>
-                    {   
-                        //determine access level
-                        let libraryUserAccessLevel: number = 0;
-                        if (libraryUserAccessLevel == 0 && cashFlowRuleLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
-                        if (libraryUserAccessLevel == 0 && cashFlowRuleLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
+            //create library users
+            cashFlowRuleLibraryUsers.forEach((cashFlowRuleLibraryUser, index) =>
+            {   
+                //determine access level
+                let libraryUserAccessLevel: number = 0;
+                if (libraryUserAccessLevel == 0 && cashFlowRuleLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
+                if (libraryUserAccessLevel == 0 && cashFlowRuleLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
 
-                        //create library user object
-                        let libraryUser: LibraryUser = {
-                            userId: cashFlowRuleLibraryUser.userId,
-                            userName: cashFlowRuleLibraryUser.username,
-                            accessLevel: libraryUserAccessLevel
-                        }
-
-                        //add library user to an array
-                        libraryUserData.push(libraryUser);
-                    });
-                    if (!isNullOrUndefined(this.selectedCashFlowRuleLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedCashFlowRuleLibrary).then(this.isShared = this.isSharedLibrary);
-                    }
-                    //update budget library sharing
-                    CashFlowService.upsertOrDeleteCashFlowRuleLibraryUsers(this.selectedCashFlowRuleLibrary.id, libraryUserData).then((response: AxiosResponse) => {
-                        if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
-                        {
-                            this.resetPage();
-                        }
-                    });
+                //create library user object
+                let libraryUser: LibraryUser = {
+                    userId: cashFlowRuleLibraryUser.userId,
+                    userName: cashFlowRuleLibraryUser.username,
+                    accessLevel: libraryUserAccessLevel
                 }
+
+                //add library user to an array
+                libraryUserData.push(libraryUser);
+            });
+            if (!isNil(selectedCashFlowRuleLibrary.value.id)) {
+                getIsSharedLibraryAction(selectedCashFlowRuleLibrary).then(() => isShared = isSharedLibrary.value);
+            }
+            //update budget library sharing
+            CashFlowService.upsertOrDeleteCashFlowRuleLibraryUsers(selectedCashFlowRuleLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
+                {
+                    resetPage();
+                }
+            });
+        }
     }
-}
 </script>
 
 <style>

@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Hubs;
+using System.Linq;
 
 namespace BridgeCareCore.Controllers
 {
@@ -249,8 +250,12 @@ namespace BridgeCareCore.Controllers
             try
             {
                 // A JWT is too large to store in the URL, so it is passed in the authorization header.
-                var idToken = Request.Headers["Authorization"].ToString().Split(" ")[1];
-                EsecSecurity.RevokeToken(idToken);
+                var tokenParts = Request.Headers["Authorization"].ToString().Split(" ");
+                var idToken = tokenParts.Count() > 1 ? tokenParts[1] : string.Empty;
+                if (!string.IsNullOrEmpty(idToken))
+                {
+                    EsecSecurity.RevokeToken(idToken);
+                }
                 return Ok();
             }
             catch (Exception e)

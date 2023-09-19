@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<BudgetPriorityLibraryDTO> GetBudgetPriorityLibraries();
 
+        DateTime GetLibraryModifiedDate(Guid budgetPriorityLibraryId);
+
         List<BudgetPriorityLibraryDTO> GetBudgetPriortyLibrariesNoChildren();
 
         void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto);

@@ -45,11 +45,6 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         public TreatmentCategory Category { get; set; }
 
         /// <summary>
-        /// Collection of consequences applied to this specific committed project
-        /// </summary>
-        public List<CommittedProjectConsequenceDTO> Consequences { get; set; } = new List<CommittedProjectConsequenceDTO>();
-
-        /// <summary>
         /// The cost to apply the project
         /// </summary>
         /// <remarks>

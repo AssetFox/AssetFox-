@@ -67,6 +67,32 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetTargetLibraryModifiedDate/{libraryId}")]
+        [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
+        public async Task<IActionResult> GetTargetLibraryDate(Guid libraryId)
+        {
+            try
+            {
+                var users = new DateTime();
+                await Task.Factory.StartNew(() =>
+                {
+                    users = UnitOfWork.TargetConditionGoalRepo.GetLibraryModifiedDate(libraryId);
+                });
+                return Ok(users);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
         [HttpPost]
         [Route("GetLibraryTargetConditionGoalPage/{libraryId}")]
         [Authorize(Policy = Policy.ViewTargetConditionGoalFromLibrary)]

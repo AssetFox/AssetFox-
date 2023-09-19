@@ -42,19 +42,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 PerformanceFactor = dto.PerformanceFactor
             };
         }
-
-        public static void CreateCommittedProjectConsequence(this CommittedProjectConsequenceEntity entity, CommittedProject committedProject)
-        {
-            var consequence = committedProject.Consequences.GetAdd(new TreatmentConsequence());
-            consequence.Id = entity.Id;
-            consequence.Change.Expression = entity.ChangeValue;
-            consequence.Attribute = committedProject.Asset.Network.Explorer.NumberAttributes
-                .SingleOrDefault(_ => _.Name == entity.Attribute.Name);
-            if (consequence.Attribute == null)
-            {
-                consequence.Attribute = committedProject.Asset.Network.Explorer.TextAttributes
-                    .SingleOrDefault(_ => _.Name == entity.Attribute.Name);
-            }
-        }
     }
 }

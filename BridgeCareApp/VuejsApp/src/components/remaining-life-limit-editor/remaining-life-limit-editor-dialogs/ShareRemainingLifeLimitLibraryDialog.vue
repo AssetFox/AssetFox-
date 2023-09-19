@@ -46,10 +46,8 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+<script setup lang="ts">
+import Vue, { watch } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {RemainingLifeLimitLibraryUser } from '@/shared/models/iAM/remaining-life-limit';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -61,34 +59,36 @@ import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {RemainingLifeLimitLibraryUserGridRow, ShareRemainingLifeLimitLibraryDialogData } from '@/shared/models/modals/share-remaining-life-limit-data';
 import RemainingLifeLimitService from '@/services/remaining-life-limit.service';
 import { http2XX } from '@/shared/utils/http-utils';
+import { useStore } from 'vuex';
 
-@Component
-export default class ShareRemainingLifeLimitLibraryDialog extends Vue {
-  @Prop() dialogData: ShareRemainingLifeLimitLibraryDialogData;
+  const props = defineProps<{
+    dialogData: ShareRemainingLifeLimitLibraryDialogData
+  }>();
+  const emit = defineEmits(['submit']);
+  let store = useStore();
+  let stateUsers :User[] = (store.state.userModule.users);
 
-  @State(state => state.userModule.users) stateUsers: User[];
-
-  remainingLifeLimitLibraryUserGridHeaders: DataTableHeader[] = [
+  let remainingLifeLimitLibraryUserGridHeaders: DataTableHeader[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  remainingLifeLimitLibraryUserGridRows: RemainingLifeLimitLibraryUserGridRow[] = [];
-  currentUserAndOwner: RemainingLifeLimitLibraryUser[] = [];
-  searchTerm: string = '';
+  let remainingLifeLimitLibraryUserGridRows: RemainingLifeLimitLibraryUserGridRow[] = [];
+  let currentUserAndOwner: RemainingLifeLimitLibraryUser[] = [];
+  let searchTerm: string = '';
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    if (this.dialogData.showDialog) {
-      this.onSetGridData();
-      this.onSetUsersSharedWith();
+  watch((() => props.dialogData), onDialogDataChanged )
+  function onDialogDataChanged() {
+    if (props.dialogData.showDialog) {
+      onSetGridData();
+      onSetUsersSharedWith();
     }
   }
 
-  onSetGridData() {
+  function onSetGridData() {
     const currentUser: string = getUserName();
 
-    this.remainingLifeLimitLibraryUserGridRows = this.stateUsers
+    remainingLifeLimitLibraryUserGridRows = stateUsers
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -98,10 +98,10 @@ export default class ShareRemainingLifeLimitLibraryDialog extends Vue {
         }));
   }
 
-    onSetUsersSharedWith() {
+  function onSetUsersSharedWith() {
         // Remaining Life Limit library users
         let remainingLifeLimitLibraryUsers: RemainingLifeLimitLibraryUser[] = [];
-        RemainingLifeLimitService.getRemainingLifeLimitLibraryUsers(this.dialogData.remainingLifeLimitLibrary.id).then(response => {
+        RemainingLifeLimitService.getRemainingLifeLimitLibraryUsers(props.dialogData.remainingLifeLimitLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -130,18 +130,18 @@ export default class ShareRemainingLifeLimitLibraryDialog extends Vue {
                 const isCurrentUserOrOwner = (remainingLifeLimitLibraryUser: RemainingLifeLimitLibraryUser) => remainingLifeLimitLibraryUser.username === currentUser || remainingLifeLimitLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (remainingLifeLimitLibraryUser: RemainingLifeLimitLibraryUser) => remainingLifeLimitLibraryUser.username !== currentUser && !remainingLifeLimitLibraryUser.isOwner;
 
-                this.currentUserAndOwner = filter(isCurrentUserOrOwner, remainingLifeLimitLibraryUsers) as RemainingLifeLimitLibraryUser[];
+                currentUserAndOwner = filter(isCurrentUserOrOwner, remainingLifeLimitLibraryUsers) as RemainingLifeLimitLibraryUser[];
                 const otherUsers: RemainingLifeLimitLibraryUser[] = filter(isNotCurrentUserOrOwner, remainingLifeLimitLibraryUsers) as RemainingLifeLimitLibraryUser[];
 
                 otherUsers.forEach((remainingLifeLimitLibraryUser: RemainingLifeLimitLibraryUser) => {
-                    if (any(propEq('id', remainingLifeLimitLibraryUser.userId), this.remainingLifeLimitLibraryUserGridRows)) {
+                    if (any(propEq('id', remainingLifeLimitLibraryUser.userId), remainingLifeLimitLibraryUserGridRows)) {
                         const remainingLifeLimitLibraryUserGridRow: RemainingLifeLimitLibraryUserGridRow = find(
-                            propEq('id', remainingLifeLimitLibraryUser.userId), this.remainingLifeLimitLibraryUserGridRows) as RemainingLifeLimitLibraryUserGridRow;
+                            propEq('id', remainingLifeLimitLibraryUser.userId), remainingLifeLimitLibraryUserGridRows) as RemainingLifeLimitLibraryUserGridRow;
 
-                        this.remainingLifeLimitLibraryUserGridRows = update(
-                            findIndex(propEq('id', remainingLifeLimitLibraryUser.userId), this.remainingLifeLimitLibraryUserGridRows),
+                        remainingLifeLimitLibraryUserGridRows = update(
+                            findIndex(propEq('id', remainingLifeLimitLibraryUser.userId), remainingLifeLimitLibraryUserGridRows),
                             { ...remainingLifeLimitLibraryUserGridRow, isShared: true, canModify: remainingLifeLimitLibraryUser.canModify },
-                            this.remainingLifeLimitLibraryUserGridRows
+                            remainingLifeLimitLibraryUserGridRows
                         );
                     }
                 });
@@ -149,26 +149,26 @@ export default class ShareRemainingLifeLimitLibraryDialog extends Vue {
         });
   }
 
-  removeUserModifyAccess(userId: string, isShared: boolean) {
+  function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      this.remainingLifeLimitLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), this.remainingLifeLimitLibraryUserGridRows),
-          'canModify', false, this.remainingLifeLimitLibraryUserGridRows);
+      remainingLifeLimitLibraryUserGridRows = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), remainingLifeLimitLibraryUserGridRows),
+          'canModify', false, remainingLifeLimitLibraryUserGridRows);
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.getRemainingLifeLimitLibraryUsers());
+      emit('submit', getRemainingLifeLimitLibraryUsers());
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.remainingLifeLimitLibraryUserGridRows = [];
+    remainingLifeLimitLibraryUserGridRows = [];
   }
 
-  getRemainingLifeLimitLibraryUsers() {
-    const usersSharedWith: RemainingLifeLimitLibraryUser[] = this.remainingLifeLimitLibraryUserGridRows
+  function getRemainingLifeLimitLibraryUsers() {
+    const usersSharedWith: RemainingLifeLimitLibraryUser[] = remainingLifeLimitLibraryUserGridRows
         .filter((remainingLifeLimitLibraryUserGridRow: RemainingLifeLimitLibraryUserGridRow) => remainingLifeLimitLibraryUserGridRow.isShared)
         .map((remainingLifeLimitLibraryUserGridRow: RemainingLifeLimitLibraryUserGridRow) => ({
           userId: remainingLifeLimitLibraryUserGridRow.id,
@@ -177,9 +177,8 @@ export default class ShareRemainingLifeLimitLibraryDialog extends Vue {
           isOwner: false
         }));
 
-    return [...this.currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner, ...usersSharedWith];
   }
-}
 </script>
 
 <style>

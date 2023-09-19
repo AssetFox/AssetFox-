@@ -59,6 +59,11 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         public int Year { get; set; }
 
         /// <summary>
+        /// Project source associated with the committed project
+        /// </summary>
+        public string ProjectSource { get; set; }
+
+        /// <summary>
         /// The number of years until any other treatment may be performed
         /// </summary>
         public int ShadowForAnyTreatment { get; set; }

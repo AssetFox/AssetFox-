@@ -32,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Cost = domain.Cost,
                 Year = domain.Year,
                 treatmentCategory = domain.treatmentCategory,
+                ProjectSource = domain.ProjectSource
             };
 
             entity.CommittedProjectLocation = maintainableAsset.MaintainableAssetLocation.ToCommittedProjectLocation(entity);
@@ -55,22 +56,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     throw new InvalidOperationException($"Scenario budget is not present in committed project.");
                 }
 
-                var commit = new SectionCommittedProjectDTO()
-                {
-                    Id = entity.Id,
-                    Cost = entity.Cost,
-                    ScenarioBudgetId = entity.ScenarioBudgetId,
-                    SimulationId = entity.SimulationId,
-                    Treatment = entity.Name,
-                    Year = entity.Year,
-                    ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
-                    ShadowForSameTreatment = entity.ShadowForSameTreatment,
-                    Category = convertedCategory,
-                    LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
-                };
-                return commit;
-            default:
-                throw new ArgumentException($"Location type of {entity.CommittedProjectLocation.Discriminator} is not supported.");
+                    var commit = new SectionCommittedProjectDTO()
+                    {
+                        Id = entity.Id,
+                        Cost = entity.Cost,
+                        ScenarioBudgetId = entity.ScenarioBudgetId,
+                        SimulationId = entity.SimulationId,
+                        Treatment = entity.Name,
+                        Year = entity.Year,
+                        ProjectSource = entity.ProjectSource,
+                        ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
+                        ShadowForSameTreatment= entity.ShadowForSameTreatment,
+                        Category = convertedCategory,
+                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
+                    };
+                    return commit;
+                default:
+                    throw new ArgumentException($"Location type of {entity.CommittedProjectLocation.Discriminator} is not supported.");
             }
         }
 
@@ -87,6 +89,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Category = dto.Category.ToString(),
                 Year = dto.Year,
+                ProjectSource = dto.ProjectSource
             };
 
             if (dto is SectionCommittedProjectDTO)
@@ -238,7 +241,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         }
                     }
                 }
-
+                
             }
         }
     }

@@ -146,6 +146,7 @@ public sealed class Scenario
         NameOfUsableBudget = source.Budget.Name,
         NameOfTemplateTreatment = source.TemplateTreatment.Name,
         Year = source.Year,
+        ProjectSource = source.ProjectSource
     };
 
     private static ConditionalTreatmentConsequence Convert(Analysis.ConditionalTreatmentConsequence source) => new()
@@ -566,6 +567,7 @@ public sealed class Scenario
                 Name = source.Name,
                 treatmentCategory = source.Category,
                 TemplateTreatment = TreatmentByName[source.NameOfTemplateTreatment],
+                ProjectSource = source.ProjectSource
             };
 
             return result;

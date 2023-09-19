@@ -495,6 +495,17 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet("projectsources")]
+        public IActionResult GetWorkTypes()
+        {
+            var projectSources = typeof(ProjectSourceDTO).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+                                               .Where(f => f.IsLiteral && !f.IsInitOnly)
+                                               .Select(f => f.GetValue(null).ToString())
+                                               .ToList();
+
+            return Ok(projectSources);
+        }
+
         private void CheckUpsertPermit(List<SectionCommittedProjectDTO> projects)
         {
             if (_claimHelper.RequirePermittedCheck())

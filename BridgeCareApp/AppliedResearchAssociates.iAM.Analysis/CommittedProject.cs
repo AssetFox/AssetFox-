@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
 
@@ -20,6 +21,8 @@ public sealed class CommittedProject : Treatment
     public Budget Budget { get; set; }
 
     public double Cost { get; set; }
+
+    public string ProjectSource { get; set; }
 
     /// <remarks>
     ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
@@ -55,6 +58,11 @@ public sealed class CommittedProject : Treatment
         if (Cost < 0)
         {
             results.Add(ValidationStatus.Error, "Cost is less than zero.", this, nameof(Cost));
+        }
+
+        if (ProjectSource == ProjectSourceDTO.None)
+        {
+            results.Add(ValidationStatus.Error, "ProjectSource is unset.", this, nameof(ProjectSource));
         }
 
         return results;

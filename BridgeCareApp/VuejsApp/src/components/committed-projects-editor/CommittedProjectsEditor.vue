@@ -112,6 +112,17 @@
                                                     @change="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])">
                                             
                                         </v-combobox>
+
+                                        <v-combobox v-else-if="header.value === 'projectSource'"
+                                                    :items="projectSourceOptions"
+                                                    append-icon="$vuetify.icons.ghd-down"
+                                                    class="ghd-down-small"
+                                                    label="Select Project Source"
+                                                    v-model="props.item.projectSource"
+                                                    :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                                    @change="onEditCommittedProjectProperty(props.item, header.value, props.item[header.value])">
+                                        </v-combobox>
+
                                         <v-edit-dialog v-if="header.value !== 'actions' && header.value !== 'selection'"
                                             :return-value.sync="props.item[header.value]"
                                             @save="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])"
@@ -122,7 +133,8 @@
                                                 && header.value !== 'year' 
                                                 && header.value !== 'keyAttr' 
                                                 && header.value !== 'treatment'
-                                                && header.value !== 'cost'"
+                                                && header.value !== 'cost'
+                                                && header.value !== 'projectSource'"
                                                 readonly
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"
@@ -148,7 +160,7 @@
                                             <v-text-field v-if="header.value === 'cost'"
                                                 :value='formatAsCurrency(props.item[header.value])'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-
+                                                
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'keyAttr'"
                                                     label="Edit"
@@ -183,7 +195,7 @@
                                                     v-model.number="props.item[header.value]"
                                                     v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-
+                                                
                                             </template>
                                         </v-edit-dialog>
                                 
@@ -429,6 +441,14 @@ export default class CommittedProjectsEditor extends Vue  {
             class: '',
             width: '10%',
         },
+        { 
+        text: 'Project Source', 
+        value: 'projectSource',
+        align: 'left',
+        sortable: false,
+        class: '',
+        width: '10%'
+      },
         {
             text: 'Actions',
             value: 'actions',
@@ -439,7 +459,14 @@ export default class CommittedProjectsEditor extends Vue  {
         },
     ];
     
-    mounted() {
+    
+    data() {
+    return {
+       projectSourceOptions: [], 
+    };
+}
+
+mounted() {
         this.reverseCatMap.forEach(cat => {
             this.categorySelectItems.push({text: cat, value: cat})        
         })
@@ -448,8 +475,8 @@ export default class CommittedProjectsEditor extends Vue  {
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             this.importCompleted,
         );
-        this.fetchTreatmentLibrary(this.scenarioId);
     }   
+
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
 
@@ -571,8 +598,6 @@ export default class CommittedProjectsEditor extends Vue  {
             this.setCpItems();
     }
 
-
-
     @Watch('sectionCommittedProjects')
     onSectionCommittedProjectsChanged() {  
         this.setCpItems();  
@@ -684,8 +709,9 @@ export default class CommittedProjectsEditor extends Vue  {
         newRow.locationKeys[this.keyattr] = '';
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = this.scenarioId;
+        newRow.projectSource = '';
         this.addedRows.push(newRow)
-        this.onPaginationChanged();
+        this.onPaginationChanged();   
      }
 
      OnSaveClick(){
@@ -807,6 +833,9 @@ export default class CommittedProjectsEditor extends Vue  {
             else if(property === 'budget'){
                 this.handleBudgetChange(row, scp, value)
             }
+            else if(property === 'projectSource') {
+            this.handleProjectSourceChange(row, scp, value)
+            }
             else{
                 if(property === 'category')
                     value = this.catMap.get(value);
@@ -917,7 +946,9 @@ export default class CommittedProjectsEditor extends Vue  {
                 ) == true &&
                 this.rules['generalRules'].valueIsWithinRange(
                     scp.year, [this.firstYear, this.lastYear],
-                ) === true
+                ) === true &&
+                scp.projectSource !== ""
+                
             );
         },
     );
@@ -955,7 +986,8 @@ export default class CommittedProjectsEditor extends Vue  {
             id: scp.id,
             errors: [],
             yearErrors: [],
-            category: value
+            category: value,
+            projectSource: scp.projectSource
         }
         return row
     }
@@ -985,6 +1017,12 @@ export default class CommittedProjectsEditor extends Vue  {
         this.onPaginationChanged();
     }
 
+    handleProjectSourceChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSource: string) {
+    row.projectSource = projectSource;
+    this.updateCommittedProject(row, projectSource, 'projectSource');
+    this.onPaginationChanged();
+    }
+
     onUploadCommittedProjectTemplate(){
       document.getElementById("committedProjectTemplateUpload")?.click();
    }
@@ -1008,6 +1046,14 @@ export default class CommittedProjectsEditor extends Vue  {
             }
         });
     }
+
+    fetchProjectSources() {
+    CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
+        if (hasValue(response, 'data')) {
+            this.projectSourceOptions = response.data.filter((option: string) => option !== "None");
+        }
+    });
+}
 
     checkExistenceOfAssets(){//todo: refine this
         const uncheckKeys = this.currentPage.map(scp => scp.keyAttr).filter(key => isNil(this.isKeyAttributeValidMap.get(key)))

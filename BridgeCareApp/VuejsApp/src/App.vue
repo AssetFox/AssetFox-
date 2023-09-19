@@ -708,7 +708,7 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
     function onLogout() {
         logOutAction().then(() => {
             clearRefreshIntervalID(); 
-            if (window.location.host.toLowerCase().indexOf('penndot.gov') === -1 && this.securityType === this.esecSecurityType) {
+            if (window.location.host.toLowerCase().indexOf('penndot.gov') === -1 && securityType.value === esecSecurityType) {
                 /*
                  * In order to log out properly, the browser must visit the /iAM page of a penndot deployment, as iam-deploy.com cannot
                  * modify browser cookies for penndot.gov. So, the current host is sent as part of the query to the penndot site

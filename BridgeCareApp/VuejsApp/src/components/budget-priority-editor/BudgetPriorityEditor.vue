@@ -299,7 +299,7 @@
     let librarySelectItems: SelectItem[] = [];
     let shareBudgetPriorityLibraryDialogData: ShareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
     let isShared: boolean = false;
-    dateModified: string;
+    let dateModified: string;
 
     let selectedBudgetPriorityLibrary: BudgetPriorityLibrary = clone(emptyBudgetPriorityLibrary);
     let budgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
@@ -443,7 +443,7 @@
     }
 
     watch(pagination, onPaginationChanged )
-    function onPaginationChanged() {
+    async function onPaginationChanged() {
         if(initializing)
             return;
         checkHasUnsavedChanges();
@@ -472,15 +472,15 @@
                     populateEmptyBudgetPercentagePairs(currentPage.value);
                 }
             });
-        else if(this.hasSelectedLibrary)
-             await BudgetPriorityService.getBudgetPriorityLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+        else if(hasSelectedLibrary)
+             await BudgetPriorityService.getBudgetPriorityLibraryDate(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '').then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      this.dateModified = data.slice(0, 10);
+                      dateModified = data.slice(0, 10);
                    }
              }),
-             await BudgetPriorityService.getLibraryBudgetPriorityPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+             await BudgetPriorityService.getLibraryBudgetPriorityPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
                     currentPage.value = data.items;

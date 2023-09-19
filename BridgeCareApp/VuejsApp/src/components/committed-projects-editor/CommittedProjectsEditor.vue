@@ -542,28 +542,6 @@ import { createDecipheriv } from 'crypto';
             setCpItems();
     }
 
-    // watch(librarySelectItemValue, () => onSelectAttributeItemValueChanged)
-    // function onSelectAttributeItemValueChanged() {
-    //     selectTreatmentLibraryAction(librarySelectItemValue);
-    //     hasSelectedLibrary = true;
-    //     const library = stateTreatmentLibraries.value.find(o => o.id == librarySelectItemValue.value)
-    //     if(!isNil(library)){
-    //         selectedLibraryTreatments.value = library.treatments;
-    //         onSelectedLibraryTreatmentsChanged()
-    //     }        
-    // }
-
-    // watch(selectedCommittedProject, () => onSelectedCommittedProject)
-    // function onSelectedCommittedProject(){
-    //     if(!isNil(selectedCommittedProject)){
-    //         const selectedProject = find(propEq('id', selectedCommittedProject), sectionCommittedProjects.value);
-    //         if(!isNil(selectedProject)){
-    //             selectedConsequences = selectedProject.consequences;
-    //         }             
-    //     }
-    // }
-
-
     watch(sectionCommittedProjects, () => onSectionCommittedProjectsChanged)
     function onSectionCommittedProjectsChanged() {  
         setCpItems();  
@@ -763,10 +741,7 @@ import { createDecipheriv } from 'crypto';
        let row = sectionCommittedProjects.value.find(o => o.id === scp.id)
         if(!isNil(row))
         {
-            if(property === 'treatment'){
-                handleTreatmentChange(scp, value, row)             
-            }
-            else if(property === 'keyAttr'){
+            if(property === 'keyAttr'){
                 handleKeyAttrChange(row, scp, value);               
             }
             else if(property === 'budget'){

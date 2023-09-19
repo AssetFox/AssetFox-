@@ -31,27 +31,28 @@
   </v-layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
+import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
 import {emptyTreatment, Treatment} from '@/shared/models/iAM/treatment';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
-@Component
-export default class CreateTreatmentDialog extends Vue {
-  @Prop() showDialog: boolean;
+const props = defineProps<{showDialog: Boolean}>()
+const showDialog = reactive(props.showDialog);
+let newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
+let store = useStore();
+const emit = defineEmits(['submit'])
 
-  newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
-
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.newTreatment.addTreatment = true;
-      this.$emit('submit', this.newTreatment);
+      newTreatment.addTreatment = true;
+      emit('submit', newTreatment);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newTreatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
+    newTreatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
   }
-}
+
 </script>

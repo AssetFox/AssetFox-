@@ -46,10 +46,9 @@
     </v-layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Getter} from 'vuex-class';
-import { Component, Prop, Watch } from 'vue-property-decorator';
+import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { CreateTreatmentLibraryDialogData } from '@/shared/models/modals/create-treatment-library-dialog-data';
 import {
     emptyTreatmentLibrary,
@@ -60,25 +59,30 @@ import {
 } from '@/shared/models/iAM/treatment';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateTreatmentLibraryDialog extends Vue {
-    @Prop() dialogData: CreateTreatmentLibraryDialogData;
+    const props = defineProps<{dialogData: CreateTreatmentLibraryDialogData}>()
+    const dialogData = reactive(props.dialogData);
+    const emit = defineEmits(['submit'])
+    let store = useStore();
 
-    @Getter('getIdByUserName') getIdByUserNameGetter: any;
+    async function getIdByUserNameGetter(payload?: any): Promise<any> {
+        await store.dispatch('getIdByUserName');
+    }
 
-    newTreatmentLibrary: TreatmentLibrary = {
+    let newTreatmentLibrary: TreatmentLibrary = {
         ...emptyTreatmentLibrary,
         id: getNewGuid(),
     };
 
-    @Watch('dialogData')
-    onDialogDataChanged() {
+    
+  watch(dialogData, () => onDialogDataChanged)
+  async function onDialogDataChanged() {
         let currentUser: string = getUserName();
 
-        this.newTreatmentLibrary = {
-            ...this.newTreatmentLibrary,
-            treatments: this.dialogData.selectedTreatmentLibraryTreatments.map(
+        newTreatmentLibrary = {
+            ...newTreatmentLibrary,
+            treatments: dialogData.selectedTreatmentLibraryTreatments.map(
                 (treatment: Treatment) => ({
                     ...treatment,
                     id: getNewGuid(),
@@ -94,7 +98,7 @@ export default class CreateTreatmentLibraryDialog extends Vue {
                     ),
                 }),
             ),
-            owner: this.getIdByUserNameGetter(currentUser),
+            owner: await getIdByUserNameGetter(currentUser),
         };
     }
 
@@ -103,17 +107,16 @@ export default class CreateTreatmentLibraryDialog extends Vue {
      * newTreatmentLibrary object
      * @param submit Whether or not to emit the newTreatmentLibrary object
      */
-    onSubmit(submit: boolean) {
+   function onSubmit(submit: boolean) {
         if (submit) {
-            this.$emit('submit', this.newTreatmentLibrary);
+            emit('submit', newTreatmentLibrary);
         } else {
-            this.$emit('submit');
+            emit('submit');
         }
 
-        this.newTreatmentLibrary = {
+        newTreatmentLibrary = {
             ...emptyTreatmentLibrary,
             id: getNewGuid(),
         };
     }
-}
 </script>

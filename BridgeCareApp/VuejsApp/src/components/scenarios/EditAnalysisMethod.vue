@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <v-form ref="form" v-model="valid" lazy-validation>
         <v-layout column>
             <v-flex xs6>
@@ -208,11 +208,8 @@
     </v-form>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Watch } from 'vue-property-decorator';
-import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount } from 'vue'; 
 import { clone, equals, isNil } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -228,31 +225,33 @@ import { SelectItem } from '@/shared/models/vue/select-item';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { useStore } from 'vuex'; 
+import { useRouter } from 'vue-router'; 
 
-@Component({
-    components: { GeneralCriterionEditorDialog },
-})
-export default class EditAnalysisMethod extends Vue {
-    @State(state => state.analysisMethodModule.analysisMethod)
-    stateAnalysisMethod: AnalysisMethod;
-    @State(state => state.attributeModule.numericAttributes)
-    stateNumericAttributes: Attribute[];
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
+    let store = useStore(); 
+    const $router = useRouter(); 
 
-    @Action('getAnalysisMethod') getAnalysisMethodAction: any;
-    @Action('upsertAnalysisMethod') upsertAnalysisMethodAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
+    let stateAnalysisMethod: AnalysisMethod = shallowRef(store.state.analysisMethodModule.analysisMethod) ;
+    const stateNumericAttributes: Attribute[] = shallowReactive(store.state.attributeModule.numericAttributes) ;
 
-    selectedScenarioId: string = getBlankGuid();
-    analysisMethod: AnalysisMethod = clone(emptyAnalysisMethod);
-    optimizationStrategy: SelectItem[] = [
+    let hasAdminAccess: boolean = (store.state.authenticationModule.hasAdminAccess) ; 
+
+    async function getAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('getAnalysisMethod')} 
+    async function upsertAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('upsertAnalysisMethod')} 
+
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges')} 
+
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch('getCurrentUserOrSharedScenario')}
+    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario')} 
+
+    let selectedScenarioId: string = getBlankGuid();
+    let analysisMethod: AnalysisMethod = shallowReactive(clone(emptyAnalysisMethod));
+    let optimizationStrategy: SelectItem[] = [
         { text: 'Benefit', value: OptimizationStrategy.Benefit },
         {
             text: 'Benefit-to-Cost Ratio',
@@ -264,7 +263,7 @@ export default class EditAnalysisMethod extends Vue {
             value: OptimizationStrategy.RemainingLifeToCostRatio,
         },
     ];
-    spendingStrategy: SelectItem[] = [
+    let spendingStrategy: SelectItem[] = [
         { text: 'No Spending', value: SpendingStrategy.NoSpending },
         {
             text: 'Unlimited Spending',
@@ -284,173 +283,176 @@ export default class EditAnalysisMethod extends Vue {
         },
         { text: 'As Budget Permits', value: SpendingStrategy.AsBudgetPermits },
     ];
-    benefitAttributes: SelectItem[] = [];
-    weightingAttributes: SelectItem[] = [{ text: '', value: '' }];
-    simulationName: string;
-    networkName: string = '';
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    let benefitAttributes: SelectItem[] = [];
+    let weightingAttributes: SelectItem[] = [{ text: '', value: '' }];
+    let simulationName: string;
+    let networkName: string = '';
+    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
         emptyGeneralCriterionEditorDialogData,
     );
-    rules: InputValidationRules = rules;
-    valid: boolean = true;
-    criteriaIsIntentionallyEmpty: boolean = false;
+    let rules: InputValidationRules = validationRules;
+    let valid: boolean = true;
+    let criteriaIsIntentionallyEmpty: boolean = false;
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.selectedScenarioId = to.query.scenarioId;
-            vm.simulationName = to.query.simulationName;
-            vm.networkName = to.query.networkName;
-            console.log("check it!");
-            if (vm.selectedScenarioId === getBlankGuid()) {
+    //beforeRouteEnter(to: any, from: any, next: any) {
+       //next((vm: any) => {
+    created(); 
+    function created() { 
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+            simulationName = $router.currentRoute.value.query.simulationName;
+            networkName = $router.currentRoute.value.query.networkName;
+            if (selectedScenarioId === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
-                vm.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'Found no selected scenario for edit',
                 });
-                vm.$router.push('/Scenarios/');
+                $router.push('/Scenarios/');
             }
 
             // get the selected scenario's analysisMethod data
-            vm.getAnalysisMethodAction({ scenarioId: vm.selectedScenarioId }).then(() => {                       
-                vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                    vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+            getAnalysisMethodAction({ scenarioId: selectedScenarioId }).then(() => {                       
+                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+                    selectScenarioAction({ scenarioId: selectedScenarioId });        
                 });
             });
-        });
+        //});
     }
 
-    mounted() {
-        if (hasValue(this.stateNumericAttributes)) {
-            this.setBenefitAndWeightingAttributes();
+    onMounted(() => mounted);
+    function mounted() {
+        if (hasValue(stateNumericAttributes)) {
+            setBenefitAndWeightingAttributes();
         }
     }
 
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
+    onBeforeUnmount(() => beforeDestroy );
+    function beforeDestroy() {
+        setHasUnsavedChangesAction({ value: false });
     }
 
-    @Watch('stateAnalysisMethod')
-    onStateAnalysisChanged() {
-        this.analysisMethod = {
-            ...this.stateAnalysisMethod,
+    watch(stateAnalysisMethod, () => onStateAnalysisChanged)
+    function onStateAnalysisChanged() {
+        analysisMethod = {
+            ...stateAnalysisMethod,
             benefit: {
-                ...this.stateAnalysisMethod.benefit,
+                ...stateAnalysisMethod.benefit,
                 id:
-                    this.stateAnalysisMethod.benefit.id === getBlankGuid()
+                    stateAnalysisMethod.benefit.id === getBlankGuid()
                         ? getNewGuid()
-                        : this.stateAnalysisMethod.benefit.id,
+                        : stateAnalysisMethod.benefit.id,
             },
         };
     }
 
-    @Watch('analysisMethod')
-    onAnalysisChanged() {
-        this.setHasUnsavedChangesAction({
+    watch(analysisMethod, () => onAnalysisChanged)
+    function onAnalysisChanged() {
+        setHasUnsavedChangesAction({
             value:
-                !equals(this.analysisMethod, this.stateAnalysisMethod),
+                !equals(analysisMethod, stateAnalysisMethod),
         });
 
-        this.setBenefitAttributeIfEmpty();        
+        setBenefitAttributeIfEmpty();        
     }
 
-    @Watch('stateNumericAttributes')
-    onStateNumericAttributesChanged() {
-        if (hasValue(this.stateNumericAttributes)) {
-            this.setBenefitAndWeightingAttributes();
-            this.setBenefitAttributeIfEmpty();
+    watch(stateNumericAttributes, () => onStateNumericAttributesChanged)
+    function onStateNumericAttributesChanged() {
+        if (hasValue(stateNumericAttributes)) {
+            setBenefitAndWeightingAttributes();
+            setBenefitAttributeIfEmpty();
         }
     }
 
-    setBenefitAttributeIfEmpty() {
+    function setBenefitAttributeIfEmpty() {
         if (
-            !hasValue(this.analysisMethod.benefit.attribute) &&
-            hasValue(this.benefitAttributes)
+            !hasValue(analysisMethod.benefit.attribute) &&
+            hasValue(benefitAttributes)
         ) {
-            this.analysisMethod.benefit.attribute = this.benefitAttributes[0].value.toString();
+            analysisMethod.benefit.attribute = benefitAttributes[0].value.toString();
         }
     }
 
-    onSetAnalysisMethodProperty(property: string, value: any) {
-        this.analysisMethod = setItemPropertyValue(
+    function onSetAnalysisMethodProperty(property: string, value: any) {
+        analysisMethod = setItemPropertyValue(
             property,
             value,
-            this.analysisMethod,
+            analysisMethod,
         );
     }
 
-    onSetBenefitProperty(property: string, value: any) {
-        this.analysisMethod.benefit = setItemPropertyValue(
+    function onSetBenefitProperty(property: string, value: any) {
+        analysisMethod.benefit = setItemPropertyValue(
             property,
             value,
-            this.analysisMethod.benefit,
+            analysisMethod.benefit,
         );
     }
 
-    setBenefitAndWeightingAttributes() {
-        const numericAttributeSelectItems: SelectItem[] = this.stateNumericAttributes.map(
+    function setBenefitAndWeightingAttributes() {
+        const numericAttributeSelectItems: SelectItem[] = stateNumericAttributes.map(
             (attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name,
             }),
         );
-        this.benefitAttributes = [...numericAttributeSelectItems];
-        this.weightingAttributes = [
-            this.weightingAttributes[0],
+        benefitAttributes = [...numericAttributeSelectItems];
+        weightingAttributes = [
+            weightingAttributes[0],
             ...numericAttributeSelectItems,
         ];
     }
 
-    onShowCriterionEditorDialog() {
-        this.criterionEditorDialogData = {
+    function onShowCriterionEditorDialog() {
+        criterionEditorDialogData = {
             showDialog: true,
-            CriteriaExpression: this.analysisMethod.criterionLibrary.mergedCriteriaExpression,
+            CriteriaExpression: analysisMethod.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onCriterionEditorDialogSubmit(criterionexpression: string) {
-        this.criterionEditorDialogData = clone(
+    function onCriterionEditorDialogSubmit(criterionexpression: string) {
+        criterionEditorDialogData = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
         if (!isNil(criterionexpression)) {
-            if(this.analysisMethod.criterionLibrary.id == getBlankGuid())
-                this.analysisMethod.criterionLibrary.id = getNewGuid();
-            this.analysisMethod = {
-                ...this.analysisMethod,
-                criterionLibrary: {...this.analysisMethod.criterionLibrary, mergedCriteriaExpression: criterionexpression} as CriterionLibrary,
+            if(analysisMethod.criterionLibrary.id == getBlankGuid())
+                analysisMethod.criterionLibrary.id = getNewGuid();
+            analysisMethod = {
+                ...analysisMethod,
+                criterionLibrary: {...analysisMethod.criterionLibrary, mergedCriteriaExpression: criterionexpression} as CriterionLibrary,
             };
         }
     }
 
-    criteriaIsEmpty()
+    function criteriaIsEmpty()
     {
-        return (isNil(this.analysisMethod.criterionLibrary) ||
-                isNil(this.analysisMethod.criterionLibrary.mergedCriteriaExpression) ||
-                this.analysisMethod.criterionLibrary.mergedCriteriaExpression == ""
+        return (isNil(analysisMethod.criterionLibrary) ||
+                isNil(analysisMethod.criterionLibrary.mergedCriteriaExpression) ||
+                analysisMethod.criterionLibrary.mergedCriteriaExpression == ""
                 );
     }
 
-    criteriaRows()
+    function criteriaRows()
     {
-        return this.criteriaIsEmpty() ? 4 : 6;
+        return criteriaIsEmpty() ? 4 : 6;
     }
 
-    criteriaIsInvalid() {
-        return this.criteriaIsEmpty() && !this.criteriaIsIntentionallyEmpty;
+    function criteriaIsInvalid() {
+        return criteriaIsEmpty() && !criteriaIsIntentionallyEmpty;
     }    
 
-    onUpsertAnalysisMethod() {
-        const form: any = this.$refs.form;
+    function onUpsertAnalysisMethod() {
+        const form: any = $refs.form;
 
         if (form.validate()) {
-            this.upsertAnalysisMethodAction({
-                analysisMethod: this.analysisMethod,
-                scenarioId: this.selectedScenarioId,
+            upsertAnalysisMethodAction({
+                analysisMethod: analysisMethod,
+                scenarioId: selectedScenarioId,
             });
         }
     }
 
-    onDiscardChanges() {
-        this.analysisMethod = clone(this.stateAnalysisMethod);
+    function onDiscardChanges() {
+        analysisMethod = clone(stateAnalysisMethod);
     }
-}
+
 </script>

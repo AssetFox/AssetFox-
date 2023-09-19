@@ -633,10 +633,8 @@
     </v-layout>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted } from 'vue'; 
 import moment from 'moment';
 import {
     emptyScenario,
@@ -670,7 +668,7 @@ import { any, clone, isNil } from 'ramda';
 import { getUserName } from '@/shared/utils/get-user-info';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import CreateNetworkDialog from '@/components/scenarios/scenarios-dialogs/CreateNetworkDialog.vue';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
@@ -696,90 +694,65 @@ import GhdQueueSvg from '@/shared/icons/GhdQueueSvg.vue';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { PagingRequest } from '@/shared/models/iAM/paging';
 import ScenarioService from '@/services/scenario.service';
+import { useStore } from 'vuex'; 
+import { useRouter } from 'vue-router'; 
 
-@Component({
-    components: {
-        MigrateLegacySimulationDialog,
-        ConfirmCloneScenarioAlert: Alert,
-        ConfirmDeleteAlert: Alert,
-        ConfirmCancelAlert: Alert,
-        ConfirmRollupAlert: Alert,
-        ConfirmAnalysisRunAlert: Alert,
-        ConfirmAnalysisRunAlertWithButtons: AlertWithButtons,
-        ConfirmAnalysisRunAlertPrehecks: AlertPreChecks,
-        ConfirmConvertToRelationalAlert: Alert,
-        ReportsDownloaderDialog,
-        CreateScenarioDialog,
-        FilterScenarioList,
-        CloneScenarioDialog,
-        CreateNetworkDialog,
-        ShareScenarioDialog,
-        ShowAggregationDialog,
-        CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
-        Alert,
-        AlertWithButtons,
-        AlertPreChecks,
-        GhdShareSvg,
-        GhdStarSvg,
-        GhdQueueSvg
-    },
-})
-export default class Scenarios extends Vue {
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
-    @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
+    let store = useStore(); 
+    const $router = useRouter(); 
 
-    @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
-    @State(state => state.scenarioModule.currentUserScenarioPage) stateUserScenariosPage: Scenario[];
+    let stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
+    const stateScenarios: Scenario[] = shallowReactive(store.state.scenarioModule.scenarios); 
+
+    const stateSharedScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentSharedScenariosPage) ;
+    const stateUserScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentUserScenarioPage) ;
+
+    let stateTotalSharedScenarios: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalSharedScenarios) ;
+    let stateTotalUserScenarios: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalUserScenarios) ;
+
+    const stateWorkQueuePage: QueuedWork[] = shallowReactive(store.state.scenarioModule.currentWorkQueuePage) ;
+    let stateTotalQueuedSimulations: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalQueuedSimulations) ;
+    const stateFastWorkQueuePage: QueuedWork[] = shallowReactive(store.state.scenarioModule.currentFastWorkQueuePage);
+    let stateTotalFastQueuedItems: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalFastQueuedItems);
+
+    let navigation: any[] = (store.state.breadcrumbModule.navigation) ; 
+
+    let authenticated:boolean = (store.state.authenticationModule.authenticated);
+    let userId: string = (store.state.authenticationModule.userId);
+    let hasAdminAccess: boolean = (store.state.authenticationModule.hasAdminAccess) ; 
+    let hasSimulationAccess:boolean = (store.state.authenticationModule.hasSimulationAccess) ; 
+
+    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification')}
+    async function addWarningNotificationAction(payload?: any): Promise<any>{await store.dispatch('addWarningNotification')}
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
+    async function addInfoNotificationAction(payload?: any): Promise<any>{await store.dispatch('addInfoNotification')}
+    async function getScenariosAction(payload?: any): Promise<any>{await store.dispatch('getScenarios')}
+    async function getSharedScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getSharedScenariosPage')}
+    async function createScenarioAction(payload?: any): Promise<any>{await store.dispatch('createScenario')}
+    async function cloneScenarioAction(payload?: any): Promise<any>{await store.dispatch('cloneScenario')}
+
+    async function updateScenarioAction(payload?: any): Promise<any>{await store.dispatch('updateScenario')}
+    async function deleteScenarioAction(payload?: any): Promise<any>{await store.dispatch('deleteScenario')}
+    async function cancelWorkQueueItemAction(payload?: any): Promise<any>{await store.dispatch('cancelWorkQueueItem')}
+    async function cancelFastQueueItemAction(payload?: any): Promise<any>{await store.dispatch('cancelFastQueueItem')}
+    async function runSimulationAction(payload?: any): Promise<any>{await store.dispatch('runSimulation')}
+
+    async function migrateLegacySimulationDataAction(payload?: any): Promise<any>{await store.dispatch('migrateLegacySimulationData')}
+    async function updateSimulationAnalysisDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationAnalysisDetail')}
+    async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail')}
+    async function updateNetworkRollupDetailAction(payload?: any): Promise<any>{await store.dispatch('updateNetworkRollupDetail')}
+
+    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario')} 
+    async function upsertBenefitQuantifierAction(payload?: any): Promise<any>{await store.dispatch('upsertBenefitQuantifier')} 
+    async function aggregateNetworkDataAction(payload?: any): Promise<any>{await store.dispatch('aggregateNetworkData')} 
+    async function getUserScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getUserScenariosPage')}
+
+    async function updateQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateQueuedWorkStatus')} 
+    async function getWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getWorkQueuePage')} 
+    async function getFastWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getFastWorkQueuePage')} 
+    async function updateFastQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateFastQueuedWorkStatus')} 
     
-    @State(state => state.scenarioModule.totalSharedScenarios) stateTotalSharedScenarios: number;
-    @State(state => state.scenarioModule.totalUserScenarios) stateTotalUserScenarios: number;
-    
-    @State(state => state.scenarioModule.currentWorkQueuePage) stateWorkQueuePage: QueuedWork[];
-    @State(state => state.scenarioModule.totalQueuedSimulations) stateTotalQueuedSimulations: number;
-    @State(state => state.scenarioModule.currentFastWorkQueuePage) stateFastWorkQueuePage: QueuedWork[];
-    @State(state => state.scenarioModule.totalFastQueuedItems) stateTotalFastQueuedItems: number;
-
-    @State(state => state.breadcrumbModule.navigation) navigation: any[];
-
-    @State(state => state.authenticationModule.authenticated)
-    authenticated: boolean;
-    @State(state => state.authenticationModule.userId) userId: string;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.authenticationModule.hasSimulationAccess) hasSimulationAccess: boolean;
-
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('addWarningNotification') addWarningNotificationAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('addInfoNotification') addInfoNotificationAction: any;
-    @Action('getScenarios') getScenariosAction: any;
-    @Action('getSharedScenariosPage') getSharedScenariosPageAction: any;  
-    @Action('createScenario') createScenarioAction: any;
-    @Action('cloneScenario') cloneScenarioAction: any;
-    @Action('updateScenario') updateScenarioAction: any;
-    @Action('deleteScenario') deleteScenarioAction: any;
-    @Action('cancelWorkQueueItem') cancelWorkQueueItemAction: any;
-    @Action('cancelFastQueueItem') cancelFastQueueItemAction: any;
-    @Action('runSimulation') runSimulationAction: any;
-    @Action('validateSimulation') validateSimulationAction: any;
-    @Action('migrateLegacySimulationData')
-    migrateLegacySimulationDataAction: any;
-    @Action('updateSimulationAnalysisDetail')
-    updateSimulationAnalysisDetailAction: any;
-    @Action('updateSimulationReportDetail')
-    updateSimulationReportDetailAction: any;
-    @Action('updateNetworkRollupDetail') updateNetworkRollupDetailAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
-    @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
-    @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
-    @Action('getUserScenariosPage') getUserScenariosPageAction: any;
-
-    @Action('updateQueuedWorkStatus') updateQueuedWorkStatusAction: any;
-    @Action('getWorkQueuePage') getWorkQueuePageAction: any;
-    @Action('getFastWorkQueuePage') getFastWorkQueuePageAction: any;
-    @Action('updateFastQueuedWorkStatus') updateFastQueuedWorkStatusAction: any;
-    
-    networks: Network[] = [];
-    scenarioGridHeaders: DataTableHeader[] = [
+    let networks: Network[] = [];
+    let scenarioGridHeaders: DataTableHeader[] = [
         {
             text: 'Scenario',
             value: 'name',
@@ -877,7 +850,7 @@ export default class Scenarios extends Vue {
             width: '',
         },
     ];
-    workQueueGridHeaders: DataTableHeader[] = [
+    let workQueueGridHeaders: DataTableHeader[] = [
         {
             text: 'Queue Position',
             value: 'queuePosition',
@@ -968,138 +941,148 @@ export default class Scenarios extends Vue {
         },        
     ];
 
-    actionItems: ScenarioActions[] = [];
-    actionItemsForSharedScenario: ScenarioActions[] = [];
-    actionItemsForWorkQueue: ScenarioActions[] = [];
-    actionItemsForFastWorkQueue: ScenarioActions[] = [];
-    tabItems: TabItems[] = [];
-    tab: string = '';
-    availableActions: any;
-    availableSimulationActions: any;
-    nameUpdate: string = '';
-    sortedMineCategory: string = '';
-    sortedMineValue: string = '';
-    sortedCategory: string = '';
-    sortedValue: string = '';
-    scenarios: Scenario[] = [];
+    let actionItems: ScenarioActions[] = [];
+    let actionItemsForSharedScenario: ScenarioActions[] = [];
+    let actionItemsForWorkQueue: ScenarioActions[] = [];
+    let actionItemsForFastWorkQueue: ScenarioActions[] = [];
+    let tabItems: TabItems[] = [];
+    let tab: string = '';
+    let availableActions: any;
+    let availableSimulationActions: any;
+    let nameUpdate: string = '';
 
-    preCheckStatus: any;
-    preCheckMessage: any;
-    runAnalysisScenario: Scenario = clone(emptyScenario);
+    let scenarios: Scenario[] = [];
 
-    userScenarios: Scenario[] = [];
-    currentUserScenariosPage: Scenario[] = []
-    userScenariosPagination: Pagination = clone(emptyPagination);
-    totalUserScenarios: number = 0;
+    let userScenarios: Scenario[] = [];
+    let currentUserScenariosPage: Scenario[] = []
+    const userScenariosPagination: Pagination = shallowReactive(clone(emptyPagination));
 
-    sharedScenarios: Scenario[] = [];
-    currentSharedScenariosPage: Scenario[] = [];
-    sharedScenariosPagination:  Pagination = clone(emptyPagination);    
-    totalSharedScenarios: number = 0;
-    initializing: boolean = true;
+    let totalUserScenarios: ShallowRef<number> = shallowRef(0);
+
+    let sharedScenarios: Scenario[] = [];
+    let currentSharedScenariosPage: Scenario[] = [];
+    const sharedScenariosPagination: Pagination = shallowReactive(clone(emptyPagination));    
+    let totalSharedScenarios: Ref<number> = ref(0);
+    let initializing: boolean = true;
     
-    searchMine: string = '';
-    currentSearchMine: string = '';
-    searchShared: string = '';
-    currentSearchShared: string = '';
+    let searchMine: string = '';
+    let currentSearchMine: string = ''
+    let searchShared: string = '';
+    let currentSearchShared: string = '';
     //confirmRollupAlertData: AlertData = clone(emptyAlertData);
     //showCreateNetworkDialog: boolean = false;
-    reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(
-        emptyReportsDownloadDialogData,
-    );
-    confirmAnalysisRunAlertData: AlertDataWithButtons = clone(emptyAlertDataWithButtons);
-    onSecondConfirmAnalysisRunAlertData: AlertPreChecksData = clone(emptyAlertPreChecksData);
-    shareScenarioDialogData: ShareScenarioDialogData = clone(
-        emptyShareScenarioDialogData,
-    );
+    let reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(emptyReportsDownloadDialogData,);
+
+    let confirmAnalysisRunAlertData: AlertData = clone(emptyAlertData);
+    let shareScenarioDialogData: ShareScenarioDialogData = clone(emptyShareScenarioDialogData,);
     
-    ConfirmConvertJsonToRelationalData: AlertData = clone(emptyAlertData);
-    confirmCloneScenarioAlertData: AlertData = clone(emptyAlertData);
-    cloneScenarioDialogData: CloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    confirmCancelAlertData: AlertData = clone(emptyAlertData);
-    showCreateScenarioDialog: boolean = false;
-    showFilterScenarioList: boolean = false;
-    showSharedFilterScenarioList: boolean = false;
-    selectedScenario: Scenario = clone(emptyScenario);   
-    networkDataAssignmentStatus: string = '';
-    rules: InputValidationRules = rules;
-    showMigrateLegacySimulationDialog: boolean = false;
-    showImportExportCommittedProjectsDialog: boolean = false;
-    alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
-    selectedScenarioId: string = "";
+    let ConfirmConvertJsonToRelationalData: AlertData = clone(emptyAlertData);
+    let confirmCloneScenarioAlertData: AlertData = clone(emptyAlertData);
+    let cloneScenarioDialogData: CloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
+    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let confirmCancelAlertData: AlertData = clone(emptyAlertData);
+    let showCreateScenarioDialog: boolean = false;
+    let selectedScenario: Scenario = clone(emptyScenario);   
+    let networkDataAssignmentStatus: string = '';
+    let rules: InputValidationRules = validationRules;
+    let showMigrateLegacySimulationDialog: boolean = false;
+    let showImportExportCommittedProjectsDialog: boolean = false;
+    let alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
+    let selectedScenarioId: string = "";
     
-    currentWorkQueuePage: QueuedWork[] = [];
-    workQueuePagination: Pagination = clone(emptyPagination);
-    totalQueuedSimulations: number = 0;
-    initializingWorkQueue: boolean = true;
-    selectedQueuedWork: QueuedWork = clone(emptyQueuedWork);
+    let currentWorkQueuePage: QueuedWork[] = [];
+    let workQueuePagination: Pagination = clone(emptyPagination);
+    let totalQueuedSimulations: ShallowRef<number> = shallowRef(0);
+    let initializingWorkQueue: boolean = true;
+    let selectedQueuedWork: QueuedWork = clone(emptyQueuedWork);
 
-    currentFastWorkQueuePage: QueuedWork[] = [];
-    fastWorkQueuePagination: Pagination = clone(emptyPagination);
-    totalFastQueuedItems: number = 0;
-    initializingFastWorkQueue: boolean = true;
-    selectedFastQueuedWork: QueuedWork = clone(emptyQueuedWork);
+    let currentFastWorkQueuePage: QueuedWork[] = [];
+    const fastWorkQueuePagination: Pagination = shallowReactive(clone(emptyPagination));
+    let totalFastQueuedItems: ShallowRef<number> = shallowRef(0);
+    let initializingFastWorkQueue: boolean = true;
+    let selectedFastQueuedWork: QueuedWork = clone(emptyQueuedWork);
 
-    aggragateDialogData: any = { showDialog: false };
+    let aggragateDialogData: any = { showDialog: false };
 
-    @Watch('stateNetworks')
-    onStateNetworksChanged() {
-        this.networks = clone(this.stateNetworks);
-        if (hasValue(this.networks)) {
-            this.initializeScenarioPages()
+    watch(stateNetworks, onStateNetworksChanged) 
+    function onStateNetworksChanged() {
+        networks = clone(stateNetworks);
+        if (hasValue(networks)) {
+            initializeScenarioPages()
         }
     }
 
-    @Watch('stateScenarios', {deep: true})
-    onStateScenariosChanged() {
-        this.scenarios = clone(this.stateScenarios);
+    //@Watch('stateScenarios', {deep: true}) // make it reactive to go deep
+    watch(stateScenarios, onStateScenariosChanged) 
+    function onStateScenariosChanged() {
+        scenarios = clone(stateScenarios);
     }
 
-    @Watch('stateSharedScenariosPage', {deep: true}) onStateSharedScenariosPageChanged(){
-        this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
+    //@Watch('stateSharedScenariosPage', {deep: true})
+    watch(stateSharedScenariosPage, onStateSharedScenariosPageChanged) 
+    function onStateSharedScenariosPageChanged(){
+        currentSharedScenariosPage = clone(stateSharedScenariosPage);
     }
-    @Watch('stateTotalSharedScenarios') onStateTotalSharedScenariosChanged(){
-        this.totalSharedScenarios = this.stateTotalSharedScenarios;
+
+    watch(stateTotalSharedScenarios, onStateTotalSharedScenariosChanged) 
+    function onStateTotalSharedScenariosChanged(){
+        totalSharedScenarios = stateTotalSharedScenarios;
     }
-    @Watch('totalSharedScenarios') onTotalSharedScenariosChanged(){
-        this.setTabTotals();
+    watch(totalSharedScenarios, onTotalSharedScenariosChanged) 
+    function onTotalSharedScenariosChanged(){
+        setTabTotals();
+    }
+    //@Watch('stateUserScenariosPage', {deep: true}) 
+    watch(stateUserScenariosPage, onStateUserScenariosPageChanged) 
+    function onStateUserScenariosPageChanged(){
+        currentUserScenariosPage = clone(stateUserScenariosPage);
+    }
+
+    watch(stateTotalUserScenarios, onStateTotalUserScenariosChanged) 
+    function onStateTotalUserScenariosChanged(){
+        totalUserScenarios = stateTotalUserScenarios;
+    }
+    watch(totalUserScenarios, onTotalUserScenariosChanged) 
+    function onTotalUserScenariosChanged(){
+        setTabTotals();
     }
     
-    @Watch('stateUserScenariosPage', {deep: true}) onStateUserScenariosPageChanged(){
-        this.currentUserScenariosPage = clone(this.stateUserScenariosPage);
-    }
-    @Watch('stateTotalUserScenarios') onStateTotalUserScenariosChanged(){
-        this.totalUserScenarios = this.stateTotalUserScenarios;
-    }
-    @Watch('totalUserScenarios') onTotalUserScenariosChanged(){
-        this.setTabTotals();
-    }
-    
-    @Watch('stateWorkQueuePage', {deep: true}) onStateWorkQueuePageChanged(){
-        this.currentWorkQueuePage = clone(this.stateWorkQueuePage);
-    }
-    @Watch('stateTotalQueuedSimulations') onStateTotalQueuedSimulations(){
-        this.totalQueuedSimulations = this.stateTotalQueuedSimulations;
-    }
-    @Watch('totalQueuedSimulations') onTotalQueuedSimulationsChanged(){
-        this.setTabTotals();
+    //@Watch('stateWorkQueuePage', {deep: true})
+    watch(stateWorkQueuePage, onStateWorkQueuePageChanged) 
+    function onStateWorkQueuePageChanged(){
+        currentWorkQueuePage = clone(stateWorkQueuePage);
     }
 
-    @Watch('stateFastWorkQueuePage', {deep: true}) onStateFastWorkQueuePageChanged(){
-        this.currentFastWorkQueuePage = clone(this.stateFastWorkQueuePage);
+    watch(stateTotalQueuedSimulations, onStateTotalQueuedSimulations) 
+    function onStateTotalQueuedSimulations(){
+        totalQueuedSimulations = stateTotalQueuedSimulations;
     }
-    @Watch('stateTotalFastQueuedItems') onStateTotalFastQueuedItemsChanged(){
-        this.totalFastQueuedItems = this.stateTotalFastQueuedItems;
-    }
-    @Watch('totalFastQueuedItems') onTotalFastQueuedItemsChanged(){
-        this.setTabTotals();
+    watch(totalQueuedSimulations, onTotalQueuedSimulationsChanged) 
+    function onTotalQueuedSimulationsChanged(){
+        setTabTotals();
     }
 
-    @Watch('userScenariosPagination') onUserScenariosPagination() {
-        if(this.initializing)
+    //@Watch('stateFastWorkQueuePage', {deep: true})
+    watch(stateFastWorkQueuePage, onStateFastWorkQueuePageChanged) 
+    function onStateFastWorkQueuePageChanged(){
+        currentFastWorkQueuePage = clone(stateFastWorkQueuePage);
+    }
+    @Watch('stateTotalFastQueuedItems')
+    watch(stateTotalFastQueuedItems, onStateTotalFastQueuedItemsChanged) 
+    function onStateTotalFastQueuedItemsChanged(){
+        totalFastQueuedItems = stateTotalFastQueuedItems;
+    }
+  
+    watch(totalFastQueuedItems, onTotalFastQueuedItemsChanged) 
+    function onTotalFastQueuedItemsChanged(){
+        setTabTotals();
+    }
+
+    watch(userScenariosPagination, onUserScenariosPagination) 
+    function onUserScenariosPagination() {
+        if(initializing)
             return;
-        const { sortBy, descending, page, rowsPerPage } = this.userScenariosPagination;
+        const { sortBy, descending, page, rowsPerPage } = userScenariosPagination;
 
         const request: PagingRequest<Scenario>= {
             page: page,
@@ -1113,16 +1096,17 @@ export default class Scenarios extends Vue {
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
-            search: this.currentSearchMine
+            search: currentSearchMine
         };
-        if(hasValue(this.networks) )
-            this.getUserScenariosPageAction(request); 
+        if(hasValue(networks) )
+            getUserScenariosPageAction(request); 
     }
 
-    @Watch('sharedScenariosPagination') onSharedScenariosPagination() {
-        if(this.initializing)
+    watch(sharedScenariosPagination, onSharedScenariosPagination) 
+    function onSharedScenariosPagination() {
+        if(initializing)
             return;
-        const { sortBy, descending, page, rowsPerPage } = this.sharedScenariosPagination;
+        const { sortBy, descending, page, rowsPerPage } = sharedScenariosPagination;
 
         const request: PagingRequest<Scenario>= {
             page: page,
@@ -1136,18 +1120,18 @@ export default class Scenarios extends Vue {
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
-            search: this.currentSearchShared
+            search: currentSearchShared
         };
-        if(hasValue(this.networks) )
-            this.getSharedScenariosPageAction(request); 
+        if(hasValue(networks) )
+            getSharedScenariosPageAction(request); 
     }
 
     // Refresh both lists and counts(gets called when clone, delete, create operations are performed)
-    onScenariosPagination() {
-        if(this.initializing)
+    function onScenariosPagination() {
+        if(initializing)
             return;
 
-        const { sortBy, descending, page, rowsPerPage } = this.userScenariosPagination;
+        const { sortBy, descending, page, rowsPerPage } = userScenariosPagination;
         const request: PagingRequest<Scenario>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -1160,27 +1144,29 @@ export default class Scenarios extends Vue {
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
-            search: this.currentSearchMine
+            search: currentSearchMine
         };
 
-        if(hasValue(this.networks))
-            this.getUserScenariosPageAction(request).then(() => {
-                this.onSharedScenariosPagination();
+        if(hasValue(networks))
+            getUserScenariosPageAction(request).then(() => {
+                onSharedScenariosPagination();
             });
     }
 
-    @Watch('workQueuePagination') onWorkQueuePagination() {
-        this.doWorkQueuePagination();
+    watch(workQueuePagination, onWorkQueuePagination) 
+    function onWorkQueuePagination() {
+        doWorkQueuePagination();
     }
 
-    @Watch('fastWorkQueuePagination') onFastWorkQueuePagination() {
-        this.doFastQueuePagination();
+    watch(fastWorkQueuePagination, onFastWorkQueuePagination) 
+    function onFastWorkQueuePagination() {
+        doFastQueuePagination();
     }
 
-    doWorkQueuePagination() {
-        if(this.initializingWorkQueue)
+    function doWorkQueuePagination() {
+        if(initializingWorkQueue)
             return;
-        const { sortBy, descending, page, rowsPerPage } = this.workQueuePagination;
+        const { sortBy, descending, page, rowsPerPage } = workQueuePagination;
 
         const workQueueRequest: PagingRequest<QueuedWork>= {
             page: page,
@@ -1196,13 +1182,13 @@ export default class Scenarios extends Vue {
             isDescending: descending != null ? descending : false,
             search: ""
         };
-        this.getWorkQueuePageAction(workQueueRequest);    
+        getWorkQueuePageAction(workQueueRequest);    
     }
 
-    doFastQueuePagination() {
-        if(this.initializingWorkQueue)
+    function doFastQueuePagination() {
+        if(initializingWorkQueue)
             return;
-        const { sortBy, descending, page, rowsPerPage } = this.fastWorkQueuePagination;
+        const { sortBy, descending, page, rowsPerPage } = fastWorkQueuePagination;
 
         const workQueueRequest: PagingRequest<QueuedWork>= {
             page: page,
@@ -1218,46 +1204,47 @@ export default class Scenarios extends Vue {
             isDescending: descending != null ? descending : false,
             search: ""
         };
-        this.getFastWorkQueuePageAction(workQueueRequest);    
+        getFastWorkQueuePageAction(workQueueRequest);    
     }
 
-    mounted() {
-        this.networks = clone(this.stateNetworks);
-        if (hasValue(this.networks) ) {
-            this.initializeScenarioPages();
+    onMounted(() => mounted);
+    function mounted() {
+        networks = clone(stateNetworks);
+        if (hasValue(networks) ) {
+            initializeScenarioPages();
         } 
         
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
-            this.getDataMigrationStatus,
+            getDataMigrationStatus,
         );
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent,
-            this.getScenarioAnalysisDetailUpdate,
+            getScenarioAnalysisDetailUpdate,
         );
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent,
-            this.updateWorkQueue,
+            updateWorkQueue,
         );
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent,
-            this.getWorkQueueUpdate,
+            getWorkQueueUpdate,
         );
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastFastWorkQueueUpdateEvent,
-            this.updateFastWorkQueue,
+            updateFastWorkQueue,
         );
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent,
-            this.getFastWorkQueueUpdate,
+            getFastWorkQueueUpdate,
         );
 
-        this.$statusHub.$on(
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
-            this.getReportStatus,
+            getReportStatus,
         );
 
-        this.availableActions = {
+        availableActions = {
             runAnalysis: 'runAnalysis',
             reports: 'reports',
             settings: 'settings',
@@ -1267,118 +1254,119 @@ export default class Scenarios extends Vue {
             commitedProjects: 'commitedProjects',
             convert:'convert'
         };
-        this.availableSimulationActions = {
+        availableSimulationActions = {
             cancel: 'cancel',
             fastCancel: 'fastCancel'
         }
-        this.actionItemsForSharedScenario = [
+        actionItemsForSharedScenario = [
             {
                 title: 'Run Analysis',
-                action: this.availableActions.runAnalysis,
+                action: availableActions.runAnalysis,
                 icon: require("@/assets/icons/monitor.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Reports',
-                action: this.availableActions.reports,
+                action: availableActions.reports,
                 icon: require("@/assets/icons/clipboard.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Settings',
-                action: this.availableActions.settings,
+                action: availableActions.settings,
                 icon: require("@/assets/icons/gear.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Committed Projects',
-                action: this.availableActions.commitedProjects,
+                action: availableActions.commitedProjects,
                 icon: require("@/assets/icons/committed-projects.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Convert Output from Json to Relational',
-                action: this.availableActions.convert,
+                action: availableActions.convert,
                 icon: "fas fa-exchange-alt",
                 isCustomIcon: false
             },
             {
                 title: 'Clone',
-                action: this.availableActions.clone,
+                action: availableActions.clone,
                 icon: require("@/assets/icons/copy.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Delete',
-                action: this.availableActions.delete,
+                action: availableActions.delete,
                 icon: require("@/assets/icons/trash.svg"),
                 isCustomIcon: true
             }           
         ];
-        this.actionItemsForWorkQueue = [
+        actionItemsForWorkQueue = [
              {
                 title: 'Cancel Work',
-                action: this.availableSimulationActions.cancel,
+                action: availableSimulationActions.cancel,
                 icon: require("@/assets/icons/x-circle.svg"),
                 isCustomIcon: true
             }             
         ];
-        this.actionItemsForFastWorkQueue = [
+        actionItemsForFastWorkQueue = [
              {
                 title: 'Cancel Work',
-                action: this.availableSimulationActions.fastCancel,
+                action: availableSimulationActions.fastCancel,
                 icon: require("@/assets/icons/x-circle.svg"),
                 isCustomIcon: true
             }             
         ];
-        this.actionItems = this.actionItemsForSharedScenario.slice();
-        this.actionItems.splice(4, 0, {
+        actionItems = actionItemsForSharedScenario.slice();
+        actionItems.splice(4, 0, {
             title: 'Share',
-            action: this.availableActions.share,
+            action: availableActions.share,
             icon: require("@/assets/icons/share-geometric.svg"),
                 isCustomIcon: true
         });
-        this.tabItems.push(
-            { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: this.totalUserScenarios },
-            { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: this.totalSharedScenarios },
-            { name: 'General work queue', icon: require("@/assets/icons/queue.svg"), count: this.totalQueuedSimulations },
+        tabItems.push(
+            { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: totalUserScenarios },
+            { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: totalSharedScenarios },
+            { name: 'General work queue', icon: require("@/assets/icons/queue.svg"), count: totalQueuedSimulations },
         );
-        this.tab = 'My scenarios';
+        tab = 'My scenarios';
     }
 
-    beforeDestroy() {
-        this.$statusHub.$off(
+    onBeforeUnmount(()=> beforeDestroy); 
+    function beforeDestroy() {
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
-            this.getDataMigrationStatus,
+            getDataMigrationStatus,
         );
-        this.$statusHub.$off(
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent,
-            this.getScenarioAnalysisDetailUpdate,
+            getScenarioAnalysisDetailUpdate,
         );
-        this.$statusHub.$off(
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent,
-            this.updateWorkQueue,
+            updateWorkQueue,
         );
-        this.$statusHub.$off(
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent,
-            this.getWorkQueueUpdate,
+            getWorkQueueUpdate,
         );
-        this.$statusHub.$off(
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastFastWorkQueueUpdateEvent,
-            this.updateFastWorkQueue,
+            updateFastWorkQueue,
         );
-        this.$statusHub.$off(
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent,
-            this.getFastWorkQueueUpdate,
+            getFastWorkQueueUpdate,
         );
-        this.$statusHub.$off(
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
-            this.getReportStatus,
+            getReportStatus,
         );
     }
 
-    initializeScenarioPages(){
-        const { sortBy, descending, page, rowsPerPage } = this.sharedScenariosPagination;
+    function initializeScenarioPages(){
+        const { sortBy, descending, page, rowsPerPage } = sharedScenariosPagination;
 
         const request: PagingRequest<Scenario> = {
             page: 1,
@@ -1408,80 +1396,78 @@ export default class Scenarios extends Vue {
             isDescending: false,
             search: ''
         };        
-        this.getSharedScenariosPageAction(request).then(() =>
-        this.getUserScenariosPageAction(request).then(() =>
-        this.getWorkQueuePageAction(workQueueRequest).then(() => 
-        this.getFastWorkQueuePageAction(workQueueRequest).then(() => {
-            this.initializing = false;
-            this.initializingWorkQueue = false;
-            this.initializingFastWorkQueue = false;
-            this.totalUserScenarios = this.stateTotalUserScenarios;
-            this.totalSharedScenarios = this.stateTotalSharedScenarios;
-            this.totalQueuedSimulations = this.stateTotalQueuedSimulations;
-            this.totalFastQueuedItems = this.stateTotalFastQueuedItems;
-            this.currentUserScenariosPage = clone(this.stateUserScenariosPage);
-            this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
-            this.currentWorkQueuePage = clone(this.stateWorkQueuePage);
-            this.currentFastWorkQueuePage = clone(this.stateFastWorkQueuePage);
+        getSharedScenariosPageAction(request).then(() =>
+        getUserScenariosPageAction(request).then(() =>
+        getWorkQueuePageAction(workQueueRequest).then(() => 
+        getFastWorkQueuePageAction(workQueueRequest).then(() => {
+            initializing = false;
+            initializingWorkQueue = false;
+            initializingFastWorkQueue = false;
+            totalUserScenarios = stateTotalUserScenarios;
+            totalSharedScenarios = stateTotalSharedScenarios;
+            totalQueuedSimulations = stateTotalQueuedSimulations;
+            totalFastQueuedItems = stateTotalFastQueuedItems;
+            currentUserScenariosPage = clone(stateUserScenariosPage);
+            currentSharedScenariosPage = clone(stateSharedScenariosPage);
+            currentWorkQueuePage = clone(stateWorkQueuePage);
+            currentFastWorkQueuePage = clone(stateFastWorkQueuePage);
         })))); 
     }
 
-    formatDate(dateToFormat: Date) {
+    function formatDate(dateToFormat: Date) {
         return hasValue(dateToFormat)
             ? moment(dateToFormat).format('M/D/YYYY')
             : null;
     }
 
-    formatDateWithTime(dateToFormat: Date) {
+    function formatDateWithTime(dateToFormat: Date) {
     return hasValue(dateToFormat)
         ? moment(dateToFormat).format('M/D/YYYY hh:mm:ss')
         : null;
     }
 
-    canModifySharedScenario(scenarioUsers: ScenarioUser[]) {
+    function canModifySharedScenario(scenarioUsers: ScenarioUser[]) {
         const currentUser: string = getUserName();
         const scenarioUserCanModify = (user: ScenarioUser) =>
             user.username === currentUser && user.canModify;
         return (
-            this.hasAdminAccess ||
-            this.hasSimulationAccess ||
+            hasAdminAccess ||
+            hasSimulationAccess ||
             any(scenarioUserCanModify, scenarioUsers)
         );
     }
 
     // TODO: update to send no payload when API is modified to migrate ALL simulations
-    onStartDataMigration() {
+    function onStartDataMigration() {
         // the legacy scenario id is hardcoded to our test scenario "JML Run District 8"
-        this.migrateLegacySimulationDataAction({
+        migrateLegacySimulationDataAction({
             simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
-        }).then(() => this.initializeScenarioPages());
+        }).then(() => initializeScenarioPages());
     }
 
-    onEditScenarioName(scenario: Scenario, name: string) {
+    function onEditScenarioName(scenario: Scenario, name: string) {
         scenario.name = name;
         if (hasValue(scenario.name)) {
-            this.updateScenarioAction({ scenario: scenario }).then(() => {
-                if(this.tab == '0')
-                    this.onUserScenariosPagination();
+            updateScenarioAction({ scenario: scenario }).then(() => {
+                if(tab == '0')
+                    onUserScenariosPagination();
                 else
-                    this.onSharedScenariosPagination();
+                    onSharedScenariosPagination();
             });
         } else {
-            this.scenarios = [];
-            setTimeout(() => (this.scenarios = clone(this.stateScenarios)));
+            scenarios = [];
+            setTimeout(() => (scenarios = clone(stateScenarios)));
         }
     }
 
-    prepareForNameEdit(name: string) {
-        this.nameUpdate = name;
+    function prepareForNameEdit(name: string) {
+        nameUpdate = name;
     }
 
-    onShowConfirmAnalysisRunAlert(scenario: Scenario) {
-        this.selectedScenario = clone(scenario);
-        let AlertButton = emptyAlertButton;
-        
-        AlertButton.label  = "Run Pre-Checks" + "Cancel" + "Continue";
-        this.confirmAnalysisRunAlertData = {
+    function onShowConfirmAnalysisRunAlert(scenario: Scenario) {
+        selectedScenario = clone(scenario);
+
+        confirmAnalysisRunAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1492,88 +1478,21 @@ export default class Scenarios extends Vue {
         };
     }
 
-    async onConfirmAnalysisRunAlertSubmit(submit: string) {
-        this.confirmAnalysisRunAlertData = clone(emptyAlertDataWithButtons);
-        this.runAnalysisScenario = this.selectedScenario;
+    function onConfirmAnalysisRunAlertSubmit(submit: boolean) {
+        confirmAnalysisRunAlertData = clone(emptyAlertData);
 
-        if(submit == "pre-checks"){
-                if (submit && this.selectedScenario.id !== getBlankGuid()) 
-                {
-                        await ScenarioService.upsertValidateSimulation(this.selectedScenario.networkId, this.selectedScenario.id).then((response: AxiosResponse) => {
-                        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                            this.addSuccessNotificationAction({message: "Simulation pre-checks completed",});
-                            if(this.preCheckStatus != undefined && this.preCheckMessage != undefined)
-                            this.preCheckStatus = response.data[0].status;
-                            this.preCheckMessage = response.data[0].message;
-                        }
-                    });
-                }
-                this.secondRunAnalysisModal();
-             }
-        else if(submit == "continue") {
-            if (submit && this.selectedScenario.id !== getBlankGuid()) {
-                this.runSimulationAction({
-                    networkId: this.selectedScenario.networkId,
-                    scenarioId: this.selectedScenario.id,
-                }).then(() => (this.selectedScenario = clone(emptyScenario)));
-            }
+        if (submit && selectedScenario.id !== getBlankGuid()) {
+            runSimulationAction({
+                networkId: selectedScenario.networkId,
+                scenarioId: selectedScenario.id,
+            }).then(() => (selectedScenario = clone(emptyScenario)));
         }
     }
 
-    onSecondConfirmAnalysisRunAlertSubmit(submit: string) {
-        this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertPreChecksData);
-        
-        this.selectedScenario = this.runAnalysisScenario;
+    function onShowConfirmConvertJsonToRelationalAlert(scenario: Scenario) {
+        selectedScenario = clone(scenario);
 
-        if (submit && this.selectedScenario.id !== getBlankGuid()) {
-                this.runSimulationAction({
-                    networkId: this.selectedScenario.networkId,
-                    scenarioId: this.selectedScenario.id,
-                }).then(() => (this.selectedScenario = clone(emptyScenario)));
-            }
-    }
-
-    secondRunAnalysisModal() {
-            this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertPreChecksData);
-            this.preCheckMessage = this.preCheckMessage.split('.');
-            this.preCheckMessage.pop();
-
-            if(this.preCheckStatus = 0) 
-            {
-                (this.selectedScenario = clone(emptyScenario));
-                this.onSecondConfirmAnalysisRunAlertData = {
-                showDialog: true,
-                heading: 'Error',
-                choice: false,
-                message:(this.preCheckMessage),
-                }
-            }
-            else if(this.preCheckStatus = 1)
-            {
-                (this.selectedScenario = clone(emptyScenario));
-                this.onSecondConfirmAnalysisRunAlertData = {
-                showDialog: true,
-                heading: 'Warnings',
-                choice: true,
-                message:(this.preCheckMessage),
-                }
-            }
-            else if(this.preCheckStatus = 2)
-            {
-                (this.selectedScenario = clone(emptyScenario));
-                this.onSecondConfirmAnalysisRunAlertData = {
-                showDialog: true,
-                heading: 'Information',
-                choice: true,
-                message:(this.preCheckMessage),
-                }
-            }
-    }
-
-    onShowConfirmConvertJsonToRelationalAlert(scenario: Scenario) {
-        this.selectedScenario = clone(scenario);
-
-        this.ConfirmConvertJsonToRelationalData = {
+        ConfirmConvertJsonToRelationalData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1582,16 +1501,16 @@ export default class Scenarios extends Vue {
         };
     }
 
-    onConfirmConvertJsonToRelationalAlertSubmit(submit: boolean) {
-        this.ConfirmConvertJsonToRelationalData = clone(emptyAlertData);
+    function onConfirmConvertJsonToRelationalAlertSubmit(submit: boolean) {
+        ConfirmConvertJsonToRelationalData = clone(emptyAlertData);
 
-        if (submit && this.selectedScenario.id !== getBlankGuid()) {
-            ScenarioService.ConvertSimulationOutputToRelational(this.selectedScenario.id);
+        if (submit && selectedScenario.id !== getBlankGuid()) {
+            ScenarioService.ConvertSimulationOutputToRelational(selectedScenario.id);
         }
     }
 
-    onShowReportsDownloaderDialog(scenario: Scenario) {
-        this.reportsDownloaderDialogData = {
+    function onShowReportsDownloaderDialog(scenario: Scenario) {
+        reportsDownloaderDialogData = {
             showModal: true,
             scenarioId: scenario.id,
             networkId: scenario.networkId,
@@ -1599,10 +1518,10 @@ export default class Scenarios extends Vue {
         };
     }
 
-    onNavigateToEditScenarioView(localScenario: Scenario) {
-        this.selectScenarioAction({ scenarioId: localScenario.id });
+    function onNavigateToEditScenarioView(localScenario: Scenario) {
+        selectScenarioAction({ scenarioId: localScenario.id });
 
-        this.$router.push({
+        $router.push({
             path: '/EditScenario/',
             query: {
                 scenarioId: localScenario.id,
@@ -1613,10 +1532,10 @@ export default class Scenarios extends Vue {
         });
     }
 
-    onNavigateToCommittedProjectView(localScenario: Scenario) {
-        this.selectScenarioAction({ scenarioId: localScenario.id });
+    function onNavigateToCommittedProjectView(localScenario: Scenario) {
+        selectScenarioAction({ scenarioId: localScenario.id });
 
-        this.$router.push({
+        $router.push({
             path: '/CommittedProjectsEditor/Scenario/',
             query: {
                 scenarioId: localScenario.id,
@@ -1626,44 +1545,33 @@ export default class Scenarios extends Vue {
             },
         });
     }
-    onNavigateToReportsView(localScenario: Scenario) {
-        this.selectScenarioAction({scenarioId: localScenario.id });
-        this.$router.push({
-            path: '/ReportsAndOutputs/Scenario/',
-            query: {
-                scenarioId: localScenario.id,
-                networkId: localScenario.networkId,
-                scenarioName: localScenario.name,
-                networkName: localScenario.networkName,
-            }
-        });
-    }
-    onShowShareScenarioDialog(scenario: Scenario) {
-        this.shareScenarioDialogData = {
+
+    function onShowShareScenarioDialog(scenario: Scenario) {
+        shareScenarioDialogData = {
             showDialog: true,
             scenario: clone(scenario),
         };
     }
 
-    onShareScenarioDialogSubmit(scenarioUsers: ScenarioUser[]) {
+    function onShareScenarioDialogSubmit(scenarioUsers: ScenarioUser[]) {
         const scenario: Scenario = {
-            ...this.shareScenarioDialogData.scenario,
+            ...shareScenarioDialogData.scenario,
             users: [],
         };
 
-        this.shareScenarioDialogData = clone(emptyShareScenarioDialogData);
+        shareScenarioDialogData = clone(emptyShareScenarioDialogData);
 
         if (!isNil(scenarioUsers) && scenario.id !== getBlankGuid()) {
-            this.updateScenarioAction({
+            updateScenarioAction({
                 scenario: { ...scenario, users: scenarioUsers },
             });
         }
     }
 
-    onShowConfirmCloneScenarioAlert(scenario: Scenario) {
-        this.selectedScenario = clone(scenario);
+    function onShowConfirmCloneScenarioAlert(scenario: Scenario) {
+        selectedScenario = clone(scenario);
 
-        this.confirmCloneScenarioAlertData = {
+        confirmCloneScenarioAlertData = {
             showDialog: true,
             heading: 'Clone Scenario',
             choice: true,
@@ -1671,50 +1579,50 @@ export default class Scenarios extends Vue {
         };
     }
 
-    onShowCloneScenarioDialog(scenario: Scenario) {
-        this.selectedScenario = clone(scenario);
+    function onShowCloneScenarioDialog(scenario: Scenario) {
+        selectedScenario = clone(scenario);
 
-        this.cloneScenarioDialogData = {
+        cloneScenarioDialogData = {
             showDialog: true,
-            scenario: this.selectedScenario
+            scenario: selectedScenario
         };
     }
 
-    onConfirmCloneScenarioAlertSubmit(submit: boolean) {
-        this.confirmCloneScenarioAlertData = clone(emptyAlertData);
+    function onConfirmCloneScenarioAlertSubmit(submit: boolean) {
+        confirmCloneScenarioAlertData = clone(emptyAlertData);
 
-        if (submit && this.selectedScenario.id !== getBlankGuid()) {
-            this.cloneScenarioAction({
-                scenarioId: this.selectedScenario.id,
+        if (submit && selectedScenario.id !== getBlankGuid()) {
+            cloneScenarioAction({
+                scenarioId: selectedScenario.id,
             }).then(() => {
-                this.selectedScenario = clone(emptyScenario)
-                if(this.tab == '0')
-                    this.onUserScenariosPagination();
+                selectedScenario = clone(emptyScenario)
+                if(tab == '0')
+                    onUserScenariosPagination();
                 else
-                    this.onSharedScenariosPagination();
+                    onSharedScenariosPagination();
             });
         }
     }
 
-    onCloneScenarioDialogSubmit(scenario: Scenario) {
-        this.cloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
+    function onCloneScenarioDialogSubmit(scenario: Scenario) {
+        cloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
 
         if (!isNil(scenario)) {
-            this.cloneScenarioAction({
+            cloneScenarioAction({
                 scenarioId: scenario.id,
                 networkId: scenario.networkId,
                 scenarioName: scenario.name
             }).then(() => {
-                this.selectedScenario = clone(emptyScenario)
-                this.onScenariosPagination();
+                selectedScenario = clone(emptyScenario)
+                onScenariosPagination();
             });
         }
     }
 
-    onShowConfirmDeleteAlert(scenario: Scenario) {
-        this.selectedScenario = clone(scenario);
+    function onShowConfirmDeleteAlert(scenario: Scenario) {
+        selectedScenario = clone(scenario);
 
-        this.confirmDeleteAlertData = {
+        confirmDeleteAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1723,10 +1631,10 @@ export default class Scenarios extends Vue {
     }
 
 
-    onShowConfirmCancelAlert(simulation: QueuedWork) {
-        this.selectedQueuedWork = clone(simulation);
+    function onShowConfirmCancelAlert(simulation: QueuedWork) {
+        selectedQueuedWork = clone(simulation);
 
-        this.confirmCancelAlertData = {
+        confirmCancelAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1734,10 +1642,10 @@ export default class Scenarios extends Vue {
         };
     }
 
-    onShowConfirmFastCancelAlert(simulation: QueuedWork) {
-        this.selectedFastQueuedWork = clone(simulation);
+    function onShowConfirmFastCancelAlert(simulation: QueuedWork) {
+        selectedFastQueuedWork = clone(simulation);
 
-        this.confirmCancelAlertData = {
+        confirmCancelAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1745,181 +1653,146 @@ export default class Scenarios extends Vue {
         };
     }
 
-    onConfirmDeleteAlertSubmit(submit: boolean) {
-        this.confirmDeleteAlertData = clone(emptyAlertData);
+    function onConfirmDeleteAlertSubmit(submit: boolean) {
+        confirmDeleteAlertData = clone(emptyAlertData);
 
-        if (submit && this.selectedScenario.id !== getBlankGuid()) {
-            this.deleteScenarioAction({
-                scenarioId: this.selectedScenario.id,
-                scenarioName: this.selectedScenario.name,
+        if (submit && selectedScenario.id !== getBlankGuid()) {
+            deleteScenarioAction({
+                scenarioId: selectedScenario.id,
+                scenarioName: selectedScenario.name,
             }).then(async () => {
-                this.selectedScenario = clone(emptyScenario); 
+                selectedScenario = clone(emptyScenario); 
             });
         }
     }
 
-    onConfirmCancelAlertSubmit(submit: boolean) {
-        this.confirmCancelAlertData = clone(emptyAlertData);
+    function onConfirmCancelAlertSubmit(submit: boolean) {
+        confirmCancelAlertData = clone(emptyAlertData);
 
-        if (submit && this.selectedQueuedWork.id !== getBlankGuid() && this.selectedQueuedWork.id.trim() != '') {
-            this.cancelWorkQueueItem({
-                simulationId: this.selectedQueuedWork.id,
+        if (submit && selectedQueuedWork.id !== getBlankGuid() && selectedQueuedWork.id.trim() != '') {
+            cancelWorkQueueItemAction({
+                simulationId: selectedQueuedWork.id,
             }).then(() => {
-                this.selectedQueuedWork = clone(emptyQueuedWork);
+                selectedQueuedWork = clone(emptyQueuedWork);
             });
         }
-        else if(submit && this.selectedFastQueuedWork.id !== getBlankGuid() && this.selectedFastQueuedWork.id.trim() != '') {
-            this.cancelFastQueueItemAction(this.selectedFastQueuedWork.id).then(() => {
-                this.selectedFastQueuedWork = clone(emptyQueuedWork);
+        else if(submit && selectedFastQueuedWork.id !== getBlankGuid() && selectedFastQueuedWork.id.trim() != '') {
+            cancelFastQueueItemAction(selectedFastQueuedWork.id).then(() => {
+                selectedFastQueuedWork = clone(emptyQueuedWork);
             });
         }
     }
 
 
-    getDataMigrationStatus(data: any) {
+    function getDataMigrationStatus(data: any) {
         const status: any = data.status;
         if (status.indexOf('Error') !== -1) {
-            this.addErrorNotificationAction({
+            addErrorNotificationAction({
                 message: 'Data migration error.',
                 longMessage: data.status,
             });
         } else {
-            this.addInfoNotificationAction({
+            addInfoNotificationAction({
                 message: 'Data migration info.',
                 longMessage: data.status,
             });
         }
     }
 
-    delay(ms: number) {
+    function delay(ms: number) {
         return new Promise( resolve => setTimeout(resolve, ms) );
     }
 
-    getScenarioAnalysisDetailUpdate(data: any) {
-        this.updateSimulationAnalysisDetailAction({
+    function getScenarioAnalysisDetailUpdate(data: any) {
+        updateSimulationAnalysisDetailAction({
             simulationAnalysisDetail: data.simulationAnalysisDetail,
         });
         const updatedQueueItem: queuedWorkStatusUpdate = {
             id: data.simulationAnalysisDetail.simulationId as string + WorkType[WorkType.SimulationAnalysis] ,
             status: data.simulationAnalysisDetail.status
         }
-        this.updateQueuedWorkStatusAction({
+        updateQueuedWorkStatusAction({
             workQueueStatusUpdate: updatedQueueItem
         })                            
     }
 
-    getWorkQueueUpdate(data: any) {
+    function getWorkQueueUpdate(data: any) {
             var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
             if(isNil(updatedQueueItem))
                 return;
-            var queueItem = this.stateWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
+            var queueItem = stateWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
             if(!isNil(queueItem)){
-                this.updateQueuedWorkStatusAction({
+                updateQueuedWorkStatusAction({
                     workQueueStatusUpdate: updatedQueueItem
                 })
             }                                
     }
 
-    updateWorkQueue(data: any) {
+    function updateWorkQueue(data: any) {
         (async () => { 
-            await this.delay(1000);
-                this.doWorkQueuePagination();
+            await delay(1000);
+                doWorkQueuePagination();
             })();
     }
 
-    getFastWorkQueueUpdate(data: any) {
+    function getFastWorkQueueUpdate(data: any) {
             var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
             if(isNil(updatedQueueItem))
                 return;
-            var queueItem = this.stateFastWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
+            var queueItem = stateFastWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
             if(!isNil(queueItem)){
-                this.updateFastQueuedWorkStatusAction({
+                updateFastQueuedWorkStatusAction({
                     workQueueStatusUpdate: updatedQueueItem
                 })
             }                                
     }
 
-    updateFastWorkQueue(data: any) {
+    function updateFastWorkQueue(data: any) {
         (async () => { 
-            await this.delay(1000);
-                this.doFastQueuePagination();
+            await delay(1000);
+                doFastQueuePagination();
             })();
     }
 
-    getReportStatus(data: any) {
-        this.updateSimulationReportDetailAction({
+    function getReportStatus(data: any) {
+        updateSimulationReportDetailAction({
             simulationReportDetail: data.simulationReportDetail,
         });
     }
 
-    onCreateScenarioDialogSubmit(scenario: Scenario) {
-        this.showCreateScenarioDialog = false;
+    function onCreateScenarioDialogSubmit(scenario: Scenario) {
+        showCreateScenarioDialog = false;
 
         if (!isNil(scenario)) {
-            this.createScenarioAction({
+            createScenarioAction({
                 scenario: scenario,
                 networkId: scenario.networkId,
             }).then(() => {
-                this.onScenariosPagination();
+                onScenariosPagination();
             });
         }
     }
-    onFilterScenarioListSubmit(filterCategory:string, FilterValue:string) {
-        this.showFilterScenarioList = false;
-        this.sortedMineCategory = filterCategory;
-        this.sortedMineValue = FilterValue;
-        if ((filterCategory !=''&&!isNil(filterCategory)) && (FilterValue !=''&&!isNil(FilterValue)))
-        {
-            this.currentSearchMine = FilterValue;
-            this.resetPageMine();
-        }
-        else if(!isNil(filterCategory)||!isNil(FilterValue))
-        {
-            this.sortedMineCategory = '';
-            this.sortedMineValue = '';
-            this.currentSearchMine = '';
-            this.resetPageMine();
-        }
-    }
-    onFilterSharedScenarioListSubmit(filterCategory:string, FilterValue:string) {
-        this.showSharedFilterScenarioList = false;
-        this.sortedCategory = filterCategory;
-        this.sortedValue = FilterValue;
-        if ((filterCategory !=''&&!isNil(filterCategory)) && (FilterValue !=''&&!isNil(FilterValue)))
-        {
-            this.currentSearchShared = FilterValue;
-            this.resetPageShared();
-        }
-        else if(!isNil(filterCategory)||!isNil(FilterValue))
-        {
-            this.sortedCategory = ''
-            this.sortedValue = ''
-            this.currentSearchShared = '';
-            this.resetPageShared();
-        }
-        
-    }
-    
-    onMigrateLegacySimulationSubmit(legacySimulationId: number) {
-        this.showMigrateLegacySimulationDialog = false;
+
+    function onMigrateLegacySimulationSubmit(legacySimulationId: number) {
+        showMigrateLegacySimulationDialog = false;
 
         if (!isNil(legacySimulationId)) {
-            this.migrateLegacySimulationDataAction({
+            migrateLegacySimulationDataAction({
                 simulationId: legacySimulationId,
                 networkId: 'D7B54881-DD44-4F93-8250-3D4A630A4D3B',
-            }).then(() => this.initializeScenarioPages());
+            }).then(() => initializeScenarioPages());
         }
     }
 
-    onSubmitImportExportCommittedProjectsDialogResult(
+    function onSubmitImportExportCommittedProjectsDialogResult(
         result: ImportExportCommittedProjectsDialogResult,
     ) {
-        this.showImportExportCommittedProjectsDialog = false;
+        showImportExportCommittedProjectsDialog = false;
 
         if (hasValue(result)) {
             if (result.isExport) {
                 CommittedProjectsService.exportCommittedProjects(
-                    this.selectedScenarioId,
+                    selectedScenarioId,
                 ).then((response: AxiosResponse) => {
                     if (hasValue(response, 'data')) {
                         const fileInfo: FileInfo = response.data as FileInfo;
@@ -1935,13 +1808,13 @@ export default class Scenarios extends Vue {
                     CommittedProjectsService.importCommittedProjects(
                         result.file,
                         result.applyNoTreatment,
-                        this.selectedScenarioId,
+                        selectedScenarioId,
                     ).then((response: AxiosResponse) => {
                         if (
                             hasValue(response, 'status') &&
                             http2XX.test(response.status.toString())
                         ) {
-                            this.addSuccessNotificationAction({
+                            addSuccessNotificationAction({
                                 message: 'Successful upload.',
                                 longMessage:
                                     'Successfully uploaded committed projects.',
@@ -1949,7 +1822,7 @@ export default class Scenarios extends Vue {
                         }
                     });
                 } else {
-                    this.addErrorNotificationAction({
+                    addErrorNotificationAction({
                         message: 'No file selected.',
                         longMessage:
                             'No file selected to upload the committed projects.',
@@ -1959,8 +1832,8 @@ export default class Scenarios extends Vue {
         }
     }
 
-    onDeleteCommittedProjects() {
-        this.alertDataForDeletingCommittedProjects = {
+    function onDeleteCommittedProjects() {
+        alertDataForDeletingCommittedProjects = {
             showDialog: true,
             heading: 'Are you sure?',
             message:
@@ -1969,18 +1842,18 @@ export default class Scenarios extends Vue {
         };
     }
 
-    onDeleteCommittedProjectsSubmit(doDelete: boolean) {
-        this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
+    function onDeleteCommittedProjectsSubmit(doDelete: boolean) {
+        alertDataForDeletingCommittedProjects = { ...emptyAlertData };
 
         if (doDelete) {
             CommittedProjectsService.deleteSpecificCommittedProjects(
-                [this.selectedScenarioId],
+                [selectedScenarioId],
             ).then((response: AxiosResponse) => {
                 if (
                     hasValue(response) &&
                     http2XX.test(response.status.toString())
                 ) {
-                    this.addSuccessNotificationAction({
+                    addSuccessNotificationAction({
                         message: 'Committed projects have been deleted.',
                     });
                 }
@@ -1988,75 +1861,75 @@ export default class Scenarios extends Vue {
         }
     }
 
-    OnActionTaken(
+    function OnActionTaken(
         action: string,
         scenarioUsers: ScenarioUser[],
         scenario: Scenario,
         isOwner: boolean,
     ) {
         switch (action) {
-            case this.availableActions.runAnalysis:
-                if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
-                    this.onShowConfirmAnalysisRunAlert(scenario);
+            case availableActions.runAnalysis:
+                if (canModifySharedScenario(scenarioUsers) || isOwner) {
+                    onShowConfirmAnalysisRunAlert(scenario);
                 } else {
                 }
                 break;
-            case this.availableActions.reports:
-                this.onNavigateToReportsView(scenario);
+            case availableActions.reports:
+                onShowReportsDownloaderDialog(scenario);
                 break;
-            case this.availableActions.settings:
-                if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
-                    this.onNavigateToEditScenarioView(scenario);
+            case availableActions.settings:
+                if (canModifySharedScenario(scenarioUsers) || isOwner) {
+                    onNavigateToEditScenarioView(scenario);
                 }
                 break;
-            case this.availableActions.share:
-                this.onShowShareScenarioDialog(scenario);
+            case availableActions.share:
+                onShowShareScenarioDialog(scenario);
                 break;
-            case this.availableActions.clone:
-                this.onShowCloneScenarioDialog(scenario);
+            case availableActions.clone:
+                onShowCloneScenarioDialog(scenario);
                 break;
-            case this.availableActions.delete:
-                this.onShowConfirmDeleteAlert(scenario);
+            case availableActions.delete:
+                onShowConfirmDeleteAlert(scenario);
                 break;
-            case this.availableActions.commitedProjects:
-                if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
-                    this.onNavigateToCommittedProjectView(scenario);
+            case availableActions.commitedProjects:
+                if (canModifySharedScenario(scenarioUsers) || isOwner) {
+                    onNavigateToCommittedProjectView(scenario);
                 }
                 break;
-            case this.availableActions.convert:
-                this.onShowConfirmConvertJsonToRelationalAlert(scenario);
+            case availableActions.convert:
+                onShowConfirmConvertJsonToRelationalAlert(scenario);
         }
     }
 
-    OnWorkQueueActionTaken(
+    function OnWorkQueueActionTaken(
         action: string,
         simulation: QueuedWork,
     ) {
         switch (action) {
-            case this.availableSimulationActions.cancel:
-                this.onShowConfirmCancelAlert(simulation);
+            case availableSimulationActions.cancel:
+                onShowConfirmCancelAlert(simulation);
                 break;
-            case this.availableSimulationActions.fastCancel:
-                this.onShowConfirmFastCancelAlert(simulation);
+            case availableSimulationActions.fastCancel:
+                onShowConfirmFastCancelAlert(simulation);
                 break;
         }
     }
 
 
-    onShowAggregatePopup() {
-        this.aggragateDialogData = {
+    function onShowAggregatePopup() {
+        aggragateDialogData = {
             showDialog: true,
         };
     }
 
-    onMineSearchClick(){
-        this.currentSearchMine = this.searchMine;
-        this.resetPageMine()
+    function onMineSearchClick(){
+        currentSearchMine = searchMine;
+        resetPageMine()
     }
 
-    onMineClearClick(){
-        this.searchMine = '';
-        this.onMineSearchClick();
+    function onMineClearClick(){
+        searchMine = '';
+        onMineSearchClick();
     }
     onMineFilterClearClick(){
         this.sortedMineCategory = '';
@@ -2065,14 +1938,14 @@ export default class Scenarios extends Vue {
         this.resetPageMine()
     }
 
-    resetPageMine(){
-        this.userScenariosPagination.page = 1;
-        this.onUserScenariosPagination();
+    function resetPageMine(){
+        userScenariosPagination.page = 1;
+        onUserScenariosPagination();
     }
 
-    onSharedSearchClick(){
-        this.currentSearchShared = this.searchShared;
-        this.resetPageShared()
+    function onSharedSearchClick(){
+        currentSearchShared = searchShared;
+        resetPageShared()
     }
     onSharedFilterClearClick(){
         this.sortedCategory = '';
@@ -2081,41 +1954,41 @@ export default class Scenarios extends Vue {
         this.resetPageShared()
     }
 
-    onSharedClearClick(){
-        this.searchShared = '';
-        this.onSharedSearchClick();
+    function onSharedClearClick(){
+        searchShared = '';
+        onSharedSearchClick();
     }
 
-    resetPageShared(){
-        this.sharedScenariosPagination.page = 1;
-        this.onSharedScenariosPagination();
+    function resetPageShared(){
+        sharedScenariosPagination.page = 1;
+        onSharedScenariosPagination();
     }
 
-    hasSharedSearch(): boolean{
-        return this.currentSearchShared.trim() !== '';
+    function hasSharedSearch(): boolean{
+        return currentSearchShared.trim() !== '';
     }
 
-    hasMineSearch(): boolean{
-        return this.currentSearchMine.trim() !== '';
+    function hasMineSearch(): boolean{
+        return currentSearchMine.trim() !== '';
     }
 
-    setTabTotals(){
-        this.tabItems.forEach(tab => {
+    function setTabTotals(){
+        tabItems.forEach(tab => {
             if(tab.name === 'Shared with me')
-                tab.count = this.totalSharedScenarios;
+                tab.count = totalSharedScenarios;
             else if (tab.name === 'My scenarios')
-                tab.count = this.totalUserScenarios;
+                tab.count = totalUserScenarios;
             else
-                tab.count = this.totalQueuedSimulations + this.totalFastQueuedItems;
+                tab.count = totalQueuedSimulations + totalFastQueuedItems;
         })
     }
 
-    getEmptyWorkQueueMessage()
+    function getEmptyWorkQueueMessage()
     {
-        if (this.totalSharedScenarios == 0 &&
-            this.totalUserScenarios == 0 &&
-            this.totalQueuedSimulations == 0 &&
-            this.totalFastQueuedItems == 0){
+        if (totalSharedScenarios == 0 &&
+            totalUserScenarios == 0 &&
+            totalQueuedSimulations == 0 &&
+            totalFastQueuedItems == 0){
             
             return "Retrieving data..."
         }
@@ -2123,7 +1996,7 @@ export default class Scenarios extends Vue {
             return "No queued work"
         }
     }
-}
+
 </script>
 
 <style>

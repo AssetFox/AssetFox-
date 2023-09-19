@@ -39,9 +39,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public List<string> Errors { get; private set; }
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
-
+        public string Criteria { get; set; }
         private InventoryParameters _failedQuery = new InventoryParameters { BMSID = string.Empty, BRKEY_ = -1 };
-
         private List<SegmentAttributeDatum> segmentData;
         private InventoryParameters segmentIds;
 

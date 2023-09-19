@@ -18,6 +18,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void DeleteDeficientConditionGoalLibrary(Guid libraryId);
 
+        DateTime GetLibraryModifiedDate(Guid deficientLibraryId);
+
         List<DeficientConditionGoalDTO> GetScenarioDeficientConditionGoals(Guid simulationId);
 
         List<DeficientConditionGoalDTO> GetDeficientConditionGoalsByLibraryId(Guid libraryId);

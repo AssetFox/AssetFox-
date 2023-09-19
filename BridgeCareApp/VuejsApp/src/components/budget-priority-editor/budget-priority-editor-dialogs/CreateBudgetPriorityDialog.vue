@@ -12,20 +12,20 @@
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-layout column>
           <v-subheader class="ghd-md-gray ghd-control-label">Priority Level</v-subheader>
-          <v-text-field outline v-model.number="newBudgetPriority.priorityLevel"
+          <v-text-field id="CreateBudgetPriorityDialog-priorityLevel-vtextfield" outline v-model.number="newBudgetPriority.priorityLevel"
                         :mask="'##########'" :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>
           <v-subheader class="ghd-md-gray ghd-control-label">Year</v-subheader>
-          <v-text-field outline v-model.number="newBudgetPriority.year"
+          <v-text-field id="CreateBudgetPriorityDialog-year-vtextfield" outline v-model.number="newBudgetPriority.year"
                         :mask="'####'" class="ghd-text-field-border ghd-text-field"/>
         </v-layout>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row>
-          <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
+          <v-btn id="CreateBudgetPriorityDialog-cancel-vbtn" @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn >
-          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+          <v-btn id="CreateBudgetPriorityDialog-save-vbtn" :disabled="disableSubmitButton()" @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>         
         </v-layout>

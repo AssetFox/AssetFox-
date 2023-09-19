@@ -51,6 +51,11 @@ export default class InvestmentService {
         return coreAxiosInstance.get(`${API.Investment}/GetBudgetLibraryUsers/${libraryId}`)
     }
 
+    static getBudgetLibraryModifiedDate (libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Investment}/GetBudgetLibraryModifiedDate/${libraryId}`)
+    }
+
+
     static upsertOrDeleteBudgetLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.Investment}/UpsertOrDeleteBudgetLibraryUsers/${libraryId}`
@@ -69,6 +74,7 @@ export default class InvestmentService {
             `${API.Investment}/GetInvestmentPlan/${scenarioId}`,
         );
     }
+
 
     static getScenarioBudgetYears(scenarioId: string){
         return coreAxiosInstance.get(

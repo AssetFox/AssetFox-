@@ -34,10 +34,8 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import {Prop} from 'vue-property-decorator';
+<script lang="ts" setup>
+import { ref } from 'vue';
 import {
   CashFlowRule,
   emptyCashFlowRule,
@@ -45,25 +43,20 @@ import {
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
-@Component
-export default class AddCashFlowDialog extends Vue {
-    @Prop() showDialog: boolean;
+const props = defineProps<{showDialog: boolean}>()
+const emit = defineEmits(['submit']);
+let newCashRule: CashFlowRule = {...emptyCashFlowRule, id: getNewGuid()};
+let inputRules: InputValidationRules = rules;
 
-  newCashRule: CashFlowRule = {...emptyCashFlowRule, id: getNewGuid()};
-  rules: InputValidationRules = rules;
-
-  disableSubmitButton() {
-    return !(this.rules['generalRules'].valueIsNotEmpty(this.newCashRule.name) === true);
+function disableSubmitButton() {
+  return !(inputRules['generalRules'].valueIsNotEmpty(newCashRule.name) === true);
+}
+function onSubmit(submit: boolean) {
+  if (submit) {
+    emit('submit', newCashRule);
+  } else {
+    emit('submit', null);
   }
-
-  onSubmit(submit: boolean) {
-    if (submit) {
-      this.$emit('submit', this.newCashRule);
-    } else {
-      this.$emit('submit', null);
-    }
-
-    this.newCashRule = {...emptyCashFlowRule, id: getNewGuid()};
-  }
+  newCashRule = {...emptyCashFlowRule, id: getNewGuid()};
 }
 </script>

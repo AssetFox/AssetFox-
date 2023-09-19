@@ -47,8 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import {CreateCriterionLibraryDialogData} from '@/shared/models/modals/create-criterion-library-dialog-data';
 import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
@@ -60,17 +59,19 @@ let newCriterionLibrary: CriterionLibrary = {...emptyCriterionLibrary, id: getNe
 let store = useStore();
 const emit = defineEmits(['submit'])
 
+const dialogData = reactive(props.dialogData);
+
 async function getIdByUserNameGetter(payload?: any): Promise<any> {
         await store.dispatch('getIdByUserName');
 }
 
-  watch(props.dialogData, () => onDialogDataChanged)
+  watch(dialogData, () => onDialogDataChanged)
   async function onDialogDataChanged() {
     let currentUser: string = getUserName();
 
     newCriterionLibrary = {
       ...newCriterionLibrary,
-      mergedCriteriaExpression: props.dialogData.mergedCriteriaExpression,
+      mergedCriteriaExpression: dialogData.mergedCriteriaExpression,
       owner: await getIdByUserNameGetter(currentUser),
     };
   }

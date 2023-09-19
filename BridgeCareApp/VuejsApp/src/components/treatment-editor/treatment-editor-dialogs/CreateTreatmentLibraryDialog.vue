@@ -13,12 +13,12 @@
                 <v-card-text>
                     <v-layout column>
                         <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
-                        <v-text-field class="ghd-control-border ghd-control-text ghd-control-width-lg"
+                        <v-text-field id="CreateTreatmentLibraryDialog-name-textField" class="ghd-control-border ghd-control-text ghd-control-width-lg"
                             outline
                             v-model="newTreatmentLibrary.name"
                         ></v-text-field>
                         <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
-                        <v-textarea class="ghd-control-border ghd-control-text ghd-control-width-lg"
+                        <v-textarea id="CreateTreatmentLibraryDialog-desc-textareaField" class="ghd-control-border ghd-control-text ghd-control-width-lg"
                             no-resize
                             outline
                             rows="3"
@@ -33,6 +33,7 @@
                             >Cancel</v-btn
                         >
                         <v-btn
+                            id="CreateTreatmentLibraryDialog-addLibrary-btn"
                             :disabled="newTreatmentLibrary.name === ''"
                             @click="onSubmit(true)"
                             class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding"

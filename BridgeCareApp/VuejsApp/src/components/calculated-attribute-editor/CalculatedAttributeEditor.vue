@@ -49,7 +49,7 @@
         <v-flex xs6 class="ghd-constant-header" style="margin-bottom: 15px">
             <v-layout v-if='hasSelectedLibrary && !hasScenario' align-center>
                 <div class="header-text-content owner-padding">
-                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                 </div>
                 <v-divider class="owner-shared-divider" inset vertical></v-divider>
                 <v-badge v-show="isShared" style="padding: 10px">
@@ -392,6 +392,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     let initializing: boolean = true;
     let uuidNIL: string = getBlankGuid();
     let isShared: boolean = false;
+    let modifiedDate: string;
 
     let shareCalculatedAttributeLibraryDialogData: ShareCalculatedAttributeLibraryDialogData = clone(emptyShareCalculatedAttributeLibraryDialogData);
 
@@ -525,7 +526,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
 
     // Watchers
     watch(pagination,() => onPaginationChanged)
-    function onPaginationChanged() {
+    async function onPaginationChanged() {
         if( initializing)
             return;
          checkHasUnsavedChanges();
@@ -561,8 +562,17 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                 }
             });
         }            
-        else if( hasSelectedLibrary)
-             CalculatedAttributeService.getLibraryCalculatedAttributePage( librarySelectItemValue.value !== null ?  librarySelectItemValue.value : '', request).then(response => {
+        else if(hasSelectedLibrary)
+        initializing = true;
+        await CalculatedAttributeService.getCalculatedLibraryModifiedDate(selectedCalculatedAttributeLibrary.id).then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      modifiedDate = data.slice(0, 10);
+                   }
+             });
+
+             await CalculatedAttributeService.getLibraryCalculatedAttributePage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
                      currentPage.equations = data.items;

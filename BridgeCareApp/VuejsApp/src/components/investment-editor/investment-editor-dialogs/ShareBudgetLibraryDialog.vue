@@ -43,10 +43,8 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import { BudgetLibraryUser } from '@/shared/models/iAM/investment';
 import { LibraryUser } from '@/shared/models/iAM/user';
@@ -59,34 +57,38 @@ import { BudgetLibraryUserGridRow, ShareBudgetLibraryDialogData } from '@/shared
 import InvestmentService from '@/services/investment.service';
     import { AxiosResponse } from 'axios';
     import { http2XX } from '@/shared/utils/http-utils';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class ShareBudgetLibraryDialog extends Vue {
-  @Prop() dialogData: ShareBudgetLibraryDialogData;
+let store = useStore();
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+  dialogData: ShareBudgetLibraryDialogData
+}>()
+let stateUsers = ref<User[]>(store.state.userModule.users);
 
-  @State(state => state.userModule.users) stateUsers: User[];
-
-  budgetLibraryUserGridHeaders: DataTableHeader[] = [
+  let budgetLibraryUserGridHeaders: DataTableHeader[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  budgetLibraryUserGridRows: BudgetLibraryUserGridRow[] = [];
-  currentUserAndOwner: BudgetLibraryUser[] = [];
-  searchTerm: string = '';
+  let budgetLibraryUserGridRows: BudgetLibraryUserGridRow[] = [];
+  let currentUserAndOwner: BudgetLibraryUser[] = [];
+  let searchTerm: string = '';
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    if (this.dialogData.showDialog) {
-      this.onSetGridData();
-      this.onSetUsersSharedWith();
+  watch(props.dialogData,()=>onDialogDataChanged)
+  function onDialogDataChanged() {
+    if (props.dialogData.showDialog) {
+      onSetGridData();
+      onSetUsersSharedWith();
     }
   }
 
-  onSetGridData() {
+  function onSetGridData() {
     const currentUser: string = getUserName();
 
-    this.budgetLibraryUserGridRows = this.stateUsers
+    budgetLibraryUserGridRows = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -96,10 +98,10 @@ export default class ShareBudgetLibraryDialog extends Vue {
         }));
   }
 
-    onSetUsersSharedWith() {
+    function onSetUsersSharedWith() {
         //budget library users
         let budgetLibraryUsers: BudgetLibraryUser[] = [];
-        InvestmentService.getBudgetLibraryUsers(this.dialogData.budgetLibrary.id).then(response => {
+        InvestmentService.getBudgetLibraryUsers(props.dialogData.budgetLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -128,18 +130,18 @@ export default class ShareBudgetLibraryDialog extends Vue {
                 const isCurrentUserOrOwner = (budgetLibraryUser: BudgetLibraryUser) => budgetLibraryUser.username === currentUser || budgetLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (budgetLibraryUser: BudgetLibraryUser) => budgetLibraryUser.username !== currentUser && !budgetLibraryUser.isOwner;
 
-                this.currentUserAndOwner = filter(isCurrentUserOrOwner, budgetLibraryUsers) as BudgetLibraryUser[];
+                currentUserAndOwner = filter(isCurrentUserOrOwner, budgetLibraryUsers) as BudgetLibraryUser[];
                 const otherUsers: BudgetLibraryUser[] = filter(isNotCurrentUserOrOwner, budgetLibraryUsers) as BudgetLibraryUser[];
 
                 otherUsers.forEach((budgetLibraryUser: BudgetLibraryUser) => {
-                    if (any(propEq('id', budgetLibraryUser.userId), this.budgetLibraryUserGridRows)) {
+                    if (any(propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows)) {
                         const budgetLibraryUserGridRow: BudgetLibraryUserGridRow = find(
-                            propEq('id', budgetLibraryUser.userId), this.budgetLibraryUserGridRows) as BudgetLibraryUserGridRow;
+                            propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows) as BudgetLibraryUserGridRow;
 
-                        this.budgetLibraryUserGridRows = update(
-                            findIndex(propEq('id', budgetLibraryUser.userId), this.budgetLibraryUserGridRows),
+                        budgetLibraryUserGridRows = update(
+                            findIndex(propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows),
                             { ...budgetLibraryUserGridRow, isShared: true, canModify: budgetLibraryUser.canModify },
-                            this.budgetLibraryUserGridRows
+                            budgetLibraryUserGridRows
                         );
                     }
                 });
@@ -147,26 +149,26 @@ export default class ShareBudgetLibraryDialog extends Vue {
         });
   }
 
-  removeUserModifyAccess(userId: string, isShared: boolean) {
+  function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      this.budgetLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), this.budgetLibraryUserGridRows),
-          'canModify', false, this.budgetLibraryUserGridRows);
+      budgetLibraryUserGridRows = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), budgetLibraryUserGridRows),
+          'canModify', false, budgetLibraryUserGridRows);
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.getBudgetLibraryUsers());
+      emit('submit', getBudgetLibraryUsers());
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.budgetLibraryUserGridRows = [];
+    budgetLibraryUserGridRows = [];
   }
 
-  getBudgetLibraryUsers() {
-    const usersSharedWith: BudgetLibraryUser[] = this.budgetLibraryUserGridRows
+  function getBudgetLibraryUsers() {
+    const usersSharedWith: BudgetLibraryUser[] = budgetLibraryUserGridRows
         .filter((budgetLibraryUserGridRow: BudgetLibraryUserGridRow) => budgetLibraryUserGridRow.isShared)
         .map((budgetLibraryUserGridRow: BudgetLibraryUserGridRow) => ({
           userId: budgetLibraryUserGridRow.id,
@@ -175,9 +177,8 @@ export default class ShareBudgetLibraryDialog extends Vue {
           isOwner: false
         }));
 
-    return [...this.currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner, ...usersSharedWith];
   }
-}
 </script>
 
 <style>

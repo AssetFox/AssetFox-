@@ -63,6 +63,21 @@ namespace BridgeCareCore.Services
                     return simulations.OrderByDescending(_ => _.Name.ToLower()).ToList();
                 else
                     return simulations.OrderBy(_ => _.Name.ToLower()).ToList();
+            case "creator":
+                if (isDescending)
+                    return simulations.OrderByDescending(_ => _.Creator.ToLower()).ToList();
+                else
+                    return simulations.OrderBy(_ => _.Creator.ToLower()).ToList();
+            case "owner":
+                if (isDescending)
+                    return simulations.OrderByDescending(_ => _.Owner.ToLower()).ToList();
+                else
+                    return simulations.OrderBy(_ => _.Owner.ToLower()).ToList();
+            case "network":
+                if (isDescending)
+                    return simulations.OrderByDescending(_ => _.NetworkName.ToLower()).ToList();
+                else
+                    return simulations.OrderBy(_ => _.NetworkName.ToLower()).ToList();
             case "lastrun":
                 if (isDescending)
                     return simulations.OrderByDescending(_ => _.LastRun).ToList();

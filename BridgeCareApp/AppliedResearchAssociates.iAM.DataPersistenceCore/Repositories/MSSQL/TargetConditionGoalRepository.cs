@@ -215,6 +215,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteEntity<TargetConditionGoalLibraryEntity>(_ => _.Id == libraryId);
         }
 
+        public DateTime GetLibraryModifiedDate(Guid targetLibraryId)
+        {
+            var dtos = _unitOfWork.Context.TargetConditionGoalLibrary.Where(_ => _.Id == targetLibraryId).FirstOrDefault().LastModifiedDate;
+            return dtos;
+        }
+
         public List<TargetConditionGoalDTO> GetScenarioTargetConditionGoals(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

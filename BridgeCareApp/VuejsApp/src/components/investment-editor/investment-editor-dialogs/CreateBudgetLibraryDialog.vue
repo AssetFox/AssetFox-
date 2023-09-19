@@ -37,32 +37,34 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts"setup>
 import Vue from 'vue';
 import {contains} from 'ramda';
-import {Getter} from 'vuex-class';
-import {Component, Prop, Watch} from 'vue-property-decorator';
 import {CreateBudgetLibraryDialogData} from '@/shared/models/modals/create-budget-library-dialog-data';
 import {Budget, BudgetAmount, BudgetLibrary, emptyBudgetLibrary} from '@/shared/models/iAM/investment';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { getUserName } from '@/shared/utils/get-user-info';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+let store = useStore();
+const props = defineProps<{
 
-@Component
-export default class CreateBudgetLibraryDialog extends Vue {
-  @Prop() dialogData: CreateBudgetLibraryDialogData;
-  @Prop() libraryNames: string[];
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+  dialogData:CreateBudgetLibraryDialogData,
+  libraryNames: string[];
+}>()
+const emit = defineEmits(['submit'])
+let getIdByUserNameGetter: any = store.getters.getIdByUserName
+let newBudgetLibrary: BudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};
+let rules: InputValidationRules = validationRules;
 
-  newBudgetLibrary: BudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};
-  rules: InputValidationRules = rules;
-
-  @Watch('dialogData')
-  onDialogDataChanged() {
+watch(()=>props.dialogData,()=> onDialogDataChanged)
+  function onDialogDataChanged() {
     let currentUser: string = getUserName();
-    this.newBudgetLibrary = {
-      ...this.newBudgetLibrary,
-      budgets: this.dialogData.budgets.map((budget: Budget) => ({
+    newBudgetLibrary = {
+      ...newBudgetLibrary,
+      budgets: props.dialogData.budgets.map((budget: Budget) => ({
         ...budget,
         id: getNewGuid(),
         budgetAmounts: budget.budgetAmounts.map((budgetAmount: BudgetAmount) => ({
@@ -70,23 +72,22 @@ export default class CreateBudgetLibraryDialog extends Vue {
           id: getNewGuid()
         }))
       })),
-      owner: this.getIdByUserNameGetter(currentUser)
+      owner: getIdByUserNameGetter(currentUser)
     };
   }
-  canDisableSave() : boolean {
+  function canDisableSave() : boolean {
     let check: boolean = false;
-    if (this.newBudgetLibrary.name === '') return true;
-    if (contains(this.newBudgetLibrary.name, this.libraryNames)) return true;
+    if (newBudgetLibrary.name === '') return true;
+    if (contains(newBudgetLibrary.name, props.libraryNames)) return true;
     return  check;
   }
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newBudgetLibrary);
+      emit('submit', newBudgetLibrary);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newBudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};
+    newBudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};
   }
-}
 </script>

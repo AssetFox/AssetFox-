@@ -24,6 +24,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
+        public DateTime GetLibraryModifiedDate(Guid calculatedLibraryId)
+        {
+            var dtos = _unitOfDataPersistenceWork.Context.CalculatedAttributeLibrary.Where(_ => _.Id == calculatedLibraryId).FirstOrDefault().LastModifiedDate;
+            return dtos;
+        }
+
         public ICollection<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibraries() =>
             _unitOfDataPersistenceWork.Context.CalculatedAttributeLibrary.AsNoTracking()
                 .Include(_ => _.CalculatedAttributes)

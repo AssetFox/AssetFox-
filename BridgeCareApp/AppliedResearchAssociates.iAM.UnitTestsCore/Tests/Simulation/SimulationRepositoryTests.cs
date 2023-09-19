@@ -124,14 +124,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     Year = DateTime.Now.Year,
                     ShadowForAnyTreatment = 1,
                     ShadowForSameTreatment = 1,
-                    ScenarioBudgetId = budgetId,
-                    CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>
-                    {
-                        new CommittedProjectConsequenceEntity
-                        {
-                            Id = Guid.NewGuid(), AttributeId = attribute.Id, ChangeValue = "+1"
-                        }
-                    }
+                    ScenarioBudgetId = budgetId
                 };
                 committedProjectEnity.CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation, "FacilitySection")
                 {
@@ -657,7 +650,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 .Include(_ => _.InvestmentPlan)
                 // committed projects
                 .Include(_ => _.CommittedProjects)
-                .ThenInclude(_ => _.CommittedProjectConsequences)
                 .Include(_ => _.CommittedProjects)
                 .ThenInclude(_ => _.ScenarioBudget)
                 // performance curves
@@ -738,7 +730,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 .Include(_ => _.InvestmentPlan)
                 // committed projects
                 .Include(_ => _.CommittedProjects)
-                .ThenInclude(_ => _.CommittedProjectConsequences)
                 .Include(_ => _.CommittedProjects)
                 .ThenInclude(_ => _.ScenarioBudget)
                 // performance curves

@@ -64,6 +64,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<AdminSettingsEntity> AdminSettings { get; set; }
 
+        public virtual DbSet<CommittedProjectSettingsEntity> CommittedProjectSettings{ get; set; }
+
         public virtual DbSet<AggregatedResultEntity> AggregatedResult { get; set; }
 
         public virtual DbSet<AnalysisMethodEntity> AnalysisMethod { get; set; }
@@ -706,11 +708,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithOne(p => p.CommittedProject)
                     .HasForeignKey<CommittedProjectLocationEntity>(d => d.CommittedProjectId)
                     .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasMany(d => d.CommittedProjectConsequences)
-                    .WithOne(p => p.CommittedProject)
-                    .HasForeignKey(d => d.CommittedProjectId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<CommittedProjectLocationEntity>(entity =>
@@ -741,10 +738,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.PerformanceFactor).IsRequired();
 
-                entity.HasOne(d => d.CommittedProject)
-                    .WithMany(p => p.CommittedProjectConsequences)
-                    .HasForeignKey(d => d.CommittedProjectId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<CriterionLibraryEntity>(entity =>
@@ -2227,6 +2220,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasIndex(p => p.Key).IsUnique();
                 entity.HasKey(p => p.Key);
                 
+            });
+            modelBuilder.Entity<CommittedProjectSettingsEntity>(entity =>
+            {
+                entity.Property(e => e.Value)
+                .HasColumnType("nvarchar(max)")
+                .IsRequired();
+                entity.HasIndex(p => p.Key).IsUnique();
+                entity.HasKey(p => p.Key);
+
             });
             modelBuilder.Entity<SimulationUserEntity>(entity =>
             {

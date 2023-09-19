@@ -74,23 +74,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Local").Id,
             ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Local"),
             CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation, "1"),
-            CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
-                {
-                    new CommittedProjectConsequenceEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
-                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED"),
-                        ChangeValue = "+3"
-                    },
-                    new CommittedProjectConsequenceEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
-                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N"),
-                        ChangeValue = "1"
-                    }
-                }
         };
 
         private static CommittedProjectEntity SomethingFourYear2023() =>
@@ -118,23 +101,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate").Id,
             ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate"),
             CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation, "2"),
-            CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
-                {
-                    new CommittedProjectConsequenceEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
-                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED"),
-                        ChangeValue = "9"
-                    },
-                    new CommittedProjectConsequenceEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
-                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N"),
-                        ChangeValue = "1"
-                    }
-                }
         };
         public static List<CommittedProjectEntity> CommittedProjectsWithoutBudgets()
         {

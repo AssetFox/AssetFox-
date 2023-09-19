@@ -141,12 +141,10 @@ public sealed class Scenario
     private static CommittedProject Convert(Analysis.CommittedProject source) => new()
     {
         AssetID = source.Asset.Id,
-        Consequences = source.Consequences.Select(Convert).ToList(),
         Cost = source.Cost,
         Name = source.Name,
-        ShadowForAnyTreatment = source.ShadowForAnyTreatment,
-        ShadowForSameTreatment = source.ShadowForSameTreatment,
         NameOfUsableBudget = source.Budget.Name,
+        NameOfTemplateTreatment = source.TemplateTreatment.Name,
         Year = source.Year,
     };
 
@@ -240,6 +238,7 @@ public sealed class Scenario
         Consequences = source.Consequences.Select(Convert).ToList(),
         Costs = source.Costs.Select(Convert).ToList(),
         FeasibilityCriterionExpressions = source.FeasibilityCriteria.Select(criterion => criterion.Expression).ToList(),
+        ForCommittedProjectsOnly = source.ForCommittedProjectsOnly,
         Name = source.Name,
         PerformanceCurveAdjustmentFactors = source.PerformanceCurveAdjustmentFactors.Select(Convert).ToList(),
         Schedulings = source.Schedulings.Select(Convert).ToList(),
@@ -262,12 +261,6 @@ public sealed class Scenario
     {
         DefaultValue = source.DefaultValue,
         Name = source.Name,
-    };
-
-    private static TreatmentConsequence Convert(Analysis.TreatmentConsequence source) => new()
-    {
-        AttributeName = source.Attribute.Name,
-        ChangeExpression = source.Change.Expression,
     };
 
     private static TreatmentScheduling Convert(Analysis.TreatmentScheduling source) => new()
@@ -342,8 +335,9 @@ public sealed class Scenario
 
             result.Category = source.Category;
             result.Name = source.Name;
-            result.ShadowForAnyTreatment = source.ShadowForAnyTreatment;
-            result.ShadowForSameTreatment = source.ShadowForSameTreatment;
+            result.SetShadowForAnyTreatment(source.ShadowForAnyTreatment);
+            result.SetShadowForSameTreatment(source.ShadowForSameTreatment);
+            result.ForCommittedProjectsOnly = source.ForCommittedProjectsOnly;
 
             foreach (var item in source.NamesOfUsableBudgets)
             {
@@ -570,24 +564,12 @@ public sealed class Scenario
                 Budget = BudgetByName[source.NameOfUsableBudget],
                 Cost = source.Cost,
                 Name = source.Name,
-                ShadowForAnyTreatment = source.ShadowForAnyTreatment,
-                ShadowForSameTreatment = source.ShadowForSameTreatment,
                 treatmentCategory = source.Category,
+                TemplateTreatment = TreatmentByName[source.NameOfTemplateTreatment],
             };
-
-            foreach (var item in source.Consequences)
-            {
-                result.Consequences.Add(Convert(item));
-            }
 
             return result;
         }
-
-        private Analysis.TreatmentConsequence Convert(TreatmentConsequence source) => new()
-        {
-            Attribute = AttributeByName[source.AttributeName],
-            Change = { Expression = source.ChangeExpression },
-        };
 
         private void Convert(AnalysisMethod source, Analysis.AnalysisMethod target)
         {

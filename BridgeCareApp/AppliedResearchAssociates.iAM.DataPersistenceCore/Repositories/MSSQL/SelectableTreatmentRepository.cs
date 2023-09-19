@@ -263,6 +263,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
+        public DateTime GetLibraryModifiedDate(Guid treatmentLibraryId)
+        {
+            var dtos = _unitOfWork.Context.TreatmentLibrary.Where(_ => _.Id == treatmentLibraryId).FirstOrDefault().LastModifiedDate;
+            return dtos;
+        }
+
         public List<TreatmentLibraryDTO> GetAllTreatmentLibrariesNoChildren()
         {
             if (!_unitOfWork.Context.SelectableTreatment.Any())
@@ -998,15 +1004,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void AddDefaultPerformanceFactors(Guid scenarioId, List<TreatmentDTO> treatments)
         {
-            var distinctPerformanceCurves = _unitOfWork.Context.ScenarioPerformanceCurve.Include(_ => _.Attribute).Where(_ => _.SimulationId == scenarioId).ToList().GroupBy(_ => _.Attribute.Name).Select(_ => _.First()).ToList();
+            var distinctPerformanceCurves = _unitOfWork.Context.ScenarioPerformanceCurve.Include(_ => _.Attribute).Where(_ => _.SimulationId == scenarioId).ToList().GroupBy(_ => _.Attribute.Name).Select(_ => _.First().Attribute.Name).ToList();
             if (distinctPerformanceCurves.Count > 0)
             {
                 treatments.ForEach(_ =>
                 {
-                    if(_.PerformanceFactors != null && _.PerformanceFactors.Count == 0)
-                    {
-                        _.PerformanceFactors = distinctPerformanceCurves.Select(__ => new TreatmentPerformanceFactorDTO() { Attribute = __.Attribute.Name, Id = Guid.NewGuid(), PerformanceFactor = 1 }).ToList();
-                    }
+                    var factorsToBeRemoved = _.PerformanceFactors.Where(p => !distinctPerformanceCurves.Contains(p.Attribute)).Select(__ => __.Attribute).ToList();
+                    var factorsToBeAdded = distinctPerformanceCurves.Where(dpc => _.PerformanceFactors.FirstOrDefault(__ => __.Attribute == dpc) == null).ToList();
+                    if(factorsToBeAdded.Count > 0)
+                        _.PerformanceFactors =  _.PerformanceFactors.Concat(factorsToBeAdded.Select(__ => new TreatmentPerformanceFactorDTO() { Attribute = __, Id = Guid.NewGuid(), PerformanceFactor = 1 })).ToList();
+                    if(factorsToBeRemoved.Count > 0)
+                        _.PerformanceFactors.RemoveAll(__ => factorsToBeRemoved.Contains(__.Attribute));                  
                 });
             }
         }

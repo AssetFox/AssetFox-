@@ -20,6 +20,10 @@ export default class CashFlowService {
         );
     }
 
+    static getCashLibraryDate(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.CashFlow}/GetCashLibraryModifiedDate/${libraryId}`);
+    }
+
     static getLibraryCashFlowRulePage(libraryId: string, data:PagingRequest<CashFlowRule>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.CashFlow}/GetLibraryCashFlowRulePage/${libraryId}`, data

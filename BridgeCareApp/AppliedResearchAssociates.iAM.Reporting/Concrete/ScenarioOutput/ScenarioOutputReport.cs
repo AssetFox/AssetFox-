@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Hubs.Services;
+using AppliedResearchAssociates.iAM.Reporting.Services;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Newtonsoft.Json;
 
@@ -19,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         private IUnitOfWork _unitOfWork;
         private readonly IHubService _hubService;
+        private readonly ReportHelper _reportHelper;
 
         public Guid ID { get; set; }
         public Guid? SimulationID { get; set; }
@@ -37,6 +39,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Suffix => throw new NotImplementedException();
 
+        public string Criteria { get; set; }
+
         public ScenarioOutputReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork;
@@ -47,6 +51,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Report definition created.";
             Results = String.Empty;
             IsComplete = false;
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
@@ -54,9 +59,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog ??= new DoNothingWorkQueueLog();
             // TODO:  Don't regenerate the report if it has already been generated AND the date on the file was after the LastRun date of the
             // scenario.
-
+            string simulationId = ReportHelper.GetSimulationId(parameters);
             // Determine the Guid for the simulation
-            if (!Guid.TryParse(parameters, out Guid simulationGuid))
+            if (!Guid.TryParse(simulationId, out Guid simulationGuid))
             {
                 Errors.Add("Simulation ID could not be parsed to a Guid");
                 IndicateError();

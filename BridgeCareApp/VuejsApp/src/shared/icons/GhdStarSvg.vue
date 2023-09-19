@@ -5,12 +5,7 @@
 
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-
-export default class GhdStarSvg extends Vue {
-    
-}
+<script setup lang='ts'>
 </script>
 
 <style >

@@ -8,6 +8,8 @@ using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.StaticContent;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using System;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -15,11 +17,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
     {
         private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
         private BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public PostedClosedBridgeWorkSummary(WorkSummaryModel workSummaryModel)
+        public PostedClosedBridgeWorkSummary(WorkSummaryModel workSummaryModel,IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon(); 
-            _bridgeWorkSummaryComputationHelper = new BridgeWorkSummaryComputationHelper();
+            _bridgeWorkSummaryComputationHelper = new BridgeWorkSummaryComputationHelper(_unitOfWork);
         }
 
         internal ChartRowsModel FillPostedBridgesCountByBPN(ExcelWorksheet worksheet, CurrentCell currentCell,

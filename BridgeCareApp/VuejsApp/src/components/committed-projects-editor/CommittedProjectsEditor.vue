@@ -284,6 +284,7 @@ import { stat } from 'fs';
 import { Hub } from '@/connectionHub';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
+import TreatmentService from '@/services/treatment.service';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -300,6 +301,7 @@ export default class CommittedProjectsEditor extends Vue  {
     templateSelectItems: string[] = [];
     templateItemSelected: string = "";
     attributeSelectItems: SelectItem[] = [];
+    treatmentSelectItems: string[] = [];
     budgetSelectItems: SelectItem[] = [];
     categorySelectItems: SelectItem[] = [];
     categories: string[] = [];
@@ -307,6 +309,7 @@ export default class CommittedProjectsEditor extends Vue  {
     networkId: string = getBlankGuid();
     rules: InputValidationRules = rules;
     network: Network = clone(emptyNetwork);
+    selectedLibraryTreatments: Treatment[];
     isAdminTemplateUploaded: Boolean
     fileData: AxiosResponse
 
@@ -445,6 +448,7 @@ export default class CommittedProjectsEditor extends Vue  {
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             this.importCompleted,
         );
+        this.fetchTreatmentLibrary(this.scenarioId);
     }   
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
@@ -538,6 +542,13 @@ export default class CommittedProjectsEditor extends Vue  {
             this.cpGridHeaders[0].text = this.keyattr;
         }
             
+    }
+
+    @Watch('selectedLibraryTreatments', {deep: true})
+    onSelectedLibraryTreatmentsChanged(){
+        this.treatmentSelectItems = this.selectedLibraryTreatments.map(
+            (treatment: Treatment) => (treatment.name)
+        );
     }
 
     @Watch('stateScenarioSimpleBudgetDetails')
@@ -722,6 +733,31 @@ export default class CommittedProjectsEditor extends Vue  {
             })   
      }
 
+    handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
+    row.treatment = treatmentName;
+    this.updateCommittedProject(row, treatmentName, 'treatment')  
+    CommittedProjectsService.FillTreatmentValues({
+        committedProjectId: row.id,
+        treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : getBlankGuid(),
+        treatmentName: treatmentName,
+        KeyAttributeValue: row.locationKeys[this.keyattr],
+        networkId: this.networkId
+    })
+    .then((response: AxiosResponse) => {
+        if (hasValue(response, 'data')) {
+            var values = response.data as CommittedProjectFillTreatmentReturnValues;
+            row.cost = values.treatmentCost;
+            row.category = values.treatmentCategory;
+            scp.cost = row.cost;
+            let cat = this.reverseCatMap.get(row.category);
+            if (!isNil(cat))
+                scp.category = cat;
+            this.updateCommittedProject(row, row.cost, 'cost')  
+            this.onPaginationChanged();
+        }
+    });
+}
+
      updateNoTreatment(){
         if(this.isNoTreatmentBefore)
                 ScenarioService.setNoTreatmentBeforeCommitted(this.scenarioId).then((response: AxiosResponse) => {
@@ -860,34 +896,34 @@ export default class CommittedProjectsEditor extends Vue  {
         return null;
     }
     disableCrudButtons() {
-        const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+    const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
-            (scp: SectionCommittedProject) => {
-                return (
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.simulationId,
-                    ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.year,
-                    ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.cost,
-                    ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.treatment
-                    ) == true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.locationKeys[this.keyattr]
-                    ) == true &&
-                    this.rules['generalRules'].valueIsWithinRange(
-                        scp.year, [this.firstYear, this.lastYear],
-                    ) === true
-                );
-            },
-        );
+        (scp: SectionCommittedProject) => {
+            return (
+                this.rules['generalRules'].valueIsNotEmpty(
+                    scp.simulationId,
+                ) === true &&
+                this.rules['generalRules'].valueIsNotEmpty(
+                    scp.year,
+                ) === true &&
+                this.rules['generalRules'].valueIsNotEmpty(
+                    scp.cost,
+                ) === true &&
+                this.rules['generalRules'].valueIsNotEmpty(
+                    scp.treatment
+                ) == true &&
+                this.rules['generalRules'].valueIsNotEmpty(
+                    scp.locationKeys[this.keyattr]
+                ) == true &&
+                this.rules['generalRules'].valueIsWithinRange(
+                    scp.year, [this.firstYear, this.lastYear],
+                ) === true
+            );
+        },
+    );
         this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
-    }
+}
 
 
     setCpItems(){
@@ -1128,6 +1164,34 @@ export default class CommittedProjectsEditor extends Vue  {
             })
         }        
     }
+
+    async fetchTreatmentLibrary(simulationId: string) {
+        try {
+            const response = await TreatmentService.getTreatmentLibraryBySimulationId(simulationId);
+
+            if (hasValue(response, 'data')) {
+                const treatmentLibrary = response.data as TreatmentLibrary;
+                this.$store.commit('scenarioTreatmentLibraryMutator', treatmentLibrary);
+                this.handleLibrarySelectChange(treatmentLibrary.id);
+            }
+        } catch (error) {
+            this.addErrorNotificationAction({
+                message: 'Error fetching treatment library.',
+                longMessage: 'There was an issue fetching the treatment library. Please try again.'
+            });
+        }
+    }
+
+handleLibrarySelectChange(libraryId: string) {
+    this.selectTreatmentLibraryAction(libraryId);
+    this.hasSelectedLibrary = true;
+    const library = this.stateTreatmentLibraries.find((o) => o.id === libraryId);
+
+    if (!isNil(library)) {
+      this.selectedLibraryTreatments = library.treatments;
+      this.onSelectedLibraryTreatmentsChanged();
+    } 
+}
 
     async initializePages(){
         const request: PagingRequest<SectionCommittedProject>= {

@@ -15,6 +15,10 @@ export default class DeficientConditionGoalService {
         );
     }
 
+    static getDeficientLibraryDate(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.DeficientConditionGoal}/GetDeficientModifiedDate/${libraryId}`);
+    }
+
     static getLibraryDeficientConditionGoalPage(libraryId: string, data:PagingRequest<DeficientConditionGoal>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.DeficientConditionGoal}/GetLibraryDeficientConditionGoalPage/${libraryId}`, data

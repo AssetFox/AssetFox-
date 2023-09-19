@@ -4,6 +4,7 @@ using System.Linq;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentTime
 {
@@ -11,11 +12,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
     {
         private UnfundedTreatmentCommon _unfundedTreatmentCommon;
         private ReportHelper _reportHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UnfundedTreatmentTime()
+        public UnfundedTreatmentTime(IUnitOfWork unitOfWork)
         {
-            _unfundedTreatmentCommon = new UnfundedTreatmentCommon();
-            _reportHelper = new ReportHelper();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unfundedTreatmentCommon = new UnfundedTreatmentCommon(_unitOfWork);
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public void Fill(ExcelWorksheet unfundedTreatmentTimeWorksheet, SimulationOutput simulationOutput)

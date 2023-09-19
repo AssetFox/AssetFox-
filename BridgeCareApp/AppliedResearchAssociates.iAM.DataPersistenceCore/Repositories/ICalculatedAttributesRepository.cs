@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         ICollection<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibraries();
         CalculatedAttributeLibraryDTO GetCalculatedAttributeLibraryByID(Guid id);
 
+        DateTime GetLibraryModifiedDate(Guid calculatedLibraryId);
+
         List<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibrariesNoChildren();
 
         public List<CalculatedAttributeDTO> GetCalcuatedAttributesByLibraryIdNoChildren(Guid libraryid);

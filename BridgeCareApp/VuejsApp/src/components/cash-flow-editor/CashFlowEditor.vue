@@ -7,6 +7,7 @@
                     <v-select
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
+                        id="CashFlowEditor-SelectLibrary-vselect"
                         outline
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -16,7 +17,7 @@
                 <v-flex xs4 class="ghd-constant-header">    
                     <v-layout row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 28px !important">
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content" style="padding-top: 7px !important">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
                         <v-divider class="owner-shared-divider" inset vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
@@ -41,6 +42,7 @@
                             Add Cash Flow Rule
                         </v-btn>
                         <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
+                            id="CashFlowEditor-addCashFlowLibrary-btn"
                             outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario">
                             Create New Library
@@ -179,6 +181,7 @@
                 v-show="hasSelectedLibrary || hasScenario">
                 <v-btn outline
                     @click="onDeleteCashFlowRuleLibrary"
+                    id="CashFlowEditor-deleteLibrary-btn"
                     flat class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission">
@@ -349,6 +352,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     let selectedScenarioId: any = getBlankGuid();
     let librarySelectItems: SelectItem[] = [];
     let selectedCashFlowRuleLibrary = ref<CashFlowRuleLibrary>(clone(emptyCashFlowRuleLibrary));
+    let dateModified: string;
 
     const $router = useRouter();
 
@@ -507,45 +511,65 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
         : [];
     }
 
-    watch(pagination, () => onPaginationChanged)
-    function onPaginationChanged() {
-        if(initializing)
-        return;
-    checkHasUnsavedChanges();
-    const { sortBy, descending, page, rowsPerPage } = pagination.value;
-    const request: PagingRequest<CashFlowRule>= {
-        page: page,
-        rowsPerPage: rowsPerPage,
-        syncModel: {
-            libraryId: librarySelectItemValue.value,
-            updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
-            rowsForDeletion: deletionIds.value,
-            addedRows: addedRows.value,
-            isModified: scenarioLibraryIsModified
-        },           
-        sortColumn: sortBy,
-        isDescending: descending != null ? descending : false,
-        search: currentSearch
-    };
-    if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
-        CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
-            if(response.data){
-                let data = response.data as PagingPage<CashFlowRule>;
-                currentPage.value = data.items;
-                rowCache = clone(currentPage.value)
-                totalItems = data.totalItems;
-            }
-        });
-    else if(hasSelectedLibrary)
-         CashFlowService.getLibraryCashFlowRulePage(librarySelectItemValue.value, request).then(response => {
-            if(response.data){
-                let data = response.data as PagingPage<CashFlowRule>;
-                currentPage.value = data.items;
-                rowCache = clone(currentPage.value)
-                totalItems = data.totalItems;
-                if (!isNil(selectedCashFlowRuleLibrary.value.id) ) {
-                    getIsSharedLibraryAction(selectedCashFlowRuleLibrary).then(() => isShared = isSharedLibrary.value);
+    @Watch('cashFlowRuleGridData')
+    onCashFlowRuleGridDataChanged() {
+
+    }
+
+    @Watch('selectedCashFlowRule')
+    onSelectedSplitTreatmentIdChanged() {
+        this.cashFlowDistributionRuleGridData = hasValue(
+            this.selectedCashFlowRule.cashFlowDistributionRules,
+        )
+            ? clone(this.selectedCashFlowRule.cashFlowDistributionRules)
+            : [];
+    }
+    @Watch('isSharedLibrary')
+    onStateSharedAccessChanged() {
+        this.isShared = this.isSharedLibrary;
+        if (!isNullOrUndefined(this.selectCashFlowRuleLibrary)) {
+            this.selectCashFlowRuleLibrary.isShared = this.isShared;
+        } 
+    }
+    @Watch('pagination')
+    async onPaginationChanged() {
+        if(this.initializing)
+            return;
+        this.checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+        const request: PagingRequest<CashFlowRule>= {
+            page: page,
+            rowsPerPage: rowsPerPage,
+            syncModel: {
+                libraryId: this.librarySelectItemValue !== null && this.importLibraryDisabled ? this.librarySelectItemValue : null,
+                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: this.deletionIds,
+                addedRows: this.addedRows,
+                isModified: this.scenarioLibraryIsModified
+            },           
+            sortColumn: sortBy,
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearch
+        };
+        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
+            await CashFlowService.getScenarioCashFlowRulePage(this.selectedScenarioId, request).then(response => {
+                if(response.data){
+                    let data = response.data as PagingPage<CashFlowRule>;
+                    this.currentPage = data.items;
+                    this.rowCache = clone(this.currentPage)
+                    this.totalItems = data.totalItems;
                 }
+            });
+        else if(this.hasSelectedLibrary)
+             CashFlowService.getLibraryCashFlowRulePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+                if(response.data){
+                    let data = response.data as PagingPage<CashFlowRule>;
+                    this.currentPage = data.items;
+                    this.rowCache = clone(this.currentPage)
+                    this.totalItems = data.totalItems;
+                    if (!isNullOrUndefined(this.selectedCashFlowRuleLibrary.id) ) {
+                        this.getIsSharedLibraryAction(this.selectedCashFlowRuleLibrary).then(this.isShared = this.isSharedLibrary);
+                    }
 
             }
         });     

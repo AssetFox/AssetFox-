@@ -15,11 +15,15 @@ export default class TreatmentService {
             data,
         );
     }
-
+    
     static deleteTreatmentLibrary(libraryId: string): AxiosPromise {
         return coreAxiosInstance.delete(
             `${API.Treatment}/DeleteTreatmentLibrary/${libraryId}`,
         );
+    }
+
+    static getTreatmentLibraryModifiedDate (libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Treatment}/GetTreatmentLibraryModifiedDate/${libraryId}`)
     }
 
     static getScenarioSelectedTreatments(scenarioId: string): AxiosPromise {

@@ -15,6 +15,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertRemainingLifeLimitLibrary(RemainingLifeLimitLibraryDTO dto);
 
+        DateTime GetLibraryModifiedDate(Guid remainingLibraryId);
+
         void UpsertOrDeleteRemainingLifeLimits(List<RemainingLifeLimitDTO> remainingLifeLimits, Guid libraryId);
         void UpsertRemainingLifeLimitLibraryAndLimits(RemainingLifeLimitLibraryDTO library);
         void DeleteRemainingLifeLimitLibrary(Guid libraryId);

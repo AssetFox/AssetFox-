@@ -49,7 +49,7 @@
         <v-flex xs6 class="ghd-constant-header" style="margin-bottom: 15px">
             <v-layout v-if='hasSelectedLibrary && !hasScenario' align-center>
                 <div class="header-text-content owner-padding">
-                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                 </div>
                 <v-divider class="owner-shared-divider" inset vertical></v-divider>
                 <v-badge v-show="isShared" style="padding: 10px">
@@ -379,7 +379,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     let pairsCache: CriterionAndEquationSet[] = [];
     let updatedPairsMaps:Map<string, [CriterionAndEquationSet, CriterionAndEquationSet]> = 
         new Map<string, [CriterionAndEquationSet, CriterionAndEquationSet]>();//0: original value | 1: updated value 
-    let addedCalcPairs: Map<string, CriterionAndEquationSet[]> = new  Map<string, CriterionAndEquationSet[]>();
+    addedPairs: Map<string, CriterionAndEquationSet[]> = new  Map<string, CriterionAndEquationSet[]>();
     let deletionPairsIds: Map<string, string[]> = new Map<string, string[]>();
     let updatedPairs:  Map<string, CriterionAndEquationSet[]> = new  Map<string, CriterionAndEquationSet[]>();
     let defaultEquations: Map<string, CriterionAndEquationSet> = new Map<string, CriterionAndEquationSet>()
@@ -392,6 +392,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     let initializing: boolean = true;
     let uuidNIL: string = getBlankGuid();
     let isShared: boolean = false;
+    modifiedDate: string;
 
     let shareCalculatedAttributeLibraryDialogData: ShareCalculatedAttributeLibraryDialogData = clone(emptyShareCalculatedAttributeLibraryDialogData);
 
@@ -525,7 +526,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
 
     // Watchers
     watch(pagination,() => onPaginationChanged)
-    function onPaginationChanged() {
+    async function onPaginationChanged() {
         if( initializing)
             return;
          checkHasUnsavedChanges();
@@ -561,8 +562,17 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                 }
             });
         }            
-        else if( hasSelectedLibrary)
-             CalculatedAttributeService.getLibraryCalculatedAttributePage( librarySelectItemValue.value !== null ?  librarySelectItemValue.value : '', request).then(response => {
+        else if(this.hasSelectedLibrary)
+        this.initializing = true;
+        await CalculatedAttributeService.getCalculatedLibraryModifiedDate(this.selectedCalculatedAttributeLibrary.id).then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.modifiedDate = data.slice(0, 10);
+                   }
+             });
+
+             await CalculatedAttributeService.getLibraryCalculatedAttributePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
                      currentPage.equations = data.items;

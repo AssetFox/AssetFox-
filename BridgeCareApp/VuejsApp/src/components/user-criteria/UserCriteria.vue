@@ -167,7 +167,7 @@ import { User } from '@/shared/models/iAM/user';
 import { itemsAreEqual } from '@/shared/utils/equals-utils';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { emptyUserCriteriaFilter, UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
-import CriteriaFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDialog.vue';
+import CriteriaFilterEditorDialog from '@/shared/modals/CriteriaFilterEditorDialog.vue';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';

@@ -35,6 +35,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Value = "BRKEY_,BMSID"
             };
             entities.Add(KeyFields);
+
+            var RawDataKeyFields = new AdminSettingsEntity()
+            {
+                Key = "RawDataKeyFields",
+                Value = "BRKEY_,BMSID"
+            };
+            entities.Add(RawDataKeyFields);
+
+            var inventoryReportKey = new AdminSettingsEntity()
+            {
+                Key = "InventoryReportNames",
+                Value = "BAMSInventoryLookup(P)"
+            };
+            entities.Add(inventoryReportKey);
             return entities;
         }
 

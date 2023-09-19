@@ -16,6 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
     {
         private TestDataForMaintainableAssetRepo _testData;
         private UnitOfDataPersistenceWork _testRepo;
+        private UnitOfDataPersistenceWork _testRawRepo;
         private Mock<IAMContext> _mockedContext;
         private Mock<DbSet<MaintainableAssetEntity>> _mockedMaintainableAssetEntitySet;
         private Mock<DbSet<AggregatedResultEntity>> _mockedAggregatedResultsEntitySet;
@@ -38,6 +39,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var mockedRepo = new Mock<UnitOfDataPersistenceWork>(mockedConfiguration.Object, _mockedContext.Object);
             mockedRepo.Setup(_ => _.NetworkRepo.GetMainNetwork()).Returns(_testData.TestNetwork);
             _testRepo = mockedRepo.Object;
+
+            var mockedRawRepo = new Mock<UnitOfDataPersistenceWork>(mockedConfiguration.Object, _mockedContext.Object);
+            mockedRepo.Setup(_ => _.NetworkRepo.GetRawNetwork()).Returns(_testData.TestNetwork);
+            _testRawRepo = mockedRepo.Object;
         }
 
         [Fact]
@@ -49,12 +54,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 
             // Act
             var repo = new MaintainableAssetDataRepository(_testRepo);
+            var rawRepo = new MaintainableAssetDataRepository(_testRepo);
 
             // Assert
             Assert.Equal(2, repo.KeyProperties.Count());
             Assert.Equal(5, repo.KeyProperties["BRKEY_"].Count());
             var brKeyDatum = repo.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == "13401256");
             var bmsIdDatum = repo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256");
+            Assert.Equal(brKeyDatum.AssetId, checkGuid);
+            Assert.Equal(bmsIdDatum.AssetId, checkGuid);
+
+            Assert.Equal(2, rawRepo.KeyProperties.Count());
+            Assert.Equal(5, rawRepo.KeyProperties["BRKEY_"].Count());
+            var brKeyRawDatum = rawRepo.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == "13401256");
+            var bmsIdRawDatum = rawRepo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256");
             Assert.Equal(brKeyDatum.AssetId, checkGuid);
             Assert.Equal(bmsIdDatum.AssetId, checkGuid);
         }

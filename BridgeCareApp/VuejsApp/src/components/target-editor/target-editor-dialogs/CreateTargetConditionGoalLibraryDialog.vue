@@ -5,27 +5,36 @@
         <v-layout justify-start>
           <div class="dialog-header"><h5>Create New Target Condition Goal Library</h5></div>
         </v-layout>
-        <v-btn @click="onSubmit(false)" icon>
+        <v-btn @click="onSubmit(false)" 
+                    id="CreateTargetConditionGoalLibraryDialog-Close-btn"
+                    icon>
                     <i class="fas fa-times fa-2x"></i>
         </v-btn>
       </v-card-title>
       <v-card-text  class="ghd-dialog-text-field-padding">
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
-          <v-text-field  outline v-model="newTargetConditionGoalLibrary.name"
+          <v-text-field  outline 
+                        id="CreateTargetConditionGoalLibraryDialog-Name-textField"
+                        v-model="newTargetConditionGoalLibrary.name"
                         class="ghd-control-text ghd-control-border"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
-          <v-textarea no-resize outline rows="3"
+          <v-textarea no-resize outline 
+                      id="CreateTargetConditionGoalLibraryDialog-Description-textarea"
+                      rows="3"
                       class="ghd-control-text ghd-control-border" height="100px"
                       v-model="newTargetConditionGoalLibrary.description"/>
         </v-layout>
       </v-card-text>
       <v-card-actions class="py-0">
         <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
-          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue" outline>Cancel</v-btn>
+          <v-btn @click="onSubmit(false)"
+           id="CreateTargetConditionGoalLibraryDialog-Cancel-btn"
+           class="ghd-white-bg ghd-blue" outline>Cancel</v-btn>
           <v-btn :disabled="newTargetConditionGoalLibrary.name ===''" @click="onSubmit(true)" outline
-                 class="ghd-white-bg ghd-blue">
+                 class="ghd-white-bg ghd-blue"
+                 id="CreateTargetConditionGoalLibraryDialog-Save-btn">
             Save
           </v-btn>
 

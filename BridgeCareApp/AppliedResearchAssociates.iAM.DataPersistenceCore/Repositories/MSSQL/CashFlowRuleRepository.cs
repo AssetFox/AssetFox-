@@ -22,6 +22,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public CashFlowRuleRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
+        public DateTime GetLibraryModifiedDate(Guid cashLibraryId)
+        {
+            var dtos = _unitOfWork.Context.CashFlowRuleLibrary.Where(_ => _.Id == cashLibraryId).FirstOrDefault().LastModifiedDate;
+            return dtos;
+        }
+
 
         public void CreateCashFlowRules(List<CashFlowRule> cashFlowRules, Guid simulationId)
         {

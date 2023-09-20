@@ -6,6 +6,7 @@
                     <v-layout column>
                         <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
                         <v-select
+                            id="TargetConditionGoalEditor-SelectLibrary-select"
                             class="ghd-select ghd-text-field ghd-text-field-border"
                             :items="librarySelectItems"
                             append-icon=$vuetify.icons.ghd-down
@@ -20,7 +21,7 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout v-if="hasSelectedLibrary && ! hasScenario" style="padding-top: 10px; padding-left: 10px">
                         <div v-if="hasSelectedLibrary && !hasScenario" class="header-text-content owner-padding" style="padding-top: 7px;">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
                         <v-divider vertical 
                             class="owner-shared-divider"
@@ -48,6 +49,7 @@
                             v-show="hasSelectedLibrary || hasScenario" 
                         >Add Target Condition Goal</v-btn>
                         <v-btn 
+                            id="TargetConditionGoalEditor=CreateLibrary-btn"
                             @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario"
@@ -315,6 +317,7 @@
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-layout justify-center row>
                 <v-btn outline
+                    id="TargetConditionGoalEditor-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue"
                     v-show="!hasScenario"
@@ -330,6 +333,7 @@
                     Cancel
                 </v-btn>
                 <v-btn outline
+                    id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     :disabled="disableCrudButtons()"
@@ -345,6 +349,7 @@
                     Save
                 </v-btn>
                 <v-btn
+                    id="TargetConditionGoalEditor-UpdateLibrary-btn"
                     @click="onUpsertTargetConditionGoalLibrary"
                     class="ghd-blue-bg ghd-white"
                     v-show="!hasScenario"

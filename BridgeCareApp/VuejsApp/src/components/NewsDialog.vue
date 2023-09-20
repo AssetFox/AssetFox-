@@ -97,122 +97,125 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import { Action, State } from 'vuex-class';
-import { Component, Prop } from 'vue-property-decorator';
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import moment from 'moment';
 import { hasValue } from '@/shared/utils/has-value-util';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class NewsDialog extends Vue {
-    @Prop() showDialog: boolean;
-  
-    @State(state => state.announcementModule.announcements) announcements: Announcement[];
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    
-    @Action('upsertAnnouncement') upsertAnnouncementAction: any;
-    @Action('deleteAnnouncement') deleteAnnouncementAction: any;
+const emit = defineEmits(['close'])
+let store = useStore();
+const props = defineProps<{
+    showDialog: boolean
+    }>()
 
-    announcementListOffset: number = 0;
+let announcements = ref<Announcement[]>(store.state.announcementModule.announcements);
+let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
 
-    newAnnouncementTitle: string = '';
-    newAnnouncementContent: string = '';
+async function upsertAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('upsertAnnouncement');}
+async function deleteAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('deleteAnnouncement');}
+ 
+    let announcementListOffset: number = 0;
 
-    selectedAnnouncementForEdit?: Announcement = undefined;
+    let newAnnouncementTitle: string = '';
+    let newAnnouncementContent: string = '';
 
-    getVisibleAnnouncements() {
-        return this.announcements.slice(this.announcementListOffset, this.announcementListOffset + (this.hasAdminAccess ? 9 : 10));
+    let selectedAnnouncementForEdit: Announcement|undefined = undefined;
+
+    function getVisibleAnnouncements() {
+        return announcements.value.slice(announcementListOffset, announcementListOffset + (hasAdminAccess ? 9 : 10));
     }
 
-    formatDate(announcementDate: Date) {
+    function formatDate(announcementDate: Date) {
         return `${moment(announcementDate).format('dddd, MMMM Do, YYYY')}`;
     }
 
-    closeDialog() {
-        this.$emit("close", true);
+    function closeDialog() {
+        emit("close", true);
     }
 
-    onDeleteAnnouncement(announcementId: string) {
-        this.deleteAnnouncementAction({ deletedAnnouncementId: announcementId });
+    function onDeleteAnnouncement(announcementId: string) {
+        deleteAnnouncementAction({ deletedAnnouncementId: announcementId });
     }
 
-    onSendAnnouncement() {
-        if (!hasValue(this.selectedAnnouncementForEdit)) {
-            this.onCreateAnnouncement();
+    function onSendAnnouncement() {
+        if (!hasValue(selectedAnnouncementForEdit)) {
+            onCreateAnnouncement();
         } else {
-            this.onEditAnnouncement();
+            onEditAnnouncement();
         }
     }
 
-    onCreateAnnouncement() {
-        this.upsertAnnouncementAction({
+    function onCreateAnnouncement() {
+        upsertAnnouncementAction({
             announcement: {
                 ...emptyAnnouncement,
-                title: this.newAnnouncementTitle,
-                content: this.newAnnouncementContent,
+                title: newAnnouncementTitle,
+                content: newAnnouncementContent,
                 createdDate: new Date(),
             },
         });
 
-        this.newAnnouncementContent = this.newAnnouncementTitle = '';
+        newAnnouncementContent = newAnnouncementTitle = '';
     }
 
-    onEditAnnouncement() {
-        if (!hasValue(this.selectedAnnouncementForEdit)) {
+    function onEditAnnouncement() {
+        if (!hasValue(selectedAnnouncementForEdit)) {
             return;
         }
 
-        this.upsertAnnouncementAction({
+        upsertAnnouncementAction({
             announcement: {
-                ...this.selectedAnnouncementForEdit,
-                title: this.newAnnouncementTitle,
-                content: this.newAnnouncementContent,
+                ...selectedAnnouncementForEdit,
+                title: newAnnouncementTitle,
+                content: newAnnouncementContent,
             },
         });
 
-        this.newAnnouncementContent = this.newAnnouncementTitle = '';
-        this.selectedAnnouncementForEdit = undefined;
+        newAnnouncementContent = newAnnouncementTitle = '';
+        selectedAnnouncementForEdit = undefined;
     }
 
-    onSetAnnouncementForEdit(announcement: Announcement) {
-        this.selectedAnnouncementForEdit = announcement;
-        this.newAnnouncementTitle = announcement.title;
-        this.newAnnouncementContent = announcement.content;
+    function onSetAnnouncementForEdit(announcement: Announcement) {
+        selectedAnnouncementForEdit = announcement;
+        newAnnouncementTitle = announcement.title;
+        newAnnouncementContent = announcement.content;
     }
 
-    onStopEditing() {
-        this.selectedAnnouncementForEdit = undefined;
-        this.newAnnouncementTitle = this.newAnnouncementContent = '';
+    function onStopEditing() {
+        selectedAnnouncementForEdit = undefined;
+        newAnnouncementTitle = newAnnouncementContent = '';
     }
 
-    isEditingAnnouncement(announcement?: Announcement) {
+    function isEditingAnnouncement(announcement?: Announcement) {
         if (!hasValue(announcement)) {
-            return hasValue(this.selectedAnnouncementForEdit);
+            return hasValue(selectedAnnouncementForEdit);
         }
-        return hasValue(this.selectedAnnouncementForEdit) && this.selectedAnnouncementForEdit!.id === announcement!.id;
+        return hasValue(selectedAnnouncementForEdit) && selectedAnnouncementForEdit!.id === announcement!.id;
     }
 
-    seeNewerAnnouncements() {
+    function seeNewerAnnouncements() {
         // Admins see the announcement creation card, so they're shown one less announcement at a time to save space
-        const decrement = this.hasAdminAccess ? 9 : 10;
-        if (this.announcementListOffset > decrement) {
-            this.announcementListOffset -= decrement;
+        const decrement = hasAdminAccess ? 9 : 10;
+        if (announcementListOffset > decrement) {
+            announcementListOffset -= decrement;
         } else {
-            this.announcementListOffset = 0;
+            announcementListOffset = 0;
         }
     }
 
-    seeOlderAnnouncements() {
-        const increment = this.hasAdminAccess ? 9 : 10;
-        if (this.announcementListOffset < this.announcements.length - increment) {
-            this.announcementListOffset += increment;
+    function seeOlderAnnouncements() {
+        const increment = hasAdminAccess ? 9 : 10;
+        if (announcementListOffset < announcements.value.length - increment) {
+            announcementListOffset += increment;
         } else {
-            this.announcementListOffset = this.announcementListOffset - increment;
+            announcementListOffset = announcementListOffset - increment;
         }
     }
-}
+
 </script>
 
 <style>

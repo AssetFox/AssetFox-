@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch } from 'vue'; 
+import Vue, { ref, shallowReactive, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -72,9 +72,9 @@ import { useStore } from 'vuex';
   const props = defineProps<{showDialog: boolean}>();
   const emit = defineEmits(['submit'])
 
-    let stateUsers: User[] = shallowRef(store.state.userModule.users);
-    let stateNetworks: Network[] = shallowRef(store.state.networkModule.networks) ;
-    let shared: ShallowRef<boolean> = shallowRef(false);
+    const stateUsers: User[] = shallowReactive(store.state.userModule.users);
+    let shared = ref<boolean>(false);
+    let stateNetworks = ref<Network[]>(store.state.networkModule.networks) ;
 
     let newScenario: Scenario = { ...emptyScenario, id: getNewGuid() };
     
@@ -150,7 +150,7 @@ import { useStore } from 'vuex';
         }
 
         newScenario = { ...emptyScenario, id: getNewGuid() };
-        shared = shallowRef(false);
+        shared = ref(false);
     }
 
 </script>

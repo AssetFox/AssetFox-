@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { shallowRef, ShallowRef, watch, onMounted, onBeforeUnmount } from 'vue'; 
+import Vue, { ref, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -70,8 +70,8 @@ import { useStore } from 'vuex';
   const props = defineProps<{showDialog: boolean}>();
   const emit = defineEmits(['submit'])
 
-    let stateUsers: User[] = shallowRef(store.state.userModule.users);
-    let shared: ShallowRef<boolean> = shallowRef(false);
+    let stateUsers = ref<User[]>(store.state.userModule.users);
+    let shared = ref<boolean>(false);
 
     let filters: string[] = [
         "Scenario",
@@ -88,7 +88,6 @@ import { useStore } from 'vuex';
         FilterCategory = '';
         FilterValue = '';
     }
-
 
     watch(shared, ()=> onSetPublic)
     function onSetPublic() {

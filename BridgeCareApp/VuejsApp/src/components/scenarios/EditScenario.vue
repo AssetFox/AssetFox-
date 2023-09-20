@@ -106,15 +106,15 @@ import { useRouter } from 'vue-router';
     let store = useStore(); 
     const $router = useRouter(); 
 
-    let stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
+    const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
     let hasAdminAccess: boolean = (store.state.authenticationModule.hasAdminAccess) ; 
     let hasSimulationAccess:boolean = (store.state.authenticationModule.hasSimulationAccess) ; 
 
-    let stateSelectedScenario: Scenario = shallowRef(store.state.scenarioModule.selectedScenario) ;
+    const stateSelectedScenario: Scenario = shallowReactive(store.state.scenarioModule.selectedScenario) ;
     const stateSharedScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentSharedScenariosPage) ;
     const stateUserScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentUserScenarioPage) ;
 
-    let userId: string = shallowRef(store.state.authenticationModule.userId);
+    let userId = ref<string>(store.state.authenticationModule.userId);
 
     async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification')}
     async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
@@ -220,9 +220,7 @@ import { useRouter } from 'vue-router';
     let alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
 
     created();
-    //beforeRouteEnter(to: any, from: any, next: any) {
     function created() { 
-        //next((vm: any) => {
             // set selectedScenarioId
             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
             networkId = $router.currentRoute.value.query.networkId as string;
@@ -276,7 +274,6 @@ import { useRouter } from 'vue-router';
                     $router.push(navigationTabs[0].navigation);
                 }                
             }
-        //});
     }
 
     watch(stateSelectedScenario, () => onStateSelectedScenarioChanged)

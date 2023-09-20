@@ -165,7 +165,7 @@ import { useStore } from 'vuex';
 
     const props = defineProps<{dialogData: any}>();
 
-    let stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks);
+    const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks);
 
     async function aggregateNetworkDataAction(payload?: any): Promise<any>{await store.dispatch('aggregateNetworkData')}
     async function upsertBenefitQuantifierAction(payload?: any): Promise<any>{await store.dispatch('upsertBenefitQuantifier')} 

@@ -60,7 +60,7 @@ import { useStore } from 'vuex';
   const props = defineProps<{dialogData: ShareScenarioDialogData}>();
   const emit = defineEmits(['submit'])
 
-  let stateUsers: User[] = shallowReactive(store.state.userModule.users)
+  const stateUsers: User[] = shallowReactive(store.state.userModule.users)
 
   let scenarioUserGridHeaders: DataTableHeader[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},

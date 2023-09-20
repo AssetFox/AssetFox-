@@ -701,7 +701,7 @@ import { useRouter } from 'vue-router';
     const $router = useRouter(); 
     const $statusHub = inject('$statusHub') as any;
 
-    let stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
+    const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
     const stateScenarios: Scenario[] = shallowReactive(store.state.scenarioModule.scenarios); 
 
     const stateSharedScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentSharedScenariosPage) ;
@@ -963,11 +963,15 @@ import { useRouter } from 'vue-router';
     let sharedScenarios: Scenario[] = [];
     let currentSharedScenariosPage: Scenario[] = [];
     const sharedScenariosPagination: Pagination = shallowReactive(clone(emptyPagination));    
-    let totalSharedScenarios: Ref<number> = ref(0);
+    let totalSharedScenarios = ref<number>(0);
     let initializing: boolean = true;
     
     let searchMine: string = '';
     let currentSearchMine: string = ''
+    let sortedMineCategory: string = '';
+    let sortedMineValue: string = '';
+    let sortedCategory: string = '';
+    let sortedValue: string = '';
     let searchShared: string = '';
     let currentSearchShared: string = '';
     //confirmRollupAlertData: AlertData = clone(emptyAlertData);
@@ -992,7 +996,7 @@ import { useRouter } from 'vue-router';
     let selectedScenarioId: string = "";
     
     let currentWorkQueuePage: QueuedWork[] = [];
-    let workQueuePagination: Pagination = clone(emptyPagination);
+    const workQueuePagination: Pagination = shallowReactive(clone(emptyPagination));
     let totalQueuedSimulations: ShallowRef<number> = shallowRef(0);
     let initializingWorkQueue: boolean = true;
     let selectedQueuedWork: QueuedWork = clone(emptyQueuedWork);
@@ -1012,14 +1016,12 @@ import { useRouter } from 'vue-router';
             initializeScenarioPages()
         }
     }
-
-    //@Watch('stateScenarios', {deep: true}) // make it reactive to go deep
+ 
     watch(stateScenarios, onStateScenariosChanged) 
     function onStateScenariosChanged() {
         scenarios = clone(stateScenarios);
     }
 
-    //@Watch('stateSharedScenariosPage', {deep: true})
     watch(stateSharedScenariosPage, onStateSharedScenariosPageChanged) 
     function onStateSharedScenariosPageChanged(){
         currentSharedScenariosPage = clone(stateSharedScenariosPage);
@@ -1033,7 +1035,7 @@ import { useRouter } from 'vue-router';
     function onTotalSharedScenariosChanged(){
         setTabTotals();
     }
-    //@Watch('stateUserScenariosPage', {deep: true}) 
+
     watch(stateUserScenariosPage, onStateUserScenariosPageChanged) 
     function onStateUserScenariosPageChanged(){
         currentUserScenariosPage = clone(stateUserScenariosPage);
@@ -1048,7 +1050,6 @@ import { useRouter } from 'vue-router';
         setTabTotals();
     }
     
-    //@Watch('stateWorkQueuePage', {deep: true})
     watch(stateWorkQueuePage, onStateWorkQueuePageChanged) 
     function onStateWorkQueuePageChanged(){
         currentWorkQueuePage = clone(stateWorkQueuePage);
@@ -1063,12 +1064,11 @@ import { useRouter } from 'vue-router';
         setTabTotals();
     }
 
-    //@Watch('stateFastWorkQueuePage', {deep: true})
     watch(stateFastWorkQueuePage, onStateFastWorkQueuePageChanged) 
     function onStateFastWorkQueuePageChanged(){
         currentFastWorkQueuePage = clone(stateFastWorkQueuePage);
     }
-    @Watch('stateTotalFastQueuedItems')
+
     watch(stateTotalFastQueuedItems, onStateTotalFastQueuedItemsChanged) 
     function onStateTotalFastQueuedItemsChanged(){
         totalFastQueuedItems = stateTotalFastQueuedItems;
@@ -1327,9 +1327,9 @@ import { useRouter } from 'vue-router';
                 isCustomIcon: true
         });
         tabItems.push(
-            { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: totalUserScenarios },
-            { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: totalSharedScenarios },
-            { name: 'General work queue', icon: require("@/assets/icons/queue.svg"), count: totalQueuedSimulations },
+            { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: totalUserScenarios.value },
+            { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: totalSharedScenarios.value },
+            { name: 'General work queue', icon: require("@/assets/icons/queue.svg"), count: totalQueuedSimulations.value },
         );
         tab = 'My scenarios';
     }
@@ -1684,7 +1684,6 @@ import { useRouter } from 'vue-router';
         }
     }
 
-
     function getDataMigrationStatus(data: any) {
         const status: any = data.status;
         if (status.indexOf('Error') !== -1) {
@@ -1932,11 +1931,11 @@ import { useRouter } from 'vue-router';
         searchMine = '';
         onMineSearchClick();
     }
-    onMineFilterClearClick(){
-        this.sortedMineCategory = '';
-        this.sortedMineValue = '';
-        this.currentSearchMine= '';
-        this.resetPageMine()
+    function onMineFilterClearClick(){
+        sortedMineCategory = '';
+        sortedMineValue = '';
+        currentSearchMine= '';
+        resetPageMine()
     }
 
     function resetPageMine(){
@@ -1948,11 +1947,11 @@ import { useRouter } from 'vue-router';
         currentSearchShared = searchShared;
         resetPageShared()
     }
-    onSharedFilterClearClick(){
-        this.sortedCategory = '';
-        this.sortedValue = '';
-        this.currentSearchShared = '';
-        this.resetPageShared()
+    function onSharedFilterClearClick(){
+        sortedCategory = '';
+        sortedValue = '';
+        currentSearchShared = '';
+        resetPageShared()
     }
 
     function onSharedClearClick(){
@@ -1976,20 +1975,20 @@ import { useRouter } from 'vue-router';
     function setTabTotals(){
         tabItems.forEach(tab => {
             if(tab.name === 'Shared with me')
-                tab.count = totalSharedScenarios;
+                tab.count = totalSharedScenarios.value;
             else if (tab.name === 'My scenarios')
-                tab.count = totalUserScenarios;
+                tab.count = totalUserScenarios.value;
             else
-                tab.count = totalQueuedSimulations + totalFastQueuedItems;
+                tab.count = totalQueuedSimulations.value + totalFastQueuedItems.value;
         })
     }
 
     function getEmptyWorkQueueMessage()
     {
-        if (totalSharedScenarios == 0 &&
-            totalUserScenarios == 0 &&
-            totalQueuedSimulations == 0 &&
-            totalFastQueuedItems == 0){
+        if (totalSharedScenarios.value == 0 &&
+            totalUserScenarios.value == 0 &&
+            totalQueuedSimulations.value == 0 &&
+            totalFastQueuedItems.value == 0){
             
             return "Retrieving data..."
         }

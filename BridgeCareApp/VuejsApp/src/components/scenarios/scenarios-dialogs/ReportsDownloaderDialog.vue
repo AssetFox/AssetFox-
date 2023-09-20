@@ -65,11 +65,11 @@ import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { clone } from 'ramda';
 import { useStore } from 'vuex'; 
 
-  let store = useStore(); 
+    let store = useStore(); 
 
-  const props = defineProps<{dialogData: ReportsDownloaderDialogData}>();
+    const props = defineProps<{dialogData: ReportsDownloaderDialogData}>();
 
-    let isBusy: boolean = shallowReactive(store.state.busyModule.isBusy)
+    let isBusy = ref<boolean>(store.state.busyModule.isBusy);
 
     let stateSimulationReportNames: string[] = (store.state.adminDataModule.simulationReportNames)
 

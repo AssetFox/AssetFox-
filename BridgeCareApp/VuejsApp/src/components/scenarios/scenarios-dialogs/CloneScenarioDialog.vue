@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { shallowRef, ShallowRef, watch } from 'vue'; 
+import Vue, { ref, shallowReactive, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -72,9 +72,9 @@ import { useStore } from 'vuex';
     const props = defineProps<{dialogData: CloneScenarioDialogData}>();
     const emit = defineEmits(['submit']);
 
-    let stateUsers: User[] = shallowRef(store.state.userModule.users);
-    let stateCompatibleNetworks: Network[] = shallowRef(store.state.networkModule.compatibleNetworks);
-    let shared: ShallowRef<boolean> = shallowRef(false);
+    const stateUsers =  shallowReactive<User[]>(store.state.userModule.users);
+    const stateCompatibleNetworks = shallowReactive<Network[]>(store.state.networkModule.compatibleNetworks);  
+    let shared =  ref<boolean>(false);
 
     async function getCompatibleNetworksAction(payload?: any): Promise<any>{await store.dispatch('getCompatibleNetworks')}
 
@@ -165,7 +165,7 @@ import { useStore } from 'vuex';
         }
 
         newScenario = { ...emptyScenario, id: getNewGuid() };
-        shared = shallowRef(false);
+        shared = ref(false);
         hasCompatibleNetworks = false;
     }
 

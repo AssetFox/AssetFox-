@@ -60,6 +60,7 @@ import {
 import { getUserName } from '@/shared/utils/get-user-info';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
     const props = defineProps<{dialogData: CreateTreatmentLibraryDialogData}>()
     const dialogData = reactive(props.dialogData);

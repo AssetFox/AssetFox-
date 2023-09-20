@@ -10,7 +10,7 @@
                     class="elevation-1 v-table__overflow ghd-padding-top"
                     hide-actions
                 >
-                    <template slot="items" slot-scope="props">
+                    <template slot="items" slot-scope="props" v-slot:items="props">
                         <tr style="border:none">
                             <td xs5>                            
                                 <v-layout xs6 align-center>                                
@@ -106,9 +106,8 @@
     </v-layout>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
+<script lang="ts" setup>
+import Vue, { shallowRef } from 'vue';
 import { emptyCost, TreatmentCost } from '@/shared/models/iAM/treatment';
 import {
     emptyEquationEditorDialogData,
@@ -125,20 +124,16 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
 
-@Component({
-    components: {
-        GeneralCriterionEditorDialog,
-        CostEquationEditorDialog: EquationEditorDialog,
-        Alert
-    },
-})
-export default class CostsTab extends Vue {
-    @Prop() selectedTreatmentCosts: TreatmentCost[];
-    @Prop() callFromScenario: boolean;
-    @Prop() callFromLibrary: boolean;
+    const emit = defineEmits(['submit', 'onAddCost', 'onModifyCost', 'onRemoveCost'])
+    let store = useStore();
+    let selectedTreatmentCosts = shallowRef<TreatmentCost[]>();
+    let  callFromScenario: boolean;
+    let  callFromLibrary: boolean;
 
-    costsGridHeaders: DataTableHeader[] = [
+    let costsGridHeaders: DataTableHeader[] = [
         {
             text: '',
             value: 'equation',
@@ -164,102 +159,102 @@ export default class CostsTab extends Vue {
             width: '100px',
         },
     ];
-    costsGridData: TreatmentCost[] = [];
-    costEquationEditorDialogData: EquationEditorDialogData = clone(
+    let costsGridData: TreatmentCost[] | undefined = [];
+    let costEquationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
     );
-    costCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    let costCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
         emptyGeneralCriterionEditorDialogData,
     );
-    selectedCostForEquationOrCriteriaEdit: TreatmentCost = clone(emptyCost);
-    uuidNIL: string = getBlankGuid();
-    alertData: AlertData = clone(emptyAlertData);
+    let selectedCostForEquationOrCriteriaEdit: TreatmentCost = clone(emptyCost);
+    let uuidNIL: string = getBlankGuid();
+    let alertData: AlertData = clone(emptyAlertData);
 
-    @Watch('selectedTreatmentCosts')
-    onSelectedTreatmentCostsChanged() {
-        this.costsGridData = clone(this.selectedTreatmentCosts);
+    watch(selectedTreatmentCosts, () => onSelectedTreatmentCostsChanged)
+    function onSelectedTreatmentCostsChanged() {
+        costsGridData = clone(selectedTreatmentCosts.value);
     }
 
-    onAddCost() {
+    function onAddCost() {
         const newCost: TreatmentCost = { ...emptyCost, id: getNewGuid() };
-        this.$emit('onAddCost', newCost);
+        emit('onAddCost', newCost);
     }
 
-    onShowCostEquationEditorDialog(cost: TreatmentCost) {
-        this.selectedCostForEquationOrCriteriaEdit = clone(cost);
+    function onShowCostEquationEditorDialog(cost: TreatmentCost) {
+        selectedCostForEquationOrCriteriaEdit = clone(cost);
 
-        this.costEquationEditorDialogData = {
+        costEquationEditorDialogData = {
             showDialog: true,
             equation: clone(cost.equation),
         };
     }
 
-    onSubmitCostEquationEditorDialogResult(equation: Equation) {
-        this.costEquationEditorDialogData = clone(
+    function onSubmitCostEquationEditorDialogResult(equation: Equation) {
+        costEquationEditorDialogData = clone(
             emptyEquationEditorDialogData,
         );
 
         if (
             !isNil(equation) &&
-            this.selectedCostForEquationOrCriteriaEdit.id !== this.uuidNIL
+            selectedCostForEquationOrCriteriaEdit.id !== uuidNIL
         ) {
-            this.$emit(
+            emit(
                 'onModifyCost',
                 setItemPropertyValue(
                     'equation',
                     equation,
-                    this.selectedCostForEquationOrCriteriaEdit,
+                    selectedCostForEquationOrCriteriaEdit,
                 ),
             );
         }
 
-        this.selectedCostForEquationOrCriteriaEdit = clone(emptyCost);
+        selectedCostForEquationOrCriteriaEdit = clone(emptyCost);
     }
 
-    onShowCostCriterionEditorDialog(cost: TreatmentCost) {
-        this.selectedCostForEquationOrCriteriaEdit = clone(cost);
+    function onShowCostCriterionEditorDialog(cost: TreatmentCost) {
+        selectedCostForEquationOrCriteriaEdit = clone(cost);
 
-        this.costCriterionEditorDialogData = {
+        costCriterionEditorDialogData = {
             showDialog: true,
             CriteriaExpression: cost.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onSubmitCostCriterionEditorDialogResult(
+    function onSubmitCostCriterionEditorDialogResult(
         criterionExpression: string,
     ) {
-        this.costCriterionEditorDialogData = clone(
+        costCriterionEditorDialogData = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
         if (
             !isNil(criterionExpression) &&
-            this.selectedCostForEquationOrCriteriaEdit.id !== this.uuidNIL
+            selectedCostForEquationOrCriteriaEdit.id !== uuidNIL
         ) {
-            if(this.selectedCostForEquationOrCriteriaEdit.criterionLibrary.id === getBlankGuid())
-                this.selectedCostForEquationOrCriteriaEdit.criterionLibrary.id = getNewGuid();
-            this.$emit(
+            if(selectedCostForEquationOrCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                selectedCostForEquationOrCriteriaEdit.criterionLibrary.id = getNewGuid();
+            emit(
                 'onModifyCost',
                 setItemPropertyValue(
                     'criterionLibrary',
-                    {...this.selectedCostForEquationOrCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
-                    this.selectedCostForEquationOrCriteriaEdit,
+                    {...selectedCostForEquationOrCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
+                    selectedCostForEquationOrCriteriaEdit,
                 ),
             );
         }
 
-        this.selectedCostForEquationOrCriteriaEdit = clone(emptyCost);
+        selectedCostForEquationOrCriteriaEdit = clone(emptyCost);
     }
 
-    onRemoveCost(costId: string) {
-        this.$emit('onRemoveCost', costId);
+    function onRemoveCost(costId: string) {
+        emit('onRemoveCost', costId);
     }
 
     /**
      * Shows the Alert
      */
-    showExampleFunction() {
-        this.alertData = {
+     function showExampleFunction() {
+        alertData = {
             showDialog: true,
             heading: 'Example',
             choice: false,
@@ -269,10 +264,10 @@ export default class CostsTab extends Vue {
         };
     }
 
-    onSubmitAlertResult(dummy: boolean) {
-        this.alertData = clone(emptyAlertData);
+    function onSubmitAlertResult(dummy: boolean) {
+        alertData = clone(emptyAlertData);
     }
-}
+
 </script>
 
 <style>

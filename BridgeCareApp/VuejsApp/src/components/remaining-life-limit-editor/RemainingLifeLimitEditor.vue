@@ -523,12 +523,12 @@ import { useRouter } from 'vue-router';
                     totalItems = data.totalItems;
                 }
             });
-        else if(this.hasSelectedLibrary)
-            await RemainingLifeLimitService.getRemainingLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+        else if(hasSelectedLibrary)
+            await RemainingLifeLimitService.getRemainingLibraryDate(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '').then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      this.dateModified = data.slice(0, 10);
+                      dateModified = data.slice(0, 10);
                    }
              }),     
              RemainingLifeLimitService.getLibraryRemainingLifeLimitPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {

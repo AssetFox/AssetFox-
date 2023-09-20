@@ -265,7 +265,7 @@
 
         <SetRangeForDeletingBudgetYearsDialog :showDialog='showSetRangeForDeletingBudgetYearsDialog'
                                               :endYear='lastYear'
-                                              :maxRange='yearsInAnalysisPeriod'
+                                              :maxRange='yearsInAnalysisPeriod()'
                                               @submit='onSubmitRemoveBudgetYearRange' />
 
         <EditBudgetsDialog :dialogData='editBudgetsDialogData' @submit='onSubmitEditBudgetsDialogResult' />
@@ -375,15 +375,14 @@ async function getCriterionLibrariesAction(payload?: any): Promise<any> {await s
 async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage');}
 async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
     
-    @Getter('getLibraryDateModified') getModifiedDate: any;
-
+let getModifiedDate = store.getters.getLibraryDateModified;
 let getUserNameByIdGetter = store.getters.getUserNameById;
 
 function budgetLibraryMutator(payload:any){store.commit('budgetLibraryMutator');}
 function selectedBudgetLibraryMutator(payload:any){store.commit('selectedBudgetLibraryMutator');}
 function investmentPlanMutator(payload:any){store.commit('investmentPlanMutator');}
 function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator');}
-    modifiedDate: string;
+    let modifiedDate: string;
 
     let addedBudgets: Budget[] = [];
     let updatedBudgetsMap:Map<string, [Budget, Budget]> = new Map<string, [Budget, Budget]>();//0: original value | 1: updated value
@@ -563,11 +562,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         else if(hasSelectedLibrary){
             if(librarySelectItemValue === null)
                 return;
-                await InvestmentService.getBudgetLibraryModifiedDate(this.selectedBudgetLibrary.id).then(response => {
+                await InvestmentService.getBudgetLibraryModifiedDate(selectedBudgetLibrary.id).then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      this.modifiedDate = data.slice(0, 10);
+                      modifiedDate = data.slice(0, 10);
                    }
              });
 
@@ -1281,7 +1280,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         parentLibraryId = loadedParentId;
     }
 
-    function formatAsCurrency(value: any) {
+    function formatAsCurrency(value: any): any {
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }

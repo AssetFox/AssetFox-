@@ -709,10 +709,10 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                             if(response.data){
                                 setAlertMessageAction("A performance curve import has been added to the work queue")
                             }
-                            vm.initializePages().then(() =>{
-                                vm.hasScenario = true;
-                                vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                                    vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                            initializePages().then(() =>{
+                                hasScenario = true;
+                                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+                                    selectScenarioAction({ scenarioId: selectedScenarioId });        
                             });
                         });
                             
@@ -778,14 +778,14 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 }
             });
         }          
-        else if(this.hasSelectedLibrary){
-            this.isRunning = true;
+        else if(hasSelectedLibrary){
+            isRunning = true;
 
-            await PerformanceCurveService.getPerformanceLibraryModifiedDate(this.selectedPerformanceCurveLibrary.id).then(response => {
+            await PerformanceCurveService.getPerformanceLibraryModifiedDate(selectedPerformanceCurveLibrary.value.id).then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      this.modifiedDate = data.slice(0, 10);
+                      modifiedDate = data.slice(0, 10);
                    }
              });
 
@@ -1118,14 +1118,14 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
             addedRows: addedRows.value,
             isModified: scenarioLibraryIsModified
-        }, selectedScenarioId).then((response: AxiosResponse) => {
+        }, selectedScenarioId).then(async (response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-                this.clearChanges()
-                this.performancePagination.page = 1;
-                await this.onPaginationChanged();
-                this.addSuccessNotificationAction({message: "Modified scenario's deterioration models"});
-                this.librarySelectItemValue = null
+                parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+                clearChanges()
+                performancePagination.value.page = 1;
+                await onPaginationChanged();
+                addSuccessNotificationAction({message: "Modified scenario's deterioration models"});
+                librarySelectItemValue.value = null
             }           
         });
     }

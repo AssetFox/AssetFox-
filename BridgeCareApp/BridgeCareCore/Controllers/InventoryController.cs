@@ -103,31 +103,12 @@ namespace BridgeCareCore.Controllers
                 }
             }
 
-            var temp = new List<string>(); 
             List<InventoryItem> inventoryItems = new List<InventoryItem>();
-            foreach(var assetKeyDataValue in  assetKeyData.Values)
+            var assetKeyDataValues = assetKeyData.Select(x => x.Value.FirstOrDefault()).Distinct().ToList();
+            foreach (var assetKeyDataValue in  assetKeyDataValues)
             {
-                if(temp != assetKeyDataValue)
-                {
-                    inventoryItems.Add(new InventoryItem { keyProperties = assetKeyDataValue });
-                }
-                temp = assetKeyDataValue;
+                    inventoryItems.Add(new InventoryItem { keyProperties = new List<string> { assetKeyDataValue } });
             }
-
-            // Remove the duplicates
-            //for (int i = 0; i < inventoryItems.Count - 1; i++)
-            //{
-            //    for (int j = i + 1; j < inventoryItems.Count; j++)
-            //    {
-            //        if (inventoryItems[i].keyProperties[0] == inventoryItems[j].keyProperties[0])
-            //        {
-            //            inventoryItems.RemoveAt(j);
-
-            //            j--;
-            //        }
-            //    }
-            //}
-
             return Ok(inventoryItems);
         }
 

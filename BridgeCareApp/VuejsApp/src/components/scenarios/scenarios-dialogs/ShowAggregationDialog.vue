@@ -157,12 +157,12 @@ import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
 import { Hub } from '@/connectionHub';
-import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount } from 'vue'; 
+import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject } from 'vue'; 
 import { useStore } from 'vuex'; 
 
     let store = useStore(); 
+    const $statusHub = inject('$statusHub') as any
 
-    //@Prop() dialogData: any;
     const props = defineProps<{dialogData: any}>();
 
     let stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks);

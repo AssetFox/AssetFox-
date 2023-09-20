@@ -51,10 +51,8 @@
     </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { State } from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { shallowRef, ShallowRef, watch, onMounted, onBeforeUnmount } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -65,51 +63,57 @@ import {
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
+import { useStore } from 'vuex'; 
 
-@Component
-export default class FilterScenarioList extends Vue {
-    @Prop() showDialog: boolean;
+  let store = useStore(); 
 
-    @State(state => state.userModule.users) stateUsers: User[];
-    filters: string[] = [
+  const props = defineProps<{showDialog: boolean}>();
+  const emit = defineEmits(['submit'])
+
+    let stateUsers: User[] = shallowRef(store.state.userModule.users);
+    let shared: ShallowRef<boolean> = shallowRef(false);
+
+    let filters: string[] = [
         "Scenario",
         "Owner",
         "Creator",
         "Network"
     ]
-    FilterCategory = '';
-    FilterValue = '';
+    let FilterCategory = '';
+    let FilterValue = '';
+    let isNetworkSelected: boolean = false;
 
-    @Watch('showDialog')
-    onShowDialogChanged() {
-        this.FilterCategory = '';
-        this.FilterValue = '';
+    watch(()=> props.showDialog,()=> onShowDialogChanged)
+    function onShowDialogChanged() {
+        FilterCategory = '';
+        FilterValue = '';
     }
 
-    @Watch('shared')
-    onSetPublic() {
-        this.onModifyScenarioUserAccess();
+
+    watch(shared, ()=> onSetPublic)
+    function onSetPublic() {
+        // ToDo - commented the below line as the function is missing
+        //onModifyScenarioUserAccess();
     }
 
-    selectedFilter(FilterCategory: string, FilterValue: string){
-      this.FilterCategory = FilterCategory;
-      this.FilterValue = FilterValue;
+    function selectedFilter(FilterCategory: string, FilterValue: string){
+      FilterCategory = FilterCategory;
+      FilterValue = FilterValue;
       if(FilterCategory != '' && !isNil(FilterCategory)){
-        this.isNetworkSelected = true;
+        isNetworkSelected = true;
       }
       else{
-        this.isNetworkSelected = false;
+        isNetworkSelected = false;
       }
     }
 
-
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-            this.$emit('submit', this.FilterCategory,this.FilterValue);
+            emit('submit', FilterCategory,FilterValue);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
 
     }
-}
+
 </script>

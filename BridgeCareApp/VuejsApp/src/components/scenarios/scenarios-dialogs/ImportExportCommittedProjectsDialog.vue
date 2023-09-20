@@ -35,74 +35,72 @@
     </v-dialog>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action } from 'vuex-class';
+<script lang='ts' setup>
+import Vue, {  watch } from 'vue'; 
+
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
 import FileSelector from '@/shared/components/FileSelector.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { clone } from 'ramda';
+import { useStore } from 'vuex'; 
 
-@Component({
-    components: { CommittedProjectsFileSelector: FileSelector },
-})
-export default class ImportExportCommittedProjectsDialog extends Vue {
-    @Prop() showDialog: boolean;
+    let store = useStore(); 
+    const props = defineProps<{showDialog: boolean}>();
+    const emit = defineEmits(['submit','delete'])
 
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setIsBusy') setIsBusyAction: any;
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
+    async function setIsBusyAction(payload?: any): Promise<any>{await store.dispatch('setIsBusy')}
 
-    committedProjectsFile: File | null = null;
-    applyNoTreatment: boolean = true;
-    closed: boolean = false;
+    let committedProjectsFile: File | null = null;
+    let applyNoTreatment: boolean = true;
+    let closed: boolean = false;
 
-    @Watch('showDialog')
-    onShowDialogChanged() {
-        if (this.showDialog) {
-            this.closed = false;
+    watch(()=> props.showDialog,()=> onShowDialogChanged)
+    function onShowDialogChanged() {
+        if (props.showDialog) {
+            closed = false;
         } else {
-            this.committedProjectsFile = null;
-            this.closed = true;
+            committedProjectsFile = null;
+            closed = true;
         }
     }
 
     /**
      * FileSelector submit event handler
      */
-    onSubmitFileSelectorFile(file: File, treatment: boolean) {
-        this.committedProjectsFile = hasValue(file) ? clone(file) : null;
-        this.applyNoTreatment = treatment;
+    function onSubmitFileSelectorFile(file: File, treatment: boolean) {
+        committedProjectsFile = hasValue(file) ? clone(file) : null;
+        applyNoTreatment = treatment;
     }
 
     /**
      * Dialog submit event handler
      */
-    onSubmit(submit: boolean, isExport: boolean = false) {
+    function onSubmit(submit: boolean, isExport: boolean = false) {
         if (submit) {
             const result: ImportExportCommittedProjectsDialogResult = {
-                applyNoTreatment: this.applyNoTreatment,
-                file: this.committedProjectsFile as File,
+                applyNoTreatment: applyNoTreatment,
+                file: committedProjectsFile as File,
                 isExport: isExport,
             };
-            this.$emit('submit', result);
+            emit('submit', result);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
     }
     /**
      * Apply no treatment event handler
      */
-    onTreatmentChanged(treatment: boolean) {
-        this.applyNoTreatment = treatment;
+    function onTreatmentChanged(treatment: boolean) {
+        applyNoTreatment = treatment;
     }
     /**
      * Dialog delete event handler
      */
-    onDelete() {
-        this.$emit('delete');
+    function onDelete() {
+        emit('delete');
     }
-}
+
 </script>
 <style scoped>
 .div-warning-border {

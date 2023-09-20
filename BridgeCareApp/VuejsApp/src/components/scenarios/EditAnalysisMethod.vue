@@ -209,7 +209,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount } from 'vue'; 
+import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject } from 'vue'; 
 import { clone, equals, isNil } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -234,6 +234,8 @@ import { useRouter } from 'vue-router';
 
     let store = useStore(); 
     const $router = useRouter(); 
+    // ToDo - verify if below is correct. Its used in onUpsertAnalysisMethod()
+    const $refs = inject('$refs') as any
 
     let stateAnalysisMethod: AnalysisMethod = shallowRef(store.state.analysisMethodModule.analysisMethod) ;
     const stateNumericAttributes: Attribute[] = shallowReactive(store.state.attributeModule.numericAttributes) ;
@@ -298,9 +300,9 @@ import { useRouter } from 'vue-router';
        //next((vm: any) => {
     created(); 
     function created() { 
-            selectedScenarioId = $router.currentRoute.value.query.scenarioId;
-            simulationName = $router.currentRoute.value.query.simulationName;
-            networkName = $router.currentRoute.value.query.networkName;
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+            simulationName = $router.currentRoute.value.query.simulationName as string;
+            networkName = $router.currentRoute.value.query.networkName as string;
             if (selectedScenarioId === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
                 addErrorNotificationAction({

@@ -634,7 +634,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted } from 'vue'; 
+import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted, inject } from 'vue'; 
 import moment from 'moment';
 import {
     emptyScenario,
@@ -699,6 +699,7 @@ import { useRouter } from 'vue-router';
 
     let store = useStore(); 
     const $router = useRouter(); 
+    const $statusHub = inject('$statusHub') as any;
 
     let stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
     const stateScenarios: Scenario[] = shallowReactive(store.state.scenarioModule.scenarios); 

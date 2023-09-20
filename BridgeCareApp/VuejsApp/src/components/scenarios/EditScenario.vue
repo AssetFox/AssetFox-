@@ -127,6 +127,7 @@ import { useRouter } from 'vue-router';
     let selectedScenarioId: string = getBlankGuid();
     let showImportExportCommittedProjectsDialog: boolean = false;
     let networkId: string = getBlankGuid();
+    let simulationName: string;
     let networkName: string = '';
     let selectedScenario: Scenario = clone(emptyScenario);
     let navigationTabs: NavigationTab[] = [
@@ -223,10 +224,10 @@ import { useRouter } from 'vue-router';
     function created() { 
         //next((vm: any) => {
             // set selectedScenarioId
-            selectedScenarioId = $router.currentRoute.value.query.scenarioId;
-            networkId = $router.currentRoute.value.query.networkId;
-            simulationName = $router.currentRoute.value.query.scenarioName;
-            networkName = $router.currentRoute.value.query.networkName;
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+            networkId = $router.currentRoute.value.query.networkId as string;
+            simulationName = $router.currentRoute.value.query.scenarioName as string;
+            networkName = $router.currentRoute.value.query.networkName as string;
 
             // check that selectedScenarioId is set
             if (selectedScenarioId === getBlankGuid()) {

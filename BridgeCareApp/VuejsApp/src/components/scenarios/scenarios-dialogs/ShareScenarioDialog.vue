@@ -59,7 +59,6 @@ import { useStore } from 'vuex';
 
   const props = defineProps<{dialogData: ShareScenarioDialogData}>();
   const emit = defineEmits(['submit'])
-  
 
   let stateUsers: User[] = shallowReactive(store.state.userModule.users)
 

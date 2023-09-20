@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
+namespace BridgeCareCore.Services.SimulationCloning
 {
     public class SimulationCloningCommittedProjectErrors
     {

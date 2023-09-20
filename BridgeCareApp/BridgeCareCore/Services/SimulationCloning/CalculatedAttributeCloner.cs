@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
-namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
+namespace BridgeCareCore.Services.SimulationCloning
 {
     internal class CalculatedAttributeCloner
     {

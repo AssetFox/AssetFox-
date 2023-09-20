@@ -2,7 +2,7 @@
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Static;
 
-namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
+namespace BridgeCareCore.Services.SimulationCloning
 {
     internal class CriterionLibraryCloner
     {

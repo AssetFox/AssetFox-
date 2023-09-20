@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Data.SimulationCloning;
 
-namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
+namespace BridgeCareCore.Services.SimulationCloning
 {
     internal class ReportIndexCloner
     {

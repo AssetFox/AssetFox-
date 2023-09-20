@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AppliedResearchAssociates.iAM.Data.SimulationCloning
+namespace BridgeCareCore.Services.SimulationCloning
 {
     internal class TreatmentCostCloner
     {

@@ -22,19 +22,20 @@
     </v-container>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
     import Vue from 'vue';
-    import Component from 'vue-class-component';
-    import {State} from 'vuex-class';
     import { hasValue } from '@/shared/utils/has-value-util';
     import { SecurityTypes } from '@/shared/utils/security-types';
+    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+    import { useStore } from 'vuex';
+    import { useRouter } from 'vue-router';
 
-    @Component
-    export default class Logout extends Vue {
-        @State(state => state.authenticationModule.securityType) securityType: string;
-
-        mounted() {
-            if (this.securityType === SecurityTypes.esec) {
+    const $router = useRouter();
+    let store = useStore();
+    let securityType = ref<string>(store.state.authenticationModule.securityType);
+    onMounted(()=>mounted())
+    function mounted() {
+            if (securityType === SecurityTypes.esec) {
                 /*
                  * The /iAM/ pages of the penndot deployments fail to set the cookie until they have been refreshed.
                  */
@@ -43,7 +44,7 @@
                     window.location.reload();
                 }
 
-                if (!hasValue(this.$route.query.host)) {
+                if (!hasValue($router.currentRoute.value.query.host)) {
                     return;
                 }
                 /*
@@ -51,13 +52,12 @@
                  * modify browser cookies for penndot.gov. So, if the browser was sent here from another host, redirect back to the landing
                  * page of that host without the 'host' query string.
                  */
-                const host: string = this.$route.query.host as string;
+                const host: string = $router.currentRoute.value.query.host as string;
                 if (host !== window.location.host) {
                     window.location.href = 'http://' + host + '/iAM';
                 }
             }
         }
-    }
 </script>
 
 <style>

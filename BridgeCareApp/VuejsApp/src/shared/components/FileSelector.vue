@@ -53,91 +53,96 @@
     </v-layout>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Watch, Prop} from 'vue-property-decorator';
-import {Action} from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { shallowRef } from 'vue';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {clone, prop} from 'ramda';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import { formatBytes } from '@/shared/utils/math-utils';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class FileSelector extends Vue {
-    @Prop() closed: boolean = false;
-    @Prop() useTreatment: boolean = false;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setIsBusy') setIsBusyAction: any;
+let store = useStore();
+const emit = defineEmits(['submit','treatment'])
+const props = defineProps<{
+    closed: boolean,
+    useTreatment: boolean
+    }>()
 
-    applyNoTreatment: boolean = true;
-    fileSelect: HTMLInputElement = {} as HTMLInputElement;
-    tableHeaders: DataTableHeader[] = [
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy');}
+
+    let applyNoTreatment= shallowRef<boolean>(true);
+    let fileSelect: HTMLInputElement = {} as HTMLInputElement;
+    let tableHeaders: DataTableHeader[] = [
         {text: 'Name', value: 'name', align: 'left', sortable: false, class: '', width: '50%'},
         {text: 'Size', value: 'size', align: 'left', sortable: false, class: '', width: '35%'},
         {text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: ''}
     ];
-    files: File[] = [];
-    file: File | null = null;   
+    let files: File[] = [];
+    let file= shallowRef<File|null>(null);   
+    let closed = shallowRef<boolean>(true);
 
-    chooseFiles(){
+    function chooseFiles(){
         if(document != null)
         {
             document.getElementById('file-select')!.click();
         }
     }
 
-    @Watch('file')
-    onFileChanged() {        
-        this.files = hasValue(this.file) ? [this.file as File] : [];                                   
-        this.$emit('submit', this.file);
+    watch(file,()=>onFileChanged())
+    function onFileChanged() {        
+        files = hasValue(file.value) ? [file.value as File] : [];                                   
+        emit('submit', file);
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     }
 
-    @Watch('closed')
-    onClose() {
-        if (this.closed) {
-            this.files = [];
-            this.file = null;
-            this.fileSelect.value = '';
+    watch(closed,()=>onClose())
+    function onClose() {
+        if (closed) {
+            files = [];
+            file.value = null;
+            fileSelect.value = '';
             (<HTMLInputElement>document.getElementById('file-select')!).value = '';
         }
     }
-    @Watch('applyNoTreatment')
-    onTreatmentChanged() {
-        this.$emit('treatment', this.applyNoTreatment);
+    watch(applyNoTreatment,()=>onTreatmentChanged())
+    function onTreatmentChanged() {
+        emit('treatment', applyNoTreatment);
     }
-    mounted() {
+    onMounted(()=>mounted())
+    function mounted() {
         // couple fileSelect object with #file-select input element
-        this.fileSelect = document.getElementById('file-select') as HTMLInputElement;        
+        fileSelect = document.getElementById('file-select') as HTMLInputElement;        
     }    
 
     /**
      * File input change event handler
      */
-    onSelect(fileList: FileList) {
+    function onSelect(fileList: FileList) {
         if (hasValue(fileList)) {
             const fileName: string = prop('name', fileList[0]) as string;
 
             if (fileName.indexOf('xlsx') === -1) {
-                this.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'Only .xlsx file types are allowed',
                 });
             }
 
-            this.file = clone(fileList[0]);
+            file.value = clone(fileList[0]);
         }
 
-        this.fileSelect.value = '';
+        fileSelect.value = '';
     }
 
     /**
      * Returns a formatted string of a file's bytes
      */
-    formatBytesSize(bytes: number) {
+    function formatBytesSize(bytes: number) {
         return formatBytes(bytes);
     }
-}
 </script>
 
 <style>

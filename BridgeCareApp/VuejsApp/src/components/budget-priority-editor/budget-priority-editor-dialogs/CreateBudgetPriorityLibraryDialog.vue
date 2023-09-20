@@ -13,19 +13,19 @@
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-layout column >
           <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
-          <v-text-field outline v-model="newBudgetPriorityLibrary.name"
+          <v-text-field id="CreateBudgetPriorityLibraryDialog-name-vtextfield" outline v-model="newBudgetPriorityLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>
           <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
-          <v-textarea no-resize outline :rows="5"
+          <v-textarea id="CreateBudgetPriorityLibraryDialog-description-vtextfield" no-resize outline :rows="5"
                       v-model="newBudgetPriorityLibrary.description"
                       class="ghd-text-field-border"/>
         </v-layout>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row >       
-          <v-btn @click="onSubmit(false)" outline class='ghd-blue ghd-button-text ghd-button'>Cancel </v-btn>
-          <v-btn :disabled="newBudgetPriorityLibrary.name === ''" @click="onSubmit(true)"
+          <v-btn id="CreateBudgetPriorityLibraryDialog-cancel-vbtn" @click="onSubmit(false)" outline class='ghd-blue ghd-button-text ghd-button'>Cancel </v-btn>
+          <v-btn id="CreateBudgetPriorityLibraryDialog-save-vbtn" :disabled="newBudgetPriorityLibrary.name === ''" @click="onSubmit(true)"
                  outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>

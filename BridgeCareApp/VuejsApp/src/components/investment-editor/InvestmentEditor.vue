@@ -21,6 +21,9 @@
                         <div class="header-text-content invest-owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                         </div>
+                        <div class="header-text-content invest-owner-padding">
+                            Date Modified: {{ modifiedDate }}
+                        </div>
                         <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                                v-show='!hasScenario'>
                             Share Library
@@ -262,7 +265,7 @@
 
         <SetRangeForDeletingBudgetYearsDialog :showDialog='showSetRangeForDeletingBudgetYearsDialog'
                                               :endYear='lastYear'
-                                              :maxRange='yearsInAnalysisPeriod'
+                                              :maxRange='yearsInAnalysisPeriod()'
                                               @submit='onSubmitRemoveBudgetYearRange' />
 
         <EditBudgetsDialog :dialogData='editBudgetsDialogData' @submit='onSubmitEditBudgetsDialogResult' />
@@ -372,13 +375,14 @@ async function getCriterionLibrariesAction(payload?: any): Promise<any> {await s
 async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage');}
 async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
     
-
+let getModifiedDate = store.getters.getLibraryDateModified;
 let getUserNameByIdGetter = store.getters.getUserNameById;
 
 function budgetLibraryMutator(payload:any){store.commit('budgetLibraryMutator');}
 function selectedBudgetLibraryMutator(payload:any){store.commit('selectedBudgetLibraryMutator');}
 function investmentPlanMutator(payload:any){store.commit('investmentPlanMutator');}
 function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator');}
+    let modifiedDate: string;
 
     let addedBudgets: Budget[] = [];
     let updatedBudgetsMap:Map<string, [Budget, Budget]> = new Map<string, [Budget, Budget]>();//0: original value | 1: updated value
@@ -558,6 +562,14 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         else if(hasSelectedLibrary){
             if(librarySelectItemValue === null)
                 return;
+                await InvestmentService.getBudgetLibraryModifiedDate(selectedBudgetLibrary.id).then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      modifiedDate = data.slice(0, 10);
+                   }
+             });
+
             await InvestmentService.getLibraryInvestmentPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
@@ -571,6 +583,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             }); 
         }                
     }
+   
 
     watch(deletionBudgetIds,()=> onDeletionBudgetIdsChanged)
     function onDeletionBudgetIdsChanged() {
@@ -1267,7 +1280,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         parentLibraryId = loadedParentId;
     }
 
-    function formatAsCurrency(value: any) {
+    function formatAsCurrency(value: any): any {
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }

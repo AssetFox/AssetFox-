@@ -155,10 +155,8 @@
   </v-layout>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Component, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+<script lang='ts' setup>
+import Vue, { getCurrentInstance } from 'vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import {
@@ -169,38 +167,38 @@ import { User } from '@/shared/models/iAM/user';
 import { itemsAreEqual } from '@/shared/utils/equals-utils';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { emptyUserCriteriaFilter, UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
-import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDialog.vue';
+import CriteriaFilterEditorDialog from '@/shared/modals/CriteriaFilterEditorDialog.vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-  components: {
-    CriteriaFilterEditorDialog: CriterionFilterEditorDialog, Alert,
-  },
-  computed: {
-    filteredUsersCriteriaFilter() {
-    if (this.loading || !this.search) {
-      return this.assignedUsersCriteriaFilter;
+let store = useStore();
+const instance = getCurrentInstance();
+
+const emit = defineEmits(['submit'])
+
+    function filteredUsersCriteriaFilter() {
+    if (loading || !search) {
+      return assignedUsersCriteriaFilter;
     }
-    const lowerCaseSearch = this.search.toLowerCase();
-    return this.assignedUsersCriteriaFilter.filter((item: { [s: string]: unknown; } | ArrayLike<unknown>) => {
+    const lowerCaseSearch = search.toLowerCase();
+    
+    return assignedUsersCriteriaFilter.filter((item: { [s: string]: any; } | ArrayLike<unknown>) => {
       return Object.values(item).some(val => String(val).toLowerCase().includes(lowerCaseSearch));
     });
-  },
-},
-})
+  }
+  
+  let stateUsers = ref<User[]>(store.state.userModule.users);
+  let stateUsersCriteriaFilter = ref<UserCriteriaFilter[]>(store.state.userModule.usersCriteriaFilter);
 
-export default class UserCriteriaEditor extends Vue {
-  @State(state => state.userModule.users) stateUsers: User[];
-  @State(state => state.userModule.usersCriteriaFilter) stateUsersCriteriaFilter: UserCriteriaFilter[];
-
-  @Action('getAllUsers') getAllUserCriteriaAction: any;
-  @Action('deleteUser') deleteUserAction: any;
-
-  @Action('getAllUserCriteriaFilter') getAllUserCriteriaFilterAction: any;
-  @Action('updateUserCriteriaFilter') updateUserCriteriaFilterAction: any;
-  @Action('revokeUserCriteriaFilter') revokeUserCriteriaFilterAction: any;
-
-  beforeDeleteAlertData: AlertData = { ...emptyAlertData };
-  userCriteriaGridHeaders: object[] = [
+  async function getAllUserCriteriaAction(payload?: any): Promise<any> {await store.dispatch('getAllUsers');}
+  async function deleteUserAction(payload?: any): Promise<any> {await store.dispatch('deleteUser');}
+  async function getAllUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('getAllUserCriteriaFilter');}
+  async function updateUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('updateUserCriteriaFilter');}
+  async function revokeUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('revokeUserCriteriaFilter');}
+  
+  let beforeDeleteAlertData: AlertData = { ...emptyAlertData };
+  let userCriteriaGridHeaders: object[] = [
     { text: 'User', align: 'left', sortable: true, value: 'userName' },
     { text: 'Criteria Filter', sortable: true, value: 'hasCriteria' },
     { text: '', align: 'right', sortable: false, value: 'actions' },
@@ -208,48 +206,49 @@ export default class UserCriteriaEditor extends Vue {
     { text: 'Description', align: 'Left', sortable: false, value: 'description' }
   ];
 
-  unassignedUsers: User[] = [];
-  assignedUsers: User[] = [];
+  let unassignedUsers: User[] = [];
+  let assignedUsers: User[] = [];
 
-  assignedUsersCriteriaFilter: UserCriteriaFilter[] = [];
-  unassignedUsersCriteriaFilter: UserCriteriaFilter[] = [];
+  let assignedUsersCriteriaFilter: UserCriteriaFilter[]=[] ;
+  let unassignedUsersCriteriaFilter: UserCriteriaFilter[] = [];
   
-  criteriaFilterEditorDialogData: CriterionFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
-  selectedUser: UserCriteriaFilter = { ...emptyUserCriteriaFilter };
-  uuidNIL: string = getBlankGuid();
-  nameValue: string = '';
-  descriptionValue: string = '';
-  sortKey: string = "userName";
-  sortOrder: string = "asc";
-  search: string = '';
-  loading: boolean = true;
+  let criteriaFilterEditorDialogData: CriterionFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
+  let selectedUser: UserCriteriaFilter = { ...emptyUserCriteriaFilter };
+  let uuidNIL: string = getBlankGuid();
+  let nameValue: string = '';
+  let descriptionValue: string = '';
+  let sortKey: string = "userName";
+  let sortOrder: string = "asc";
+  let search: string = '';
+  let loading: boolean = true;
+  const $forceUpdate = inject('$forceUpdate') as any
+  created();
+  function created() {
+  criteriaFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
+  unassignedUsersCriteriaFilter = [];
+  assignedUsersCriteriaFilter = [];
 
-  created() {
-  this.criteriaFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
-  this.unassignedUsersCriteriaFilter = [];
-  this.assignedUsersCriteriaFilter = [];
-
-  this.getAllUserCriteriaAction().then(() => {
-    this.loading = false;
+  getAllUserCriteriaAction().then(() => {
+    loading = false;
   });
 
-  this.$watch('stateUsersCriteriaFilter', () => {
-    this.assignedUsersCriteriaFilter.forEach((userCriteriaFilter: UserCriteriaFilter) => {
+  watch(stateUsersCriteriaFilter, () => {
+    assignedUsersCriteriaFilter.forEach((userCriteriaFilter: UserCriteriaFilter) => {
       if (userCriteriaFilter.hasCriteria) {
-        this.nameValue = userCriteriaFilter.name;
-        this.descriptionValue = userCriteriaFilter.description;
+        nameValue = userCriteriaFilter.name;
+        descriptionValue = userCriteriaFilter.description;
       }
     });
   });
 }
 
-@Watch('stateUsers')
-  onUserCriteriaChanged() {
-    this.unassignedUsers = this.stateUsers.filter((user: User) => !user.hasInventoryAccess);
-    this.assignedUsers = this.stateUsers.filter((user: User) => user.hasInventoryAccess);
+watch(stateUsers,()=>onUserCriteriaChanged())
+  function onUserCriteriaChanged() {
+    unassignedUsers = stateUsers.value.filter((user: User) => !user.hasInventoryAccess);
+    assignedUsers = stateUsers.value.filter((user: User) => user.hasInventoryAccess);
 
-    this.unassignedUsersCriteriaFilter = [{ ...emptyUserCriteriaFilter }];
-    this.unassignedUsers.forEach((value) => {
+    unassignedUsersCriteriaFilter = [{ ...emptyUserCriteriaFilter }];
+    unassignedUsers.forEach((value) => {
       var tempL: UserCriteriaFilter = {
         userId: value.id,
         userName: value.username,
@@ -260,27 +259,28 @@ export default class UserCriteriaEditor extends Vue {
         criteria: '',
         criteriaId: '',
       };
-      this.unassignedUsersCriteriaFilter.push(tempL);
+      unassignedUsersCriteriaFilter.push(tempL);
     });
-    this.unassignedUsersCriteriaFilter.shift(); // removes the 1st element, which is always bank in this case
-    this.$forceUpdate();
+    unassignedUsersCriteriaFilter.shift(); // removes the 1st element, which is always bank in case
+    $forceUpdate();
   }
 
-  @Watch('stateUsersCriteriaFilter')
-  onUserCriteriaFilterChanged() {
-    this.assignedUsersCriteriaFilter = this.stateUsersCriteriaFilter;
-    this.$forceUpdate();
+  watch(stateUsersCriteriaFilter,()=>onUserCriteriaFilterChanged())
+  function onUserCriteriaFilterChanged() {
+    assignedUsersCriteriaFilter = stateUsersCriteriaFilter.value;
+    $forceUpdate();
   }
 
-  mounted() {
-    this.getAllUserCriteriaFilterAction();
+  onMounted(()=>mounted())
+  function mounted() {
+    getAllUserCriteriaFilterAction();
   }
 
-  onEditCriteria(userFilter: UserCriteriaFilter) {
-    this.selectedUser = userFilter;
-    var currentUser = this.stateUsers.filter((user: User) => user.id == userFilter.userId)[0];
+  function onEditCriteria(userFilter: UserCriteriaFilter) {
+    selectedUser = userFilter;
+    var currentUser = stateUsers.value.filter((user: User) => user.id == userFilter.userId)[0];
 
-    this.criteriaFilterEditorDialogData = {
+    criteriaFilterEditorDialogData = {
       showDialog: true,
       userId: currentUser.id,
       name: userFilter.name,
@@ -293,50 +293,50 @@ export default class UserCriteriaEditor extends Vue {
     };
   }
 
-  onSort(sortBy: string, sortDesc: any) {
-  this.sortKey = sortBy;
-  this.sortOrder = sortDesc ? 'desc' : 'asc';
+  function onSort(sortBy: string, sortDesc: any) {
+  sortKey = sortBy;
+  sortOrder = sortDesc ? 'desc' : 'asc';
 }
 
-  onSubmitCriteria(userCriteriaFilter: UserCriteriaFilter) {
-    this.criteriaFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
+  function onSubmitCriteria(userCriteriaFilter: UserCriteriaFilter) {
+    criteriaFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
     if (userCriteriaFilter != null) {
       if (userCriteriaFilter.criteriaId == '') {
         userCriteriaFilter.criteriaId = getNewGuid();
       }
-      this.updateUserCriteriaFilterAction({ userCriteriaFilter: userCriteriaFilter });
+      updateUserCriteriaFilterAction({ userCriteriaFilter: userCriteriaFilter });
     }
 
-    this.selectedUser = { ...emptyUserCriteriaFilter };
+    selectedUser = { ...emptyUserCriteriaFilter };
   }
 
-  updateName(userCriteriaFilter: UserCriteriaFilter) {
+  function updateName(userCriteriaFilter: UserCriteriaFilter) {
   const updatedUserCriteriaFilter = {
     ...userCriteriaFilter,
     name: userCriteriaFilter.name
   }
-  this.updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter })
+  updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter })
 }
 
-  updateDescription(userCriteriaFilter: UserCriteriaFilter) {
+  function updateDescription(userCriteriaFilter: UserCriteriaFilter) {
   const updatedUserCriteriaFilter = {
     ...userCriteriaFilter,
     description: userCriteriaFilter.description,
   };
-  this.updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter });
+  updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter });
 }
 
-  onRevokeAccess(targetUser: UserCriteriaFilter) {
+  function onRevokeAccess(targetUser: UserCriteriaFilter) {
     const userCriteriaFilter = {
       ...targetUser,
       criteria: undefined,
       hasAccess: false,
       hasCriteria: false,
     };
-    this.revokeUserCriteriaFilterAction({ userCriteriaId: userCriteriaFilter.criteriaId });
+    revokeUserCriteriaFilterAction({ userCriteriaId: userCriteriaFilter.criteriaId });
   }
 
-  onGiveUnrestrictedAccess(targetUser: UserCriteriaFilter) {
+  function onGiveUnrestrictedAccess(targetUser: UserCriteriaFilter) {
     const userFilterCriteria = {
       ...targetUser,
       criteria: '',
@@ -346,30 +346,30 @@ export default class UserCriteriaEditor extends Vue {
     if (userFilterCriteria.criteriaId == '') {
       userFilterCriteria.criteriaId = getNewGuid();
     }
-    this.updateUserCriteriaFilterAction({ userCriteriaFilter: userFilterCriteria });
+    updateUserCriteriaFilterAction({ userCriteriaFilter: userFilterCriteria });
   }
 
-  onDeleteUser(user: UserCriteriaFilter) {
-    this.selectedUser = user;
+  function onDeleteUser(user: UserCriteriaFilter) {
+    selectedUser = user;
 
-    this.beforeDeleteAlertData = {
+    beforeDeleteAlertData = {
       choice: true,
       heading: 'Delete User',
-      message: `Are you sure you want to delete user ${this.selectedUser.userName}?`,
+      message: `Are you sure you want to delete user ${selectedUser.userName}?`,
       showDialog: true,
     };
   }
 
-  onSubmitDeleteUserResponse(doDelete: boolean) {
-    this.beforeDeleteAlertData = { ...emptyAlertData };
+  function onSubmitDeleteUserResponse(doDelete: boolean) {
+    beforeDeleteAlertData = { ...emptyAlertData };
 
-    if (doDelete && !itemsAreEqual(this.selectedUser, emptyUserCriteriaFilter)) {
+    if (doDelete && !itemsAreEqual(selectedUser, emptyUserCriteriaFilter)) {
 
-      this.deleteUserAction({ userId: this.selectedUser.userId })
-          .then(() => this.selectedUser = { ...emptyUserCriteriaFilter });
+      deleteUserAction({ userId: selectedUser.userId })
+          .then(() => selectedUser = { ...emptyUserCriteriaFilter });
     }
   }
-}
+
 </script>
 
 <style>

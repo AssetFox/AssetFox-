@@ -84,4 +84,8 @@ export default class ScenarioService {
     static ConvertSimulationOutputToRelational(simulationId: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.Scenario}/ConvertSimulationOutputToRelational/${simulationId}`);
     } 
+
+    static upsertValidateSimulation(networkId: string, simulationId: string | undefined): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/ValidateSimulation/${networkId}/${simulationId}`);
+    }
 }

@@ -69,10 +69,10 @@ const actions = {
                 }
             });
     },
-    async azureB2CLogout() {
-        await state.app.logout();
+    async azureB2CLogout() {     
         localStorage.removeItem('access_token');
         localStorage.removeItem('LoggedInUser');
+        state.app.logout();
     },
     async getAzureB2CAccessToken(
         { commit, dispatch }: any,

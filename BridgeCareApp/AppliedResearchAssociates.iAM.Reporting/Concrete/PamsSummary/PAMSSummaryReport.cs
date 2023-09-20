@@ -195,7 +195,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
 
-            // reportOutputData will be having all assets data, filter it based on criteria expression
+            // reportOutputData will have all assets data, filter it based on criteria expression
             if (!string.IsNullOrEmpty(Criteria))
             {
                 var criteriaValidationResult = _reportHelper.FilterReportOutputData(reportOutputData, networkId, Criteria);

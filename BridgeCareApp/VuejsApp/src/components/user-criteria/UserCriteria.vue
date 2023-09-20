@@ -62,12 +62,12 @@
             <template v-slot:header="{ header, index }">
               <span style='cursor: pointer'>
                 {{ header.text }}
-                <v-icon v-if='sortKeyUserCriteria === header.value'>
-                  {{ sortOrderUserCriteria === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                <v-icon v-if='sortKey === header.value'>
+                  {{ sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
                 </v-icon>
               </span>
             </template>
-            <template slot='items' 
+            <template v-slot:items="props" slot='items' 
             slot-scope='props'>
               <td style='width: 15%; font-size: 1.2em; padding-top: 0.4em'>{{ props.item.userName }}</td>
               <td style='width: 35%'>
@@ -167,7 +167,7 @@ import { User } from '@/shared/models/iAM/user';
 import { itemsAreEqual } from '@/shared/utils/equals-utils';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { emptyUserCriteriaFilter, UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
-import CriteriaFilterEditorDialog from '@/shared/modals/CriteriaFilterEditorDialog.vue';
+import CriterionFilterEditorDialog from '@/shared/modals/CriteriaFilterEditorDialog.vue';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';

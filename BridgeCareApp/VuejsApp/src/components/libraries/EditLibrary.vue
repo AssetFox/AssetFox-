@@ -44,10 +44,8 @@
     </v-layout>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { State } from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { ref } from 'vue'
 import { any } from 'ramda';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
@@ -60,27 +58,16 @@ import RemainingLifeLimitSvg from '@/shared/icons/RemainingLifeLimitSvg.vue';
 import TargetConditionGoalSvg from '@/shared/icons/TargetConditionGoalSvg.vue';
 import TreatmentSvg from '@/shared/icons/TreatmentSvg.vue';
 import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
+import { useStore } from 'vuex'; 
 
-@Component({
-    components: {
-        TreatmentSvg, 
-        TargetConditionGoalSvg,
-        RemainingLifeLimitSvg,
-        PerformanceCurveSvg,
-        DeficientConditionGoalSvg,
-        InvestmentSvg,
-        CashFlowSvg,
-        BudgetPrioritySvg,
-        CalculatedAttributeSvg
-    },
-})
-export default class EditLibrary extends Vue {
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.authenticationModule.userId) userId: string;
+    let store = useStore(); 
 
-    networkId: string = getBlankGuid();
-    networkName: string = '';
-    navigationTabs: NavigationTab[] = [
+    let hasAdminAccess: boolean = ref(store.state.authenticationModule.hasAdminAccess) ; 
+    let userId: string = ref(store.state.authenticationModule.userId);
+
+    let networkId: string = getBlankGuid();
+    let networkName: string = '';
+    let navigationTabs: NavigationTab[] = [
         {
             tabName: 'Investment',
             tabIcon: 'fas fa-dollar-sign',
@@ -146,10 +133,11 @@ export default class EditLibrary extends Vue {
         },
     ];
 
-    
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-                vm.navigationTabs = vm.navigationTabs.map(
+    created();
+    //beforeRouteEnter(to: any, from: any, next: any) {   
+    function created() { 
+        //next((vm: any) => {
+                navigationTabs = navigationTabs.map(
                     (navTab: NavigationTab) => {
                         const navigationTab = {
                             ...navTab,
@@ -164,7 +152,7 @@ export default class EditLibrary extends Vue {
                             || navigationTab.tabName === 'Target Condition Goal' 
                             || navigationTab.tabName === 'Deficient Condition Goal' 
                             || navigationTab.tabName === 'Calculated Attribute') {
-                            navigationTab['visible'] = vm.hasAdminAccess;
+                            navigationTab['visible'] = hasAdminAccess;
                         }
 
                         return navigationTab;
@@ -177,19 +165,19 @@ export default class EditLibrary extends Vue {
                 const hasChildPath = any(
                     (navigationTab: NavigationTab) =>
                         href.indexOf(navigationTab.navigation.path) !== -1,
-                    vm.navigationTabs,
+                    navigationTabs,
                 );
-        });
+        //});
     }
 
 
-    visibleNavigationTabs() {
-        return this.navigationTabs.filter(
+    function visibleNavigationTabs() {
+        return navigationTabs.filter(
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,
         );
     }
-}
+
 </script>
 
 <style>

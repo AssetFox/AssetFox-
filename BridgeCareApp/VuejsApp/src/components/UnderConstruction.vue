@@ -22,13 +22,11 @@
     </v-container>
 </template>
 
-<script lang="ts">
-    import Vue from 'vue';
-    import {Component} from 'vue-property-decorator';
+<script lang="ts" setup>
+    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-    @Component
-    export default class UnderConstruction extends Vue {
-    }
 </script>
 
 <style>

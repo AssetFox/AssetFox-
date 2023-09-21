@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         ICommittedProjectRepository CommittedProjectRepo { get; }
 
-        ICompleteSimulationRepository CompleteSimulationRepo { get; }
+        //ICompleteSimulationRepository CompleteSimulationRepo { get; }
 
         ICriterionLibraryRepository CriterionLibraryRepo { get; }
 

@@ -26,6 +26,7 @@ using MoreLinq;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.Validation;
 using System.Collections.Generic;
+using BridgeCareCore.Services.SimulationCloning;
 
 namespace BridgeCareCore.Controllers
 {
@@ -40,6 +41,7 @@ namespace BridgeCareCore.Controllers
         private readonly IWorkQueueService _workQueueService;
         private readonly IGeneralWorkQueueService _generalWorkQueueService;
         private readonly IClaimHelper _claimHelper;
+        private readonly ICompleteSimulationCloningService _completeSimulationCloningService;
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
@@ -51,6 +53,7 @@ namespace BridgeCareCore.Controllers
             IHubService hubService,
             IHttpContextAccessor httpContextAccessor,
             IClaimHelper claimHelper,
+            ICompleteSimulationCloningService simulationCloningService,
             IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
@@ -234,7 +237,7 @@ namespace BridgeCareCore.Controllers
                 {
 
                     _claimHelper.CheckUserSimulationModifyAuthorization(dto.SourceScenarioId, UserId);
-                    var cloneResult = UnitOfWork.CompleteSimulationRepo.Clone(dto);
+                    var cloneResult = _completeSimulationCloningService.Clone(dto);
                     return cloneResult;
                 });
 

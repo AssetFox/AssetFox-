@@ -1,6 +1,5 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Data.SimulationCloning;
 
 namespace BridgeCareCore.Services.SimulationCloning
 {

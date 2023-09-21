@@ -9,16 +9,16 @@ using Moq;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public static class CompleteSimulationRepositoryMocks
-    {
-        public static Mock<ICompleteSimulationRepository> DefaultMock(Mock<IUnitOfWork> unitOfWork = null)
-        {
-            var repository = new Mock<ICompleteSimulationRepository>();
-            if (unitOfWork != null)
-            {
-                unitOfWork.Setup(u => u.CompleteSimulationRepo).Returns(repository.Object);
-            }
-            return repository;
-        }
-    }
+    //public static class CompleteSimulationRepositoryMocks
+    //{
+    //    public static Mock<ICompleteSimulationRepository> DefaultMock(Mock<IUnitOfWork> unitOfWork = null)
+    //    {
+    //        var repository = new Mock<ICompleteSimulationRepository>();
+    //        if (unitOfWork != null)
+    //        {
+    //            unitOfWork.Setup(u => u.CompleteSimulationRepo).Returns(repository.Object);
+    //        }
+    //        return repository;
+    //    }
+    //}
 }

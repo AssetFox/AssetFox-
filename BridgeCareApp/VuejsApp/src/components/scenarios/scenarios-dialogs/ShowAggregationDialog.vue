@@ -133,7 +133,7 @@
                     :dialogData="equationEditorDialogData"
                     @submit="onSubmitEquationEditorDialogSubmit"
                 />
-                <ConfirmDataAssignmentAlert
+                <ConfirmDataAssignmentAlert :is="Alert"
                     :dialogData="confirmDataAggregationAlertData"
                     @submit="onConfirmDataAggregationAlertSubmit"
                 />

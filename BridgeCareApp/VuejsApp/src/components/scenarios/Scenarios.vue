@@ -562,16 +562,18 @@
                 </v-tabs-items>
             </v-card>
         </v-flex>
+        <!-- missing implemtation
          <ConfirmAnalysisRunAlertPrehecks
             :dialogDataPreChecks="onSecondConfirmAnalysisRunAlertData"
             @submit="onSecondConfirmAnalysisRunAlertSubmit"
         />
+        -->
          <ConfirmAnalysisRunAlertWithButtons
             :dialogDataWithButtons="confirmAnalysisRunAlertData"
             @submit="onConfirmAnalysisRunAlertSubmit"
             />
 
-        <ConfirmConvertToRelationalAlert
+        <ConfirmConvertToRelationalAlert :is="Alert"
             :dialogData="ConfirmConvertJsonToRelationalData"
             @submit="onConfirmConvertJsonToRelationalAlertSubmit"
         />
@@ -583,17 +585,17 @@
             @submit="onShareScenarioDialogSubmit"
         />
 
-        <ConfirmCloneScenarioAlert
+        <ConfirmCloneScenarioAlert :is="Alert"
             :dialogData="confirmCloneScenarioAlertData"
             @submit="onConfirmCloneScenarioAlertSubmit"
         />
 
-        <ConfirmDeleteAlert
+        <ConfirmDeleteAlert :is="Alert"
             :dialogData="confirmDeleteAlertData"
             @submit="onConfirmDeleteAlertSubmit"
         />
        
-        <ConfirmCancelAlert
+        <ConfirmCancelAlert :is="Alert"
             :dialogData="confirmCancelAlertData"
             @submit="onConfirmCancelAlertSubmit"
         />
@@ -602,7 +604,8 @@
             :showDialog="showCreateScenarioDialog"
             @submit="onCreateScenarioDialogSubmit"
         />
-        <FilterScenarioList
+        <!-- missing implemtation
+            <FilterScenarioList
             :showDialog="showSharedFilterScenarioList"
             @submit="onFilterSharedScenarioListSubmit"
         />
@@ -610,6 +613,7 @@
             :showDialog="showFilterScenarioList"
             @submit="onFilterScenarioListSubmit"
         />
+        -->
 
         <CloneScenarioDialog
             :dialogData="cloneScenarioDialogData"
@@ -1475,7 +1479,6 @@ import { useRouter } from 'vue-router';
             message:
                 'Only one simulation can be run at a time. The model run you are about to queue will be ' +
                 'executed in the order in which it was received.',
-            buttons: [AlertButton.label]
         };
     }
 

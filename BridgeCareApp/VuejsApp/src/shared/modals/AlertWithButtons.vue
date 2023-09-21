@@ -37,21 +37,26 @@
     </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
     import Vue from 'vue';
-    import {Component, Prop, Watch} from 'vue-property-decorator';
     import {AlertDataWithButtons} from '../models/modals/alert-data';
-    
-    @Component
-    export default class AlertWithButtons extends Vue {
-        @Prop() dialogDataWithButtons: AlertDataWithButtons;
+    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+    import { useStore } from 'vuex';
+    import { useRouter } from 'vue-router';
+
+    const props = defineProps<{
+        dialogDataWithButtons: AlertDataWithButtons
+    }>()
+
+const emit = defineEmits(['submit'])
+
 
         /**
          * Emits a boolean result to the parent component
          * @param submit
          */
-        onReturn(submit: string) {
-            this.$emit('submit', submit);
+        function onReturn(submit: string) {
+            emit('submit', submit);
         }
-    }
+    
 </script>

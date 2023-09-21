@@ -28,7 +28,7 @@
                 </v-layout>
             </v-flex>
             <div v-show="true">
-                <input @change="onSelect($event.target?.files)" id="file-select" type="file" hidden />
+                <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
             </div>
         </v-layout>        
         <div class="files-table">

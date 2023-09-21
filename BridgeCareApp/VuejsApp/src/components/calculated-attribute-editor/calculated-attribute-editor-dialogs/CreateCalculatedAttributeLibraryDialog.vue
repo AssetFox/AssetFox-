@@ -14,7 +14,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
                     <v-text-field
                         v-model="newCalculatedAttributeLibrary.name"
-                        :rules="InputRules['generalRules'].valueIsNotEmpty"
+                        :rules="rules['generalRules'].valueIsNotEmpty"
                         outline
                         class="ghd-text-field-border ghd-text-field"/>
                     <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>

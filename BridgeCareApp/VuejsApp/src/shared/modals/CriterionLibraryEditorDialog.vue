@@ -49,10 +49,8 @@
     </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
 import { CriterionLibraryEditorDialogData } from '../models/modals/criterion-library-editor-dialog-data';
 import {
     CriterionLibrary,
@@ -65,39 +63,34 @@ import { clone, isNil } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-    components: { CriterionLibraryEditor, HasUnsavedChangesAlert: Alert },
-})
-export default class CriterionLibraryEditorDialog extends Vue {
-    @Prop() dialogData: CriterionLibraryEditorDialogData;
+let store = useStore();
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+    dialogData: CriterionLibraryEditorDialogData
+    }>()
 
-    @State(state => state.criterionModule.criterionLibraries)
-    stateCriterionLibraries: CriterionLibrary[];
-    @State(state => state.criterionModule.selectedCriterionLibrary)
-    stateSelectedCriterionLibrary: CriterionLibrary;
-    @State(state => state.criterionModule.selectedCriterionIsValid)
-    stateSelectedCriterionIsValid: boolean;
-    @State(state => state.criterionModule.scenarioRelatedCriteria)
-    stateScenarioRelatedCriteria: CriterionLibrary;
-
-    @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-    @Action('setSelectedCriterionIsValid')
-    setSelectedCriterionIsValidAction: any;
-    @Action('selectScenarioRelatedCriterion')
-    selectScenarioRelatedCriterionAction: any;
-    @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
-    @Action('upsertCriterionLibrary') upsertCriterionLibraryAction: any;
-
-    criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary = clone(
+    let stateCriterionLibraries = ref<CriterionLibrary[]>(store.state.criterionModule.criterionLibraries);
+    let stateSelectedCriterionLibrary = ref<CriterionLibrary>(store.state.criterionModule.selectedCriterionLibrary);
+    let stateSelectedCriterionIsValid = ref<boolean>(store.state.criterionModule.selectedCriterionIsValid);
+    let stateScenarioRelatedCriteria = ref<CriterionLibrary>(store.state.criterionModule.scenarioRelatedCriteria);
+    async function getCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCriterionLibraries');}
+    async function setSelectedCriterionIsValidAction(payload?: any): Promise<any> {await store.dispatch('setSelectedCriterionIsValid');}
+    async function selectScenarioRelatedCriterionAction(payload?: any): Promise<any> {await store.dispatch('selectScenarioRelatedCriterion');}
+    async function selectCriterionLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectCriterionLibrary');}
+    async function upsertCriterionLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertCriterionLibrary');}
+    let criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary = clone(
         emptyCriterionLibrary,
     );
-    uuidNIL: string = getBlankGuid();
-    hasUnsavedChanges: boolean = false;
-    hasUnsavedChangesAlertData: AlertData = clone(emptyAlertData);
+    let uuidNIL: string = getBlankGuid();
+    let hasUnsavedChanges: boolean = false;
+    let hasUnsavedChangesAlertData: AlertData = clone(emptyAlertData);
 
-    @Watch('dialogData')
-    onDialogDataChanged() {
+    watch(()=>props.dialogData,()=>onDialogDataChanged())
+    function onDialogDataChanged() {
         const htmlTag: HTMLCollection = document.getElementsByTagName(
             'html',
         ) as HTMLCollection;
@@ -105,24 +98,24 @@ export default class CriterionLibraryEditorDialog extends Vue {
             'criteria-editor-card',
         ) as HTMLCollection;
 
-        if (this.dialogData.showDialog) {
-            if (!hasValue(this.stateCriterionLibraries)) {
-                this.getCriterionLibrariesAction().then(() => {
-                    if (this.dialogData.isCallFromScenario || this.dialogData.isCriterionForLibrary) {
-                        this.selectScenarioRelatedCriterionAction({
-                            libraryId: this.dialogData.libraryId,
+        if (props.dialogData.showDialog) {
+            if (!hasValue(stateCriterionLibraries)) {
+                getCriterionLibrariesAction().then(() => {
+                    if (props.dialogData.isCallFromScenario || props.dialogData.isCriterionForLibrary) {
+                        selectScenarioRelatedCriterionAction({
+                            libraryId: props.dialogData.libraryId,
                         });
                     }
                 });
             } else {
-                if (this.dialogData.isCallFromScenario || this.dialogData.isCriterionForLibrary) {
-                    this.selectScenarioRelatedCriterionAction({
-                        libraryId: this.dialogData.libraryId,
+                if (props.dialogData.isCallFromScenario || props.dialogData.isCriterionForLibrary) {
+                    selectScenarioRelatedCriterionAction({
+                        libraryId: props.dialogData.libraryId,
                     });
                 }
             }
 
-            this.setSelectedCriterionIsValidAction({ isValid: false });
+            setSelectedCriterionIsValidAction({ isValid: false });
 
             if (hasValue(htmlTag)) {
                 htmlTag[0].setAttribute('style', 'overflow:hidden;');
@@ -135,39 +128,39 @@ export default class CriterionLibraryEditorDialog extends Vue {
             if (hasValue(htmlTag)) {
                 htmlTag[0].setAttribute('style', 'overflow:auto;');
             }
-            this.selectScenarioRelatedCriterionAction({
-                libraryId: this.uuidNIL,
+            selectScenarioRelatedCriterionAction({
+                libraryId: uuidNIL,
             });
         }
     }
 
-    @Watch('criterionLibraryEditorSelectedCriterionLibrary')
-    onCriterionLibraryEditorSelectedCriterionLibraryChanged() {
-        this.hasUnsavedChanges = hasUnsavedChangesCore(
+    watch(criterionLibraryEditorSelectedCriterionLibrary,()=> onCriterionLibraryEditorSelectedCriterionLibraryChanged())
+    function onCriterionLibraryEditorSelectedCriterionLibraryChanged() {
+        hasUnsavedChanges = hasUnsavedChangesCore(
             'criterion-library',
-            this.criterionLibraryEditorSelectedCriterionLibrary,
-            this.stateSelectedCriterionLibrary,
+            criterionLibraryEditorSelectedCriterionLibrary,
+            stateSelectedCriterionLibrary,
         );
     }
 
-    onSubmitSelectedCriterionLibrary(
+    function onSubmitSelectedCriterionLibrary(
         criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary,
     ) {
-        this.criterionLibraryEditorSelectedCriterionLibrary = clone(
+        criterionLibraryEditorSelectedCriterionLibrary = clone(
             criterionLibraryEditorSelectedCriterionLibrary,
         );
     }
 
-    onBeforeSubmit(submit: boolean) {
-        if (this.hasUnsavedChanges && !this.dialogData.isCallFromScenario) {
-            this.onShowHasUnsavedChangesAlert();
+   function  onBeforeSubmit(submit: boolean) {
+        if (hasUnsavedChanges && !props.dialogData.isCallFromScenario) {
+            onShowHasUnsavedChangesAlert();
         } else {
-            this.onSubmit(submit);
+            onSubmit(submit);
         }
     }
 
-    onShowHasUnsavedChangesAlert() {
-        this.hasUnsavedChangesAlertData = {
+    function onShowHasUnsavedChangesAlert() {
+        hasUnsavedChangesAlertData = {
             showDialog: true,
             heading: 'Unsaved Changes',
             message:
@@ -176,26 +169,26 @@ export default class CriterionLibraryEditorDialog extends Vue {
         };
     }
 
-    onCloseHasUnsavedChangesAlert() {
-        this.hasUnsavedChangesAlertData = clone(emptyAlertData);
+    function onCloseHasUnsavedChangesAlert() {
+        hasUnsavedChangesAlertData = clone(emptyAlertData);
     }
 
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-            if (!isNil(this.stateScenarioRelatedCriteria)) {
-                this.upsertCriterionLibraryAction({
-                    library: this.stateScenarioRelatedCriteria,
+            if (!isNil(stateScenarioRelatedCriteria)) {
+                upsertCriterionLibraryAction({
+                    library: stateScenarioRelatedCriteria,
                 })
                 .then((id: string) => {
-                    this.stateScenarioRelatedCriteria.id = id;
-                    this.$emit('submit', this.stateScenarioRelatedCriteria);
+                    stateScenarioRelatedCriteria.value.id = id;
+                    emit('submit', stateScenarioRelatedCriteria);
                 });
             }
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
     }
-}
+
 </script>
 
 <style>

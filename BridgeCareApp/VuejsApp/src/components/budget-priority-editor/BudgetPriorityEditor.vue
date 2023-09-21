@@ -60,7 +60,7 @@
                               class='v-table__overflow ghd-table' item-key='id' select-all
                               sort-icon=$vuetify.icons.ghd-table-sort                              
                               v-model='selectedBudgetPriorityGridRows' >
-                    <template slot='items' slot-scope='props'>
+                    <template v-slot:items="props">
                         <td>
                             <v-checkbox id="BudgetPriorityEditor-deleteBudgetPriority-vcheckbox" hide-details primary v-model='props.selected'></v-checkbox>
                         </td>

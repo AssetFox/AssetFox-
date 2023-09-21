@@ -1118,12 +1118,12 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
             addedRows: addedRows.value,
             isModified: scenarioLibraryIsModified
-        }, selectedScenarioId).then((response: AxiosResponse) => {
+        }, selectedScenarioId).then(async (response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
                 clearChanges()
                 performancePagination.value.page = 1;
-                onPaginationChanged();
+                await onPaginationChanged();
                 addSuccessNotificationAction({message: "Modified scenario's deterioration models"});
                 librarySelectItemValue.value = null
             }           

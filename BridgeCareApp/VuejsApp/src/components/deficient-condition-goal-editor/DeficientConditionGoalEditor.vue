@@ -648,11 +648,11 @@ import { useRouter } from 'vue-router';
                 }
             });
         else if(hasSelectedLibrary)
-            await DeficientConditionGoalService.getDeficientLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+            await DeficientConditionGoalService.getDeficientLibraryDate(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '').then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      this.dateModified = data.slice(0, 10);
+                      dateModified = data.slice(0, 10);
                    }
              }),    
              await DeficientConditionGoalService.getLibraryDeficientConditionGoalPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {

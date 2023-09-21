@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { ref } from 'vue'
+import Vue, { ref, shallowReactive } from 'vue'
 import { any } from 'ramda';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
@@ -62,8 +62,8 @@ import { useStore } from 'vuex';
 
     let store = useStore(); 
 
-    let hasAdminAccess: boolean = ref(store.state.authenticationModule.hasAdminAccess) ; 
-    let userId: string = ref(store.state.authenticationModule.userId);
+    const hasAdminAccess: boolean = shallowReactive(store.state.authenticationModule.hasAdminAccess) ; 
+    let userId = ref<string>(store.state.authenticationModule.userId);
 
     let networkId: string = getBlankGuid();
     let networkName: string = '';

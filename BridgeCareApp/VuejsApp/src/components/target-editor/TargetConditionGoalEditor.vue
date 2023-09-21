@@ -360,7 +360,7 @@
             </v-layout>
         </v-flex>
     
-        <ConfirmDeleteAlert
+        <ConfirmDeleteAlert :is="Alert"
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
@@ -477,22 +477,17 @@ import { useRouter } from 'vue-router';
     let getNumericAttributesGetter = store.getters.getNumericAttributes;
     let getUserNameByIdGetter = store.getters.getUserNameById;
 
-    //let addedRows: TargetConditionGoal[] = [];
     let addedRows = ref<TargetConditionGoal[]>([]);
     let updatedRowsMap:Map<string, [TargetConditionGoal, TargetConditionGoal]> = new Map<string, [TargetConditionGoal, TargetConditionGoal]>();//0: original value | 1: updated value
-   //let deletionIds: string[] = [];
-    //let rowCache: TargetConditionGoal[] = [];
     let deletionIds = ref<string[]>([]);
     let rowCache = ref<TargetConditionGoal[]>([]);
 
     let gridSearchTerm = '';
     let currentSearch = '';
-    //let pagination: Pagination = clone(emptyPagination);
     let pagination = ref<Pagination>(clone(emptyPagination));
     let isPageInit = false;
     let totalItems = 0;
-    //let currentPage: TargetConditionGoal[] = [];
-    let currentPage = ref <TargetConditionGoal[]>([]);
+    let currentPage = ref<TargetConditionGoal[]>([]);
     let initializing: boolean = true;
 
     let unsavedDialogAllowed: boolean = true;
@@ -558,7 +553,6 @@ import { useRouter } from 'vue-router';
         }
     ];
     let numericAttributeNames: string[] = [];
-    //let selectedGridRows: TargetConditionGoal[] = [];
     let selectedGridRows= ref<TargetConditionGoal[]>([]);
     let selectedTargetConditionGoalIds: string[] = [];
     let selectedTargetConditionGoalForCriteriaEdit: TargetConditionGoal = clone(
@@ -586,9 +580,9 @@ import { useRouter } from 'vue-router';
     let loadedParentId: string = "";
     let newLibrarySelection: boolean = false;
 
-   beforeRouteEnter();  
-    function beforeRouteEnter(){
-        (() => {
+   //beforeRouteEnter();  
+    created();
+    function created(){
             librarySelectItemValue.value = null;
             getTargetConditionGoalLibrariesAction();
             numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
@@ -611,7 +605,6 @@ import { useRouter } from 'vue-router';
                     });                                        
                 }
             });            
-        });
     }
 
     onBeforeUnmount(()=> beforeDestroy());

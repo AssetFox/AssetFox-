@@ -78,7 +78,7 @@ import { http2XX } from '@/shared/utils/http-utils';
   let currentUserAndOwner: TreatmentLibraryUser[] = [];
   let searchTerm: string = '';
 
-  watch(dialogData, () => onDialogDataChanged)
+  watch(() => props.dialogData, () => onDialogDataChanged)
   async function onDialogDataChanged() {
     if (dialogData.showDialog) {
       onSetGridData();

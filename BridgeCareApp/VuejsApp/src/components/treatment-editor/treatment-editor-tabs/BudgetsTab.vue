@@ -4,7 +4,7 @@
             <v-flex xs12>
                 <v-layout>
                     <v-flex xs10>
-                        <v-layout column v-if='budgets.length === 0'>
+                        <v-layout column v-if='budgets?.values.length === 0'>
                             <h3>Investment Library Not Found</h3>
                             <div>
                                 No investmentModule library data was found for the selected scenario.
@@ -62,33 +62,33 @@ import { getPropertyValues } from '@/shared/utils/getter-utils';
     let budgetHeaders: DataTableHeader[] = [        
         { text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300' },
     ];
-    let budgets: SimpleBudgetDetail[] = [];
-    let selectedBudgets: SimpleBudgetDetail[] = [];
+    let budgets = shallowRef<SimpleBudgetDetail[]>();
+    let selectedBudgets = shallowRef<SimpleBudgetDetail[]>();
 
    
 
     watch(stateScenarioSimpleBudgetDetails, () => onStateScenarioInvestmentLibraryChanged)
      async function onStateScenarioInvestmentLibraryChanged() {
-        budgets = clone(stateScenarioSimpleBudgetDetails.value);
+        budgets.value = clone(stateScenarioSimpleBudgetDetails.value);
     }
 
     
     watch(selectedTreatmentBudgets, () => onBudgetsTabDataChanged)
      async function onBudgetsTabDataChanged() {   
         if ((addTreatment || fromLibrary) && !initializedBudgets) {        
-            selectedBudgets = budgets;
+            selectedBudgets.value = budgets.value;
             initializedBudgets = true;
         } else {
-            selectedBudgets = budgets
+            selectedBudgets.value = budgets.value!
                 .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id));
         }
     }
 
     watch(selectedBudgets, () => onSelectedBudgetsChanged)
      async function onSelectedBudgetsChanged() { 
-        const selectedBudgetIds: string[] = getPropertyValues('id', selectedBudgets) as string[];
+        const selectedBudgetIds: string[] = getPropertyValues('id', selectedBudgets.value!) as string[];
         if (!isEqual(selectedTreatmentBudgets, selectedBudgetIds)) {
-            emit('onModifyBudget', selectedBudgets);
+            emit('onModifyBudget', selectedBudgets.value);
         }
     }
 

@@ -43,7 +43,7 @@ import {emptyTreatment, Treatment} from '@/shared/models/iAM/treatment';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
 const props = defineProps<{showDialog: Boolean}>()
-const showDialog = reactive(props.showDialog);
+const showDialog = props.showDialog;
 let newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
 let store = useStore();
 const emit = defineEmits(['submit'])

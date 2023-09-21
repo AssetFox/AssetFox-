@@ -34,7 +34,7 @@ import { useStore } from 'vuex';
 import TreatmentsFileSelector from '@/shared/components/FileSelector.vue';
 
     const props = defineProps<{showDialog: Boolean}>()
-    const showDialog = reactive(props.showDialog);
+    const showDialog = props.showDialog;
 
     async function addErrorNotificationAction(payload?: any): Promise<any> {
         await store.dispatch('addErrorNotification');

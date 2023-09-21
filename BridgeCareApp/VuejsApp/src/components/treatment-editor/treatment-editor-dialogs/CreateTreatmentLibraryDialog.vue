@@ -64,7 +64,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
     const props = defineProps<{dialogData: CreateTreatmentLibraryDialogData}>()
-    const dialogData = reactive(props.dialogData);
+    const dialogData = props.dialogData;
     const emit = defineEmits(['submit'])
     let store = useStore();
 
@@ -78,13 +78,13 @@ import { useRouter } from 'vue-router';
     };
 
     
-  watch(dialogData, () => onDialogDataChanged)
+  watch(() => props.dialogData, () => onDialogDataChanged)
   async function onDialogDataChanged() {
         let currentUser: string = getUserName();
 
         newTreatmentLibrary = {
             ...newTreatmentLibrary,
-            treatments: dialogData.selectedTreatmentLibraryTreatments.map(
+            treatments: props.dialogData.selectedTreatmentLibraryTreatments.map(
                 (treatment: Treatment) => ({
                     ...treatment,
                     id: getNewGuid(),

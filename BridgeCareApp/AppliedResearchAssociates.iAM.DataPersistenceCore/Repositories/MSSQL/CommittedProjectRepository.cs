@@ -54,6 +54,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CommittedProjectLocation)
                 .Include(_ => _.ScenarioBudget)
                 .Where(_ => _.SimulationId == simulation.Id).ToList();
+                .OrderBy(_ => _.Year).ToList();
 
             var keyPropertyNames = (List<string>)_unitOfWork.AdminSettingsRepo.GetKeyFields();
 

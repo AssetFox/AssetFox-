@@ -984,7 +984,8 @@ export default class Scenarios extends Vue {
     scenarios: Scenario[] = [];
 
     preCheckStatus: any;
-    preCheckMessage: any;
+    preCheckMessage:  any = '';
+    preCheckHeading: any;
     runAnalysisScenario: Scenario = clone(emptyScenario);
 
     userScenarios: Scenario[] = [];
@@ -1502,9 +1503,20 @@ export default class Scenarios extends Vue {
                         await ScenarioService.upsertValidateSimulation(this.selectedScenario.networkId, this.selectedScenario.id).then((response: AxiosResponse) => {
                         if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                             this.addSuccessNotificationAction({message: "Simulation pre-checks completed",});
-                            if(this.preCheckStatus != undefined && this.preCheckMessage != undefined)
-                            this.preCheckStatus = response.data[0].status;
-                            this.preCheckMessage = response.data[0].message;
+                            if(response.data.length > 0)
+                            {
+                                this.preCheckStatus = response.data[0].status;
+                                for(const item of response.data)
+                                {
+                                    if (item.message != '') {
+                                    this.preCheckMessage += item.message;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                this.preCheckStatus = 3;
+                            }
                         }
                     });
                 }
@@ -1535,35 +1547,40 @@ export default class Scenarios extends Vue {
 
     secondRunAnalysisModal() {
             this.onSecondConfirmAnalysisRunAlertData = clone(emptyAlertPreChecksData);
-            this.preCheckMessage = this.preCheckMessage.split('.');
-            this.preCheckMessage.pop();
 
-            if(this.preCheckStatus = 0) 
+            if(this.preCheckStatus == 0)
+            {
+                this.preCheckHeading = 'Error';
+            }
+            else if(this.preCheckStatus == 1)
+            {
+                this.preCheckHeading = 'Warning';
+            }
+            else if(this.preCheckStatus == 2)
+            {
+                this.preCheckHeading = 'Information';
+            }
+            else if(this.preCheckStatus == 3)
+            {
+                this.preCheckHeading = 'Success';
+                this.preCheckMessage += 'No warnings have been returned.' + 'No errors have been returned';
+            }
+
+            if(this.preCheckStatus == 0)
             {
                 (this.selectedScenario = clone(emptyScenario));
                 this.onSecondConfirmAnalysisRunAlertData = {
                 showDialog: true,
-                heading: 'Error',
+                heading: (this.preCheckHeading),
                 choice: false,
                 message:(this.preCheckMessage),
                 }
             }
-            else if(this.preCheckStatus = 1)
-            {
+            else{
                 (this.selectedScenario = clone(emptyScenario));
                 this.onSecondConfirmAnalysisRunAlertData = {
                 showDialog: true,
-                heading: 'Warnings',
-                choice: true,
-                message:(this.preCheckMessage),
-                }
-            }
-            else if(this.preCheckStatus = 2)
-            {
-                (this.selectedScenario = clone(emptyScenario));
-                this.onSecondConfirmAnalysisRunAlertData = {
-                showDialog: true,
-                heading: 'Information',
+                heading: (this.preCheckHeading),
                 choice: true,
                 message:(this.preCheckMessage),
                 }

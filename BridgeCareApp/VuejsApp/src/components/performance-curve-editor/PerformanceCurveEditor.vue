@@ -145,7 +145,7 @@
                             class="fixed-header ghd-table v-table__overflow"
                             item-key="id"
                         >
-                            <template slot="items" slot-scope="props">
+                            <template slot="items" slot-scope="props" v-slot:items="props">
                                 <td>
                                     <v-checkbox id="PerformanceCurveEditor-deleteModel-vcheckbox" class="ghd-checkbox"
                                         hide-details

@@ -50,21 +50,25 @@
     </v-layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
     import Vue from 'vue';
-    import {Component, Prop} from 'vue-property-decorator';
     import {AlertPreChecksData} from '../models/modals/alert-data';
+    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+    import { useStore } from 'vuex';
+    import { useRouter } from 'vue-router';
 
-    @Component
-    export default class AlertPreChecks extends Vue {
-        @Prop() dialogDataPreChecks: AlertPreChecksData;
+    const props = defineProps<{
+        dialogDataPreChecks: AlertPreChecksData
+    }>()
+
+const emit = defineEmits(['submit'])
 
         /**
          * Emits a boolean result to the parent component
          * @param submit
          */
-        onSubmit(submit: boolean) {
-            this.$emit('submit', submit);
+        function onSubmit(submit: boolean) {
+            emit('submit', submit);
         }
-    }
+    
 </script>

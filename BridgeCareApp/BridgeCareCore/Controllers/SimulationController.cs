@@ -53,13 +53,14 @@ namespace BridgeCareCore.Controllers
             IHubService hubService,
             IHttpContextAccessor httpContextAccessor,
             IClaimHelper claimHelper,
-            ICompleteSimulationCloningService simulationCloningService,
+            ICompleteSimulationCloningService completeSimulationCloningService,
             IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
+            _completeSimulationCloningService = completeSimulationCloningService ?? throw new ArgumentNullException(nameof(completeSimulationCloningService));
         }
 
         [HttpPost]
@@ -237,7 +238,7 @@ namespace BridgeCareCore.Controllers
                 {
 
                     _claimHelper.CheckUserSimulationModifyAuthorization(dto.SourceScenarioId, UserId);
-                    var cloneResult = _completeSimulationCloningService.Clone(dto);
+                    var cloneResult =  _completeSimulationCloningService.Clone(dto);
                     return cloneResult;
                 });
 

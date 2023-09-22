@@ -10,11 +10,11 @@ using AppliedResearchAssociates.iAM.Common;
 
 namespace BridgeCareCore.Services.SimulationCloning
 {
-    internal class CompleteSimulationCloningService : ICompleteSimulationCloningService
+    public class CompleteSimulationCloningService : ICompleteSimulationCloningService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CompleteSimulationCloningService(UnitOfDataPersistenceWork unitOfWork)
+        public CompleteSimulationCloningService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
@@ -83,26 +83,5 @@ namespace BridgeCareCore.Services.SimulationCloning
             var clone = _unitOfWork.SimulationRepo.CreateSimulation(cloneSimulation, keyAttribute, simulationCloningCommittedProjectErrors, baseEntityProperties);
             return clone;
         }
-
-        //private SimulationCloningResultDTO CreateNewSimulation(CompleteSimulationDTO completeSimulationDTO, string keyAttribute, SimulationCloningCommittedProjectErrors simulationCloningCommittedProjectErrors, BaseEntityProperties baseEntityProperties)
-        //{
-        //    var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();           
-        //    var entity = CompleteSimulationMapper.ToNewEntity(completeSimulationDTO, attributes, keyAttribute, baseEntityProperties);//Has to be in the EF Core project
-
-        //    _unitOfWork.AsTransaction(() =>
-        //    {
-        //        _unitOfWork.Context.AddEntity(entity);
-        //    }); //has to be in the EF core project 
-        //    var simulation = _unitOfWork.SimulationRepo.GetSimulation(completeSimulationDTO.Id);
-        //    var warningMessage = simulationCloningCommittedProjectErrors.BudgetsPreventingCloning.Any() && simulationCloningCommittedProjectErrors.NumberOfCommittedProjectsAffected > 0
-        //            ? $"The following committed project budgets were not found which has prevented {simulationCloningCommittedProjectErrors.NumberOfCommittedProjectsAffected} committed project(s) from being cloned: {string.Join(", ", simulationCloningCommittedProjectErrors.BudgetsPreventingCloning)}"
-        //            : null;
-        //    var cloningResult = new SimulationCloningResultDTO
-        //    {
-        //        Simulation = simulation,
-        //        WarningMessage = warningMessage,
-        //    };
-        //    return cloningResult;
-        //}
     }
 }

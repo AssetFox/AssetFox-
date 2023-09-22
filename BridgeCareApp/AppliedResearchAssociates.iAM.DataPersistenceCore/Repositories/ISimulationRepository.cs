@@ -53,6 +53,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void RemoveNoTreatmentBeforeCommitted(Guid simulationId);
 
-         SimulationCloningResultDTO CreateSimulation(CompleteSimulationDTO completeSimulationDTO, string keyAttribute, SimulationCloningCommittedProjectErrors simulationCloningCommittedProjectErrors, BaseEntityProperties baseEntityProperties)
+        SimulationCloningResultDTO CreateSimulation(CompleteSimulationDTO completeSimulationDTO, string keyAttribute, SimulationCloningCommittedProjectErrors simulationCloningCommittedProjectErrors, BaseEntityProperties baseEntityProperties);
     }
 }

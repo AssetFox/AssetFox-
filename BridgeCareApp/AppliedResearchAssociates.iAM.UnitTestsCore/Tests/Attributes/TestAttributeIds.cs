@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
 {
-    internal class TestAttributeIds
+    public class TestAttributeIds
     {
         public const string CulvDurationNIdString  = "efca598b-9fca-4e3c-ac48-0d95a9eaa867";
         public static Guid CulvDurationNId = Guid.Parse(CulvDurationNIdString);

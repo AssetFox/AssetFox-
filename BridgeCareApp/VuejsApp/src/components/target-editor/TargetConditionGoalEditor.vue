@@ -489,6 +489,7 @@ import { useRouter } from 'vue-router';
     let totalItems = 0;
     let currentPage = ref<TargetConditionGoal[]>([]);
     let initializing: boolean = true;
+    let dateModified: string;
 
     let unsavedDialogAllowed: boolean = true;
     let trueLibrarySelectItemValue = shallowRef<string|null>(''); 
@@ -705,7 +706,7 @@ import { useRouter } from 'vue-router';
     }
     
     watch(pagination,()=> onPaginationChanged)
-    function onPaginationChanged() {
+    async function onPaginationChanged() {
         if(initializing)
             return;
         checkHasUnsavedChanges();
@@ -725,7 +726,7 @@ import { useRouter } from 'vue-router';
             search: currentSearch
         };
         if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
-            TargetConditionGoalService.getScenarioTargetConditionGoalPage(selectedScenarioId, request).then(response => {
+            await TargetConditionGoalService.getScenarioTargetConditionGoalPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     currentPage.value = data.items;
@@ -734,7 +735,14 @@ import { useRouter } from 'vue-router';
                 }
             });
         else if(hasSelectedLibrary)
-             TargetConditionGoalService.getLibraryTargetConditionGoalPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
+            await TargetConditionGoalService.getTargetLibraryDate(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '').then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      dateModified = data.slice(0, 10);
+                   }
+             }),
+             await TargetConditionGoalService.getLibraryTargetConditionGoalPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     currentPage.value = data.items;

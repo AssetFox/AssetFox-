@@ -568,7 +568,7 @@
             @submit="onSecondConfirmAnalysisRunAlertSubmit"
         />
         -->
-         <ConfirmAnalysisRunAlertWithButtons
+         <ConfirmAnalysisRunAlertWithButtons :is="Alert" 
             :dialogDataWithButtons="confirmAnalysisRunAlertData"
             @submit="onConfirmAnalysisRunAlertSubmit"
             />
@@ -629,7 +629,7 @@
             :dialogData="alertDataForDeletingCommittedProjects"
             @submit="onDeleteCommittedProjectsSubmit"
         />
-        <CommittedProjectsFileUploaderDialog
+        <CommittedProjectsFileUploaderDialog :is="ImportExportCommittedProjectsDialog" 
             :showDialog="showImportExportCommittedProjectsDialog"
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
             @delete="onDeleteCommittedProjects"

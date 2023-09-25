@@ -86,7 +86,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var bmsIdRawDatum = rawRepo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256");
             Assert.Equal(brKeyRawDatum.AssetId, checkGuid);
             Assert.Equal(bmsIdRawDatum.AssetId, checkGuid);
-
         }
 
         [Fact]

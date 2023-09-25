@@ -231,7 +231,8 @@ import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData
     let  rules: InputValidationRules;
     let  callFromScenario: boolean;
     let  callFromLibrary: boolean;
-    
+    let TreatmentIsUnSelectable: boolean = false;
+
 
 
     let treatmentCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(

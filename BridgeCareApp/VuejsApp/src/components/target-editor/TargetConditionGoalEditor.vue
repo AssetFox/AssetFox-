@@ -885,8 +885,8 @@ import { useRouter } from 'vue-router';
         TargetConditionGoalService.upsertTargetConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 clearChanges();
-                addedOrUpdatedTargetConditionGoalLibraryMutator(selectedTargetConditionGoalLibrary);
-                selectedTargetConditionGoalLibraryMutator(selectedTargetConditionGoalLibrary.id);
+                addedOrUpdatedTargetConditionGoalLibraryMutator(selectedTargetConditionGoalLibrary.value.id);
+                selectedTargetConditionGoalLibraryMutator(selectedTargetConditionGoalLibrary.value.id);
                 addSuccessNotificationAction({message: "Updated target condition goal library",});
             }
         });

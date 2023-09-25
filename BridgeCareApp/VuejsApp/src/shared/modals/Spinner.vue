@@ -12,15 +12,15 @@
     </v-layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
     import Vue from 'vue';
-    import {Component} from 'vue-property-decorator';
-    import {State} from 'vuex-class';
+    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-    @Component
-    export default class Spinner extends Vue {
-        @State(store => store.busyModule.isBusy) loading: boolean;
-    }
+let store = useStore();
+let loading = ref<boolean>(store.state.busyModule.isBusy);
+
 </script>
 
 <style>

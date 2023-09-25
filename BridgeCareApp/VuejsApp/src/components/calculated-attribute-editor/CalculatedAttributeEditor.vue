@@ -137,7 +137,7 @@
                 class="v-table__overflow ghd-table"
                 sort-icon=$vuetify.icons.ghd-table-sort
                 item-key="calculatedAttributeLibraryEquationId">
-                <template slot="items" slot-scope="props">
+                <template slot="items" slot-scope="props" v-slot:items="props">
                     <td class="text-xs-center">
                         <v-text-field
                             readonly
@@ -156,7 +156,7 @@
                         </v-text-field>
                     </td>
                     <td class="text-xs-center">
-                        <v-text-field
+                        <v-text-field 
                             readonly
                             class="sm-txt"
                             :value="props.item.criteriaExpression"

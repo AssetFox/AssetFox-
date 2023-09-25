@@ -37,8 +37,8 @@
                               <template>
                                 <v-subheader class="equation-list-subheader">Attributes: Click to add</v-subheader>
                                 <div class="attributes-list-container">
-                                  <template v-for="(attribute, index) in attributesList">
-                                    <v-list-tile :key="attribute"
+                                  <template v-for="(attribute, index) in attributesList" :key="attribute">
+                                    <v-list-tile 
                                                 @click="onAddValueToExpression(`[${attribute}]`)" class="list-tile"
                                                 ripple>
                                       <v-list-tile-content>
@@ -57,8 +57,8 @@
                               <template>
                                 <v-subheader class="equation-list-subheader">Formulas: Click to add</v-subheader>
                                 <div class="formulas-list-container">
-                                  <template v-for="(formula, index) in formulasList">
-                                    <v-list-tile :key="formula"
+                                  <template v-for="(formula, index) in formulasList" :key="formula">
+                                    <v-list-tile 
                                                 @click="onAddFormulaToEquation(formula)" class="list-tile"
                                                 ripple
                                                 >
@@ -131,7 +131,7 @@
                                           sort-icon=$vuetify.icons.ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
-                              <template slot="items" slot-scope="props">
+                              <template slot="items" slot-scope="props"  v-slot:items="props">
                                 <td v-for="header in piecewiseGridHeaders">
                                   <div v-if="header.value !== ''">
                                     <div v-if="props.item.timeValue === 0">
@@ -202,7 +202,7 @@
                                           sort-icon=$vuetify.icons.ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
-                              <template slot="items" slot-scope="props">
+                              <template slot="items" slot-scope="props"  v-slot:items="props">
                                 <td v-for="header in timeInRatingGridHeaders">
                                   <div v-if="header.value !== ''">
                                     <div @click="onEditDataPoint(props.item, header.value)"
@@ -396,10 +396,8 @@
   </v-layout>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+<script lang="ts" setup>
+import Vue, {ShallowRef, shallowRef} from 'vue';
 import {EquationEditorDialogData} from '@/shared/models/modals/equation-editor-dialog-data';
 import {formulas} from '@/shared/utils/formulas';
 import {AxiosResponse} from 'axios';
@@ -415,143 +413,147 @@ import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
 import ValidationService from '@/services/validation.service';
 import {EquationValidationParameters, ValidationResult} from '@/shared/models/iAM/expression-validation';
 import { emptyUserCriteriaFilter } from '../models/iAM/user-criteria-filter';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class EquationEditorDialog extends Vue {
-    @Prop() dialogData: EquationEditorDialogData;
-    @Prop() isFromPerformanceCurveEditor: Boolean;
+let store = useStore();
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+  dialogData: EquationEditorDialogData,
+  isFromPerformanceCurveEditor: Boolean
+    }>()
+    
+let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributes);
+async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 
-    @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
-
-    @Action('getAttributes') getAttributesAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-
-  equation: Equation = {...emptyEquation, id: getNewGuid()};
-  attributesList: string[] = [];
-  formulasList: string[] = formulas;
-  expression: string = '';
-  isPiecewise: boolean = false;
-  textareaInput: HTMLTextAreaElement = {} as HTMLTextAreaElement;
-  cursorPosition: number = 0;
-  cannotSubmit: boolean = true;
-  invalidExpressionMessage: string = '';
-  validExpressionMessage: string = '';
-  piecewiseGridHeaders: DataTableHeader[] = [
+  let equation: Equation = {...emptyEquation, id: getNewGuid()};
+  let attributesList: string[] = [];
+  let formulasList: string[] = formulas;
+  let expression = shallowRef<string>('');
+  let isPiecewise: boolean = false;
+  let textareaInput: HTMLTextAreaElement = {} as HTMLTextAreaElement;
+  let cursorPosition: number = 0;
+  let cannotSubmit: boolean = true;
+  let invalidExpressionMessage: string = '';
+  let validExpressionMessage: string = '';
+  let piecewiseGridHeaders: DataTableHeader[] = [
     {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
     {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
     {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
   ];
-  timeInRatingGridHeaders: DataTableHeader[] = [
+  let timeInRatingGridHeaders: DataTableHeader[] = [
     {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
     {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
     {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
   ];
-  piecewiseGridData: TimeConditionDataPoint[] = [];
-  timeInRatingGridData: TimeConditionDataPoint[] = [];
-  showAddDataPointPopup: boolean = false;
-  newDataPoint: TimeConditionDataPoint = clone(emptyTimeConditionDataPoint);
-  xAxisMax: number = 0;
-  yAxisMax: number = 0;
-  dataPointsSource: number[][] = [];
-  showAddMultipleDataPointsPopup: boolean = false;
-  multipleDataPoints: string = '';
-  selectedTab: number = 0;
-  showEditDataPointPopup: boolean = false;
-  editedDataPointProperty: string = '';
-  editedDataPoint: TimeConditionDataPoint = clone(emptyTimeConditionDataPoint);
-  piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/;
-  multipleDataPointsRegex: RegExp = /(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*)/;
-  uuidNIL: string = getBlankGuid();
-
-  /**
-   * mounted => This event handler is used to set the textareaInput object, set the cursorPosition object, and to trigger
+  let piecewiseGridData: TimeConditionDataPoint[] = [];
+  let timeInRatingGridData: TimeConditionDataPoint[] = [];
+  let showAddDataPointPopup: boolean = false;
+  let newDataPoint: TimeConditionDataPoint = clone(emptyTimeConditionDataPoint);
+  let xAxisMax: number = 0;
+  let yAxisMax: number = 0;
+  let dataPointsSource: number[][] = [];
+  let showAddMultipleDataPointsPopup: boolean = false;
+  let multipleDataPoints: string = '';
+  let selectedTab: number = 0;
+  let showEditDataPointPopup: boolean = false;
+  let editedDataPointProperty: string = '';
+  let editedDataPoint: TimeConditionDataPoint = clone(emptyTimeConditionDataPoint);
+  let piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/;
+  let multipleDataPointsRegex: RegExp = /(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*)/;
+  let uuidNIL: string = getBlankGuid();
+/**
+   * mounted => event handler is used to set the textareaInput object, set the cursorPosition object, and to trigger
    * a function to set the attributesList object.
    */
-  mounted() {
-    this.textareaInput = document.getElementById('equation_textarea') as HTMLTextAreaElement;
-    this.cursorPosition = this.textareaInput.selectionStart;
-    if (hasValue(this.stateNumericAttributes)) {
-      this.setAttributesList();
+  onMounted(()=>mounted())
+   function mounted() {
+    textareaInput = document.getElementById('equation_textarea') as HTMLTextAreaElement;
+    cursorPosition = textareaInput.selectionStart;
+    if (hasValue(stateNumericAttributes)) {
+      setAttributesList();
     }
   }
 
   /**
-   * onStateNumericAttributesChanged => This stateNumericAttributes watcher is used to trigger a function to set the
+   * onStateNumericAttributesChanged => stateNumericAttributes watcher is used to trigger a function to set the
    * attributesList object.
    */
-  @Watch('stateNumericAttributes')
-  onStateNumericAttributesChanged() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.setAttributesList();
+  watch(stateNumericAttributes,()=>onStateNumericAttributesChanged())
+  function onStateNumericAttributesChanged() {
+    if (hasValue(stateNumericAttributes)) {
+      setAttributesList();
     }
   }
 
   /**
-   * onDialogDataChanged => This dialogData watcher is used to set the equation object, set the expression object, set
+   * onDialogDataChanged => dialogData watcher is used to set the equation object, set the expression object, set
    * the isPiecewise object, set the selectedTab object (if expression is piecewise), and trigger a function to set
    * some of the piecewise chart properties (if expression is piecewise).
    */
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    this.equation = {
-      id: this.dialogData.equation.id === this.uuidNIL ? this.equation.id : this.dialogData.equation.id,
-      expression: !isNil(this.dialogData.equation.expression) ? this.dialogData.equation.expression : ''
+  watch(()=>props.dialogData,()=>onDialogDataChanged())
+  function onDialogDataChanged() {
+    equation = {
+      id: props.dialogData.equation.id === uuidNIL ? equation.id : props.dialogData.equation.id,
+      expression: !isNil(props.dialogData.equation.expression) ? props.dialogData.equation.expression : ''
     };
-    this.expression = this.equation.expression;
+    expression.value = equation.expression;
 
-    if (this.piecewiseRegex.test(this.expression)) {
-      this.isPiecewise = true;
-      this.selectedTab = 1;
-      this.onParsePiecewiseEquation();
+    if (piecewiseRegex.test(expression.value)) {
+      isPiecewise = true;
+      selectedTab = 1;
+      onParsePiecewiseEquation();
     } else {
-      this.isPiecewise = false;
+      isPiecewise = false;
     }
   }
 
   /**
-   * onPiecewiseGridDataChanged => This piecewiseGridData watcher is used to reset the cannotSubmit, invalidExpressionMessage,
+   * onPiecewiseGridDataChanged => piecewiseGridData watcher is used to reset the cannotSubmit, invalidExpressionMessage,
    * and validExpressionMessage objects. It will also set the xAxisMax, yAxisMax, and dataPointsSource objects.
    */
-  @Watch('piecewiseGridData')
-  onPiecewiseGridDataChanged() {
-    this.cannotSubmit = true;
-    this.invalidExpressionMessage = '';
-    this.validExpressionMessage = '';
+  watch(piecewiseGridData,()=> onPiecewiseGridDataChanged())
+  function onPiecewiseGridDataChanged() {
+    cannotSubmit = true;
+    invalidExpressionMessage = '';
+    validExpressionMessage = '';
 
-    let highestTimeValue: number = getLastPropertyValue('timeValue', this.piecewiseGridData);
+    let highestTimeValue: number = getLastPropertyValue('timeValue', piecewiseGridData);
     if (highestTimeValue % 2 !== 0) {
       highestTimeValue += 1;
     }
-    this.xAxisMax = highestTimeValue;
+    xAxisMax = highestTimeValue;
 
-    let highestConditionValue: number = getLastPropertyValue('conditionValue', this.piecewiseGridData);
+    let highestConditionValue: number = getLastPropertyValue('conditionValue', piecewiseGridData);
     if (highestConditionValue % 2 !== 0) {
       highestConditionValue += 1;
     }
-    this.yAxisMax = highestConditionValue;
+    yAxisMax = highestConditionValue;
 
-    this.dataPointsSource = this.piecewiseGridData.map((dataPoint: TimeConditionDataPoint) =>
+    dataPointsSource = piecewiseGridData.map((dataPoint: TimeConditionDataPoint) =>
         [dataPoint.timeValue, dataPoint.conditionValue]);
   }
 
   /**
-   * onExpressionChanged => This expression watcher is used to reset the invalidExpressionMessage and validExpressionMessage
+   * onExpressionChanged => expression watcher is used to reset the invalidExpressionMessage and validExpressionMessage
    * objects as well as set the cannotSubmit object.
    */
-  @Watch('expression')
-  onExpressionChanged() {
-    this.invalidExpressionMessage = '';
-    this.validExpressionMessage = '';
-    this.cannotSubmit = !(this.expression === '' && !this.isPiecewise);
+  watch(expression,()=>onExpressionChanged())
+  function onExpressionChanged() {
+    invalidExpressionMessage = '';
+    validExpressionMessage = '';
+    cannotSubmit = !(expression.value === '' && !isPiecewise);
   }
 
   /**
-   * onParsePiecewiseEquation => This function is used to
+   * onParsePiecewiseEquation => function is used to
    */
-  onParsePiecewiseEquation() {
+  function onParsePiecewiseEquation() {
     let dataPoints: TimeConditionDataPoint[] = [];
 
-    const dataPointStrings: string[] = this.expression.split(this.piecewiseRegex)
+    const dataPointStrings: string[] = expression.value.split(piecewiseRegex)
         .filter((dataPoint: string) => hasValue(dataPoint) && dataPoint.indexOf(',') !== -1);
 
     dataPointStrings.forEach((dataPoint: string) => {
@@ -569,134 +571,134 @@ export default class EquationEditorDialog extends Vue {
 
     dataPoints = sortByProperty('timeValue', dataPoints);
 
-    this.syncDataGridLists(dataPoints);
+    syncDataGridLists(dataPoints);
   }
 
   /**
-   * setAttributesList => This function is used to set the attributesList object.
+   * setAttributesList => function is used to set the attributesList object.
    */
-  setAttributesList() {
-    this.attributesList = getPropertyValues('name', this.stateNumericAttributes);
+  function setAttributesList() {
+    attributesList = getPropertyValues('name', stateNumericAttributes.value);
   }
 
   /**
    * Setter: cursorPosition
    */
-  setCursorPosition() {
-    this.cursorPosition = this.textareaInput.selectionStart;
+   function setCursorPosition() {
+    cursorPosition = textareaInput.selectionStart;
   }
 
   /**
    * One of the formula list items in the list of formulas has been clicked
    * @param formula The formula string to add to the expression string
    */
-  onAddFormulaToEquation(formula: string) {
-    if (this.cursorPosition === 0) {
-      this.expression = `${formula}${this.expression}`;
-      this.cursorPosition = formula !== 'E' && formula !== 'PI'
+   function onAddFormulaToEquation(formula: string) {
+    if (cursorPosition === 0) {
+      expression.value = `${formula}${expression}`;
+      cursorPosition = formula !== 'E' && formula !== 'PI'
           ? formula.indexOf('(') + 1
           : formula.length;
-    } else if (this.cursorPosition === this.expression.length) {
-      this.expression = `${this.expression}${formula}`;
+    } else if (cursorPosition === expression.value.length) {
+      expression.value = `${expression}${formula}`;
       if (formula !== 'E' && formula !== 'PI') {
-        let i = this.expression.length;
-        while (this.expression.charAt(i) !== '(') {
+        let i = expression.value.length;
+        while (expression.value.charAt(i) !== '(') {
           i--;
         }
-        this.cursorPosition = i + 1;
+        cursorPosition = i + 1;
       } else {
-        this.cursorPosition = this.expression.length;
+        cursorPosition = expression.value.length;
       }
     } else {
-      const output = `${this.expression.substr(0, this.cursorPosition)}${formula}`;
-      this.expression = `${output}${this.expression.substr(this.cursorPosition)}`;
+      const output = `${expression.value.substr(0, cursorPosition)}${formula}`;
+      expression.value = `${output}${expression.value.substr(cursorPosition)}`;
       if (formula !== 'E' && formula !== 'PI') {
         let i = output.length;
         while (output.charAt(i) !== '(') {
           i--;
         }
-        this.cursorPosition = i + 1;
+        cursorPosition = i + 1;
       } else {
-        this.cursorPosition = output.length;
+        cursorPosition = output.length;
       }
     }
-    this.textareaInput.focus();
+    textareaInput.focus();
   }
 
   /**
-   * onAddValueToExpression => This function is used to add a string value to the expression object using the cursorPosition
+   * onAddValueToExpression => function is used to add a string value to the expression object using the cursorPosition
    * object's value and then to reset the cursorPosition object's value after modifying the expression object. Finally,
    * the textareaInput object is put into focus.
    */
-  onAddValueToExpression(value: string) {
-    if (this.cursorPosition === 0) {
-      this.cursorPosition = value.length;
-      this.expression = `${value}${this.expression}`;
-    } else if (this.cursorPosition === this.expression.length) {
-      this.expression = `${this.expression}${value}`;
-      this.cursorPosition = this.expression.length;
+   function onAddValueToExpression(value: string) {
+    if (cursorPosition === 0) {
+      cursorPosition = value.length;
+      expression.value = `${value}${expression}`;
+    } else if (cursorPosition === expression.value.length) {
+      expression.value = `${expression}${value}`;
+      cursorPosition = expression.value.length;
     } else {
-      const output = `${this.expression.substr(0, this.cursorPosition)}${value}`;
-      this.expression = `${output}${this.expression.substr(this.cursorPosition)}`;
-      this.cursorPosition = output.length;
+      const output = `${expression.value.substr(0, cursorPosition)}${value}`;
+      expression.value = `${output}${expression.value.substr(cursorPosition)}`;
+      cursorPosition = output.length;
     }
-    this.textareaInput.focus();
+    textareaInput.focus();
   }
 
   /**
-   * setTextareaCursorPosition => This function is used to set the textareaInput object's cursor position.
+   * setTextareaCursorPosition => function is used to set the textareaInput object's cursor position.
    */
-  setTextareaCursorPosition() {
+   function setTextareaCursorPosition() {
     setTimeout(() =>
-        this.textareaInput.setSelectionRange(this.cursorPosition, this.cursorPosition)
+        textareaInput.setSelectionRange(cursorPosition, cursorPosition)
     );
   }
 
   /**
-   * onAddTimeAttributeDataPoint => This function is used to set the newDataPoint object's id property with a new uuid
+   * onAddTimeAttributeDataPoint => function is used to set the newDataPoint object's id property with a new uuid
    * and then set the showAddDataPointPopup object to 'true'.
    */
-  onAddTimeAttributeDataPoint() {
-    this.newDataPoint = {
-      ...this.newDataPoint,
+   function onAddTimeAttributeDataPoint() {
+    newDataPoint = {
+      ...newDataPoint,
       id: getNewGuid()
     };
-    this.showAddDataPointPopup = true;
+    showAddDataPointPopup = true;
   }
 
   /**
-   * onSubmitNewDataPoint => This function is used to parse the newDataPoint object's timeValue and conditionValue properties
+   * onSubmitNewDataPoint => function is used to parse the newDataPoint object's timeValue and conditionValue properties
    * and then sync it with the other data point values between the piecewise and time-in-rating data grids/charts.
    */
-  onSubmitNewDataPoint(submit: boolean) {
-    this.showAddDataPointPopup = false;
+   function onSubmitNewDataPoint(submit: boolean) {
+    showAddDataPointPopup = false;
 
     if (submit) {
       const newParsedDataPoint: TimeConditionDataPoint = {
-        ...this.newDataPoint,
-        timeValue: parseInt(this.newDataPoint.timeValue.toString()),
-        conditionValue: parseFloat(this.newDataPoint.conditionValue.toString())
+        ...newDataPoint,
+        timeValue: parseInt(newDataPoint.timeValue.toString()),
+        conditionValue: parseFloat(newDataPoint.conditionValue.toString())
       };
 
-      const dataPoints: TimeConditionDataPoint[] = this.selectedTab === 1
-          ? [...this.piecewiseGridData, newParsedDataPoint]
-          : [...this.timeInRatingGridData, newParsedDataPoint];
+      const dataPoints: TimeConditionDataPoint[] = selectedTab === 1
+          ? [...piecewiseGridData, newParsedDataPoint]
+          : [...timeInRatingGridData, newParsedDataPoint];
 
-      this.syncDataGridLists(dataPoints);
+      syncDataGridLists(dataPoints);
     }
 
-    this.newDataPoint = clone(emptyTimeConditionDataPoint);
+    newDataPoint = clone(emptyTimeConditionDataPoint);
   }
 
   /**
-   * syncDataGridLists => This function is used to calculate and sync the data points between the piecewise and
+   * syncDataGridLists => function is used to calculate and sync the data points between the piecewise and
    * time-in-rating data grids/charts.
    */
-  syncDataGridLists(dataPoints: TimeConditionDataPoint[]) {
+   function syncDataGridLists(dataPoints: TimeConditionDataPoint[]) {
     let piecewiseData: TimeConditionDataPoint[] = [];
     let timeInRatingData: TimeConditionDataPoint[] = [];
 
-    if (this.selectedTab === 1) {
+    if (selectedTab === 1) {
       piecewiseData = sortByProperty('timeValue', dataPoints)
           .filter((dataPoint: TimeConditionDataPoint) => dataPoint.timeValue !== 0);
 
@@ -745,35 +747,35 @@ export default class EquationEditorDialog extends Vue {
       }
     }
 
-    this.piecewiseGridData = piecewiseData;
-    this.timeInRatingGridData = timeInRatingData;
+    piecewiseGridData = piecewiseData;
+    timeInRatingGridData = timeInRatingData;
   }
 
   /**
-   * onSubmitNewDataPointMulti => This function is used to parse the Multiple Data Points Popup's 'submit' result and
+   * onSubmitNewDataPointMulti => function is used to parse the Multiple Data Points Popup's 'submit' result and
    * then to sync the parsed data point values between the piecewise and time-in-rating data grids/charts.
    */
-  onSubmitNewDataPointMulti(submit: boolean) {
+   function onSubmitNewDataPointMulti(submit: boolean) {
     if (submit) {
-      const parsedMultiDataPoints: TimeConditionDataPoint[] = this.parseMultipleDataPoints();
+      const parsedMultiDataPoints: TimeConditionDataPoint[] = parseMultipleDataPoints();
 
-      const dataPoints = this.selectedTab === 1
-          ? [...this.piecewiseGridData, ...parsedMultiDataPoints]
-          : [...this.timeInRatingGridData, ...parsedMultiDataPoints];
+      const dataPoints = selectedTab === 1
+          ? [...piecewiseGridData, ...parsedMultiDataPoints]
+          : [...timeInRatingGridData, ...parsedMultiDataPoints];
 
-      this.syncDataGridLists(dataPoints);
+      syncDataGridLists(dataPoints);
     }
 
-    this.showAddMultipleDataPointsPopup = false;
-    this.multipleDataPoints = '';
+    showAddMultipleDataPointsPopup = false;
+    multipleDataPoints = '';
   }
 
   /**
-   * parseMultipleDataPoints => This function is used to parse the multipleDataPoints string into a list of
+   * parseMultipleDataPoints => function is used to parse the multipleDataPoints string into a list of
    * TimeConditionDataPoint objects.
    */
-  parseMultipleDataPoints() {
-    const splitDataPoints: string[] = this.multipleDataPoints
+   function parseMultipleDataPoints() {
+    const splitDataPoints: string[] = multipleDataPoints
         .split(/\r?\n/).filter((dataPoints: string) => dataPoints !== '');
 
     if (hasValue(splitDataPoints)) {
@@ -794,65 +796,65 @@ export default class EquationEditorDialog extends Vue {
   }
 
   /**
-   * onEditDataPoint => This function is used to set the objects editedDataPoint, editedDataPointProperty, and
+   * onEditDataPoint => function is used to set the objects editedDataPoint, editedDataPointProperty, and
    * showEditDataPointPopup.
    */
-  onEditDataPoint(dataPoint: TimeConditionDataPoint, property: string) {
-    this.editedDataPoint = clone(dataPoint);
-    this.editedDataPointProperty = property;
-    this.showEditDataPointPopup = true;
+   function onEditDataPoint(dataPoint: TimeConditionDataPoint, property: string) {
+    editedDataPoint = clone(dataPoint);
+    editedDataPointProperty = property;
+    showEditDataPointPopup = true;
   }
 
   /**
-   * onSubmitEditedDataPointValue => This function is used to update a data point that was edited via the
+   * onSubmitEditedDataPointValue => function is used to update a data point that was edited via the
    * Edit Data Point Popup and then to sync the changes between the piecewise and time-in-rating data grids/charts.
    */
-  onSubmitEditedDataPointValue(submit: boolean) {
+   function onSubmitEditedDataPointValue(submit: boolean) {
     if (submit) {
-      let dataPoints = this.selectedTab === 1 ? clone(this.piecewiseGridData) : clone(this.timeInRatingGridData);
-      var timeValue = parseFloat(this.editedDataPoint.timeValue.toString());
-      var conditionValue = parseFloat(this.editedDataPoint.conditionValue.toString());
+      let dataPoints = selectedTab === 1 ? clone(piecewiseGridData) : clone(timeInRatingGridData);
+      var timeValue = parseFloat(editedDataPoint.timeValue.toString());
+      var conditionValue = parseFloat(editedDataPoint.conditionValue.toString());
       if (!isNaN(timeValue) && !isNaN(conditionValue)) {
-        this.editedDataPoint.timeValue = timeValue;
-        this.editedDataPoint.conditionValue = conditionValue;
+        editedDataPoint.timeValue = timeValue;
+        editedDataPoint.conditionValue = conditionValue;
         dataPoints = update(
-          findIndex(propEq('id', this.editedDataPoint.id), dataPoints), this.editedDataPoint, dataPoints
+          findIndex(propEq('id', editedDataPoint.id), dataPoints), editedDataPoint, dataPoints
         );
 
-        this.syncDataGridLists(dataPoints);
+        syncDataGridLists(dataPoints);
       }
     }
 
-    this.editedDataPoint = clone(emptyTimeConditionDataPoint);
-    this.editedDataPointProperty = '';
-    this.showEditDataPointPopup = false;
+    editedDataPoint = clone(emptyTimeConditionDataPoint);
+    editedDataPointProperty = '';
+    showEditDataPointPopup = false;
   }
 
   /**
-   * onRemoveTimeAttributeDataPoint => This function is used to remove a TimeConditionDataPoint object from either the
+   * onRemoveTimeAttributeDataPoint => function is used to remove a TimeConditionDataPoint object from either the
    * piecewise data grid/chart list or the time-in-rating data grid/chart list and then to sync the data point values
    * between the piecewise and time-in-rating data grids/charts.
    */
-  onRemoveTimeAttributeDataPoint(id: string) {
-    const dataPoints: TimeConditionDataPoint[] = this.selectedTab === 1
-        ? this.piecewiseGridData.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id)
-        : this.timeInRatingGridData.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id);
+   function onRemoveTimeAttributeDataPoint(id: string) {
+    const dataPoints: TimeConditionDataPoint[] = selectedTab === 1
+        ? piecewiseGridData.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id)
+        : timeInRatingGridData.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id);
 
-    this.syncDataGridLists(dataPoints);
+    syncDataGridLists(dataPoints);
   }
 
-    disableEquationCheck() {
-        return this.isPiecewise ? !hasValue(this.onParseTimeAttributeDataPoints()) : !hasValue(this.expression);
+  function disableEquationCheck() {
+        return isPiecewise ? !hasValue(onParseTimeAttributeDataPoints()) : !hasValue(expression);
     }
 
   /**
-   * onCheckEquation => This function is used to trigger a service function to make an HTTP request to the backend API
+   * onCheckEquation => function is used to trigger a service function to make an HTTP request to the backend API
    * equation validation service in order to validate the current expression.
    */
-  onCheckEquation() {
+   function onCheckEquation() {
     const equationValidationParameters: EquationValidationParameters = {
-      expression: this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression,
-      isPiecewise: this.isPiecewise,
+      expression: isPiecewise ? onParseTimeAttributeDataPoints() : expression.value,
+      isPiecewise: isPiecewise,
       currentUserCriteriaFilter: {...emptyUserCriteriaFilter},
       networkId: getBlankGuid()
     };
@@ -862,90 +864,90 @@ export default class EquationEditorDialog extends Vue {
           if (hasValue(response, 'data')) {
             const result: ValidationResult = response.data as ValidationResult;
             if (result.isValid) {
-              this.validExpressionMessage = 'Equation is valid.';
-              this.invalidExpressionMessage = '';
-              this.cannotSubmit = false;
+              validExpressionMessage = 'Equation is valid.';
+              invalidExpressionMessage = '';
+              cannotSubmit = false;
             } else {
-              this.invalidExpressionMessage = result.validationMessage;
-              this.validExpressionMessage = '';
-              this.cannotSubmit = true;
+              invalidExpressionMessage = result.validationMessage;
+              validExpressionMessage = '';
+              cannotSubmit = true;
             }
           }
         });
   }
 
   /**
-   * onParseTimeAttributeDataPoints => This function is used to parse a list of TimeAttributeDataPoints objects into a
+   * onParseTimeAttributeDataPoints => function is used to parse a list of TimeAttributeDataPoints objects into a
    * string of (x,y) data points.
    */
-  onParseTimeAttributeDataPoints() {
-    return this.piecewiseGridData.map((timeAttributeDataPoint: TimeConditionDataPoint) =>
+   function onParseTimeAttributeDataPoints() {
+    return piecewiseGridData.map((timeAttributeDataPoint: TimeConditionDataPoint) =>
         `(${timeAttributeDataPoint.timeValue},${timeAttributeDataPoint.conditionValue})`
     ).join('');
   }
 
   /**
-   * onSubmit => This function is used to emit the modified equation object back to the parent component.
+   * onSubmit => function is used to emit the modified equation object back to the parent component.
    */
-  onSubmit(submit: boolean) {
-    this.resetComponentCalculatedProperties();
+   function onSubmit(submit: boolean) {
+    resetComponentCalculatedProperties();
 
     if (submit) {
-      this.equation.expression = this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression;
-      this.$emit('submit', this.equation);
+      equation.expression = isPiecewise ? onParseTimeAttributeDataPoints() : expression.value;
+      emit('submit', equation);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.piecewiseGridData = [];
-    this.timeInRatingGridData = [];
-    this.selectedTab = 0;
-    this.equation = {...emptyEquation, id: getNewGuid()};
+    piecewiseGridData = [];
+    timeInRatingGridData = [];
+    selectedTab = 0;
+    equation = {...emptyEquation, id: getNewGuid()};
   }
 
   /**
-   * resetComponentCalculatedProperties => This function is used to reset the cursorPosition, invalidExpressionMessage,
+   * resetComponentCalculatedProperties => function is used to reset the cursorPosition, invalidExpressionMessage,
    * and validExpressionMessage objects.
    */
-  resetComponentCalculatedProperties() {
-    this.cursorPosition = 0;
-    this.invalidExpressionMessage = '';
-    this.validExpressionMessage = '';
+   function resetComponentCalculatedProperties() {
+    cursorPosition = 0;
+    invalidExpressionMessage = '';
+    validExpressionMessage = '';
   }
 
   /**
-   * disableNewDataPointSubmit => This function is used to disable the New Data Point Popup's 'submit' button if the data
+   * disableNewDataPointSubmit => function is used to disable the New Data Point Popup's 'submit' button if the data
    * point value is not valid.
    */
-  disableNewDataPointSubmit() {
-    return this.timeValueIsNotEmpty(this.newDataPoint.timeValue.toString()) !== true ||
-        this.timeValueIsGreaterThanZero(this.newDataPoint.timeValue.toString()) !== true ||
-        this.timeValueIsNew(this.newDataPoint.timeValue.toString()) !== true ||
-        this.conditionValueIsNotEmpty(this.newDataPoint.conditionValue.toString()) !== true ||
-        this.conditionValueIsNew(this.newDataPoint.conditionValue.toString()) !== true;
+   function disableNewDataPointSubmit() {
+    return timeValueIsNotEmpty(newDataPoint.timeValue.toString()) !== true ||
+        timeValueIsGreaterThanZero(newDataPoint.timeValue.toString()) !== true ||
+        timeValueIsNew(newDataPoint.timeValue.toString()) !== true ||
+        conditionValueIsNotEmpty(newDataPoint.conditionValue.toString()) !== true ||
+        conditionValueIsNew(newDataPoint.conditionValue.toString()) !== true;
   }
 
   /**
-   * disableMultipleDataPointsSubmit => This function is used to disable the Multiple Data Points Popup's 'submit' button
+   * disableMultipleDataPointsSubmit => function is used to disable the Multiple Data Points Popup's 'submit' button
    * if the multiple data points' values are not valid.
    */
-  disableMultipleDataPointsSubmit() {
-    return this.multipleDataPoints === '' ||
-        this.isCorrectMultipleDataPointsFormat() !== true ||
-        this.multipleDataPointsAreNew() !== true;
+   function disableMultipleDataPointsSubmit() {
+    return multipleDataPoints === '' ||
+        isCorrectMultipleDataPointsFormat() !== true ||
+        multipleDataPointsAreNew() !== true;
   }
 
   /**
-   * disableEditDataPointSubmit => This function is used to disable the Edit Data Point Popup's 'submit' button if the
+   * disableEditDataPointSubmit => function is used to disable the Edit Data Point Popup's 'submit' button if the
    * data point's modified value is not valid.
    */
-  disableEditDataPointSubmit() {
+   function disableEditDataPointSubmit() {
 
-      return (this.timeValueIsNotEmpty(this.editedDataPoint.timeValue.toString()) !== true ||
-          this.timeValueIsGreaterThanZero(this.editedDataPoint.timeValue.toString()) !== true ||
-          this.timeValueIsNew(this.editedDataPoint.timeValue.toString()) !== true) &&
-       (this.conditionValueIsNotEmpty(this.editedDataPoint.conditionValue.toString()) !== true ||
-          this.conditionValueIsNew(this.editedDataPoint.conditionValue.toString()) !== true);
+      return (timeValueIsNotEmpty(editedDataPoint.timeValue.toString()) !== true ||
+          timeValueIsGreaterThanZero(editedDataPoint.timeValue.toString()) !== true ||
+          timeValueIsNew(editedDataPoint.timeValue.toString()) !== true) &&
+       (conditionValueIsNotEmpty(editedDataPoint.conditionValue.toString()) !== true ||
+          conditionValueIsNew(editedDataPoint.conditionValue.toString()) !== true);
     
   }
 
@@ -953,7 +955,7 @@ export default class EquationEditorDialog extends Vue {
    * Rule: Checks if a given time value is > 0
    * @param value
    */
-  timeValueIsGreaterThanZero(value: string) {
+   function timeValueIsGreaterThanZero(value: string) {
     return parseInt(value) > 0 || 'Time values cannot be less than or equal to 0';
   }
 
@@ -961,9 +963,9 @@ export default class EquationEditorDialog extends Vue {
    * Rule: Checks if a given time value is new
    * @param value
    */
-  timeValueIsNew(value: string) {
-    if (this.selectedTab === 1) {
-      const timeValues: number[] = getPropertyValues('timeValue', this.piecewiseGridData);
+   function timeValueIsNew(value: string) {
+    if (selectedTab === 1) {
+      const timeValues: number[] = getPropertyValues('timeValue', piecewiseGridData);
 
       return timeValues.indexOf(parseInt(value)) === -1 || 'Time value already exists';
     }
@@ -975,7 +977,7 @@ export default class EquationEditorDialog extends Vue {
    * Rule: Checks if a given time value is not empty
    * @param value
    */
-  timeValueIsNotEmpty(value: string) {
+   function timeValueIsNotEmpty(value: string) {
     return hasValue(value) || 'A value must be entered';
   }
 
@@ -983,10 +985,10 @@ export default class EquationEditorDialog extends Vue {
    * Rule: Checks if a given condition value is new
    * @param value
    */
-  conditionValueIsNew(value: string) {
-    const conditionValues: number[] = this.selectedTab === 1
-        ? getPropertyValues('conditionValue', this.piecewiseGridData)
-        : getPropertyValues('conditionValue', this.timeInRatingGridData);
+   function conditionValueIsNew(value: string) {
+    const conditionValues: number[] = selectedTab === 1
+        ? getPropertyValues('conditionValue', piecewiseGridData)
+        : getPropertyValues('conditionValue', timeInRatingGridData);
 
     return conditionValues.indexOf(parseFloat(value)) === -1 || 'Condition value already exists';
   }
@@ -995,25 +997,25 @@ export default class EquationEditorDialog extends Vue {
    * Rule: Checks if a given condition value is not empty
    * @param value
    */
-  conditionValueIsNotEmpty(value: string) {
+   function conditionValueIsNotEmpty(value: string) {
     return hasValue(value) || 'A value must be entered';
   }
 
   /**
    * Rule: Checks if the multiple data points popup's textarea is not empty
    */
-  multipleDataPointsFormIsNotEmpty() {
-    return this.multipleDataPoints !== '' || 'Values must be entered';
+   function multipleDataPointsFormIsNotEmpty() {
+    return multipleDataPoints !== '' || 'Values must be entered';
   }
 
   /**
    * Rule: Checks if the multiple data points popup's textarea has correctly formatted data
    */
-  isCorrectMultipleDataPointsFormat() {
-    const eachDataPointIsValid = this.multipleDataPoints
+   function isCorrectMultipleDataPointsFormat() {
+    const eachDataPointIsValid = multipleDataPoints
         .split(/\r?\n/).filter((dataPoints: string) => dataPoints !== '')
         .every((dataPoints: string) => {
-          return this.multipleDataPointsRegex.test(dataPoints) &&
+          return multipleDataPointsRegex.test(dataPoints) &&
               dataPoints.split(',').every((value: string) => !isNaN(parseFloat(value)));
         });
 
@@ -1023,26 +1025,26 @@ export default class EquationEditorDialog extends Vue {
   /**
    * Rule: Checks if the multiple data points popup's textarea data has all new values for times & conditions
    */
-  multipleDataPointsAreNew() {
-    const dataPoints: TimeConditionDataPoint[] = this.parseMultipleDataPoints();
+   function multipleDataPointsAreNew() {
+    const dataPoints: TimeConditionDataPoint[] = parseMultipleDataPoints();
     const existingConditionValues: number[] = [];
     const existingTimeValues: number[] = [];
 
     const eachDataPointIsNew = dataPoints.every((dataPoint: TimeConditionDataPoint) => {
-      const conditionValueIsNew = this.conditionValueIsNew(dataPoint.conditionValue.toString()) === true;
-      const timeValueIsNew: boolean = this.timeValueIsNew(dataPoint.timeValue.toString()) === true;
+      const conditionEditorValueIsNew = conditionValueIsNew(dataPoint.conditionValue.toString()) === true;
+      const timeEditorValueIsNew: boolean = timeValueIsNew(dataPoint.timeValue.toString()) === true;
 
       if (!conditionValueIsNew) {
         existingConditionValues.push(dataPoint.conditionValue);
       }
 
-      if (this.selectedTab === 1 && !timeValueIsNew) {
+      if (selectedTab === 1 && !timeValueIsNew) {
         existingTimeValues.push(dataPoint.timeValue);
       }
 
-      return this.selectedTab === 1
-          ? conditionValueIsNew && timeValueIsNew
-          : conditionValueIsNew;
+      return selectedTab === 1
+          ? conditionEditorValueIsNew && timeEditorValueIsNew
+          : conditionEditorValueIsNew;
     });
 
     let conditionValuesAlreadyExistsMessage: string = '';
@@ -1065,7 +1067,6 @@ export default class EquationEditorDialog extends Vue {
 
     return eachDataPointIsNew || `${conditionValuesAlreadyExistsMessage}\n${timeValuesAlreadyExistsMessage}`;
   }
-}
 </script>
 
 <style>

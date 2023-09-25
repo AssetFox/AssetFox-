@@ -41,10 +41,8 @@
     </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
 import { GeneralCriterionEditorDialogData } from '../models/modals/general-criterion-editor-dialog-data';
 import {
   CriteriaEditorData,
@@ -61,43 +59,41 @@ import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import CriteriaEditor from '../components/CriteriaEditor.vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+let store = useStore();
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+    dialogData: GeneralCriterionEditorDialogData
+    }>()
+let stateCriterionLibraries = ref<CriterionLibrary[]>(store.state.criterionModule.criterionLibraries);
+let stateSelectedCriterionLibrary = ref<CriterionLibrary>(store.state.criterionModule.selectedCriterionLibrary);
+let stateSelectedCriterionIsValid = ref<boolean>(store.state.criterionModule.selectedCriterionIsValid);
 
-@Component({
-    components: { CriterionLibraryEditor, HasUnsavedChangesAlert: Alert, CriteriaEditor },
-})
-export default class GeneralCriterionEditorDialog extends Vue {
-    @Prop() dialogData: GeneralCriterionEditorDialogData;
-
-    @State(state => state.criterionModule.criterionLibraries)
-    stateCriterionLibraries: CriterionLibrary[];
-    @State(state => state.criterionModule.selectedCriterionLibrary)
-    stateSelectedCriterionLibrary: CriterionLibrary;
-    @State(state => state.criterionModule.selectedCriterionIsValid)
-    stateSelectedCriterionIsValid: boolean;
-
-    criteriaEditorData: CriteriaEditorData = {
+let criteriaEditorData: CriteriaEditorData = {
     ...emptyCriteriaEditorData,
     isLibraryContext: true
   };
 
-  uuidNIL: string = getBlankGuid();
-  canUpdateOrCreate: boolean = false;
+  let uuidNIL: string = getBlankGuid();
+  let canUpdateOrCreate: boolean = false;
 
-  CriteriaExpressionToReturn: string | null = "";
+  let CriteriaExpressionToReturn: string | null = "";
 
-  @Watch('dialogData')
-    onDialogDataChanged() {
+  watch(()=>props.dialogData,()=>onDialogDataChanged())
+    function onDialogDataChanged() {
         const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
         const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
 
-        if (this.dialogData.showDialog) {    
-            this.criteriaEditorData = {
-                    ...this.criteriaEditorData,
-                    mergedCriteriaExpression: this.dialogData.CriteriaExpression,
+        if (props.dialogData.showDialog) {    
+            criteriaEditorData = {
+                    ...criteriaEditorData,
+                    mergedCriteriaExpression: props.dialogData.CriteriaExpression,
                     isLibraryContext: true
                 };
 
-            this.canUpdateOrCreate = false;
+            canUpdateOrCreate = false;
 
             if (hasValue(htmlTag)) {
                 htmlTag[0].setAttribute('style', 'overflow:hidden;');
@@ -113,24 +109,23 @@ export default class GeneralCriterionEditorDialog extends Vue {
         }
     }
 
-    onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
-        this.canUpdateOrCreate = result.validated;
+    function onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
+        canUpdateOrCreate = result.validated;
 
         if (result.validated) {
-            this.CriteriaExpressionToReturn = result.criteria
+            CriteriaExpressionToReturn = result.criteria
         }
     }
 
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-            if (!isNil(this.CriteriaExpressionToReturn)) {
-                this.$emit('submit', this.CriteriaExpressionToReturn);
+            if (!isNil(CriteriaExpressionToReturn)) {
+                emit('submit', CriteriaExpressionToReturn);
             }
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
     }
-}
 </script>
 
 <style>

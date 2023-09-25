@@ -56,25 +56,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
         {
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
-                var brKey = _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "CRS");
+                var CRS = _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "CRS");
                 //var familyId = int.Parse(_reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "FAMILY_ID"));
                 var years = simulationOutput.Years.OrderBy(yr => yr.Year);
 
                 // Year 0
-                var PAMSdecisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, years.FirstOrDefault().Year - 1, initialAssetSummary);
+                var PAMSdecisionDataModel = GetInitialDecisionDataModel(currentAttributes, CRS, years.FirstOrDefault().Year - 1, initialAssetSummary);
                 FillInitialDataInWorksheet(decisionsWorksheet, PAMSdecisionDataModel, currentAttributes, currentCell.Row, 1);
 
                 var yearZeroRow = currentCell.Row++;
                 foreach (var year in years)
                 {
-                    var section = year.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "CRS") == brKey);
+                    var section = year.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "CRS") == CRS);
                     if (section.TreatmentCause == TreatmentCause.CommittedProject)
                     {
                         continue;
                     }
 
                     // Generate data model                    
-                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, brKey, year, section);
+                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, CRS, year, section);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, currentCell);

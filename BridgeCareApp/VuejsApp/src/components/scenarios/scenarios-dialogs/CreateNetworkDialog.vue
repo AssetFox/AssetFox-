@@ -24,26 +24,24 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
 import {emptyNetwork, Network} from '@/shared/models/iAM/network';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
-@Component
-export default class CreateNetworkDialog extends Vue {
-  @Prop() showDialog: boolean;
+  const props = defineProps<{showDialog: boolean}>();
+  const emit = defineEmits(['submit'])
 
-  newNetwork: Network = {...emptyNetwork, id: getNewGuid()};
+  let newNetwork: Network = {...emptyNetwork, id: getNewGuid()};
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newNetwork);
+      emit('submit', newNetwork);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newNetwork = {...emptyNetwork, id: getNewGuid()};
+    newNetwork = {...emptyNetwork, id: getNewGuid()};
   }
-}
+
 </script>

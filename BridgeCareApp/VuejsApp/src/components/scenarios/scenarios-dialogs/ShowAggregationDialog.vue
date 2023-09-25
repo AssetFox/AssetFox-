@@ -133,7 +133,7 @@
                     :dialogData="equationEditorDialogData"
                     @submit="onSubmitEquationEditorDialogSubmit"
                 />
-                <ConfirmDataAssignmentAlert
+                <ConfirmDataAssignmentAlert :is="Alert"
                     :dialogData="confirmDataAggregationAlertData"
                     @submit="onConfirmDataAggregationAlertSubmit"
                 />
@@ -142,7 +142,7 @@
     </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Alert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '@/shared/modals/EquationEditorDialog.vue';
 import { Equation } from '@/shared/models/iAM/equation';
@@ -156,32 +156,28 @@ import {
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
 import { Hub } from '@/connectionHub';
+import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject } from 'vue'; 
+import { useStore } from 'vuex'; 
 
-@Component({
-    components: {
-        EquationEditorDialog,
-        ConfirmDataAssignmentAlert: Alert,
-    },
-})
-export default class ShowAggregationDialog extends Vue {
-    @Prop() dialogData: any;
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
+    let store = useStore(); 
+    const $statusHub = inject('$statusHub') as any
 
-    @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
-    @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
+    const props = defineProps<{dialogData: any}>();
 
-    equationEditorDialogData: EquationEditorDialogData = clone(
+    const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks);
+
+    async function aggregateNetworkDataAction(payload?: any): Promise<any>{await store.dispatch('aggregateNetworkData')}
+    async function upsertBenefitQuantifierAction(payload?: any): Promise<any>{await store.dispatch('upsertBenefitQuantifier')} 
+
+    let equationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
     );
-    confirmDataAggregationAlertData: AlertData = clone(emptyAlertData);
+    let confirmDataAggregationAlertData: AlertData = clone(emptyAlertData);
     
-    networkDataAssignmentStatus: string = '';
-    networkDataAssignmentPercentage = 0;
-    networkGridHeaders: DataTableHeader[] = [
+    let networkDataAssignmentStatus: string = '';
+    let networkDataAssignmentPercentage = 0;
+    let networkGridHeaders: DataTableHeader[] = [
         {
             text: 'Network',
             value: 'name',
@@ -223,39 +219,41 @@ export default class ShowAggregationDialog extends Vue {
             width: '',
         },
     ];
-    networks: Network[] = [];
-    selectedNetworkId: string = '';
+    let networks: Network[] = [];
+    let selectedNetworkId: string = '';
 
-    @Watch('stateNetworks')
-    onStateNetworksChanged() {
-        this.networks = clone(this.stateNetworks);
+    watch(stateNetworks, ()=> onStateNetworksChanged)
+    function onStateNetworksChanged() {
+        networks = clone(stateNetworks);
     }
-    mounted() {
-        this.networks = clone(this.stateNetworks);
 
-        this.$statusHub.$on(
+    onMounted(() => mounted)
+    function mounted() {
+        networks = clone(stateNetworks);
+
+        $statusHub.$on(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
+            getDataAggregationStatus,
         );
     }
 
-    onShowEquationEditorDialog(equation: Equation, networkId: string) {
-        this.selectedNetworkId = networkId;
-        this.equationEditorDialogData = {
+    function onShowEquationEditorDialog(equation: Equation, networkId: string) {
+        selectedNetworkId = networkId;
+        equationEditorDialogData = {
             showDialog: true,
             equation: equation,
         };
     }
-    onSubmitEquationEditorDialogSubmit(equation: Equation) {
-        this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
+    function onSubmitEquationEditorDialogSubmit(equation: Equation) {
+        equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
-        if (!isNil(equation) && hasValue(this.networks)) {
-            var localNetworkObj = this.networks.find(_ => _.id == this.selectedNetworkId);
+        if (!isNil(equation) && hasValue(networks)) {
+            var localNetworkObj = networks.find(_ => _.id == selectedNetworkId);
 
             if(isNil(localNetworkObj)){
-                return `no network found with networkId ${this.selectedNetworkId}`;
+                return `no network found with networkId ${selectedNetworkId}`;
             }
-            this.upsertBenefitQuantifierAction({
+            upsertBenefitQuantifierAction({
                 benefitQuantifier: {
                     ...localNetworkObj.benefitQuantifier,
                     equation: equation,
@@ -264,9 +262,9 @@ export default class ShowAggregationDialog extends Vue {
         }
     }
 
-    onShowConfirmDataAggregationAlert(networkId: string) {
-        this.selectedNetworkId = networkId;
-        this.confirmDataAggregationAlertData = {
+    function onShowConfirmDataAggregationAlert(networkId: string) {
+        selectedNetworkId = networkId;
+        confirmDataAggregationAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -276,40 +274,42 @@ export default class ShowAggregationDialog extends Vue {
         };
     }
 
-    onConfirmDataAggregationAlertSubmit(response: boolean) {
-        this.confirmDataAggregationAlertData = clone(emptyAlertData);
+    function onConfirmDataAggregationAlertSubmit(response: boolean) {
+        confirmDataAggregationAlertData = clone(emptyAlertData);
 
         if (response) {
-            this.aggregateNetworkDataAction({
-                networkId: this.selectedNetworkId,
+            aggregateNetworkDataAction({
+                networkId: selectedNetworkId,
             });
         }
     }
 
-    getDataAggregationStatus(data: any) {
+    function getDataAggregationStatus(data: any) {
         const networkRollupDetail: NetworkRollupDetail = data.networkRollupDetail as NetworkRollupDetail;
-        if (any(propEq('id', networkRollupDetail.networkId), this.networks)) {
+        if (any(propEq('id', networkRollupDetail.networkId), networks)) {
             const updatedNetwork: Network = find(
                 propEq('id', networkRollupDetail.networkId),
-                this.networks,
+                networks,
             ) as Network;
             updatedNetwork.status = networkRollupDetail.status;
             updatedNetwork.networkDataAssignmentPercentage = data.percentage as number;
 
-            this.networks = update(
-                findIndex(propEq('id', updatedNetwork.id), this.networks),
+            networks = update(
+                findIndex(propEq('id', updatedNetwork.id), networks),
                 updatedNetwork,
-                this.networks,
+                networks,
             );
         }
     }
-    beforeDestroy() {
-        this.$statusHub.$off(
+
+    onBeforeUnmount(() => beforeDestroy); 
+    function beforeDestroy() {
+        $statusHub.$off(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
+            getDataAggregationStatus,
         );
     }
-}
+
 </script>
 
 <style scoped>

@@ -46,10 +46,9 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+<script lang="ts" setup>
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {TargetConditionGoalLibraryUser } from '@/shared/models/iAM/target-condition-goal';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -61,34 +60,37 @@ import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {TargetConditionGoalLibraryUserGridRow, ShareTargetConditionGoalLibraryDialogData } from '@/shared/models/modals/share-target-condition-goals-data';
 import TargetConditionGoalService from '@/services/target-condition-goal.service';
 import { http2XX } from '@/shared/utils/http-utils';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class ShareTargetConditionGoalLibraryDialog extends Vue {
-  @Prop() dialogData: ShareTargetConditionGoalLibraryDialogData;
+  let store = useStore();
+  const emit = defineEmits(['submit'])
+  const props = defineProps<{dialogData: ShareTargetConditionGoalLibraryDialogData}>()
 
-  @State(state => state.userModule.users) stateUsers: User[];
+  let stateUsers = ref<User[]>(store.state.userModule.users);
 
-  targetConditionGoalLibraryUserGridHeaders: DataTableHeader[] = [
+  let targetConditionGoalLibraryUserGridHeaders: DataTableHeader[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  targetConditionGoalLibraryUserGridRows: TargetConditionGoalLibraryUserGridRow[] = [];
-  currentUserAndOwner: TargetConditionGoalLibraryUser[] = [];
-  searchTerm: string = '';
+  let targetConditionGoalLibraryUserGridRows: TargetConditionGoalLibraryUserGridRow[] = [];
+  let currentUserAndOwner: TargetConditionGoalLibraryUser[] = [];
+  let searchTerm: string = '';
+  
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    if (this.dialogData.showDialog) {
-      this.onSetGridData();
-      this.onSetUsersSharedWith();
+  watch(()=> props.dialogData, () => onDialogDataChanged)
+  function onDialogDataChanged() {
+    if (props.dialogData.showDialog) {
+      onSetGridData();
+      onSetUsersSharedWith();
     }
   }
 
-  onSetGridData() {
+  function onSetGridData() {
     const currentUser: string = getUserName();
 
-    this.targetConditionGoalLibraryUserGridRows = this.stateUsers
+    targetConditionGoalLibraryUserGridRows = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -98,10 +100,10 @@ export default class ShareTargetConditionGoalLibraryDialog extends Vue {
         }));
   }
 
-    onSetUsersSharedWith() {
+    function onSetUsersSharedWith() {
         // Target Condition Goal library users
         let targetConditionGoalLibraryUsers: TargetConditionGoalLibraryUser[] = [];
-        TargetConditionGoalService.getTargetConditionGoalLibraryUsers(this.dialogData.targetConditionGoalLibrary.id).then(response => {
+        TargetConditionGoalService.getTargetConditionGoalLibraryUsers(props.dialogData.targetConditionGoalLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -130,18 +132,18 @@ export default class ShareTargetConditionGoalLibraryDialog extends Vue {
                 const isCurrentUserOrOwner = (targetConditionGoalLibraryUser: TargetConditionGoalLibraryUser) => targetConditionGoalLibraryUser.username === currentUser || targetConditionGoalLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (targetConditionGoalLibraryUser: TargetConditionGoalLibraryUser) => targetConditionGoalLibraryUser.username !== currentUser && !targetConditionGoalLibraryUser.isOwner;
 
-                this.currentUserAndOwner = filter(isCurrentUserOrOwner, targetConditionGoalLibraryUsers) as TargetConditionGoalLibraryUser[];
+                currentUserAndOwner = filter(isCurrentUserOrOwner, targetConditionGoalLibraryUsers) as TargetConditionGoalLibraryUser[];
                 const otherUsers: TargetConditionGoalLibraryUser[] = filter(isNotCurrentUserOrOwner, targetConditionGoalLibraryUsers) as TargetConditionGoalLibraryUser[];
 
                 otherUsers.forEach((targetConditionGoalLibraryUser: TargetConditionGoalLibraryUser) => {
-                    if (any(propEq('id', targetConditionGoalLibraryUser.userId), this.targetConditionGoalLibraryUserGridRows)) {
+                    if (any(propEq('id', targetConditionGoalLibraryUser.userId), targetConditionGoalLibraryUserGridRows)) {
                         const targetConditionGoalLibraryUserGridRow: TargetConditionGoalLibraryUserGridRow = find(
-                            propEq('id', targetConditionGoalLibraryUser.userId), this.targetConditionGoalLibraryUserGridRows) as TargetConditionGoalLibraryUserGridRow;
+                            propEq('id', targetConditionGoalLibraryUser.userId), targetConditionGoalLibraryUserGridRows) as TargetConditionGoalLibraryUserGridRow;
 
-                        this.targetConditionGoalLibraryUserGridRows = update(
-                            findIndex(propEq('id', targetConditionGoalLibraryUser.userId), this.targetConditionGoalLibraryUserGridRows),
+                        targetConditionGoalLibraryUserGridRows = update(
+                            findIndex(propEq('id', targetConditionGoalLibraryUser.userId), targetConditionGoalLibraryUserGridRows),
                             { ...targetConditionGoalLibraryUserGridRow, isShared: true, canModify: targetConditionGoalLibraryUser.canModify },
-                            this.targetConditionGoalLibraryUserGridRows
+                            targetConditionGoalLibraryUserGridRows
                         );
                     }
                 });
@@ -149,26 +151,26 @@ export default class ShareTargetConditionGoalLibraryDialog extends Vue {
         });
   }
 
-  removeUserModifyAccess(userId: string, isShared: boolean) {
+  function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      this.targetConditionGoalLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), this.targetConditionGoalLibraryUserGridRows),
-          'canModify', false, this.targetConditionGoalLibraryUserGridRows);
+      targetConditionGoalLibraryUserGridRows = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), targetConditionGoalLibraryUserGridRows),
+          'canModify', false, targetConditionGoalLibraryUserGridRows);
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.getTargetConditionGoalLibraryUsers());
+      emit('submit', getTargetConditionGoalLibraryUsers());
     } else {
-      this.$emit('submit', null);
+       emit('submit', null);
     }
 
-    this.targetConditionGoalLibraryUserGridRows = [];
+    targetConditionGoalLibraryUserGridRows = [];
   }
 
-  getTargetConditionGoalLibraryUsers() {
-    const usersSharedWith: TargetConditionGoalLibraryUser[] = this.targetConditionGoalLibraryUserGridRows
+  function getTargetConditionGoalLibraryUsers() {
+    const usersSharedWith: TargetConditionGoalLibraryUser[] = targetConditionGoalLibraryUserGridRows
         .filter((targetConditionGoalLibraryUserGridRow: TargetConditionGoalLibraryUserGridRow) => targetConditionGoalLibraryUserGridRow.isShared)
         .map((targetConditionGoalLibraryUserGridRow: TargetConditionGoalLibraryUserGridRow) => ({
           userId: targetConditionGoalLibraryUserGridRow.id,
@@ -177,9 +179,9 @@ export default class ShareTargetConditionGoalLibraryDialog extends Vue {
           isOwner: false
         }));
 
-    return [...this.currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner, ...usersSharedWith];
   }
-}
+
 </script>
 
 <style>

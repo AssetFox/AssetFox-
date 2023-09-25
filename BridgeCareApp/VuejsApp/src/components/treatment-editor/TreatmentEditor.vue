@@ -574,6 +574,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     let confirmBeforeDeleteTreatmentAlertData: AlertData = clone(emptyAlertData);
     let isNoTreatmentSelected: boolean = false;
     let hasImport: boolean = false;
+    let modifiedDate: string = '';
 
     let deletionIds: ShallowRef<string[]> = ref([]);
     let addedRows: Treatment[] = [];
@@ -809,6 +810,11 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             else if(!isNil(treatment))
                 selectedTreatment = clone(treatment);
             else
+                 selectedTreatment = clone(emptyTreatment);
+                 if (!keepActiveTab) {
+                     activeTab = 0;
+                    }
+                keepActiveTab = true;
                 TreatmentService.getScenarioSelectedTreatmentById(treatmentSelectItemValue).then((response: AxiosResponse) => {
                     if(hasValue(response, 'data')) {
                         var data = response.data as Treatment;
@@ -818,14 +824,8 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                     }
                 })
         }
-        else
-            selectedTreatment = clone(emptyTreatment);
-       
-        if (!keepActiveTab) {
-            activeTab = 0;
-        }
-        keepActiveTab = true;
-    }
+   
+    
 
     watch('selectedTreatment', () => onSelectedTreatmentChanged())
     function onSelectedTreatmentChanged() {
@@ -838,6 +838,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             criterionLibrary: selectedTreatment.criterionLibrary,
             category: selectedTreatment.category,
             assetType: selectedTreatment.assetType,
+            isUnselectable: selectedTreatment.isUnselectable,
         };
 
         isNoTreatmentSelected = selectedTreatment.name == 'No Treatment';

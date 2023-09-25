@@ -251,6 +251,7 @@ import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData
     function onSelectedTreatmentDetailsChanged(){
         treatmentCategoryBinding = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;
         assetTypeBinding = assetTypeReverseMap.get(selectedTreatmentDetails.value.assetType)!;
+        TreatmentIsUnSelectable = selectedTreatmentDetails.isUnselectable
     }
 
     function onShowTreatmentCriterionEditorDialog() {

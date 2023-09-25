@@ -231,7 +231,7 @@ import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData
     let  rules: InputValidationRules;
     let  callFromScenario: boolean;
     let  callFromLibrary: boolean;
-    let TreatmentIsUnSelectable: boolean = false;
+    let TreatmentIsUnSelectable = ref<boolean>(store.state.TreatmentDetailsTab.TreatmentIsUnSelectable);
 
 
 
@@ -251,8 +251,21 @@ import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData
     function onSelectedTreatmentDetailsChanged(){
         treatmentCategoryBinding = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;
         assetTypeBinding = assetTypeReverseMap.get(selectedTreatmentDetails.value.assetType)!;
-        TreatmentIsUnSelectable = selectedTreatmentDetails.value.isUnselectable;
+        TreatmentIsUnSelectable.value = selectedTreatmentDetails.value.isUnselectable;
     }
+
+    watch(TreatmentIsUnSelectable, () => onToggleIsUnSelectable)
+    function onToggleIsUnSelectable(value: boolean) {
+        console.log('onToggleIsUnSelectable called with value:', value);
+                emit(
+                'onModifyTreatmentDetails',
+                 setItemPropertyValue(
+                 'isUnselectable',
+                 value,
+                selectedTreatmentDetails,
+    ),
+  );
+}
 
     function onShowTreatmentCriterionEditorDialog() {
         treatmentCriterionEditorDialogData = {

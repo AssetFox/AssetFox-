@@ -7,7 +7,7 @@
                               class='elevation-1 fixed-header v-table__overflow'
                               sort-icon=$vuetify.icons.ghd-table-sort
                               hide-actions>
-                    <template slot='items' slot-scope='props'>
+                    <template slot='items' slot-scope='props' v-slot:items="props">
                         <td v-for='header in consequencesGridHeaders'>
                             <v-edit-dialog
                                 v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
@@ -117,12 +117,12 @@
     </v-layout>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { State } from 'vuex-class';
-import { clone, isNil } from 'ramda';
+<script lang='ts' setup>
+import Vue, { shallowRef } from 'vue';
+import { any, clone, isNil } from 'ramda';
 import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
+import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
 import { emptyConsequence, TreatmentConsequence } from '@/shared/models/iAM/treatment';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import {
@@ -141,112 +141,109 @@ import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
-@Component({
-    components: {
-        GeneralCriterionEditorDialog,
-        ConsequenceEquationEditorDialog: EquationEditorDialog,
-    },
-})
-export default class ConsequencesTab extends Vue {
-    @Prop() selectedTreatmentConsequences: TreatmentConsequence[];
-    @Prop() rules: InputValidationRules;
-    @Prop() callFromScenario: boolean;
-    @Prop() callFromLibrary: boolean;
+    let selectedTreatmentConsequences = shallowRef<TreatmentConsequence[]>();
+    let rules: InputValidationRules;
+    let callFromScenario: boolean;
+    let callFromLibrary: boolean;
+    const emit = defineEmits(['submit', 'onAddConsequence', 'onModifyConsequence', 'onRemoveConsequence'])
+    let store = useStore();
 
-    @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+    let stateAttributes = ref<Attribute[]>(store.state.attributeModule.attributes);
+    
 
-    consequencesGridHeaders: DataTableHeader[] = [
+    let consequencesGridHeaders: DataTableHeader[] = [
         { text: 'Attribute', value: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
         { text: 'Change Value', value: 'changeValue', align: 'left', sortable: false, class: '', width: '125px' },
         { text: 'Equation', value: 'equation', align: 'left', sortable: false, class: '', width: '125px' },
         { text: 'Criteria', value: 'criterionLibrary', align: 'left', sortable: false, class: '', width: '125px' },
         { text: 'Actions', value: '', align: 'left', sortable: false, class: '', width: '100px' },
     ];
-    consequencesGridData: TreatmentConsequence[] = [];
-    consequenceEquationEditorDialogData: EquationEditorDialogData = clone(emptyEquationEditorDialogData);
-    consequenceCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
-    selectedConsequenceForEquationOrCriteriaEdit: TreatmentConsequence = clone(emptyConsequence);
-    attributeSelectItems: SelectItem[] = [];
-    uuidNIL: string = getBlankGuid();
+    let consequencesGridData = shallowRef<TreatmentConsequence[]>();
+    let consequenceEquationEditorDialogData: EquationEditorDialogData = clone(emptyEquationEditorDialogData);
+    let consequenceCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+    let selectedConsequenceForEquationOrCriteriaEdit: TreatmentConsequence = clone(emptyConsequence);
+    let attributeSelectItems: SelectItem[] = [];
+    let uuidNIL: string = getBlankGuid();
 
-    mounted() {
-        this.setAttributeSelectItems();
+   created();
+   function created() {
+        setAttributeSelectItems();
     }
 
-    @Watch('selectedTreatmentConsequences')
-    onSelectedTreatmentConsequencesChanged() {
-        this.consequencesGridData = clone(this.selectedTreatmentConsequences);
+    watch(selectedTreatmentConsequences, () => onSelectedTreatmentConsequencesChanged)
+     async function onSelectedTreatmentConsequencesChanged() {
+        consequencesGridData = clone(selectedTreatmentConsequences);
     }
 
-    @Watch('stateAttributes')
-    onStateAttributesChanged() {
-        this.setAttributeSelectItems();
+    watch(stateAttributes, () => onStateAttributesChanged)
+     async function onStateAttributesChanged() {
+        setAttributeSelectItems();
     }
 
-    setAttributeSelectItems() {
-        if (hasValue(this.stateAttributes)) {
-            this.attributeSelectItems = this.stateAttributes.map((attribute: Attribute) => ({
+    function setAttributeSelectItems() {
+        if (hasValue(stateAttributes)) {
+            attributeSelectItems = stateAttributes.value.map((attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name,
             }));
         }
     }
 
-    onAddConsequence() {
+    function onAddConsequence() {
         const newConsequence: TreatmentConsequence = { ...emptyConsequence, id: getNewGuid() };
-        this.$emit('onAddConsequence', newConsequence);
+        emit('onAddConsequence', newConsequence);
     }
 
-    onEditConsequenceProperty(consequence: TreatmentConsequence, property: string, value: any) {
-        this.$emit('onModifyConsequence', setItemPropertyValue(property, value, consequence));
+    function onEditConsequenceProperty(consequence: TreatmentConsequence, property: string, value: any) {
+        emit('onModifyConsequence', setItemPropertyValue(property, value, consequence));
     }
 
-    onShowConsequenceEquationEditorDialog(consequence: TreatmentConsequence) {
-        this.selectedConsequenceForEquationOrCriteriaEdit = clone(consequence);
+    function onShowConsequenceEquationEditorDialog(consequence: TreatmentConsequence) {
+        selectedConsequenceForEquationOrCriteriaEdit = clone(consequence);
 
-        this.consequenceEquationEditorDialogData = {
+        consequenceEquationEditorDialogData = {
             showDialog: true,
             equation: clone(consequence.equation),
         };
     }
 
-    onSubmitConsequenceEquationEditorDialogResult(equation: Equation) {
-        this.consequenceEquationEditorDialogData = clone(emptyEquationEditorDialogData);
+    function onSubmitConsequenceEquationEditorDialogResult(equation: Equation) {
+        consequenceEquationEditorDialogData = clone(emptyEquationEditorDialogData);
 
-        if (!isNil(equation) && this.selectedConsequenceForEquationOrCriteriaEdit.id !== this.uuidNIL) {
-            this.$emit('onModifyConsequence', setItemPropertyValue('equation', equation, this.selectedConsequenceForEquationOrCriteriaEdit));
+        if (!isNil(equation) && selectedConsequenceForEquationOrCriteriaEdit.id !== uuidNIL) {
+            emit('onModifyConsequence', setItemPropertyValue('equation', equation, selectedConsequenceForEquationOrCriteriaEdit));
         }
 
-        this.selectedConsequenceForEquationOrCriteriaEdit = clone(emptyConsequence);
+        selectedConsequenceForEquationOrCriteriaEdit = clone(emptyConsequence);
     }
 
-    onShowConsequenceCriterionEditorDialog(consequence: TreatmentConsequence) {
-        this.selectedConsequenceForEquationOrCriteriaEdit = clone(consequence);
+    function onShowConsequenceCriterionEditorDialog(consequence: TreatmentConsequence) {
+        selectedConsequenceForEquationOrCriteriaEdit = clone(consequence);
 
-        this.consequenceCriterionEditorDialogData = {
+        consequenceCriterionEditorDialogData = {
             showDialog: true,
             CriteriaExpression: consequence.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onSubmitConsequenceCriterionEditorDialogResult(criterionExpression: string) {
-        this.consequenceCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+    function onSubmitConsequenceCriterionEditorDialogResult(criterionExpression: string) {
+        consequenceCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionExpression) && this.selectedConsequenceForEquationOrCriteriaEdit.id !== this.uuidNIL) {
-            if(this.selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary.id === getBlankGuid())
-                this.selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary.id = getNewGuid();
-            this.$emit('onModifyConsequence', setItemPropertyValue('criterionLibrary', 
-            {...this.selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary, 
-            this.selectedConsequenceForEquationOrCriteriaEdit));
+        if (!isNil(criterionExpression) && selectedConsequenceForEquationOrCriteriaEdit.id !== uuidNIL) {
+            if(selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary.id = getNewGuid();
+            emit('onModifyConsequence', setItemPropertyValue('criterionLibrary', 
+            {...selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary, 
+            selectedConsequenceForEquationOrCriteriaEdit));
         }
 
-        this.selectedConsequenceForEquationOrCriteriaEdit = clone(emptyConsequence);
+        selectedConsequenceForEquationOrCriteriaEdit = clone(emptyConsequence);
     }
 
-    onRemoveConsequence(consequenceId: string) {
-        this.$emit('onRemoveConsequence', consequenceId);
+    function onRemoveConsequence(consequenceId: string) {
+        emit('onRemoveConsequence', consequenceId);
     }
-}
+
 </script>
 
 <style>

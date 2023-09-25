@@ -24,60 +24,64 @@
     </v-dialog>
 </template>
 
-<script lang='ts'>
+<script lang='ts' setup>
 import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action } from 'vuex-class';
+import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/import-export-treatments-dialog-result';
 import {clone} from 'ramda';
+import { useStore } from 'vuex';
 import TreatmentsFileSelector from '@/shared/components/FileSelector.vue';
 
-@Component({
-    components: { TreatmentsFileSelector }
-})
-export default class ImportExportTreatmentsDialog extends Vue {
-    @Prop() showDialog: boolean;
+    const props = defineProps<{showDialog: Boolean}>()
+    const showDialog = props.showDialog;
 
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setIsBusy') setIsBusyAction: any;
+    async function addErrorNotificationAction(payload?: any): Promise<any> {
+        await store.dispatch('addErrorNotification');
+    }
 
-    TreatmentsFile: File | null = null;
-    overwriteBudgets: boolean = true;
-    closed: boolean = false;
+    async function setIsBusyAction(payload?: any): Promise<any> {
+        await store.dispatch('setIsBusy');
+    }   
 
-    @Watch('showDialog')
-    onShowDialogChanged() {
-        if (this.showDialog) {
-            this.closed = false;
+    let TreatmentsFile: File | null = null;
+    let overwriteBudgets: boolean = true;
+    let closed: boolean = false;
+    let store = useStore();
+    const emit = defineEmits(['submit'])
+
+    watch(showDialog, () => onShowDialogChanged)
+    async function onShowDialogChanged() {
+        if (showDialog) {
+            closed = false;
         } else {
-            this.TreatmentsFile = null;
-            this.closed = true;
+            TreatmentsFile = null;
+            closed = true;
         }
     }
 
     /**
      * FileSelector submit event handler
      */
-    onFileSelectorChange(file: File) {
-        this.TreatmentsFile = hasValue(file) ? clone(file) : null;
+    function onFileSelectorChange(file: File) {
+        TreatmentsFile = hasValue(file) ? clone(file) : null;
     }
 
     /**
      * Dialog submit event handler
      */
-    onSubmit(submit: boolean, isExport: boolean = false) {
+    function onSubmit(submit: boolean, isExport: boolean = false) {
         if (submit) {
             const result: ImportExportTreatmentsDialogResult = {
-                file: this.TreatmentsFile as File,
+                file: TreatmentsFile as File,
                 isExport: isExport
             };
-            this.$emit('submit', result);
+            emit('submit', result);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
     }
-}
+
 </script>
 <style scoped>
 .div-padding {

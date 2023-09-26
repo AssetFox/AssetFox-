@@ -161,10 +161,8 @@
     </v-layout>
 </template>
 
-<script lang='ts'>
+<script setup lang='ts'>
 import Vue from 'vue';
-import { Action, State } from 'vuex-class';
-import Component from 'vue-class-component';
 import { clone, update, find, findIndex, propEq } from 'ramda';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
@@ -180,37 +178,33 @@ import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { Report, emptyReport } from '@/shared/models/iAM/reports';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
+import { useStore } from 'vuex';
+    let store = useStore();
+    let stateSimulationReportNames: string[] = (store.state.adminDataModule.simulationReportNames) ;
 
-@Component({
-    components: { GeneralCriterionEditorDialog },
-})
-export default class ReportsAndOutputs extends Vue {
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification');} 
+    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification');} 
+    async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports');} 
 
-    @State(state => state.adminDataModule.simulationReportNames) stateSimulationReportNames: string[];
+    let initializedBudgets: boolean = false;
 
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('getSimulationReports') getSimulationReportsAction: any;
+    let simulationName: string;
+    let networkName: string = '';
+    let networkId: string = getBlankGuid();
+    let selectedScenarioId: string = getBlankGuid();
 
-    initializedBudgets: boolean = false;
+    let rules: InputValidationRules = clone(validationRules);
 
-    simulationName: string;
-    networkName: string = '';
-    networkId: string = getBlankGuid();
-    selectedScenarioId: string = getBlankGuid();
-
-    rules: InputValidationRules = clone(rules);
-
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
         emptyGeneralCriterionEditorDialogData,
     );
-    currentPage: Report[] = [];
-    reports: SelectItem[] = [];   
-    selectedReport: Report = emptyReport; 
+    let currentPage: Report[] = [];
+    let reports: SelectItem[] = [];   
+    let selectedReport: Report = emptyReport; 
 
-    reportsGridHeaders: DataTableHeader[] = [
+    let reportsGridHeaders: DataTableHeader[] = [
         {
             text: 'Name',
             value: 'name',
@@ -237,15 +231,15 @@ export default class ReportsAndOutputs extends Vue {
         },
     ];
 
-    mounted() {
-        this.getSimulationReportsAction().then(() => {
-            const reports: string[] = clone(this.stateSimulationReportNames)
-            this.reports = reports.map(rep => {
+    function mounted() {
+        getSimulationReportsAction().then(() => {
+            const stateReports: string[] = clone(stateSimulationReportNames)
+            reports = stateReports.map(rep => {
                 return {text: rep, value: rep}
             })
 
-            this.stateSimulationReportNames.forEach(reportName => {
-                this.currentPage.push({
+            stateSimulationReportNames.forEach(reportName => {
+                currentPage.push({
                     id: getNewGuid(),
                     name: reportName,
                     mergedExpression: ""
@@ -255,13 +249,13 @@ export default class ReportsAndOutputs extends Vue {
             // newReport.name = "Report 1";
             // newReport.id = getBlankGuid();
             // newReport.mergedExpression = "";
-            // this.currentPage.push(newReport);
+            // currentPage.push(newReport);
 
-            if(reports.length > 0)
-                this.selectedReport = this.currentPage[0];// reports[0];
+            if(stateReports.length > 0)
+                selectedReport = currentPage[0];// reports[0];
         });
     }
-    beforeRouteEnter(to: any, from: any, next: any) {
+    function beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.selectedScenarioId = to.query.scenarioId;
             vm.simulationName = to.query.scenarioName;
@@ -276,43 +270,43 @@ export default class ReportsAndOutputs extends Vue {
             }
         });
     }
-    onShowCriterionEditorDialog(reportId: string) {
+    function onShowCriterionEditorDialog(reportId: string) {
 
-        this.selectedReport = find(
+        selectedReport = find(
             propEq('id', reportId),
-            this.currentPage,
+            currentPage,
         ) as Report;
 
-        this.criterionEditorDialogData = {
+        criterionEditorDialogData = {
             showDialog: true,
-            CriteriaExpression: this.selectedReport.mergedExpression,
+            CriteriaExpression: selectedReport.mergedExpression,
         };
     }
-    onCriterionEditorDialogSubmit(criterionexpression: string) {
-        this.criterionEditorDialogData = clone(
+    function onCriterionEditorDialogSubmit(criterionexpression: string) {
+        criterionEditorDialogData = clone(
             emptyGeneralCriterionEditorDialogData,
         );
-        this.currentPage = update(
+        currentPage = update(
             findIndex(
-                propEq('id', this.selectedReport.id), this.currentPage), { ...this.selectedReport, mergedExpression: criterionexpression}, this.currentPage,
+                propEq('id', selectedReport.id), currentPage), { ...selectedReport, mergedExpression: criterionexpression}, currentPage,
             );
     }
-    async onDownloadSimulationLog(download: boolean) {
+    async function onDownloadSimulationLog(download: boolean) {
         if (download) {            
             await ReportsService.downloadSimulationLog(
-                this.networkId,
-                this.selectedScenarioId,
+                networkId,
+                selectedScenarioId,
             ).then((response: AxiosResponse<any>) => {
                 if (hasValue(response, 'data')) {
-                    this.addSuccessNotificationAction({
+                    addSuccessNotificationAction({
                         message: 'Report downloaded',
                     });
                     FileDownload(
                         response.data,
-                        `Simulation Log ${this.simulationName}.txt`,
+                        `Simulation Log ${simulationName}.txt`,
                     );
                 } else {
-                    this.addErrorNotificationAction({
+                    addErrorNotificationAction({
                         message: 'Failed to download simulation log.',
                         longMessage:
                             'Failed to download simulation log. Please try generating and downloading the log again.',
@@ -321,28 +315,28 @@ export default class ReportsAndOutputs extends Vue {
             });
         } 
     }
-    async onGenerateReport(reportId: string, download: boolean) {
+    async function onGenerateReport(reportId: string, download: boolean) {
         if (download) {            
             // Get the selected report
-            this.selectedReport = find(
+            selectedReport = find(
                 propEq('id', reportId),
-                this.currentPage,
+                currentPage,
             ) as Report;
             // Generate report with selected one from table
             await ReportsService.generateReportWithCriteria(
-                this.selectedScenarioId, this.selectedReport.mergedExpression, this.selectedReport.name
+                selectedScenarioId, selectedReport.mergedExpression, selectedReport.name
             ).then((response: AxiosResponse<any>) => {
                 if (response.status == 200) {
                     if (hasValue(response, 'data')) {
                         const resultId: string = response.data as string;
-                        this.reportIndexID = resultId;
+                        reportIndexID = resultId;
                     }
-                    this.addSuccessNotificationAction({
-                        message: this.selectedReport.name +  ' report generation started for ' + this.simulationName + '.',
+                    addSuccessNotificationAction({
+                        message: selectedReport.name +  ' report generation started for ' + simulationName + '.',
                     });
                 } else {
-                    this.addErrorNotificationAction({
-                        message: 'Failed to generate apricot for ' + this.simulationName + '.',
+                    addErrorNotificationAction({
+                        message: 'Failed to generate apricot for ' + simulationName + '.',
                         longMessage:
                             'Failed to generate the report or output. Make sure the scenario has been run',
                     });
@@ -351,20 +345,19 @@ export default class ReportsAndOutputs extends Vue {
         }
     }
 
-    async onDownloadReport(reportId: string) {        
-
-        this.selectedReport = find(
+    async function onDownloadReport(reportId: string) {        
+        selectedReport = find(
             propEq('id', reportId),
-            this.currentPage,
+            currentPage,
         ) as Report;
         await ReportsService.downloadReport(
-            this.selectedScenarioId, this.selectedReport.name
+            selectedScenarioId, selectedReport.name
         ).then((response: AxiosResponse<any>) => {
             if (hasValue(response, 'data')) {
                 const fileInfo: FileInfo = response.data as FileInfo;
                 FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
             } else {
-                this.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'Failed to download report.',
                     longMessage:
                         'Failed to download the report or output. Make sure the scenario has been run',
@@ -372,7 +365,7 @@ export default class ReportsAndOutputs extends Vue {
             }
         });
     }
-}
+
 </script>
 <style>
 </style>

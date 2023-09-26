@@ -61,7 +61,7 @@ namespace BridgeCareCore.Services.SimulationCloning
                 DeficientConditionGoals = cloneDeficientConditionGoal,
                 Budgets = cloneBudget,
                 CommittedProjects = cloneBaseCommittedProject,
-                Id = cloneRequest.Id,
+                Id = Guid.NewGuid(),
                 Users = users,
             };
             return clone;

@@ -192,7 +192,7 @@ import { useStore } from 'vuex';
     text-decoration: none;
 }
 
-.primary--text .library-icon{
+.text-primary .library-icon{
     fill: #FFFFFF !important;
 }
 
@@ -200,7 +200,7 @@ import { useStore } from 'vuex';
     fill: #999999 !important;
 }
 
-.primary--text .library-icon-stroke{
+.text-primary .library-icon-stroke{
     stroke: #FFFFFF !important;
 }
 

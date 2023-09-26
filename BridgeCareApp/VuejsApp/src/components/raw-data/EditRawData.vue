@@ -165,7 +165,7 @@ import { useStore } from 'vuex';
     visibility: hidden !important;
 }
 
-.primary--text .raw-data-icon{
+.text-primary .raw-data-icon{
     stroke: #FFFFFF !important;
 }
 
@@ -177,7 +177,7 @@ import { useStore } from 'vuex';
     fill: #FFFFFF;
 }
 
-.primary--text .raw-data-svg-fill {
+.text-primary .raw-data-svg-fill {
     fill: #2A578D;
 }
 </style>

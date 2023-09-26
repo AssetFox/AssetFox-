@@ -35,7 +35,7 @@
                           <div>
                             <v-list>
                               <template>
-                                <v-subheader class="equation-list-subheader">Attributes: Click to add</v-subheader>
+                                <v-list-subheader class="equation-list-subheader">Attributes: Click to add</v-list-subheader>
                                 <div class="attributes-list-container">
                                   <template v-for="(attribute, index) in attributesList" :key="attribute">
                                     <v-list-tile 

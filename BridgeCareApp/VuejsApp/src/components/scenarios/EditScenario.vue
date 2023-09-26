@@ -440,7 +440,7 @@ import { useRouter } from 'vue-router';
 }
 
 
-.primary--text .scenario-icon{
+.text-primary .scenario-icon{
     fill: #FFFFFF !important;
 }
 
@@ -448,7 +448,7 @@ import { useRouter } from 'vue-router';
     fill: #999999 !important;
 }
 
-.primary--text .scenario-icon-stroke{
+.text-primary .scenario-icon-stroke{
     stroke: #FFFFFF !important;
 }
 

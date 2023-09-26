@@ -347,12 +347,12 @@ v-list-item.ghd-control-text {
 
 
 /* Navigation List */
-.ghd-navigation-list .primary--text {
+.ghd-navigation-list .text-primary {
     background-color: #2A578D !important;
     color: #FFFFFF !important;
 }
 
-.ghd-navigation-list .primary--text .v-icon {
+.ghd-navigation-list .text-primary .v-icon {
     background-color: #2A578D !important;
     color: #FFFFFF !important;
 }
@@ -362,7 +362,7 @@ v-list-item.ghd-control-text {
     color: #999999 ! important;
 }
 
-.ghd-navigation-rawdata-list .primary--text {
+.ghd-navigation-rawdata-list .text-primary {
     background-color: #FFFFFF !important;
     color: black !important;
 }

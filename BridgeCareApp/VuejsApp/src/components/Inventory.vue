@@ -99,6 +99,7 @@
         @Watch('inventoryItems')
         async onInventoryItemsChanged() {
             this.keyAttributeValues = await this.setupSelectLists();
+            console.log(this.keyAttributeValues);
         }
 
         @Watch('staticHTMLForInventory')
@@ -186,95 +187,46 @@
             };
             let toReturn: string[][] = [];
             let result = await this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])  
-            if(result.keys.length > 0 && this.reportType === 'P'){
                 for(let i = 0; i < this.inventoryDetails.length; i++){
                     toReturn[i] = clone(result.keys[i]);
                 }
-            }
-            else{
-                for(let i = 0; i < 1; i++){
-                    toReturn[i] = clone(result.keys[i]);
-                }
-            }
             return toReturn;                  
         }
 
         initializeLists() {
-            if(this.reportType === 'P') {
+                this.inventorySelectListsWorker = this.$worker.create(
+                    [
+                        {
+                            message: 'setInventorySelectLists', func: (data: any) => {
+                                if (data) {
+                                    
+                                    const inventoryItems = data.inventoryItems;
 
-            this.inventorySelectListsWorker = this.$worker.create(
-                [
-                    {
-                        message: 'setInventorySelectLists', func: (data: any) => {
-                            if (data) {
-                                
-                                const inventoryItems = data.inventoryItems;
-
-                                const keys: any[][] = []
-                                inventoryItems.forEach((item: InventoryItem, index: number) => {
-                                    if (index === 0) { 
+                                    const keys: any[][] = []
+                                    inventoryItems.forEach((item: InventoryItem, index: number) => {
+                                        if (index === 0) { 
+                                            for(let i = 0; i < data.inventoryDetails.length; i++){
+                                                keys.push([])
+                                                keys[i].push({header: `${data.inventoryDetails[i]}'s`})
+                                            }
+                                        }                           
+                                        
                                         for(let i = 0; i < data.inventoryDetails.length; i++){
-                                            keys.push([])
-                                            keys[i].push({header: `${data.inventoryDetails[i]}'s`})
+                                            keys[i].push({
+                                                identifier: item.keyProperties[i],
+                                                group: data.inventoryDetails[i]
+                                            })
                                         }
-                                    }                           
-                                    
-                                    for(let i = 0; i < data.inventoryDetails.length; i++){
-                                        keys[i].push({
-                                            identifier: item.keyProperties[i],
-                                            group: data.inventoryDetails[i]
-                                        })
-                                    }
-                                });
-                           
-                                return {keys: keys};
+                                    });
+                            
+                                    return {keys: keys};
+                                }
+                                return  {keys: []};
                             }
-                            return  {keys: []};
                         }
-                    }
-                ]
-            );
-        }
-        else
-        this.initializeRawLists();
+                    ]
+                );
     }
-
-
-        initializeRawLists() {
-            this.inventorySelectListsWorker = this.$worker.create(
-                [
-                    {
-                        message: 'setInventorySelectLists', func: (data: any) => {
-                            if (data) {
-                                
-                                const inventoryItems = data.inventoryItems;
-
-                                const keys: any[][] = []
-                                inventoryItems.forEach((item: InventoryItem, index: number) => {
-                                    if (index === 0) { 
-                                        for(let i = 0; i < 1; i++){
-                                            keys.push([])
-                                            keys[i].push({header: `${data.inventoryDetails[i]}'s`})
-                                        }
-                                    }                           
-                                    
-                                    for(let i = 0; i < 1; i++){
-                                        keys[i].push({
-                                            identifier: item.keyProperties[i],
-                                            group: data.inventoryDetails[i]
-                                        })
-                                    }
-                                });
-                           
-                                return {keys: keys};
-                            }
-                            return  {keys: []};
-                        }
-                    }
-                ]
-            );
-        }
-
 
         async resetDropdowns() {
             this.keyAttributeValues = [];

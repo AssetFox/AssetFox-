@@ -10,7 +10,7 @@
                 <v-list 
                     id = "EditScenario-navigation-vList"
                     class="ghd-navigation-list">
-                    <v-list-item-group
+                    <v-list-item
                         id = "EditScenario-navigation-vlistItemGroup"
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
@@ -33,11 +33,9 @@
                                     <ReportsSvg style="height: 38px; width: 30px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
                                 </v-list-tile-icon>
                             </v-list-tile-action>
-                            <v-list-tile-content>
-                                <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
-                            </v-list-tile-content>
+                            <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
                         </v-list-tile>
-                    </v-list-item-group>
+                    </v-list-item>
                 </v-list>
                 <div style="margin: auto; width: 85%;">
                     <v-btn

@@ -8,9 +8,10 @@
                 style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #999999;"
             >
                 <v-list class="ghd-navigation-list">
-                    <v-list-item-group
+                    <v-list-item
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
+                        :value="navigationTab"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
                         <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
@@ -28,11 +29,9 @@
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="library-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
                                 </v-list-tile-icon>
                             </v-list-tile-action>
-                            <v-list-tile-content>
                                 <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
-                            </v-list-tile-content>
                         </v-list-tile>
-                    </v-list-item-group>
+                    </v-list-item>
                 </v-list>
             </v-card>
             <v-flex xs12 class="ghd-content">

@@ -10,9 +10,10 @@
                     Raw Data
                 </div>
                 <v-list class="ghd-navigation-list">
-                    <v-list-item-group
+                    <v-list-item
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
+                        :value="navigationTab"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
                         <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
@@ -23,11 +24,9 @@
                                     <NetworksSvg  id="EditRawData-networks-button" style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Networks'"/>                            
                                 </v-list-tile-icon>
                             </v-list-tile-action>
-                            <v-list-tile-content>
-                                <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
-                            </v-list-tile-content>
+                            <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>                         
                         </v-list-tile>
-                    </v-list-item-group>
+                    </v-list-item>
                 </v-list>
             </v-card>
             <v-flex xs12 class="ghd-content">

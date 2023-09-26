@@ -9,6 +9,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     {
         private List<AttributeEntity> _attributeLibrary;
         private List<AdminSettingsEntity> _adminSettingsLibrary;
+        private List<AdminSettingsEntity> _failedAdminSettingsLibrary;
         private List<MaintainableAssetLocationEntity> _maintainableAssetLocationLibrary;
 
         public NetworkEntity TestNetwork { get; private set; }
@@ -16,6 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public IQueryable<MaintainableAssetEntity> MaintainableAssetsLibrary => TestNetwork.MaintainableAssets.AsQueryable();
         public IQueryable<AggregatedResultEntity> AggregatedResultsLibrary => TestNetwork.MaintainableAssets.SelectMany(_ => _.AggregatedResults).AsQueryable();
         public IQueryable<AdminSettingsEntity> AdminSettingsLibrary => _adminSettingsLibrary.AsQueryable();
+        public IQueryable<AdminSettingsEntity> FailedAdminSettingsLibrary => _failedAdminSettingsLibrary.AsQueryable();
         public IQueryable<MaintainableAssetLocationEntity> MaintainableAssetLocationLibrary => _maintainableAssetLocationLibrary.AsQueryable();
 
         public TestDataForMaintainableAssetRepo()
@@ -23,6 +25,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             _attributeLibrary = CreateTestAttributes();
             _adminSettingsLibrary = CreateAdminSettingsLibrary();
             TestNetwork = CreateTestNetwork();
+            _failedAdminSettingsLibrary = CreateFalseAdminSettingsLibrary();
         }
 
         private List<AdminSettingsEntity> CreateAdminSettingsLibrary()
@@ -35,8 +38,50 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Value = "BRKEY_,BMSID"
             };
             entities.Add(KeyFields);
+
+            var RawDataKeyFields = new AdminSettingsEntity()
+            {
+                Key = "RawDataKeyFields",
+                Value = "BRKEY_,BMSID"
+            };
+            entities.Add(RawDataKeyFields);
+
+            var inventoryReportKey = new AdminSettingsEntity()
+            {
+                Key = "InventoryReportNames",
+                Value = "BAMSInventoryLookup(P)"
+            };
+            entities.Add(inventoryReportKey);
             return entities;
         }
+
+        private List<AdminSettingsEntity> CreateFalseAdminSettingsLibrary()
+        {
+            var entities = new List<AdminSettingsEntity>();
+            // entities will need to be added here.
+            var KeyFields = new AdminSettingsEntity()
+            {
+                Key = "KeyFields",
+                Value = "BRKEY_,BMSID"
+            };
+            entities.Add(KeyFields);
+
+            var RawDataKeyFields = new AdminSettingsEntity()
+            {
+                Key = "RawDataKeyFields",
+                Value = "BRKEY_,BMSID"
+            };
+            entities.Add(RawDataKeyFields);
+
+            var inventoryReportKey = new AdminSettingsEntity()
+            {
+                Key = "InventoryReportNames",
+                Value = ""
+            };
+            entities.Add(inventoryReportKey);
+            return entities;
+        }
+
 
         private NetworkEntity CreateTestNetwork()
         {

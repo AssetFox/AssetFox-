@@ -251,7 +251,7 @@ namespace BridgeCareCoreTests.Tests
             };
             var cloneSimulationDto = new CloneSimulationDTO
             {
-                SourceScenarioId = simulationId,
+                ScenarioId = simulationId,
                 NetworkId = networkId,
                 ScenarioName = SimulationName,
             };

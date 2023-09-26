@@ -237,7 +237,7 @@ namespace BridgeCareCore.Controllers
                 var result = await Task.Factory.StartNew(() =>
                 {
 
-                    _claimHelper.CheckUserSimulationModifyAuthorization(dto.SourceScenarioId, UserId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(dto.ScenarioId, UserId);
                     var cloneResult =  _completeSimulationCloningService.Clone(dto);
                     return cloneResult;
                 });

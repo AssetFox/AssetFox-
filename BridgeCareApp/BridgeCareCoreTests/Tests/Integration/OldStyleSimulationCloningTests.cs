@@ -47,7 +47,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var cloneSimulationDto = new CloneSimulationDTO
             {
                 NetworkId = _testSimulationToClone.NetworkId,
-                SourceScenarioId = _testSimulationToClone.Id,
+                ScenarioId = _testSimulationToClone.Id,
                 Id = Guid.NewGuid(),
                 ScenarioName = _testSimulationToClone.Name,
             };

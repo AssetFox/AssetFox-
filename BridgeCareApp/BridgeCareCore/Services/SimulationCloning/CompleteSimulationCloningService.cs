@@ -54,7 +54,7 @@ namespace BridgeCareCore.Services.SimulationCloning
         public SimulationCloningResultDTO Clone(CloneSimulationDTO dto)
         {
             // load it
-            var sourceSimulationId = dto.SourceScenarioId.ToString();
+            var sourceSimulationId = dto.ScenarioId.ToString();
             var sourceSimulation = this.GetSimulation(sourceSimulationId);
             var simulationCloningCommittedProjectErrors = new SimulationCloningCommittedProjectErrors();
             var badCommittedProjects = sourceSimulation.CommittedProjects.Where(c => !sourceSimulation.Budgets.Any(b => b.Id == c.ScenarioBudgetId)).ToList();

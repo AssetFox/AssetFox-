@@ -4,7 +4,7 @@
             <v-flex xs12>
                 <v-layout>
                     <v-flex xs10>
-                        <v-layout column v-if='budgets.length === 0'>
+                        <v-layout column v-if='budgets?.values.length === 0'>
                             <h3>Investment Library Not Found</h3>
                             <div>
                                 No investmentModule library data was found for the selected scenario.
@@ -20,7 +20,7 @@
                                           hide-actions
                                           item-key='id' select-all
                                           v-model='selectedBudgets'>
-                                <template slot='items' slot-scope='props'>
+                                <template slot='items' slot-scope='props'  v-slot:items="props">
                                     <td>
                                         <v-checkbox hide-details primary v-model='props.selected' />
                                     </td>
@@ -38,60 +38,65 @@
     </v-container>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
+<script lang='ts' setup>
+import Vue, { shallowRef } from 'vue';
 import { clone, contains } from 'ramda';
+import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import { State } from 'vuex-class';
+import { useStore } from 'vuex';
+
 import { isEqual } from '@/shared/utils/has-unsaved-changes-helper';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 
-@Component
-export default class BudgetsTab extends Vue {
-    @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
 
-    @Prop() selectedTreatmentBudgets: string[];
-    @Prop() addTreatment: boolean;
-    @Prop() fromLibrary: boolean;    
+    const emit = defineEmits(['submit', 'onModifyBudget'])
+    let store = useStore();
+    let stateScenarioSimpleBudgetDetails = ref<SimpleBudgetDetail[]>(store.state.adminDataModule.stateAttributes);
 
-    initializedBudgets: boolean = false;
-    budgetHeaders: DataTableHeader[] = [        
+    let selectedTreatmentBudgets = shallowRef<string[]>();
+    let addTreatment: boolean;
+    let fromLibrary: boolean;    
+
+    let initializedBudgets: boolean = false;
+    let budgetHeaders: DataTableHeader[] = [        
         { text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300' },
     ];
-    budgets: SimpleBudgetDetail[] = [];
-    selectedBudgets: SimpleBudgetDetail[] = [];
+    let budgets = shallowRef<SimpleBudgetDetail[]>();
+    let selectedBudgets = shallowRef<SimpleBudgetDetail[]>();
 
-    @Watch('stateScenarioSimpleBudgetDetails')
-    onStateScenarioInvestmentLibraryChanged() {
-        this.budgets = clone(this.stateScenarioSimpleBudgetDetails);
+   
+
+    watch(stateScenarioSimpleBudgetDetails, () => onStateScenarioInvestmentLibraryChanged)
+     async function onStateScenarioInvestmentLibraryChanged() {
+        budgets.value = clone(stateScenarioSimpleBudgetDetails.value);
     }
 
-    @Watch('selectedTreatmentBudgets')
-    onBudgetsTabDataChanged() {        
-        if ((this.addTreatment || this.fromLibrary) && !this.initializedBudgets) {        
-            this.selectedBudgets = this.budgets;
-            this.initializedBudgets = true;
+    
+    watch(selectedTreatmentBudgets, () => onBudgetsTabDataChanged)
+     async function onBudgetsTabDataChanged() {   
+        if ((addTreatment || fromLibrary) && !initializedBudgets) {        
+            selectedBudgets.value = budgets.value;
+            initializedBudgets = true;
         } else {
-            this.selectedBudgets = this.budgets
-                .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id, this.selectedTreatmentBudgets));
+            selectedBudgets.value = budgets.value!
+                .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id));
         }
     }
 
-    @Watch('selectedBudgets')
-    onSelectedBudgetsChanged() {
-        const selectedBudgetIds: string[] = getPropertyValues('id', this.selectedBudgets) as string[];
-        if (!isEqual(this.selectedTreatmentBudgets, selectedBudgetIds)) {
-            this.$emit('onModifyBudgets', this.selectedBudgets);
+    watch(selectedBudgets, () => onSelectedBudgetsChanged)
+     async function onSelectedBudgetsChanged() { 
+        const selectedBudgetIds: string[] = getPropertyValues('id', selectedBudgets.value!) as string[];
+        if (!isEqual(selectedTreatmentBudgets, selectedBudgetIds)) {
+            emit('onModifyBudget', selectedBudgets.value);
         }
     }
 
-    @Watch('budgets')
-    onBudgetsChanged() {
-        this.selectedBudgets = clone(this.budgets);
+    watch(budgets, () => onBudgetsChanged)
+     async function onBudgetsChanged(){ 
+        selectedBudgets = clone(budgets);
     }
-}
+
 </script>
 
 <style>

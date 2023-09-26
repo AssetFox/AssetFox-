@@ -14,80 +14,81 @@
     </v-container>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
     import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
-    import Vue from 'vue';
-    import {Component} from 'vue-property-decorator';
-    import {Action, State} from 'vuex-class';
+    import Vue, { onMounted, ref } from 'vue';
     import { SecurityTypes } from '@/shared/utils/security-types';
+    import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-    @Component
-    export default class Authentication extends Vue {
-        @State(state => state.authenticationModule.authenticated) authenticated: boolean;
-        @State(state => state.authenticationModule.hasRole) hasRole: boolean;
-        @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-        @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
-        @State(state => state.authenticationModule.securityType) securityType: string;
+    let store = useStore();
+    let authenticated : boolean = store.state.authenticationModule.authenticated;  
+    let hasRole: boolean = store.state.authenticationModule.hasRole;
+    let hasAdminAccess: boolean = store.state.authenticationModule.hasAdminAccess;
+    let currentUserCriteriaFilter: UserCriteriaFilter = store.state.userModule.currentUserCriteriaFilter;
+    let securityType: string = store.state.authenticationModule.securityType;
 
-        @Action('setSuccessMessage') setSuccessMessageAction: any;
-        @Action('setErrorMessage') setErrorMessageAction: any;
-        @Action('getUserTokens') getUserTokensAction: any;
-        @Action('getUserInfo') getUserInfoAction: any;
-        @Action('getAzureAccountDetails') getAzureAccountDetailsAction: any;
-        @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
-        @Action('addErrorNotification') addErrorNotificationAction: any;
+    async function setSuccessMessageAction(payload?: any): Promise<any> {await store.dispatch('setSuccessMessage');}
+    async function setErrorMessageAction(payload?: any): Promise<any> {await store.dispatch('setErrorMessage');}
+    async function getUserTokensAction(payload?: any): Promise<any> {await store.dispatch('getUserTokens');}
+    async function getUserInfoAction(payload?: any): Promise<any> {await store.dispatch('getUserInfo');}
+    async function getAzureAccountDetailsAction(payload?: any): Promise<any> {await store.dispatch('getAzureAccountDetails');}
+    async function getUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('getUserCriteriaFilter');}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 
-        mounted() {
-            const code: string = this.$route.query.code as string;
-            const state: string = this.$route.query.state as string;
+    const $router = useRouter();
 
-            if (this.securityType === SecurityTypes.esec) {
-                // The ESEC login will always redirect the browser to the iam-deploy site.
-                // If the state is set, we know the authentication was started by a local client,
-                // and so we should send the browser back to that client.
-                if (state === 'localhost' + process.env.PORT) {
-                    window.location.href = `http://localhost:${process.env.PORT}/Authentication/?code=${code}`;
-                    return;
-                }
+    onMounted(() => mounted);
+    function mounted() {
+        const code: string = $router.currentRoute.value.query.code as string;
+        const state: string = $router.currentRoute.value.query.state as string;
 
-                this.getUserTokensAction(code).then(() => {
-                    if (!this.authenticated) {
-                        this.onAuthenticationFailure();
-                    } else {
-                        this.getUserInfoAction().then(() => {
-                            this.getUserCriteriaFilterAction().then(() => {
-                                if (!this.hasRole || (!this.currentUserCriteriaFilter.hasAccess && !this.hasAdminAccess)) {
-                                    this.onRoleFailure();
-                                } else {
-                                    this.onAuthenticationSuccess();
-                                }
-                            });
-                        });
-                    }
-                });
+        if (securityType === SecurityTypes.esec) {
+            // The ESEC login will always redirect the browser to the iam-deploy site.
+            // If the state is set, we know the authentication was started by a local client,
+            // and so we should send the browser back to that client.
+            if (state === 'localhost' + process.env.PORT) {
+                window.location.href = `http://localhost:${process.env.PORT}/Authentication/?code=${code}`;
+                return;
             }
 
-        if (this.securityType === SecurityTypes.b2c) {
-            this.getAzureAccountDetailsAction();
-            if (!this.authenticated) {
-                this.onAuthenticationFailure();
+            getUserTokensAction(code).then(() => {
+                if (!authenticated) {
+                    onAuthenticationFailure();
+                } else {
+                    getUserInfoAction().then(() => {
+                        getUserCriteriaFilterAction().then(() => {
+                            if (!hasRole || (!currentUserCriteriaFilter.hasAccess && !hasAdminAccess)) {
+                                onRoleFailure();
+                            } else {
+                                onAuthenticationSuccess();
+                            }
+                        });
+                    });
+                }
+            });
+        }
+
+        if (securityType === SecurityTypes.b2c) {
+            getAzureAccountDetailsAction();
+            if (!authenticated) {
+                onAuthenticationFailure();
             } else {
-                this.onAuthenticationSuccess();
+                onAuthenticationSuccess();
             }
         }
     }
 
-    onAuthenticationSuccess() {
-        this.$router.push('/Scenarios/');
+    function onAuthenticationSuccess() {
+        $router.push('/Scenarios/');
     }
 
-    onAuthenticationFailure() {
-        this.addErrorNotificationAction({ message: 'Authentication failed.' });
-        this.$router.push('/AuthenticationFailure/');
+    function onAuthenticationFailure() {
+        addErrorNotificationAction({ message: 'Authentication failed.' });
+        $router.push('/AuthenticationFailure/');
     }
 
-    onRoleFailure() {
-        this.$router.push('/NoRole/');
+    function onRoleFailure() {
+        $router.push('/NoRole/');
     }
-}
 </script>

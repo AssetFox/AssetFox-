@@ -24,15 +24,9 @@
     </v-container>
 </template>
 
-<script lang="ts">
-    import Vue from 'vue';
-    import {Component} from 'vue-property-decorator';
-
-    @Component
-    export default class NoRole extends Vue {
-        onRequestAccess() {
-            console.error('onRequestAccess() has not been implemented!');
-        }
+<script setup lang="ts">
+    function onRequestAccess() {
+        console.error('onRequestAccess() has not been implemented!');
     }
 </script>
 

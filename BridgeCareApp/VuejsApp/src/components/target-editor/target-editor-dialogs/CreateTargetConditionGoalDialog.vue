@@ -45,84 +45,88 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {State} from 'vuex-class';
+<script lang="ts" setup>
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+
 import {emptyTargetConditionGoal, TargetConditionGoal} from '@/shared/models/iAM/target-condition-goal';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules,} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class CreateTargetConditionGoalDialog extends Vue {
-  @Prop() showDialog: boolean;
-  @Prop() currentNumberOfTargetConditionGoals: number;
+  const props = defineProps<{
+          showDialog: boolean,
+          currentNumberOfTargetConditionGoals:number
+        }>();
 
-  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
+  let store = useStore();
+  const emit = defineEmits(['submit'])
+  let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributes);
 
-  newTargetConditionGoal: TargetConditionGoal = {...emptyTargetConditionGoal, id: getNewGuid()};
-  numericAttributeNames: string[] = [];
-  rules: InputValidationRules = rules;
+  let newTargetConditionGoal: TargetConditionGoal = {...emptyTargetConditionGoal, id: getNewGuid()};
+  let numericAttributeNames = ref<string[]>([]);
+  let rules: InputValidationRules = validationRules;
 
-  mounted() {
-    this.setNumericAttributeNames();
+  onMounted(() => mounted);
+  function mounted() {
+    setNumericAttributeNames();
   }
 
-  @Watch('stateNumericAttributes')
-  onStateNumericAttributesChanged() {
-    this.setNumericAttributeNames();
+  watch(stateNumericAttributes,()=> onStateNumericAttributesChanged)
+  function onStateNumericAttributesChanged() {
+    setNumericAttributeNames();
   }
 
-  @Watch('numericAttributeNames')
-  onNumericAttributeNamesChanged() {
-    this.setNewTargetConditionGoalDefaultValues();
+  watch(numericAttributeNames,()=> onNumericAttributeNamesChanged)
+  function onNumericAttributeNamesChanged() {
+    setNewTargetConditionGoalDefaultValues();
   }
 
-  @Watch('showDialog')
-  onShowDialogChanged() {
-    this.setNewTargetConditionGoalDefaultValues();
+  watch(() => props.showDialog,()=> onShowDialogChanged)
+  function onShowDialogChanged() {
+    setNewTargetConditionGoalDefaultValues();
   }
 
-  @Watch('currentNumberOfTargetConditionGoals')
-  onCurrentNumberOfDeficientConditionGoalsChanged() {
-    this.setNewTargetConditionGoalDefaultValues();
+  watch(() => props.currentNumberOfTargetConditionGoals,()=> onCurrentNumberOfDeficientConditionGoalsChanged)
+  function onCurrentNumberOfDeficientConditionGoalsChanged() {
+    setNewTargetConditionGoalDefaultValues();
   }
 
-  setNewTargetConditionGoalDefaultValues() {
-    if (this.showDialog) {
-      this.newTargetConditionGoal = {
-        ...this.newTargetConditionGoal,
-        attribute: hasValue(this.numericAttributeNames) ? this.numericAttributeNames[0] : '',
-        name: `Unnamed Target Condition Goal ${this.currentNumberOfTargetConditionGoals + 1}`,
-        target: this.currentNumberOfTargetConditionGoals > 0 ? this.currentNumberOfTargetConditionGoals + 1 : 1
+  function setNewTargetConditionGoalDefaultValues() {
+    if (props.showDialog) {
+      newTargetConditionGoal = {
+        ...newTargetConditionGoal,
+        attribute: hasValue(numericAttributeNames.value) ? numericAttributeNames.value[0] : '',
+        name: `Unnamed Target Condition Goal ${props.currentNumberOfTargetConditionGoals + 1}`,
+        target: props.currentNumberOfTargetConditionGoals > 0 ? props.currentNumberOfTargetConditionGoals + 1 : 1
       };
     }
   }
 
-  setNumericAttributeNames() {
-    if (hasValue(this.stateNumericAttributes) && !isEqual(this.numericAttributeNames, this.stateNumericAttributes)) {
-      this.numericAttributeNames = getPropertyValues('name', this.stateNumericAttributes);
+  function setNumericAttributeNames() {
+    if (hasValue(stateNumericAttributes) && !isEqual(numericAttributeNames.value, stateNumericAttributes)) {
+      numericAttributeNames.value = getPropertyValues('name', stateNumericAttributes.value);
     }
   }
 
-  disableSubmitButton() {
-    return !(this.rules['generalRules'].valueIsNotEmpty(this.newTargetConditionGoal.attribute) === true &&
-        this.rules['generalRules'].valueIsNotEmpty(this.newTargetConditionGoal.target) === true &&
-        this.rules['generalRules'].valueIsNotEmpty(this.newTargetConditionGoal.name) === true);
+  function disableSubmitButton() {
+    return !(rules['generalRules'].valueIsNotEmpty(newTargetConditionGoal.attribute) === true &&
+        rules['generalRules'].valueIsNotEmpty(newTargetConditionGoal.target) === true &&
+        rules['generalRules'].valueIsNotEmpty(newTargetConditionGoal.name) === true);
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newTargetConditionGoal);
+      emit('submit', newTargetConditionGoal);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newTargetConditionGoal = {...emptyTargetConditionGoal, id: getNewGuid()};
+    newTargetConditionGoal = {...emptyTargetConditionGoal, id: getNewGuid()};
   }
-}
+
 </script>

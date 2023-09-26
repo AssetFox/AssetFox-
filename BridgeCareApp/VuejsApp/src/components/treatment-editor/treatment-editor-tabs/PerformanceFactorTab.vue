@@ -6,7 +6,7 @@
                               class='elevation-1 fixed-header v-table__overflow'
                               sort-icon=$vuetify.icons.ghd-table-sort
                               hide-actions>
-                    <template slot='items' slot-scope='props'>
+                    <template slot='items' slot-scope='props' v-slot:items="props">
                         <td v-for='header in factorGridHeaders'>
                             <v-edit-dialog
                                 v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
@@ -38,10 +38,8 @@
     </v-layout>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { State } from 'vuex-class';
+<script lang='ts' setup>
+import Vue, { onMounted, ref, shallowRef } from 'vue';
 import { TreatmentAttributeFactor, TreatmentPerformanceFactor, Treatment } from '@/shared/models/iAM/treatment';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -55,49 +53,52 @@ import {
     PerformanceCurve,
 } from '@/shared/models/iAM/performance';
 import { isNullOrUndefined } from 'util';
-import { clone } from 'ramda';
+import { any, clone } from 'ramda';
+import { useStore } from 'vuex';
+import { inject, reactive, onBeforeUnmount, watch, Ref} from 'vue';
 
-@Component({
-    components: {
-    },
-})
-export default class PerformanceFactorTab extends Vue {
-    @Prop() selectedTreatmentPerformanceFactors: TreatmentPerformanceFactor[];
-    @Prop() selectedTreatment: Treatment;
-    @Prop() scenarioId: string;
-    @Prop() rules: InputValidationRules;
-    @Prop() callFromScenario: boolean;
-    @Prop() callFromLibrary: boolean;
+    let selectedTreatmentPerformanceFactors: TreatmentPerformanceFactor[];
+    let selectedTreatment = shallowRef<Treatment>(); 
+    let scenarioId: string;
+    let rules: InputValidationRules;
+    let callFromScenario: boolean;
+    let callFromLibrary: boolean;
 
-    @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
-    @State(state => state.performanceCurveModule.scenarioPerformanceCurves) stateScenarioPerformanceCurves: PerformanceCurve[];
+    const emit = defineEmits(['submit', 'onAddConsequence', 'onModifyConsequence', 'onRemoveConsequence','onModifyPerformanceFactor'])
+    let store = useStore();
 
-    factorGridHeaders: DataTableHeader[] = [
+    let stateAttributes = ref<Attribute[]>(store.state.attributeModule.attributes);
+    let stateScenarioPerformanceCurves = ref<PerformanceCurve[]>(store.state.performanceCurveModule.scenarioPerformanceCurves)
+
+    let factorGridHeaders: DataTableHeader[] = [
         { text: 'Attribute', value: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
         { text: 'Performance Factor', value: 'performanceFactor', align: 'left', sortable: false, class: '', width: '100px' },
     ];
-    factorGridData: TreatmentPerformanceFactor[] = [];
-    attributeSelectItems: SelectItem[] = [];
-    uuidNIL: string = getBlankGuid();
+    let factorGridData: TreatmentPerformanceFactor[] = [];
+    let attributeSelectItems: SelectItem[] = [];
+    let uuidNIL: string = getBlankGuid();
 
-    mounted() {
-        this.setAttributeSelectItems();
+
+    onMounted(() => mounted());
+    function mounted() {
+        setAttributeSelectItems();
    }
 
-    @Watch('stateAttributes')
-    onStateAttributesChanged() {
-        this.setAttributeSelectItems();
+   watch(stateAttributes, () => onStateAttributesChanged)
+    function onStateAttributesChanged() {
+        setAttributeSelectItems();
     }
-    @Watch('selectedTreatment')
-    onSelectedTreatmentChanged() {
-        if (this.selectedTreatmentPerformanceFactors.length <= 0) {
-           this.buildDataFromCurves(); 
-           this.factorGridData.forEach(_ => this.$emit('onModifyPerformanceFactor', clone(_)))
+
+    watch(selectedTreatment, () => onSelectedTreatmentChanged)
+    function onSelectedTreatmentChanged() {
+        if (selectedTreatmentPerformanceFactors.length <= 0) {
+           buildDataFromCurves(); 
+           factorGridData.forEach(_ => emit('onModifyPerformanceFactor', clone(_)))
         }
         else{
-            this.factorGridData.forEach(data => {
+            factorGridData.forEach(data => {
                 let found = false;
-                this.selectedTreatmentPerformanceFactors.forEach(factors => {
+                selectedTreatmentPerformanceFactors.forEach(factors => {
                     if (factors.attribute === data.attribute) {
                         data.id = factors.id;
                         data.performanceFactor = factors.performanceFactor;
@@ -105,32 +106,32 @@ export default class PerformanceFactorTab extends Vue {
                     }
                 });
                 if(!found)
-                    this.$emit('onModifyPerformanceFactor', clone(data))
+                    emit('onModifyPerformanceFactor', clone(data))
             });
         }
     }
-    @Watch('stateScenarioPerformanceCurves')
-    onStatePerformanceCurvesChanged() {
-        this.buildDataFromCurves();
+    watch(stateScenarioPerformanceCurves, () => onStatePerformanceCurvesChanged)
+   function onStatePerformanceCurvesChanged() {
+        buildDataFromCurves();
     }
-    setAttributeSelectItems() {
-        if (hasValue(this.stateAttributes)) {
-            this.attributeSelectItems = this.stateAttributes.map((attribute: Attribute) => ({
+    function setAttributeSelectItems() {
+        if (hasValue(stateAttributes)) {
+            attributeSelectItems = stateAttributes.value.map((attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name,
             }));
         }
     }
-    onEditPerformanceFactorProperty(performancefactor: TreatmentPerformanceFactor, property: string, value: any) {
+    function onEditPerformanceFactorProperty(performancefactor: TreatmentPerformanceFactor, property: string, value: any) {
         performancefactor.performanceFactor = value;
-        this.$emit('onModifyPerformanceFactor', setItemPropertyValue(property, value, performancefactor));
+        emit('onModifyPerformanceFactor', setItemPropertyValue(property, value, performancefactor));
     }
-    buildDataFromCurves() {
-        if(this.callFromLibrary)
+    function buildDataFromCurves() {
+        if(callFromLibrary)
             return;
         let testStateAttributes:Attribute[] = [];
-        this.stateScenarioPerformanceCurves.forEach(curve => {
-            this.stateAttributes.forEach(state => {
+        stateScenarioPerformanceCurves.value.forEach(curve => {
+            stateAttributes.value.forEach(state => {
                 if (state.name === curve.attribute) {
                     if (testStateAttributes.findIndex((o) => { return o.name === curve.attribute }) === -1){
                         testStateAttributes.push(state);
@@ -139,13 +140,12 @@ export default class PerformanceFactorTab extends Vue {
             });
         });
 
-        this.factorGridData = testStateAttributes.map(_ => ({
+        factorGridData = testStateAttributes.map(_ => ({
             id: getNewGuid(),
             attribute: _.name,
             performanceFactor: 1.0
         }));
     }
-}
 </script>
 
 <style>

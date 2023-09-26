@@ -24,24 +24,23 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
+<script lang="ts" setup>
+import Vue from 'vue'; 
 
-@Component
-export default class MigrateLegacySimulationDialog extends Vue {
-  @Prop() showDialog: boolean;
+  const emit = defineEmits(['submit'])
+  const props = defineProps<{showDialog: boolean}>();
 
-  legacySimulationId: number = 0;
 
-  onSubmit(submit: boolean) {
+  let legacySimulationId: number = 0;
+
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.legacySimulationId);
+      emit('submit', legacySimulationId);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.legacySimulationId = 0;
+    legacySimulationId = 0;
   }
-}
+
 </script>

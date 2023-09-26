@@ -201,9 +201,10 @@
     </v-layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
+import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
 import { clone, isNil } from 'ramda';
 import { InputValidationRules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
@@ -224,109 +225,107 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
-@Component({
-    components: {
-        GeneralCriterionEditorDialog,
-    },
-})
-export default class TreatmentDetailsTab extends Vue {
-    @Prop() selectedTreatmentDetails: TreatmentDetails;
-    @Prop() rules: InputValidationRules;
-    @Prop() callFromScenario: boolean;
-    @Prop() callFromLibrary: boolean;
+    const emit = defineEmits(['submit', 'onModifyTreatmentDetails'])
+    let store = useStore();
+    let selectedTreatmentDetails = ref<TreatmentDetails>(store.state.TreatmentDetailsTab.selectedTreatmentDetails);
+    let  rules: InputValidationRules;
+    let  callFromScenario: boolean;
+    let  callFromLibrary: boolean;
+    let TreatmentIsUnSelectable = ref<boolean>(store.state.TreatmentDetailsTab.TreatmentIsUnSelectable);
 
-    treatmentCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+
+
+    let treatmentCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
         emptyGeneralCriterionEditorDialogData,
     );
-    uuidNIL: string = getBlankGuid();
+    let uuidNIL: string = getBlankGuid();
 
-    treatmentCategoryMap: Map<string, TreatmentCategory> = clone(treatmentCategoryMap);
-    treatmentCategoryReverseMap: Map<TreatmentCategory, string> = clone(treatmentCategoryReverseMap);
-    assetTypeReverseMap: Map<AssetType, string> = clone(assetTypeReverseMap);
-    treatmentCategoryBinding: string = '';
-    assetTypeMap: Map<string, AssetType> = clone(assetTypeMap);
-    assetTypeBinding: string = '';
-    TreatmentIsUnSelectable: boolean = false;
+    let treatmentCategoryMapValue: Map<string, TreatmentCategory> = clone(treatmentCategoryMap);
+    let treatmentCategoryReverseMapValue: Map<TreatmentCategory, string> = clone(treatmentCategoryReverseMap);
+    let assetTypeReverseMapValue: Map<AssetType, string> = clone(assetTypeReverseMap);
+    let treatmentCategoryBinding: string = '';
+    let assetTypeMapValue: Map<string, AssetType> = clone(assetTypeMap);
+    let assetTypeBinding: string = '';
 
-    @Watch('selectedTreatmentDetails')
-onSelectedTreatmentDetailsChanged(){
-  this.treatmentCategoryBinding = treatmentCategoryReverseMap.get(this.selectedTreatmentDetails.category)!;
-  this.assetTypeBinding = this.assetTypeReverseMap.get(this.selectedTreatmentDetails.assetType)!;
-  this.TreatmentIsUnSelectable = this.selectedTreatmentDetails.isUnselectable;
-}
+    watch(selectedTreatmentDetails, () => onSelectedTreatmentDetailsChanged)
+    function onSelectedTreatmentDetailsChanged(){
+        treatmentCategoryBinding = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;
+        assetTypeBinding = assetTypeReverseMap.get(selectedTreatmentDetails.value.assetType)!;
+        TreatmentIsUnSelectable.value = selectedTreatmentDetails.value.isUnselectable;
+    }
 
-@Watch('TreatmentIsUnSelectable')
-onToggleIsUnSelectable(value: boolean) {
-  console.log('onToggleIsUnSelectable called with value:', value);
-  this.$emit(
-    'onModifyTreatmentDetails',
-    setItemPropertyValue(
-      'isUnselectable',
-      value,
-      this.selectedTreatmentDetails,
+    watch(TreatmentIsUnSelectable, () => onToggleIsUnSelectable)
+    function onToggleIsUnSelectable(value: boolean) {
+        console.log('onToggleIsUnSelectable called with value:', value);
+                emit(
+                'onModifyTreatmentDetails',
+                 setItemPropertyValue(
+                 'isUnselectable',
+                 value,
+                selectedTreatmentDetails,
     ),
   );
 }
 
-    onShowTreatmentCriterionEditorDialog() {
-        this.treatmentCriterionEditorDialogData = {
+    function onShowTreatmentCriterionEditorDialog() {
+        treatmentCriterionEditorDialogData = {
             showDialog: true,
-            CriteriaExpression: this.selectedTreatmentDetails.criterionLibrary.mergedCriteriaExpression
+            CriteriaExpression: selectedTreatmentDetails.value.criterionLibrary.mergedCriteriaExpression
         };
     }
 
-    onSubmitTreatmentCriterionEditorDialogResult(
+    function onSubmitTreatmentCriterionEditorDialogResult(
         criterionExpression: string,
     ) {
-        this.treatmentCriterionEditorDialogData = clone(
+        treatmentCriterionEditorDialogData = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
         if (!isNil(criterionExpression)) {
-            if(this.selectedTreatmentDetails.criterionLibrary.id === getBlankGuid())
-                this.selectedTreatmentDetails.criterionLibrary.id = getNewGuid();
-            this.$emit(
+            if(selectedTreatmentDetails.value.criterionLibrary.id === getBlankGuid())
+                selectedTreatmentDetails.value.criterionLibrary.id = getNewGuid();
+            emit(
                 'onModifyTreatmentDetails',
                 setItemPropertyValue(
                     'criterionLibrary',
-                    {...this.selectedTreatmentDetails.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
-                    this.selectedTreatmentDetails,
+                    {...selectedTreatmentDetails.value.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
+                     selectedTreatmentDetails,
                 ),
             );
         }
     }
 
-    onEditTreatmentType(property: string, key: any){
-        var category = this.treatmentCategoryMap.get(key);
-        this.onEditTreatmentDetails(property, category);
+    function onEditTreatmentType(property: string, key: any){
+        var category = treatmentCategoryMap.get(key);
+        onEditTreatmentDetails(property, category);
     }
-    onEditAssetType(property: string, key: any){
-        var asset = this.assetTypeMap.get(key);
-        this.onEditTreatmentDetails(property, asset);
+    function onEditAssetType(property: string, key: any){
+        var asset = assetTypeMap.get(key);
+        onEditTreatmentDetails(property, asset);
     }
 
-    onEditTreatmentDetails(property: string, value: any) {
-        this.$emit(
+    function onEditTreatmentDetails(property: string, value: any) {
+        emit(
             'onModifyTreatmentDetails',
             setItemPropertyValue(
                 property,
                 value,
-                this.selectedTreatmentDetails,
+                selectedTreatmentDetails,
             ),
         );
     }
 
-    onRemoveTreatmentCriterion() {
-        this.$emit(
+    function onRemoveTreatmentCriterion() {
+        emit(
             'onModifyTreatmentDetails',
             setItemPropertyValue(
                 'criterionLibrary',
                 clone(emptyCriterionLibrary),
-                this.selectedTreatmentDetails,
+                selectedTreatmentDetails,
             ),
         );
     }
-}
+
 </script>
 
 <style>

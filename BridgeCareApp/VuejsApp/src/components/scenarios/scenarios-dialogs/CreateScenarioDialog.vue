@@ -53,10 +53,8 @@
     </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { State } from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { ref, shallowReactive, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -67,47 +65,50 @@ import {
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
+import { useStore } from 'vuex'; 
 
-@Component
-export default class CreateScenarioDialog extends Vue {
-    @Prop() showDialog: boolean;
+  let store = useStore(); 
 
-    @State(state => state.userModule.users) stateUsers: User[];
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
+  const props = defineProps<{showDialog: boolean}>();
+  const emit = defineEmits(['submit'])
 
-    newScenario: Scenario = { ...emptyScenario, id: getNewGuid() };
-    shared: boolean = false;
-    selectedNetworkId: string = getBlankGuid();
-    isNetworkSelected: boolean = false;
-    networkMetaData: Network = {...emptyNetwork}
-    selectedNetworkName: string;
+    const stateUsers: User[] = shallowReactive(store.state.userModule.users);
+    let shared = ref<boolean>(false);
+    let stateNetworks = ref<Network[]>(store.state.networkModule.networks) ;
 
-    @Watch('showDialog')
-    onShowDialogChanged() {
-        this.onModifyScenarioUserAccess();
+    let newScenario: Scenario = { ...emptyScenario, id: getNewGuid() };
+    
+    let selectedNetworkId: string = getBlankGuid();
+    let isNetworkSelected: boolean = false;
+    let networkMetaData: Network = {...emptyNetwork}
+    let selectedNetworkName: string;
+
+    watch(()=> props.showDialog,()=> onShowDialogChanged)
+    function onShowDialogChanged() {
+        onModifyScenarioUserAccess();
     }
 
-    @Watch('shared')
-    onSetPublic() {
-        this.onModifyScenarioUserAccess();
+    watch(shared, ()=> onSetPublic)
+    function onSetPublic() {
+        onModifyScenarioUserAccess();
     }
 
-    selectedNetwork(networkName: string, networkId: string){
-      this.selectedNetworkId = networkId;
-      this.selectedNetworkName = networkName;
+    function selectedNetwork(networkName: string, networkId: string){
+      selectedNetworkId = networkId;
+      selectedNetworkName = networkName;
       if(networkId != '' && !isNil(networkId) && networkId != getBlankGuid()){
-        this.isNetworkSelected = true;
+        isNetworkSelected = true;
       }
       else{
-        this.isNetworkSelected = false;
+        isNetworkSelected = false;
       }
     }
 
-    onModifyScenarioUserAccess() {
-        if (this.showDialog) {
+    function onModifyScenarioUserAccess() {
+        if (props.showDialog) {
             const currentUser: User = find(
                 propEq('username', getUserName()),
-                this.stateUsers,
+                stateUsers,
             ) as User;
             const owner: ScenarioUser = {
                 userId: currentUser.id,
@@ -116,13 +117,13 @@ export default class CreateScenarioDialog extends Vue {
                 isOwner: true,
             };
 
-            this.newScenario = {
-                ...this.newScenario,
-                networkId: this.selectedNetworkId,
-                users: this.shared
+            newScenario = {
+                ...newScenario,
+                networkId: selectedNetworkId,
+                users: shared
                     ? [
                           owner,
-                          ...this.stateUsers
+                          ...stateUsers
                               .filter(
                                   (user: User) =>
                                       user.username !== currentUser.username,
@@ -139,17 +140,17 @@ export default class CreateScenarioDialog extends Vue {
         }
     }
 
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-            this.newScenario.networkId = this.selectedNetworkId;
-            this.newScenario.networkName = this.selectedNetworkName;
-            this.$emit('submit', this.newScenario);
+            newScenario.networkId = selectedNetworkId;
+            newScenario.networkName = selectedNetworkName;
+            emit('submit', newScenario);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
 
-        this.newScenario = { ...emptyScenario, id: getNewGuid() };
-        this.shared = false;
+        newScenario = { ...emptyScenario, id: getNewGuid() };
+        shared = ref(false);
     }
-}
+
 </script>

@@ -108,7 +108,7 @@ import { useStore } from 'vuex';
                 if (response.status == 200) {
                     if (hasValue(response, 'data')) {
                         const resultId: string = response.data as string;
-                        reportIndexID = resultId;
+                        //reportIndexID = resultId;
                     }
 
                     addSuccessNotificationAction({

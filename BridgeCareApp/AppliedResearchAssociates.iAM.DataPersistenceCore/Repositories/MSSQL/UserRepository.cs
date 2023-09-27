@@ -24,15 +24,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 return;
             }
-          
-            _unitOfWork.Context.User.Add(new UserEntity
-            {
-                Id = Guid.NewGuid(),
-                Username = username,
-                HasInventoryAccess = hasAdminClaim,
-            });
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfWork.AsTransaction(() =>
+            {
+                _unitOfWork.Context.User.Add(new UserEntity
+                {
+                    Id = Guid.NewGuid(),
+                    Username = username,
+                    HasInventoryAccess = hasAdminClaim,
+                });
+
+            });
         }
 
         public void UpdateLastNewsAccessDate(Guid id, DateTime accessDate)

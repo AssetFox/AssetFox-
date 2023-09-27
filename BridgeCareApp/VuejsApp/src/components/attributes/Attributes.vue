@@ -145,11 +145,11 @@
                     Cancel
                 </v-btn>  
                 <v-btn v-if="selectedAttribute.dataSource.type == 'SQL'" :disabled="selectedAttribute.dataSource.type != 'SQL'" 
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-button'
                     @click="CheckSqlCommand">
                     Test
                 </v-btn>
-                <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Save
                 </v-btn>               
             </v-layout>

@@ -157,7 +157,7 @@ import { createDecipheriv } from 'crypto';
     padding-left: 20px !important;
 }
 
-.primary--text .selected-sidebar-icon .v-icon{
+.text-primary .selected-sidebar-icon .v-icon{
     visibility: visible !important;
 }
 
@@ -165,7 +165,7 @@ import { createDecipheriv } from 'crypto';
     visibility: hidden !important;
 }
 
-.primary--text .raw-data-icon{
+.text-primary .raw-data-icon{
     stroke: #FFFFFF !important;
 }
 
@@ -177,7 +177,7 @@ import { createDecipheriv } from 'crypto';
     fill: #FFFFFF;
 }
 
-.primary--text .raw-data-svg-fill {
+.text-primary .raw-data-svg-fill {
     fill: #2A578D;
 }
 </style>

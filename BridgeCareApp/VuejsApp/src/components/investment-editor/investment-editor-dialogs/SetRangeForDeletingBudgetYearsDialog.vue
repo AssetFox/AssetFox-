@@ -15,8 +15,8 @@
         <label>{{rangeLabel}}</label>
       </v-card-text>
       <v-card-actions>
-        <v-btn :disabled="range === 0 || range > maxRange" @click="onSubmit(true)" class="ara-blue-bg white--text">Save</v-btn>
-        <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+        <v-btn :disabled="range === 0 || range > maxRange" @click="onSubmit(true)" class="ara-blue-bg text-white">Save</v-btn>
+        <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

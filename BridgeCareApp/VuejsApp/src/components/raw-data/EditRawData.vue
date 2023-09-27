@@ -158,7 +158,7 @@ import { useStore } from 'vuex';
     padding-left: 20px !important;
 }
 
-.primary--text .selected-sidebar-icon .v-icon{
+.text-primary .selected-sidebar-icon .v-icon{
     visibility: visible !important;
 }
 
@@ -166,7 +166,7 @@ import { useStore } from 'vuex';
     visibility: hidden !important;
 }
 
-.primary--text .raw-data-icon{
+.text-primary .raw-data-icon{
     stroke: #FFFFFF !important;
 }
 
@@ -178,7 +178,7 @@ import { useStore } from 'vuex';
     fill: #FFFFFF;
 }
 
-.primary--text .raw-data-svg-fill {
+.text-primary .raw-data-svg-fill {
     fill: #2A578D;
 }
 </style>

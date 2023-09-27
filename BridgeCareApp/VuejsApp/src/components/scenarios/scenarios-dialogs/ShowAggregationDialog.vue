@@ -105,7 +105,7 @@
                                                         props.item.id,
                                                     )
                                                 "
-                                                class="green--text darken-1"
+                                                class="text-green darken-1"
                                                 :disabled="
                                                     props.item.benefitQuantifier
                                                         .equation.expression ===

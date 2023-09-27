@@ -236,14 +236,14 @@
                 <v-btn id="InvestmentEditor-updateLibrary-btn"
                        :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                        @click='onUpsertBudgetLibrary()'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                       class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                        v-show='!hasScenario'>
                     Update Library
                 </v-btn>
                 <v-btn id="InvestmentEditor-save-btn"
                        :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
                        @click='onUpsertInvestment()'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                       class='ghd-blue-bg text-white ghd-button-text ghd-button'
                        v-show='hasScenario'>
                     Save
                 </v-btn>

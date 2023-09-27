@@ -17,14 +17,12 @@
     </v-container>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
     import Vue from 'vue';
-    import {Component} from 'vue-property-decorator';
-
-    @Component
-    export default class AuthenticationFailure extends Vue {
-        onAttemptAuthentication() {
-            this.$router.push('/AuthenticationStart/');
-        }
+import { useRouter } from 'vue-router';
+    const $router = useRouter();
+    function onAttemptAuthentication() {
+        $router.push('/AuthenticationStart/');
     }
+    
 </script>

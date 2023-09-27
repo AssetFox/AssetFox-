@@ -7,7 +7,7 @@
                         <v-subheader id="Networks-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Network</v-subheader>
                         <v-select :items='selectNetworkItems'
                             id="Networks-selectNetwork-vselect"
-                            outline  
+                            variant="outlined"
                             v-model='selectNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
@@ -31,7 +31,7 @@
                         </v-subheader>
                         <v-select
                             id="Networks-KeyAttribute-vselect"
-                            outline                           
+                            variant="outlined"
                             class="ghd-select ghd-text-field ghd-text-field-border"
                             :disabled="!isNewNetwork"
                             v-model="selectedKeyAttributeItem"
@@ -43,7 +43,7 @@
                 <v-layout v-show="!isNewNetwork">
                     <v-select
                         id="Networks-DataSource-vselect"
-                        outline 
+                        variant="outlined"
                         :items="selectDataSourceItems"  
                         style="margin-top: 18px !important;"                  
                         class="ghd-select ghd-text-field ghd-text-field-border shifted-label"

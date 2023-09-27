@@ -6,7 +6,7 @@
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
                         <v-select :items='selectPrimaryNetworkItems'
-                            outline  
+                            variant="outlined"
                             v-model='selectPrimaryNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
@@ -16,7 +16,7 @@
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Network</v-subheader>
                         <v-select :items="selectRawDataNetworkItems"
-                            outline
+                            variant="outlined"
                             v-model="selectRawdataNetworkItemValue"
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>

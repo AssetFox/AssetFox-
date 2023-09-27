@@ -14,7 +14,7 @@
                         v-if="!hasSelectedCriterionLibrary"
                         :items="criterionLibrarySelectItems"
                         label="Select a Criteria Library"
-                        outline
+                        variant="outlined"
                     >
                     </v-select>
                     <v-text-field

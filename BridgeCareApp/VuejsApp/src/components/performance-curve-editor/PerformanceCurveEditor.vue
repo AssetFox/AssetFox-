@@ -10,7 +10,7 @@
                             class="ghd-control-border ghd-control-text ghd-select"
                             :items="librarySelectItems"
                             append-icon=$vuetify.icons.ghd-down
-                            outline
+                            variant="outlined"
                             v-model="librarySelectItemValue"
                         >
                             <template v-slot:selection="{ item }">

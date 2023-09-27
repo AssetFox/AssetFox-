@@ -26,7 +26,7 @@
               :items="attributeSelectItems"
               append-icon=$vuetify.icons.ghd-down
               :rules="[rules['generalRules'].valueIsNotEmpty]"
-              outline
+              variant="outlined"
             >
               <template v-slot:selection="{ item }">
                 <span class="ghd-control-text">{{ item.text }}</span>

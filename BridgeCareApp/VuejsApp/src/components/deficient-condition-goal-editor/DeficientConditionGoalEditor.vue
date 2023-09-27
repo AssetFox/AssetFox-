@@ -9,7 +9,7 @@
                         id="DeficientConditionGoalEditor-librarySelect-vselect"
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
-                        outline
+                        variant="outlined"
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>

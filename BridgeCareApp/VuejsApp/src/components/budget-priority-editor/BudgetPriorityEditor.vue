@@ -8,7 +8,7 @@
                             <v-select id="BudgetPriorityEditor-library-vselect"
                                 :items='librarySelectItems' 
                                 append-icon=$vuetify.icons.ghd-down
-                                outline                           
+                                variant="outlined"
                                 v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                             </v-select>    
                              <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       

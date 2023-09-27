@@ -14,7 +14,7 @@
                 <v-spacer></v-spacer>
                 <v-layout>
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
-                        <v-autocomplete :items="keyAttributeValues[index]" @change="onSelectInventoryItem(index)" item-text="identifier" item-value="identifier"
+                        <v-autocomplete :items="keyAttributeValues[index]" @change="onSelectInventoryItem(index)" item-title="identifier" item-value="identifier"
                                         :label="`Select by ${key} Key`" outline
                                         v-model="selectedKeys[index]"
                                         :disabled = "isDisabled(index)">

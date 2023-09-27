@@ -24,7 +24,7 @@
               <v-select id="CreateDeficientConditionGoalDialog-attribute-vselect"
                         :items="numericAttributeNames"
                         append-icon=$vuetify.icons.ghd-down
-                        outline
+                        variant="outlined"
                         v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-select ghd-text-field ghd-text-field-border">
               </v-select>

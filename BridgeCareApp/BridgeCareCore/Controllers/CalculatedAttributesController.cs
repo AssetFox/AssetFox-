@@ -190,7 +190,10 @@ namespace BridgeCareCore.Controllers
                             {
                                 _.Id = Guid.NewGuid();
                                 _.Equation.Id = Guid.NewGuid();
-                                _.CriteriaLibrary.Id = Guid.NewGuid();
+                                if (_.CriteriaLibrary != null)
+                                {
+                                    _.CriteriaLibrary.Id = Guid.NewGuid();
+                                }
                             });
                             attribute.Equations = equations;
                         });

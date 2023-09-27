@@ -1,10 +1,9 @@
 //import '@babel/polyfill';
 import '@fortawesome/fontawesome-free/css/all.css';
-import Vue, { createApp, defineComponent, watch, reactive } from 'vue';
+import Vue, { h, createApp, defineComponent, watch, reactive } from 'vue';
 import 'vuetify/dist/vuetify.min.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Vuetify from 'vuetify';
 import App from './App.vue';
 import router from './router';
 import store from './store/root-store';
@@ -28,7 +27,32 @@ import GhdDownSvg from '@/shared/icons/GhdDownSvg.vue';
 import GhdTableSortSvg from '@/shared/icons/GhdTableSortSvg.vue';
 import authenticationModule from './store-modules/authentication.module';
 import { ap } from 'ramda';
+import { IconProps, IconSet, createVuetify } from 'vuetify';
+import { fa } from 'vuetify/iconsets/fa'
 
+const ghdSearchIconSet: IconSet = {
+  component: (props: IconProps) => {
+    return h(GhdSearchSvg, {
+      name: 'ghd-search'
+    });
+  }
+}
+
+const ghdDownIconSet: IconSet = {
+  component: (props: IconProps) => {
+    return h(GhdDownSvg, {
+      name: 'ghd-down' 
+    });
+  }
+}
+
+const ghdTableSortIconSet: IconSet = {
+  component: (props: IconProps) => {
+    return h(GhdTableSortSvg, {
+      name: 'ghd-table-sort'
+    });
+  }
+}
 fetch(process.env.BASE_URL + 'config.json')
     .then(response => response.json())
     .then(config => {
@@ -37,30 +61,15 @@ fetch(process.env.BASE_URL + 'config.json')
         router,
         render: (h: (arg0: typeof Vue) => any) => h(App),
     })
-      app.use(Vuetify, {
-        iconfont: 'fa',
-        icons: {
-            'ghd-search': {
-              component: GhdSearchSvg, // you can use string here if component is registered globally
-              props: { // pass props to your component if needed
-                name: 'ghd-search'
-              }
-            },
-            'ghd-down': {
-                component: GhdDownSvg, 
-                props: { 
-                  name: 'ghd-down'
-                }
-              },
-              'ghd-table-sort': {
-                component: GhdTableSortSvg, 
-                props: { 
-                  name: 'ghd-table-sort'
-                }
-              },
-        }
-      });
-    
+    const vuetify = createVuetify({ 
+      icons: { 
+        defaultSet: 'fa', 
+        sets: { fa, ghdSearchIconSet, ghdTableSortIconSet, ghdDownIconSet },
+      },
+    });
+
+    app.use(vuetify);
+ 
       app.use(VueWorker);
       
       app.use(KendoChartInstaller);

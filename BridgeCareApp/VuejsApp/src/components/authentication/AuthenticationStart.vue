@@ -26,62 +26,66 @@
     </v-container>
 </template>
 
-<script lang="ts">
-    import Vue from 'vue';
+<script setup lang="ts">
+    import Vue, { inject, onMounted } from 'vue';
     import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
     import { SecurityTypes } from '@/shared/utils/security-types';
     import { hasValue } from '@/shared/utils/has-value-util';
     import { isAuthenticatedUser,
     } from '@/shared/utils/authentication-utils';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-    @Component
-    export default class AuthenticationStart extends Vue {
-        @State(state => state.authenticationModule.authenticated) authenticated: boolean;
-        @State(state => state.authenticationModule.hasRole) hasRole: boolean;
-        @State(state => state.authenticationModule.checkedForRole) checkedForRole: boolean;
-        @State(state => state.authenticationModule.securityType) securityType: string;
-        @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
+    let store = useStore();
+    let authenticated: boolean = (store.state.authenticationModule.authenticated);
+    let hasRole: boolean = (store.state.authenticationModule.hasRole) ;
+    let checkedForRole: boolean = (store.state.authenticationModule.checkedForRole) ;
+    let securityType: string = (store.state.authenticationModule.securityType) ;
+    let currentUserCriteriaFilter: UserCriteriaFilter = (store.state.userModule.currentUserCriteriaFilter) ;
 
-        @Action('azureB2CLogin') azureB2CLoginAction: any;
+    async function azureB2CLoginAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogin');} 
 
-        esecSecurityType: string = SecurityTypes.esec;
-        b2cSecurityType: string = SecurityTypes.b2c;
+    let esecSecurityType: string = SecurityTypes.esec;
+    let b2cSecurityType: string = SecurityTypes.b2c;
 
-        mounted() {
-            const hasAuthInfo: boolean =
-                this.securityType === SecurityTypes.esec
-                    ? hasValue(localStorage.getItem('UserTokens'))
-                    : hasValue(localStorage.getItem('LoggedInUser'));
-            if (!this.authenticated && hasAuthInfo) {
-                isAuthenticatedUser()
-                    .then((isAuthenticated: boolean | void) => {
-                        if (isAuthenticated) {
-                            this.$router.push('/Scenarios/')
-                        }
-                    });
-            } else if (this.authenticated && hasAuthInfo) {
-                this.$router.push('/Scenarios/');
-            } else {
-                if (this.securityType === SecurityTypes.esec) {
-                    this.onRedirect();
-                } else if (this.securityType === SecurityTypes.b2c) {
-                    this.azureB2CLoginAction();
-                }
+    const $router = useRouter();
+    const $config = inject('$config') as any
+
+    onMounted(() => mounted)
+    function mounted() {
+        const hasAuthInfo: boolean =
+            securityType === SecurityTypes.esec
+                ? hasValue(localStorage.getItem('UserTokens'))
+                : hasValue(localStorage.getItem('LoggedInUser'));
+        if (!authenticated && hasAuthInfo) {
+            isAuthenticatedUser()
+                .then((isAuthenticated: boolean | void) => {
+                    if (isAuthenticated) {
+                        $router.push('/Scenarios/')
+                    }
+                });
+        } else if (authenticated && hasAuthInfo) {
+            $router.push('/Scenarios/');
+        } else {
+            if (securityType === SecurityTypes.esec) {
+                onRedirect();
+            } else if (securityType === SecurityTypes.b2c) {
+                azureB2CLoginAction();
             }
         }
+    }
 
-        onRedirect() { 
-            let href: string = `${this.$config.authorizationEndpoint}?response_type=code&scope=openid&scope=BAMS`;
-            href += `&client_id=${this.$config.clientId}`;
-            href += `&redirect_uri=${this.$config.redirectUri}`;
+    function onRedirect() { 
+        let href: string = `${$config.authorizationEndpoint}?response_type=code&scope=openid&scope=BAMS`;
+        href += `&client_id=${$config.clientId}`;
+        href += `&redirect_uri=${$config.redirectUri}`;
 
-            // The 'state' query parameter that is sent to ESEC will be sent back to
-            // the /Authentication page of the iam-deploy app.
-            if (process.env.VUE_APP_IS_PRODUCTION !== 'true') {
-                href += '&state=localhost' + process.env.PORT;
-            }
-
-            window.location.href = href;
+        // The 'state' query parameter that is sent to ESEC will be sent back to
+        // the /Authentication page of the iam-deploy app.
+        if (process.env.VUE_APP_IS_PRODUCTION !== 'true') {
+            href += '&state=localhost' + process.env.PORT;
         }
+
+        window.location.href = href;
     }
 </script>

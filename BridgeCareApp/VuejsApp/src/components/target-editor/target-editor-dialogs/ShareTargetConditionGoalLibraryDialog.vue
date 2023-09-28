@@ -14,16 +14,16 @@
                       :items="targetConditionGoalLibraryUserGridRows"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
-          <template slot="items" slot-scope="props">
+          <template slot="items" slot-scope="props" v-slot:item="{item}">
             <td>
-              {{ props.item.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="props.item.isShared"
-                          @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
+              <v-checkbox label="Is Shared" v-model="item.raw.isShared"
+                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox :disabled="!item.isShared" label="Can Modify" v-model="item.raw.canModify"/>
             </td>
           </template>
           <v-alert :value="true"

@@ -145,23 +145,23 @@
                             class="fixed-header ghd-table v-table__overflow"
                             item-key="id"
                         >
-                            <template slot="items" slot-scope="props" v-slot:items="props">
+                            <template slot="items" slot-scope="props" v-slot:item="item">
                                 <td>
                                     <v-checkbox id="PerformanceCurveEditor-deleteModel-vcheckbox" class="ghd-checkbox"
                                         hide-details
                                         primary
-                                        v-model='props.selected'
+                                        v-model='item.raw.selected'
                                     >
                                     </v-checkbox>
                                 </td>                                
                                 <td class="text-xs-left">
                                     <v-edit-dialog
-                                        :return-value.sync="props.item.name"
+                                        :return-value.sync="item.name"
                                         @save="
                                             onEditPerformanceCurveProperty(
-                                                props.item.id,
+                                                item.id,
                                                 'name',
-                                                props.item.name,
+                                                item.name,
                                             )
                                         "
                                         large
@@ -171,7 +171,7 @@
                                             readonly
                                             single-line
                                             class="sm-txt equation-name-text-field-output"
-                                            :value="props.item.name"
+                                            :value="item.name"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty,
@@ -181,7 +181,7 @@
                                             <v-text-field
                                                 label="Edit"
                                                 single-line
-                                                v-model="props.item.name"
+                                                v-model="item.name"
                                                 :rules="[
                                                     rules['generalRules']
                                                         .valueIsNotEmpty,
@@ -193,13 +193,13 @@
                                 <td class="text-xs-left">
                                     <v-edit-dialog
                                         :return-value.sync="
-                                            props.item.attribute
+                                            item.attribute
                                         "
                                         @save="
                                             onEditPerformanceCurveProperty(
-                                                props.item.id,
+                                                item.id,
                                                 'attribute',
-                                                props.item.attribute,
+                                                item.attribute,
                                             )
                                         "
                                         large
@@ -209,7 +209,7 @@
                                             readonly
                                             single-line
                                             class="sm-txt attribute-text-field-output"
-                                            :value="props.item.attribute"
+                                            :value="item.attribute"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty,
@@ -220,7 +220,7 @@
                                                 :items="attributeSelectItems"
                                                 append-icon=$vuetify.icons.ghd-down
                                                 label="Edit"
-                                                v-model="props.item.attribute"
+                                                v-model="item.attribute"
                                                 :rules="[
                                                     rules['generalRules']
                                                         .valueIsNotEmpty,
@@ -235,7 +235,7 @@
                                         min-height="500px"
                                         min-width="500px"
                                         v-show="
-                                            props.item.equation.expression !==
+                                            item.equation.expression !==
                                                 ''
                                         "
                                     >
@@ -250,7 +250,7 @@
                                                     id="PerformanceCurveEditor-checkEquation-vtextarea"
                                                     class="sm-txt Montserrat-font-family"
                                                     :value="
-                                                        props.item.equation
+                                                        item.equation
                                                             .expression
                                                     "
                                                     full-width
@@ -265,7 +265,7 @@
                                     <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
                                         @click="
                                             onShowEquationEditorDialog(
-                                                props.item.id,
+                                                item.id,
                                             )
                                         "
                                         class="ghd-blue"
@@ -280,7 +280,7 @@
                                         min-width="500px"
                                         right
                                         v-show="
-                                            props.item.criterionLibrary
+                                            item.criterionLibrary
                                                 .mergedCriteriaExpression !== ''
                                         "
                                     >
@@ -295,7 +295,7 @@
                                                     id="PerformanceCurveEditor-checkCriteria-vtextarea"
                                                     class="sm-txt Montserrat-font-family"
                                                     :value="
-                                                        props.item
+                                                        item
                                                             .criterionLibrary
                                                             .mergedCriteriaExpression
                                                     "
@@ -311,7 +311,7 @@
                                     <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
                                         @click="
                                             onEditPerformanceCurveCriterionLibrary(
-                                                props.item.id,
+                                                item.id,
                                             )
                                         "
                                         class="ghd-blue"
@@ -324,7 +324,7 @@
                                     <v-btn id="PerformanceCurveEditor-deleteModel-vbtn"
                                         @click="
                                             onRemovePerformanceCurve(
-                                                props.item.id,
+                                                item.id,
                                             )
                                         "
                                         class="ghd-blue"

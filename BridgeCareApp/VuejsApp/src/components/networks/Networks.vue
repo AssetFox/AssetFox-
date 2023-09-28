@@ -127,12 +127,12 @@
                                 :must-sort='true'
                                 hide-actions
                                 :pagination.sync="pagination">
-                                <template slot='items' slot-scope='props'>
+                                <template slot='items' slot-scope='props' v-slot:item="{item}">
                                     <td>
-                                        <v-checkbox id="Networks-SelectAttribute-vcheckbox" hide-details primary v-model='props.selected'></v-checkbox>
+                                        <v-checkbox id="Networks-SelectAttribute-vcheckbox" hide-details primary v-model='item.raw.selected'></v-checkbox>
                                     </td>
-                                    <td>{{ props.item.name }}</td> 
-                                    <td>{{ props.item.dataSource.type }}</td> 
+                                    <td>{{ item.name }}</td> 
+                                    <td>{{ item.dataSource.type }}</td> 
                                 </template>
                             </v-data-table>    
                             <div class="text-xs-center pt-2">

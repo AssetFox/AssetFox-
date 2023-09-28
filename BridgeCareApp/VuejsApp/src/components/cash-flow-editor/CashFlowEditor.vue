@@ -68,7 +68,7 @@
                     select-all>
                     <template v-slot:item="{item}" slot="items" slot-scope="props">
                         <td>
-                            <v-checkbox hide-details primary v-model='item.selected'></v-checkbox>
+                            <v-checkbox hide-details primary v-model='item.raw.selected'></v-checkbox>
                         </td>
                         <td>
                             <v-edit-dialog

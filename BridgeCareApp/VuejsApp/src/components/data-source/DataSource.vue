@@ -11,7 +11,7 @@
                       append-icon=$vuetify.icons.ghd-down
                       v-model="sourceTypeItem"
                       outline
-                      outlined
+                      variant = "outlined"
                     >
                     </v-select>
                 </v-layout>
@@ -35,7 +35,7 @@
               append-icon=$vuetify.icons.ghd-down
               v-model="dataSourceTypeItem"
               outline
-              outlined
+              variant = "outlined"
             >
             </v-select>
         </v-layout>
@@ -49,7 +49,7 @@
                         class="ghd-control-text ghd-control-border Montserrat-font-family"
                         v-model="fileName"
                         outline
-                        outlined
+                        variant = "outlined"
                     ></v-text-field>
                     <v-btn id="DataSource-AddFile-vbtn" v-show="showExcel" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="chooseFiles()">Add File</v-btn>
                     <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
@@ -63,7 +63,7 @@
                 v-show="showExcel"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
                 outline
-                outlined
+                variant = "outlined"
                 >
                 </v-select>
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
@@ -75,7 +75,7 @@
                 v-model="currentExcelDateColumn"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
                 outline
-                outlined
+                variant = "outlined"
                 >
                 </v-select>
             </div>

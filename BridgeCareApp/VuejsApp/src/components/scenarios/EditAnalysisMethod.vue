@@ -442,15 +442,18 @@ import { useRouter } from 'vue-router';
         return criteriaIsEmpty() && !criteriaIsIntentionallyEmpty;
     }    
 
-    function onUpsertAnalysisMethod() {
+    async function onUpsertAnalysisMethod() {
         const form: any = $refs.form;
 
-        if (form.validate()) {
-            upsertAnalysisMethodAction({
+        await(form.validate(), () =>{
+            if(form.result.valid){
+                upsertAnalysisMethodAction({
                 analysisMethod: analysisMethod,
                 scenarioId: selectedScenarioId,
             });
-        }
+            }
+        })
+         
     }
 
     function onDiscardChanges() {

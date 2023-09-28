@@ -18,13 +18,13 @@
                                         :label="`Select by ${key} Key`" outline
                                         v-model="selectedKeys[index]"
                                         :disabled = "isDisabled(index)">
-                            <template v-slot:items="data" slot="item" slot-scope="data">
+                            <template v-slot:item="data" slot="item" slot-scope="data">
                                 <template v-if="typeof data.item !== 'object'">
                                     <v-list-tile-content v-text="data.item"></v-list-tile-content>
                                 </template>
                                 <template v-else>
                                     <v-list-tile-content>
-                                        <v-list-tile-title v-html="data.item.identifier"></v-list-tile-title>
+                                        <v-list-tile-title v-html="data.item.value"></v-list-tile-title>
                                     </v-list-tile-content>
                                 </template>
                             </template>

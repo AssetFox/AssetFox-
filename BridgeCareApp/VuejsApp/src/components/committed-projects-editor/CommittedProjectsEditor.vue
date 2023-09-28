@@ -283,6 +283,7 @@ export default class CommittedProjectsEditor extends Vue  {
     rules: InputValidationRules = rules;
     network: Network = clone(emptyNetwork);
     isAdminTemplateUploaded: Boolean
+    fileData: AxiosResponse
 
     addedRows: SectionCommittedProject[] = [];
     updatedRowsMap:Map<string, [SectionCommittedProject, SectionCommittedProject]> = new Map<string, [SectionCommittedProject, SectionCommittedProject]>();//0: original value | 1: updated value
@@ -613,24 +614,25 @@ export default class CommittedProjectsEditor extends Vue  {
             });
      }
 
-     OnGetTemplateClick(){
-        CommittedProjectsService.getUploadedCommittedProjectTemplate()
+      async OnGetTemplateClick(){
+       await CommittedProjectsService.getUploadedCommittedProjectTemplate()
             .then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    FileDownload(convertBase64ToArrayBuffer(response.data), 'Committed Project Template', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                    this.isAdminTemplateUploaded = true;
-                }
-            });
-
-            if(this.isAdminTemplateUploaded = false){
-                 CommittedProjectsService.getCommittedProjectTemplate(this.networkId)
-                 .then((response: AxiosResponse) => {
+                    if(response.data.toString() != ""){
+                        FileDownload(convertBase64ToArrayBuffer(response.data), 'Committed Project Template', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                        this.isAdminTemplateUploaded = true;
+                    }
+                    else{
+                         CommittedProjectsService.getCommittedProjectTemplate(this.networkId)
+                            .then((response: AxiosResponse) => {
                         if (hasValue(response, 'data')) {
                           const fileInfo: FileInfo = response.data as FileInfo;  
                           FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
                         }
                 });
-            }
+                    }
+            });
+
+    
      }
 
      OnAddCommittedProjectClick(){

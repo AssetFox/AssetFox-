@@ -66,7 +66,7 @@
             <v-flex xs6>
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-bottom: 50px !important">
                         <div class="ghd-control-label">
-                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |    
+                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> | Date Modified: {{ modifiedDate }}   
                         <v-badge v-show="isShared">
                             <template v-slot: badge>
                                 <span>Shared</span>
@@ -188,14 +188,14 @@
                                                 <v-card-text
                                                     class='card-tab-content'
                                                 >
-                                                    <PerformanceFactorTab
-                                                        :selectedTreatment='selectedTreatment'
-                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
-                                                        :scenarioId='loadedScenarioId'
+                                                    <ConsequencesTab
+                                                        :selectedTreatmentConsequences='selectedTreatment.consequences'
                                                         :rules='rules'
                                                         :callFromScenario='hasScenario'
                                                         :callFromLibrary='!hasScenario'
-                                                        @onModifyPerformanceFactor='modifySelectedTreatmentPerformanceFactor'
+                                                        @onAddConsequence='addSelectedTreatmentConsequence'
+                                                        @onModifyConsequence='modifySelectedTreatmentConsequence'
+                                                        @onRemoveConsequence='removeSelectedTreatmentConsequence'
                                                     />
                                                 </v-card-text>
                                             </v-card>
@@ -205,14 +205,14 @@
                                                 <v-card-text
                                                     class='card-tab-content'
                                                 >
-                                                    <ConsequencesTab
-                                                        :selectedTreatmentConsequences='selectedTreatment.consequences'
+                                                    <PerformanceFactorTab
+                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
+                                                        :selectedTreatment='selectedTreatment'
+                                                        :scenarioId='loadedScenarioId'
                                                         :rules='rules'
                                                         :callFromScenario='hasScenario'
                                                         :callFromLibrary='!hasScenario'
-                                                        @onAddConsequence='addSelectedTreatmentConsequence'
-                                                        @onModifyConsequence='modifySelectedTreatmentConsequence'
-                                                        @onRemoveConsequence='removeSelectedTreatmentConsequence'
+                                                        @onModifyPerformanceFactor='modifySelectedTreatmentPerformanceFactor'
                                                     />
                                                 </v-card-text>
                                             </v-card>
@@ -498,7 +498,7 @@ export default class TreatmentEditor extends Vue {
     selectedTreatment: Treatment = clone(emptyTreatment);
     selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     activeTab: number = 0;
-    treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Performance Factor', 'Consequences'];
+    treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences'];
     createTreatmentLibraryDialogData: CreateTreatmentLibraryDialogData = clone(
         emptyCreateTreatmentLibraryDialogData,
     );
@@ -548,6 +548,7 @@ export default class TreatmentEditor extends Vue {
     loadedParentId: string  = this.uuidNIL;
     newLibrarySelection: boolean = false;
     newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
+    modifiedDate: string;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -566,7 +567,7 @@ export default class TreatmentEditor extends Vue {
                 vm.getSimpleScenarioSelectableTreatmentsAction(vm.selectedScenarioId);
                 vm.getTreatmentLibraryBySimulationIdAction(vm.selectedScenarioId);
                 vm.getScenarioPerformanceCurvesAction(vm.selectedScenarioId);
-                vm.treatmentTabs = [...vm.treatmentTabs, 'Budgets'];
+                vm.treatmentTabs = [...vm.treatmentTabs, 'Performance Factor', 'Budgets'];
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId, }).then(()=> {
                     vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
                         vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });   
@@ -600,7 +601,7 @@ export default class TreatmentEditor extends Vue {
         this.budgets = clone(this.stateScenarioSimpleBudgetDetails);
     }
 
-    
+  
     @Watch('stateTreatmentLibraries')
     onStateTreatmentLibrariesChanged() {
         this.librarySelectItems = this.stateTreatmentLibraries.map(
@@ -638,11 +639,13 @@ export default class TreatmentEditor extends Vue {
         this.setParentLibraryName(this.librarySelectItemValue ? this.librarySelectItemValue : this.parentLibraryId);
         this.scenarioLibraryIsModified = false;
         this.newLibrarySelection = true;
+
     }
     onSelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue;
         this.selectTreatmentLibraryAction({
             libraryId: this.librarySelectItemValue,
+            
         });
     
         if(!isNil(this.librarySelectItemValue)){
@@ -730,7 +733,16 @@ export default class TreatmentEditor extends Vue {
             else if(!isNil(addedRow)){
                 this.selectedTreatment = clone(addedRow);
             }               
-            else if(this.hasSelectedLibrary)
+            else if(this.hasSelectedLibrary){
+                if(!isNil(this.librarySelectItemValue))
+                    TreatmentService.getTreatmentLibraryModifiedDate(this.librarySelectItemValue).then(response => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                        {
+                            var data = response.data as string;
+                            this.modifiedDate = data.slice(0, 10);
+                        }
+                    })
+
                 TreatmentService.getSelectedTreatmentById(this.treatmentSelectItemValue).then((response: AxiosResponse) => {
                     if(hasValue(response, 'data')) {
                         var data = response.data as Treatment;
@@ -739,6 +751,9 @@ export default class TreatmentEditor extends Vue {
                             this.treatmentCache.push(data)
                     }
                 })
+            }
+
+            
             else if(!isNil(treatment))
                 this.selectedTreatment = clone(treatment);
             else
@@ -771,6 +786,7 @@ export default class TreatmentEditor extends Vue {
             criterionLibrary: this.selectedTreatment.criterionLibrary,
             category: this.selectedTreatment.category,
             assetType: this.selectedTreatment.assetType,
+            isUnselectable: this.selectedTreatment.isUnselectable,
         };
 
         this.isNoTreatmentSelected = this.selectedTreatment.name == 'No Treatment';
@@ -976,6 +992,7 @@ export default class TreatmentEditor extends Vue {
                 },
                 scenarioId: null
         }
+
         TreatmentService.upsertTreatmentLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges();              
@@ -1009,6 +1026,7 @@ export default class TreatmentEditor extends Vue {
                 criterionLibrary: treatmentDetails.criterionLibrary,
                 category: treatmentDetails.category,
                 assetType: treatmentDetails.assetType,
+                isUnselectable: treatmentDetails.isUnselectable,
             });
         }
     }
@@ -1106,11 +1124,10 @@ export default class TreatmentEditor extends Vue {
     }
 
     modifySelectedTreatment(treatment: Treatment) {
-        this.selectedTreatment = treatment;
-
-        this.onUpdateRow(treatment.id, treatment);
-        this.checkHasUnsavedChanges();
-    }
+    this.selectedTreatment = treatment;
+    this.onUpdateRow(treatment.id, treatment);
+    this.checkHasUnsavedChanges();
+}
 
     onDiscardChanges() {
         this.treatmentSelectItemValue = "";
@@ -1305,13 +1322,13 @@ export default class TreatmentEditor extends Vue {
     }
 
     checkHasUnsavedChanges(){
-        const hasUnsavedChanges: boolean = 
-            this.addedRows.length > 0 ||
-            this.updatedRowsMap.size > 0 || 
-            (this.hasScenario && this.hasSelectedLibrary) ||
-            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.stateSelectedTreatmentLibrary, this.selectedTreatmentLibrary))
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-    }
+    const hasUnsavedChanges: boolean =
+        this.addedRows.length > 0 ||
+        this.updatedRowsMap.size > 0 ||
+        (this.hasScenario && this.hasSelectedLibrary) ||
+        (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.stateSelectedTreatmentLibrary, this.selectedTreatmentLibrary)) 
+    this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+}
 
     CheckUnsavedDialog(next: any, otherwise: any) {
         if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {

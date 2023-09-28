@@ -287,7 +287,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.InvestmentPlan)
                 // committed projects
                 .Include(_ => _.CommittedProjects)
-                .ThenInclude(_ => _.CommittedProjectConsequences)
                 .Include(_ => _.CommittedProjects)
                 .ThenInclude(_ => _.ScenarioBudget)
                 .Include(_ => _.CommittedProjects)
@@ -548,16 +547,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         _unitOfWork.Context.ReInitializeAllEntityBaseProperties(committedProject,
                             _unitOfWork.UserEntity?.Id);
 
-                        if (committedProject.CommittedProjectConsequences.Any())
-                        {
-                            committedProject.CommittedProjectConsequences.ForEach(consequence =>
-                            {
-                                consequence.Id = Guid.NewGuid();
-                                consequence.CommittedProjectId = committedProject.Id;
-                                _unitOfWork.Context.ReInitializeAllEntityBaseProperties(consequence,
-                                    _unitOfWork.UserEntity?.Id);
-                            });
-                        }
 
                         if (committedProject.CommittedProjectLocation != null)
                         {
@@ -1016,15 +1005,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(simulationToClone.CommittedProjects.ToList());
                 var committedProjectLocations = simulationToClone.CommittedProjects.Select(_ => _.CommittedProjectLocation).ToList();
                 _unitOfWork.Context.AddAll(committedProjectLocations);
-                // add committed project consequences
-                if (simulationToClone.CommittedProjects.Any(_ => _.CommittedProjectConsequences.Any()))
-                {
-                    _unitOfWork.Context.AddAll(simulationToClone.CommittedProjects
-                        .Where(_ => _.CommittedProjectConsequences.Any())
-                        .SelectMany(_ => _.CommittedProjectConsequences
-                            .Select(consequence => consequence))
-                        .ToList());
-                }
             }
 
             // add performance curves

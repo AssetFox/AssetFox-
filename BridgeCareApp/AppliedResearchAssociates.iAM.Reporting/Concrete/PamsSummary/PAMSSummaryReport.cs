@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
@@ -10,9 +9,8 @@ using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.Reporting.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.CountySummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.GraphTabs;
@@ -24,7 +22,6 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNa
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.UnfundedPavementProjects;
 using BridgeCareCore.Services;
 using OfficeOpenXml;
-
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -38,11 +35,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly PavementWorkSummary _pavementWorkSummary;
         private readonly PavementWorkSummaryByBudget _pavementWorkSummaryByBudget;
         private readonly UnfundedPavementProjects _unfundedPavementProjects;
-
         private readonly CountySummary _countySummary;
-
         private readonly AddGraphsInTabs _addGraphsInTabs;
         private readonly SummaryReportGlossary _summaryReportGlossary;
+        private readonly ReportHelper _reportHelper;
 
         private Guid _networkId;
 
@@ -62,6 +58,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
+        public string Criteria { get; set; }
+
         public string Suffix => throw new NotImplementedException();
 
         public PAMSSummaryReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
@@ -80,6 +78,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _countySummary = new CountySummary();
             _addGraphsInTabs = new AddGraphsInTabs();
             _summaryReportGlossary = new SummaryReportGlossary();
+            _reportHelper = new ReportHelper(_unitOfWork);
 
             //check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -88,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             ID = (Guid)reportId;
             Errors = new List<string>();
             Status = "Report definition created.";
-            Results = String.Empty;
+            Results = string.Empty;
             IsComplete = false;
         }
 
@@ -104,7 +103,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Determine the Guid for the simulation and set simulation id
-            if (!Guid.TryParse(parameters, out Guid _simulationId))
+            string simulationId = ReportHelper.GetSimulationId(parameters);
+            if (!Guid.TryParse(simulationId, out Guid _simulationId))
             {
                 Errors.Add("Simulation ID could not be parsed to a Guid");
                 IndicateError();
@@ -146,7 +146,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var summaryReportPath = "";
             try
             {
+                Criteria = ReportHelper.GetCriteria(parameters);
                 summaryReportPath = GenerateSummaryReport(_networkId, _simulationId, workQueueLog, cancellationToken);
+                if (!string.IsNullOrEmpty(Criteria) && string.IsNullOrEmpty(summaryReportPath))
+                {
+                    var errorStatus = "No assets found for given criteria";
+                    IndicateError(errorStatus);
+                    Errors.Add(errorStatus);
+                    return;
+                }
             }
             catch (Exception e)
             {
@@ -187,13 +195,27 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
 
+            // reportOutputData will have all assets data, filter it based on criteria expression
+            if (!string.IsNullOrEmpty(Criteria))
+            {
+                var criteriaValidationResult = _reportHelper.FilterReportOutputData(reportOutputData, networkId, Criteria);
+
+                if (!reportOutputData.InitialAssetSummaries.Any())
+                {
+                    reportDetailDto.Status = "Failed to generate report due to no assets found for given criteria";
+                    workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+                    UpdateSimulationAnalysisDetail(reportDetailDto);
+
+                    return string.Empty;
+                }
+            }
+                        
             var simulationYears = new List<int>();
             foreach (var item in reportOutputData.Years) {
                 simulationYears.Add(item.Year);
             }
 
             var simulationYearsCount = simulationYears.Count;
-
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
@@ -325,6 +347,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 Status = $""
             };
             UpsertSimulationReportDetail(reportDetailDto);
+        }
+
+        private void IndicateError(string status = null)
+        {
+            Status = status ?? "Summary output report completed with errors";
+            IsComplete = true;
         }
     }
 }

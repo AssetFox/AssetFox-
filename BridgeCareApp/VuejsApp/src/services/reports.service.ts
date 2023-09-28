@@ -11,7 +11,15 @@ export default class ReportsService {
             responseType: 'text'
         });
     }
-
+    static generateReportWithCriteria(scenarioId: string, expression: string, reportType:string): AxiosPromise {
+        return coreAxiosInstance.request({
+            method: 'POST',
+            url: `${API.Report}/GetFile/${reportType}`,
+            headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
+            data: {'scenarioId':scenarioId, 'expression':expression},
+            responseType: 'text'
+        });
+    }
     static downloadSimulationLog(networkId: string, scenarioId: string): AxiosPromise {
         return coreAxiosInstance.request({
             method: 'POST',

@@ -102,6 +102,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
+        public DateTime GetLibraryModifiedDate(Guid remainingLibraryId)
+        {
+            var dtos = _unitOfWork.Context.RemainingLifeLimitLibrary.Where(_ => _.Id == remainingLibraryId).FirstOrDefault().LastModifiedDate;
+            return dtos;
+        }
         public List<RemainingLifeLimitLibraryDTO> GetAllRemainingLifeLimitLibrariesNoChildren()
         {
             if (!_unitOfWork.Context.RemainingLifeLimitLibrary.Any())

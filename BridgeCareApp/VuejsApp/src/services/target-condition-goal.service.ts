@@ -20,6 +20,11 @@ export default class TargetConditionGoalService {
         );
     }
 
+    static getTargetLibraryDate(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.TargetConditionGoal}/GetTargetLibraryModifiedDate/${libraryId}`);
+    }
+
+
     static getLibraryTargetConditionGoalPage(libraryId: string, data:PagingRequest<TargetConditionGoal>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.TargetConditionGoal}/GetLibraryTargetConditionGoalPage/${libraryId}`, data

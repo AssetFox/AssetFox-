@@ -68,10 +68,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         Category = convertedCategory,
                         LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
                     };
-                    foreach (var consequence in entity.CommittedProjectConsequences)
-                    {
-                        commit.Consequences.Add(consequence.ToDTO());
-                    }
                     return commit;
                 default:
                     throw new ArgumentException($"Location type of {entity.CommittedProjectLocation.Discriminator} is not supported.");
@@ -91,12 +87,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Category = dto.Category.ToString(),
                 Year = dto.Year,
-                CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
             };
-            foreach (var consequence in dto.Consequences)
-            {
-                result.CommittedProjectConsequences.Add(consequence.ToEntity(attributes));
-            }
                         
             if (dto is SectionCommittedProjectDTO)
             {                
@@ -217,26 +208,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));
             committedProject.Id = entity.Id;
             committedProject.Name = entity.Name;
-            committedProject.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
-            committedProject.ShadowForSameTreatment = entity.ShadowForSameTreatment;
             committedProject.Cost = entity.Cost; 
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
             committedProject.LastModifiedDate = entity.LastModifiedDate;
-            if (entity.CommittedProjectConsequences.Any())
-            {
-                entity.CommittedProjectConsequences.ForEach(_ =>
-                {
-                    _.CreateCommittedProjectConsequence(committedProject);
-                    var numberAttributes = simulation.Network.Explorer.NumberAttributes;
-                    foreach (var attribute in numberAttributes)
-                    {
-                        if (attribute.Name == _.Attribute.Name)
-                        {
-                            committedProject.PerformanceCurveAdjustmentFactors.Add(attribute, _.PerformanceFactor);
-                        }
-                    }
-                });
-            }
+
             if (noTreatmentForCommittedProjects)
             {
                 int startYear = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
@@ -249,8 +224,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         var projectToAdd = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, year));
                         projectToAdd.Id = Guid.NewGuid();
                         projectToAdd.Name = noTreatmentEntity.Name;
-                        projectToAdd.ShadowForAnyTreatment = 0;
-                        projectToAdd.ShadowForSameTreatment = 0;
                         projectToAdd.Cost = noTreatmentDefaultCost;
                         projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
                         //projectToAdd.Budget = null;  // This would be the better way, but it fails vaildation
@@ -267,12 +240,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 }
                 
             }
-        }
-       
-        private static SelectableTreatment MapNoTreatmentToDomain(Simulation simulation, SelectableTreatmentEntity noTreatmentEntity)
-        {
-            var domain = simulation.AddTreatment();
-            throw new NotImplementedException();
         }
     }
 }

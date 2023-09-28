@@ -4,6 +4,8 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using System;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {
@@ -12,12 +14,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         private SummaryReportHelper _summaryReportHelper;
         private TreatmentCommon _treatmentCommon;
         private ReportHelper _reportHelper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UnfundedTreatmentCommon()
+        public UnfundedTreatmentCommon(IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _summaryReportHelper = new SummaryReportHelper();
-            _treatmentCommon = new TreatmentCommon();
-            _reportHelper = new ReportHelper();
+            _treatmentCommon = new TreatmentCommon(_unitOfWork);
+            _reportHelper = new ReportHelper(_unitOfWork);
         }
 
         public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment)

@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var keyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
             var rawNetwork = _unitOfWork.NetworkRepo.GetRawNetwork();
             var rawKeyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetRawKeyFields();
-            
+
             var keyDatumFields = _unitOfWork.Context.Attribute
                 .Where(_ => keyDatumFieldNames.Contains(_.Name))
                 .Select(_ => new {_.Id, _.Name, Type = _.DataType})
@@ -58,9 +58,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     keyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, dataValue) });
                 }
 
-                if (reportTypeParam[0].Contains("(P)"))
+                if (reportTypeParam != null)
                 {
-                    KeyProperties.Add(attribute.Name, keyFieldValue);
+                    if(reportTypeParam.Count() > 0)
+                    {
+                        if (reportTypeParam[0].Contains("(P)"))
+                        {
+                            KeyProperties.Add(attribute.Name, keyFieldValue);
+                        }
+                    }
                 }
             }
 
@@ -139,12 +145,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var datumValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
                     rawKeyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, datumValue)});
                 }
-                
-               if (reportTypeParam[0].Contains("(R)"))
-                {
-                    KeyProperties.Add(attribute.Name, rawKeyFieldValue);
-                }
 
+                if (reportTypeParam != null)
+                {
+                    if (reportTypeParam.Count() > 0)
+                    {
+                        if (reportTypeParam[0].Contains("(R)"))
+                        {
+                            KeyProperties.Add(attribute.Name, rawKeyFieldValue);
+                        }
+                    }
+                }
             }
         }
 

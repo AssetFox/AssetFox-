@@ -12,6 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void GetScenarioSelectableTreatments(Simulation simulation);
 
+        DateTime GetLibraryModifiedDate(Guid treatmentLibraryId);
+
         List<TreatmentLibraryDTO> GetAllTreatmentLibraries();
 
         void UpsertTreatmentLibrary(TreatmentLibraryDTO dto);

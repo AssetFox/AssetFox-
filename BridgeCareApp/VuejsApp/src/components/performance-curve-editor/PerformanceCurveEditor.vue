@@ -83,7 +83,7 @@
                                 v-if='hasSelectedLibrary && !hasScenario'
                                 class="ghd-control-label ghd-md-gray"
                             > 
-                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }} |
+                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                             <v-badge v-show="isShared">
                             <template v-slot: badge>
                                 <span>Shared</span>
@@ -626,6 +626,7 @@ export default class PerformanceCurveEditor extends Vue {
     hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
     librarySelectItems: SelectItem[] = [];
+    modifiedDate: string; 
     
     performanceCurveGridHeaders: DataTableHeader[] = [
         {
@@ -731,13 +732,15 @@ export default class PerformanceCurveEditor extends Vue {
                             if(response.data){
                                 vm.setAlertMessageAction("A performance curve import has been added to the work queue")
                             }
-                        })
-                        vm.initializePages();
-
-                        vm.hasScenario = true;
-                        vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                            vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                            vm.initializePages().then(() =>{
+                                vm.hasScenario = true;
+                                vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                                    vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                            });
                         });
+                            
+                        })
+
                     }
 
                     
@@ -800,7 +803,16 @@ export default class PerformanceCurveEditor extends Vue {
         }          
         else if(this.hasSelectedLibrary){
             this.isRunning = true;
-            await PerformanceCurveService.GetLibraryPerformanceCurvePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+
+            await PerformanceCurveService.getPerformanceLibraryModifiedDate(this.selectedPerformanceCurveLibrary.id).then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.modifiedDate = data.slice(0, 10);
+                   }
+             });
+
+             await PerformanceCurveService.GetLibraryPerformanceCurvePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
                     this.currentPage = data.items;
@@ -1129,18 +1141,19 @@ export default class PerformanceCurveEditor extends Vue {
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
             addedRows: this.addedRows,
             isModified: this.scenarioLibraryIsModified
-        }, this.selectedScenarioId).then((response: AxiosResponse) => {
+        }, this.selectedScenarioId).then(async (response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
                 this.clearChanges()
-                this.resetPage();
+                this.performancePagination.page = 1;
+                await this.onPaginationChanged();
                 this.addSuccessNotificationAction({message: "Modified scenario's deterioration models"});
                 this.librarySelectItemValue = null
             }           
         });
     }
 
-    onUpsertPerformanceCurveLibrary() { // need to do upsert things
+    onUpsertPerformanceCurveLibrary() { 
         const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
                 library: this.selectedPerformanceCurveLibrary,
                 isNewLibrary: false,

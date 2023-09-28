@@ -17,7 +17,7 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout row v-show='hasSelectedLibrary || hasScenario' class="shared-owner-flex-padding">
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
                         <v-divider class="owner-shared-divider" inset vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
@@ -307,6 +307,7 @@ export default class BudgetPriorityEditor extends Vue {
     librarySelectItems: SelectItem[] = [];
     shareBudgetPriorityLibraryDialogData: ShareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
     isShared: boolean = false;
+    dateModified: string;
 
     selectedBudgetPriorityLibrary: BudgetPriorityLibrary = clone(emptyBudgetPriorityLibrary);
     budgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
@@ -453,7 +454,7 @@ export default class BudgetPriorityEditor extends Vue {
     }
 
     @Watch('pagination')
-    onPaginationChanged() {
+    async onPaginationChanged() {
         if(this.initializing)
             return;
         this.checkHasUnsavedChanges();
@@ -473,7 +474,7 @@ export default class BudgetPriorityEditor extends Vue {
             search: this.currentSearch
         };
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            BudgetPriorityService.getScenarioBudgetPriorityPage(this.selectedScenarioId, request).then(response => {
+            await BudgetPriorityService.getScenarioBudgetPriorityPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
                     this.currentPage = data.items;
@@ -483,7 +484,14 @@ export default class BudgetPriorityEditor extends Vue {
                 }
             });
         else if(this.hasSelectedLibrary)
-             BudgetPriorityService.getLibraryBudgetPriorityPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+             await BudgetPriorityService.getBudgetPriorityLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      this.dateModified = data.slice(0, 10);
+                   }
+             }),
+             await BudgetPriorityService.getLibraryBudgetPriorityPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
                     this.currentPage = data.items;

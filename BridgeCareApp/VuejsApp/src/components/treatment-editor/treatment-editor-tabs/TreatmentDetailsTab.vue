@@ -186,10 +186,14 @@
                             </v-card-text>
                         </v-card>
                     </v-menu>
-                </v-flex>      
+                    <v-switch
+                        v-model="TreatmentIsUnSelectable"
+                        label="Mark treatment as unselectable by scenario engine"
+                        style="margin-left: 10px; margin-top: 30px;"
+                    ></v-switch>    
+                </v-flex>              
             </v-layout>
-        </v-flex>
-
+        </v-flex>   
         <GeneralCriterionEditorDialog
             :dialogData="treatmentCriterionEditorDialogData"
             @submit="onSubmitTreatmentCriterionEditorDialogResult"
@@ -210,7 +214,7 @@ import {
     treatmentCategoryMap,
     assetTypeMap,
     treatmentCategoryReverseMap,
-    assetTypeReverseMap
+    assetTypeReverseMap,
 } from '@/shared/models/iAM/treatment';
 import {
     CriterionLibrary,
@@ -242,12 +246,27 @@ export default class TreatmentDetailsTab extends Vue {
     treatmentCategoryBinding: string = '';
     assetTypeMap: Map<string, AssetType> = clone(assetTypeMap);
     assetTypeBinding: string = '';
+    TreatmentIsUnSelectable: boolean = false;
 
     @Watch('selectedTreatmentDetails')
-    onSelectedTreatmentDetailsChanged(){
-        this.treatmentCategoryBinding = treatmentCategoryReverseMap.get(this.selectedTreatmentDetails.category)!;
-        this.assetTypeBinding = this.assetTypeReverseMap.get(this.selectedTreatmentDetails.assetType)!;
-    }
+onSelectedTreatmentDetailsChanged(){
+  this.treatmentCategoryBinding = treatmentCategoryReverseMap.get(this.selectedTreatmentDetails.category)!;
+  this.assetTypeBinding = this.assetTypeReverseMap.get(this.selectedTreatmentDetails.assetType)!;
+  this.TreatmentIsUnSelectable = this.selectedTreatmentDetails.isUnselectable;
+}
+
+@Watch('TreatmentIsUnSelectable')
+onToggleIsUnSelectable(value: boolean) {
+  console.log('onToggleIsUnSelectable called with value:', value);
+  this.$emit(
+    'onModifyTreatmentDetails',
+    setItemPropertyValue(
+      'isUnselectable',
+      value,
+      this.selectedTreatmentDetails,
+    ),
+  );
+}
 
     onShowTreatmentCriterionEditorDialog() {
         this.treatmentCriterionEditorDialogData = {

@@ -50,7 +50,7 @@
                             <td>
                                 <v-text-field readonly single-line class='sm-txt'
                                               :value='props.criterionLibrary.mergedCriteriaExpression'>
-                                    <template slot='append-outer'>
+                                    <template slot='append-inner'>
                                         <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" icon style="margin-top:-6px;">
                                             <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-btn>                                        

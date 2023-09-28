@@ -334,7 +334,7 @@
                                     </v-btn>
                                 </td>
                             </template>
-                            <template v-slot:body.append>
+                            <template v-slot:body.append-inner>
                             <v-btn>Append button</v-btn>
                             </template>                               
                         </v-data-table>

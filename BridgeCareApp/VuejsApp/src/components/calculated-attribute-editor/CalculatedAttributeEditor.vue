@@ -110,7 +110,7 @@
                             class="sm-txt"
                             v-model="defaultEquation.equation.expression"
                             :disabled="!hasAdminAccess">
-                            <template slot="append-outer">
+                            <template slot="append">
                                 <v-btn
                                     id="CalculatedAttribute-defaultEquationEditor-btn"
                                     @click="onShowEquationEditorDialogForDefaultEquation()"
@@ -144,7 +144,7 @@
                             class="sm-txt"
                             :value="props.item.equation"
                             :disabled="!hasAdminAccess">
-                            <template slot="append-outer">
+                            <template slot="append">
                                 <v-btn
                                     @click="onShowEquationEditorDialog(props.item.id)"
                                     class="ghd-blue"
@@ -161,7 +161,7 @@
                             class="sm-txt"
                             :value="props.item.criteriaExpression"
                             :disabled="!hasAdminAccess">
-                            <template slot="append-outer">
+                            <template slot="append">
                                 <v-btn
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
                                     class="ghd-blue"

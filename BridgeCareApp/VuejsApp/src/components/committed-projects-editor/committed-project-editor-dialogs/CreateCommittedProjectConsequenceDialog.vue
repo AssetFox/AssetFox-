@@ -6,7 +6,7 @@
           <div class="ghd-control-dialog-header">Add Consequence</div>
           <v-btn 
               id="CreateCommittedProjectConsequenceDialog-close-vbtn"
-              @click="onSubmit(false)" flat class="ghd-close-button">
+              @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
           </v-btn>
         </v-layout>
@@ -38,10 +38,10 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row>
-          <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
+          <v-btn @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn >
-          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" variant = "outline" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>         
         </v-layout>

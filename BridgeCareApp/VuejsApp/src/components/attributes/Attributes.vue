@@ -12,7 +12,7 @@
                             v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
                     </v-layout>
-                    <v-btn id="Attributes-addAttribute-vbtn" style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                    <v-btn id="Attributes-addAttribute-vbtn" style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline">
                         Add Attribute
                     </v-btn>
                 </v-layout>
@@ -141,7 +141,7 @@
         <!-- The Buttons  -->
         <v-flex xs12 v-if="hasSelectedAttribute">        
             <v-layout justify-center>
-                <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'>
+                <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
                 <v-btn v-if="selectedAttribute.dataSource.type == 'SQL'" :disabled="selectedAttribute.dataSource.type != 'SQL'" 

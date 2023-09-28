@@ -6,7 +6,7 @@
                     <v-layout justify-left>
                         <h3 class="ghd-title">Create New Treatment Library</h3>
                     </v-layout>
-                    <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+                    <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                         X
                     </v-btn>
                 </v-card-title>

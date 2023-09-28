@@ -30,7 +30,7 @@
                                         right
                                     >
                                         <template slot="activator">
-                                            <v-btn class="ghd-blue" tooltip flat icon>
+                                            <v-btn class="ghd-blue" tooltip variant = "flat" icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>

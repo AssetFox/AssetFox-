@@ -21,7 +21,7 @@
                     return-object
                     v-on:change="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
                     dense
-                    outline
+                    variant = "outline"
                 ></v-select>
                 <v-text-field
                     id="CreateScenarioDialog-scenarioName-textField"

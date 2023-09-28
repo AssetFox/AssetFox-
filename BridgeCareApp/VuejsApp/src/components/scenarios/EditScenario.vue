@@ -45,7 +45,7 @@
                         @click="onShowRunSimulationAlert"
                         depressed
                         block
-                        outlined>
+                        variant = "outline">
                         Run Scenario
                     </v-btn>
                 </div>

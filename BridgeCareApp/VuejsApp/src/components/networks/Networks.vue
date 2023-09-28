@@ -14,7 +14,7 @@
                     </v-layout>
                     <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
                         id="Networks-addNetwork-vbtn"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
                         @click="onAddNetworkDialog">
                         Add Network
                     </v-btn>
@@ -52,7 +52,7 @@
                     </v-select>  
                     <v-btn style="margin-top: 20px !important;" 
                         id="Networks-SelectAllFromSource-vbtn"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
                         @click="selectAllFromSource">
                         Select All From Source
                     </v-btn>                            
@@ -110,13 +110,13 @@
                     <v-layout column>
                         <div class='priorities-data-table' v-show="!isNewNetwork">
                             <v-layout justify-center>
-                                <v-btn id="Networks-AddAll-vbtn" flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                                <v-btn id="Networks-AddAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onAddAll">
                                     Add All
                                 </v-btn>
                                 <v-divider class="investment-divider" inset vertical>
                                 </v-divider>
-                                <v-btn id="Networks-RemoveAll-vbtn" flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                                <v-btn id="Networks-RemoveAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onRemoveAll">
                                     Remove All
                                 </v-btn>
@@ -150,7 +150,7 @@
         <v-flex xs12 v-show="hasSelectedNetwork">        
             <v-layout justify-center style="padding-top: 30px !important">
                 <v-btn id="Networks-Cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
-                    flat class='ghd-blue ghd-button-text ghd-button'>
+                variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
                 <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>

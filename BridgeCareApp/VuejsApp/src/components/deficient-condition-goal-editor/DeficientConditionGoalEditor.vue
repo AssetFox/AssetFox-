@@ -38,7 +38,7 @@
                         <span>Shared</span>
                         </template>
                         </v-badge>
-                        <v-btn id="DeficientConditionGoalEditor-shareLibrary-vbtn" @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn id="DeficientConditionGoalEditor-shareLibrary-vbtn" @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
                             v-show='!hasScenario'>
                             Share Library
                     </v-btn>
@@ -52,13 +52,13 @@
                         @click="showCreateDeficientConditionGoalDialog = true"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="hasSelectedLibrary || hasScenario"
-                        outline>
+                        variant = "outline">
                         Add Deficient Condition Goal
                     </v-btn>
                     <v-btn id="DeficientConditionGoalEditor-createNewLibrary-vbtn" @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
-                        outline>    
+                        variant = "outline">    
                         Create New Library        
                     </v-btn>
                 </v-layout>
@@ -198,7 +198,7 @@
                     :disabled="selectedDeficientConditionGoalIds.length === 0"
                     @click="onRemoveSelectedDeficientConditionGoals"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    flat>
+                    variant = "flat">
                     Delete Selected
             </v-btn>              
             </div>
@@ -228,7 +228,7 @@
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="hasScenario"
                     :disabled="!hasUnsavedChanges"
-                    flat>
+                    variant = "flat">
                     Cancel
                 </v-btn>
                 <v-btn
@@ -237,7 +237,7 @@
                     class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
-                    outline>
+                    variant = "outline">
                     Delete Library
                 </v-btn>    
                 <v-btn
@@ -245,7 +245,7 @@
                     @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     :disabled="disableCrudButtons()"
-                    outline>
+                    variant = "outline">
                     Create as New Library
                 </v-btn>
                 <v-btn

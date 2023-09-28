@@ -5,7 +5,7 @@
         <v-layout justify-center>
           <h3>Calculated Attribute Library Sharing</h3>
         </v-layout>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
       </v-card-title>

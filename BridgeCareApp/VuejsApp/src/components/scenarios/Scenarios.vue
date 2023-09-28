@@ -18,7 +18,7 @@
                     <v-flex xs1></v-flex>
                 </v-tabs>
                 <v-tabs-items v-model="tab">
-                    <v-tab-item>
+                    <v-window-item>
                         <v-flex x12>
                             <v-card elevation="5">
                                 <v-card-title>
@@ -41,14 +41,14 @@
                                             <v-btn id="Scenarios-performSearch-button" 
                                                 style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                outline 
+                                                variant = "outline" 
                                                 @click="onMineSearchClick()">
                                                 Search
                                             </v-btn>
                                             <v-btn id="Scenarios-performFilter-button" 
                                                 style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                outline 
+                                                variant = "outline" 
                                                 @click="showFilterScenarioList = true">
                                                 Filter
                                             </v-btn>
@@ -223,8 +223,8 @@
                                 </v-data-table>
                             </v-card>
                         </v-flex>
-                    </v-tab-item>
-                    <v-tab-item>
+                    </v-window-item>
+                    <v-window-item>
                         <v-flex xs12>
                             <v-card elevation="5">
                                 <v-card-title>
@@ -247,14 +247,14 @@
                                             <v-btn style="margin-top: 2px;" 
                                                 id="Scenarios-shared-performSearch-button"
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                outline 
+                                                variant = "outline" 
                                                 @click="onSharedSearchClick()">
                                                 Search
                                             </v-btn>
                                             <v-btn id="Scenarios-performFilter-button" 
                                                 style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                outline 
+                                                variant = "outline" 
                                                 @click="showSharedFilterScenarioList = true">
                                                 Filter
                                             </v-btn>
@@ -410,8 +410,8 @@
                                 </v-data-table>
                             </v-card>
                         </v-flex>
-                    </v-tab-item>
-                    <v-tab-item>
+                    </v-window-item>
+                    <v-window-item>
                         <v-flex xs12>
                             <v-card elevation="5">
                                 <v-card-title class="ghd-dialog-padding-top-title">
@@ -558,7 +558,7 @@
                                 </v-data-table>
                             </v-card>
                         </v-flex>
-                    </v-tab-item>
+                    </v-window-item>
                 </v-tabs-items>
             </v-card>
         </v-flex>

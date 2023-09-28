@@ -24,7 +24,7 @@
                         <div class="header-text-content invest-owner-padding">
                             Date Modified: {{ modifiedDate }}
                         </div>
-                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
                                v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -35,7 +35,7 @@
                         <v-spacer></v-spacer>
                         <v-btn id="InvestmentEditor-CreateNewLibrary-vbtn" @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
-                        outline>
+                        variant = "outline">
                             Create New Library
                         </v-btn>
                     </v-layout>
@@ -100,7 +100,7 @@
                     <v-layout row>
                         <v-btn id="InvestmentEditor-editBudgets-btn"
                             @click='onShowEditBudgetsDialog'
-                            outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                            variant = "outline" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Edit Budgets
                         </v-btn>
                         <v-text-field id="InvestmentEditor-numberYearsToAdd-textField"
@@ -111,7 +111,7 @@
                         <v-btn id="InvestmentEditor-addBudgetYearRange-btn"
                                :disabled='currentPage.length === 0'
                                @click='onSubmitAddBudgetYearRange'
-                               class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' outline>
+                               class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' variant = "outline">
                             Add Year(s)
                         </v-btn>
                     </v-layout>
@@ -127,21 +127,21 @@
                         <v-spacer></v-spacer>
                         <v-btn id="InvestmentEditor-upload-btn"
                             :disabled='false' @click='showImportExportInvestmentBudgetsDialog = true;'
-                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Upload
                         </v-btn>
                         <v-divider class="investment-divider" inset vertical>
                         </v-divider>
                         <v-btn id="InvestmentEditor-download-btn"
                                :disabled='false' @click='exportInvestmentBudgets()'
-                               flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                               variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Download
                         </v-btn>
                         <v-divider class="upload-download-divider" inset vertical>
                         </v-divider>
                         <v-btn id="InvestmentEditor-downloadTemplate-btn"
                                :disabled='false' @click='OnDownloadTemplateClick()'
-                               flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                               variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Download Template
                         </v-btn>
                     </v-layout>
@@ -198,7 +198,7 @@
                 </v-data-table>
                 <v-btn id="InvestmentEditor-deleteSelected-btn"
                        :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
-                       class='ghd-blue ghd-button' flat>
+                       class='ghd-blue ghd-button' variant = "flat">
                     Delete Selected
                 </v-btn>
             </v-flex>
@@ -218,19 +218,19 @@
         <v-flex xs12>
             <v-layout justify-center row v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn id="InvestmentEditor-cancel-btn"
-                       :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'
+                       :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'
                        v-show='hasScenario'>
                     Cancel
                 </v-btn>
                 <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
-                       @click='onShowConfirmDeleteAlert' flat class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
+                       @click='onShowConfirmDeleteAlert' variant = "flat" class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
                        :disabled='!hasLibraryEditPermission'>
                     Delete Library
                 </v-btn>
                 <v-btn id="InvestmentEditor-createAsNewLibrary-btn"
                        :disabled='disableCrudButton()'
                        @click='onShowCreateBudgetLibraryDialog(true)'
-                       class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                       class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline">
                     Create as New Library
                 </v-btn>
                 <v-btn id="InvestmentEditor-updateLibrary-btn"

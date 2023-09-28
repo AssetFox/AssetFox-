@@ -4,7 +4,7 @@
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-layout justify-space-between align-center >
           <div class="ghd-control-dialog-header">New Budget Priority Library</div>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
         </v-layout>
@@ -24,9 +24,9 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row >       
-          <v-btn id="CreateBudgetPriorityLibraryDialog-cancel-vbtn" @click="onSubmit(false)" outline class='ghd-blue ghd-button-text ghd-button'>Cancel </v-btn>
+          <v-btn id="CreateBudgetPriorityLibraryDialog-cancel-vbtn" @click="onSubmit(false)" variant = "outline" class='ghd-blue ghd-button-text ghd-button'>Cancel </v-btn>
           <v-btn id="CreateBudgetPriorityLibraryDialog-save-vbtn" :disabled="newBudgetPriorityLibrary.name === ''" @click="onSubmit(true)"
-                 outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+          variant = "outline" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>
         </v-layout>

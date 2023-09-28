@@ -5,7 +5,7 @@
         <v-layout justify-center>
           <h5>Deficient Condition Goal Library Sharing</h5>
         </v-layout>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
       </v-card-title>

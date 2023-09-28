@@ -25,7 +25,7 @@
       </v-card-text>
       <v-card-actions>
           <v-layout justify-center row>
-            <v-btn id="CreatePerformanceCurveLibraryDialog-Cancel-vbtn" outline
+            <v-btn id="CreatePerformanceCurveLibraryDialog-Cancel-vbtn" variant = "outline"
                    class="ghd-white-bg ghd-blue ghd-button-text"
                    depressed
                    @click="onSubmit(false)">

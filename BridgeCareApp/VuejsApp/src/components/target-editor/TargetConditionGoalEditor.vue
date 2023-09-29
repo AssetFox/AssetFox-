@@ -12,7 +12,7 @@
                             append-icon=$vuetify.icons.ghd-down
                             outline
                             v-model="librarySelectItemValue"
-                            outlined
+                            variant = "outlined"
                         >
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  

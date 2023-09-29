@@ -75,7 +75,7 @@
                                     </v-btn>
                                 </td>
                             </template>
-                            <template v-slot:body.append>
+                            <template v-slot:body.append-inner>
                             </template>                               
                         </v-data-table>
                     </v-card>

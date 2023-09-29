@@ -1446,7 +1446,7 @@ import { useRouter } from 'vue-router';
     function onStartDataMigration() {
         // the legacy scenario id is hardcoded to our test scenario "JML Run District 8"
         migrateLegacySimulationDataAction({
-            simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
+            simulationId: import.meta.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
         }).then(() => initializeScenarioPages());
     }
 

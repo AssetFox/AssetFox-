@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="65%" min persistent v-model="showDialog">
+  <v-dialog max-width="65%" min persistent v-bind:show="showDialog">
     <v-container fluid grid-list-xl>
         <v-layout>
             <v-flex xs12>

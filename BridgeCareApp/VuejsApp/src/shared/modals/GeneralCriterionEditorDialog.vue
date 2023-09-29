@@ -22,7 +22,7 @@
                 <v-layout justify-center>
                     <v-btn
                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                        depressed
+                        variant = "flat"
                         @click="onSubmit(false)"
                     >
                         Cancel
@@ -30,7 +30,7 @@
                     <v-btn
                         :disabled="!canUpdateOrCreate"
                         class="ghd-blue-bg ghd-white ghd-button-text"
-                        depressed
+                        variant = "flat"
                         @click="onSubmit(true)"
                     >
                         Save

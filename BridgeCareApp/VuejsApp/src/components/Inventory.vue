@@ -33,7 +33,7 @@
                 </v-layout>
                 <v-spacer></v-spacer>
                     <v-btn style="padding-top: 15px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                    outline 
+                    variant ="outline" 
                     @click="resetDropdowns()">
                     Reset Key Fields
                     </v-btn>

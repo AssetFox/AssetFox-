@@ -4,7 +4,7 @@
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-layout justify-space-between align-center>
           <div class="ghd-control-dialog-header">Cash Flow Rule Settings: {{selectedCashFlowRule.name}}</div>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
         </v-layout>
@@ -161,7 +161,7 @@
                 </template>
             </v-data-table>
                 </div>
-                <v-btn @click="onAddCashFlowDistributionRule" class='ghd-blue ghd-button' flat id="CashFlowRuleEditDialog-addDistributionRule-btn">
+                <v-btn @click="onAddCashFlowDistributionRule" class='ghd-blue ghd-button' variant = "flat" id="CashFlowRuleEditDialog-addDistributionRule-btn">
                     Add Distribution Rule
                 </v-btn>
             </div>
@@ -170,13 +170,13 @@
                             
       <v-card-actions>
         <v-layout justify-center row>
-            <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline id="CashFlowRuleEditDialog-cancel-btn">
+            <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" id="CashFlowRuleEditDialog-cancel-btn">
             Cancel
           </v-btn>
           <v-btn @click="onSubmit(true)"
                  :disabled="!hasUnsavedChanges || !isDataValid"
                  id="CashFlowRuleEditDialog-submit-btn"
-                 class='ghd-blue hd-button-text ghd-button' flat>
+                 class='ghd-blue hd-button-text ghd-button' variant = "flat">
             Submit
           </v-btn>         
         </v-layout>

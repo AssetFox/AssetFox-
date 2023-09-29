@@ -16,7 +16,7 @@
                     </v-select>
                 </v-layout>
                 </v-flex>
-                <v-btn id="DataSource-AddDataSource-vbtn" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" outline>Add Data Source</v-btn>
+                <v-btn id="DataSource-AddDataSource-vbtn" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" variant = "outlined">Add Data Source</v-btn>
             </v-layout>
             <v-divider v-show="showMssql || showExcel"></v-divider>
             <v-layout column>
@@ -105,7 +105,7 @@
         </v-layout>
         <v-layout justify-center> 
             <v-flex xs6>
-                <v-btn id="DataSource-Cancel-vbtn" v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
+                <v-btn id="DataSource-Cancel-vbtn" v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" variant = "flat">Cancel</v-btn>
                 <v-btn id="DataSource-Test-vbtn" v-show="showMssql" @click="checkSQLConnection" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
                 <v-btn id="DataSource-Save-vbtn" v-show="showMssql || showExcel" :disabled="disableCrudButtons() || !hasUnsavedChanges" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
                 <v-btn id="DataSource-Load-vbtn" v-show="showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>

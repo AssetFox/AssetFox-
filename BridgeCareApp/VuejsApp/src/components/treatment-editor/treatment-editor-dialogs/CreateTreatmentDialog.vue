@@ -20,7 +20,7 @@
           <v-layout row justify-center>
             <v-btn
               id="CreateTreatmentDialog-cancel-btn"
-              @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel
+              @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel
             </v-btn>
             <v-btn 
               id="CreateTreatmentDialog-save-btn"

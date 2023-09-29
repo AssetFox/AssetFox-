@@ -29,14 +29,14 @@
           <v-layout justify-center row>
             <v-btn
                    class="ghd-white-bg ghd-blue ghd-button-text"
-                   depressed
+                   variant = "flat"
                    @click="onSubmit(false)">
               Cancel
             </v-btn>
             <v-btn :disabled="newCriterionLibrary.name === ''"
                    class="ghd-blue-bg ghd-white ghd-button-text"
                    @click="onSubmit(true)"
-                   depressed                   
+                   variant = "flat"                   
                    >
               Save
             </v-btn>

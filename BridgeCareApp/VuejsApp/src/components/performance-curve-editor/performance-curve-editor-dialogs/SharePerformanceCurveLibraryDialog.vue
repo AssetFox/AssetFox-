@@ -5,7 +5,7 @@
         <v-layout justify-center>
           <h3>Performance Curve Library Sharing</h3>
         </v-layout>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
       </v-card-title>
@@ -36,7 +36,7 @@
       </v-card-text>
       <v-card-actions>
         <v-layout row justify-center>
-          <v-btn id="SharePerformanceCurveLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel</v-btn>
+          <v-btn id="SharePerformanceCurveLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
           <v-btn id="SharePerformanceCurveLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>

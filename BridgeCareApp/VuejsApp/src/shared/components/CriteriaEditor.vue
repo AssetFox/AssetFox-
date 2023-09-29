@@ -45,7 +45,7 @@
                                     id="CriteriaEditor-addSubCriteria-btn"
                                     @click="onAddSubCriteria"
                                     class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"    
-                                    depressed                                
+                                    variant = "flat"                                
                                     >Add Subcriteria
                                 </v-btn>
                             </v-layout>
@@ -107,7 +107,7 @@
                                         :disabled="onDisableCheckOutputButton()"
                                         @click="onCheckCriteria"
                                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                        depressed
+                                        variant = "flat"
                                     >
                                         Check Output
                                     </v-btn>
@@ -167,7 +167,7 @@
                                 <v-tab @click="onParseSubCriteriaJson" ripple id="CriteriaEditor-rawView-tab">
                                     Raw Criteria
                                 </v-tab>
-                                <v-tab-item>
+                                <v-window-item>
                                     <vue-query-builder 
                                         id="CriteriaEditor-criteria-vuequerybuilder"
                                         :labels="queryBuilderLabels"
@@ -178,8 +178,8 @@
                                         v-model="selectedSubCriteriaClause"
                                     >
                                     </vue-query-builder>
-                                </v-tab-item>
-                                <v-tab-item>
+                                </v-window-item>
+                                <v-window-item>
                                     <v-textarea
                                         id="CriteriaEditor-rawText-vtextarea"
                                         no-resize
@@ -188,7 +188,7 @@
                                         v-model="selectedRawSubCriteriaClause"
                                         class="ghd-control-text"
                                     ></v-textarea>
-                                </v-tab-item>
+                                </v-window-item>
                             </v-tabs>
                         </v-card-text>
                         <v-card-actions
@@ -224,7 +224,7 @@
                                         "
                                         @click="onCheckSubCriteria"
                                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                        depressed
+                                        variant = "flat"
                                     >
                                         Update Subcriteria
                                     </v-btn>

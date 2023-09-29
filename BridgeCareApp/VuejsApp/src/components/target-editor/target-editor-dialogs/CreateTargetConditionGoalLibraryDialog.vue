@@ -31,8 +31,8 @@
         <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
           <v-btn @click="onSubmit(false)"
            id="CreateTargetConditionGoalLibraryDialog-Cancel-btn"
-           class="ghd-white-bg ghd-blue" outline>Cancel</v-btn>
-          <v-btn :disabled="newTargetConditionGoalLibrary.name ===''" @click="onSubmit(true)" outline
+           class="ghd-white-bg ghd-blue" variant = "outlined">Cancel</v-btn>
+          <v-btn :disabled="newTargetConditionGoalLibrary.name ===''" @click="onSubmit(true)" variant = "outlined"
                  class="ghd-white-bg ghd-blue"
                  id="CreateTargetConditionGoalLibraryDialog-Save-btn">
             Save

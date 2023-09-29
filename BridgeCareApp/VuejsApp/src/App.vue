@@ -11,7 +11,7 @@
                         id="App-scenarios-btn"
                         @click="onNavigate('/Scenarios/')"
                         class="ara-blue-pantone-281"
-                        flat                        
+                        variant = "flat"                     
                     >
                         Scenarios
                     </v-btn>                   
@@ -19,7 +19,7 @@
                         id="App-libraries-btn"
                         @click="onNavigate('/EditLibrary/')"
                         class="ara-blue-pantone-281"
-                        flat
+                        variant = "flat"
                     >
                         Libraries
                     </v-btn>
@@ -27,7 +27,7 @@
                         id="App-rawData-btn"
                         @click="onNavigate('/EditRawData/')"
                         class="ara-blue-pantone-281"
-                        flat
+                        variant = "flat"
                         v-if="hasAdminAccess"
                     >
                         Raw Data
@@ -36,7 +36,7 @@
                         id="App-administration-btn"
                         @click="onNavigate('/EditAdmin/')"
                         class="ara-blue-pantone-281"
-                        flat
+                        variant = "flat"
                         v-if="hasAdminAccess"
                     >
                         Administration
@@ -45,7 +45,7 @@
                         id="App-inventory-btn"
                         @click="onNavigate('/Inventory/')"
                         class="ara-blue-pantone-281"
-                        flat
+                        variant = "flat"
                     >
                         Inventory
                     </v-btn>
@@ -53,7 +53,7 @@
                         id="App-news-btn"
                         @click="onShowNewsDialog()"
                         class="ara-blue-pantone-281"
-                        flat
+                        variant = "flat"
                     >
                         News
                         <v-icon v-if="hasUnreadNewsItem" size="13" class="news-notification">fas fa-exclamation-circle</v-icon>
@@ -62,7 +62,7 @@
                 <v-spacer></v-spacer>
                 <v-toolbar-title class="white--text">
                     <v-menu
-                        offset-y
+                        offset-
                         min-width="20%"
                         max-width="20%"
                         max-height="75%"

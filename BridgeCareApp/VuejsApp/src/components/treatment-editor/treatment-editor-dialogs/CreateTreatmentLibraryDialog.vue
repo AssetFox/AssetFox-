@@ -29,7 +29,7 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-layout row justify-center>
-                        <v-btn outline @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed
+                        <v-btn outline @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat"
                             >Cancel</v-btn
                         >
                         <v-btn

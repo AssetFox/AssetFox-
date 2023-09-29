@@ -41,14 +41,14 @@
                                             <v-btn id="Scenarios-performSearch-button" 
                                                 style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                variant = "outline" 
+                                                variant = "outlined" 
                                                 @click="onMineSearchClick()">
                                                 Search
                                             </v-btn>
                                             <v-btn id="Scenarios-performFilter-button" 
                                                 style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                variant = "outline" 
+                                                variant = "outlined" 
                                                 @click="showFilterScenarioList = true">
                                                 Filter
                                             </v-btn>
@@ -247,14 +247,14 @@
                                             <v-btn style="margin-top: 2px;" 
                                                 id="Scenarios-shared-performSearch-button"
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                variant = "outline" 
+                                                variant = "outlined" 
                                                 @click="onSharedSearchClick()">
                                                 Search
                                             </v-btn>
                                             <v-btn id="Scenarios-performFilter-button" 
                                                 style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                variant = "outline" 
+                                                variant = "outlined" 
                                                 @click="showSharedFilterScenarioList = true">
                                                 Filter
                                             </v-btn>

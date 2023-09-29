@@ -12,7 +12,7 @@
                             v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
                     </v-layout>
-                    <v-btn id="Attributes-addAttribute-vbtn" style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline">
+                    <v-btn id="Attributes-addAttribute-vbtn" style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                         Add Attribute
                     </v-btn>
                 </v-layout>

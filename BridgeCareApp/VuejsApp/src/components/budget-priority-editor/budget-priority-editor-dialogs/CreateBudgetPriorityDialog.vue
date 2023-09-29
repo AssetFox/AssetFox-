@@ -25,7 +25,7 @@
           <v-btn id="CreateBudgetPriorityDialog-cancel-vbtn" @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn >
-          <v-btn id="CreateBudgetPriorityDialog-save-vbtn" :disabled="disableSubmitButton()" @click="onSubmit(true)" variant = "outline" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+          <v-btn id="CreateBudgetPriorityDialog-save-vbtn" :disabled="disableSubmitButton()" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>         
         </v-layout>

@@ -16,7 +16,7 @@
                     <v-btn 
                     id="Alert-Cancel-vbtn"
                     @click="onReturn('cancel')" 
-                    class="ghd-blue ghd-button" variant = "outline">
+                    class="ghd-blue ghd-button" variant = "outlined">
                         Cancel
                     </v-btn>
                     <v-btn 
@@ -28,7 +28,7 @@
                     <v-btn 
                     id="Alert-Cancel-vbtn"
                     @click="onReturn('continue')" 
-                    class="ghd-blue ghd-button" variant = "outline">
+                    class="ghd-blue ghd-button" variant = "outlined">
                         Continue
                     </v-btn>
                 </v-layout>

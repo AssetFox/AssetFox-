@@ -26,9 +26,9 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row>
-          <v-btn id="CreateBudgetLibraryDialog-cancel-btn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' variant = "outline">Cancel</v-btn>
+          <v-btn id="CreateBudgetLibraryDialog-cancel-btn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' variant = "outlined">Cancel</v-btn>
           <v-btn id="CreateBudgetLibraryDialog-save-btn" :disabled="canDisableSave()" @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline">
+                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
             Save
           </v-btn>          
         </v-layout>

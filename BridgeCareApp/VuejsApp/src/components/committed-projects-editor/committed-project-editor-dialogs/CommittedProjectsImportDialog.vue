@@ -27,7 +27,7 @@
             <v-card-actions>
                 <v-layout justify-center row>
                     <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' variant = "flat">Cancel</v-btn>
-                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outline">Upload</v-btn>
+                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
                     <!-- <v-tooltip top>
                         <template slot='activator'>
                             <v-btn @click='onDelete' class='ara-orange-bg white--text'>Delete</v-btn>

@@ -28,13 +28,13 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-space-between row>
-          <v-btn @click="onSubmit(false)" variant = "outline" 
+          <v-btn @click="onSubmit(false)" variant = "outlined" 
                  id="CreateCashFlowRuleLibraryDialog-Cancel-vbtn"
                  class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn>
           <v-btn :disabled="newCashFlowRuleLibrary.name === ''" @click="onSubmit(true)"
-          variant = "outline" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+          variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                  id="CreateCashFlowRuleLibraryDialog-Create-vbtn">
             Submit
           </v-btn>        

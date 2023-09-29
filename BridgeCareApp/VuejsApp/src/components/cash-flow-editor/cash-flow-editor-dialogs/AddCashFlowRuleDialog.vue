@@ -25,7 +25,7 @@
           </v-btn>
           <v-btn :disabled="newCashRule.name === ''" @click="onSubmit(true)"
                   id="AddCashFlowRuleDialog-submit-btn"
-                  variant = "outline" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                  variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Submit
           </v-btn>        
         </v-layout>

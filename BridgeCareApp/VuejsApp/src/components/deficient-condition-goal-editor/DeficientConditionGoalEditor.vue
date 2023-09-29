@@ -38,7 +38,7 @@
                         <span>Shared</span>
                         </template>
                         </v-badge>
-                        <v-btn id="DeficientConditionGoalEditor-shareLibrary-vbtn" @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
+                        <v-btn id="DeficientConditionGoalEditor-shareLibrary-vbtn" @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                     </v-btn>
@@ -52,13 +52,13 @@
                         @click="showCreateDeficientConditionGoalDialog = true"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="hasSelectedLibrary || hasScenario"
-                        variant = "outline">
+                        variant = "outlined">
                         Add Deficient Condition Goal
                     </v-btn>
                     <v-btn id="DeficientConditionGoalEditor-createNewLibrary-vbtn" @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
-                        variant = "outline">    
+                        variant = "outlined">    
                         Create New Library        
                     </v-btn>
                 </v-layout>
@@ -237,7 +237,7 @@
                     class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
-                    variant = "outline">
+                    variant = "outlined">
                     Delete Library
                 </v-btn>    
                 <v-btn
@@ -245,7 +245,7 @@
                     @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     :disabled="disableCrudButtons()"
-                    variant = "outline">
+                    variant = "outlined">
                     Create as New Library
                 </v-btn>
                 <v-btn

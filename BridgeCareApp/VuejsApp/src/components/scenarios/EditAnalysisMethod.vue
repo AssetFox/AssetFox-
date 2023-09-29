@@ -187,13 +187,13 @@
                         id="EditAnalysisMethod-cancel-btn"
                         @click="onDiscardChanges"
                         class="ghd-white-bg ghd-blue ghd-button-text ghd-button"
-                        depressed
+                        variant = "flat"
                         >Cancel</v-btn
                     >
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
                         @click="onUpsertAnalysisMethod"
-                        depressed
+                        variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
                         >Save</v-btn
                     >

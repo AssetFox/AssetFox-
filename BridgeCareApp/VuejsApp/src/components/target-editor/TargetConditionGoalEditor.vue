@@ -33,7 +33,7 @@
                                 <span>Shared</span>
                             </template>
                         </v-badge>
-                        <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
+                        <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -42,7 +42,7 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout justify-end align-end style="padding-top: 18px !important;">
                         <v-spacer></v-spacer>
-                        <v-btn variant = "outline"
+                        <v-btn variant = "outlined"
                             id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
                             @click="showCreateTargetConditionGoalDialog = true"
                             class="ghd-control-border ghd-blue"
@@ -53,7 +53,7 @@
                             @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario"
-                            variant = "outline"
+                            variant = "outlined"
                         >
                         Create New Library
                         </v-btn>
@@ -316,7 +316,7 @@
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-layout justify-center row>
-                <v-btn variant = "outline"
+                <v-btn variant = "outlined"
                     id="TargetConditionGoalEditor-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue"
@@ -332,7 +332,7 @@
                 >
                     Cancel
                 </v-btn>
-                <v-btn variant = "outline"
+                <v-btn variant = "outlined"
                     id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'

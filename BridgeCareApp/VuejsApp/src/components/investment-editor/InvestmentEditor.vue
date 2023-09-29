@@ -24,7 +24,7 @@
                         <div class="header-text-content invest-owner-padding">
                             Date Modified: {{ modifiedDate }}
                         </div>
-                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
+                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                                v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -35,7 +35,7 @@
                         <v-spacer></v-spacer>
                         <v-btn id="InvestmentEditor-CreateNewLibrary-vbtn" @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
-                        variant = "outline">
+                        variant = "outlined">
                             Create New Library
                         </v-btn>
                     </v-layout>
@@ -100,7 +100,7 @@
                     <v-layout row>
                         <v-btn id="InvestmentEditor-editBudgets-btn"
                             @click='onShowEditBudgetsDialog'
-                            variant = "outline" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Edit Budgets
                         </v-btn>
                         <v-text-field id="InvestmentEditor-numberYearsToAdd-textField"
@@ -111,7 +111,7 @@
                         <v-btn id="InvestmentEditor-addBudgetYearRange-btn"
                                :disabled='currentPage.length === 0'
                                @click='onSubmitAddBudgetYearRange'
-                               class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' variant = "outline">
+                               class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' variant = "outlined">
                             Add Year(s)
                         </v-btn>
                     </v-layout>
@@ -230,7 +230,7 @@
                 <v-btn id="InvestmentEditor-createAsNewLibrary-btn"
                        :disabled='disableCrudButton()'
                        @click='onShowCreateBudgetLibraryDialog(true)'
-                       class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline">
+                       class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Create as New Library
                 </v-btn>
                 <v-btn id="InvestmentEditor-updateLibrary-btn"

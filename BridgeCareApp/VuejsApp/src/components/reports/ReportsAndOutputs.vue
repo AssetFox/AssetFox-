@@ -90,7 +90,7 @@
                 </v-subheader>
                 <v-divider style="margin:0px;" />
                 <v-layout style="margin:0px;">
-                    <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" depressed>Simulation Log</v-btn>
+                    <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" variant = "flat">Simulation Log</v-btn>
                 </v-layout>
             </v-flex>
 

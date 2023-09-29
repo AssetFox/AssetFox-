@@ -89,7 +89,7 @@
                 >
                     Create as New Library
                 </v-btn>
-                <v-btn variant = "outline"
+                <v-btn variant = "outlined"
                     @click="onShowConfirmDeleteAlert"
                     class="ara-orange-bg white--text"
                     :disabled="!hasLibraryEditPermission"

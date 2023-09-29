@@ -5,7 +5,7 @@
                 <v-flex xs12>
                     <v-layout>
                         <v-btn @click='OnGetTemplateClick' 
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outline">Get Template</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Get Template</v-btn>
                             <input
                             id="committedProjectTemplateUpload"
                             type="file"
@@ -14,13 +14,13 @@
                             @change="handleCommittedProjectTemplateUpload"
                             hidden/>
                         <v-btn @click="onUploadCommittedProjectTemplate"
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outline">Upload Committed Project Template</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Upload Committed Project Template</v-btn>
                         <v-btn @click='showImportExportCommittedProjectsDialog = true' 
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outline">Import Projects</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Import Projects</v-btn>
                         <v-btn @click='OnExportProjectsClick' 
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outline">Export Projects</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Export Projects</v-btn>
                         <v-btn @click='OnDeleteAllClick' 
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outline">Delete All</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Delete All</v-btn>
                     </v-layout>
                 </v-flex>
 
@@ -50,7 +50,7 @@
                                 </v-text-field>
                                 <v-btn 
                                 id="CommittedProjectsEditor-performSearch-vbtn"
-                                style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline" @click="onSearchClick()">Search</v-btn>
+                                style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
                             </v-layout>
                            
                         </v-flex>
@@ -179,7 +179,7 @@
                         </v-data-table>    
                         <v-btn id="CommittedProjectsEditor-addCommittedProject-vbtn" 
                         @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
-                        class="ghd-white-bg ghd-blue ghd-button btn-style" variant = "outline">Add Committed Project</v-btn> 
+                        class="ghd-white-bg ghd-blue ghd-button btn-style" variant = "outlined">Add Committed Project</v-btn> 
                     </v-layout>
                 </v-flex>
 

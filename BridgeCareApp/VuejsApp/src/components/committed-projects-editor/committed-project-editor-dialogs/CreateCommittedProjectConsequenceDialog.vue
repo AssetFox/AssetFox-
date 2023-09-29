@@ -41,7 +41,7 @@
           <v-btn @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn >
-          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" variant = "outline" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>         
         </v-layout>

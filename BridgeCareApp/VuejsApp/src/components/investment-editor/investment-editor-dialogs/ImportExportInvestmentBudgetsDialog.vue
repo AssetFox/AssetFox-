@@ -23,7 +23,7 @@
                 <v-card-actions>
                     <v-layout justify-center>
                         <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "flat">Cancel</v-btn>
-                        <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outline">Upload</v-btn>
+                        <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
                     </v-layout>
                 </v-card-actions>
             </v-card>
@@ -38,7 +38,7 @@
                 </v-card-title>
                 <v-card-actions class="bottom-portion-padding">
                     <v-layout justify-space-between row>
-                        <v-btn @click="flipVisible()" variant = "outline" class="ghd-blue ghd-button-text">Ok</v-btn>
+                        <v-btn @click="flipVisible()" variant = "outlined" class="ghd-blue ghd-button-text">Ok</v-btn>
                     </v-layout>
                 </v-card-actions>
                 

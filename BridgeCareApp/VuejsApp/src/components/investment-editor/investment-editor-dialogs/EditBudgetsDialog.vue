@@ -74,7 +74,7 @@
                 
                 <v-card-actions class="ghd-dialog-box-padding-bottom">
                     <v-layout justify-center>
-                        <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline">Cancel</v-btn>
+                        <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">Cancel</v-btn>
                         <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' variant = "flat"
                                :disabled='disableSubmitButton()'>
                             Save

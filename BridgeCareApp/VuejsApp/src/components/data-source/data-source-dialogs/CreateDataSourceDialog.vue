@@ -21,7 +21,7 @@
         <v-layout justify-center row>
           <v-btn id="CreateDataSourceDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' variant = "flat">Cancel</v-btn>
           <v-btn id="CreateDataSourceDialog-Save-vbtn" @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline">
+                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
             Save
           </v-btn>          
         </v-layout>

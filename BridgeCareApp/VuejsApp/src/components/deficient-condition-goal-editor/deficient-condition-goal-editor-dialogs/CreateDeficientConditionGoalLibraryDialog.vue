@@ -22,9 +22,9 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-space-between row>
-          <v-btn id="CreateDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" variant = "outline" class='ghd-blue ghd-button-text ghd-button'>Cancel</v-btn>
+          <v-btn id="CreateDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button-text ghd-button'>Cancel</v-btn>
           <v-btn id="CreateDeficientConditionGoalLibraryDialog-save-vbtn" :disabled="newDeficientConditionGoalLibrary.name === ''" @click="onSubmit(true)"
-          variant = "outline" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+          variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>         
         </v-layout>

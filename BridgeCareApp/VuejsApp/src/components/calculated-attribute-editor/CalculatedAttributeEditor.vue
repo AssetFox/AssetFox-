@@ -33,11 +33,11 @@
                                     class="ghd-text-field-border ghd-text-field search-icon-general"
                                     style="margin-top:20px !important">
                         </v-text-field>
-                        <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px; margin-right: 1px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline" @click="onSearchClick()">Search</v-btn>
+                        <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px; margin-right: 1px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
                         <v-btn
                             @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                            variant = "outline"
+                            variant = "outlined"
                             v-show="!hasScenario"
                             style="top: 2px !important; position: relative">
                             Create New Library
@@ -57,7 +57,7 @@
                         <span>Shared</span>
                     </template>
                     </v-badge>
-                    <v-btn @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
+                    <v-btn @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                 v-show='!hasScenario'>
                 Share Library
             </v-btn>
@@ -187,7 +187,7 @@
             <v-btn
                 @click="onAddCriterionEquationSet()"
                 class='ghd-blue ghd-button'
-                variant = "outline"
+                variant = "outlined"
                 v-if="hasAdminAccess"
                 :disabled="
                     attributeSelectItemValue == null ||
@@ -231,7 +231,7 @@
                     :disabled="disableCrudButton()"
                     v-if="hasAdminAccess"
                     @click="onShowCreateCalculatedAttributeLibraryDialog(true)"
-                    variant = "outline"
+                    variant = "outlined"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                     Create as New Library
                 </v-btn>

@@ -16,7 +16,7 @@
                     </v-select>
                 </v-layout>
                 </v-flex>
-                <v-btn id="DataSource-AddDataSource-vbtn" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" variant = "outline">Add Data Source</v-btn>
+                <v-btn id="DataSource-AddDataSource-vbtn" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" variant = "outlined">Add Data Source</v-btn>
             </v-layout>
             <v-divider v-show="showMssql || showExcel"></v-divider>
             <v-layout column>

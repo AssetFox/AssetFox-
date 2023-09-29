@@ -29,14 +29,14 @@
             <v-card-actions class="ghd-dialog-box-padding-bottom">
                 <v-layout justify-center>
                     <v-btn
-                    variant = "outline" 
+                    variant = "outlined" 
                         class='ghd-blue ghd-button-text ghd-button'
                         @click="onSubmit(false)">
                         Cancel
                     </v-btn>
                     <v-btn
                         :disabled="newCalculatedAttributeLibrary.name === ''"
-                        variant = "outline" 
+                        variant = "outlined" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         @click="onSubmit(true)">
                         Save

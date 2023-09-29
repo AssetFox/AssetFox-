@@ -29,7 +29,7 @@
       <v-card-actions class="py-0">
         <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
           <v-btn id="CreateRemainingLifeLimitDialog-cancel-btn" @click="onSubmit(false)" class="ghd-button" variant = "flat">Cancel</v-btn>
-          <v-btn id="CreateRemainingLifeLimitDialog-save-btn" :disabled="disableSubmitAction()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button" variant = "outline">
+          <v-btn id="CreateRemainingLifeLimitDialog-save-btn" :disabled="disableSubmitAction()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button" variant = "outlined">
             Save
           </v-btn>
         </v-layout>

@@ -14,7 +14,7 @@
                     class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>   
                     <v-btn style="margin-top: 2px !important; margin-left: 10px !important"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                     @click="onAddClick"
                     :disabled='isAddDisabled()'>
                         Add
@@ -42,7 +42,7 @@
                 <v-btn @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                 Cancel
                 </v-btn >
-                <v-btn @click="onSubmit(true)" variant = "outline" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                <v-btn @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                 Save
                 </v-btn>         
             </v-layout>

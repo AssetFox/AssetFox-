@@ -32,7 +32,7 @@
                 <v-flex style="padding-right: 5px">
                     <v-btn
                         @click='showImportTreatmentDialog = true'
-                        depressed
+                        variant = "flat"
                         class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
                         v-show='hasSelectedLibrary'                        
                     >
@@ -42,7 +42,7 @@
                 <v-flex style="padding-right: 5px">
                     <v-btn
                         @click='onShowConfirmDeleteTreatmentAlert'
-                        depressed
+                        variant = "flat"
                         class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
                         v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
                     >
@@ -55,7 +55,7 @@
                         @click='onShowCreateTreatmentLibraryDialog(false)'
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
-                        variant = "outline"
+                        variant = "outlined"
 
                     >
                         Create New Library
@@ -72,7 +72,7 @@
                                 <span>Shared</span>
                             </template>
                         </v-badge>
-                        <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
+                        <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                                v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -88,7 +88,7 @@
                <v-btn
                     id="TreatmentEditor-addTreatment-btn"
                     @click='showCreateTreatmentDialog = true'
-                    depressed
+                    variant = "flat"
                     class='ghd-white-bg ghd-blue ghd-button-text ghd-text-padding'                              
                     style='float:left;'
                 >
@@ -256,15 +256,15 @@
                 <v-btn :disabled='!hasUnsavedChanges'
                     @click='onDiscardChanges'
                     class='ghd-white-bg ghd-blue ghd-button-text'
-                    depressed
+                    variant = "flat"
                     v-show='hasScenario'
                 >
                     Cancel
                 </v-btn>
-                <v-btn id='TreatmentEditor-deleteLibrary-btn' outline
+                <v-btn id='TreatmentEditor-deleteLibrary-btn' variant = "outline"
                     @click='onShowConfirmDeleteAlert'
                     class='ghd-white-bg ghd-blue ghd-button-text'
-                    depressed
+
                     v-show='!hasScenario'
                     :disabled='!hasLibraryEditPermission'
                 >
@@ -273,7 +273,7 @@
                 <v-btn
                     @click='onShowCreateTreatmentLibraryDialog(true)'
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    variant = "outline"
+                    variant = "outlined"
                     :disabled='disableCrudButtons()'
                 >
                     Create as New Library
@@ -281,7 +281,7 @@
                 <v-btn
                     @click='onUpsertScenarioTreatments'
                     class='ghd-blue-bg ghd-white ghd-button-text'
-                    depressed
+                    variant = "flat"
                     v-show='hasScenario'
                     :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
@@ -290,7 +290,7 @@
                     id="TreatmentEditor-updateLibrary-btn"
                     @click='onUpsertTreatmentLibrary'
                     class='ghd-blue-bg ghd-white ghd-button-text  ghd-text-padding'
-                    depressed
+                    variant = "flat"
                     v-show='!hasScenario'
                     :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                 >

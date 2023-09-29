@@ -45,7 +45,7 @@
                                     id="CriteriaEditor-addSubCriteria-btn"
                                     @click="onAddSubCriteria"
                                     class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"    
-                                    depressed                                
+                                    variant = "flat"                                
                                     >Add Subcriteria
                                 </v-btn>
                             </v-layout>
@@ -107,7 +107,7 @@
                                         :disabled="onDisableCheckOutputButton()"
                                         @click="onCheckCriteria"
                                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                        depressed
+                                        variant = "flat"
                                     >
                                         Check Output
                                     </v-btn>
@@ -224,7 +224,7 @@
                                         "
                                         @click="onCheckSubCriteria"
                                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                        depressed
+                                        variant = "flat"
                                     >
                                         Update Subcriteria
                                     </v-btn>

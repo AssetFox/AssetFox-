@@ -14,7 +14,7 @@
                     </v-layout>
                     <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
                         id="Networks-addNetwork-vbtn"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onAddNetworkDialog">
                         Add Network
                     </v-btn>
@@ -52,7 +52,7 @@
                     </v-select>  
                     <v-btn style="margin-top: 20px !important;" 
                         id="Networks-SelectAllFromSource-vbtn"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outline"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="selectAllFromSource">
                         Select All From Source
                     </v-btn>                            

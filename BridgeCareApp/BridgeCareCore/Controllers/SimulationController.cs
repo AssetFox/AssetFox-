@@ -234,6 +234,8 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                //AB 
+                // if (dto.DestinationNetworkId == dto.NetworkId
                 var result = await Task.Factory.StartNew(() =>
                 {
 

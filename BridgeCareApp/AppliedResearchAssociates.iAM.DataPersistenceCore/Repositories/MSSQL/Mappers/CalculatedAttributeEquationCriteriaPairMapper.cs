@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class CalculatedAttributeEquationCriteriaPairMapper
     {
-        public static ScenarioCalculatedAttributeEquationCriteriaPairEntity ToScenarioEntity(this CalculatedAttributeEquationCriteriaPairDTO dto, Guid calculatedAttributeId, BaseEntityProperties baseEntityProperties=null)
+        public static ScenarioCalculatedAttributeEquationCriteriaPairEntity ToScenarioEntity(this CalculatedAttributeEquationCriteriaPairDTO dto, Guid calculatedAttributeId, BaseEntityProperties baseEntityProperties = null)
         {
             var entity = new ScenarioCalculatedAttributeEquationCriteriaPairEntity()
             {
@@ -21,12 +21,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             return entity;
         }
-          public static ScenarioCriterionLibraryCalculatedAttributePairEntity ToScenarioEntity(this CriterionLibraryDTO criterion, Guid calculatedAttributePairId) =>
-            new ScenarioCriterionLibraryCalculatedAttributePairEntity()
-            {
-                CriterionLibraryId = criterion.Id,
-                ScenarioCalculatedAttributePairId = calculatedAttributePairId
-            };
+
+        public static ScenarioCriterionLibraryCalculatedAttributePairEntity ToScenarioEntity(this CriterionLibraryDTO criterion, Guid calculatedAttributePairId) =>
+          new ScenarioCriterionLibraryCalculatedAttributePairEntity()
+          {
+              CriterionLibraryId = criterion.Id,
+              ScenarioCalculatedAttributePairId = calculatedAttributePairId
+          };
 
         public static ScenarioEquationCalculatedAttributePairEntity ToScenarioEntity(this EquationDTO equation, Guid calculatedAttributePairId) =>
             new ScenarioEquationCalculatedAttributePairEntity()
@@ -34,6 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 EquationId = equation.Id,
                 ScenarioCalculatedAttributePairId = calculatedAttributePairId
             };
+
         public static CriterionLibraryCalculatedAttributePairEntity ToLibraryEntity(this CriterionLibraryDTO criterion,
           Guid calculatedAttributePairId) =>
           new CriterionLibraryCalculatedAttributePairEntity
@@ -41,6 +43,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
               CriterionLibraryId = criterion.Id,
               CalculatedAttributePairId = calculatedAttributePairId
           };
+
         public static CalculatedAttributeEquationCriteriaPairEntity ToLibraryEntity(
           this CalculatedAttributeEquationCriteriaPairDTO dto, Guid calculatedAttributeId) =>
           new CalculatedAttributeEquationCriteriaPairEntity
@@ -48,6 +51,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
               Id = dto.Id,
               CalculatedAttributeId = calculatedAttributeId
           };
+
         public static CalculatedAttributeEquationCriteriaPairDTO ToDto(this ScenarioCalculatedAttributeEquationCriteriaPairEntity entity) =>
          new CalculatedAttributeEquationCriteriaPairDTO()
          {
@@ -55,6 +59,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
              Equation = entity.EquationCalculatedAttributeJoin?.Equation.ToDto(),
              CriteriaLibrary = entity.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary.ToDto()
          };
+
         public static CalculatedAttributeEquationCriteriaPairDTO ToDto(this CalculatedAttributeEquationCriteriaPairEntity entity) =>
             new CalculatedAttributeEquationCriteriaPairDTO()
             {
@@ -62,7 +67,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Equation = entity.EquationCalculatedAttributeJoin?.Equation.ToDto(),
                 CriteriaLibrary = entity.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary.ToDto()
             };
-
-
     }
 }

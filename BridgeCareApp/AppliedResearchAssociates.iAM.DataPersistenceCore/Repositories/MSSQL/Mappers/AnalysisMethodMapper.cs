@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class AnalysisMethodMapper
     {
-        public static AnalysisMethodEntity ToEntity(this AnalysisMethod domain, Guid simulationId, Guid? attributeId, BaseEntityProperties baseEntityProperties = null) =>
+        public static AnalysisMethodEntity ToEntity(this AnalysisMethod domain, Guid simulationId, Guid? attributeId) =>
             new AnalysisMethodEntity
             {
                 Id = domain.Id,
@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldUseExtraFundsAcrossBudgets = domain.AllowFundingFromMultipleBudgets
             };
 
-        public static void FillSimulationAnalysisMethod(this AnalysisMethodEntity entity, Simulation simulation, string userCriteria, BaseEntityProperties baseEntityProperties = null)
+        public static void FillSimulationAnalysisMethod(this AnalysisMethodEntity entity, Simulation simulation, string userCriteria)
         {
             simulation.AnalysisMethod.Id = entity.Id;
             simulation.AnalysisMethod.Description = entity.Description;

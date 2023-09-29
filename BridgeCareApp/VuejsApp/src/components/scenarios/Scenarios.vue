@@ -173,7 +173,7 @@
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.reportStatus }}</td>
                                         <td>
-                                            <v-menu offset-x left>
+                                            <v-menu offset left>
                                                 <template
                                                     v-slot:activator="{
                                                         on,
@@ -365,7 +365,7 @@
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.reportStatus }}</td>
                                         <td>
-                                            <v-menu offset-x left>
+                                            <v-menu offset left>
                                                 <template
                                                     v-slot:activator="{
                                                         on,
@@ -450,7 +450,7 @@
                                         <td>{{ props.item.previousRunTime }}</td>
                                         <td>{{ props.item.status }}</td>  
                                         <td>
-                                            <v-menu offset-x left>
+                                            <v-menu offset left>
                                                 <template
                                                     v-slot:activator="{
                                                         on,
@@ -521,7 +521,7 @@
                                         <td>{{ props.item.previousRunTime }}</td>
                                         <td>{{ props.item.status }}</td>  
                                         <td>
-                                            <v-menu offset-x left>
+                                            <v-menu offset left>
                                                 <template
                                                     v-slot:activator="{
                                                         on,

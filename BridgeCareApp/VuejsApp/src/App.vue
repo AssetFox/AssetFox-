@@ -62,7 +62,7 @@
                 <v-spacer></v-spacer>
                 <v-toolbar-title class="white--text">
                     <v-menu
-                        offset-y
+                        offset-
                         min-width="20%"
                         max-width="20%"
                         max-height="75%"

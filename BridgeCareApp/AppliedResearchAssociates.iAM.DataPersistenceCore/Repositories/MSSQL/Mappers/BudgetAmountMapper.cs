@@ -14,7 +14,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static BudgetAmountEntity ToLibraryEntity(this BudgetAmountDTO dto, Guid budgetId) =>
             new BudgetAmountEntity { Id = dto.Id, BudgetId = budgetId, Value = dto.Value, Year = dto.Year };
 
-        //William will this mess up other calls
         public static ScenarioBudgetAmountEntity ToScenarioEntity(this BudgetAmountDTO dto, Guid budgetId, BaseEntityProperties baseEntityProperties = null)
         {
             var entity = new ScenarioBudgetAmountEntity

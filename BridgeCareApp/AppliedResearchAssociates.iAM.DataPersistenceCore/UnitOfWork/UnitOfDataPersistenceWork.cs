@@ -44,8 +44,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ICashFlowDistributionRuleRepository _cashFlowDistributionRuleRepo;
         private ICashFlowRuleRepository _cashFlowRuleRepo;
         private ICommittedProjectConsequenceRepository _committedProjectConsequenceRepo;
-        private ICommittedProjectRepository _committedProjectRepo;
-        //private ICompleteSimulationRepository _completeSimulationRepo;
+        private ICommittedProjectRepository _committedProjectRepo;      
         private ICriterionLibraryRepository _criterionLibraryRepo;
         private IDeficientConditionGoalRepository _deficientConditionGoalRepo;
         private IExcelRawDataRepository _excelWorksheetRepo;
@@ -103,8 +102,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ICommittedProjectConsequenceRepository CommittedProjectConsequenceRepo => _committedProjectConsequenceRepo ??= new CommittedProjectConsequenceRepository(this);
 
         public ICommittedProjectRepository CommittedProjectRepo => _committedProjectRepo ??= new CommittedProjectRepository(this);
-
-       // public ICompleteSimulationRepository CompleteSimulationRepo => _completeSimulationRepo ??= new CompleteSimulationRepository(this);
 
         public ICriterionLibraryRepository CriterionLibraryRepo => _criterionLibraryRepo ??= new CriterionLibraryRepository(this);
 

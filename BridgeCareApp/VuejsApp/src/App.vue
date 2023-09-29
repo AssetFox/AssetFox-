@@ -377,23 +377,23 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
     function container() {
         const container: any = {};
 
-        if ($vuetify.breakpoint.xs) {
+        if ($vuetify.display.xs) {
             container['grid-list-xs'] = true;
         }
 
-        if ($vuetify.breakpoint.sm) {
+        if ($vuetify.display.sm) {
             container['grid-list-sm'] = true;
         }
 
-        if ($vuetify.breakpoint.md) {
+        if ($vuetify.display.md) {
             container['grid-list-md'] = true;
         }
 
-        if ($vuetify.breakpoint.lg) {
+        if ($vuetify.display.lg) {
             container['grid-list-lg'] = true;
         }
 
-        if ($vuetify.breakpoint.xl) {
+        if ($vuetify.display.xl) {
             container['grid-list-xl'] = true;
         }
 

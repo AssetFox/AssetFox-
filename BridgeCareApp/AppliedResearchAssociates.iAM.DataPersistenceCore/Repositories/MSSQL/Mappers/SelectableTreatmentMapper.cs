@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
-using AppliedResearchAssociates.iAM.DTOs.Static;
 using MoreLinq;
-
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using Microsoft.Extensions.DependencyModel;
+using MathNet.Numerics.Statistics.Mcmc;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -25,12 +27,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Description = dto.Description,
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
-                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType
+                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
+                IsUnselectable = dto.IsUnselectable
             };
 
         public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this TreatmentDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties=null)
         {
-           
             var treatment = new ScenarioSelectableTreatmentEntity
             {
                 Id = dto.Id,
@@ -42,8 +44,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 IsModified = dto.IsModified,
                 LibraryId = dto.LibraryId,
-               
-                
+                IsUnselectable = dto.IsUnselectable,
+
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
                 AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
                 ScenarioTreatmentPerformanceFactors = dto.ToScenarioSelectableTreatmentPerformanceFactorEntity(baseEntityProperties),
@@ -51,7 +53,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             BaseEntityPropertySetter.SetBaseEntityProperties(treatment, baseEntityProperties);
             return treatment;
         }
-
         public static ScenarioSelectableTreatmentEntity ToScenarioEntityWithCriterionLibraryWithChildren(this TreatmentDTO dto, Guid simulationId, IEnumerable<AttributeEntity> attributes, BaseEntityProperties baseEntityProperties = null)
         {
             var entity = ToScenarioEntity(dto, simulationId);
@@ -71,10 +72,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             var costEntities = new List<ScenarioTreatmentCostEntity>();
             foreach (var cost in dto.Costs)
-            {               
+            {
                 var costEntity = cost.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, baseEntityProperties);
                 costEntities.Add(costEntity);
             }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             entity.ScenarioTreatmentCosts = costEntities;
 
             var consequencetEntities = new List<ScenarioConditionalTreatmentConsequenceEntity>();
@@ -85,6 +87,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var consequenceEntity = consequence.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, attribute.Id, baseEntityProperties);
                 consequencetEntities.Add(consequenceEntity);
             }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             entity.ScenarioTreatmentConsequences = consequencetEntities;
             return entity;
         }
@@ -126,8 +129,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             selectableTreatment.Id = entity.Id;
             selectableTreatment.Name = entity.Name;
-            selectableTreatment.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
-            selectableTreatment.ShadowForSameTreatment = entity.ShadowForSameTreatment;
+            selectableTreatment.SetShadowForAnyTreatment(entity.ShadowForAnyTreatment);
+            selectableTreatment.SetShadowForSameTreatment(entity.ShadowForSameTreatment);
             selectableTreatment.Description = entity.Description;
             selectableTreatment.Category = (TreatmentCategory)entity.Category;
             selectableTreatment.AssetCategory = (AssetCategory)(AssetCategories)entity.AssetType;
@@ -146,7 +149,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     {
                         if (attribute.Name == _.Attribute)
                         {
-                        selectableTreatment.PerformanceCurveAdjustmentFactors.Add(attribute, _.PerformanceFactor);
+                            selectableTreatment.PerformanceCurveAdjustmentFactors.Add(attribute, _.PerformanceFactor);
                         }
                     }
                 });
@@ -196,7 +199,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),
                 Category = (TreatmentCategory)entity.Category,
-                AssetType = (AssetCategories)entity.AssetType
+                AssetType = (AssetCategories)entity.AssetType,
+
+                IsUnselectable = entity.IsUnselectable
             };
 
         public static TreatmentDTOWithSimulationId ToDtoWithSimulationId(this ScenarioSelectableTreatmentEntity entity)
@@ -280,7 +285,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsModified = entity.IsModified,
                 LibraryId = entity.LibraryId,
 
-                AssetType = (AssetCategories)entity.AssetType
+                AssetType = (AssetCategories)entity.AssetType,
+
+                IsUnselectable = entity.IsUnselectable
             };
     }
 }

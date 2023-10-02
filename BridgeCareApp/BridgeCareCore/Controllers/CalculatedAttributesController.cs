@@ -72,6 +72,32 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
+        [Route("GetCalculatedLibraryModifiedDate/{libraryId}")]
+        [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
+        public async Task<IActionResult> GetCalculatedLibraryDate(Guid libraryId)
+        {
+            try
+            {
+                var users = new DateTime();
+                await Task.Factory.StartNew(() =>
+                {
+                    users = UnitOfWork.CalculatedAttributeRepo.GetLibraryModifiedDate(libraryId);
+                });
+                return Ok(users);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
         [Route("GetEmptyCalculatedAttributesByScenarioId/{scenarioId}")]
         [ClaimAuthorize("CalculatedAttributesViewAccess")]
         public async Task<IActionResult> GetEmptyCalculatedAttributesByScenarioId(Guid scenarioId)

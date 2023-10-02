@@ -219,7 +219,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.Equal(2, result.Count);
             Assert.Equal(210000, result.Sum(_ => _.Cost));
             Assert.True(result.First() is SectionCommittedProjectDTO);
-            Assert.Equal(2, result.First().Consequences.Count);
             Assert.Equal(2, result.First().LocationKeys.Count);
         }
 
@@ -362,7 +361,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Assert
             Assert.Equal(2, result.Count);
             Assert.Equal(210000, result.Sum(_ => _.Cost));
-            Assert.Equal(2, result.First().Consequences.Count);
             Assert.Equal(2, result.First().LocationKeys.Count);
         }
 
@@ -449,21 +447,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                     { "CULV_DURATION_N", "3"},
                     { "BRKEY_", "2" },
                     { "BMSID", "9876543" }
-                },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "9"
-                    },
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_DURATION_N",
-                        ChangeValue = "1"
-                    }
                 }
             };
             var committedProject2 = new SectionCommittedProjectDTO
@@ -483,21 +466,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                     { "BRKEY_", "2" },
                     { "BMSID", "9876543" }
                 },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "9"
-                    },
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_DURATION_N",
-                        ChangeValue = "1"
-                    }
-                }
             };
             testCommittedProjects.Add(committedProject);
             testCommittedProjects.Add(committedProject2);

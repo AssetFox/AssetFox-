@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DTOs.Static;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -44,7 +45,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
                 entity.CriterionLibraryScenarioTreatmentCostJoin = join;
             }
-            return entity;
+            var hasEquation = dto.Equation != null && dto.Equation.Id != Guid.Empty;
+            if (hasEquation)
+            {
+                var equation = EquationMapper.ToEntity(dto.Equation, baseEntityProperties);
+                var joinEquation = new ScenarioTreatmentCostEquationEntity
+                {
+                    ScenarioTreatmentCostId = entity.Id,
+                    Equation = equation,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(joinEquation, baseEntityProperties);
+                entity.ScenarioTreatmentCostEquationJoin = joinEquation;
+            }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;          
         }
 
         public static void CreateTreatmentCost(this ScenarioTreatmentCostEntity entity, SelectableTreatment selectableTreatment)

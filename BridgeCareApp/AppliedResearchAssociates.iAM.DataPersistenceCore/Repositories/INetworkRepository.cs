@@ -22,9 +22,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<Network> GetAllNetworks();
 
         NetworkEntity GetMainNetwork();
+
+        NetworkEntity GetRawNetwork();
+
         List<NetworkDTO> GetNetworksByIdsNoChildren(List<Guid> ids);
 
-        Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true);
+        Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true, Guid? simulationId = null);
 
         void DeleteNetworkData();
 

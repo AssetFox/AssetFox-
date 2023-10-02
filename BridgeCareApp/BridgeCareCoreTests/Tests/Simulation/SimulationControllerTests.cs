@@ -9,6 +9,7 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
+using BridgeCareCore.Services.SimulationCloning;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
 using BridgeCareCoreTests.Tests.General_Work_Queue;
@@ -26,7 +27,7 @@ namespace BridgeCareCoreTests.Tests
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
         private readonly Mock<IWorkQueueService> _mockSimulationQueueService = new();
 
-        private SimulationController CreateController(Mock<IUnitOfWork> unitOfWork)
+        private SimulationController CreateController(Mock<IUnitOfWork> unitOfWork, Mock<ICompleteSimulationCloningService> completeSimulationCloningService=null)
         {
             var security = EsecSecurityMocks.AdminMock;
             var hubService = HubServiceMocks.DefaultMock();
@@ -35,6 +36,7 @@ namespace BridgeCareCoreTests.Tests
             var generalWorkQueueService = GeneralWorkQueueServiceMocks.New();
             var pagingService = new SimulationPagingService(unitOfWork.Object, unitOfWork.Object.SimulationRepo);
             var queueService = SimulationQueueServiceMocks.New();
+            completeSimulationCloningService ??= CompleteSimulationCloningServiceMocks.New();
             var controller = new SimulationController(
                 pagingService,
                 queueService.Object,
@@ -42,7 +44,8 @@ namespace BridgeCareCoreTests.Tests
                 unitOfWork.Object,
                 hubService.Object,
                 contextAccessor.Object,
-                claimHelper.Object,
+                claimHelper.Object,               
+                completeSimulationCloningService.Object,
                 generalWorkQueueService.Object
                 );
             return controller;
@@ -234,26 +237,31 @@ namespace BridgeCareCoreTests.Tests
         public async Task CloneSimulation_CallsCloneSimulationOnRepo()
         {
             var unitOfWork = UnitOfWorkMocks.EveryoneExists();
-            var repo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
-            var controller = CreateController(unitOfWork);
+            var completeSimulationCloningServiceMock = CompleteSimulationCloningServiceMocks.New();
             var simulationId = Guid.NewGuid();
             var networkId = Guid.NewGuid();
             var cloneSimulationId = Guid.NewGuid();
             var ownerId = Guid.NewGuid();
             var simulationDto = SimulationDtos.Dto(cloneSimulationId, SimulationName, ownerId);
+
             var cloneResult = new SimulationCloningResultDTO
             {
                 Simulation = simulationDto,
                 WarningMessage = null,
             };
-            repo.Setup(r => r.CloneSimulation(simulationId, networkId, SimulationName)).Returns(cloneResult);
             var cloneSimulationDto = new CloneSimulationDTO
             {
-                SourceScenarioId = simulationId,
+                ScenarioId = simulationId,
                 NetworkId = networkId,
                 ScenarioName = SimulationName,
             };
+            completeSimulationCloningServiceMock.Setup(r => r.Clone(cloneSimulationDto)).Returns(cloneResult);
 
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork, completeSimulationCloningServiceMock);
+          
+         
+           
             var result = await controller.CloneSimulation(cloneSimulationDto);
 
             var value = ActionResultAssertions.OkObject(result);

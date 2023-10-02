@@ -18,5 +18,7 @@
         public const string ConsequenceCriterion = "Consequence Criterion";
         public const string Budgets = "Budgets";
         public const string BudgetName = "Budget Name";
+        public const string PerformanceFactors = "Performance Factors";
+        public const string PerformanceFactor = "Performance Factor";
     }
 }

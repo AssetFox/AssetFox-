@@ -4,7 +4,8 @@
             <v-layout column>                
                 <v-flex>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Description</v-subheader>
-                    <v-textarea                        
+                    <v-textarea  
+                        id ="TreatmentDetailsTab-desc-vtextarea"                      
                         class='ghd-control-border ghd-control-text'
                         no-resize
                         outline
@@ -21,7 +22,7 @@
                 <v-layout xs12 row class="ghd-left-padding ghd-right-padding">
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Category</v-subheader>
-                        <v-select
+                        <v-select id="TreatmentDetailsTab-category-vselect"
                         class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                             :items="Array.from(treatmentCategoryMap.keys())"
                             append-icon=$vuetify.icons.ghd-down
@@ -39,7 +40,7 @@
                     </v-flex>
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Asset type</v-subheader>
-                        <v-select
+                        <v-select id="TreatmentDetailsTab-assetType-vselect"
                         class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                         :items="Array.from(assetTypeMap.keys())"
                         append-icon=$vuetify.icons.ghd-down
@@ -57,7 +58,7 @@
                     </v-flex>
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Years Before Any</v-subheader>
-                        <v-text-field 
+                        <v-text-field id="TreatmentDetailsTab-yearsBeforeAny-vtext"
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
                             :mask="'####'"
                             @input="
@@ -76,7 +77,7 @@
                     </v-flex>
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Years Before Same</v-subheader>
-                        <v-text-field
+                        <v-text-field id="TreatmentDetailsTab-yearsBeforeSame-vtext"
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
                             :mask="'####'"
                             rows="4"
@@ -128,7 +129,7 @@
                                         <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
                                     </v-flex>
                                     <v-flex xs2>                                 
-                                        <v-btn
+                                        <v-btn id="TreatmentDetailsTab-RemoveCriteria-vbtn"
                                             @click="
                                                 onRemoveTreatmentCriterion
                                             "
@@ -137,7 +138,7 @@
                                         >
                                             <v-icon style="font-size:20px !important" class="ghd-blue">fas fa-eraser</v-icon>
                                         </v-btn>
-                                        <v-btn
+                                        <v-btn id="TreatmentDetailsTab-EditCriteria-vbtn"
                                             @click="
                                                 onShowTreatmentCriterionEditorDialog
                                             "
@@ -185,10 +186,14 @@
                             </v-card-text>
                         </v-card>
                     </v-menu>
-                </v-flex>      
+                    <v-switch
+                        v-model="TreatmentIsUnSelectable"
+                        label="Mark treatment as unselectable by scenario engine"
+                        style="margin-left: 10px; margin-top: 30px;"
+                    ></v-switch>    
+                </v-flex>              
             </v-layout>
-        </v-flex>
-
+        </v-flex>   
         <GeneralCriterionEditorDialog
             :dialogData="treatmentCriterionEditorDialogData"
             @submit="onSubmitTreatmentCriterionEditorDialogResult"
@@ -209,7 +214,7 @@ import {
     treatmentCategoryMap,
     assetTypeMap,
     treatmentCategoryReverseMap,
-    assetTypeReverseMap
+    assetTypeReverseMap,
 } from '@/shared/models/iAM/treatment';
 import {
     CriterionLibrary,
@@ -241,12 +246,27 @@ export default class TreatmentDetailsTab extends Vue {
     treatmentCategoryBinding: string = '';
     assetTypeMap: Map<string, AssetType> = clone(assetTypeMap);
     assetTypeBinding: string = '';
+    TreatmentIsUnSelectable: boolean = false;
 
     @Watch('selectedTreatmentDetails')
-    onSelectedTreatmentDetailsChanged(){
-        this.treatmentCategoryBinding = treatmentCategoryReverseMap.get(this.selectedTreatmentDetails.category)!;
-        this.assetTypeBinding = this.assetTypeReverseMap.get(this.selectedTreatmentDetails.assetType)!;
-    }
+onSelectedTreatmentDetailsChanged(){
+  this.treatmentCategoryBinding = treatmentCategoryReverseMap.get(this.selectedTreatmentDetails.category)!;
+  this.assetTypeBinding = this.assetTypeReverseMap.get(this.selectedTreatmentDetails.assetType)!;
+  this.TreatmentIsUnSelectable = this.selectedTreatmentDetails.isUnselectable;
+}
+
+@Watch('TreatmentIsUnSelectable')
+onToggleIsUnSelectable(value: boolean) {
+  console.log('onToggleIsUnSelectable called with value:', value);
+  this.$emit(
+    'onModifyTreatmentDetails',
+    setItemPropertyValue(
+      'isUnselectable',
+      value,
+      this.selectedTreatmentDetails,
+    ),
+  );
+}
 
     onShowTreatmentCriterionEditorDialog() {
         this.treatmentCriterionEditorDialogData = {

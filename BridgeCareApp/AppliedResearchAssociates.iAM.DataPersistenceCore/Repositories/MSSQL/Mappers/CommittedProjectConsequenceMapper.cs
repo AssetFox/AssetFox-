@@ -28,33 +28,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 PerformanceFactor = entity.PerformanceFactor
             };
 
-        public static CommittedProjectConsequenceEntity ToEntity(this CommittedProjectConsequenceDTO dto, IList<AttributeEntity> attributes)
+        public static CommittedProjectConsequenceEntity ToEntity(this CommittedProjectConsequenceDTO dto, IList<AttributeEntity> attributes, BaseEntityProperties baseEntityProperties=null)
         {
             var attributeEntity = attributes.FirstOrDefault(_ => _.Name == dto.Attribute);
             if (attributeEntity == null)
                 throw new ArgumentException($"Unable to find {dto.Attribute} in the provided list of attributes");
-            return new CommittedProjectConsequenceEntity
+            var entity = new CommittedProjectConsequenceEntity
             {
                 Id = dto.Id,
                 CommittedProjectId = dto.CommittedProjectId,
                 AttributeId = attributeEntity.Id,
                 ChangeValue = dto.ChangeValue,
                 PerformanceFactor = dto.PerformanceFactor
+               
             };
-        }
-
-        public static void CreateCommittedProjectConsequence(this CommittedProjectConsequenceEntity entity, CommittedProject committedProject)
-        {
-            var consequence = committedProject.Consequences.GetAdd(new TreatmentConsequence());
-            consequence.Id = entity.Id;
-            consequence.Change.Expression = entity.ChangeValue;
-            consequence.Attribute = committedProject.Asset.Network.Explorer.NumberAttributes
-                .SingleOrDefault(_ => _.Name == entity.Attribute.Name);
-            if (consequence.Attribute == null)
-            {
-                consequence.Attribute = committedProject.Asset.Network.Explorer.TextAttributes
-                    .SingleOrDefault(_ => _.Name == entity.Attribute.Name);
-            }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
         }
     }
 }

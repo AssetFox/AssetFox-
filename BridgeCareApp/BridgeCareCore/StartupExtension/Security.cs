@@ -196,6 +196,11 @@ namespace BridgeCareCore.StartupExtension
                                                                    Claim.SimulationCloneAnyAccess,
                                                                    Claim.SimulationAccess));
 
+                options.AddPolicy(Policy.ValidateSimulation,
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationValidatePermittedAccess,
+                                                                   Claim.SimulationValidateAnyAccess,
+                                                                   Claim.SimulationAccess));
+
                 // Budget Priority
                 options.AddPolicy(Policy.ViewBudgetPriorityFromLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityViewAnyFromLibraryAccess, Claim.BudgetPriorityViewPermittedFromLibraryAccess));                
@@ -248,7 +253,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddSingleton<IAuthorizationHandler, RestrictAccessHandler>();
             services.AddSingleton<IRoleClaimsMapper, RoleClaimsMapper>();
             services.AddScoped<IClaimHelper, ClaimHelper>();
-            services.AddScoped<IGraphApiClientService, GraphApiClientService>();
+            services.AddSingleton<IGraphApiClientService, GraphApiClientService>();
         }
     }
 }

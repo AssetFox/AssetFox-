@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
-using AppliedResearchAssociates.iAM.Data.SimulationCloning;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
@@ -30,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         List<AttributeEntity> attributes,
             string networkKeyAttribute, BaseEntityProperties baseEntityProperties)
         {
-            var analysisMethod = AnalysisMethodMapper.ToEntityWithBenefit(dto.AnalysisMethod, dto.Id, attributes);
+            var analysisMethod = AnalysisMethodMapper.ToEntityWithBenefit(dto.AnalysisMethod, dto.Id, attributes, baseEntityProperties:baseEntityProperties);
             if (CriterionLibraryValidityChecker.IsValid(dto.AnalysisMethod.CriterionLibrary))
             {
                 var analysisMethodCriterionLibraryEntity = CriterionMapper.ToSingleUseEntity(dto.AnalysisMethod.CriterionLibrary, baseEntityProperties);
@@ -39,6 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     AnalysisMethodId = dto.AnalysisMethod.Id,
                     CriterionLibrary = analysisMethodCriterionLibraryEntity,
                 };
+                BaseEntityPropertySetter.SetBaseEntityProperties(analysisMethodJoin, baseEntityProperties);
                 analysisMethod.CriterionLibraryAnalysisMethodJoin = analysisMethodJoin;
             }
             var investmentPlan = InvestmentPlanMapper.ToEntityNullPropagating(dto.InvestmentPlan, dto.Id, baseEntityProperties);
@@ -107,6 +107,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 scenarioSelectableTreatmentEntity.ScenarioSelectableTreatmentScenarioBudgetJoins = budgetJoins;
                 scenarioSelectableTreatmentEntities.Add(scenarioSelectableTreatmentEntity);
             }
+           
+
             var scenarioTargetConditionGoalEntities = new List<ScenarioTargetConditionGoalEntity>();
             foreach (var targetConditionGoal in dto.TargetConditionGoals)
             {
@@ -173,7 +175,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Name = dto.Name,
                 Id = dto.Id,
-                NetworkId = dto.NetworkId,
+                NetworkId = dto.NetworkId,             
+                NumberOfYearsOfTreatmentOutlook = 100,
                 AnalysisMethod = analysisMethod,
                 InvestmentPlan = investmentPlan,
                 SimulationReports = reportIndexEntities,

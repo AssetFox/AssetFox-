@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
     /// </summary>
     public class CompleteSimulationDTO : SimulationDTO
     {
+               
         /// <summary>
         /// The Analysis repository of a simulation.
         /// </summary>

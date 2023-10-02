@@ -250,16 +250,7 @@ const actions = {
             payload.id,
             true
         ).then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                const treatments: Treatment[] = [response.data];
-                commit('simpleScenarioSelectableTreatmentsMutator', treatments.map(_ => {
-                    const treatment: SimpleTreatment = {name: _.name, id: _.name}
-                    return treatment;
-                } ));                
-                dispatch('addSuccessNotification', {
-                    message: 'Treatments file imported',
-                });
-            }
+            dispatch('setAlertMessage', "A treatment import has been added to the work queue");
         });
     },
     async importLibraryTreatmentsFile(
@@ -271,11 +262,7 @@ const actions = {
             payload.id,
             false
         ).then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {           
-                dispatch('addSuccessNotification', {
-                    message: 'Treatments file imported',
-                });
-            }
+            dispatch('setAlertMessage', "A treatment import has been added to the work queue");
         });
     },
     async deleteTreatment(

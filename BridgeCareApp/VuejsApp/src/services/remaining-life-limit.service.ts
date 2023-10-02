@@ -14,6 +14,10 @@ export default class RemainingLifeLimitService {
         );
     }
 
+    static getRemainingLibraryDate(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.RemainingLifeLimit}/GetRemainingLibraryModifiedDate/${libraryId}`);
+    }
+
     static getScenarioRemainingLifeLimitPage(scenarioId: string, data:PagingRequest<RemainingLifeLimit>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.RemainingLifeLimit}/GetScenarioRemainingLifeLimitPage/${scenarioId}`, data

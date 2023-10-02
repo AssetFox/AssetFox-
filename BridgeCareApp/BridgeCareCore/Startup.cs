@@ -22,6 +22,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BridgeCareCore.Services;
+using BridgeCareCore.Services.SimulationCloning;
 
 namespace BridgeCareCore
 {
@@ -60,7 +61,7 @@ namespace BridgeCareCore
             }));
 
             services.AddSecurityConfig(Configuration);
-            services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
+            services.AddSingleton<IClaimsTransformation, ClaimsTransformation>();
 
             services.AddSingleton(Configuration);
             services.AddControllers().AddNewtonsoftJson();
@@ -86,16 +87,14 @@ namespace BridgeCareCore
             services.AddGraphQLServer()
                 .AddQueryType<QueryObjectType>()
                 .AddFiltering()
-                .AddSorting()
-                .AddAuthorization();
+                .AddSorting();
+                //.AddAuthorization();
 
             SetupReporting(services);
-            var reportLookup = new Dictionary<string, Type>();
-
-            reportLookup.Add("PAMSSummaryReport", typeof(PAMSSummaryReport));
 
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
             services.AddScoped<IAggregationService, AggregationService>();
+            services.AddScoped<ICompleteSimulationCloningService, CompleteSimulationCloningService>();
 
             services.AddSingleton<IAnalysisEventLoggingService, AnalysisEventLoggingService>();
         }

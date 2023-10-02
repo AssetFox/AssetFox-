@@ -75,9 +75,9 @@ namespace BridgeCareCore.Services.SimulationCloning
 
             // do the clone
             var ownerId = _unitOfWork.CurrentUser?.Id ?? Guid.Empty;
-            var baseEntityProperties = new BaseEntityProperties { CreatedBy = ownerId, LastModifiedBy = ownerId };//Unclear if it should be at the BridgeCareCore level
+            var baseEntityProperties = new BaseEntityProperties { CreatedBy = ownerId, LastModifiedBy = ownerId };
             var ownerName = _unitOfWork.CurrentUser?.Username;
-            var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId, ownerName);//This can be at the BridgeCareCore level
+            var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId, ownerName);
 
             // save it
             var keyAttribute = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(dto.NetworkId);           

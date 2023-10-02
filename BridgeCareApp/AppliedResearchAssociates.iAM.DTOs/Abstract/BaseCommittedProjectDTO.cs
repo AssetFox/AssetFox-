@@ -81,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// It is a generic way of defining behavior on subclasses and accessing it on the superclass.
         /// </summary>
         /// <returns>
-        /// TOutput is 
+        /// TOutput is type paramet for whatever is being returned.  THelper is typer paramete for whatever type the helper has.
         /// </returns>
         public abstract TOutput Accept<TOutput, THelper>(IBaseCommittedProjectDtoVisitor<THelper, TOutput> visitor, THelper helper);
 

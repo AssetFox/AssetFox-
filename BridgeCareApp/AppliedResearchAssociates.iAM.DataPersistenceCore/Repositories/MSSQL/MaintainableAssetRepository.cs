@@ -304,5 +304,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return assetIds;
         }
+
+        public List<String> GetMaintableAssetByNetworkId(Guid networkId)
+        {
+            var assetNames = new List<String>();
+         
+            var assets = _unitOfWork.Context.MaintainableAsset
+               .Where(_ => _.NetworkId == networkId)
+              .SelectMany(_ => _.SpatialWeighting.Distinct().ToList());
+
+            foreach (var asset in assets)
+               // if (asset. .SpatialWeighting != null)
+                {
+                  //  assetNames.Add(asset.SpatialWeighting);
+                }
+                
+            return assetNames;
+        }
     }
 }

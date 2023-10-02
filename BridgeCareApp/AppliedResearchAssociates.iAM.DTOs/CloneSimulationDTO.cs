@@ -7,6 +7,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
     {
         public Guid ScenarioId { get; set; }
         public Guid NetworkId { get; set; }
+        public Guid DestinationNetworkId { get; set; }
         public string ScenarioName { get; set; }
 
     }

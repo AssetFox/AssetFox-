@@ -232,13 +232,18 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = Policy.CloneSimulation)]
         public async Task<IActionResult> CloneSimulation([FromBody] CloneSimulationDTO dto)
         {
+           
             try
             {
-                
+                dto.DestinationNetworkId = Guid.Parse("502C1684-C8B6-48FD-9725-A2295AA3E0F0");
+
                 var result = await Task.Factory.StartNew(() =>
                 {
-
                     _claimHelper.CheckUserSimulationModifyAuthorization(dto.ScenarioId, UserId);
+                    if (dto.DestinationNetworkId != dto.NetworkId)
+                    {
+                        var isCompatible = _completeSimulationCloningService.CheckCompatibleNetworkAttributes(dto);
+                    }
                     var cloneResult =  _completeSimulationCloningService.Clone(dto);
                     return cloneResult;
                 });

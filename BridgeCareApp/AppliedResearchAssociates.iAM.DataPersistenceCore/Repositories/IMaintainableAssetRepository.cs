@@ -27,5 +27,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         MaintainableAsset GetMaintainableAssetByKeyAttribute(Guid networkId, string attributeValue);
 
         List<Guid> GetAllIdsInCommittedProjectsForSimulation(Guid simulationId, Guid networkId);
+
+        List<String> GetMaintableAssetByNetworkId(Guid networkId);
+
     }
 }

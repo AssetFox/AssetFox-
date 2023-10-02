@@ -7,6 +7,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.Common;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Services.SimulationCloning
 {
@@ -83,5 +84,16 @@ namespace BridgeCareCore.Services.SimulationCloning
             var clone = _unitOfWork.SimulationRepo.CreateSimulation(cloneSimulation, keyAttribute, simulationCloningCommittedProjectErrors, baseEntityProperties);
             return clone;
         }
+        public bool CheckCompatibleNetworkAttributes(CloneSimulationDTO dto)
+        {
+            var keyAttribute = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetByNetworkId(dto.NetworkId);
+            var destinationKeyAttribute = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetByNetworkId(dto.DestinationNetworkId);
+            bool IsCompatible = true;
+               
+
+              return IsCompatible;
+        }
+
+        public bool IsCompleteSimulation(CloneSimulationDTO dto) => throw new NotImplementedException();
     }
 }

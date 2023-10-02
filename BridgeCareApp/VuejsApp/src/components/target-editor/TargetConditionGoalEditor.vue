@@ -32,7 +32,7 @@
                                 <span>Shared</span>
                             </template>
                         </v-badge>
-                        <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -41,7 +41,7 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout justify-end align-end style="padding-top: 18px !important;">
                         <v-spacer></v-spacer>
-                        <v-btn outline
+                        <v-btn variant = "outlined"
                             id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
                             @click="showCreateTargetConditionGoalDialog = true"
                             class="ghd-control-border ghd-blue"
@@ -52,7 +52,7 @@
                             @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario"
-                            outline
+                            variant = "outlined"
                         >
                         Create New Library
                         </v-btn>
@@ -296,7 +296,7 @@
         </v-flex>
 
         <v-layout justify-start align-center v-show="hasSelectedLibrary || hasScenario">
-            <v-btn flat right
+            <v-btn variant = "flat" right
                 id="TargetConditionGoalEditor-deleteSelected-vbtn"
                 class="ghd-control-label ghd-blue"
                 @click="onRemoveTargetConditionGoals"> 
@@ -315,7 +315,7 @@
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-layout justify-center row>
-                <v-btn outline
+                <v-btn variant = "outlined"
                     id="TargetConditionGoalEditor-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue"
@@ -324,14 +324,14 @@
                 >
                     Delete Library
                 </v-btn>
-                <v-btn :disabled='!hasUnsavedChanges' flat
+                <v-btn :disabled='!hasUnsavedChanges' variant = "flat"
                     @click="onDiscardChanges"
                     class="ghd-white-bg ghd-blue"
                     v-show="hasScenario"
                 >
                     Cancel
                 </v-btn>
-                <v-btn outline
+                <v-btn variant = "outlined"
                     id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'

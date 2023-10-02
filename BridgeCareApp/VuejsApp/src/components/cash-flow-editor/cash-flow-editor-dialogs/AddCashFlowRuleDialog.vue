@@ -4,7 +4,7 @@
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-layout justify-space-between align-center>
           <div class="ghd-control-dialog-header">New Cash Flow Rule Library</div>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
         </v-layout>
@@ -20,12 +20,12 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-space-between row>
-          <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
+          <v-btn @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn>
           <v-btn :disabled="newCashRule.name === ''" @click="onSubmit(true)"
                   id="AddCashFlowRuleDialog-submit-btn"
-                 outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                  variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Submit
           </v-btn>        
         </v-layout>

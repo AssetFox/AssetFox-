@@ -50,7 +50,7 @@
             <v-btn
               id="CreatePerformanceCurveDialog-cancel-button"
               class="ghd-white-bg ghd-blue ghd-button-text"
-              depressed
+              variant = "flat"
               @click="onSubmit(false)">
               Cancel
             </v-btn>
@@ -59,7 +59,7 @@
               :disabled="newPerformanceCurve.name === '' || newPerformanceCurve.attribute === ''"
               class="ghd-blue-bg ghd-white ghd-button-text"
               @click="onSubmit(true)"
-              depressed>
+              variant = "flat">
               Save
             </v-btn>
           </v-layout>

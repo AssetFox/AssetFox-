@@ -110,7 +110,7 @@ namespace BridgeCareCore.Controllers
                 {
                     if (reportTypeParam[0].Contains("(R)"))
                     {
-                        var assetKeyDataValues = assetKeyData.Select(_ => _.Value.FirstOrDefault()).Distinct().ToList();
+                        var assetKeyDataValues = assetKeyData.Select(_ => _.Value.FirstOrDefault()).ToList();
                         foreach (var assetKeyDataValue in assetKeyDataValues)
                         {
                             inventoryItems.Add(new InventoryItem { keyProperties = new List<string> { assetKeyDataValue } });

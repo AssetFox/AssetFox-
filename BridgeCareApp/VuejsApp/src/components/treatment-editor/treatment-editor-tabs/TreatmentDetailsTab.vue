@@ -11,12 +11,7 @@
                         outline
                         rows="3"
                         v-model="selectedTreatmentDetails.description"
-                        @input="
-                            onEditTreatmentDetails(
-                                'description',
-                                selectedTreatmentDetails.description,
-                            )
-                        "
+                        @update:model-value="onEditTreatmentDetails('description', selectedTreatmentDetails.description)"
                     />
                 </v-flex>                
                 <v-layout xs12 row class="ghd-left-padding ghd-right-padding">
@@ -26,12 +21,7 @@
                         class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                             :items="Array.from(treatmentCategoryMap.keys())"
                             append-icon=$vuetify.icons.ghd-down
-                            @input="
-                                onEditTreatmentType(
-                                    'category',
-                                    treatmentCategoryBinding,
-                                )
-                            "
+                            @update:model-value="onEditTreatmentType('category', treatmentCategoryBinding)"
                             label="Category"
                             outline
                             v-model="treatmentCategoryBinding"
@@ -44,16 +34,11 @@
                         class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                         :items="Array.from(assetTypeMap.keys())"
                         append-icon=$vuetify.icons.ghd-down
-                            @input="
-                                onEditAssetType(
-                                    'assetType',
-                                    assetTypeBinding,
-                                )
-                            "
-                            label="Asset type"
-                            outline
-                            v-model="assetTypeBinding"
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        @update:model-value="onEditAssetType('assetType', assetTypeBinding)"
+                        label="Asset type"
+                        outline
+                        v-model="assetTypeBinding"
+                        :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
                     </v-flex>
                     <v-flex xs3>
@@ -61,12 +46,7 @@
                         <v-text-field id="TreatmentDetailsTab-yearsBeforeAny-vtext"
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
                             :mask="'####'"
-                            @input="
-                                onEditTreatmentDetails(
-                                    'shadowForAnyTreatment',
-                                    selectedTreatmentDetails.shadowForAnyTreatment,
-                                )
-                            "
+                            @update:model-value="onEditTreatmentDetails('shadowForAnyTreatment', selectedTreatmentDetails.shadowForAnyTreatment)"
                             label="Years Before Any"
                             outline
                             v-model="
@@ -81,12 +61,7 @@
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
                             :mask="'####'"
                             rows="4"
-                            @input="
-                                onEditTreatmentDetails(
-                                    'shadowForSameTreatment',
-                                    selectedTreatmentDetails.shadowForSameTreatment,
-                                )
-                            "
+                            @update:model-value="onEditTreatmentDetails('shadowForSameTreatment', selectedTreatmentDetails.shadowForSameTreatment)"
                             label="Years Before Same"
                             outline
                             v-model="

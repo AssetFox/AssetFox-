@@ -215,7 +215,7 @@
                         outline
                         rows="4"
                         v-model="selectedDeficientConditionGoalLibrary.description"
-                        @input='checkHasUnsavedChanges()'
+                        @update:model-value="checkHasUnsavedChanges()"
                     >
                     </v-textarea>
                 </v-flex>

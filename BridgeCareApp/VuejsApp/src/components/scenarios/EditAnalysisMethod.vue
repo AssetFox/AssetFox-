@@ -86,7 +86,7 @@
                                 id="EditAnalysisMethod-benefitLimit-textField"
                                 style="margin:0px"
                                 class="ghd-control-text ghd-control-border"
-                                @input="onSetBenefitProperty('limit', $event)"
+                                @update:model-value="onSetBenefitProperty('limit',$event)"
                                 outline
                                 type="number"
                                 min="0"
@@ -119,12 +119,7 @@
                             <v-textarea
                                 id="EditAnalysisMethod-description-textArea"
                                 class="ghd-control-text ghd-control-border"
-                                @input="
-                                    onSetAnalysisMethodProperty(
-                                        'description',
-                                        $event,
-                                    )
-                                "
+                                @update:model-value="onSetAnalysisMethodProperty('description', $event)"
                                 no-resize
                                 outline
                                 rows="6"

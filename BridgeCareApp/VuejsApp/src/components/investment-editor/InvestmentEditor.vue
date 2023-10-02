@@ -209,7 +209,7 @@
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea no-resize outline rows='4'
                                 v-model='selectedBudgetLibrary.description'
-                                @input='checkHasUnsavedChanges()'
+                                @update:model-value="checkHasUnsavedChanges()"
                                 class="ghd-text-field-border">
                     </v-textarea>
                 </v-flex>

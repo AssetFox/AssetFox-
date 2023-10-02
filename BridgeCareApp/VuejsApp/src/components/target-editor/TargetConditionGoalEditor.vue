@@ -311,7 +311,7 @@
                 class="ghd-control-text ghd-control-border"
                 outline
                 v-model="selectedTargetConditionGoalLibrary.description"
-                @input='checkHasUnsavedChanges()'>
+                @update:model-value="checkHasUnsavedChanges()">
             </v-textarea>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>

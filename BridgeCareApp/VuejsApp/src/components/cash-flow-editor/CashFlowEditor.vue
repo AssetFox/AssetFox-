@@ -169,7 +169,8 @@
                         outline
                         rows="4"
                         v-model="selectedCashFlowRuleLibrary.description"
-                        @input='checkHasUnsavedChanges()'>
+                        @update:model-value="checkHasUnsavedChanges()">
+
                     </v-textarea>
                 </v-flex>
             </v-layout>

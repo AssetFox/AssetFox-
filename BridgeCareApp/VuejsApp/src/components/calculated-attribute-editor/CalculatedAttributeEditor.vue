@@ -204,7 +204,7 @@
                 class="ghd-text-field-border"
                 rows="4"
                 v-model="selectedCalculatedAttributeLibrary.description"
-                @input='checkHasUnsavedChanges()'/>
+                @update:model-value="checkHasUnsavedChanges()">
         </v-flex>
         <!-- buttons -->
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">

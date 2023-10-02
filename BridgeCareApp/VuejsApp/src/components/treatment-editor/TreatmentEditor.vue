@@ -246,7 +246,7 @@
                         outline
                         rows='2'
                         v-model='selectedTreatmentLibrary.description'
-                        @input='checkHasUnsavedChanges()'
+                        @update:model-value="checkHasUnsavedChanges()"
                     />
                 </v-flex>
             </v-layout>

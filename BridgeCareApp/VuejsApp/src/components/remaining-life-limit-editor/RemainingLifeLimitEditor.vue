@@ -169,7 +169,7 @@
                     <v-textarea
                         class="ghd-control-text ghd-control-border"
                         v-model="selectedRemainingLifeLimitLibrary.description"
-                        @input="checkHasUnsavedChanges()"
+                        @update:model-value="checkHasUnsavedChanges()"
                         outline
                     >
                     </v-textarea>

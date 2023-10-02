@@ -21,7 +21,7 @@
                     :items="numericAttributeNames"
                     append-icon=$vuetify.icons.ghd-down
                     class="ghd-select ghd-control-text ghd-text-field ghd-text-field-border"
-                    outline v-model="newTargetConditionGoal.attribute"
+                    variant="outlined" v-model="newTargetConditionGoal.attribute"
                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Year</v-subheader>
           <v-text-field id="CreateTargetConditionGoalDialog-year-vtextfield" :mask="'####'" class="ghd-control-text ghd-control-border" outline v-model.number="newTargetConditionGoal.year"/>

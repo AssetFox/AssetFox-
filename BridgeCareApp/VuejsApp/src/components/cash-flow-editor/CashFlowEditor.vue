@@ -8,7 +8,7 @@
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
                         id="CashFlowEditor-SelectLibrary-vselect"
-                        outline
+                        variant="outlined"
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
@@ -68,7 +68,7 @@
                     select-all>
                     <template v-slot:item="{item}" slot="items" slot-scope="props">
                         <td>
-                            <v-checkbox hide-details primary v-model='item.selected'></v-checkbox>
+                            <v-checkbox hide-details primary v-model='item.raw.selected'></v-checkbox>
                         </td>
                         <td>
                             <v-edit-dialog

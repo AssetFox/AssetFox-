@@ -33,7 +33,7 @@
                                 )
                             "
                             label="Category"
-                            outline
+                            variant="outlined"
                             v-model="treatmentCategoryBinding"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
@@ -51,7 +51,7 @@
                                 )
                             "
                             label="Asset type"
-                            outline
+                            variant="outlined"
                             v-model="assetTypeBinding"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />

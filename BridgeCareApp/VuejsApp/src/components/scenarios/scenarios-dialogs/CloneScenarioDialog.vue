@@ -16,13 +16,13 @@
               <v-select
                     :items="stateCompatibleNetworks"
                     label="Select a compatible network"
-                    item-text="name"
+                    item-title="name"
                     v-model="networkMetaData"
                     return-object
                     v-if="hasCompatibleNetworks"
                     v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
                     dense
-                    outline
+                    variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CloneScenarioDialog-scenarioName-textField"

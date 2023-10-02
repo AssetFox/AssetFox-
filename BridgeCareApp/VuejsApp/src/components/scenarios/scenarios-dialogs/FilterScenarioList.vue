@@ -16,12 +16,12 @@
                     id="FilterScenarioList-selectAFilter-select"
                     :items="filters"
                     label="Select a filter"
-                    item-text="name"
+                    item-title="name"
                     v-model="FilterCategory"
                     return-object
                     v-on:change="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
                     dense
-                    variant = "outlined"
+                    variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CreateScenarioDialog-scenarioName-textField"

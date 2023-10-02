@@ -10,18 +10,18 @@
                             class="ghd-control-border ghd-control-text ghd-select"
                             :items="librarySelectItems"
                             append-icon=$vuetify.icons.ghd-down
-                            outline
+                            variant="outlined"
                             v-model="librarySelectItemValue"
                         >
                             <template v-slot:selection="{ item }">
-                                <span class="ghd-control-text">{{ item.text }}</span>
+                                <span class="ghd-control-text">{{ item.raw.text }}</span>
                             </template>
                             <template v-slot:item="{ item }">
-                                <v-list-item v-on="on" v-bind="attrs">
+                                <v-list-item v-on="on" v-bind="$attrs">
                                 <v-list-item-content>
                                     <v-list-item-title>
                                     <v-row no-gutters align="center">
-                                    <span>{{ item.text }}</span>
+                                    <span>{{ item.raw.text }}</span>
                                     </v-row>
                                     </v-list-item-title>
                                 </v-list-item-content>

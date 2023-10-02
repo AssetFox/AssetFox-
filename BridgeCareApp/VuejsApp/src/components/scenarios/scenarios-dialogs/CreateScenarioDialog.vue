@@ -16,12 +16,12 @@
                     id="CreateScenarioDialog-selectANetwork-select"
                     :items="stateNetworks"
                     label="Select a network"
-                    item-text="name"
+                    item-title="name"
                     v-model="networkMetaData"
                     return-object
                     v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
                     dense
-                    outline
+                    variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CreateScenarioDialog-scenarioName-textField"

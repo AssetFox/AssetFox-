@@ -20,7 +20,7 @@
                       append-icon=$vuetify.icons.ghd-down
                       :rules="[rules['generalRules'].valueIsNotEmpty]"
                       label="Select Attribute"
-                      outline/>
+                      variant="outlined" />
           </v-layout>
         </v-card-text>
         <v-card-actions>

@@ -22,7 +22,7 @@
             <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
             <v-select :items="attributeNames"
               append-icon=$vuetify.icons.ghd-down
-              outline
+              variant="outlined"
               v-model="newConsequence.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
               class="ghd-select ghd-text-field ghd-text-field-border">
             </v-select>

@@ -96,7 +96,7 @@
                                 <v-edit-dialog v-if="header.value !== 'criterionLibrary' && header.value !== 'action'"
                                     :return-value.sync="props.item[header.value]"
                                     @save="onEditDeficientConditionGoalProperty(props.item,header.value,props.item[header.value])"
-                                    large
+                                    size="large"
                                     lazy>
                                     <v-text-field v-if="header.value !== 'allowedDeficientPercentage'"
                                         readonly
@@ -155,7 +155,7 @@
                                     align-center
                                     style="flex-wrap:nowrap">
                                     <v-menu
-                                        bottom
+                                        location="bottom"
                                         min-height="500px"
                                         min-width="500px">
                                         <template slot="activator">

@@ -20,7 +20,7 @@
                     v-model="FilterCategory"
                     return-object
                     v-on:change="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
-                    dense
+                    density="default"
                     variant = "outlined"
                 ></v-select>
                 <v-text-field

@@ -13,7 +13,7 @@
                                 v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
                                 :return-value.sync='props.item[header.value]'
                                 @save='onEditConsequenceProperty(props.item, header.value, props.item[header.value])'
-                                large lazy persistent>
+                                size="large" lazy persistent>
                                 <v-text-field v-if="header.value === 'attribute'" readonly single-line class='ghd-control-text-sm'
                                               :value='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />
@@ -33,7 +33,7 @@
                             </v-edit-dialog>
 
                             <v-menu
-                                left
+                                location="left"
                                 min-height="500px"
                                 min-width="500px"
                                 v-show="header.value === 'equation'"
@@ -65,7 +65,7 @@
                             </v-btn>                       
 
                             <v-menu
-                                left
+                                location="left"
                                 min-height="500px"
                                 min-width="500px"
                                 v-show="header.value === 'criterionLibrary'"

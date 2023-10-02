@@ -119,8 +119,8 @@
               </td>
               <td>
                 <v-menu bottom min-height='200px' min-width='200px'>
-                  <template v-slot:activator="{ on }">
-                    <v-text-field v-model='props.item.name' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' v-on='on' class='text-center' />
+                  <template v-slot:activator="{ props }">
+                    <v-text-field v-model='props.item.name' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' class='text-center' />
                   </template>
                   <v-card>
                     <v-card-text>

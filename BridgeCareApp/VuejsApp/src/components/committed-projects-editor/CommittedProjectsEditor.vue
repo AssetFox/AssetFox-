@@ -92,7 +92,7 @@
                                         <v-edit-dialog v-if="header.value !== 'actions' && header.value !== 'selection'"
                                             :return-value.sync="props.item[header.value]"
                                             @save="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])"
-                                            large
+                                            size="large"
                                             lazy
                                             >
                                             <v-text-field v-if="header.value !== 'budget' 

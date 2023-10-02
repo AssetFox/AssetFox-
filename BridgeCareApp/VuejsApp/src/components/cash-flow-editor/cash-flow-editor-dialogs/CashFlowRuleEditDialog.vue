@@ -23,7 +23,7 @@
                             :return-value.sync="item.durationInYears"
                             @save="onEditSelectedLibraryListData(item,'durationInYears')"
                             full-width
-                            large
+                            size="large"
                             lazy
                             persistent>
                             <v-text-field
@@ -60,7 +60,7 @@
                     <td>
                         <v-edit-dialog
                             :return-value.sync="item.costCeiling"
-                            large
+                            size="large"
                             lazy
                             persistent
                             full-width
@@ -117,7 +117,7 @@
                             :return-value.sync="item.yearlyPercentages"
                             @save="onEditSelectedLibraryListData(item,'yearlyPercentages')"
                             full-width
-                            large
+                            size="large"
                             lazy
                             persistent>
                             <v-text-field

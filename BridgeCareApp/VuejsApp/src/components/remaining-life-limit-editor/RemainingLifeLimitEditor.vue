@@ -73,7 +73,7 @@
                         <td>
                             <v-edit-dialog
                                 :return-value.sync="props.item.attribute"
-                                large
+                                size="large"
                                 lazy
                                 @save="
                                     onEditRemainingLifeLimitProperty(
@@ -110,7 +110,7 @@
                         <td>
                             <v-edit-dialog
                                 :return-value.sync="props.item.value"
-                                large
+                                size="large"
                                 lazy
                                 @save="
                                     onEditRemainingLifeLimitProperty(

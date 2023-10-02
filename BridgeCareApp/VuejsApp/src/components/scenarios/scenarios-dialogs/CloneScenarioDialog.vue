@@ -21,7 +21,7 @@
                     return-object
                     v-if="hasCompatibleNetworks"
                     v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
-                    dense
+                    density="default"
                     outline
                 ></v-select>
                 <v-text-field

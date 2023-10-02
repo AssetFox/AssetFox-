@@ -68,11 +68,10 @@
                         max-height="75%"
                         :close-on-content-click="false"
                     >
-                        <template v-slot:activator="{ on, attrs }">
+                        <template v-slot:activator="{ props }">
                             <button
                                 id="App-notification-button"
-                                v-on="on"
-                                v-bind="attrs"
+                                v-bind="props"
                                 @click="onNotificationMenuSelect"
                                 class="notification-icon"
                                 icon
@@ -127,9 +126,9 @@
                                                     notification.shortMessage
                                                 "
                                             ></v-list-tile-content>
-                                            <v-btn icon small right absolute>
+                                            <v-btn icon size="small" end position="absolute">
                                                 <v-icon
-                                                    small
+                                                    size="small"
                                                     @click="
                                                         onRemoveNotification(
                                                             notification.id,
@@ -173,7 +172,7 @@
                         icon
                         color="#002E6C"
                     >
-                        <v-icon small color="white">fas fa-sign-in-alt</v-icon>
+                        <v-icon size="small" color="white">fas fa-sign-in-alt</v-icon>
                     </v-btn>
                     <v-btn
                         v-if="securityType === esecSecurityType && currentURL != 'AuthenticationStart'"
@@ -194,7 +193,7 @@
                         icon
                         color="#002E6C"
                     >
-                        <v-icon small color="white">fas fa-sign-out-alt</v-icon>
+                        <v-icon size="small" color="white">fas fa-sign-out-alt</v-icon>
                     </v-btn>
                     <v-btn
                         id="App-esecLogout-vbtn"
@@ -204,7 +203,7 @@
                         icon                        
                         color="#002E6C"
                     >
-                        <v-icon small color="white">fas fa-sign-out-alt</v-icon>
+                        <v-icon size="small" color="white">fas fa-sign-out-alt</v-icon>
                     </v-btn>
                 </v-toolbar-title>
             </v-toolbar>

@@ -98,7 +98,7 @@
                                         <td>
                                         
                                             <v-edit-dialog
-                                                large
+                                                size="large"
                                                 lazy
                                                 persistent
                                                 :return-value.sync="
@@ -173,19 +173,18 @@
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.reportStatus }}</td>
                                         <td>
-                                            <v-menu offset left>
+                                            <v-menu offset location="left">
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
+
                                                 >
                                                     <v-btn
                                                         id="Scenarios-actionMenu-vbtn"
                                                         color="green--text darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -290,7 +289,7 @@
 
                                         <td>
                                             <v-edit-dialog
-                                                large
+                                                size="large"
                                                 lazy
                                                 persistent
                                                 :return-value.sync="
@@ -365,19 +364,17 @@
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.reportStatus }}</td>
                                         <td>
-                                            <v-menu offset left>
+                                            <v-menu offset location="left">
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
                                                 >
                                                     <v-btn
                                                         id="Scenarios-shared-actionMenu-vbtn"
                                                         color="green--text darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -450,18 +447,16 @@
                                         <td>{{ props.item.previousRunTime }}</td>
                                         <td>{{ props.item.status }}</td>  
                                         <td>
-                                            <v-menu offset left>
+                                            <v-menu offset location="left">
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
                                                 >
                                                     <v-btn
                                                         color="green--text darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -524,15 +519,13 @@
                                             <v-menu offset left>
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
                                                 >
                                                     <v-btn
                                                         color="green--text darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>

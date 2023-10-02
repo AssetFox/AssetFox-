@@ -93,7 +93,7 @@
                 <v-flex class="criteria-flex">
                     <v-menu
                         full-width
-                        bottom
+                        location="bottom"
                         min-height="500px"
                         min-width="1000px"
                     >   

@@ -80,27 +80,27 @@
                           <div class="math-buttons-container">
                             <v-layout justify-space-between row>
                               <v-btn @click="onAddValueToExpression('+')" class="math-button add circular-button" icon
-                                     small>
+                                     size="small">
                                 <span>+</span>
                               </v-btn>
                               <v-btn @click="onAddValueToExpression('-')" class="math-button subtract circular-button" icon
-                                     small>
+                              size="small">
                                 <span>-</span>
                               </v-btn>
                               <v-btn @click="onAddValueToExpression('*')" class="math-button multiply circular-button" icon
-                                     small>
+                              size="small">
                                 <span>*</span>
                               </v-btn>
                               <v-btn @click="onAddValueToExpression('/')" class="math-button divide circular-button" icon
-                                     small>
+                              size="small">
                                 <span>/</span>
                               </v-btn>
                               <v-btn @click="onAddValueToExpression('(')" class="math-button parentheses circular-button" icon
-                                     small>
+                              size="small">
                                 <span>(</span>
                               </v-btn>
                               <v-btn @click="onAddValueToExpression(')')" class="math-button parentheses circular-button" icon
-                                     small>
+                              size="small">
                                 <span>)</span>
                               </v-btn>
                             </v-layout>
@@ -312,10 +312,10 @@
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
           <v-layout justify-center row>
-            <v-btn @click="onSubmitNewDataPoint(false)" variant = "flat" small class="ghd-blue ghd-button ghd-button-text">Cancel</v-btn>
+            <v-btn @click="onSubmitNewDataPoint(false)" variant = "flat" size="small" class="ghd-blue ghd-button ghd-button-text">Cancel</v-btn>
             <v-btn :disabled="disableNewDataPointSubmit()" @click="onSubmitNewDataPoint(true)"
             variant = "outlined"
-                   small class="ghd-blue ghd-button ghd-button-text">
+            size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>            
           </v-layout>
@@ -341,11 +341,11 @@
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
           <v-layout justify-center row>
-            <v-btn @click="onSubmitNewDataPointMulti(false)" variant = "flat" small class="ghd-blue ghd-button ghd-button-text">Cancel
+            <v-btn @click="onSubmitNewDataPointMulti(false)" variant = "flat" size="small" class="ghd-blue ghd-button ghd-button-text">Cancel
             </v-btn>
             <v-btn :disabled="disableMultipleDataPointsSubmit()" @click="onSubmitNewDataPointMulti(true)"
             variant = "outlined"
-                   small class="ghd-blue ghd-button ghd-button-text">
+            size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>           
           </v-layout>
@@ -383,10 +383,10 @@
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
           <v-layout justify-center row>
-            <v-btn @click="onSubmitEditedDataPointValue(false)" variant = "flat" small class="ghd-blue ghd-button-text">Cancel</v-btn>
+            <v-btn @click="onSubmitEditedDataPointValue(false)" variant = "flat" size="small" class="ghd-blue ghd-button-text">Cancel</v-btn>
             <v-btn :disabled="disableEditDataPointSubmit()" @click="onSubmitEditedDataPointValue(true)"
             variant = "outlined"
-                   small class="ghd-blue ghd-button ghd-button-text">
+            size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>            
           </v-layout>

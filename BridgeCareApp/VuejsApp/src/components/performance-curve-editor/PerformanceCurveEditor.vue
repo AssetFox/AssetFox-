@@ -164,7 +164,7 @@
                                                 props.item.name,
                                             )
                                         "
-                                        large
+                                        size="large"
                                         lazy
                                     >
                                         <v-text-field
@@ -202,7 +202,7 @@
                                                 props.item.attribute,
                                             )
                                         "
-                                        large
+                                        size="large"
                                         lazy
                                     >
                                         <v-text-field
@@ -278,7 +278,7 @@
                                     <v-menu
                                         min-height="500px"
                                         min-width="500px"
-                                        right
+                                        location="right"
                                         v-show="
                                             props.item.criterionLibrary
                                                 .mergedCriteriaExpression !== ''

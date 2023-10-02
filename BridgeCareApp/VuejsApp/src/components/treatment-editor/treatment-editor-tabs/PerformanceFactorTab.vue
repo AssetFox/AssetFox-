@@ -12,7 +12,7 @@
                                 v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
                                 :return-value.sync='props.item[header.value]'
                                 @save='onEditPerformanceFactorProperty(props.item, header.value, props.item[header.value])'
-                                large lazy persistent>
+                                size="large" lazy persistent>
                                 <v-text-field v-if="header.value === 'attribute'" readonly single-line class='ghd-control-text-sm'
                                               :value='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />

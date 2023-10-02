@@ -1,6 +1,6 @@
 <template>
     <v-dialog max-width="450px" persistent v-model="showDialog">
-        <v-card elevation="5" outlined class="modal-pop-up-padding">
+        <v-card elevation="5" variant = "outlined" class="modal-pop-up-padding">
             <v-card-title>
                 <h3 class="dialog-header">
                     Filter For Scenarios
@@ -16,12 +16,12 @@
                     id="FilterScenarioList-selectAFilter-select"
                     :items="filters"
                     label="Select a filter"
-                    item-text="name"
+                    item-title="name"
                     v-model="FilterCategory"
                     return-object
                     v-on:change="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
                     dense
-                    outline
+                    variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CreateScenarioDialog-scenarioName-textField"

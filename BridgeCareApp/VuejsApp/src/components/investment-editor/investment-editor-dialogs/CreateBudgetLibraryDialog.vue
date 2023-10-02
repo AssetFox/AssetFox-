@@ -4,7 +4,7 @@
       <v-card-title class="ghd-dialog-box-padding-top">
          <v-layout justify-space-between align-center>
             <div class="ghd-control-dialog-header">New Investment Library</div>
-            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+            <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
           </v-layout>
@@ -26,9 +26,9 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row>
-          <v-btn id="CreateBudgetLibraryDialog-cancel-btn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' outline>Cancel</v-btn>
+          <v-btn id="CreateBudgetLibraryDialog-cancel-btn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' variant = "outlined">Cancel</v-btn>
           <v-btn id="CreateBudgetLibraryDialog-save-btn" :disabled="canDisableSave()" @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
             Save
           </v-btn>          
         </v-layout>

@@ -6,7 +6,7 @@
         max-width="60%"
         transition="dialog-bottom-transition"
     >
-        <v-card elevation="5" outlined >
+        <v-card elevation="5" variant = "outlined" >
             <v-card-title>
                 <h3 class="dialog-header">
                     Aggregate Data

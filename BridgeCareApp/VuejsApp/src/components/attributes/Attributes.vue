@@ -7,12 +7,12 @@
                         <v-subheader id="Attributes-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                         <v-select :items='selectAttributeItems'
                             id="Attributes-selectAttribute-vselect"
-                            outline
+                            variant="outlined"
                             append-icon=$vuetify.icons.ghd-down                           
                             v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
                     </v-layout>
-                    <v-btn id="Attributes-addAttribute-vbtn" style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                    <v-btn id="Attributes-addAttribute-vbtn" style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                         Add Attribute
                     </v-btn>
                 </v-layout>
@@ -30,7 +30,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Type</v-subheader>
                     <v-select
                         id="Attributes-attributeDataType-vselect"
-                        outline
+                        variant="outlined"
                         append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='typeSelectValues'
@@ -43,7 +43,7 @@
                     </v-subheader>
                     <v-select
                         id="Attributes-attributeAggregationRule-vselect"
-                        outline
+                        variant="outlined"
                         append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='aggregationRuleSelectValues'
@@ -93,7 +93,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
                     <v-select
                         id="Attributes-attributeDataSource-vselect"
-                        outline
+                        variant="outlined"
                         append-icon=$vuetify.icons.ghd-down  
                         v-model='selectDatasourceItemValue'
                         :items='selectDatasourceItems'                     
@@ -129,7 +129,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Column Name</v-subheader>
                     <v-select
                         id="Attributes-attributeColumnName-vselect"
-                        outline
+                        variant="outlined"
                         append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='selectExcelColumns'
@@ -141,7 +141,7 @@
         <!-- The Buttons  -->
         <v-flex xs12 v-if="hasSelectedAttribute">        
             <v-layout justify-center>
-                <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'>
+                <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
                 <v-btn v-if="selectedAttribute.dataSource.type == 'SQL'" :disabled="selectedAttribute.dataSource.type != 'SQL'" 

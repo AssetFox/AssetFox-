@@ -8,7 +8,7 @@
                             <v-select id="BudgetPriorityEditor-library-vselect"
                                 :items='librarySelectItems' 
                                 append-icon=$vuetify.icons.ghd-down
-                                outline                           
+                                variant="outlined"
                                 v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                             </v-select>    
                              <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       
@@ -27,7 +27,7 @@
                                 <span>Shared</span>
                             </template>
                         </v-badge>
-                        <v-btn id="BudgetPriorityEditor-shareLibrary-vbtn" @click='onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn id="BudgetPriorityEditor-shareLibrary-vbtn" @click='onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -36,10 +36,10 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout row align-end class="left-buttons-padding">
                         <v-spacer></v-spacer>
-                        <v-btn id="BudgetPriorityEditor-addBudgetPriority-vbtn" @click='showCreateBudgetPriorityDialog = true' outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        <v-btn id="BudgetPriorityEditor-addBudgetPriority-vbtn" @click='showCreateBudgetPriorityDialog = true' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show='hasSelectedLibrary || hasScenario'>Add Budget Priority</v-btn>
                         
-                        <v-btn id="BudgetPriorityEditor-createNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(false)' outline
+                        <v-btn id="BudgetPriorityEditor-createNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(false)' variant = "outlined"
                             v-show='!hasScenario' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' > 
                             Create New Library
                         </v-btn>
@@ -136,7 +136,7 @@
                     </template>
                 </v-data-table>
                 <v-btn :disabled='selectedBudgetPriorityIds.length === 0' @click='onRemoveBudgetPriorities'
-                    class='ghd-blue ghd-button' flat>
+                    class='ghd-blue ghd-button' variant = "flat">
                     Delete Selected
                 </v-btn>
             </div>
@@ -155,11 +155,11 @@
         </v-flex>
         <v-flex xs12>           
             <v-layout justify-center row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn  flat @click='onDiscardChanges'
+                <v-btn  variant = "flat" @click='onDiscardChanges'
                        v-show='hasScenario' :disabled='!hasUnsavedChanges' class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn id="BudgetPriorityEditor-createAsNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                <v-btn id="BudgetPriorityEditor-createAsNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                        :disabled='disableCrudButtons()'>
                     Create as New Library
                 </v-btn>
@@ -168,7 +168,7 @@
                        v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
-                <v-btn id="BudgetPriorityEditor-deleteLibrary-vbtn"  @click='onShowConfirmDeleteAlert' outline
+                <v-btn id="BudgetPriorityEditor-deleteLibrary-vbtn"  @click='onShowConfirmDeleteAlert' variant = "outlined"
                        v-show='!hasScenario' :disabled='!hasSelectedLibrary' class='ghd-blue ghd-button-text ghd-button'>
                     Delete Library
                 </v-btn>             

@@ -5,7 +5,7 @@
         <v-layout justify-center>
           <h5>Deficient Condition Goal Library Sharing</h5>
         </v-layout>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
       </v-card-title>
@@ -37,7 +37,7 @@
       </v-card-text>
       <v-card-actions>
         <v-layout row justify-center>
-          <v-btn id="ShareDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel</v-btn>
+          <v-btn id="ShareDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
           <v-btn id="ShareDeficientConditionGoalLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>

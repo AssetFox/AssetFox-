@@ -1,6 +1,6 @@
 ﻿<template>
     <v-dialog max-width="450px" persistent v-model="showDialog">
-        <v-card elevation="5" outlined class="modal-pop-up-padding">
+        <v-card elevation="5" variant = "outlined" class="modal-pop-up-padding">
             <v-card-title>
                 <h3 class="dialog-header">
                     Create new scenario
@@ -16,12 +16,12 @@
                     id="CreateScenarioDialog-selectANetwork-select"
                     :items="stateNetworks"
                     label="Select a network"
-                    item-text="name"
+                    item-title="name"
                     v-model="networkMetaData"
                     return-object
                     v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
                     dense
-                    outline
+                    variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CreateScenarioDialog-scenarioName-textField"

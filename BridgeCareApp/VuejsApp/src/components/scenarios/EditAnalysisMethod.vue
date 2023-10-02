@@ -17,7 +17,7 @@
                                         $event,
                                     )
                                 "
-                                outline
+                                variant="outlined"
                                 clearable
                                 :value="analysisMethod.attribute"
                                 :disabled="!hasAdminAccess"
@@ -37,7 +37,7 @@
                                         $event,
                                     )
                                 "
-                                outline
+                                variant="outlined"
                                 :value="analysisMethod.optimizationStrategy"
                                 :disabled="!hasAdminAccess"
                             >
@@ -56,7 +56,7 @@
                                         $event,
                                     )
                                 "
-                                outline
+                                variant="outlined"
                                 :value="analysisMethod.spendingStrategy"
                             >
                             </v-select>
@@ -74,7 +74,7 @@
                                 @change="
                                     onSetBenefitProperty('attribute', $event)
                                 "
-                                outline
+                                variant="outlined"
                                 :value="analysisMethod.benefit.attribute"
                                 :disabled="!hasAdminAccess"
                             >
@@ -187,13 +187,13 @@
                         id="EditAnalysisMethod-cancel-btn"
                         @click="onDiscardChanges"
                         class="ghd-white-bg ghd-blue ghd-button-text ghd-button"
-                        depressed
+                        variant = "flat"
                         >Cancel</v-btn
                     >
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
                         @click="onUpsertAnalysisMethod"
-                        depressed
+                        variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
                         >Save</v-btn
                     >
@@ -442,15 +442,18 @@ import { useRouter } from 'vue-router';
         return criteriaIsEmpty() && !criteriaIsIntentionallyEmpty;
     }    
 
-    function onUpsertAnalysisMethod() {
+    async function onUpsertAnalysisMethod() {
         const form: any = $refs.form;
 
-        if (form.validate()) {
-            upsertAnalysisMethodAction({
+        await(form.validate(), () =>{
+            if(form.result.valid){
+                upsertAnalysisMethodAction({
                 analysisMethod: analysisMethod,
                 scenarioId: selectedScenarioId,
             });
-        }
+            }
+        })
+         
     }
 
     function onDiscardChanges() {

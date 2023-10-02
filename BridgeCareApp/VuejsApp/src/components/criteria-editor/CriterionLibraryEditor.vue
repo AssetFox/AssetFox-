@@ -14,7 +14,7 @@
                         v-if="!hasSelectedCriterionLibrary"
                         :items="criterionLibrarySelectItems"
                         label="Select a Criteria Library"
-                        outline
+                        variant="outlined"
                     >
                     </v-select>
                     <v-text-field
@@ -22,7 +22,7 @@
                         v-model="selectedCriterionLibrary.name"
                         @change="canUpdateOrCreate = true"
                     >
-                        <template slot="append">
+                        <template slot="append-inner">
                             <v-btn
                                 @click="librarySelectItemValue = ''"
                                 class="ara-orange"
@@ -89,7 +89,7 @@
                 >
                     Create as New Library
                 </v-btn>
-                <v-btn outline
+                <v-btn variant = "outlined"
                     @click="onShowConfirmDeleteAlert"
                     class="ara-orange-bg white--text"
                     :disabled="!hasLibraryEditPermission"

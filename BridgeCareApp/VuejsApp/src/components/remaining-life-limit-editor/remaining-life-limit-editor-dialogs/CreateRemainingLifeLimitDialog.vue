@@ -15,8 +15,9 @@
           <v-select id="CreateRemainingLifeLimitDialog-selectAnAttribute-select"
                     :items="dialogData.numericAttributeSelectItems"
                     append-icon=$vuetify.icons.ghd-down
-                    outline v-model="newRemainingLifeLimit.attribute"
+                    v-model="newRemainingLifeLimit.attribute"
                     :rules="[rules['generalRules'].valueIsNotEmpty]"
+                    variant="outlined"
                     class="ghd-select ghd-control-text ghd-text-field ghd-text-field-border"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Limit</v-subheader>
           <v-text-field id="CreateRemainingLifeLimitDialog-limit-textField"
@@ -28,8 +29,8 @@
       </v-card-text>
       <v-card-actions class="py-0">
         <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
-          <v-btn id="CreateRemainingLifeLimitDialog-cancel-btn" @click="onSubmit(false)" class="ghd-button" flat>Cancel</v-btn>
-          <v-btn id="CreateRemainingLifeLimitDialog-save-btn" :disabled="disableSubmitAction()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button" outline>
+          <v-btn id="CreateRemainingLifeLimitDialog-cancel-btn" @click="onSubmit(false)" class="ghd-button" variant = "flat">Cancel</v-btn>
+          <v-btn id="CreateRemainingLifeLimitDialog-save-btn" :disabled="disableSubmitAction()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button" variant = "outlined">
             Save
           </v-btn>
         </v-layout>

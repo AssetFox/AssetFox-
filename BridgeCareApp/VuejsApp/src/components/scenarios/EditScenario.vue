@@ -41,9 +41,9 @@
                     <v-btn
                         class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
                         @click="onShowRunSimulationAlert"
-                        depressed
+                        
                         block
-                        outlined>
+                        variant = "outlined">
                         Run Scenario
                     </v-btn>
                 </div>

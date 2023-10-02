@@ -10,17 +10,17 @@
                             class="ghd-control-border ghd-control-text ghd-select"
                             :items="librarySelectItems"
                             append-icon=$vuetify.icons.ghd-down
-                            outline
+                            variant="outlined"
                             v-model="librarySelectItemValue"
                         >
                             <template v-slot:selection="{ item }">
-                                <span class="ghd-control-text">{{ item.text }}</span>
+                                <span class="ghd-control-text">{{ item.raw.text }}</span>
                             </template>
                             <template v-slot:item="{ item }">
                                 <v-list-item v-on="on" v-bind="attrs">
                                     <v-list-item-title>
                                     <v-row no-gutters align="center">
-                                    <span>{{ item.text }}</span>
+                                    <span>{{ item.raw.text }}</span>
                                     </v-row>
                                     </v-list-item-title>
                                 </v-list-item>
@@ -53,7 +53,7 @@
                             v-model="gridSearchTerm"
                         >
                         </v-text-field>
-                        <v-btn id="PerformanceCurveEditor-search-button" style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
+                        <v-btn id="PerformanceCurveEditor-search-button" style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
                         </v-layout>
                     </v-flex>
                     <v-flex xs5 v-show="!(hasSelectedLibrary || hasScenario)">
@@ -65,7 +65,7 @@
                                 id="PerformanceCurveEditor-createNewLibrary-button"
                                 @click='onShowCreatePerformanceCurveLibraryDialog(false)'
                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                                outline>
+                                variant = "outlined">
                                 Create New Library
                             </v-btn>
                         </v-layout>
@@ -89,7 +89,7 @@
                             </v-badge>
                             <v-btn
                                 id="PerformanceCurveEditor-shareLibrary-button"
-                                @click='onShowSharePerformanceCurveLibraryDialog(selectedPerformanceCurveLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                                @click='onShowSharePerformanceCurveLibraryDialog(selectedPerformanceCurveLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                                 v-show='!hasScenario'>
                                 Share Library
                             </v-btn>
@@ -103,7 +103,7 @@
                         <v-btn
                             id="PerformanceCurveEditor-upload-button"
                             :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
-                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Upload
                         </v-btn>
                         <v-divider class="upload-download-divider" inset vertical>
@@ -111,7 +111,7 @@
                         <v-btn
                             id="PerformanceCurveEditor-download-button"
                             :disabled='false' @click='exportPerformanceCurves()'
-                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Download
                         </v-btn>
                         <v-divider class="upload-download-divider" inset vertical>
@@ -119,7 +119,7 @@
                         <v-btn
                             id="PerformanceCurveEditor-downloadTemplate-button"
                             :disabled='false' @click='OnDownloadTemplateClick()'
-                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Download Template
                         </v-btn>
                     </v-layout>            
@@ -283,7 +283,7 @@
                                         "
                                     >
                                         <template slot="activator">
-                                            <v-btn id="PerformanceCurveEditor-checkCriteriaEye-vbtn" class="ghd-blue" flat icon>
+                                            <v-btn id="PerformanceCurveEditor-checkCriteriaEye-vbtn" class="ghd-blue" variant = "flat" icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
@@ -332,7 +332,7 @@
                                     </v-btn>
                                 </td>
                             </template>
-                            <template v-slot:body.append>
+                            <template v-slot:body.append-inner>
                             <v-btn>Append button</v-btn>
                             </template>                               
                         </v-data-table>
@@ -340,7 +340,7 @@
                             id="PerformanceCurveEditor-deleteSelected-button"
                             :disabled='selectedPerformanceEquationIds.length === 0 || (!hasLibraryEditPermission && !hasScenario)'
                             @click='onRemovePerformanceEquations'
-                            class='ghd-blue' flat
+                            class='ghd-blue' variant = "flat"
                         >
                             Delete Selected
                         </v-btn>                        
@@ -354,8 +354,8 @@
                         id="PerformanceCurveEditor-addDeteriorationModel-button"
                         @click="showCreatePerformanceCurveDialog = true"
                         class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
-                        depressed                
-                        outlined
+                                        
+                        variant = "outlined"
                     >
                         Add Deterioration Model
                     </v-btn>
@@ -388,16 +388,16 @@
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onDiscardChanges"
                     class="ghd-white-bg ghd-blue ghd-button-text"
-                    depressed
+                    variant = "flat"
                     v-show="hasScenario"
                 >
                     Cancel
                 </v-btn>
-                <v-btn outline
+                <v-btn variant = "outlined"
                     id="PerformanceCurveEditor-deleteLibrary-button"
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue ghd-button-text"
-                    depressed
+                    variant = "flat"
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
                 >
@@ -408,7 +408,7 @@
                     :disabled="disableCrudButtons()"
                     @click="onShowCreatePerformanceCurveLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    outline                  
+                    variant = "outlined"                  
                 >
                     Create as New Library
                 </v-btn>
@@ -417,8 +417,8 @@
                     :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                     @click='onUpsertPerformanceCurveLibrary'
                     class="ghd-blue-bg ghd-white ghd-button-text ghd-button-border ghd-outline-button-padding"
-                    depressed
-                    outlined
+                    
+                    variant = "outlined",
                     v-show='!hasScenario'
                 >
                     Update Library
@@ -428,7 +428,7 @@
                     :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
                     @click='onUpsertScenarioPerformanceCurves'
                     class="ghd-blue-bg ghd-white ghd-button-text"
-                    depressed
+                    variant = "flat"
                     v-show='hasScenario'
                 >
                     Save

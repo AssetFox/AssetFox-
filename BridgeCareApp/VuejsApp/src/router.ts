@@ -1,7 +1,4 @@
-﻿import Vue from 'vue';
-import VueRouter from 'vue-router';
-import './register-hooks';
-import EditAnalysisMethod from '@/components/scenarios/EditAnalysisMethod.vue';
+﻿import EditAnalysisMethod from '@/components/scenarios/EditAnalysisMethod.vue';
 import UnderConstruction from '@/components/UnderConstruction.vue';
 import Logout from '@/components/Logout.vue';
 import AuthenticationStart from '@/components/authentication/AuthenticationStart.vue';
@@ -13,6 +10,7 @@ import {
     isAuthenticatedUser,
     onHandleLogout,
 } from '@/shared/utils/authentication-utils';
+import { createRouter, createWebHistory } from 'vue-router';
 
 // Lazily-loaded pages
 const Scenario = () =>
@@ -195,10 +193,9 @@ const beforeEnterFunc = (to: any, from: any, next: any) => {
     }
 };
 
-Vue.use(VueRouter);
 
-const router = new VueRouter({
-    mode: 'history',
+const router = createRouter({
+    history: createWebHistory(),
     routes: [
         {
             path: '/Inventory/',
@@ -515,10 +512,10 @@ const router = new VueRouter({
             component: CalculatedAttributeEditor,
             props: true,
         },
-        {
-            path: '*',
-            redirect: '/AuthenticationStart/',
-        },
+        // {
+        //     path: '*',
+        //     redirect: '/AuthenticationStart/',
+        // },
     ],
 });
 

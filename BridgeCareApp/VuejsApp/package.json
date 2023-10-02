@@ -17,10 +17,10 @@
     },
     "dependencies": {
         "@microsoft/signalr": "^3.1.22",
-        "@progress/kendo-charts-vue-wrapper": "2020.1.115",
-        "@progress/kendo-grid-vue-wrapper": "2020.1.219",
-        "@progress/kendo-theme-default": "4.12.2",
-        "@progress/kendo-ui": "2020.1.115",
+        "@progress/kendo-charts-vue-wrapper": "2023.2.718",
+        "@progress/kendo-grid-vue-wrapper": "2023.2.718",
+        "@progress/kendo-theme-default": "7.0.0",
+        "@progress/kendo-ui": "2023.2.829",
         "@types/ramda": "0.25.48",
         "@types/sanitize-html": "^2.6.2",
         "@types/socket.io-client": "^1.4.32",
@@ -67,7 +67,8 @@
         "stylus": "^0.54.5",
         "stylus-loader": "^3.0.2",
         "tslint": "5.13.1",
-        "vite": "^2.5.4"
+        "vite": "^2.5.4",
+        "vite-plugin-vuetify": "^1.0.0"
     },
     "postcss": {
         "plugins": {

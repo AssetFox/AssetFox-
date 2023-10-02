@@ -14,7 +14,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
-using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
@@ -23,7 +22,6 @@ using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Graph.Models;
 using Newtonsoft.Json.Linq;
 
 namespace BridgeCareCore.Controllers
@@ -190,142 +188,6 @@ namespace BridgeCareCore.Controllers
             }
             return Ok(result);
         }
-
-        /*[HttpPost]
-        [Route("GetFile/{reportName}")]
-        [Authorize]
-        public async Task<IActionResult> GetFile(string reportName)
-        {
-            try
-            {
-                //TODO: delete added things
-                var parameters = await GetParameters();
-                var scenarioName = "";
-                var id = "";
-                //if (parameters.SelectToken("scenarioId") != null)
-                if (reportName != "NetworkExportReport")
-                {
-                    id = parameters.SelectToken("scenarioId")?.ToObject<string>()?.ToString();
-                    var scenarioId = new Guid();
-
-                    if (Guid.TryParse(id, out scenarioId))
-                    {
-                        await Task.Factory.StartNew(() =>
-                        {
-                            scenarioName = UnitOfWork.SimulationRepo.GetSimulationName(scenarioId);
-                        });
-                    }
-                    else
-                        scenarioId = Guid.NewGuid();
-
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, scenarioId.ToString());
-                }
-                else if (parameters.SelectToken("networkId") != null)
-                {
-                    id = parameters.SelectToken("networkId")?.ToObject<string>()?.ToString();
-                    var networkId = new Guid();
-                    if (Guid.TryParse(id, out networkId))
-                    {
-                        await Task.Factory.StartNew(() =>
-                        {
-                            var networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
-                        });
-                    }
-                    else
-                        networkId = Guid.NewGuid();
-
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, networkId.ToString());
-                }
-
-                var workItem = new ReportGenerationWorkitem(parameters, UserInfo.Name, scenarioName, reportName);
-                var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
-
-                return Ok();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {HubService.errorList["Unauthorized"]}");
-                throw;
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {e.Message}");
-                throw;
-            }
-        }
-
-        [HttpGet]
-        [Route("DownloadReport/{simulationId}/{reportName}")]
-        [Authorize]
-        public async Task<IActionResult> DownloadReport(Guid simulationId, string reportName, Guid? networkId = null)
-        {
-            ReportIndexDTO report;
-            var name = "";
-            if (reportName == String.Empty)
-            {
-                var message = new List<string>() { $"No report name provided." };
-                return CreateErrorListing(message);
-            }
-
-            if (simulationId != Guid.Empty)
-            {
-                name = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-
-                if (UnitOfWork.SimulationRepo.GetSimulation(simulationId) == null)
-                {
-                    var message = new List<string>() { $"A simulation with the ID of {simulationId} is not available in the database." };
-                    return CreateErrorListing(message);
-                }
-
-                report = UnitOfWork.ReportIndexRepository.GetAllForScenario(simulationId)
-                    .Where(_ => _.Type == reportName)
-                    .OrderByDescending(_ => _.CreationDate)
-                    .FirstOrDefault();
-                if (report == null)
-                {
-                    var message = new List<string>() { $"No simulations of the specified type ({reportName}) exist for simulation {name}.  Did you run the report?" };
-                    return CreateErrorListing(message);
-                }
-            }
-            else
-            {
-                var parameters = await GetParameters();
-                networkId = new Guid(parameters.SelectToken("networkId")?.ToObject<string>()?.ToString());
-                if (networkId != null && networkId != Guid.Empty)
-                {
-                    name = UnitOfWork.NetworkRepo.GetNetworkName((Guid)networkId);
-                    report = UnitOfWork.ReportIndexRepository.GetAllForNetwork(networkId).Where(_ => _.Type == reportName).OrderByDescending(_ => _.CreationDate).FirstOrDefault();
-                    if (report == null)
-                    {
-                        var message = new List<string>() { $"No networks of the specified type ({reportName}) exist for network {name}.  Did you run the report?" };
-                        return CreateErrorListing(message);
-                    }
-                }
-                else
-                {
-                    var message = new List<string>() { $"No simulation or network provided." };
-                    return CreateErrorListing(message);
-                }
-            }
-
-            var reportPath = Path.Combine(Environment.CurrentDirectory, report.Result);
-            if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
-            {
-                var message = new List<string>() { $"The report for {name} did not include any results" };
-                return CreateErrorListing(message);
-            }
-
-            FileInfoDTO result;
-            try
-            {
-                result = await GetReport(report);
-            }
-            catch (Exception e)
-            {
-                return CreateErrorListing(new List<string>() { e.Message });
-            }
-            return Ok(result);
-        }*/
 
         #endregion
 

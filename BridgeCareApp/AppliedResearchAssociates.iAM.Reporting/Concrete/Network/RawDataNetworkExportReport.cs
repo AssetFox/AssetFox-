@@ -118,7 +118,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "File generated.";
             SimulationID = simulationId;
             NetworkID = networkId;
-            ReportTypeName = "RawDataNetworkExportReport"; //_unitOfWork.NetworkRepo.GetNetworkName(networkId) + " Network Report";
+            ReportTypeName = "RawDataNetworkExportReport";
             return;
         }
 

@@ -2,8 +2,8 @@
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Static;
 
-namespace BridgeCareCore.Services.SimulationCloning
-{
+namespace BridgeCareCore.Services
+{ 
     internal class CriterionLibraryCloner
     {
         internal static CriterionLibraryDTO CloneNullPropagating(CriterionLibraryDTO criterionLibrary, Guid ownerId)

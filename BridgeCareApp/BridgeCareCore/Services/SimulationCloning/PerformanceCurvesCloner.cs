@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace BridgeCareCore.Services
 {
     internal class PerformanceCurvesCloner
     {

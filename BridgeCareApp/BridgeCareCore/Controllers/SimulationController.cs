@@ -26,7 +26,6 @@ using MoreLinq;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.Validation;
 using System.Collections.Generic;
-using BridgeCareCore.Services.SimulationCloning;
 
 namespace BridgeCareCore.Controllers
 {

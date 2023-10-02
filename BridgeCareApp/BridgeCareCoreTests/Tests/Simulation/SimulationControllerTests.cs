@@ -9,7 +9,6 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
-using BridgeCareCore.Services.SimulationCloning;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
 using BridgeCareCoreTests.Tests.General_Work_Queue;

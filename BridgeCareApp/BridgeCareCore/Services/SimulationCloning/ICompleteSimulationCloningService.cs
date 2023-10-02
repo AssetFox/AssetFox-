@@ -1,6 +1,6 @@
 ﻿using AppliedResearchAssociates.iAM.DTOs;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace BridgeCareCore.Services
 {
     public interface ICompleteSimulationCloningService
     {

@@ -17,8 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class SimulationRepositoryTests
     {
-        
-               
+                       
         private async Task<UserDTO> AddTestUser()
         {
             var randomName = RandomStrings.Length11();

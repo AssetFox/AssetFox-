@@ -1,14 +1,11 @@
 ﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using System.Linq;
 using System;
-using Microsoft.EntityFrameworkCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.Common;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace BridgeCareCore.Services
 {
     public class CompleteSimulationCloningService : ICompleteSimulationCloningService
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace BridgeCareCore.Services
 {
     internal class CalculatedAttributeEquationCriteriaPairCloner
     {

@@ -22,7 +22,6 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using BridgeCareCore.Services;
-using BridgeCareCore.Services.SimulationCloning;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {

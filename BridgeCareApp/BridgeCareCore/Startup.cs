@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -22,7 +21,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BridgeCareCore.Services;
-using BridgeCareCore.Services.SimulationCloning;
 
 namespace BridgeCareCore
 {

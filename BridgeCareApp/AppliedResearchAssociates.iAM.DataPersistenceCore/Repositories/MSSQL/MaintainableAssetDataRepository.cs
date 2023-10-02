@@ -27,119 +27,125 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var rawKeyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetRawKeyFields();
 
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
-            if (reportTypeParam[0].Contains("(P)"))
+            if(reportTypeParam != null)
             {
-                var keyDatumFields = _unitOfWork.Context.Attribute
-                    .Where(_ => keyDatumFieldNames.Contains(_.Name))
-                    .Select(_ => new { _.Id, _.Name, Type = _.DataType })
-                    .ToList();
-                var keyDatumFieldsNetwork = _unitOfWork.Context.Attribute
-                    .Where(_ => _.Id == network.KeyAttributeId)
-                    .Select(_ => new { _.Id, _.Name, Type = _.DataType })
-                    .ToList();
-                // Ensure the network's key datum field is in the list of key properties
-                foreach (var keyDatumField in keyDatumFieldsNetwork)
+                if(reportTypeParam.Count() > 0)
                 {
-                    if (!keyDatumFields.Contains(keyDatumField))
+                    if (reportTypeParam[0].Contains("(P)"))
                     {
-                        keyDatumFields.Add(keyDatumField);
-                    }
-                }
+                        var keyDatumFields = _unitOfWork.Context.Attribute
+                            .Where(_ => keyDatumFieldNames.Contains(_.Name))
+                            .Select(_ => new { _.Id, _.Name, Type = _.DataType })
+                            .ToList();
+                        var keyDatumFieldsNetwork = _unitOfWork.Context.Attribute
+                            .Where(_ => _.Id == network.KeyAttributeId)
+                            .Select(_ => new { _.Id, _.Name, Type = _.DataType })
+                            .ToList();
+                        // Ensure the network's key datum field is in the list of key properties
+                        foreach (var keyDatumField in keyDatumFieldsNetwork)
+                        {
+                            if (!keyDatumFields.Contains(keyDatumField))
+                            {
+                                keyDatumFields.Add(keyDatumField);
+                            }
+                        }
 
-                // Populate key properties
-                // TODO: Replace key properties with main data table
-                foreach (var attribute in keyDatumFields)
-                {
-                    var keyFieldValue = new List<KeySegmentDatum>();
-                    var filteredAggregatedKeyData = _unitOfWork.Context.AggregatedResult
-                        .Include(_ => _.MaintainableAsset)
-                        .Where(_ => _.MaintainableAsset.NetworkId == network.Id && _.AttributeId == attribute.Id);
-                    foreach (var datum in filteredAggregatedKeyData)
+                        // Populate key properties
+                        // TODO: Replace key properties with main data table
+                        foreach (var attribute in keyDatumFields)
+                        {
+                            var keyFieldValue = new List<KeySegmentDatum>();
+                            var filteredAggregatedKeyData = _unitOfWork.Context.AggregatedResult
+                                .Include(_ => _.MaintainableAsset)
+                                .Where(_ => _.MaintainableAsset.NetworkId == network.Id && _.AttributeId == attribute.Id);
+                            foreach (var datum in filteredAggregatedKeyData)
+                            {
+                                var dataValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
+                                keyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, dataValue) });
+                            }
+                            KeyProperties.Add(attribute.Name, keyFieldValue);
+                        }
+
+                        // Populate main key data table
+                        MainNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
+                        var keyDatumFieldIds = keyDatumFields.Select(_ => _.Id).ToList();
+                        var filteredAggregatedData = _unitOfWork.Context.AggregatedResult
+                            .Include(_ => _.MaintainableAsset)
+                            .Include(_ => _.Attribute)
+                            .Where(_ => _.MaintainableAsset.NetworkId == network.Id && keyDatumFieldIds.Contains(_.AttributeId))
+                            .AsEnumerable()
+                            .GroupBy(_ => _.MaintainableAssetId);
+                        foreach (var asset in filteredAggregatedData)
+                        {
+                            var queryData = new MaintainableAssetQueryDTO() { AssetId = asset.Key };
+                            queryData.AssetProperties = new Dictionary<AttributeDTO, string>();
+                            foreach (var attribute in asset)
+                            {
+                                var convertedAttribute = attribute.Attribute.ToDto(null);
+                                var dataValue = convertedAttribute.Type == "NUMBER" ? attribute.NumericValue.ToString() : attribute.TextValue;
+                                queryData.AssetProperties.Add(convertedAttribute, dataValue);
+                            }
+                            MainNetworkKeyTable.Add(queryData);
+                        }
+                    }
+                    else
                     {
-                        var dataValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
-                        keyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, dataValue) });
+                        // Populate raw key data table
+                        RawNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
+
+                        var rawKeyDatumFields = _unitOfWork.Context.Attribute
+                            .Where(_ => rawKeyDatumFieldNames.Contains(_.Name))
+                            .Select(_ => new { _.Id, _.Name, Type = _.DataType })
+                            .ToList();
+
+                        var rawKeyDatumFieldsNetwork = _unitOfWork.Context.Attribute
+                            .Where(_ => _.Id == rawNetwork.KeyAttributeId)
+                            .Select(_ => new { _.Id, _.Name, Type = _.DataType })
+                            .ToList();
+
+                        // Ensure the network's key datum field is in the list of key properties
+                        foreach (var rawKeyDatumField in rawKeyDatumFieldsNetwork)
+                        {
+                            if (!rawKeyDatumFields.Contains(rawKeyDatumField))
+                            {
+                                rawKeyDatumFields.Add(rawKeyDatumField);
+                            }
+                        }
+                        var rawKeyDatumFieldIds = rawKeyDatumFields.Select(_ => _.Id).ToList();
+                        var filteredRawAggregatedData = _unitOfWork.Context.AggregatedResult
+                            .Include(_ => _.MaintainableAsset)
+                            .Include(_ => _.Attribute)
+                            .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && rawKeyDatumFieldIds.Contains(_.AttributeId))
+                            .AsEnumerable()
+                            .GroupBy(_ => _.MaintainableAssetId);
+                        foreach (var asset in filteredRawAggregatedData)
+                        {
+                            var queryData = new MaintainableAssetQueryDTO() { AssetId = asset.Key };
+                            queryData.AssetProperties = new Dictionary<AttributeDTO, string>();
+                            foreach (var attribute in asset)
+                            {
+                                var convertedAttribute = attribute.Attribute.ToDto(null);
+                                var dataValue = convertedAttribute.Type == "NUMBER" ? attribute.NumericValue.ToString() : attribute.TextValue;
+                                queryData.AssetProperties.Add(convertedAttribute, dataValue);
+                            }
+                            RawNetworkKeyTable.Add(queryData);
+                        }
+
+                        foreach (var attribute in rawKeyDatumFields)
+                        {
+                            var rawKeyFieldValue = new List<KeySegmentDatum>();
+                            var filteredRawAggregatedKeyData = _unitOfWork.Context.AggregatedResult
+                                .Include(_ => _.MaintainableAsset)
+                                .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && _.AttributeId == attribute.Id);
+
+                            foreach (var datum in filteredRawAggregatedKeyData)
+                            {
+                                var datumValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
+                                rawKeyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, datumValue) });
+                            }
+                            KeyProperties.Add(attribute.Name, rawKeyFieldValue);
+                        }
                     }
-                        KeyProperties.Add(attribute.Name, keyFieldValue);
-                }
-
-                // Populate main key data table
-                MainNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
-                var keyDatumFieldIds = keyDatumFields.Select(_ => _.Id).ToList();
-                var filteredAggregatedData = _unitOfWork.Context.AggregatedResult
-                    .Include(_ => _.MaintainableAsset)
-                    .Include(_ => _.Attribute)
-                    .Where(_ => _.MaintainableAsset.NetworkId == network.Id && keyDatumFieldIds.Contains(_.AttributeId))
-                    .AsEnumerable()
-                    .GroupBy(_ => _.MaintainableAssetId);
-                foreach (var asset in filteredAggregatedData)
-                {
-                    var queryData = new MaintainableAssetQueryDTO() { AssetId = asset.Key };
-                    queryData.AssetProperties = new Dictionary<AttributeDTO, string>();
-                    foreach (var attribute in asset)
-                    {
-                        var convertedAttribute = attribute.Attribute.ToDto(null);
-                        var dataValue = convertedAttribute.Type == "NUMBER" ? attribute.NumericValue.ToString() : attribute.TextValue;
-                        queryData.AssetProperties.Add(convertedAttribute, dataValue);
-                    }
-                    MainNetworkKeyTable.Add(queryData);
-                }
-            }
-            else
-            {
-                // Populate raw key data table
-                RawNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
-
-                var rawKeyDatumFields = _unitOfWork.Context.Attribute
-                    .Where(_ => rawKeyDatumFieldNames.Contains(_.Name))
-                    .Select(_ => new { _.Id, _.Name, Type = _.DataType })
-                    .ToList();
-
-                var rawKeyDatumFieldsNetwork = _unitOfWork.Context.Attribute
-                    .Where(_ => _.Id == rawNetwork.KeyAttributeId)
-                    .Select(_ => new { _.Id, _.Name, Type = _.DataType })
-                    .ToList();
-
-                // Ensure the network's key datum field is in the list of key properties
-                foreach (var rawKeyDatumField in rawKeyDatumFieldsNetwork)
-                {
-                    if (!rawKeyDatumFields.Contains(rawKeyDatumField))
-                    {
-                        rawKeyDatumFields.Add(rawKeyDatumField);
-                    }
-                }
-                var rawKeyDatumFieldIds = rawKeyDatumFields.Select(_ => _.Id).ToList();
-                var filteredRawAggregatedData = _unitOfWork.Context.AggregatedResult
-                    .Include(_ => _.MaintainableAsset)
-                    .Include(_ => _.Attribute)
-                    .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && rawKeyDatumFieldIds.Contains(_.AttributeId))
-                    .AsEnumerable()
-                    .GroupBy(_ => _.MaintainableAssetId);
-                foreach (var asset in filteredRawAggregatedData)
-                {
-                    var queryData = new MaintainableAssetQueryDTO() { AssetId = asset.Key };
-                    queryData.AssetProperties = new Dictionary<AttributeDTO, string>();
-                    foreach (var attribute in asset)
-                    {
-                        var convertedAttribute = attribute.Attribute.ToDto(null);
-                        var dataValue = convertedAttribute.Type == "NUMBER" ? attribute.NumericValue.ToString() : attribute.TextValue;
-                        queryData.AssetProperties.Add(convertedAttribute, dataValue);
-                    }
-                    RawNetworkKeyTable.Add(queryData);
-                }
-
-                foreach (var attribute in rawKeyDatumFields)
-                {
-                    var rawKeyFieldValue = new List<KeySegmentDatum>();
-                    var filteredRawAggregatedKeyData = _unitOfWork.Context.AggregatedResult
-                        .Include(_ => _.MaintainableAsset)
-                        .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && _.AttributeId == attribute.Id);
-
-                    foreach (var datum in filteredRawAggregatedKeyData)
-                    {
-                        var datumValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
-                        rawKeyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, datumValue) });
-                    }
-                        KeyProperties.Add(attribute.Name, rawKeyFieldValue);
                 }
             }
         }

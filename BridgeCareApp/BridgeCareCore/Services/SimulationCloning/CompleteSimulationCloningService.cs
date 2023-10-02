@@ -86,8 +86,8 @@ namespace BridgeCareCore.Services.SimulationCloning
         }
         public bool CheckCompatibleNetworkAttributes(CloneSimulationDTO dto)
         {
-            var keyAttribute = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetByNetworkId(dto.NetworkId);
-            var destinationKeyAttribute = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetByNetworkId(dto.DestinationNetworkId);
+            var keyAttribute = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.NetworkId);
+            var destinationKeyAttribute = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.DestinationNetworkId);
             bool IsCompatible = true;
                
 

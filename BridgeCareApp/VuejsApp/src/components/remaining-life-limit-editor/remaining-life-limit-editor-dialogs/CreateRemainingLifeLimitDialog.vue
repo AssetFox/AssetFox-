@@ -15,8 +15,9 @@
           <v-select id="CreateRemainingLifeLimitDialog-selectAnAttribute-select"
                     :items="dialogData.numericAttributeSelectItems"
                     append-icon=$vuetify.icons.ghd-down
-                    outline v-model="newRemainingLifeLimit.attribute"
+                    v-model="newRemainingLifeLimit.attribute"
                     :rules="[rules['generalRules'].valueIsNotEmpty]"
+                    variant="outlined"
                     class="ghd-select ghd-control-text ghd-text-field ghd-text-field-border"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Limit</v-subheader>
           <v-text-field id="CreateRemainingLifeLimitDialog-limit-textField"

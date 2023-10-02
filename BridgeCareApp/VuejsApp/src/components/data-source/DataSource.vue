@@ -10,8 +10,7 @@
                       :items="dsItems"
                       append-icon=$vuetify.icons.ghd-down
                       v-model="sourceTypeItem"
-                      outline
-                      variant = "outlined"
+                      variant="outlined"
                     >
                     </v-select>
                 </v-layout>
@@ -34,8 +33,7 @@
               :items="dsTypeItems"
               append-icon=$vuetify.icons.ghd-down
               v-model="dataSourceTypeItem"
-              outline
-              variant = "outlined"
+              variant="outlined"
             >
             </v-select>
         </v-layout>
@@ -62,8 +60,7 @@
                 v-model="currentExcelLocationColumn"
                 v-show="showExcel"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
-                outline
-                variant = "outlined"
+                variant="outlined"
                 >
                 </v-select>
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
@@ -74,8 +71,7 @@
                 v-show="showExcel"
                 v-model="currentExcelDateColumn"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
-                outline
-                variant = "outlined"
+                variant="outlined"
                 >
                 </v-select>
             </div>

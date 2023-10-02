@@ -9,7 +9,7 @@
             <v-card-text class="ghd-dialog-box-padding-center">
                 <v-layout>
                     <v-select :items='settingItems'
-                    outline  
+                    variant="outlined"
                     v-model='settingSelectItemValue'                         
                     class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>   

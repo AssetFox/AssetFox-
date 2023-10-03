@@ -8,7 +8,7 @@
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
                         id="CashFlowEditor-SelectLibrary-vselect"
-                        outline
+                        variant="outlined"
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
@@ -68,7 +68,7 @@
                     select-all>
                     <template v-slot:item="{item}" slot="items" slot-scope="props">
                         <td>
-                            <v-checkbox hide-details primary v-model='item.selected'></v-checkbox>
+                            <v-checkbox hide-details primary v-model='item.raw.selected'></v-checkbox>
                         </td>
                         <td>
                             <v-edit-dialog
@@ -204,14 +204,14 @@
                     id="CashFlowEditor-save-btn"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onUpsertScenarioCashFlowRules"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-button'
                     v-show="hasScenario">
                     Save
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                     @click="onUpsertCashFlowRuleLibrary"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario">
                     Update Library
                 </v-btn>                                       

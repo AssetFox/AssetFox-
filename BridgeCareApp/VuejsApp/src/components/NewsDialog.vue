@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="65%" min persistent v-model="showDialog">
+  <v-dialog max-width="65%" min persistent v-bind:show="showDialog">
     <v-container fluid grid-list-xl>
         <v-layout>
             <v-flex xs12>
@@ -48,7 +48,7 @@
                             </v-card>
                         </div>
                         <div style='display: flex; align-items: center; justify-content: center'>
-                            <v-btn @click='seeNewerAnnouncements()' class='ara-blue-bg white--text' round
+                            <v-btn @click='seeNewerAnnouncements()' class='ara-blue-bg text-white' round
                                    style='margin-top: 10px; margin-bottom: 0'
                                    v-if='announcementListOffset > 0'>
                                 See Newer Announcements
@@ -83,7 +83,7 @@
                             </v-card>
                         </div>
                         <div style='display: flex; align-items: center; justify-content: center;'>
-                            <v-btn @click='seeOlderAnnouncements()' class='ara-blue-bg white--text' round
+                            <v-btn @click='seeOlderAnnouncements()' class='ara-blue-bg text-white' round
                                    style='margin-top: 0; margin-bottom: 10px'
                                    v-if='announcementListOffset < announcements.length - (hasAdminAccess ? 9 : 10)'>
                                 See Older Announcements

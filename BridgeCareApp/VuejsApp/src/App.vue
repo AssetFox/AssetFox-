@@ -1,6 +1,6 @@
 <template>
     <v-app class="paper-white-bg">
-        <v-content>
+        <v-main>
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
                     <img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" /> 
@@ -77,7 +77,7 @@
                                 icon
                             >
                                 <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
-                                <notification-bell
+                                <!-- <notification-bell
                                     :size="30"
                                     :count="notificationCounter"
                                     :upperLimit="50"
@@ -90,7 +90,7 @@
                                     counterTextColor="#FFFFFF"
                                     iconColor="#002E6C"
                                     class="hide-bell-svg"
-                                />
+                                /> -->
                             </button>
                         </template>
                         <v-card class="mx-auto" max-width="100%">
@@ -140,14 +140,12 @@
                                         </v-list-tile>
                                     </template>
                                     <v-list-item>
-                                        <v-list-item-content>
                                             <v-list-item-title
                                                 class="notification-long-message"
                                                 v-text="
                                                     notification.longMessage
                                                 "
                                             ></v-list-item-title>
-                                        </v-list-item-content>
                                     </v-list-item>
                                     <v-spacer></v-spacer>
                                 </v-list-group>
@@ -246,7 +244,7 @@
             <Spinner />
             <Alert :dialog-data="alertDialogData" @submit="onAlertResult" />
             <NewsDialog :showDialog="showNewsDialog" @close="onCloseNewsDialog()" />
-        </v-content>
+        </v-main>
     </v-app>
 </template>
 
@@ -298,9 +296,9 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
     let username = ref<string>(store.state.authenticationModule.username);
     let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
     let refreshing = ref<boolean>(store.state.authenticationModule.refreshing);
-    let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
+    //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
     let notifications = ref<Notification[]>(store.state.notificationModule.notifications);
-    let notificationCounter = ref<number>(store.state.notificationModule.conotificationCounterunter);
+    let notificationCounter = ref<number>(store.state.notificationModule.counter);
     let stateSelectedScenario = ref<Scenario>(store.state.scenarioModule.selectedScenario);
     let packageVersion = ref<string>(store.state.announcementModule.packageVersion);
     let securityType = ref<string>(store.state.authenticationModule.securityType);

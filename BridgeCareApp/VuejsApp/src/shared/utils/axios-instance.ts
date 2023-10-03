@@ -1,15 +1,15 @@
 import axios, {AxiosInstance} from 'axios';
 
 export const axiosInstance: AxiosInstance = axios.create({
-    baseURL: process.env.VUE_APP_URL
+    baseURL: import.meta.env.VUE_APP_URL
 });
 
 export const nodejsAxiosInstance: AxiosInstance = axios.create({
-    baseURL: process.env.VUE_APP_NODE_URL
+    baseURL: import.meta.env.VUE_APP_NODE_URL
 });
 
 export const coreAxiosInstance: AxiosInstance = axios.create({
-    baseURL: process.env.VUE_APP_BRIDGECARE_CORE_URL
+    baseURL: import.meta.env.VUE_APP_BRIDGECARE_CORE_URL
 });
 
 // The other nodejs axios instance has an interceptor
@@ -18,7 +18,7 @@ export const coreAxiosInstance: AxiosInstance = axios.create({
 // have that spinner, and should be used for background tasks such
 // as polling.
 export const nodejsBackgroundAxiosInstance: AxiosInstance = axios.create({
-    baseURL: process.env.VUE_APP_NODE_URL
+    baseURL: import.meta.env.VUE_APP_NODE_URL
 });
 
 export const API = {

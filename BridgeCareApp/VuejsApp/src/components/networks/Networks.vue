@@ -7,7 +7,7 @@
                         <v-subheader id="Networks-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Network</v-subheader>
                         <v-select :items='selectNetworkItems'
                             id="Networks-selectNetwork-vselect"
-                            outline  
+                            variant="outlined"
                             v-model='selectNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
@@ -31,7 +31,7 @@
                         </v-subheader>
                         <v-select
                             id="Networks-KeyAttribute-vselect"
-                            outline                           
+                            variant="outlined"
                             class="ghd-select ghd-text-field ghd-text-field-border"
                             :disabled="!isNewNetwork"
                             v-model="selectedKeyAttributeItem"
@@ -43,7 +43,7 @@
                 <v-layout v-show="!isNewNetwork">
                     <v-select
                         id="Networks-DataSource-vselect"
-                        outline 
+                        variant="outlined"
                         :items="selectDataSourceItems"  
                         style="margin-top: 18px !important;"                  
                         class="ghd-select ghd-text-field ghd-text-field-border shifted-label"
@@ -127,12 +127,12 @@
                                 :must-sort='true'
                                 hide-actions
                                 :pagination.sync="pagination">
-                                <template slot='items' slot-scope='props'>
+                                <template slot='items' slot-scope='props' v-slot:item="{item}">
                                     <td>
-                                        <v-checkbox id="Networks-SelectAttribute-vcheckbox" hide-details primary v-model='props.selected'></v-checkbox>
+                                        <v-checkbox id="Networks-SelectAttribute-vcheckbox" hide-details primary v-model='item.raw.selected'></v-checkbox>
                                     </td>
-                                    <td>{{ props.item.name }}</td> 
-                                    <td>{{ props.item.dataSource.type }}</td> 
+                                    <td>{{ item.name }}</td> 
+                                    <td>{{ item.dataSource.type }}</td> 
                                 </template>
                             </v-data-table>    
                             <div class="text-xs-center pt-2">
@@ -153,15 +153,15 @@
                 variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Aggregate
                 </v-btn>
-                <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Delete
                 </v-btn>
                 <v-btn id="Networks-Create-vbtn" @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
                     v-show="isNewNetwork"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                    class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Create
                 </v-btn>            
             </v-layout>

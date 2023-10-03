@@ -78,7 +78,7 @@
                                             @click="
                                                 showCreateScenarioDialog = true
                                             "
-                                            color="blue darken-2 white--text"
+                                            color="blue darken-2 text-white"
                                         >
                                             Create new scenario
                                         </v-btn>
@@ -182,7 +182,7 @@
                                                 >
                                                     <v-btn
                                                         id="Scenarios-actionMenu-vbtn"
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
                                                         v-bind="props"
                                                     >
@@ -372,7 +372,7 @@
                                                 >
                                                     <v-btn
                                                         id="Scenarios-shared-actionMenu-vbtn"
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
                                                         v-bind="props"
                                                     >
@@ -454,7 +454,7 @@
                                                     }"
                                                 >
                                                     <v-btn
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
                                                         v-bind="props"
                                                     >
@@ -523,7 +523,7 @@
                                                     }"
                                                 >
                                                     <v-btn
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
                                                         v-bind="props"
                                                     >
@@ -1439,7 +1439,7 @@ import { useRouter } from 'vue-router';
     function onStartDataMigration() {
         // the legacy scenario id is hardcoded to our test scenario "JML Run District 8"
         migrateLegacySimulationDataAction({
-            simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
+            simulationId: import.meta.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
         }).then(() => initializeScenarioPages());
     }
 

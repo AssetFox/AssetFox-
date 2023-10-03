@@ -16,12 +16,12 @@
                     id="CreateScenarioDialog-selectANetwork-select"
                     :items="stateNetworks"
                     label="Select a network"
-                    item-text="name"
+                    item-title="name"
                     v-model="networkMetaData"
                     return-object
                     v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
                     density="default"
-                    outline
+                    variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CreateScenarioDialog-scenarioName-textField"
@@ -37,14 +37,14 @@
                         id="CreateScenarioDialog-save-btn"
                         :disabled="newScenario.name === '' || !isNetworkSelected"
                         @click="onSubmit(true)"
-                        class="ara-blue-bg white--text"
+                        class="ara-blue-bg text-white"
                     >
                         Save
                     </v-btn>
                     <v-btn
                         id="CreateScenarioDialog-cancel-btn"
                         @click="onSubmit(false)"
-                        class="ara-orange-bg white--text"
+                        class="ara-orange-bg text-white"
                         >Cancel</v-btn
                     >
                 </v-layout>

@@ -25,17 +25,15 @@
                                     v-model="selectedConjunction"
                                 >
                                     <template v-slot:selection="{ item }">
-                                        <span class="ghd-control-text">{{ item.text }}</span>
+                                        <span class="ghd-control-text">{{ item.raw.text }}</span>
                                     </template>
                                     <template v-slot:item="{ item }">
                                         <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
-                                        <v-list-item-content>
                                             <v-list-item-title>
                                             <v-row no-gutters align="center">
-                                            <span>{{ item.text }}</span>
+                                            <span>{{ item.raw.text }}</span>
                                             </v-row>
                                             </v-list-item-title>
-                                        </v-list-item-content>
                                         </v-list-item>
                                     </template>                                    
                                 </v-select>
@@ -245,14 +243,14 @@
                         id="CriteriaEditor-save-btn"
                         :disabled="cannotSubmit"
                         @click="onSubmitCriteriaEditorResult(true)"
-                        class="ara-blue-bg white--text"
+                        class="ara-blue-bg text-white"
                     >
                         Save
                     </v-btn>
                     <v-btn
                         id="CriteriaEditor-cancel-btn"
                         @click="onSubmitCriteriaEditorResult(false)"
-                        class="ara-orange-bg white--text"
+                        class="ara-orange-bg text-white"
                         >Cancel</v-btn
                     >
                 </v-layout>
@@ -306,6 +304,7 @@ import { getBlankGuid } from '../utils/uuid-utils';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { on } from 'events';
 
 let store = useStore();
 const $router = useRouter();

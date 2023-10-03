@@ -8,7 +8,7 @@
                             <v-select id="BudgetPriorityEditor-library-vselect"
                                 :items='librarySelectItems' 
                                 append-icon=$vuetify.icons.ghd-down
-                                outline                           
+                                variant="outlined"
                                 v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                             </v-select>    
                              <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       
@@ -60,30 +60,29 @@
                               class='v-table__overflow ghd-table' item-key='id' select-all
                               sort-icon=$vuetify.icons.ghd-table-sort                              
                               v-model='selectedBudgetPriorityGridRows' >
-                    <template v-slot:items="props">
+                    <template v-slot:item="{item}">
                         <td>
-                            <v-checkbox id="BudgetPriorityEditor-deleteBudgetPriority-vcheckbox" hide-details primary v-model='props.selected'></v-checkbox>
+                            <v-checkbox id="BudgetPriorityEditor-deleteBudgetPriority-vcheckbox" hide-details primary v-model='item.raw.selected'></v-checkbox>
                         </td>
                         <td v-for='header in budgetPriorityGridHeaders'>
                             <div v-if="header.value === 'priorityLevel' || header.value === 'year'">
                                 <v-edit-dialog
-                                    :return-value.sync='props.item[header.value]'
-                                    @save='onEditBudgetPriority(props.item, header.value, props.item[header.value])'
-                                    size="large"
-                                    lazy>
+                                    :return-value.sync='item[header.value]'
+                                    @save='onEditBudgetPriority(item, header.value, item[header.value])'
+                                    size="large" lazy>
                                     <v-text-field v-if="header.value === 'priorityLevel'" readonly single-line
                                                   class='sm-txt'
-                                                  :value='props.item[header.value]'
+                                                  :value='item[header.value]'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <v-text-field v-else readonly single-line class='sm-txt'
-                                                  :value='props.item[header.value]' />
+                                                  :value='item[header.value]' />
                                     <template slot='input'>
                                         <v-text-field v-if="header.value === 'priorityLevel'" label='Edit' single-line
-                                                      v-model.number='props.item[header.value]'
+                                                      v-model.number='item[header.value]'
                                                       :mask="'##########'"
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotUnique(props.item[header.value], currentPriorityList)]" />
+                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotUnique(item[header.value], currentPriorityList)]" />
                                         <v-text-field v-else label='Edit' single-line :mask="'####'"
-                                                      v-model.number='props.item[header.value]' />
+                                                      v-model.number='item[header.value]' />
                                     </template>
                                 </v-edit-dialog>
                             </div>
@@ -98,17 +97,17 @@
                                             </div>
                                             <div v-else class='priority-criteria-output'>
                                                 <v-text-field readonly single-line class='sm-txt'
-                                                              :value='props.item.criteria' />
+                                                              :value='item.criteria' />
                                             </div>
                                         </template>
                                         <v-card>
                                             <v-card-text>
-                                                <v-textarea :value='props.item.criteria' full-width no-resize outline
+                                                <v-textarea :value='item.criteria' full-width no-resize outline
                                                             readonly rows='5' />
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(props.item)' class='ghd-blue'
+                                    <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item)' class='ghd-blue'
                                            icon>
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
@@ -116,20 +115,20 @@
                             </div>
                             <div v-else-if="header.text.endsWith('%')">
                                 <v-edit-dialog
-                                    :return-value.sync='props.item[header.value]'
-                                    @save='onEditBudgetPercentagePair(props.item, header.value, props.item[header.value])'
+                                    :return-value.sync='item[header.value]'
+                                    @save='onEditBudgetPercentagePair(item, header.value, item[header.value])'
                                     size="large" lazy>
-                                    <v-text-field readonly single-line class='sm-txt' :value='props.item[header.value]'
-                                                  :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [0, 100])]" />
+                                    <v-text-field readonly single-line class='sm-txt' :value='item[header.value]'
+                                                  :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item[header.value], [0, 100])]" />
                                     <template slot='input'>
                                         <v-text-field :mask="'###'" label='Edit' single-line
-                                                      v-model.number='props.item[header.value]'
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [0, 100])]" />
+                                                      v-model.number='item[header.value]'
+                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item[header.value], [0, 100])]" />
                                     </template>
                                 </v-edit-dialog>
                             </div>
                             <div v-else>
-                                <v-btn @click="onRemoveBudgetPriority(props.item.id)"  class="ghd-blue" icon>
+                                <v-btn @click="onRemoveBudgetPriority(item.id)"  class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </div>
@@ -165,7 +164,7 @@
                     Create as New Library
                 </v-btn>
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                       class='ghd-blue-bg text-white ghd-button-text ghd-button'
                        v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
@@ -174,7 +173,7 @@
                     Delete Library
                 </v-btn>             
                 <v-btn id="BudgetPriorityEditor-updateLibrary-vbtn" @click='onUpsertBudgetPriorityLibrary'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                       class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                        v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Update Library
                 </v-btn>

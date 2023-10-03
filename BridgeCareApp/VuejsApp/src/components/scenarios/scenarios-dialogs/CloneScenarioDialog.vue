@@ -16,13 +16,13 @@
               <v-select
                     :items="stateCompatibleNetworks"
                     label="Select a compatible network"
-                    item-text="name"
+                    item-title="name"
                     v-model="networkMetaData"
                     return-object
                     v-if="hasCompatibleNetworks"
                     v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
                     density="default"
-                    outline
+                    variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CloneScenarioDialog-scenarioName-textField"
@@ -38,14 +38,14 @@
                         id="CloneScenarioDialog-save-btn"
                         :disabled="dialogData.scenario.name === '' || !isNetworkSelected"
                         @click="onSubmit(true)"
-                        class="ara-blue-bg white--text"
+                        class="ara-blue-bg text-white"
                     >
                         Save
                     </v-btn>
                     <v-btn
                         id="CloneScenarioDialog-cancel-btn"
                         @click="onSubmit(false)"
-                        class="ara-orange-bg white--text"
+                        class="ara-orange-bg text-white"
                         >Cancel</v-btn
                     >
                 </v-layout>

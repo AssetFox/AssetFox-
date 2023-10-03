@@ -9,7 +9,7 @@ import { sortByProperty } from '@/shared/utils/sorter-utils';
 
 const state = {
   announcements: [] as Announcement[],
-  packageVersion: process.env.PACKAGE_VERSION || '0',
+  packageVersion: import.meta.env.PACKAGE_VERSION || '0',
 };
 
 const mutations = {

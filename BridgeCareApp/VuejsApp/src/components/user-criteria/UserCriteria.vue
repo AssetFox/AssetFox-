@@ -20,7 +20,7 @@
               </v-flex>
               <v-flex style='padding: 0' xs4>
                 <v-layout align-center>
-                  <v-btn @click='onEditCriteria(user)' class='ara-blue-bg white--text' 
+                  <v-btn @click='onEditCriteria(user)' class='ara-blue-bg text-white' 
                           title='Give the user limited access to the bridge inventory'>
                     <v-icon size='1.5em' style='padding-right: 0.5em'>fas fa-edit</v-icon>
                     Assign Criteria Filter

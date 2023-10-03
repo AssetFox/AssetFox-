@@ -10,7 +10,7 @@
                             :items="selectListItems"
                             append-icon=$vuetify.icons.ghd-down
                             v-model="librarySelectItemValue"
-                            outline
+                            variant="outlined"
                             >
                   </v-select>
                   <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
@@ -97,7 +97,7 @@
                                         :items="numericAttributeSelectItems"
                                         append-icon=$vuetify.icons.ghd-down
                                         label="Select an Attribute"
-                                        outline
+                                        variant="outlined"
                                         v-model="props.item.attribute"
                                         :rules="[
                                             rules['generalRules']

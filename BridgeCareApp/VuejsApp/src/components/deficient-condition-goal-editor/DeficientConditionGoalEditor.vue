@@ -9,7 +9,7 @@
                         id="DeficientConditionGoalEditor-librarySelect-vselect"
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
-                        outline
+                        variant="outlined"
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
@@ -19,7 +19,7 @@
             <v-flex xs4 class="ghd-constant-header">
                 <div style="padding-top: 15px !important">
                     <v-btn v-if="hasScenario" 
-                        class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                        class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                         @click="importLibrary()"
                         :disabled="importLibraryDisabled">
                         Import
@@ -82,41 +82,41 @@
                     select-all
                     v-model="selectedGridRows"
                 >
-                    <template slot="items" slot-scope="props">
+                    <template slot="items" slot-scope="props" v-slot:item="{item}">
                         <td>
                             <v-checkbox
                                 id="DeficientConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
                                 primary
-                                v-model="props.selected"
+                                v-model="item.raw.selected"
                             ></v-checkbox>
                         </td>
                         <td v-for="header in deficientConditionGoalGridHeaders">
                             <div>
                                 <v-edit-dialog v-if="header.value !== 'criterionLibrary' && header.value !== 'action'"
-                                    :return-value.sync="props.item[header.value]"
-                                    @save="onEditDeficientConditionGoalProperty(props.item,header.value,props.item[header.value])"
+                                    :return-value.sync="item[header.value]"
+                                    @save="onEditDeficientConditionGoalProperty(item,header.value,item[header.value])"
                                     size="large"
                                     lazy>
                                     <v-text-field v-if="header.value !== 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
-                                        :value="props.item[header.value]"
+                                        :value="item[header.value]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                     <v-text-field v-if="header.value === 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
-                                        :value="props.item[header.value]"
+                                        :value="item[header.value]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty,
-                                            rules['generalRules'].valueIsWithinRange(props.item[header.value],[0, 100])]"/>
+                                            rules['generalRules'].valueIsWithinRange(item[header.value],[0, 100])]"/>
 
                                     <template slot="input">
                                         <v-text-field v-if="header.value === 'name'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalName-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model="props.item[header.value]"
+                                            v-model="item[header.value]"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                         <v-select v-if="header.value === 'attribute'"
@@ -124,7 +124,7 @@
                                             :items="numericAttributeNames"
                                             append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
-                                            v-model="props.item[header.value]"
+                                            v-model="item[header.value]"
                                             :rules="[
                                                 rules['generalRules'].valueIsNotEmpty]">
                                         </v-select>
@@ -133,7 +133,7 @@
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalLimit-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model="props.item[header.value]"
+                                            v-model="item[header.value]"
                                             :mask="'##########'"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
@@ -141,12 +141,12 @@
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalPercentage-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model.number="props.item[header.value]"
+                                            v-model.number="item[header.value]"
                                             :mask="'###'"
                                             :rules="[
                                                 rules['generalRules'].valueIsNotEmpty,
                                                 rules['generalRules'].valueIsWithinRange(
-                                                    props.item[header.value],[0, 100])]"/>
+                                                    item[header.value],[0, 100])]"/>
                                     </template>
                                 </v-edit-dialog>
                                 
@@ -162,12 +162,12 @@
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"
-                                                :value="props.item.criterionLibrary.mergedCriteriaExpression"/>
+                                                :value="item.criterionLibrary.mergedCriteriaExpression"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
-                                                    :value="props.item.criterionLibrary.mergedCriteriaExpression"
+                                                    :value="item.criterionLibrary.mergedCriteriaExpression"
                                                     full-width
                                                     no-resize
                                                     outline
@@ -178,14 +178,14 @@
                                     </v-menu>
                                     <v-btn
                                         id="DeficientConditionGoalEditor-editDeficientConditionGoalCriteria-vbtn"
-                                        @click="onShowCriterionLibraryEditorDialog(props.item)"
+                                        @click="onShowCriterionLibraryEditorDialog(item)"
                                         class="ghd-blue"
                                         icon>
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-layout>
                                 <div v-if="header.value === 'action'">
-                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(props.item.id)"  class="ghd-blue" icon>
+                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.id)"  class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>                               
@@ -250,7 +250,7 @@
                 </v-btn>
                 <v-btn
                     @click="onUpsertScenarioDeficientConditionGoals"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="hasScenario"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges">
                     Save
@@ -258,7 +258,7 @@
                 <v-btn
                     id="DeficientConditionGoalEditor-updateLibrary-vbtn"
                     @click="onUpsertDeficientConditionGoalLibrary"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges">
                     Update Library

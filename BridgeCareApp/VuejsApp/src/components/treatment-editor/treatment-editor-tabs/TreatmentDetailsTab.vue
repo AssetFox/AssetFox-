@@ -23,7 +23,7 @@
                             append-icon=$vuetify.icons.ghd-down
                             @update:model-value="onEditTreatmentType('category', treatmentCategoryBinding)"
                             label="Category"
-                            outline
+                            variant="outlined"
                             v-model="treatmentCategoryBinding"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
@@ -36,7 +36,7 @@
                         append-icon=$vuetify.icons.ghd-down
                         @update:model-value="onEditAssetType('assetType', assetTypeBinding)"
                         label="Asset type"
-                        outline
+                        variant="outlined"
                         v-model="assetTypeBinding"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />

@@ -17,7 +17,7 @@
                                         $event,
                                     )
                                 "
-                                outline
+                                variant="outlined"
                                 clearable
                                 :value="analysisMethod.attribute"
                                 :disabled="!hasAdminAccess"
@@ -37,7 +37,7 @@
                                         $event,
                                     )
                                 "
-                                outline
+                                variant="outlined"
                                 :value="analysisMethod.optimizationStrategy"
                                 :disabled="!hasAdminAccess"
                             >
@@ -56,7 +56,7 @@
                                         $event,
                                     )
                                 "
-                                outline
+                                variant="outlined"
                                 :value="analysisMethod.spendingStrategy"
                             >
                             </v-select>
@@ -74,7 +74,7 @@
                                 @change="
                                     onSetBenefitProperty('attribute', $event)
                                 "
-                                outline
+                                variant="outlined"
                                 :value="analysisMethod.benefit.attribute"
                                 :disabled="!hasAdminAccess"
                             >

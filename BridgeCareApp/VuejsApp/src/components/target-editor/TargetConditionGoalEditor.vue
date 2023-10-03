@@ -10,9 +10,8 @@
                             class="ghd-select ghd-text-field ghd-text-field-border"
                             :items="librarySelectItems"
                             append-icon=$vuetify.icons.ghd-down
-                            outline
                             v-model="librarySelectItemValue"
-                            variant = "outlined"
+                            variant="outlined"
                         >
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
@@ -78,25 +77,25 @@
                     select-all
                     v-model="selectedGridRows"
                 >
-                    <template slot="items" slot-scope="props">
+                    <template slot="items" slot-scope="props" v-slot:item="{item}">
                         <td>
                             <v-checkbox
                                 id="TargetConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
                                 primary
-                                v-model="props.selected"
+                                v-model="item.raw.selected"
                             ></v-checkbox>
                         </td>
                         <td v-for="header in targetConditionGoalGridHeaders">
                             <div>
                                 <!-- <v-edit-dialog
                                     v-if="header.value !== 'criterionLibrary'"
-                                    :return-value.sync="props.item[header.value]"
+                                    :return-value.sync="item[header.value]"
                                     @save="
                                         onEditTargetConditionGoalProperty(
-                                            props.item,
+                                            item,
                                             header.value,
-                                            props.item[header.value])"
+                                            item[header.value])"
                                     large
                                     lazy>
                                     <v-text-field
@@ -104,13 +103,13 @@
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value="props.item[header.value]"/>
+                                        :value="item[header.value]"/>
                                     <v-text-field
                                         v-else
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value="props.item[header.value]"
+                                        :value="item[header.value]"
                                         :rules="[
                                             rules['generalRules']
                                                 .valueIsNotEmpty]"/>
@@ -122,7 +121,7 @@
                                             :items="numericAttributeNames"
                                             append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
-                                            v-model="props.item.attribute"
+                                            v-model="item.attribute"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
@@ -131,13 +130,13 @@
                                             label="Edit"
                                             single-line
                                             :mask="'####'"
-                                            v-model.number="props.item[header.value]"/>
+                                            v-model.number="item[header.value]"/>
                                         <v-text-field
                                             v-if="header.value === 'target'"
                                             label="Edit"
                                             single-line
                                             :mask="'##########'"
-                                            v-model.number="props.item[header.value]"
+                                            v-model.number="item[header.value]"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
@@ -145,7 +144,7 @@
                                             v-if="header.value === 'name'"
                                             label="Edit"
                                             single-line
-                                            v-model="props.item[header.value]"
+                                            v-model="item[header.value]"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
@@ -165,14 +164,14 @@
                                                 readonly
                                                 class="sm-txt"
                                                 :value="
-                                                    props.item.criterionLibrary
+                                                    item.criterionLibrary
                                                         .mergedCriteriaExpression"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
                                                     :value="
-                                                        props.item
+                                                        item
                                                             .criterionLibrary
                                                             .mergedCriteriaExpression"
                                                     full-width
@@ -186,12 +185,12 @@
                                 </v-layout>  -->
                                 <v-edit-dialog
                                     v-if="header.value !== 'criterionLibrary' && header.value !== 'actions'"
-                                    :return-value.sync="props.item[header.value]"
+                                    :return-value.sync="item[header.value]"
                                     @save="
                                         onEditTargetConditionGoalProperty(
-                                            props.item,
+                                            item,
                                             header.value,
-                                            props.item[header.value])"
+                                            item[header.value])"
                                     size="large"
                                     lazy>
                                     <v-text-field
@@ -199,13 +198,13 @@
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value="props.item[header.value]"/>
+                                        :value="item[header.value]"/>
                                     <v-text-field
                                         v-else
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value="props.item[header.value]"
+                                        :value="item[header.value]"
                                         :rules="[
                                             rules['generalRules']
                                                 .valueIsNotEmpty]"/>
@@ -217,7 +216,7 @@
                                             :items="numericAttributeNames"
                                             append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
-                                            v-model="props.item.attribute"
+                                            v-model="item.attribute"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
@@ -227,14 +226,14 @@
                                             label="Edit"
                                             single-line
                                             :mask="'####'"
-                                            v-model.number="props.item[header.value]"/>
+                                            v-model.number="item[header.value]"/>
                                         <v-text-field
                                             id="TargetConditionGoalEditor-editTargetConditionGoalTarget-vtextfield"
                                             v-if="header.value === 'target'"
                                             label="Edit"
                                             single-line
                                             :mask="'##########'"
-                                            v-model.number="props.item[header.value]"
+                                            v-model.number="item[header.value]"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
@@ -243,7 +242,7 @@
                                             v-if="header.value === 'name'"
                                             label="Edit"
                                             single-line
-                                            v-model="props.item[header.value]"
+                                            v-model="item[header.value]"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
@@ -262,12 +261,12 @@
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"
-                                                :value="props.item.criterionLibrary.mergedCriteriaExpression"/>
+                                                :value="item.criterionLibrary.mergedCriteriaExpression"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
-                                                    :value="props.item.criterionLibrary.mergedCriteriaExpression"
+                                                    :value="item.criterionLibrary.mergedCriteriaExpression"
                                                     full-width
                                                     no-resize
                                                     outline
@@ -278,7 +277,7 @@
                                     </v-menu>
                                     <v-btn
                                         id="TargetConditionGoalEditor-editTargetConditionGoalCriteria-vbtn"
-                                        @click="onShowCriterionLibraryEditorDialog(props.item)"
+                                        @click="onShowCriterionLibraryEditorDialog(item)"
                                         class="ghd-blue"
                                         icon>
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>

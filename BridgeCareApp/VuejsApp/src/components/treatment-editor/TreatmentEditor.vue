@@ -10,7 +10,7 @@
                         append-icon=$vuetify.icons.ghd-down
                         class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                         label='Select a Treatment Library'
-                        outline                        
+                        variant="outlined"
                         v-model='librarySelectItemValue' 
                     >
                     </v-select>
@@ -24,7 +24,7 @@
                         append-icon=$vuetify.icons.ghd-down
                         class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                         label='Select'
-                        outline                        
+                        variant="outlined"
                         v-model='treatmentSelectItemValue'
                     >
                     </v-select>

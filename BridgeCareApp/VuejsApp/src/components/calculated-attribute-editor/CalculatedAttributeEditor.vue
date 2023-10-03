@@ -10,7 +10,7 @@
                                   id="CalculatedAttribute-CalculatedAttribute-select"
                                   :items="librarySelectItems"
                                   append-icon=$vuetify.icons.ghd-down
-                                  outline
+                                  variant="outlined"
                                   v-model="librarySelectItemValue"
                                   class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>
@@ -73,7 +73,7 @@
                         id="CalculatedAttribute-Attribute-select"   
                         :items="attributeSelectItems"
                         append-icon=$vuetify.icons.ghd-down
-                        outline
+                        variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         v-model="attributeSelectItemValue">
                     </v-select>
@@ -88,7 +88,7 @@
                         id="CalculatedAttribute-Timing-select"
                         :items="attributeTimingSelectItems"
                         append-icon=$vuetify.icons.ghd-down
-                        outline
+                        variant="outlined"
                         v-model="attributeTimingSelectItemValue"
                         :disabled="!hasAdminAccess"
                         class="ghd-select ghd-text-field ghd-text-field-border"
@@ -238,13 +238,13 @@
                 <v-btn
                     :disabled="disableCrudButton() || !hasUnsavedChanges"
                     @click="onUpsertCalculatedAttributeLibrary"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario">
                     Update Library
                 </v-btn>
                 <v-btn
                     @click="onUpsertScenarioCalculatedAttribute"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-button'
                     v-show="hasScenario && hasAdminAccess"
                     :disabled="disableCrudButton() || !hasUnsavedChanges">
                     Save

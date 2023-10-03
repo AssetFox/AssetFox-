@@ -5,7 +5,7 @@
                 <v-flex xs3>
                     <v-btn
                         @click="onShowCreateCriterionLibraryDialog(false)"
-                        class="ara-blue-bg white--text"
+                        class="ara-blue-bg text-white"
                     >
                         New Library
                     </v-btn>
@@ -14,7 +14,7 @@
                         v-if="!hasSelectedCriterionLibrary"
                         :items="criterionLibrarySelectItems"
                         label="Select a Criteria Library"
-                        outline
+                        variant="outlined"
                     >
                     </v-select>
                     <v-text-field
@@ -77,21 +77,21 @@
             <v-layout justify-end row v-show="hasSelectedCriterionLibrary">
                 <v-btn
                     @click="onUpsertCriterionLibrary(selectedCriterionLibrary)"
-                    class="ara-blue-bg white--text"
+                    class="ara-blue-bg text-white"
                     :disabled="!canUpdateOrCreate || !hasLibraryEditPermission"
                 >
                     Update Library
                 </v-btn>
                 <v-btn
                     @click="onShowCreateCriterionLibraryDialog(true)"
-                    class="ara-blue-bg white--text"
+                    class="ara-blue-bg text-white"
                     :disabled="!canUpdateOrCreate"
                 >
                     Create as New Library
                 </v-btn>
                 <v-btn variant = "outlined"
                     @click="onShowConfirmDeleteAlert"
-                    class="ara-orange-bg white--text"
+                    class="ara-orange-bg text-white"
                     :disabled="!hasLibraryEditPermission"
                 >
                     Delete Library

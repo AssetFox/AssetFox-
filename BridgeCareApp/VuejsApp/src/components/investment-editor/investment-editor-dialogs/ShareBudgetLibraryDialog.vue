@@ -11,16 +11,16 @@
                       :items="budgetLibraryUserGridRows"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
-          <template slot="items" slot-scope="props">
+          <template slot="items" slot-scope="props" v-slot:item="{item}">
             <td>
-              {{ props.item.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox id="ShareBudgetLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="props.item.isShared"
-                          @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
+              <v-checkbox id="ShareBudgetLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.raw.isShared"
+                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareBudgetLibraryDialog-canModify-vcheckbox" :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox id="ShareBudgetLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.raw.canModify"/>
             </td>
           </template>
           <v-alert :value="true"
@@ -33,10 +33,10 @@
       </v-card-text>
       <v-card-actions>
         <v-layout justify-space-between row>
-          <v-btn id="ShareBudgetLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ara-blue-bg white--text">
+          <v-btn id="ShareBudgetLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ara-blue-bg text-white">
             Save
           </v-btn>
-          <v-btn id="ShareBudgetLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+          <v-btn id="ShareBudgetLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
         </v-layout>
       </v-card-actions>
     </v-card>

@@ -53,55 +53,53 @@ const ghdTableSortIconSet: IconSet = {
     });
   }
 }
-fetch(process.env.BASE_URL + 'config.json')
-    .then(response => response.json())
-    .then(config => {
-      const app = createApp({
-        store,
-        router,
-        render: (h: (arg0: typeof Vue) => any) => h(App),
-    })
-    const vuetify = createVuetify({ 
-      icons: { 
-        defaultSet: 'fa', 
-        sets: { fa, ghdSearchIconSet, ghdTableSortIconSet, ghdDownIconSet },
-      },
-    });
+const app = createApp(App);
+const vuetify = createVuetify({ 
+icons: { 
+  defaultSet: 'fa', 
+  sets: { fa, ghdSearchIconSet, ghdTableSortIconSet, ghdDownIconSet },
+},
+});
+app.use(router);
+app.use(store);
+app.use(vuetify);
 
-    app.use(vuetify);
- 
-      app.use(VueWorker);
+//app.use(VueWorker);
+
+app.use(KendoChartInstaller);
+
+//app.use(VueCurrencyInput);
+//authenticationModule.state.securityType = config.securityType as string;
+//app.use(connectionHub);
+
+// app.use(VueScreen, {
+//     sm: 576,
+//     md: 768,
+//     lg: 992,
+//     xl: 1200,
+//     xxl: 1400,
+//     freeRealEstate: 1700,
+//     breakpointsOrder: ['sm', 'md', 'lg', 'xl', 'xxl', 'freeRealEstate'],
+// });
+
+var defaultOptions = {
+    allowedTags: VueSanitize.defaults.allowedTags.concat([
+        'html',
+        'head',
+        'body',
+        'link',
+    ]),
+    allowedAttributes: false,
+};
+
+app.use(VueSanitize, defaultOptions);
+
+app.config.globalProperties.productionTip = false;
+//app.use(VuejsDialog);
+//app.config.globalProperties.$config = config;
+app.mount('#app');
+// fetch(import.meta.env.BASE_URL + 'config.json')
+//     .then(response => response.json())
+//     .then(config => {
       
-      app.use(KendoChartInstaller);
-      
-      //app.use(VueCurrencyInput);
-      authenticationModule.state.securityType = config.securityType as string;
-      app.use(connectionHub);
-      
-      app.use(VueScreen, {
-          sm: 576,
-          md: 768,
-          lg: 992,
-          xl: 1200,
-          xxl: 1400,
-          freeRealEstate: 1700,
-          breakpointsOrder: ['sm', 'md', 'lg', 'xl', 'xxl', 'freeRealEstate'],
-      });
-      
-      var defaultOptions = {
-          allowedTags: VueSanitize.defaults.allowedTags.concat([
-              'html',
-              'head',
-              'body',
-              'link',
-          ]),
-          allowedAttributes: false,
-      };
-      
-      app.use(VueSanitize, defaultOptions);
-      
-      app.config.globalProperties.productionTip = false;
-      app.use(VuejsDialog);
-      app.config.globalProperties.$config = config;
-      app.mount('#app');
-    });
+//     });

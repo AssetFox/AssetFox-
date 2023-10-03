@@ -164,7 +164,7 @@
                     Create as New Library
                 </v-btn>
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                       class='ghd-blue-bg text-white ghd-button-text ghd-button'
                        v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
@@ -173,7 +173,7 @@
                     Delete Library
                 </v-btn>             
                 <v-btn id="BudgetPriorityEditor-updateLibrary-vbtn" @click='onUpsertBudgetPriorityLibrary'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                       class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                        v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Update Library
                 </v-btn>

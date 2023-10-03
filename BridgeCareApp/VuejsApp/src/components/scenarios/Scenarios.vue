@@ -78,7 +78,7 @@
                                             @click="
                                                 showCreateScenarioDialog = true
                                             "
-                                            color="blue darken-2 white--text"
+                                            color="blue darken-2 text-white"
                                         >
                                             Create new scenario
                                         </v-btn>
@@ -182,7 +182,7 @@
                                                 >
                                                     <v-btn
                                                         id="Scenarios-actionMenu-vbtn"
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
                                                         v-bind="attrs"
                                                         v-on="on"
@@ -374,7 +374,7 @@
                                                 >
                                                     <v-btn
                                                         id="Scenarios-shared-actionMenu-vbtn"
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
                                                         v-bind="attrs"
                                                         v-on="on"
@@ -458,7 +458,7 @@
                                                     }"
                                                 >
                                                     <v-btn
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
                                                         v-bind="attrs"
                                                         v-on="on"
@@ -529,7 +529,7 @@
                                                     }"
                                                 >
                                                     <v-btn
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
                                                         v-bind="attrs"
                                                         v-on="on"

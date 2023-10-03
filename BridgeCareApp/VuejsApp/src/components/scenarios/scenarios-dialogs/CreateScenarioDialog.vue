@@ -37,14 +37,14 @@
                         id="CreateScenarioDialog-save-btn"
                         :disabled="newScenario.name === '' || !isNetworkSelected"
                         @click="onSubmit(true)"
-                        class="ara-blue-bg white--text"
+                        class="ara-blue-bg text-white"
                     >
                         Save
                     </v-btn>
                     <v-btn
                         id="CreateScenarioDialog-cancel-btn"
                         @click="onSubmit(false)"
-                        class="ara-orange-bg white--text"
+                        class="ara-orange-bg text-white"
                         >Cancel</v-btn
                     >
                 </v-layout>

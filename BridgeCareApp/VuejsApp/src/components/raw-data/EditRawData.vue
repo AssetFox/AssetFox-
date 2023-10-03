@@ -157,7 +157,7 @@ import { useStore } from 'vuex';
     padding-left: 20px !important;
 }
 
-.primary--text .selected-sidebar-icon .v-icon{
+.text-primary .selected-sidebar-icon .v-icon{
     visibility: visible !important;
 }
 

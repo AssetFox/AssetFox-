@@ -14,10 +14,10 @@
       <v-card-actions>
         <v-layout justify-space-between row>
           <v-btn :disabled="newNetwork.name === ''" @click="onSubmit(true)"
-                 class="ara-blue-bg white--text">
+                 class="ara-blue-bg text-white">
             Save
           </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+          <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
         </v-layout>
       </v-card-actions>
     </v-card>

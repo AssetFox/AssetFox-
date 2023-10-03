@@ -19,7 +19,7 @@
             <v-flex xs4 class="ghd-constant-header">
                 <div style="padding-top: 15px !important">
                     <v-btn v-if="hasScenario" 
-                        class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                        class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                         @click="importLibrary()"
                         :disabled="importLibraryDisabled">
                         Import
@@ -250,7 +250,7 @@
                 </v-btn>
                 <v-btn
                     @click="onUpsertScenarioDeficientConditionGoals"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="hasScenario"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges">
                     Save
@@ -258,7 +258,7 @@
                 <v-btn
                     id="DeficientConditionGoalEditor-updateLibrary-vbtn"
                     @click="onUpsertDeficientConditionGoalLibrary"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges">
                     Update Library

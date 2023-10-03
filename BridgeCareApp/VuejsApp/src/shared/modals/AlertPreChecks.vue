@@ -40,7 +40,7 @@
                         </v-btn>
                     </v-layout>
                     <v-layout justify-center v-if="!dialogDataPreChecks.choice">
-                        <v-btn @click="onSubmit(true)" class="ara-blue-bg white--text">
+                        <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
                             OK
                         </v-btn>
                     </v-layout>

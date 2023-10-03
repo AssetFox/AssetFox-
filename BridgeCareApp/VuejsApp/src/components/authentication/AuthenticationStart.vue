@@ -13,7 +13,7 @@
                         </v-card-text>
                         <v-btn id="AuthenticationStart-goToLoginPage-btn"
                                v-if="securityType === esecSecurityType" 
-                               @click="onRedirect" class="v-btn theme--light ara-blue-bg white--text">
+                               @click="onRedirect" class="v-btn theme--light ara-blue-bg text-white">
                             Go to login page
                         </v-btn>
                         <v-card-text v-if="securityType === b2cSecurityType">

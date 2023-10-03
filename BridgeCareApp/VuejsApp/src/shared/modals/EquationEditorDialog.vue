@@ -272,7 +272,7 @@
                 <v-layout justify-center row>
                   <v-btn @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>
                   <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
-                         class="white--text ghd-blue ghd-button ghd-button-text">Save
+                         class="text-white ghd-blue ghd-button ghd-button-text">Save
                   </v-btn>                  
                 </v-layout>
               </div>

@@ -153,15 +153,15 @@
                 variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Aggregate
                 </v-btn>
-                <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Delete
                 </v-btn>
                 <v-btn id="Networks-Create-vbtn" @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
                     v-show="isNewNetwork"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                    class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Create
                 </v-btn>            
             </v-layout>

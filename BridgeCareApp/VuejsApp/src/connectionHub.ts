@@ -13,6 +13,7 @@ import { getUserName } from '@/shared/utils/get-user-info';
 import { queuedWorkStatusUpdate } from './shared/models/iAM/queuedWorkStatusUpdate';
 import { importCompletion } from './shared/models/iAM/ImportCompletion';
 import mitt from 'mitt';
+import { WorkType } from './shared/models/iAM/scenario';
 
 export default {
     install(Vue: any) {
@@ -108,6 +109,12 @@ export default {
             });
         });
 
+        connection.on(Hub.BroadcastType.BroadcastSimulationDeletionCompletion, (workType: WorkType) => {
+            emitter.emit(Hub.BroadcastEventType.BroadcastSimulationDeletionCompletionEvent, {
+                workType
+            });
+        });
+
         connection.on(Hub.BroadcastType.BroadcastError, error => {
             emitter.emit(Hub.BroadcastEventType.BroadcastErrorEvent, {
                 error,
@@ -182,7 +189,8 @@ export const Hub = {
         BroadcastWorkQueueStatusUpdate: 'BroadcastWorkQueueStatusUpdate',
         BroadcastFastWorkQueueUpdate: 'BroadcastFastWorkQueueUpdate',
         BroadcastFastWorkQueueStatusUpdate: 'BroadcastFastWorkQueueStatusUpdate',
-        BroadcastImportCompletion: 'BroadcastImportCompletion',        
+        BroadcastImportCompletion: 'BroadcastImportCompletion',   
+        BroadcastSimulationDeletionCompletion: 'BroadcastSimulationDeletionCompletion'     
     },
     BroadcastEventType: {
         BroadcastErrorEvent: 'BroadcastErrorEvent',
@@ -203,5 +211,6 @@ export const Hub = {
         BroadcastFastWorkQueueUpdateEvent: 'BroadcastFastWorkQueueUpdateEvent',
         BroadcastFastWorkQueueStatusUpdateEvent: 'BroadcastFastWorkQueueStatusUpdateEvent',        
         BroadcastImportCompletionEvent: 'BroadcastImportCompletionEvent',
+        BroadcastSimulationDeletionCompletionEvent: 'BroadcastSimulationDeletionCompletionEvent'
     },
 };

@@ -27,6 +27,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public Guid? SimulationID { get => null; set { } }
 
+        public Guid? NetworkID { get; set; }
+
         public string Results { get => String.Empty; set { } }
 
         public ReportType Type => ReportType.HTML;

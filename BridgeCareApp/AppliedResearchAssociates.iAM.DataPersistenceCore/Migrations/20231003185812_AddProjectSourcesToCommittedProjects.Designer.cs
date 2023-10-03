@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20230926200146_AddProjectSourcesToCommittedProjects")]
+    [Migration("20231003185812_AddProjectSourcesToCommittedProjects")]
     partial class AddProjectSourcesToCommittedProjects
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

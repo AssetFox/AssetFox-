@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
@@ -146,7 +147,7 @@ public sealed class Scenario
         NameOfUsableBudget = source.Budget.Name,
         NameOfTemplateTreatment = source.TemplateTreatment.Name,
         Year = source.Year,
-        ProjectSource = source.ProjectSource
+        ProjectSource = source.ProjectSource.ToString()
     };
 
     private static ConditionalTreatmentConsequence Convert(Analysis.ConditionalTreatmentConsequence source) => new()
@@ -567,7 +568,9 @@ public sealed class Scenario
                 Name = source.Name,
                 treatmentCategory = source.Category,
                 TemplateTreatment = TreatmentByName[source.NameOfTemplateTreatment],
-                ProjectSource = source.ProjectSource
+                ProjectSource = Enum.TryParse<ProjectSourceDTO>(source.ProjectSource, out var projectSourceEnum)
+                            ? projectSourceEnum
+                            : ProjectSourceDTO.None
             };
 
             return result;

@@ -10,7 +10,7 @@ namespace BridgeCareCoreTests.Tests
 {
     public static class SectionCommittedProjectDtos
     {
-        public static SectionCommittedProjectDTO Dto(Guid? id = null, Guid? scenarioBudgetId = null, Guid simulationId = new Guid(), string projectSource = ProjectSourceDTO.None)
+        public static SectionCommittedProjectDTO Dto(Guid? id = null, Guid? scenarioBudgetId = null, Guid simulationId = new Guid(), ProjectSourceDTO projectSource = ProjectSourceDTO.None)
         {
             var resolveId = id ?? Guid.NewGuid();
             var resolveScenarioBudgetId = scenarioBudgetId ?? Guid.NewGuid();

@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// <summary>
         /// Project source associated with the committed project
         /// </summary>
-        public string ProjectSource { get; set; }
+        public ProjectSourceDTO ProjectSource { get; set; }
 
         /// <summary>
         /// The number of years until any other treatment may be performed

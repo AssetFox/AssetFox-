@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Cost = domain.Cost,
                 Year = domain.Year,
                 treatmentCategory = domain.treatmentCategory,
-                ProjectSource = domain.ProjectSource
+                ProjectSource = domain.ProjectSource.ToString()
             };
 
             entity.CommittedProjectLocation = maintainableAsset.MaintainableAssetLocation.ToCommittedProjectLocation(entity);
@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         SimulationId = entity.SimulationId,
                         Treatment = entity.Name,
                         Year = entity.Year,
-                        ProjectSource = entity.ProjectSource,
+                        ProjectSource = Enum.Parse<ProjectSourceDTO>(entity.ProjectSource),
                         ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         Category = convertedCategory,
@@ -89,7 +89,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Category = dto.Category.ToString(),
                 Year = dto.Year,
-                ProjectSource = dto.ProjectSource
+                ProjectSource = dto.ProjectSource.ToString()
             };
 
             if (dto is SectionCommittedProjectDTO)

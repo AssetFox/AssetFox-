@@ -496,13 +496,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet("projectsources")]
-        public IActionResult GetWorkTypes()
+        public IActionResult GetProjectSources()
         {
-            var projectSources = typeof(ProjectSourceDTO).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
-                                               .Where(f => f.IsLiteral && !f.IsInitOnly)
-                                               .Select(f => f.GetValue(null).ToString())
-                                               .ToList();
-
+            var projectSources = Enum.GetNames(typeof(ProjectSourceDTO)).ToList();
             return Ok(projectSources);
         }
 

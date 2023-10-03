@@ -22,7 +22,7 @@ public sealed class CommittedProject : Treatment
 
     public double Cost { get; set; }
 
-    public string ProjectSource { get; set; }
+    public ProjectSourceDTO ProjectSource { get; set; }
 
     /// <remarks>
     ///     This property isn't used by the analysis engine. It probably shouldn't exist among the

@@ -112,17 +112,17 @@
                                                     @change="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])">
                                             
                                         </v-combobox>
-
-                                        <v-combobox v-else-if="header.value === 'projectSource'"
-                                                    :items="projectSourceOptions"
-                                                    append-icon="$vuetify.icons.ghd-down"
-                                                    class="ghd-down-small"
-                                                    label="Select Project Source"
-                                                    v-model="props.item.projectSource"
-                                                    :rules="[rules['generalRules'].valueIsNotEmpty]"
-                                                    @change="onEditCommittedProjectProperty(props.item, header.value, props.item[header.value])">
-                                        </v-combobox>
-
+                                        <v-combobox
+                                            v-else-if="header.value === 'projectSource'"
+                                            :items="projectSourceOptions"
+                                            append-icon="$vuetify.icons.ghd-down"
+                                            class="ghd-down-small"
+                                            label="Select Project Source"
+                                            v-model="props.item.projectSource"
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                            @change="onEditCommittedProjectProperty(props.item, header.value, props.item.projectSource)"
+                                            
+                                        ></v-combobox>
                                         <v-edit-dialog v-if="header.value !== 'actions' && header.value !== 'selection'"
                                             :return-value.sync="props.item[header.value]"
                                             @save="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])"
@@ -297,6 +297,15 @@ import { Hub } from '@/connectionHub';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import TreatmentService from '@/services/treatment.service';
+
+const projectSourceMap = new Map<number, string>([
+    [0, "None"],
+    [1, "iAMPick"],
+    [2, "Committed"],
+    [3, "SAP"],
+    [4, "ProjectBuilder"]
+]);
+
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -314,6 +323,7 @@ export default class CommittedProjectsEditor extends Vue  {
     templateItemSelected: string = "";
     attributeSelectItems: SelectItem[] = [];
     treatmentSelectItems: string[] = [];
+    projectSourceOptions: string [] = [];
     budgetSelectItems: SelectItem[] = [];
     categorySelectItems: SelectItem[] = [];
     categories: string[] = [];
@@ -458,15 +468,8 @@ export default class CommittedProjectsEditor extends Vue  {
             width: '10%',
         },
     ];
-    
-    
-    data() {
-    return {
-       projectSourceOptions: [], 
-    };
-}
 
-mounted() {
+    mounted() {
         this.reverseCatMap.forEach(cat => {
             this.categorySelectItems.push({text: cat, value: cat})        
         })
@@ -709,7 +712,7 @@ mounted() {
         newRow.locationKeys[this.keyattr] = '';
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = this.scenarioId;
-        newRow.projectSource = '';
+        newRow.projectSource = 'None';
         this.addedRows.push(newRow)
         this.onPaginationChanged();   
      }
@@ -987,7 +990,7 @@ mounted() {
             errors: [],
             yearErrors: [],
             category: value,
-            projectSource: scp.projectSource
+            projectSource: projectSourceMap.get(+scp.projectSource) || scp.projectSource
         }
         return row
     }
@@ -1018,7 +1021,7 @@ mounted() {
     }
 
     handleProjectSourceChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSource: string) {
-    row.projectSource = projectSource;
+        row.projectSource = projectSource;
     this.updateCommittedProject(row, projectSource, 'projectSource');
     this.onPaginationChanged();
     }

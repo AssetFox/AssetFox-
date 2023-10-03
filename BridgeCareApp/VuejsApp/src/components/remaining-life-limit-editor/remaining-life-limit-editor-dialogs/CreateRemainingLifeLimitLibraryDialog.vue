@@ -12,18 +12,20 @@
       <v-card-text class="ghd-dialog-text-field-padding">
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
-          <v-text-field outline v-model="newRemainingLifeLimitLibrary.name"
+          <v-text-field id="CreateRemainingLifeLimitLibraryDialog-nane-vtextarea"
+                        outline v-model="newRemainingLifeLimitLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-control-text ghd-control-border"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
-          <v-textarea no-resize outline rows="3" class="ghd-control-text ghd-control-border"
+          <v-textarea id="CreateRemainingLifeLimitLibraryDialog-description-vtextarea"
+                      no-resize outline rows="3" class="ghd-control-text ghd-control-border"
                       v-model="newRemainingLifeLimitLibrary.description"/>
         </v-layout>
       </v-card-text>
       <v-card-actions class="py-0">
         <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
-          <v-btn @click="onSubmit(false)" class="ghd-button" outline>Cancel</v-btn>
-          <v-btn :disabled="newRemainingLifeLimitLibrary.name === ''" @click="onSubmit(true)"
+          <v-btn id="CreateRemainingLifeLimitLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-button" outline>Cancel</v-btn>
+          <v-btn id="CreateRemainingLifeLimitLibraryDialog-save-vbtn" :disabled="newRemainingLifeLimitLibrary.name === ''" @click="onSubmit(true)"
                  class="ghd-white-bg ghd-blue ghd-button" outline>
             Save
           </v-btn>

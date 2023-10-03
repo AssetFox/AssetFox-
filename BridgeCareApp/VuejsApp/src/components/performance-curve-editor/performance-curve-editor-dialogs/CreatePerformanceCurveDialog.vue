@@ -32,14 +32,12 @@
                 <span class="ghd-control-text">{{ item.raw.text }}</span>
               </template>
               <template v-slot:item="{ item }">
-                <v-list-item class="ghd-control-text" v-on="on" v-bind="$attrs">
-                  <v-list-item-content>
+                <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
                     <v-list-item-title>
                       <v-row no-gutters align="center">
                       <span>{{ item.raw.text }}</span>
                       </v-row>
                     </v-list-item-title>
-                  </v-list-item-content>
                 </v-list-item>
               </template>
             </v-select>                      

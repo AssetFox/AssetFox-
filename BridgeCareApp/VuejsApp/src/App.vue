@@ -141,14 +141,12 @@
                                         </v-list-tile>
                                     </template>
                                     <v-list-item>
-                                        <v-list-item-content>
                                             <v-list-item-title
                                                 class="notification-long-message"
                                                 v-text="
                                                     notification.longMessage
                                                 "
                                             ></v-list-item-title>
-                                        </v-list-item-content>
                                     </v-list-item>
                                     <v-spacer></v-spacer>
                                 </v-list-group>

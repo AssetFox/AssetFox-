@@ -113,6 +113,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                 assetKeyData,
                 treatmentName,
                 networkId);
+
             Assert.Equal(12345, cost);
         }
     }

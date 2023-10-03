@@ -76,5 +76,14 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// An indication if the LocationKeys are valid
         /// </returns>
         public abstract bool VerifyLocation(string networkKeyAttribute);
+        /// <summary>
+        /// Visitor pattern is to define a new operation without introducing the modifications to an existing object structure.
+        /// It is a generic way of defining behavior on subclasses and accessing it on the superclass.
+        /// </summary>
+        /// <returns>
+        /// TOutput is type parameter for whatever is being returned.  THelper is type parameter for whatever type the helper has.
+        /// </returns>
+        public abstract TOutput Accept<TOutput, THelper>(IBaseCommittedProjectDtoVisitor<THelper, TOutput> visitor, THelper helper);
+
     }
 }

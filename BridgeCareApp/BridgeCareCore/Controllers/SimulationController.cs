@@ -40,6 +40,7 @@ namespace BridgeCareCore.Controllers
         private readonly IWorkQueueService _workQueueService;
         private readonly IGeneralWorkQueueService _generalWorkQueueService;
         private readonly IClaimHelper _claimHelper;
+        private readonly ICompleteSimulationCloningService _completeSimulationCloningService;
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
@@ -51,12 +52,14 @@ namespace BridgeCareCore.Controllers
             IHubService hubService,
             IHttpContextAccessor httpContextAccessor,
             IClaimHelper claimHelper,
+            ICompleteSimulationCloningService completeSimulationCloningService,
             IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
+            _completeSimulationCloningService = completeSimulationCloningService ?? throw new ArgumentNullException(nameof(completeSimulationCloningService));
         }
 
         [HttpPost]
@@ -230,11 +233,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                
                 var result = await Task.Factory.StartNew(() =>
                 {
 
-                    _claimHelper.CheckUserSimulationModifyAuthorization(dto.scenarioId, UserId);
-                    var cloneResult = UnitOfWork.SimulationRepo.CloneSimulation(dto.scenarioId, dto.networkId, dto.scenarioName);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(dto.ScenarioId, UserId);
+                    var cloneResult =  _completeSimulationCloningService.Clone(dto);
                     return cloneResult;
                 });
 

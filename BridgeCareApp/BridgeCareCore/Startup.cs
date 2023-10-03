@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -93,6 +92,7 @@ namespace BridgeCareCore
 
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
             services.AddScoped<IAggregationService, AggregationService>();
+            services.AddScoped<ICompleteSimulationCloningService, CompleteSimulationCloningService>();
 
             services.AddSingleton<IAnalysisEventLoggingService, AnalysisEventLoggingService>();
         }

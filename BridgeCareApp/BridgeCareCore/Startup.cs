@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -22,7 +21,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BridgeCareCore.Services;
-using BridgeCareCore.Services.SimulationCloning;
 
 namespace BridgeCareCore
 {
@@ -108,6 +106,7 @@ namespace BridgeCareCore
             reportFactoryList.Add(new ScenarioOutputReportFactory());
             reportFactoryList.Add(new PAMSSummaryReportFactory());
             reportFactoryList.Add(new BAMSAuditReportFactory());
+            reportFactoryList.Add(new PAMSAuditReportFactory());
             reportFactoryList.Add(new BAMSPBExportReportFactory());
             reportFactoryList.Add(new PAMSPBExportReportFactory());
             reportFactoryList.Add(new PAMSInventorySectionsReportFactory());

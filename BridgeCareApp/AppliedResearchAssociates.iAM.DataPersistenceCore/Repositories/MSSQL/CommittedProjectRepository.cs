@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -267,19 +266,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Select(_ => _.Id);
                 allExistingCommittedProjectIds.AddRange(simulationProjects);
             }
-            _unitOfWork.BeginTransaction();
-            try
+            _unitOfWork.AsTransaction(() =>
             {
-                // Upsert(update/insert) all
-                _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
-                
-                _unitOfWork.Commit();
-            }
-            catch (Exception e)
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
+                _unitOfWork.Context.UpsertAll(committedProjectEntities);
+            });
         }
 
         public void DeleteSimulationCommittedProjects(Guid simulationId)
@@ -294,16 +284,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            try
-            {
-                _unitOfWork.BeginTransaction();
-                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
-                _unitOfWork.Commit();
-            }
-            catch (Exception e)
-            {
-                _unitOfWork.Rollback();
-            }
+            _unitOfWork.AsTransaction(() =>
+                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId));
 
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
@@ -316,17 +298,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => projectIds.Contains(_.Id))
                 .Select(_ => _.SimulationId);
 
-            try
-            {
-                _unitOfWork.BeginTransaction();
-                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => projectIds.Contains(_.Id));
-                _unitOfWork.Commit();
-            }
-            catch (Exception e)
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
+            _unitOfWork.AsTransaction(() => 
+                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => projectIds.Contains(_.Id)));
+              
 
             // Update last modified date
             foreach (var simulationId in simulationIds)

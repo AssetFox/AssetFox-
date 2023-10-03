@@ -21,7 +21,7 @@ using Xunit;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.TestHelpers.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using BridgeCareCore.Services.SimulationCloning;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {

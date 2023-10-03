@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace BridgeCareCore.Services
 {
     public class BaseCommittedProjectDtoClonerVisitor : IBaseCommittedProjectDtoVisitor<Dictionary<Guid, Guid>, BaseCommittedProjectDTO>
     {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -18,8 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class SimulationRepositoryTests
     {
-        
-               
+                       
         private async Task<UserDTO> AddTestUser()
         {
             var randomName = RandomStrings.Length11();

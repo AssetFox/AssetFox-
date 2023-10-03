@@ -2,9 +2,8 @@
 using System;
 using System.Collections.Generic;
 
-namespace BridgeCareCore.Services.SimulationCloning
+namespace BridgeCareCore.Services
 {
-
     internal class DeficientConditionGoalCloner
     {
         internal static DeficientConditionGoalDTO Clone(DeficientConditionGoalDTO deficientConditionGoal, Guid ownerId)

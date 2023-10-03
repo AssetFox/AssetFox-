@@ -188,9 +188,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
             {
                 if (!UserRepo.UserExists(username))
                 {
-                    BeginTransaction();
                     UserRepo.AddUser(username, hasAdminClaim);
-                    Commit();
                 }
             }
         }

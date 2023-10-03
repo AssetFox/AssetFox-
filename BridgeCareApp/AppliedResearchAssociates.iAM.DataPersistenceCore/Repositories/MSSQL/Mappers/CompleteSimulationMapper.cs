@@ -41,6 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 BaseEntityPropertySetter.SetBaseEntityProperties(analysisMethodJoin, baseEntityProperties);
                 analysisMethod.CriterionLibraryAnalysisMethodJoin = analysisMethodJoin;
             }
+
             var investmentPlan = InvestmentPlanMapper.ToEntityNullPropagating(dto.InvestmentPlan, dto.Id, baseEntityProperties);
             var reportIndexEntities = new List<ReportIndexEntity>();
             foreach (var report in dto.ReportIndexes)
@@ -48,12 +49,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var reportEntity = report.ToEntity();
                 reportIndexEntities.Add(reportEntity);
             }
+
             var scenarioBudgetsEntities = new List<ScenarioBudgetEntity>();
             foreach (var budget in dto.Budgets)
             {
                 var scenarioBudgetEntity = budget.ToScenarioEntityWithBudgetAmounts(dto.Id, baseEntityProperties);
                 scenarioBudgetsEntities.Add(scenarioBudgetEntity);
             }
+
             var scenarioCalculatedAttributeEntities = new List<ScenarioCalculatedAttributeEntity>();
             foreach (var calculatedAttribute in dto.CalculatedAttributes)
             {
@@ -86,6 +89,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 }
                 scenarioCalculatedAttributeEntities.Add(scenarioCalculatedAttributeEntity);
             }
+
             var scenarioSelectableTreatmentEntities = new List<ScenarioSelectableTreatmentEntity>();
             foreach (var treatment in dto.Treatments)
             {
@@ -101,13 +105,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     };
                     BaseEntityPropertySetter.SetBaseEntityProperties(budgetJoin, baseEntityProperties);
                     budgetJoins.Add(budgetJoin);
-                }
-                
+                }                
                 var scenarioSelectableTreatmentEntity = treatment.ToScenarioEntityWithCriterionLibraryWithChildren(dto.Id, attributes, baseEntityProperties);
                 scenarioSelectableTreatmentEntity.ScenarioSelectableTreatmentScenarioBudgetJoins = budgetJoins;
                 scenarioSelectableTreatmentEntities.Add(scenarioSelectableTreatmentEntity);
-            }
-           
+            }           
 
             var scenarioTargetConditionGoalEntities = new List<ScenarioTargetConditionGoalEntity>();
             foreach (var targetConditionGoal in dto.TargetConditionGoals)
@@ -117,6 +119,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var scenarioTargetConditionGoalEntity = targetConditionGoal.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, attribute.Id, baseEntityProperties);
                 scenarioTargetConditionGoalEntities.Add(scenarioTargetConditionGoalEntity);
             }
+
             var scenarioDeficientConditionGoals = new List<ScenarioDeficientConditionGoalEntity>();
             foreach (var scenarioDeficientConditionGoal in dto.DeficientConditionGoals)
             {
@@ -125,6 +128,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var deficientConditionGoal = scenarioDeficientConditionGoal.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, attribute.Id, baseEntityProperties);
                 scenarioDeficientConditionGoals.Add(deficientConditionGoal);
             }
+
             var scenarioRemainingLifeLimitEntities = new List<ScenarioRemainingLifeLimitEntity>();
             foreach (var remainingLifeLimit in dto.RemainingLifeLimits)
             {
@@ -133,6 +137,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var remainingLifeLimitEntity = remainingLifeLimit.ToScenarioEntityWithCriterionLibraryJoin(dto.Id, attribute.Id, baseEntityProperties);
                 scenarioRemainingLifeLimitEntities.Add(remainingLifeLimitEntity);
             }
+
             var scenarioBudgetPriorityEntities = new List<ScenarioBudgetPriorityEntity>();
             foreach (var budgetPriority in dto.BudgetPriorities)
             {
@@ -140,6 +145,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 scenarioBudgetPriorityEntities.Add(budgetPriorityEntity);
 
             }
+
             var scenarioCashFlowRuleEntities = new List<ScenarioCashFlowRuleEntity>();
             foreach (var cashFlowRule in dto.CashFlowRules)
             {
@@ -151,12 +157,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 }
                 scenarioCashFlowRuleEntities.Add(cashFlowRuleEntity);
             }
+
             var committedProjectEntities = new List<CommittedProjectEntity>();
             foreach (var committedProject in dto.CommittedProjects)
             {
                 var committedProjectEntity = committedProject.ToEntity(attributes, networkKeyAttribute, baseEntityProperties);
                 committedProjectEntities.Add(committedProjectEntity);
             }
+
             var scenarioPerformanceCurves = new List<ScenarioPerformanceCurveEntity>();
             foreach (var performanceCurve in dto.PerformanceCurves)
             {
@@ -165,12 +173,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var performanceCurveEntity = performanceCurve.ToScenarioEntityWithCriterionLibraryJoinAndEquationJoin(dto.Id, attribute.Id, baseEntityProperties);
                 scenarioPerformanceCurves.Add(performanceCurveEntity);
             }
+
             var userJoins = new List<SimulationUserEntity>();
             foreach (var user in dto.Users)
             {
                 var userJoin = user.ToEntity(dto.Id, baseEntityProperties);
                 userJoins.Add(userJoin);
             }
+
             var entity = new SimulationEntity
             {
                 Name = dto.Name,

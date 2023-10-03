@@ -14,6 +14,7 @@ using System.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Reporting.Services.NetworkExportReport;
 using Newtonsoft.Json.Linq;
+using AppliedResearchAssociates.iAM.Reporting.Services;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -22,8 +23,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
         protected readonly IHubService _hubService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly NetworkTab _networkTab;
+        private Guid _networkId;
 
-        public NetworkExportReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService, string suffix)
+        public NetworkExportReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
@@ -39,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Report definition created.";
             Results = string.Empty;
             IsComplete = false;
-            Suffix = suffix ?? string.Empty;
+            Suffix = string.Empty;
             Criteria = string.Empty;
         }
 
@@ -69,25 +71,53 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
-            var param = JObject.Parse(parameters);
-            var scenarioId = new Guid();
-            var simulationId = new Guid();
-            var networkId = new Guid();
-            var maintainableAssets = new List<MaintainableAsset>();
-            var aggregatedResults = new List<AggregatedResultDTO>();
-            var id = param.SelectToken("scenarioId")?.ToObject<string>()?.ToString();
-            if (Guid.TryParse(id, out scenarioId))
+            workQueueLog ??= new DoNothingWorkQueueLog();
+            if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
-                networkId = _unitOfWork.SimulationRepo.GetSimulation(scenarioId).NetworkId;
-                simulationId = _unitOfWork.SimulationRepo.GetSimulation(scenarioId).Id;
-                maintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(networkId);
-                aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAllAggregatedResultsForNetwork(networkId);
+                Errors.Add("No simulation ID provided in the parameters of PAMS Simulation Report runner");
+                IndicateError();
+                return;
             }
-            else
+
+            var scenarioId = ReportHelper.GetSimulationId(parameters);
+            if (!Guid.TryParse(scenarioId, out Guid _scenarioId))
             {
-                scenarioId = Guid.NewGuid();
-                simulationId = Guid.NewGuid();
-                networkId = Guid.NewGuid();
+                Errors.Add("Provided simulation ID is not a GUID");
+                IndicateError();
+                return;
+            }
+
+            var simulationName = string.Empty;
+            List<MaintainableAsset> maintainableAssets;
+            List<AggregatedResultDTO> aggregatedResults;
+            try
+            {
+                var simulationObject = _unitOfWork.SimulationRepo.GetSimulation(_scenarioId);
+                simulationName = simulationObject.Name;
+                _networkId = simulationObject.NetworkId;
+                maintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(_networkId);
+                aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAllAggregatedResultsForNetwork(_networkId);
+            }
+            catch (Exception e)
+            {
+                IndicateError();
+                Errors.Add("Failed to find simulation");
+                Errors.Add(e.Message);
+                return;
+            }
+
+            if (simulationName == null)
+            {
+                IndicateError();
+                Errors.Add($"Failed to find name using simulation ID {_scenarioId}.");
+                return;
+            }
+
+            if (maintainableAssets == null || aggregatedResults == null)
+            {
+                IndicateError();
+                Errors.Add($"Failed to find MaintainableAssets or AggregatedResults using simulation ID {_scenarioId}.");
+                return;
             }
 
             var reportPath = string.Empty;
@@ -95,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                     throw new Exception("Report was cancelled");
-                reportPath = GenerateNetworkExportReport(workQueueLog, maintainableAssets, networkId, aggregatedResults, cancellationToken);
+                reportPath = GenerateNetworkExportReport(workQueueLog, maintainableAssets, _networkId, aggregatedResults, cancellationToken);
             }
             catch (Exception e)
             {
@@ -116,8 +146,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Results = reportPath;
             IsComplete = true;
             Status = "File generated.";
-            SimulationID = simulationId;
-            NetworkID = networkId;
+            SimulationID = _scenarioId;
+            NetworkID = _networkId;
             ReportTypeName = "NetworkExportReport";
             return;
         }

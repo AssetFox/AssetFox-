@@ -19,8 +19,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CostCeiling = domain.CostCeiling ?? 0
             };
 
-        public static ScenarioCashFlowDistributionRuleEntity ToScenarioEntity(this CashFlowDistributionRuleDTO dto, Guid cashFlowRuleId) =>
-            new ScenarioCashFlowDistributionRuleEntity
+        public static ScenarioCashFlowDistributionRuleEntity ToScenarioEntity(this CashFlowDistributionRuleDTO dto, Guid cashFlowRuleId, BaseEntityProperties baseEntityProperties=null)
+        {
+            var entity = new ScenarioCashFlowDistributionRuleEntity
             {
                 Id = dto.Id,
                 ScenarioCashFlowRuleId = cashFlowRuleId,
@@ -28,7 +29,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 DurationInYears = dto.DurationInYears,
                 YearlyPercentages = dto.YearlyPercentages
             };
-
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
         public static CashFlowDistributionRuleDTO ToDto(this ScenarioCashFlowDistributionRuleEntity entity) =>
             new CashFlowDistributionRuleDTO
             {

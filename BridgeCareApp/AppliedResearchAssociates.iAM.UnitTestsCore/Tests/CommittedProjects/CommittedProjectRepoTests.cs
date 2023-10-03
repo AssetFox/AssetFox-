@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var maintainableAssetEntity = maintainableAsset.ToEntity(networkId);
             var maintainableAssetLocation = new MaintainableAssetLocationEntity()
             {
-                Id = Guid.Parse("75b07f98-e168-438f-84b6-fcc57b3e3d8f"),
+                Id = Guid.NewGuid(), 
                 LocationIdentifier = "3",
                 Discriminator = DataPersistenceConstants.SectionLocation,
             };

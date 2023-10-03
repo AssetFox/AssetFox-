@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity, string networkKeyAttribute)
         {
-            TreatmentCategory convertedCategory = entity.treatmentCategory!=default(TreatmentCategory) ? entity.treatmentCategory : default(TreatmentCategory);
+            TreatmentCategory convertedCategory = entity.treatmentCategory != default(TreatmentCategory) ? entity.treatmentCategory : default(TreatmentCategory);
             if (Enum.TryParse(typeof(TreatmentCategory), entity.Category, true, out var convertedCategoryOut))
             {
                 convertedCategory = (TreatmentCategory)convertedCategoryOut;
@@ -49,32 +49,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             switch (entity.CommittedProjectLocation.Discriminator)
             {
-                case DataPersistenceConstants.SectionLocation:
-                    if(entity.ScenarioBudgetId != null && entity.ScenarioBudget == null)
-                    {
-                        throw new InvalidOperationException($"Scenario budget is not present in committed project.");
-                    }
+            case DataPersistenceConstants.SectionLocation:
+                if (entity.ScenarioBudgetId != null && entity.ScenarioBudget == null)
+                {
+                    throw new InvalidOperationException($"Scenario budget is not present in committed project.");
+                }
 
-                    var commit = new SectionCommittedProjectDTO()
-                    {
-                        Id = entity.Id,
-                        Cost = entity.Cost,
-                        ScenarioBudgetId = entity.ScenarioBudgetId,
-                        SimulationId = entity.SimulationId,
-                        Treatment = entity.Name,
-                        Year = entity.Year,
-                        ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
-                        ShadowForSameTreatment= entity.ShadowForSameTreatment,
-                        Category = convertedCategory,
-                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
-                    };
-                    return commit;
-                default:
-                    throw new ArgumentException($"Location type of {entity.CommittedProjectLocation.Discriminator} is not supported.");
+                var commit = new SectionCommittedProjectDTO()
+                {
+                    Id = entity.Id,
+                    Cost = entity.Cost,
+                    ScenarioBudgetId = entity.ScenarioBudgetId,
+                    SimulationId = entity.SimulationId,
+                    Treatment = entity.Name,
+                    Year = entity.Year,
+                    ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
+                    ShadowForSameTreatment = entity.ShadowForSameTreatment,
+                    Category = convertedCategory,
+                    LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
+                };
+                return commit;
+            default:
+                throw new ArgumentException($"Location type of {entity.CommittedProjectLocation.Discriminator} is not supported.");
             }
         }
 
-        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes, string networkKeyAttribute)
+        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes, string networkKeyAttribute, BaseEntityProperties baseEntityProperties = null)
         {
             var result = new CommittedProjectEntity
             {
@@ -88,9 +88,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Category = dto.Category.ToString(),
                 Year = dto.Year,
             };
-                        
+
             if (dto is SectionCommittedProjectDTO)
-            {                
+            {
                 if (dto.VerifyLocation(networkKeyAttribute))
                 {
                     result.CommittedProjectLocation = new CommittedProjectLocationEntity(
@@ -112,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 throw new ArgumentException($"Cannot convert the DTO location for committed project with the ID ${dto.Id}");
             }
-
+            BaseEntityPropertySetter.SetBaseEntityProperties( result, baseEntityProperties );
             return result;
         }
 
@@ -132,15 +132,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             const string IdKey = "ID";
             switch (entity.Discriminator)
             {
-                case DataPersistenceConstants.SectionLocation:
+            case DataPersistenceConstants.SectionLocation:
                 var result = new Dictionary<string, string>
                 {
                     { IdKey, entity.Id.ToString() },
                     { networkKeyAttribute, entity.LocationIdentifier }
                 };
                 return result;
-                default:
-                    throw new ArgumentException($"Location type of {entity.Discriminator} is not supported.");
+            default:
+                throw new ArgumentException($"Location type of {entity.Discriminator} is not supported.");
             }
         }
 
@@ -208,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));
             committedProject.Id = entity.Id;
             committedProject.Name = entity.Name;
-            committedProject.Cost = entity.Cost; 
+            committedProject.Cost = entity.Cost;
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
             committedProject.LastModifiedDate = entity.LastModifiedDate;
 
@@ -238,7 +238,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         }
                     }
                 }
-                
+
             }
         }
     }

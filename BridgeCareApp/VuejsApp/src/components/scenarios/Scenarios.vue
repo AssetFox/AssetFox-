@@ -211,7 +211,7 @@
                                         </td>
                                     </template>
                                     <v-alert
-                                        :value="hasMineSearch()"
+                                        :model-value="hasMineSearch()"
                                         class="ara-orange-bg"
                                         icon="fas fa-exclamation"
                                         slot="no-data"
@@ -397,7 +397,7 @@
                                     </template>
                                     <template v-slot:no-data v-if="hasSharedSearch()">
                                         <v-alert
-                                            :value="true"
+                                            :model-value="true"
                                             class="ara-orange-bg"
                                             icon="fas fa-exclamation">
                                             Your search for "{{ currentSearchShared }}"

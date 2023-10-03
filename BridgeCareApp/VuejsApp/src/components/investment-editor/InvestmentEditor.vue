@@ -170,23 +170,23 @@
                         </td>
                         <td v-for='header in budgetYearsGridHeaders'>
                             <div v-if="header.value === 'year'">
-                                <span class='sm-txt'>{{ item.year + firstYearOfAnalysisPeriodShift}}</span>
+                                <span class='sm-txt'>{{ item.value.year + firstYearOfAnalysisPeriodShift}}</span>
                             </div>       
                             <div v-if="header.value === 'action'">
-                                <v-btn @click="onRemoveBudgetYear(item.year)" class="ghd-blue" icon>
+                                <v-btn @click="onRemoveBudgetYear(item.value.year)" class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')" />
                                 </v-btn>
                             </div>
                             <div v-if="header.value !== 'year' && header.value !== 'action'">
-                                <v-edit-dialog :return-value.sync='item.values[header.value]'
-                                               @save='onEditBudgetYearValue(item.year, header.value, item.values[header.value])'
+                                <v-edit-dialog :return-value.sync='item.value.values[header.value]'
+                                               @save='onEditBudgetYearValue(item.value.year, header.value, item.value.values[header.value])'
                                                size="large" lazy>
                                     <v-text-field readonly single-line class='sm-txt'
-                                                  :value='formatAsCurrency(item.values[header.value])'
+                                                  :model-value='formatAsCurrency(item.value.values[header.value])'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <template slot='input'>
                                         <v-text-field label='Edit' single-line
-                                                      v-model.number='item.values[header.value]'
+                                                      v-model.number='item.value.values[header.value]'
                                                       v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                       :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>

@@ -94,29 +94,29 @@
                         <td v-for="header in deficientConditionGoalGridHeaders">
                             <div>
                                 <v-edit-dialog v-if="header.value !== 'criterionLibrary' && header.value !== 'action'"
-                                    :return-value.sync="item[header.value]"
-                                    @save="onEditDeficientConditionGoalProperty(item,header.value,item[header.value])"
+                                    :return-value.sync="item.value[header.value]"
+                                    @save="onEditDeficientConditionGoalProperty(item.value,header.value,item.value[header.value])"
                                     size="large"
                                     lazy>
                                     <v-text-field v-if="header.value !== 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
-                                        :value="item[header.value]"
+                                        :model-value="item.value[header.value]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                     <v-text-field v-if="header.value === 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
-                                        :value="item[header.value]"
+                                        :model-value="item.value[header.value]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty,
-                                            rules['generalRules'].valueIsWithinRange(item[header.value],[0, 100])]"/>
+                                            rules['generalRules'].valueIsWithinRange(item.value[header.value],[0, 100])]"/>
 
                                     <template slot="input">
                                         <v-text-field v-if="header.value === 'name'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalName-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model="item[header.value]"
+                                            v-model="item.value[header.value]"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                         <v-select v-if="header.value === 'attribute'"
@@ -124,7 +124,7 @@
                                             :items="numericAttributeNames"
                                             append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
-                                            v-model="item[header.value]"
+                                            v-model="item.value[header.value]"
                                             :rules="[
                                                 rules['generalRules'].valueIsNotEmpty]">
                                         </v-select>
@@ -133,7 +133,7 @@
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalLimit-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model="item[header.value]"
+                                            v-model="item.value[header.value]"
                                             :mask="'##########'"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
@@ -141,12 +141,12 @@
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalPercentage-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model.number="item[header.value]"
+                                            v-model.number="item.value[header.value]"
                                             :mask="'###'"
                                             :rules="[
                                                 rules['generalRules'].valueIsNotEmpty,
                                                 rules['generalRules'].valueIsWithinRange(
-                                                    item[header.value],[0, 100])]"/>
+                                                    item.value[header.value],[0, 100])]"/>
                                     </template>
                                 </v-edit-dialog>
                                 
@@ -162,15 +162,15 @@
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"
-                                                :value="item.criterionLibrary.mergedCriteriaExpression"/>
+                                                :model-value="item.value.criterionLibrary.mergedCriteriaExpression"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
-                                                    :value="item.criterionLibrary.mergedCriteriaExpression"
+                                                    :model-value="item.value.criterionLibrary.mergedCriteriaExpression"
                                                     full-width
                                                     no-resize
-                                                    outline
+                                                    variant="outlined"
                                                     readonly
                                                     rows="5"/>
                                             </v-card-text>
@@ -178,14 +178,14 @@
                                     </v-menu>
                                     <v-btn
                                         id="DeficientConditionGoalEditor-editDeficientConditionGoalCriteria-vbtn"
-                                        @click="onShowCriterionLibraryEditorDialog(item)"
+                                        @click="onShowCriterionLibraryEditorDialog(item.value)"
                                         class="ghd-blue"
                                         icon>
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-layout>
                                 <div v-if="header.value === 'action'">
-                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.id)"  class="ghd-blue" icon>
+                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.value.id)"  class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>                               

@@ -26,7 +26,7 @@
               <v-checkbox :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
             </td>
           </template>
-          <v-alert :value="true"
+          <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">

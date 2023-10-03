@@ -87,7 +87,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
-                                    :value="props.item.attribute"
+                                    :model-value="props.item.attribute"
                                     :rules="[
                                         rules['generalRules'].valueIsNotEmpty,
                                     ]"
@@ -124,7 +124,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
-                                    :value="props.item.value"
+                                    :model-value="props.item.value"
                                     :rules="[
                                         rules['generalRules'].valueIsNotEmpty,
                                     ]"

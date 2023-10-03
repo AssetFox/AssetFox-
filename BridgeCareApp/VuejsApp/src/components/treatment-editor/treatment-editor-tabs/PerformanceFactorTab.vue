@@ -14,10 +14,10 @@
                                 @save='onEditPerformanceFactorProperty(props.item, header.value, props.item[header.value])'
                                 size="large" lazy persistent>
                                 <v-text-field v-if="header.value === 'attribute'" readonly single-line class='ghd-control-text-sm'
-                                              :value='props.item.attribute'
+                                              :model-value='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                 <v-text-field v-if="header.value === 'performanceFactor'" readonly single-line class='ghd-control-text-sm'
-                                              :value='parseFloat(props.item.performanceFactor).toFixed(2)'
+                                              :model-value='parseFloat(props.item.performanceFactor).toFixed(2)'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                 <template slot='input'>
                                     <v-select v-if="header.value === 'attribute'" :items='attributeSelectItems'

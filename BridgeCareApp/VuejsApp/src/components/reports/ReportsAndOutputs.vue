@@ -38,7 +38,7 @@
                                             <v-card-text>
                                                 <v-textarea
                                                     class="sm-txt Montserrat-font-family"
-                                                    :value=props.item.mergedExpression
+                                                    :model-value=props.item.mergedExpression
                                                     full-width
                                                     no-resize
                                                     outline

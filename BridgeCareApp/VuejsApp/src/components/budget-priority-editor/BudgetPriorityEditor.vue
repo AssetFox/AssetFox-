@@ -67,22 +67,22 @@
                         <td v-for='header in budgetPriorityGridHeaders'>
                             <div v-if="header.value === 'priorityLevel' || header.value === 'year'">
                                 <v-edit-dialog
-                                    :return-value.sync='item[header.value]'
-                                    @save='onEditBudgetPriority(item, header.value, item[header.value])'
+                                    :return-value.sync='item.value[header.value]'
+                                    @save='onEditBudgetPriority(item.value, header.value, item.value[header.value])'
                                     size="large" lazy>
                                     <v-text-field v-if="header.value === 'priorityLevel'" readonly single-line
                                                   class='sm-txt'
-                                                  :value='item[header.value]'
+                                                  :model-value="item.value[header.value]"
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <v-text-field v-else readonly single-line class='sm-txt'
-                                                  :value='item[header.value]' />
+                                                  :model-value='item.value[header.value]' />
                                     <template slot='input'>
                                         <v-text-field v-if="header.value === 'priorityLevel'" label='Edit' single-line
-                                                      v-model.number='item[header.value]'
+                                                      v-model.number='item.value[header.value]'
                                                       :mask="'##########'"
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotUnique(item[header.value], currentPriorityList)]" />
+                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotUnique(item.value[header.value], currentPriorityList)]" />
                                         <v-text-field v-else label='Edit' single-line :mask="'####'"
-                                                      v-model.number='item[header.value]' />
+                                                      v-model.number='item.value[header.value]' />
                                     </template>
                                 </v-edit-dialog>
                             </div>
@@ -97,17 +97,17 @@
                                             </div>
                                             <div v-else class='priority-criteria-output'>
                                                 <v-text-field readonly single-line class='sm-txt'
-                                                              :value='item.criteria' />
+                                                              :model-value='item.value.criteria' />
                                             </div>
                                         </template>
                                         <v-card>
                                             <v-card-text>
-                                                <v-textarea :value='item.criteria' full-width no-resize outline
+                                                <v-textarea :model-value='item.value.criteria' full-width no-resize outline
                                                             readonly rows='5' />
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item)' class='ghd-blue'
+                                    <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.value)' class='ghd-blue'
                                            icon>
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
@@ -115,20 +115,20 @@
                             </div>
                             <div v-else-if="header.text.endsWith('%')">
                                 <v-edit-dialog
-                                    :return-value.sync='item[header.value]'
-                                    @save='onEditBudgetPercentagePair(item, header.value, item[header.value])'
+                                    :return-value.sync='item.value[header.value]'
+                                    @save='onEditBudgetPercentagePair(item.value, header.value, item.value[header.value])'
                                     size="large" lazy>
-                                    <v-text-field readonly single-line class='sm-txt' :value='item[header.value]'
-                                                  :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item[header.value], [0, 100])]" />
+                                    <v-text-field readonly single-line class='sm-txt' :model-value='item.value[header.value]'
+                                                  :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.value[header.value], [0, 100])]" />
                                     <template slot='input'>
                                         <v-text-field :mask="'###'" label='Edit' single-line
-                                                      v-model.number='item[header.value]'
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item[header.value], [0, 100])]" />
+                                                      :model-value.number="item.value[header.value]"
+                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.value[header.value], [0, 100])]" />
                                     </template>
                                 </v-edit-dialog>
                             </div>
                             <div v-else>
-                                <v-btn @click="onRemoveBudgetPriority(item.id)"  class="ghd-blue" icon>
+                                <v-btn @click="onRemoveBudgetPriority(item.value.id)"  class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </div>

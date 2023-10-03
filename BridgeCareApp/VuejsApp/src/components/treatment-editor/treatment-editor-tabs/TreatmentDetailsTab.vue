@@ -70,26 +70,7 @@
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
                     </v-flex>
-<!--                     <v-flex xs3>
-                        <v-subheader class="ghd-control-label ghd-md-gray">Performance Factor</v-subheader>
-                        <v-text-field
-                            class='ghd-control-border ghd-control-text ghd-control-width-sm'
-                            @input="
-                                onEditTreatmentDetails(
-                                    'performanceFactor',
-                                    selectedTreatmentDetails.performanceFactor,
-                                )
-                            "
-                            label="Performance Factor"
-                            outline
-                            :value='parseFloat(selectedTreatmentDetails.performanceFactor).toFixed(2)'
-                            v-model.number="
-                                selectedTreatmentDetails.performanceFactor
-                            "
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        />
-                    </v-flex>
- -->                </v-layout>                
+                </v-layout>                
                 <v-flex class="criteria-flex">
                     <v-menu
                         full-width
@@ -133,7 +114,7 @@
                                             outline
                                             rows="3"
                                             readonly                                            
-                                            :value="
+                                            :model-value="
                                                 selectedTreatmentDetails.criterionLibrary
                                                     .mergedCriteriaExpression
                                             "
@@ -147,7 +128,7 @@
                             <v-card-text>
                                 <v-textarea
                                     class="ghd-card-width"
-                                    :value="
+                                    :model-value="
                                         selectedTreatmentDetails
                                             .criterionLibrary
                                             .mergedCriteriaExpression

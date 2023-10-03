@@ -17,17 +17,17 @@
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <td>
-              {{ item.username }}
+              {{ item.value.username }}
             </td>
             <td>
               <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.raw.isShared"
-                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
+                          @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
             </td>
           </template>
-          <v-alert :value="true"
+          <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">

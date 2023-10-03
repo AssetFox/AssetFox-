@@ -102,28 +102,28 @@
                                                 && header.value !== 'cost'"
                                                 readonly
                                                 class="sm-txt"
-                                                :value="props.item[header.value]"
+                                                :model-value="props.item[header.value]"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
                                             <v-text-field v-if="header.value === 'budget'"
                                                 readonly
                                                 class="sm-txt"
-                                                :value="props.item[header.value]"/>
+                                                :model-value="props.item[header.value]"/>
 
                                             <v-text-field v-if="header.value === 'keyAttr'"
                                                 readonly
                                                 class="sm-txt"
-                                                :value="props.item[header.value]"
+                                                :model-value="props.item[header.value]"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"
                                                 :error-messages="props.item.errors"/>
 
                                             <v-text-field v-if="header.value === 'year'"
-                                                :value="props.item[header.value]"
+                                                :model-value="props.item[header.value]"
                                                 :mask="'##########'"
                                                 :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"
                                                 :error-messages="props.item.yearErrors"/>
 
                                             <v-text-field v-if="header.value === 'cost'"
-                                                :value='formatAsCurrency(props.item[header.value])'
+                                                :model-value='formatAsCurrency(props.item[header.value])'
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template slot="input">

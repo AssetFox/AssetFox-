@@ -28,7 +28,7 @@
                                         <span class="ghd-control-text">{{ item.raw.text }}</span>
                                     </template>
                                     <template v-slot:item="{ item }">
-                                        <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
+                                        <v-list-item class="ghd-control-text" v-bind="props">
                                             <v-list-item-title>
                                             <v-row no-gutters align="center">
                                             <span>{{ item.raw.text }}</span>
@@ -66,7 +66,7 @@
                                             index !=
                                             selectedSubCriteriaClauseIndex,
                                     }"
-                                    :value="clause"
+                                    :model-value="clause"
                                     @click="
                                         onClickSubCriteriaClauseTextarea(
                                             clause,

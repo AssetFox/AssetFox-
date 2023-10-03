@@ -19,7 +19,7 @@
                                 "
                                 variant="outlined"
                                 clearable
-                                :value="analysisMethod.attribute"
+                                :model-value="analysisMethod.attribute"
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
@@ -38,7 +38,7 @@
                                     )
                                 "
                                 variant="outlined"
-                                :value="analysisMethod.optimizationStrategy"
+                                :model-value="analysisMethod.optimizationStrategy"
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
@@ -57,7 +57,7 @@
                                     )
                                 "
                                 variant="outlined"
-                                :value="analysisMethod.spendingStrategy"
+                                :model-value="analysisMethod.spendingStrategy"
                             >
                             </v-select>
                         </v-flex>                        
@@ -75,7 +75,7 @@
                                     onSetBenefitProperty('attribute', $event)
                                 "
                                 variant="outlined"
-                                :value="analysisMethod.benefit.attribute"
+                                :model-value="analysisMethod.benefit.attribute"
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
@@ -123,7 +123,7 @@
                                 no-resize
                                 outline
                                 rows="6"
-                                :value="analysisMethod.description"
+                                :model-value="analysisMethod.description"
                             >
                             </v-textarea>
                         </v-flex>

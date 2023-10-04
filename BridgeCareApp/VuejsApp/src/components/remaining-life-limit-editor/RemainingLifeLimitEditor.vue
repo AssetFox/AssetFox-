@@ -73,7 +73,7 @@
                         <td>
                             <v-edit-dialog
                                 :return-value.sync="props.item.attribute"
-                                large
+                                size="large"
                                 lazy
                                 @save="
                                     onEditRemainingLifeLimitProperty(
@@ -87,7 +87,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
-                                    :value="props.item.attribute"
+                                    :model-value="props.item.attribute"
                                     :rules="[
                                         rules['generalRules'].valueIsNotEmpty,
                                     ]"
@@ -110,7 +110,7 @@
                         <td>
                             <v-edit-dialog
                                 :return-value.sync="props.item.value"
-                                large
+                                size="large"
                                 lazy
                                 @save="
                                     onEditRemainingLifeLimitProperty(
@@ -124,7 +124,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
-                                    :value="props.item.value"
+                                    :model-value="props.item.value"
                                     :rules="[
                                         rules['generalRules'].valueIsNotEmpty,
                                     ]"
@@ -169,7 +169,7 @@
                     <v-textarea
                         class="ghd-control-text ghd-control-border"
                         v-model="selectedRemainingLifeLimitLibrary.description"
-                        @input="checkHasUnsavedChanges()"
+                        @update:model-value="checkHasUnsavedChanges()"
                         outline
                     >
                     </v-textarea>

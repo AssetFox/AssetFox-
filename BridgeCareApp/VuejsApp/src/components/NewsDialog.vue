@@ -40,7 +40,7 @@
                                 <v-textarea
                                     auto-grow
                                     class='announcement-content'
-                                    dense label='Announcement Text (HTML tags can be used for detailed formatting.)'
+                                    density="default" label='Announcement Text (HTML tags can be used for detailed formatting.)'
                                     rows='1' single-line
                                     style='padding-left: 1em; padding-right: 1em; padding-top: 0.2em'
                                     tabindex='2'

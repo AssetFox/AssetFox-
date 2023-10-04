@@ -13,7 +13,7 @@
                     <v-list-item
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
-                        :value="navigationTab"
+                        :model-value="navigationTab"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
                         <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">

@@ -49,7 +49,7 @@
                                             <v-card-text>
                                                 <v-textarea
                                                     class="sm-txt"
-                                                    :value="
+                                                    :model-value="
                                                         props.item
                                                             .benefitQuantifier
                                                             .equation.expression

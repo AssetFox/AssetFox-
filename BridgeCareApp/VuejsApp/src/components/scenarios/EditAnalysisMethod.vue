@@ -19,7 +19,7 @@
                                 "
                                 variant="outlined"
                                 clearable
-                                :value="analysisMethod.attribute"
+                                :model-value="analysisMethod.attribute"
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
@@ -38,7 +38,7 @@
                                     )
                                 "
                                 variant="outlined"
-                                :value="analysisMethod.optimizationStrategy"
+                                :model-value="analysisMethod.optimizationStrategy"
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
@@ -57,7 +57,7 @@
                                     )
                                 "
                                 variant="outlined"
-                                :value="analysisMethod.spendingStrategy"
+                                :model-value="analysisMethod.spendingStrategy"
                             >
                             </v-select>
                         </v-flex>                        
@@ -75,7 +75,7 @@
                                     onSetBenefitProperty('attribute', $event)
                                 "
                                 variant="outlined"
-                                :value="analysisMethod.benefit.attribute"
+                                :model-value="analysisMethod.benefit.attribute"
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
@@ -86,7 +86,7 @@
                                 id="EditAnalysisMethod-benefitLimit-textField"
                                 style="margin:0px"
                                 class="ghd-control-text ghd-control-border"
-                                @input="onSetBenefitProperty('limit', $event)"
+                                @update:model-value="onSetBenefitProperty('limit',$event)"
                                 outline
                                 type="number"
                                 min="0"
@@ -119,16 +119,11 @@
                             <v-textarea
                                 id="EditAnalysisMethod-description-textArea"
                                 class="ghd-control-text ghd-control-border"
-                                @input="
-                                    onSetAnalysisMethodProperty(
-                                        'description',
-                                        $event,
-                                    )
-                                "
+                                @update:model-value="onSetAnalysisMethodProperty('description', $event)"
                                 no-resize
                                 outline
                                 rows="6"
-                                :value="analysisMethod.description"
+                                :model-value="analysisMethod.description"
                             >
                             </v-textarea>
                         </v-flex>

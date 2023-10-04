@@ -20,10 +20,10 @@
                 <template v-slot:item ="{item}" slot="items" slot-scope="props">
                     <td>
                         <v-edit-dialog
-                            :return-value.sync="item.durationInYears"
+                            :return-value.sync="item.value.durationInYears"
                             @save="onEditSelectedLibraryListData(item,'durationInYears')"
                             full-width
-                            large
+                            size="large"
                             lazy
                             persistent>
                             <v-text-field
@@ -31,7 +31,7 @@
                                 readonly
                                 single-line
                                 class="sm-txt"
-                                :value="item.durationInYears"
+                                :model-value="item.value.durationInYears"
                                 :rules="[
                                     rules['generalRules'].valueIsNotEmpty,
                                     rules[
@@ -42,7 +42,7 @@
                                     id="CashFlowRuleEditDialog-yearEdit-vtextfield"
                                     label="Edit"
                                     single-line
-                                    v-model.number="item.durationInYears"
+                                    v-model.number="item.value.durationInYears"
                                     :rules="[
                                         rules[
                                             'generalRules'
@@ -59,20 +59,20 @@
                     </td>
                     <td>
                         <v-edit-dialog
-                            :return-value.sync="item.costCeiling"
-                            large
+                            :return-value.sync="item.value.costCeiling"
+                            size="large"
                             lazy
                             persistent
                             full-width
                             @save="onEditSelectedLibraryListData(item,'costCeiling')"
-                            @open="onOpenCostCeilingEditDialog(item.id)">
+                            @open="onOpenCostCeilingEditDialog(item.value.id)">
                             <v-text-field
                                 id="CashFlowRuleEditDialog-dollarReadOnly-vtextfield"
                                 readonly
                                 single-line
                                 class="sm-txt"
-                                :value="
-                                    formatAsCurrency(item.costCeiling)"
+                                :model-value="
+                                    formatAsCurrency(item.value.costCeiling)"
                                 :rules="[
                                     rules['generalRules']
                                         .valueIsNotEmpty,
@@ -88,8 +88,8 @@
                                     name="CashFlowRuleEditDialog-dollarEdit-vtextfield"
                                     label="Edit"
                                     single-line
-                                    :id="item.id"
-                                    v-model="item.costCeiling"
+                                    :id="item.value.id"
+                                    v-model="item.value.costCeiling"
                                     v-currency="{
                                         currency: {
                                             prefix: '$',
@@ -114,10 +114,10 @@
                     </td>
                     <td>
                         <v-edit-dialog
-                            :return-value.sync="item.yearlyPercentages"
+                            :return-value.sync="item.value.yearlyPercentages"
                             @save="onEditSelectedLibraryListData(item,'yearlyPercentages')"
                             full-width
-                            large
+                            size="large"
                             lazy
                             persistent>
                             <v-text-field
@@ -125,7 +125,7 @@
                                 readonly
                                 single-line
                                 class="sm-txt"
-                                :value="item.yearlyPercentages"
+                                :model-value="item.value.yearlyPercentages"
                                 :rules="[
                                     rules['generalRules']
                                         .valueIsNotEmpty,
@@ -137,7 +137,7 @@
                                     id="CashFlowRuleEditDialog-distributionEdit-vtextfield"
                                     label="Edit"
                                     single-line
-                                    v-model="item.yearlyPercentages"
+                                    v-model="item.value.yearlyPercentages"
                                     :rules="[
                                         rules[
                                             'generalRules'
@@ -152,7 +152,7 @@
                     </td>
                     <td>
                         <v-btn
-                            @click="onDeleteCashFlowDistributionRule(item.id)"
+                            @click="onDeleteCashFlowDistributionRule(item.value.id)"
                             class="ghd-blue"
                             icon>
                             <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>

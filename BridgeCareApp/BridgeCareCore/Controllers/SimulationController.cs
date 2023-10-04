@@ -233,8 +233,6 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-               // dto.DestinationNetworkId = Guid.Parse("502C1684-C8B6-48FD-9725-A2295AA3E0F0");
-
                 var result = await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(dto.ScenarioId, UserId);
@@ -243,7 +241,7 @@ namespace BridgeCareCore.Controllers
                         var isCompatible = _completeSimulationCloningService.CheckCompatibleNetworkAttributes(dto);
                         if (!isCompatible)
                         {
-                            //Give error message that couldn't clone was not compatible
+                            //Give error message when networks are not compatible
                             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::CloneSimulation - destination network is not compatible.");
                             return null;
                         }

@@ -307,14 +307,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<String> GetMaintableAssetsAttributeByNetworkId(Guid networkId)
         {
-            var availableAttributesNames = new List<String>();
-         
+                    
             var attributes = _unitOfWork.Context.MaintainableAsset
                .Where(_ => _.NetworkId == networkId)
                .Select(_ => _.SpatialWeighting).Distinct().ToList();
 
                            
-            return availableAttributesNames;
+            return attributes;
         }
     }
 }

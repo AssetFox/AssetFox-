@@ -22,6 +22,24 @@ export interface Scenario {
     runTime?: string;
 }
 
+export interface CloneScenario {
+    id: string;
+    name: string;
+    destinationNetworkId: string;
+    networkId: string;
+    networkName: string;
+    scenarioId: string;
+    users: ScenarioUser[];
+    owner?: string;
+    creator?: string;
+    createdDate?: Date;
+    lastModifiedDate?: Date;
+    lastRun?: Date;
+    status?: string;
+    reportStatus?: string;
+    runTime?: string;
+}
+
 export interface QueuedWork {
     id: string;
     name: string;
@@ -82,6 +100,7 @@ export interface TabItems {
 
 export interface CloneScenarioData {
     scenarioId: string;
+    destinationNetworkId: string;
     networkId: string;
     scenarioName: string;
 }
@@ -89,6 +108,18 @@ export interface CloneScenarioData {
 export const emptyScenario: Scenario = {
     id: getBlankGuid(),
     name: '',
+    networkId: getBlankGuid(),
+    networkName: '',
+    users: [],
+    createdDate: new Date(),
+    lastModifiedDate: new Date(),
+};
+
+export const emptyCloneScenario: CloneScenario = {
+    id: getBlankGuid(),
+    name: '',
+    destinationNetworkId: getBlankGuid(),
+    scenarioId: getBlankGuid(),
     networkId: getBlankGuid(),
     networkName: '',
     users: [],

@@ -83,13 +83,21 @@ namespace BridgeCareCore.Services
         }
         public bool CheckCompatibleNetworkAttributes(CloneSimulationDTO dto)
         {
-            var keyAttribute = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.NetworkId);
-            var destinationKeyAttribute = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.DestinationNetworkId);
-            bool IsCompatible = true;
-               
+            var keyAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.NetworkId);
+            var destinationKeyAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.DestinationNetworkId);
 
-              return IsCompatible;
+            if (destinationKeyAttributes.Any(c => !keyAttributes.Contains(c)) && destinationKeyAttributes.Count > 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+           
         }
+
+
 
         public bool IsCompleteSimulation(CloneSimulationDTO dto) => throw new NotImplementedException();
     }

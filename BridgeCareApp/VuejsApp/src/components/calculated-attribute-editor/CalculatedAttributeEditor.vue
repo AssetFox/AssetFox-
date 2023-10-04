@@ -34,7 +34,7 @@
                                     style="margin-top:20px !important">
                         </v-text-field>
                         <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px; margin-right: 1px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
-                        <v-btn
+                        <v-btn id="CalculatedAttribute-createNewLibrary-btn"
                             @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             outline
@@ -57,7 +57,7 @@
                         <span>Shared</span>
                     </template>
                     </v-badge>
-                    <v-btn @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                    <v-btn id="CalculatedAttribute-shareLibrary-btn" @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                 v-show='!hasScenario'>
                 Share Library
             </v-btn>
@@ -219,7 +219,7 @@
                     Cancel
                 </v-btn>
                 
-                <v-btn
+                <v-btn id="CalculatedAttribute-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
                     flat
@@ -227,7 +227,7 @@
                     :disabled="!hasSelectedLibrary">
                     Delete Library
                 </v-btn>
-                <v-btn
+                <v-btn id="CalculatedAttribute-createAsNewLibrary-btn"
                     :disabled="disableCrudButton()"
                     v-if="hasAdminAccess"
                     @click="onShowCreateCalculatedAttributeLibraryDialog(true)"
@@ -235,7 +235,7 @@
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                     Create as New Library
                 </v-btn>
-                <v-btn
+                <v-btn id="CalculatedAttribute-updateLibrary-btn"
                     :disabled="disableCrudButton() || !hasUnsavedChanges"
                     @click="onUpsertCalculatedAttributeLibrary"
                     class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'

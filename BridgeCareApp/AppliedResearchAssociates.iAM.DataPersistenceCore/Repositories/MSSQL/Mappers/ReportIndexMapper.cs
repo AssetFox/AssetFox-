@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = entity.Id,
                 SimulationId = entity.SimulationID,
+                NetworkId = entity.NetworkID,
                 CreationDate = entity.CreatedDate,
                 ExpirationDate = entity.ExpirationDate,
                 Result = entity.Result,
@@ -32,6 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = dto.Id,
                 SimulationID = dto.SimulationId,
+                NetworkID = dto.NetworkId,
                 ExpirationDate = dto.ExpirationDate,
                 Result = dto.Result,
                 ReportTypeName = dto.Type,

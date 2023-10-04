@@ -24,7 +24,7 @@
                     outline
                 ></v-select>
                 <v-text-field
-                    id="CreateScenarioDialog-scenarioName-textField"
+                    id="FilterScenarioList-scenarioName-textField"
                     label="Filter Value"
                     outline
                     v-model="FilterValue"
@@ -33,14 +33,14 @@
             <v-card-actions>
                 <v-layout justify-space-between row>
                     <v-btn
-                        id="CreateScenarioDialog-save-btn"
+                        id="FilterScenarioList-save-btn"
                         @click="onSubmit(true)"
                         class="ara-blue-bg white--text"
                     >
                         Filter
                     </v-btn>
                     <v-btn
-                        id="CreateScenarioDialog-cancel-btn"
+                        id="FilterScenarioList-cancel-btn"
                         @click="onSubmit(false)"
                         class="ara-orange-bg white--text"
                         >Cancel</v-btn

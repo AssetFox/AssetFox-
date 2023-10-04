@@ -280,6 +280,7 @@
                 </v-btn>
                 <v-btn
                     @click='onUpsertScenarioTreatments'
+                    id="TreatmentEditor-SaveScenarioTreatments-btn"
                     class='ghd-blue-bg ghd-white ghd-button-text'
                     depressed
                     v-show='hasScenario'

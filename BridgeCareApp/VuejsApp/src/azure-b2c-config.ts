@@ -4,8 +4,8 @@ export const azureB2CConfig: any = {
   clientId: '8c7f8f66-30ce-47db-ab02-13a10f98c865',
   tenantId: 'aratranstest.onmicrosoft.com/B2C_1_SU-SI-POL',
   tenantName: 'aratranstest.b2clogin.com/tfp',
-  redirectUri: import.meta.env.VUE_APP_B2C_REDIRECT_URI as string,
-  postLogoutRedirectUri: import.meta.env.VUE_APP_B2C_POST_LOGOUT_REDIRECT_URI as string,
+  redirectUri: import.meta.env.VITE_APP_B2C_REDIRECT_URI as string,
+  postLogoutRedirectUri: import.meta.env.VITE_APP_B2C_POST_LOGOUT_REDIRECT_URI as string,
   authority: 'https://aratranstest.b2clogin.com/tfp/aratranstest.onmicrosoft.com/B2C_1_SU-SI-POL',
   forgotPasswordAuthority: 'https://aratranstest.b2clogin.com/tfp/aratranstest.onmicrosoft.com/B2C_1_PR-POL'
 };

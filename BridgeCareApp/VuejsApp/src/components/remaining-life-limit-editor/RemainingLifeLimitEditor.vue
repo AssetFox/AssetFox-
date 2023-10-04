@@ -68,8 +68,8 @@
                         </th>
                     </tr>
                 </template>
-                <template v-slot:items="props">
-                    <tr :active="props.selected" @click="props.selected = !props.selected">
+                <template v-slot:item="props">
+                    <tr :active="props.item.selected" @click="props.item.selected = !props.item.selected">
                         <td>
                             <v-edit-dialog
                                 :return-value.sync="props.item.attribute"
@@ -92,7 +92,7 @@
                                         rules['generalRules'].valueIsNotEmpty,
                                     ]"
                                 />
-                                <template slot="input">
+                                <template v-slot:input>
                                     <v-select
                                         :items="numericAttributeSelectItems"
                                         append-icon=$vuetify.icons.ghd-down
@@ -129,7 +129,7 @@
                                         rules['generalRules'].valueIsNotEmpty,
                                     ]"
                                 />
-                                <template slot="input">
+                                <template v-slot:input>
                                     <v-text-field
                                         label="Edit"
                                         single-line

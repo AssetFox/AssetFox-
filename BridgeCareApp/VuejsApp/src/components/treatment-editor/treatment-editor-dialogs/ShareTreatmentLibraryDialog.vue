@@ -14,7 +14,7 @@
                       :items="treatmentLibraryUserGridRows"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
-          <template slot="items" slot-scope="props" v-slot:items="props">
+          <template slot="items" slot-scope="props" v-slot:item="props">
             <td>
               {{ props.item.username }}
             </td>

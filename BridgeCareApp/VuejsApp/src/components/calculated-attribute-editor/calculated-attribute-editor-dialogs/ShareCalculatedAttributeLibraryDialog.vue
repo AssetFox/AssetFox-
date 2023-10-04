@@ -23,7 +23,7 @@
                           @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!dialogData.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox :disabled="!dialogData.showDialog" label="Can Modify" v-model="item.raw.canModify"/>
             </td>
           </template>
           <v-alert :model-value="true"

@@ -111,7 +111,7 @@
                                         :rules="[rules['generalRules'].valueIsNotEmpty,
                                             rules['generalRules'].valueIsWithinRange(item.value[header.value],[0, 100])]"/>
 
-                                    <template slot="input">
+                                    <template v-slot:input>
                                         <v-text-field v-if="header.value === 'name'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalName-vtextfield"
                                             label="Edit"
@@ -158,7 +158,7 @@
                                         location="bottom"
                                         min-height="500px"
                                         min-width="500px">
-                                        <template slot="activator">
+                                        <template v-slot:activator>
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"

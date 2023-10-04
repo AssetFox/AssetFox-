@@ -7,7 +7,7 @@
                               class='elevation-1 fixed-header v-table__overflow'
                               sort-icon=$vuetify.icons.ghd-table-sort
                               hide-actions>
-                    <template slot='items' slot-scope='props' v-slot:items="props">
+                    <template slot='items' slot-scope='props' v-slot:item="props">
                         <td v-for='header in consequencesGridHeaders'>
                             <v-edit-dialog
                                 v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
@@ -20,7 +20,7 @@
                                 <v-text-field v-if="header.value === 'changeValue'" readonly single-line class='ghd-control-text-sm'
                                               :model-value='props.item.changeValue'
                                               :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]" />
-                                <template slot='input'>
+                                <template v-slot:input>
                                     <v-select v-if="header.value === 'attribute'" :items='attributeSelectItems'
                                              append-icon=$vuetify.icons.ghd-down
                                               label='Edit'
@@ -38,7 +38,7 @@
                                 min-width="500px"
                                 v-show="header.value === 'equation'"
                             >
-                                <template slot="activator">
+                                <template v-slot:activator>
                                     <v-btn class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
@@ -70,7 +70,7 @@
                                 min-width="500px"
                                 v-show="header.value === 'criterionLibrary'"
                             >
-                                <template slot="activator">
+                                <template v-slot:activator>
                                     <v-btn class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>

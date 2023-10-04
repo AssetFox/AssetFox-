@@ -20,7 +20,7 @@
                                   item-key='id'
                                   v-model='selectedGridRows'
                                   class="ghd-table">
-                        <template slot='items' slot-scope='props'>
+                        <template slot='items' slot-scope='props' v-slot:item="props">
                             <td>
                                 <v-layout row>
                                 <v-text-field v-model="props.item.budgetOrder" @change="reorderList(props.item)" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
@@ -41,7 +41,7 @@
                                     <v-text-field id="EditBudgetsDialog-budget-textField"
                                                   readonly single-line class='sm-txt' :model-value='props.item.name'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
-                                    <template slot='input'>
+                                    <template v-slot:input>
                                         <v-text-field label='Edit' single-line v-model='props.item.name'
                                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
                                     </template>
@@ -49,8 +49,8 @@
                             </td>
                             <td>
                                 <v-text-field readonly single-line class='sm-txt'
-                                              :model-value='props.criterionLibrary.mergedCriteriaExpression'>
-                                    <template slot='append-inner'>
+                                              :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
+                                    <template v-slot:append-inner>
                                         <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" icon style="margin-top:-6px;">
                                             <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-btn>                                        

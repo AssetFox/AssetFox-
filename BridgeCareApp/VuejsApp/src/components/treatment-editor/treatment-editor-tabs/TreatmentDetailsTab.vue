@@ -78,7 +78,7 @@
                         min-height="500px"
                         min-width="1000px"
                     >   
-                        <template slot="activator">                                                                                       
+                        <template v-slot:activator>                                                                                       
                             <v-layout column class="ghd-left-padding">  
                                 <v-layout xs12 align-center style="height:50px;">                                    
                                     <v-flex xs11>

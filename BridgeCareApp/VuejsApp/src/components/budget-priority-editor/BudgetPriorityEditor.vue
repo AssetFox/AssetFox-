@@ -76,7 +76,7 @@
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <v-text-field v-else readonly single-line class='sm-txt'
                                                   :model-value='item.value[header.value]' />
-                                    <template slot='input'>
+                                    <template v-slot:input>
                                         <v-text-field v-if="header.value === 'priorityLevel'" label='Edit' single-line
                                                       v-model.number='item.value[header.value]'
                                                       :mask="'##########'"
@@ -89,7 +89,7 @@
                             <div v-else-if="header.value === 'criteria'">
                                 <v-layout align-center row style='flex-wrap:nowrap'>
                                     <v-menu bottom min-height='500px' min-width='500px'>
-                                        <template slot='activator'>
+                                        <template v-slot:activator>
                                             <div v-if='stateScenarioSimpleBudgetDetails.length > 5'>
                                                 <v-btn class='ara-blue ghd-button-text' icon>
                                                     <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
@@ -120,7 +120,7 @@
                                     size="large" lazy>
                                     <v-text-field readonly single-line class='sm-txt' :model-value='item.value[header.value]'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.value[header.value], [0, 100])]" />
-                                    <template slot='input'>
+                                    <template v-slot:input>
                                         <v-text-field :mask="'###'" label='Edit' single-line
                                                       :model-value.number="item.value[header.value]"
                                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.value[header.value], [0, 100])]" />

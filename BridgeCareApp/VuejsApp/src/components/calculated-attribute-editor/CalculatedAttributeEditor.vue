@@ -110,7 +110,7 @@
                             class="sm-txt"
                             v-model="defaultEquation.equation.expression"
                             :disabled="!hasAdminAccess">
-                            <template slot="append">
+                            <template v-slot:append>
                                 <v-btn
                                     id="CalculatedAttribute-defaultEquationEditor-btn"
                                     @click="onShowEquationEditorDialogForDefaultEquation()"
@@ -137,14 +137,14 @@
                 class="v-table__overflow ghd-table"
                 sort-icon=$vuetify.icons.ghd-table-sort
                 item-key="calculatedAttributeLibraryEquationId">
-                <template slot="items" slot-scope="props" v-slot:items="props">
+                <template slot="items" slot-scope="props" v-slot:item="props">
                     <td class="text-xs-center">
                         <v-text-field
                             readonly
                             class="sm-txt"
                             :model-value="props.item.equation"
                             :disabled="!hasAdminAccess">
-                            <template slot="append">
+                            <template v-slot:append>
                                 <v-btn
                                     @click="onShowEquationEditorDialog(props.item.id)"
                                     class="ghd-blue"
@@ -161,7 +161,7 @@
                             class="sm-txt"
                             :model-value="props.item.criteriaExpression"
                             :disabled="!hasAdminAccess">
-                            <template slot="append">
+                            <template v-slot:append>
                                 <v-btn
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
                                     class="ghd-blue"

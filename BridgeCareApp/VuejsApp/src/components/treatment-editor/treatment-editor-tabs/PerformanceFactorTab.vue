@@ -6,7 +6,7 @@
                               class='elevation-1 fixed-header v-table__overflow'
                               sort-icon=$vuetify.icons.ghd-table-sort
                               hide-actions>
-                    <template slot='items' slot-scope='props' v-slot:items="props">
+                    <template slot='items' slot-scope='props' v-slot:item="props">
                         <td v-for='header in factorGridHeaders'>
                             <v-edit-dialog
                                 v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
@@ -19,7 +19,7 @@
                                 <v-text-field v-if="header.value === 'performanceFactor'" readonly single-line class='ghd-control-text-sm'
                                               :model-value='parseFloat(props.item.performanceFactor).toFixed(2)'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-                                <template slot='input'>
+                                <template v-slot:input>
                                     <v-select v-if="header.value === 'attribute'" :items='attributeSelectItems'
                                              append-icon=$vuetify.icons.ghd-down
                                               label='Edit'

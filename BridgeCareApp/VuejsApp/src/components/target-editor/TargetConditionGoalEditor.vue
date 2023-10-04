@@ -114,7 +114,7 @@
                                             rules['generalRules']
                                                 .valueIsNotEmpty]"/>
 
-                                    <template slot="input">
+                                    <template v-slot:input>
                                         <v-select
                                             id="TargetConditionGoalEditor-editTargetConditionGoalAttribute-vselect"
                                             v-if="header.value === 'attribute'"
@@ -162,7 +162,7 @@
                                         location="bottom"
                                         min-height="500px"
                                         min-width="500px">
-                                        <template slot="activator">
+                                        <template v-slot:activator>
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"

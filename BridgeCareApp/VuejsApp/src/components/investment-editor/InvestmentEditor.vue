@@ -184,7 +184,7 @@
                                     <v-text-field readonly single-line class='sm-txt'
                                                   :model-value='formatAsCurrency(item.value.values[header.value])'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    <template slot='input'>
+                                    <template v-slot:input>
                                         <v-text-field label='Edit' single-line
                                                       v-model.number='item.value.values[header.value]'
                                                       v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"

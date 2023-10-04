@@ -5,7 +5,7 @@
         <v-layout justify-center>
           <h3>Cash Flow Rule Library Sharing</h3>
         </v-layout>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
       </v-card-title>
@@ -14,19 +14,19 @@
                       :items="shareCashFlowRuleLibraryUserGridRows"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
-          <template v-slot:items="{item}" slot="items" slot-scope="props">
+          <template v-slot:item="{item}" slot="items" slot-scope="props">
             <td>
-              {{ item.username }}
+              {{ item.value.username }}
             </td>
             <td>
               <v-checkbox label="Is Shared" v-model="item.raw.isShared"
-                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
+                          @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!item.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
             </td>
           </template>
-          <v-alert :value="true"
+          <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
@@ -36,7 +36,7 @@
       </v-card-text>
       <v-card-actions>
         <v-layout row justify-center>
-          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel</v-btn>
+          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
           <v-btn @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>

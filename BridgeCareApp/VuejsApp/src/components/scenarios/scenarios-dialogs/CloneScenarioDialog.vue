@@ -1,6 +1,7 @@
 <template>
     <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
-        <v-card elevation="5" outlined class="modal-pop-up-padding">
+        <v-card elevation="5" variant = "outlined"
+         class="modal-pop-up-padding">
             <v-card-title>
                 <h3 class="dialog-header">
                     Clone scenario
@@ -15,13 +16,13 @@
               <v-select
                     :items="stateCompatibleNetworks"
                     label="Select a compatible network"
-                    item-text="name"
+                    item-title="name"
                     v-model="networkMetaData"
                     return-object
                     v-if="hasCompatibleNetworks"
                     v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
-                    dense
-                    outline
+                    density="default"
+                    variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CloneScenarioDialog-scenarioName-textField"
@@ -37,14 +38,14 @@
                         id="CloneScenarioDialog-save-btn"
                         :disabled="dialogData.scenario.name === '' || !isNetworkSelected"
                         @click="onSubmit(true)"
-                        class="ara-blue-bg white--text"
+                        class="ara-blue-bg text-white"
                     >
                         Save
                     </v-btn>
                     <v-btn
                         id="CloneScenarioDialog-cancel-btn"
                         @click="onSubmit(false)"
-                        class="ara-orange-bg white--text"
+                        class="ara-orange-bg text-white"
                         >Cancel</v-btn
                     >
                 </v-layout>

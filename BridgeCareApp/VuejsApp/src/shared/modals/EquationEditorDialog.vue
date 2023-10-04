@@ -6,7 +6,7 @@
           <v-flex xs12>
             <v-layout justify-space-between >
               <div class="ghd-control-dialog-header">Equation Editor</div>
-              <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+              <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                 X
             </v-btn>
             </v-layout>
@@ -27,7 +27,7 @@
                 <v-tab :key="0" @click="isPiecewise = false">Equation</v-tab>
                 <v-tab :key="1" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Piecewise</v-tab>
                 <v-tab :key="2" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Time In Rating</v-tab>
-                <v-tab-item>
+                <v-window-item>
                   <div class="equation-container-div">
                     <v-layout column>
                       <div>
@@ -35,7 +35,7 @@
                           <div>
                             <v-list>
                               <template>
-                                <v-subheader class="equation-list-subheader">Attributes: Click to add</v-subheader>
+                                <v-list-subheader class="equation-list-subheader">Attributes: Click to add</v-list-subheader>
                                 <div class="attributes-list-container">
                                   <template v-for="(attribute, index) in attributesList" :key="attribute">
                                     <v-list-tile 
@@ -79,28 +79,28 @@
                         <v-layout justify-center>
                           <div class="math-buttons-container">
                             <v-layout justify-space-between row>
-                              <v-btn @click="onAddValueToExpression('+')" class="math-button add circular-button" fab
-                                     small>
+                              <v-btn @click="onAddValueToExpression('+')" class="math-button add circular-button" icon
+                                     size="small">
                                 <span>+</span>
                               </v-btn>
-                              <v-btn @click="onAddValueToExpression('-')" class="math-button subtract circular-button" fab
-                                     small>
+                              <v-btn @click="onAddValueToExpression('-')" class="math-button subtract circular-button" icon
+                              size="small">
                                 <span>-</span>
                               </v-btn>
-                              <v-btn @click="onAddValueToExpression('*')" class="math-button multiply circular-button" fab
-                                     small>
+                              <v-btn @click="onAddValueToExpression('*')" class="math-button multiply circular-button" icon
+                              size="small">
                                 <span>*</span>
                               </v-btn>
-                              <v-btn @click="onAddValueToExpression('/')" class="math-button divide circular-button" fab
-                                     small>
+                              <v-btn @click="onAddValueToExpression('/')" class="math-button divide circular-button" icon
+                              size="small">
                                 <span>/</span>
                               </v-btn>
-                              <v-btn @click="onAddValueToExpression('(')" class="math-button parentheses circular-button" fab
-                                     small>
+                              <v-btn @click="onAddValueToExpression('(')" class="math-button parentheses circular-button" icon
+                              size="small">
                                 <span>(</span>
                               </v-btn>
-                              <v-btn @click="onAddValueToExpression(')')" class="math-button parentheses circular-button" fab
-                                     small>
+                              <v-btn @click="onAddValueToExpression(')')" class="math-button parentheses circular-button" icon
+                              size="small">
                                 <span>)</span>
                               </v-btn>
                             </v-layout>
@@ -119,8 +119,8 @@
                       </div>
                     </v-layout>
                   </div>
-                </v-tab-item>
-                <v-tab-item>
+                </v-window-item>
+                <v-window-item>
                   <div class="equation-container-div">
                     <v-layout>
                       <v-flex xs5 >
@@ -155,11 +155,11 @@
                           </div>
                           <v-layout justify-space-between class="add-addmulti-container">
                             <v-btn @click="onAddTimeAttributeDataPoint"
-                                    flat  class='ghd-blue ghd-button ghd-button-text'>
+                            variant = "flat"  class='ghd-blue ghd-button ghd-button-text'>
                               Add
                             </v-btn>
                             <v-btn @click="showAddMultipleDataPointsPopup = true"
-                                    flat class="ghd-blue ghd-button ghd-button-text">
+                            variant = "flat" class="ghd-blue ghd-button ghd-button-text">
                               Add Multi
                             </v-btn>
                           </v-layout>
@@ -190,8 +190,8 @@
                       </v-flex>
                     </v-layout>
                   </div>
-                </v-tab-item>
-                <v-tab-item>
+                </v-window-item>
+                <v-window-item>
                   <div class="equation-container-div">
                     <v-layout>
                       <v-flex xs5>
@@ -222,11 +222,11 @@
                           </div>
                           <v-layout justify-space-between class="add-addmulti-container">
                             <v-btn @click="onAddTimeAttributeDataPoint"
-                                    flat class='ghd-blue ghd-button ghd-button-text' >
+                            variant = "flat" class='ghd-blue ghd-button ghd-button-text' >
                               Add
                             </v-btn>
                             <v-btn @click="showAddMultipleDataPointsPopup = true"
-                                    flat class='ghd-blue ghd-button ghd-button-text'>
+                            variant = "flat" class='ghd-blue ghd-button ghd-button-text'>
                               Add Multi
                             </v-btn>
                           </v-layout>
@@ -257,7 +257,7 @@
                       </v-flex>
                     </v-layout>
                   </div>
-                </v-tab-item>
+                </v-window-item>
               </v-tabs>
             </v-flex>
           </v-layout>
@@ -267,12 +267,12 @@
             <v-flex xs12>
               <div>
                  <v-layout justify-center row>
-                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" flat class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
+                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" variant = "flat" class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
                 </v-layout>
                 <v-layout justify-center row>
-                  <v-btn @click="onSubmit(false)" outline class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>
+                  <v-btn @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>
                   <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
-                         class="white--text ghd-blue ghd-button ghd-button-text">Save
+                         class="text-white ghd-blue ghd-button ghd-button-text">Save
                   </v-btn>                  
                 </v-layout>
               </div>
@@ -312,10 +312,10 @@
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
           <v-layout justify-center row>
-            <v-btn @click="onSubmitNewDataPoint(false)" flat small class="ghd-blue ghd-button ghd-button-text">Cancel</v-btn>
+            <v-btn @click="onSubmitNewDataPoint(false)" variant = "flat" size="small" class="ghd-blue ghd-button ghd-button-text">Cancel</v-btn>
             <v-btn :disabled="disableNewDataPointSubmit()" @click="onSubmitNewDataPoint(true)"
-                   outline
-                   small class="ghd-blue ghd-button ghd-button-text">
+            variant = "outlined"
+            size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>            
           </v-layout>
@@ -341,11 +341,11 @@
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
           <v-layout justify-center row>
-            <v-btn @click="onSubmitNewDataPointMulti(false)" flat small class="ghd-blue ghd-button ghd-button-text">Cancel
+            <v-btn @click="onSubmitNewDataPointMulti(false)" variant = "flat" size="small" class="ghd-blue ghd-button ghd-button-text">Cancel
             </v-btn>
             <v-btn :disabled="disableMultipleDataPointsSubmit()" @click="onSubmitNewDataPointMulti(true)"
-                   outline
-                   small class="ghd-blue ghd-button ghd-button-text">
+            variant = "outlined"
+            size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>           
           </v-layout>
@@ -383,10 +383,10 @@
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
           <v-layout justify-center row>
-            <v-btn @click="onSubmitEditedDataPointValue(false)" flat small class="ghd-blue ghd-button-text">Cancel</v-btn>
+            <v-btn @click="onSubmitEditedDataPointValue(false)" variant = "flat" size="small" class="ghd-blue ghd-button-text">Cancel</v-btn>
             <v-btn :disabled="disableEditDataPointSubmit()" @click="onSubmitEditedDataPointValue(true)"
-                   outline
-                   small class="ghd-blue ghd-button ghd-button-text">
+            variant = "outlined"
+            size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>            
           </v-layout>

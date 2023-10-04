@@ -6,7 +6,7 @@
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
                         <v-select :items='selectPrimaryNetworkItems'
-                            outline  
+                            variant="outlined"
                             v-model='selectPrimaryNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
@@ -16,7 +16,7 @@
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Network</v-subheader>
                         <v-select :items="selectRawDataNetworkItems"
-                            outline
+                            variant="outlined"
                             v-model="selectRawdataNetworkItemValue"
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>
@@ -32,7 +32,7 @@
                         <div class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
                     </v-flex>                        
                     <v-btn style="margin-left: 20px !important" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onEditKeyFieldsClick">
                         Edit
                     </v-btn>
@@ -47,7 +47,7 @@
                         <div class="ghd-md-gray ghd-control-label elipsisList">{{rawDataKeyFieldsDelimited}}</div>  
                     </v-flex>                        
                     <v-btn style="margin-left: 20px !important" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onEditRawDataKeyFieldsClick">
                         Edit
                     </v-btn>
@@ -62,7 +62,7 @@
                          <div class="ghd-md-gray ghd-control-label elipsisList">{{inventoryReportsDelimited}}</div> 
                     </v-flex>                 
                     <v-btn style="margin-left: 20px !important" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onEditInventoryReportsClick">
                         Edit
                     </v-btn>
@@ -77,7 +77,7 @@
                         <div class="ghd-md-gray ghd-control-label elipsisList">{{simulationReportsDelimited}}</div> 
                     </v-flex>                     
                     <v-btn style="margin-left: 20px !important" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onEditSimulationReportsClick">
                         Edit
                     </v-btn>
@@ -101,7 +101,7 @@
             <v-layout justify-center>
                 <v-flex xs7>
                     <v-btn style="margin-top: 5px !important;" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onSaveClick" :disabled='disableCrudButtons() || !hasUnsavedChanges'>
                         Save
                     </v-btn>

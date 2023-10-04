@@ -5,7 +5,7 @@
         <v-card-title class="ghd-dialog-box-padding-top">
          <v-layout justify-space-between align-center>
             <div class="ghd-control-dialog-header">Add New Deficient Condition Goal</div>
-            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+            <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
           </v-layout>
@@ -24,7 +24,7 @@
               <v-select id="CreateDeficientConditionGoalDialog-attribute-vselect"
                         :items="numericAttributeNames"
                         append-icon=$vuetify.icons.ghd-down
-                        outline
+                        variant="outlined"
                         v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-select ghd-text-field ghd-text-field-border">
               </v-select>
@@ -51,11 +51,11 @@
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
           <v-layout justify-center row>
-            <v-btn id="CreateDeficientConditionGoalDialog-cancel-vbtn" @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
+            <v-btn id="CreateDeficientConditionGoalDialog-cancel-vbtn" @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
               Cancel
             </v-btn>
             <v-btn id="CreateDeficientConditionGoalDialog-save-vbtn" :disabled="disableSubmitBtn()" @click="onSubmit(true)" 
-              outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
               Save
             </v-btn>           
           </v-layout>

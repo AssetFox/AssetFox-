@@ -20,7 +20,7 @@
               </v-flex>
               <v-flex style='padding: 0' xs4>
                 <v-layout align-center>
-                  <v-btn @click='onEditCriteria(user)' class='ara-blue-bg white--text' 
+                  <v-btn @click='onEditCriteria(user)' class='ara-blue-bg text-white' 
                           title='Give the user limited access to the bridge inventory'>
                     <v-icon size='1.5em' style='padding-right: 0.5em'>fas fa-edit</v-icon>
                     Assign Criteria Filter
@@ -75,11 +75,11 @@
                   <v-menu bottom 
                       min-height='500px' min-width='500px' v-if='props.item.hasCriteria' style='width: 100%'>
                     <template slot='activator'>
-                      <v-text-field class='sm-txt' :value='props.item.criteria' readonly style='width: 100%' type='text' />
+                      <v-text-field class='sm-txt' :model-value='props.item.criteria' readonly style='width: 100%' type='text' />
                     </template>
                     <v-card>
                       <v-card-text>
-                        <v-textarea :value='props.item.criteria' full-width no-resize outline 
+                        <v-textarea :model-value='props.item.criteria' full-width no-resize outline 
                         readonly 
                         rows='5'>
                       </v-textarea>
@@ -119,8 +119,8 @@
               </td>
               <td>
                 <v-menu bottom min-height='200px' min-width='200px'>
-                  <template v-slot:activator="{ on }">
-                    <v-text-field v-model='props.item.name' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' v-on='on' class='text-center' />
+                  <template v-slot:activator="{ props }">
+                    <v-text-field v-model='props.item.name' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' class='text-center' />
                   </template>
                   <v-card>
                     <v-card-text>

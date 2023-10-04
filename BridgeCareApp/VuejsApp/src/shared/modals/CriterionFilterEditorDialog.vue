@@ -16,11 +16,11 @@
       <v-card-actions>
         <v-layout justify-space-between row>
             <v-btn
-                 class="ara-blue-bg white--text"
+                 class="ara-blue-bg text-white"
                  @click="onBeforeSubmit(true)">
             Save
           </v-btn>
-          <v-btn class="ara-orange-bg white--text"
+          <v-btn class="ara-orange-bg text-white"
                  @click="onSubmit(false)">
             Cancel
           </v-btn>

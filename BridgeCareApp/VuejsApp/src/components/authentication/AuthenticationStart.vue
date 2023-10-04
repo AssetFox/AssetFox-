@@ -13,7 +13,7 @@
                         </v-card-text>
                         <v-btn id="AuthenticationStart-goToLoginPage-btn"
                                v-if="securityType === esecSecurityType" 
-                               @click="onRedirect" class="v-btn theme--light ara-blue-bg white--text">
+                               @click="onRedirect" class="v-btn theme--light ara-blue-bg text-white">
                             Go to login page
                         </v-btn>
                         <v-card-text v-if="securityType === b2cSecurityType">
@@ -82,8 +82,8 @@ import { useRouter } from 'vue-router';
 
         // The 'state' query parameter that is sent to ESEC will be sent back to
         // the /Authentication page of the iam-deploy app.
-        if (process.env.VUE_APP_IS_PRODUCTION !== 'true') {
-            href += '&state=localhost' + process.env.PORT;
+        if (import.meta.env.VUE_APP_IS_PRODUCTION !== 'true') {
+            href += '&state=localhost' + import.meta.env.PORT;
         }
 
         window.location.href = href;

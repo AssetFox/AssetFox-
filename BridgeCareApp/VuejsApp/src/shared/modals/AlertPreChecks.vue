@@ -5,7 +5,7 @@
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-layout justify-space-between align-center>
                         <div class="ghd-control-dialog-header">Interactive pre-checks</div>
-                        <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+                        <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                             X
                         </v-btn>
                     </v-layout>
@@ -29,7 +29,7 @@
                         <v-btn 
                         id="Alert-Cancel-vbtn"
                         @click="onSubmit(false)" 
-                        class="ghd-blue ghd-button" outline>
+                        class="ghd-blue ghd-button" variant = "outlined">
                             Cancel
                         </v-btn>
                         <v-btn 
@@ -40,7 +40,7 @@
                         </v-btn>
                     </v-layout>
                     <v-layout justify-center v-if="!dialogDataPreChecks.choice">
-                        <v-btn @click="onSubmit(true)" class="ara-blue-bg white--text">
+                        <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
                             OK
                         </v-btn>
                     </v-layout>

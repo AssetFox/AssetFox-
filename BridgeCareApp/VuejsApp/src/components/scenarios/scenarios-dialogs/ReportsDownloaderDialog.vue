@@ -7,12 +7,12 @@
         <v-layout column>
           <v-flex>
             <v-layout justify-center>
-              <h3 class="grey--text">Available Reports</h3>
+              <h3 class="text-grey">Available Reports</h3>
             </v-layout>
           </v-flex>
           <v-progress-linear :indeterminate="true" v-if="isDownloading"></v-progress-linear>
           <v-flex>
-            <span class="grey--text" v-if="isDownloading">Downloading... You can close this window, it will not stop the report generation</span>
+            <span class="text-grey" v-if="isDownloading">Downloading... You can close this window, it will not stop the report generation</span>
           </v-flex>
         </v-layout>
       </v-card-title>
@@ -42,7 +42,7 @@
       <v-card-actions>
           <v-chip
                  @click="onDownloadReport()"
-                 class="green darken-2 white--text">
+                 class="green darken-2 text-white">
             Download report
           </v-chip>
       </v-card-actions>

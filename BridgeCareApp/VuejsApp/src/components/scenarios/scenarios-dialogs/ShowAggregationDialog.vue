@@ -6,7 +6,7 @@
         max-width="60%"
         transition="dialog-bottom-transition"
     >
-        <v-card elevation="5" outlined >
+        <v-card elevation="5" variant = "outlined" >
             <v-card-title>
                 <h3 class="dialog-header">
                     Aggregate Data
@@ -49,7 +49,7 @@
                                             <v-card-text>
                                                 <v-textarea
                                                     class="sm-txt"
-                                                    :value="
+                                                    :model-value="
                                                         props.item
                                                             .benefitQuantifier
                                                             .equation.expression
@@ -105,7 +105,7 @@
                                                         props.item.id,
                                                     )
                                                 "
-                                                class="green--text darken-1"
+                                                class="text-green darken-1"
                                                 :disabled="
                                                     props.item.benefitQuantifier
                                                         .equation.expression ===

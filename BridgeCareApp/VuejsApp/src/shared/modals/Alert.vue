@@ -16,7 +16,7 @@
                     <v-btn 
                     id="Alert-Cancel-vbtn"
                     @click="onSubmit(false)" 
-                    class="ghd-blue ghd-button" outline>
+                    class="ghd-blue ghd-button" variant = "outlined">
                         Cancel
                     </v-btn>
                     <v-btn 
@@ -27,7 +27,7 @@
                     </v-btn>
                 </v-layout>
                 <v-layout justify-center v-if="!dialogData.choice">
-                    <v-btn @click="onSubmit(true)" class="ara-blue-bg white--text">
+                    <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
                         OK
                     </v-btn>
                 </v-layout>

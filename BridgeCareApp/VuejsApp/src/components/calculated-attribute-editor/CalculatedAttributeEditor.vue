@@ -10,7 +10,7 @@
                                   id="CalculatedAttribute-CalculatedAttribute-select"
                                   :items="librarySelectItems"
                                   append-icon=$vuetify.icons.ghd-down
-                                  outline
+                                  variant="outlined"
                                   v-model="librarySelectItemValue"
                                   class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>
@@ -33,11 +33,11 @@
                                     class="ghd-text-field-border ghd-text-field search-icon-general"
                                     style="margin-top:20px !important">
                         </v-text-field>
-                        <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px; margin-right: 1px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
+                        <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px; margin-right: 1px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
                         <v-btn
                             @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                            outline
+                            variant = "outlined"
                             v-show="!hasScenario"
                             style="top: 2px !important; position: relative">
                             Create New Library
@@ -57,7 +57,7 @@
                         <span>Shared</span>
                     </template>
                     </v-badge>
-                    <v-btn @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                    <v-btn @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                 v-show='!hasScenario'>
                 Share Library
             </v-btn>
@@ -73,7 +73,7 @@
                         id="CalculatedAttribute-Attribute-select"   
                         :items="attributeSelectItems"
                         append-icon=$vuetify.icons.ghd-down
-                        outline
+                        variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         v-model="attributeSelectItemValue">
                     </v-select>
@@ -88,7 +88,7 @@
                         id="CalculatedAttribute-Timing-select"
                         :items="attributeTimingSelectItems"
                         append-icon=$vuetify.icons.ghd-down
-                        outline
+                        variant="outlined"
                         v-model="attributeTimingSelectItemValue"
                         :disabled="!hasAdminAccess"
                         class="ghd-select ghd-text-field ghd-text-field-border"
@@ -110,7 +110,7 @@
                             class="sm-txt"
                             v-model="defaultEquation.equation.expression"
                             :disabled="!hasAdminAccess">
-                            <template slot="append-outer">
+                            <template slot="append">
                                 <v-btn
                                     id="CalculatedAttribute-defaultEquationEditor-btn"
                                     @click="onShowEquationEditorDialogForDefaultEquation()"
@@ -142,9 +142,9 @@
                         <v-text-field
                             readonly
                             class="sm-txt"
-                            :value="props.item.equation"
+                            :model-value="props.item.equation"
                             :disabled="!hasAdminAccess">
-                            <template slot="append-outer">
+                            <template slot="append">
                                 <v-btn
                                     @click="onShowEquationEditorDialog(props.item.id)"
                                     class="ghd-blue"
@@ -159,9 +159,9 @@
                         <v-text-field 
                             readonly
                             class="sm-txt"
-                            :value="props.item.criteriaExpression"
+                            :model-value="props.item.criteriaExpression"
                             :disabled="!hasAdminAccess">
-                            <template slot="append-outer">
+                            <template slot="append">
                                 <v-btn
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
                                     class="ghd-blue"
@@ -187,7 +187,7 @@
             <v-btn
                 @click="onAddCriterionEquationSet()"
                 class='ghd-blue ghd-button'
-                outline
+                variant = "outlined"
                 v-if="hasAdminAccess"
                 :disabled="
                     attributeSelectItemValue == null ||
@@ -204,7 +204,7 @@
                 class="ghd-text-field-border"
                 rows="4"
                 v-model="selectedCalculatedAttributeLibrary.description"
-                @input='checkHasUnsavedChanges()'/>
+                @update:model-value="checkHasUnsavedChanges()"/>
         </v-flex>
         <!-- buttons -->
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
@@ -214,7 +214,7 @@
                     v-if="hasAdminAccess && hasScenario"
                     @click="onDiscardChanges"
                     class='ghd-blue ghd-button-text ghd-button'
-                    flat
+                    variant = "flat"
                     v-show="hasSelectedLibrary || hasScenario">
                     Cancel
                 </v-btn>
@@ -222,7 +222,7 @@
                 <v-btn
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
-                    flat
+                    variant = "flat"
                     v-show="!hasScenario"
                     :disabled="!hasSelectedLibrary">
                     Delete Library
@@ -231,20 +231,20 @@
                     :disabled="disableCrudButton()"
                     v-if="hasAdminAccess"
                     @click="onShowCreateCalculatedAttributeLibraryDialog(true)"
-                    outline
+                    variant = "outlined"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                     Create as New Library
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButton() || !hasUnsavedChanges"
                     @click="onUpsertCalculatedAttributeLibrary"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario">
                     Update Library
                 </v-btn>
                 <v-btn
                     @click="onUpsertScenarioCalculatedAttribute"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-button'
                     v-show="hasScenario && hasAdminAccess"
                     :disabled="disableCrudButton() || !hasUnsavedChanges">
                     Save

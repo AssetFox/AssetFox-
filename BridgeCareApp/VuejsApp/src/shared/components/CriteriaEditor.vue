@@ -25,17 +25,15 @@
                                     v-model="selectedConjunction"
                                 >
                                     <template v-slot:selection="{ item }">
-                                        <span class="ghd-control-text">{{ item.text }}</span>
+                                        <span class="ghd-control-text">{{ item.raw.text }}</span>
                                     </template>
                                     <template v-slot:item="{ item }">
-                                        <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
-                                        <v-list-item-content>
+                                        <v-list-item class="ghd-control-text" v-bind="props">
                                             <v-list-item-title>
                                             <v-row no-gutters align="center">
-                                            <span>{{ item.text }}</span>
+                                            <span>{{ item.raw.text }}</span>
                                             </v-row>
                                             </v-list-item-title>
-                                        </v-list-item-content>
                                         </v-list-item>
                                     </template>                                    
                                 </v-select>
@@ -45,7 +43,7 @@
                                     id="CriteriaEditor-addSubCriteria-btn"
                                     @click="onAddSubCriteria"
                                     class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"    
-                                    depressed                                
+                                    variant = "flat"                                
                                     >Add Subcriteria
                                 </v-btn>
                             </v-layout>
@@ -68,7 +66,7 @@
                                             index !=
                                             selectedSubCriteriaClauseIndex,
                                     }"
-                                    :value="clause"
+                                    :model-value="clause"
                                     @click="
                                         onClickSubCriteriaClauseTextarea(
                                             clause,
@@ -107,7 +105,7 @@
                                         :disabled="onDisableCheckOutputButton()"
                                         @click="onCheckCriteria"
                                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                        depressed
+                                        variant = "flat"
                                     >
                                         Check Output
                                     </v-btn>
@@ -167,7 +165,7 @@
                                 <v-tab @click="onParseSubCriteriaJson" ripple id="CriteriaEditor-rawView-tab">
                                     Raw Criteria
                                 </v-tab>
-                                <v-tab-item>
+                                <v-window-item>
                                     <vue-query-builder 
                                         id="CriteriaEditor-criteria-vuequerybuilder"
                                         :labels="queryBuilderLabels"
@@ -178,8 +176,8 @@
                                         v-model="selectedSubCriteriaClause"
                                     >
                                     </vue-query-builder>
-                                </v-tab-item>
-                                <v-tab-item>
+                                </v-window-item>
+                                <v-window-item>
                                     <v-textarea
                                         id="CriteriaEditor-rawText-vtextarea"
                                         no-resize
@@ -188,7 +186,7 @@
                                         v-model="selectedRawSubCriteriaClause"
                                         class="ghd-control-text"
                                     ></v-textarea>
-                                </v-tab-item>
+                                </v-window-item>
                             </v-tabs>
                         </v-card-text>
                         <v-card-actions
@@ -224,7 +222,7 @@
                                         "
                                         @click="onCheckSubCriteria"
                                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                        depressed
+                                        variant = "flat"
                                     >
                                         Update Subcriteria
                                     </v-btn>
@@ -245,14 +243,14 @@
                         id="CriteriaEditor-save-btn"
                         :disabled="cannotSubmit"
                         @click="onSubmitCriteriaEditorResult(true)"
-                        class="ara-blue-bg white--text"
+                        class="ara-blue-bg text-white"
                     >
                         Save
                     </v-btn>
                     <v-btn
                         id="CriteriaEditor-cancel-btn"
                         @click="onSubmitCriteriaEditorResult(false)"
-                        class="ara-orange-bg white--text"
+                        class="ara-orange-bg text-white"
                         >Cancel</v-btn
                     >
                 </v-layout>
@@ -306,6 +304,7 @@ import { getBlankGuid } from '../utils/uuid-utils';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { on } from 'events';
 
 let store = useStore();
 const $router = useRouter();

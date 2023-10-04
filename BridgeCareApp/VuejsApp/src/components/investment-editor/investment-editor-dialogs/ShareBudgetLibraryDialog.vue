@@ -13,17 +13,17 @@
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <td>
-              {{ item.username }}
+              {{ item.value.username }}
             </td>
             <td>
               <v-checkbox id="ShareBudgetLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.raw.isShared"
-                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
+                          @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareBudgetLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox id="ShareBudgetLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
             </td>
           </template>
-          <v-alert :value="true"
+          <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
@@ -33,10 +33,10 @@
       </v-card-text>
       <v-card-actions>
         <v-layout justify-space-between row>
-          <v-btn id="ShareBudgetLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ara-blue-bg white--text">
+          <v-btn id="ShareBudgetLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ara-blue-bg text-white">
             Save
           </v-btn>
-          <v-btn id="ShareBudgetLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+          <v-btn id="ShareBudgetLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
         </v-layout>
       </v-card-actions>
     </v-card>

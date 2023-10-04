@@ -34,7 +34,7 @@
               class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
               style="padding-left: 10px"
               @click="onSaveImplementationName"
-              outline
+              variant = "outlined"
               >Save</v-btn
             >
           </v-layout>
@@ -63,7 +63,7 @@
               class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
               style="margin-right: 40%"
               @click="onUploadAgencyLogo"
-              outline
+              variant = "outlined"
               >Upload</v-btn
             >
           </v-layout>
@@ -92,7 +92,7 @@
               class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
               style="margin-right: 40%"
               @click="onUploadImplementationLogo"
-              outline
+              variant = "outlined"
               >Upload</v-btn
             >
           </v-layout>

@@ -5,7 +5,7 @@
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-layout justify-space-between align-center>
                         <div class="ghd-control-dialog-header">Edit Budget Criteria</div>
-                        <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+                        <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                             X
                         </v-btn>
                     </v-layout>
@@ -37,9 +37,9 @@
                             <td>
                                 <v-edit-dialog id="EditBudgetsDialog-budget-editDialog"
                                                :return-value.sync='props.item.name' persistent
-                                               @save='onEditBudgetName(props.item)' large lazy>
+                                               @save='onEditBudgetName(props.item)' size="large" lazy>
                                     <v-text-field id="EditBudgetsDialog-budget-textField"
-                                                  readonly single-line class='sm-txt' :value='props.item.name'
+                                                  readonly single-line class='sm-txt' :model-value='props.item.name'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
                                     <template slot='input'>
                                         <v-text-field label='Edit' single-line v-model='props.item.name'
@@ -49,8 +49,8 @@
                             </td>
                             <td>
                                 <v-text-field readonly single-line class='sm-txt'
-                                              :value='props.criterionLibrary.mergedCriteriaExpression'>
-                                    <template slot='append-outer'>
+                                              :model-value='props.criterionLibrary.mergedCriteriaExpression'>
+                                    <template slot='append-inner'>
                                         <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" icon style="margin-top:-6px;">
                                             <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-btn>                                        
@@ -66,7 +66,7 @@
                     </v-data-table>
                     </div>
                     <v-layout row align-end style="margin:0 !important">
-                        <v-btn id="EditBudgetsDialog-add-btn" @click='onAddBudget' class='ghd-blue ghd-button' flat>
+                        <v-btn id="EditBudgetsDialog-add-btn" @click='onAddBudget' class='ghd-blue ghd-button' variant = "flat">
                             Add
                         </v-btn>
                     </v-layout>
@@ -74,8 +74,8 @@
                 
                 <v-card-actions class="ghd-dialog-box-padding-bottom">
                     <v-layout justify-center>
-                        <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>Cancel</v-btn>
-                        <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' flat
+                        <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">Cancel</v-btn>
+                        <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' variant = "flat"
                                :disabled='disableSubmitButton()'>
                             Save
                         </v-btn>                        

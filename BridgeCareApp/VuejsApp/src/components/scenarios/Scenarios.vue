@@ -18,7 +18,7 @@
                     <v-flex xs1></v-flex>
                 </v-tabs>
                 <v-tabs-items v-model="tab">
-                    <v-tab-item>
+                    <v-window-item>
                         <v-flex x12>
                             <v-card elevation="5">
                                 <v-card-title>
@@ -41,14 +41,14 @@
                                             <v-btn id="Scenarios-performSearch-button" 
                                                 style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                outline 
+                                                variant = "outlined" 
                                                 @click="onMineSearchClick()">
                                                 Search
                                             </v-btn>
                                             <v-btn id="Scenarios-performFilter-button" 
                                                 style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                outline 
+                                                variant = "outlined" 
                                                 @click="showFilterScenarioList = true">
                                                 Filter
                                             </v-btn>
@@ -78,7 +78,7 @@
                                             @click="
                                                 showCreateScenarioDialog = true
                                             "
-                                            color="blue darken-2 white--text"
+                                            color="blue darken-2 text-white"
                                         >
                                             Create new scenario
                                         </v-btn>
@@ -98,7 +98,7 @@
                                         <td>
                                         
                                             <v-edit-dialog
-                                                large
+                                                size="large"
                                                 lazy
                                                 persistent
                                                 :return-value.sync="
@@ -173,19 +173,18 @@
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.reportStatus }}</td>
                                         <td>
-                                            <v-menu offset-x left>
+                                            <v-menu offset location="left">
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
+
                                                 >
                                                     <v-btn
                                                         id="Scenarios-actionMenu-vbtn"
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -212,7 +211,7 @@
                                         </td>
                                     </template>
                                     <v-alert
-                                        :value="hasMineSearch()"
+                                        :model-value="hasMineSearch()"
                                         class="ara-orange-bg"
                                         icon="fas fa-exclamation"
                                         slot="no-data"
@@ -223,8 +222,8 @@
                                 </v-data-table>
                             </v-card>
                         </v-flex>
-                    </v-tab-item>
-                    <v-tab-item>
+                    </v-window-item>
+                    <v-window-item>
                         <v-flex xs12>
                             <v-card elevation="5">
                                 <v-card-title>
@@ -247,14 +246,14 @@
                                             <v-btn style="margin-top: 2px;" 
                                                 id="Scenarios-shared-performSearch-button"
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                outline 
+                                                variant = "outlined" 
                                                 @click="onSharedSearchClick()">
                                                 Search
                                             </v-btn>
                                             <v-btn id="Scenarios-performFilter-button" 
                                                 style="margin-top: 2px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                                outline 
+                                                variant = "outlined" 
                                                 @click="showSharedFilterScenarioList = true">
                                                 Filter
                                             </v-btn>
@@ -290,7 +289,7 @@
 
                                         <td>
                                             <v-edit-dialog
-                                                large
+                                                size="large"
                                                 lazy
                                                 persistent
                                                 :return-value.sync="
@@ -365,19 +364,17 @@
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.reportStatus }}</td>
                                         <td>
-                                            <v-menu offset-x left>
+                                            <v-menu offset location="left">
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
                                                 >
                                                     <v-btn
                                                         id="Scenarios-shared-actionMenu-vbtn"
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -400,7 +397,7 @@
                                     </template>
                                     <template v-slot:no-data v-if="hasSharedSearch()">
                                         <v-alert
-                                            :value="true"
+                                            :model-value="true"
                                             class="ara-orange-bg"
                                             icon="fas fa-exclamation">
                                             Your search for "{{ currentSearchShared }}"
@@ -410,8 +407,8 @@
                                 </v-data-table>
                             </v-card>
                         </v-flex>
-                    </v-tab-item>
-                    <v-tab-item>
+                    </v-window-item>
+                    <v-window-item>
                         <v-flex xs12>
                             <v-card elevation="5">
                                 <v-card-title class="ghd-dialog-padding-top-title">
@@ -450,18 +447,16 @@
                                         <td>{{ props.item.previousRunTime }}</td>
                                         <td>{{ props.item.status }}</td>  
                                         <td>
-                                            <v-menu offset-x left>
+                                            <v-menu offset location="left">
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
                                                 >
                                                     <v-btn
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -521,18 +516,16 @@
                                         <td>{{ props.item.previousRunTime }}</td>
                                         <td>{{ props.item.status }}</td>  
                                         <td>
-                                            <v-menu offset-x left>
+                                            <v-menu offset left>
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
                                                 >
                                                     <v-btn
-                                                        color="green--text darken-1"
+                                                        color="text-green darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -558,7 +551,7 @@
                                 </v-data-table>
                             </v-card>
                         </v-flex>
-                    </v-tab-item>
+                    </v-window-item>
                 </v-tabs-items>
             </v-card>
         </v-flex>
@@ -1446,7 +1439,7 @@ import { useRouter } from 'vue-router';
     function onStartDataMigration() {
         // the legacy scenario id is hardcoded to our test scenario "JML Run District 8"
         migrateLegacySimulationDataAction({
-            simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
+            simulationId: import.meta.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
         }).then(() => initializeScenarioPages());
     }
 

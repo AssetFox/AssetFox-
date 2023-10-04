@@ -10,9 +10,8 @@
                             class="ghd-select ghd-text-field ghd-text-field-border"
                             :items="librarySelectItems"
                             append-icon=$vuetify.icons.ghd-down
-                            outline
                             v-model="librarySelectItemValue"
-                            outlined
+                            variant="outlined"
                         >
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
@@ -33,7 +32,7 @@
                                 <span>Shared</span>
                             </template>
                         </v-badge>
-                        <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -42,7 +41,7 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout justify-end align-end style="padding-top: 18px !important;">
                         <v-spacer></v-spacer>
-                        <v-btn outline
+                        <v-btn variant = "outlined"
                             id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
                             @click="showCreateTargetConditionGoalDialog = true"
                             class="ghd-control-border ghd-blue"
@@ -53,7 +52,7 @@
                             @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario"
-                            outline
+                            variant = "outlined"
                         >
                         Create New Library
                         </v-btn>
@@ -89,123 +88,28 @@
                         </td>
                         <td v-for="header in targetConditionGoalGridHeaders">
                             <div>
-                                <!-- <v-edit-dialog
-                                    v-if="header.value !== 'criterionLibrary'"
-                                    :return-value.sync="item[header.value]"
-                                    @save="
-                                        onEditTargetConditionGoalProperty(
-                                            item,
-                                            header.value,
-                                            item[header.value])"
-                                    large
-                                    lazy>
-                                    <v-text-field
-                                        v-if="header.value === 'year'"
-                                        readonly
-                                        single-line
-                                        class="sm-txt"
-                                        :value="item[header.value]"/>
-                                    <v-text-field
-                                        v-else
-                                        readonly
-                                        single-line
-                                        class="sm-txt"
-                                        :value="item[header.value]"
-                                        :rules="[
-                                            rules['generalRules']
-                                                .valueIsNotEmpty]"/>
-                                    
-
-                                    <template slot="input">
-                                        <v-select
-                                            v-if="header.value === 'attribute'"
-                                            :items="numericAttributeNames"
-                                            append-icon=$vuetify.icons.ghd-down
-                                            label="Select an Attribute"
-                                            v-model="item.attribute"
-                                            :rules="[
-                                                rules['generalRules']
-                                                    .valueIsNotEmpty]"/>
-                                        <v-text-field
-                                            v-if="header.value === 'year'"
-                                            label="Edit"
-                                            single-line
-                                            :mask="'####'"
-                                            v-model.number="item[header.value]"/>
-                                        <v-text-field
-                                            v-if="header.value === 'target'"
-                                            label="Edit"
-                                            single-line
-                                            :mask="'##########'"
-                                            v-model.number="item[header.value]"
-                                            :rules="[
-                                                rules['generalRules']
-                                                    .valueIsNotEmpty]"/>
-                                        <v-text-field
-                                            v-if="header.value === 'name'"
-                                            label="Edit"
-                                            single-line
-                                            v-model="item[header.value]"
-                                            :rules="[
-                                                rules['generalRules']
-                                                    .valueIsNotEmpty]"/>
-                                    </template>
-                                </v-edit-dialog> -->
-                                <!-- <v-layout
-                                    v-else
-                                    align-center
-                                    row
-                                    style="flex-wrap:nowrap">
-                                    <v-menu
-                                        bottom
-                                        min-height="500px"
-                                        min-width="500px">
-                                        <template slot="activator">
-                                            <v-text-field
-                                                readonly
-                                                class="sm-txt"
-                                                :value="
-                                                    item.criterionLibrary
-                                                        .mergedCriteriaExpression"/>
-                                        </template>
-                                        <v-card>
-                                            <v-card-text>
-                                                <v-textarea
-                                                    :value="
-                                                        item
-                                                            .criterionLibrary
-                                                            .mergedCriteriaExpression"
-                                                    full-width
-                                                    no-resize
-                                                    outline
-                                                    readonly
-                                                    rows="5"/>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-menu>
-                                </v-layout>  -->
                                 <v-edit-dialog
                                     v-if="header.value !== 'criterionLibrary' && header.value !== 'actions'"
-                                    :return-value.sync="item[header.value]"
+                                    :return-value.sync="item.value[header.value]"
                                     @save="
                                         onEditTargetConditionGoalProperty(
-                                            item,
+                                            item.value,
                                             header.value,
-                                            item[header.value])"
-                                    large
+                                            item.value[header.value])"
+                                    size="large"
                                     lazy>
                                     <v-text-field
                                         v-if="header.value === 'year'"
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value="item[header.value]"/>
+                                        :model-value="item.value[header.value]"/>
                                     <v-text-field
                                         v-else
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value="item[header.value]"
+                                        :model-value="item.value[header.value]"
                                         :rules="[
                                             rules['generalRules']
                                                 .valueIsNotEmpty]"/>
@@ -217,7 +121,7 @@
                                             :items="numericAttributeNames"
                                             append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
-                                            v-model="item.attribute"
+                                            v-model="item.value.attribute"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
@@ -227,14 +131,14 @@
                                             label="Edit"
                                             single-line
                                             :mask="'####'"
-                                            v-model.number="item[header.value]"/>
+                                            v-model.number="item.value[header.value]"/>
                                         <v-text-field
                                             id="TargetConditionGoalEditor-editTargetConditionGoalTarget-vtextfield"
                                             v-if="header.value === 'target'"
                                             label="Edit"
                                             single-line
                                             :mask="'##########'"
-                                            v-model.number="item[header.value]"
+                                            v-model.number="item.value[header.value]"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
@@ -243,7 +147,7 @@
                                             v-if="header.value === 'name'"
                                             label="Edit"
                                             single-line
-                                            v-model="item[header.value]"
+                                            v-model="item.value[header.value]"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty]"/>
@@ -255,19 +159,19 @@
                                     align-center
                                     style="flex-wrap:nowrap">
                                     <v-menu
-                                        bottom
+                                        location="bottom"
                                         min-height="500px"
                                         min-width="500px">
                                         <template slot="activator">
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"
-                                                :value="item.criterionLibrary.mergedCriteriaExpression"/>
+                                                :model-value="item.value.criterionLibrary.mergedCriteriaExpression"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
-                                                    :value="item.criterionLibrary.mergedCriteriaExpression"
+                                                    :model-value="item.value.criterionLibrary.mergedCriteriaExpression"
                                                     full-width
                                                     no-resize
                                                     outline
@@ -278,14 +182,14 @@
                                     </v-menu>
                                     <v-btn
                                         id="TargetConditionGoalEditor-editTargetConditionGoalCriteria-vbtn"
-                                        @click="onShowCriterionLibraryEditorDialog(item)"
+                                        @click="onShowCriterionLibraryEditorDialog(item.value)"
                                         class="ghd-blue"
                                         icon>
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-layout>
                                 <div v-if="header.value === 'actions'">
-                                    <v-btn id="TargetConditionGoalEditor-deleteTargetConditionGoal-vbtn" @click="onRemoveTargetConditionGoalsIcon(props.item)"  class="ghd-blue" icon>
+                                    <v-btn id="TargetConditionGoalEditor-deleteTargetConditionGoal-vbtn" @click="onRemoveTargetConditionGoalsIcon(item.value)"  class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div> 
@@ -297,7 +201,7 @@
         </v-flex>
 
         <v-layout justify-start align-center v-show="hasSelectedLibrary || hasScenario">
-            <v-btn flat right
+            <v-btn variant = "flat" right
                 id="TargetConditionGoalEditor-deleteSelected-vbtn"
                 class="ghd-control-label ghd-blue"
                 @click="onRemoveTargetConditionGoals"> 
@@ -311,12 +215,12 @@
                 class="ghd-control-text ghd-control-border"
                 outline
                 v-model="selectedTargetConditionGoalLibrary.description"
-                @input='checkHasUnsavedChanges()'>
+                @update:model-value="checkHasUnsavedChanges()">
             </v-textarea>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-layout justify-center row>
-                <v-btn outline
+                <v-btn variant = "outlined"
                     id="TargetConditionGoalEditor-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue"
@@ -325,14 +229,14 @@
                 >
                     Delete Library
                 </v-btn>
-                <v-btn :disabled='!hasUnsavedChanges' flat
+                <v-btn :disabled='!hasUnsavedChanges' variant = "flat"
                     @click="onDiscardChanges"
                     class="ghd-white-bg ghd-blue"
                     v-show="hasScenario"
                 >
                     Cancel
                 </v-btn>
-                <v-btn outline
+                <v-btn variant = "outlined"
                     id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'

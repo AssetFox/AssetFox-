@@ -1,6 +1,6 @@
 <template>
     <v-app class="paper-white-bg">
-        <v-content>
+        <v-main>
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
                     <img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" /> 
@@ -11,7 +11,7 @@
                         id="App-scenarios-btn"
                         @click="onNavigate('/Scenarios/')"
                         class="ara-blue-pantone-281"
-                        flat                        
+                        variant = "flat"                     
                     >
                         Scenarios
                     </v-btn>                   
@@ -19,7 +19,7 @@
                         id="App-libraries-btn"
                         @click="onNavigate('/EditLibrary/')"
                         class="ara-blue-pantone-281"
-                        flat
+                        variant = "flat"
                     >
                         Libraries
                     </v-btn>
@@ -27,7 +27,7 @@
                         id="App-rawData-btn"
                         @click="onNavigate('/EditRawData/')"
                         class="ara-blue-pantone-281"
-                        flat
+                        variant = "flat"
                         v-if="hasAdminAccess"
                     >
                         Raw Data
@@ -36,7 +36,7 @@
                         id="App-administration-btn"
                         @click="onNavigate('/EditAdmin/')"
                         class="ara-blue-pantone-281"
-                        flat
+                        variant = "flat"
                         v-if="hasAdminAccess"
                     >
                         Administration
@@ -45,7 +45,7 @@
                         id="App-inventory-btn"
                         @click="onNavigate('/Inventory/')"
                         class="ara-blue-pantone-281"
-                        flat
+                        variant = "flat"
                     >
                         Inventory
                     </v-btn>
@@ -53,7 +53,7 @@
                         id="App-news-btn"
                         @click="onShowNewsDialog()"
                         class="ara-blue-pantone-281"
-                        flat
+                        variant = "flat"
                     >
                         News
                         <v-icon v-if="hasUnreadNewsItem" size="13" class="news-notification">fas fa-exclamation-circle</v-icon>
@@ -62,23 +62,22 @@
                 <v-spacer></v-spacer>
                 <v-toolbar-title class="white--text">
                     <v-menu
-                        offset-y
+                        offset-
                         min-width="20%"
                         max-width="20%"
                         max-height="75%"
                         :close-on-content-click="false"
                     >
-                        <template v-slot:activator="{ on, attrs }">
+                        <template v-slot:activator="{ props }">
                             <button
                                 id="App-notification-button"
-                                v-on="on"
-                                v-bind="attrs"
+                                v-bind="props"
                                 @click="onNotificationMenuSelect"
                                 class="notification-icon"
                                 icon
                             >
                                 <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
-                                <notification-bell
+                                <!-- <notification-bell
                                     :size="30"
                                     :count="notificationCounter"
                                     :upperLimit="50"
@@ -91,7 +90,7 @@
                                     counterTextColor="#FFFFFF"
                                     iconColor="#002E6C"
                                     class="hide-bell-svg"
-                                />
+                                /> -->
                             </button>
                         </template>
                         <v-card class="mx-auto" max-width="100%">
@@ -127,9 +126,9 @@
                                                     notification.shortMessage
                                                 "
                                             ></v-list-tile-content>
-                                            <v-btn icon small right absolute>
+                                            <v-btn icon size="small" end position="absolute">
                                                 <v-icon
-                                                    small
+                                                    size="small"
                                                     @click="
                                                         onRemoveNotification(
                                                             notification.id,
@@ -141,14 +140,12 @@
                                         </v-list-tile>
                                     </template>
                                     <v-list-item>
-                                        <v-list-item-content>
                                             <v-list-item-title
                                                 class="notification-long-message"
                                                 v-text="
                                                     notification.longMessage
                                                 "
                                             ></v-list-item-title>
-                                        </v-list-item-content>
                                     </v-list-item>
                                     <v-spacer></v-spacer>
                                 </v-list-group>
@@ -173,7 +170,7 @@
                         icon
                         color="#002E6C"
                     >
-                        <v-icon small color="white">fas fa-sign-in-alt</v-icon>
+                        <v-icon size="small" color="white">fas fa-sign-in-alt</v-icon>
                     </v-btn>
                     <v-btn
                         v-if="securityType === esecSecurityType && currentURL != 'AuthenticationStart'"
@@ -194,7 +191,7 @@
                         icon
                         color="#002E6C"
                     >
-                        <v-icon small color="white">fas fa-sign-out-alt</v-icon>
+                        <v-icon size="small" color="white">fas fa-sign-out-alt</v-icon>
                     </v-btn>
                     <v-btn
                         id="App-esecLogout-vbtn"
@@ -204,7 +201,7 @@
                         icon                        
                         color="#002E6C"
                     >
-                        <v-icon small color="white">fas fa-sign-out-alt</v-icon>
+                        <v-icon size="small" color="white">fas fa-sign-out-alt</v-icon>
                     </v-btn>
                 </v-toolbar-title>
             </v-toolbar>
@@ -247,7 +244,7 @@
             <Spinner />
             <Alert :dialog-data="alertDialogData" @submit="onAlertResult" />
             <NewsDialog :showDialog="showNewsDialog" @close="onCloseNewsDialog()" />
-        </v-content>
+        </v-main>
     </v-app>
 </template>
 
@@ -299,9 +296,9 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
     let username = ref<string>(store.state.authenticationModule.username);
     let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
     let refreshing = ref<boolean>(store.state.authenticationModule.refreshing);
-    let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
+    //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
     let notifications = ref<Notification[]>(store.state.notificationModule.notifications);
-    let notificationCounter = ref<number>(store.state.notificationModule.conotificationCounterunter);
+    let notificationCounter = ref<number>(store.state.notificationModule.counter);
     let stateSelectedScenario = ref<Scenario>(store.state.scenarioModule.selectedScenario);
     let packageVersion = ref<string>(store.state.announcementModule.packageVersion);
     let securityType = ref<string>(store.state.authenticationModule.securityType);
@@ -377,23 +374,23 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
     function container() {
         const container: any = {};
 
-        if ($vuetify.breakpoint.xs) {
+        if ($vuetify.display.xs) {
             container['grid-list-xs'] = true;
         }
 
-        if ($vuetify.breakpoint.sm) {
+        if ($vuetify.display.sm) {
             container['grid-list-sm'] = true;
         }
 
-        if ($vuetify.breakpoint.md) {
+        if ($vuetify.display.md) {
             container['grid-list-md'] = true;
         }
 
-        if ($vuetify.breakpoint.lg) {
+        if ($vuetify.display.lg) {
             container['grid-list-lg'] = true;
         }
 
-        if ($vuetify.breakpoint.xl) {
+        if ($vuetify.display.xl) {
             container['grid-list-xl'] = true;
         }
 

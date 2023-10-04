@@ -26,20 +26,18 @@
               :items="attributeSelectItems"
               append-icon=$vuetify.icons.ghd-down
               :rules="[rules['generalRules'].valueIsNotEmpty]"
-              outline
+              variant="outlined"
             >
               <template v-slot:selection="{ item }">
-                <span class="ghd-control-text">{{ item.text }}</span>
+                <span class="ghd-control-text">{{ item.raw.text }}</span>
               </template>
               <template v-slot:item="{ item }">
-                <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
-                  <v-list-item-content>
+                <v-list-item class="ghd-control-text" v-bind="props">
                     <v-list-item-title>
                       <v-row no-gutters align="center">
-                      <span>{{ item.text }}</span>
+                      <span>{{ item.raw.text }}</span>
                       </v-row>
                     </v-list-item-title>
-                  </v-list-item-content>
                 </v-list-item>
               </template>
             </v-select>                      
@@ -50,7 +48,7 @@
             <v-btn
               id="CreatePerformanceCurveDialog-cancel-button"
               class="ghd-white-bg ghd-blue ghd-button-text"
-              depressed
+              variant = "flat"
               @click="onSubmit(false)">
               Cancel
             </v-btn>
@@ -59,7 +57,7 @@
               :disabled="newPerformanceCurve.name === '' || newPerformanceCurve.attribute === ''"
               class="ghd-blue-bg ghd-white ghd-button-text"
               @click="onSubmit(true)"
-              depressed>
+              variant = "flat">
               Save
             </v-btn>
           </v-layout>
@@ -81,6 +79,7 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { on } from 'events';
 
 let store = useStore();
 const emit = defineEmits(['submit'])

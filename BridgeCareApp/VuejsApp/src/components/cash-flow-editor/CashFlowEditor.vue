@@ -8,7 +8,7 @@
                         :items="librarySelectItems"
                         append-icon=$vuetify.icons.ghd-down
                         id="CashFlowEditor-SelectLibrary-vselect"
-                        outline
+                        variant="outlined"
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
@@ -27,7 +27,7 @@
                         <span>Shared</span>
                         </template>
                         </v-badge>
-                        <v-btn @click='onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn @click='onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                     </v-btn>
@@ -38,12 +38,12 @@
                         <v-spacer></v-spacer>
                         <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
                             id="CashFlowEditor-addCashFlowRule-btn" 
-                            outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Add Cash Flow Rule
                         </v-btn>
                         <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
                             id="CashFlowEditor-addCashFlowLibrary-btn"
-                            outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario">
                             Create New Library
                         </v-btn>
@@ -72,7 +72,7 @@
                         </td>
                         <td>
                             <v-edit-dialog
-                                :return-value.sync="item.name"
+                                :return-value.sync="item.value.name"
                                 large
                                 lazy
                                 @save="onEditSelectedLibraryListData(item,'description')"
@@ -82,7 +82,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
-                                    :value="item.name"
+                                    :model-value="item.value.name"
                                     :rules="[inputRules.generalRules.valueIsNotEmpty]"/>
                                 <template slot="input">
                                     <v-textarea
@@ -91,14 +91,14 @@
                                         outline
                                         rows="5"
                                         :rules="[inputRules.generalRules.valueIsNotEmpty]"
-                                        v-model="item.name"/>
+                                        v-model="item.value.name"/>
                                 </template>
                             </v-edit-dialog>
                         </td>
                         <td>
                             <v-layout align-center style='flex-wrap:nowrap'>
                                 <v-menu
-                                bottom
+                                location="bottom"
                                 min-height="500px"
                                 min-width="500px">
                                 <template slot="activator">
@@ -107,13 +107,13 @@
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value="item.criterionLibrary.mergedCriteriaExpression"/>
+                                        :model-value="item.value.criterionLibrary.mergedCriteriaExpression"/>
                                 </template>
                                 <v-card>
                                     <v-card-text>
                                         <v-textarea
-                                            :value="
-                                                item.criterionLibrary.mergedCriteriaExpression"
+                                            :model-value="
+                                                item.value.criterionLibrary.mergedCriteriaExpression"
                                             full-width
                                             no-resize
                                             outline
@@ -154,7 +154,7 @@
                 </v-data-table>
 
                 <v-btn :disabled='selectedCashRuleGridRows.length === 0' @click='onDeleteSelectedCashFlowRules'
-                    class='ghd-blue ghd-button' flat>
+                    class='ghd-blue ghd-button' variant = "flat">
                     Delete Selected
                 </v-btn>
             </div>
@@ -169,7 +169,8 @@
                         outline
                         rows="4"
                         v-model="selectedCashFlowRuleLibrary.description"
-                        @input='checkHasUnsavedChanges()'>
+                        @update:model-value="checkHasUnsavedChanges()">
+
                     </v-textarea>
                 </v-flex>
             </v-layout>
@@ -179,10 +180,10 @@
                 justify-center
                 row
                 v-show="hasSelectedLibrary || hasScenario">
-                <v-btn outline
+                <v-btn variant = "outlined"
                     @click="onDeleteCashFlowRuleLibrary"
                     id="CashFlowEditor-deleteLibrary-btn"
-                    flat class='ghd-blue ghd-button-text ghd-button'
+                    class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission">
                     Delete Library
@@ -190,27 +191,27 @@
                 <v-btn
                     @click="onDiscardChanges"
                     v-show="hasScenario"
-                    :disabled="!hasUnsavedChanges" flat class='ghd-blue ghd-button-text ghd-button'>
+                    :disabled="!hasUnsavedChanges" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtons()"
                     @click="onShowCreateCashFlowRuleLibraryDialog(true)"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline> 
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"> 
                     Create as New Library
                 </v-btn>
                 <v-btn
                     id="CashFlowEditor-save-btn"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onUpsertScenarioCashFlowRules"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-button'
                     v-show="hasScenario">
                     Save
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                     @click="onUpsertCashFlowRuleLibrary"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario">
                     Update Library
                 </v-btn>                                       

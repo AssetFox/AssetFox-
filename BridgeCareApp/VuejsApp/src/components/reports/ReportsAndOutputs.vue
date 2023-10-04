@@ -27,10 +27,10 @@
                                     <v-menu
                                         min-height="500px"
                                         min-width="500px"
-                                        right
+                                        location="right"
                                     >
                                         <template slot="activator">
-                                            <v-btn class="ghd-blue" tooltip flat icon>
+                                            <v-btn class="ghd-blue" tooltip variant = "flat" icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
@@ -38,7 +38,7 @@
                                             <v-card-text>
                                                 <v-textarea
                                                     class="sm-txt Montserrat-font-family"
-                                                    :value=props.item.mergedExpression
+                                                    :model-value=props.item.mergedExpression
                                                     full-width
                                                     no-resize
                                                     outline
@@ -75,7 +75,7 @@
                                     </v-btn>
                                 </td>
                             </template>
-                            <template v-slot:body.append>
+                            <template v-slot:body.append-inner>
                             </template>                               
                         </v-data-table>
                     </v-card>
@@ -90,7 +90,7 @@
                 </v-subheader>
                 <v-divider style="margin:0px;" />
                 <v-layout style="margin:0px;">
-                    <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" depressed>Simulation Log</v-btn>
+                    <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" variant = "flat">Simulation Log</v-btn>
                 </v-layout>
             </v-flex>
 

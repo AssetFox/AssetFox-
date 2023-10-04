@@ -13,17 +13,17 @@
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <td>
-              <v-label>{{ item.username }}</v-label>
+              <v-label>{{ item.value.username }}</v-label>
             </td>
             <td>
               <v-checkbox class="ghd-padding-top bottom-margin-zero" label="Is Shared" v-model="item.raw.isShared"
-                  @change="removeUserModifyAccess(item.id, item.isShared)"/>
+                  @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!item.isShared" class="ghd-padding-top bottom-margin-zero" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox :disabled="!item.value.isShared" class="ghd-padding-top bottom-margin-zero" label="Can Modify" v-model="item.raw.canModify"/>
             </td>
           </template>
-          <v-alert :value="true"
+          <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
@@ -33,10 +33,10 @@
       </v-card-text>
       <v-card-actions>
         <v-layout justify-space-between row>
-          <v-btn @click="onSubmit(true)" class="ara-blue-bg white--text">
+          <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
             Save
           </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+          <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
         </v-layout>
       </v-card-actions>
     </v-card>

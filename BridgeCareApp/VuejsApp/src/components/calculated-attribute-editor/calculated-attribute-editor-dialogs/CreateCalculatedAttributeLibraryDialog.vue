@@ -4,7 +4,7 @@
             <v-card-title class="ghd-dialog-box-padding-top">
                 <v-layout justify-space-between align-center >
                     <div class="ghd-control-dialog-header">New Calculated Attribute Library</div>
-                    <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+                    <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                         X
                     </v-btn>
                 </v-layout>
@@ -21,7 +21,7 @@
                     <v-textarea
                         v-model="newCalculatedAttributeLibrary.description"
                         no-resize
-                        outline
+                      outline
                         rows="3"
                         class="ghd-text-field-border"/>
                 </v-layout>
@@ -29,14 +29,14 @@
             <v-card-actions class="ghd-dialog-box-padding-bottom">
                 <v-layout justify-center>
                     <v-btn
-                        outline 
+                    variant = "outlined" 
                         class='ghd-blue ghd-button-text ghd-button'
                         @click="onSubmit(false)">
                         Cancel
                     </v-btn>
                     <v-btn
                         :disabled="newCalculatedAttributeLibrary.name === ''"
-                        outline 
+                        variant = "outlined" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         @click="onSubmit(true)">
                         Save

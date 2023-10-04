@@ -10,7 +10,7 @@
                             :items="selectListItems"
                             append-icon=$vuetify.icons.ghd-down
                             v-model="librarySelectItemValue"
-                            outline
+                            variant="outlined"
                             >
                   </v-select>
                   <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
@@ -29,7 +29,7 @@
                                 <span>Shared</span>
                             </template>
                         </v-badge>
-                        <v-btn @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -38,8 +38,8 @@
                 <v-flex xs4 class="ghd-constant-header">
                 <v-layout justify-end align-end style="padding-top: 18px !important;">
                     <div>
-                        <v-btn id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn" class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" outline>Add Remaining Life Limit</v-btn>
-                        <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style ="ri"  @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" outline>Create New Library</v-btn>
+                        <v-btn id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn" class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" variant = "outlined">Add Remaining Life Limit</v-btn>
+                        <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style ="ri"  @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" variant = "outlined">Create New Library</v-btn>
                     </div>
                 </v-layout>
                 </v-flex>
@@ -73,7 +73,7 @@
                         <td>
                             <v-edit-dialog
                                 :return-value.sync="props.item.attribute"
-                                large
+                                size="large"
                                 lazy
                                 @save="
                                     onEditRemainingLifeLimitProperty(
@@ -87,7 +87,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
-                                    :value="props.item.attribute"
+                                    :model-value="props.item.attribute"
                                     :rules="[
                                         rules['generalRules'].valueIsNotEmpty,
                                     ]"
@@ -97,7 +97,7 @@
                                         :items="numericAttributeSelectItems"
                                         append-icon=$vuetify.icons.ghd-down
                                         label="Select an Attribute"
-                                        outline
+                                        variant="outlined"
                                         v-model="props.item.attribute"
                                         :rules="[
                                             rules['generalRules']
@@ -110,7 +110,7 @@
                         <td>
                             <v-edit-dialog
                                 :return-value.sync="props.item.value"
-                                large
+                                size="large"
                                 lazy
                                 @save="
                                     onEditRemainingLifeLimitProperty(
@@ -124,7 +124,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
-                                    :value="props.item.value"
+                                    :model-value="props.item.value"
                                     :rules="[
                                         rules['generalRules'].valueIsNotEmpty,
                                     ]"
@@ -169,15 +169,15 @@
                     <v-textarea
                         class="ghd-control-text ghd-control-border"
                         v-model="selectedRemainingLifeLimitLibrary.description"
-                        @input="checkHasUnsavedChanges()"
+                        @update:model-value="checkHasUnsavedChanges()"
                         outline
                     >
                     </v-textarea>
                 </v-flex>
                 <v-layout justify-center row>
-                    <v-btn id="RemainingLifeLimitEditor-cancel-btn" class="ghd-blue" outline v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
-                    <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" class="ghd-blue" outline v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
-                    <v-btn id="RemainingLifeLimitEditor-createAsNewLibrary-btn" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" outline>Create as New Library</v-btn>
+                    <v-btn id="RemainingLifeLimitEditor-cancel-btn" class="ghd-blue" variant = "outlined" v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
+                    <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" class="ghd-blue" variant = "outlined" v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
+                    <v-btn id="RemainingLifeLimitEditor-createAsNewLibrary-btn" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" variant = "outlined">Create as New Library</v-btn>
                     <v-btn id="RemainingLifeLimitEditor-save-btn" class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
                     <v-btn id="RemainingLifeLimitEditor-updateLibrary-btn" class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
                 </v-layout>

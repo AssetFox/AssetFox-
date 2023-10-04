@@ -10,7 +10,7 @@
                         append-icon=$vuetify.icons.ghd-down
                         class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                         label='Select a Treatment Library'
-                        outline                        
+                        variant="outlined"
                         v-model='librarySelectItemValue' 
                     >
                     </v-select>
@@ -24,7 +24,7 @@
                         append-icon=$vuetify.icons.ghd-down
                         class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                         label='Select'
-                        outline                        
+                        variant="outlined"
                         v-model='treatmentSelectItemValue'
                     >
                     </v-select>
@@ -32,7 +32,7 @@
                 <v-flex style="padding-right: 5px">
                     <v-btn
                         @click='showImportTreatmentDialog = true'
-                        depressed
+                        variant = "flat"
                         class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
                         v-show='hasSelectedLibrary'                        
                     >
@@ -42,7 +42,7 @@
                 <v-flex style="padding-right: 5px">
                     <v-btn
                         @click='onShowConfirmDeleteTreatmentAlert'
-                        depressed
+                        variant = "flat"
                         class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
                         v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
                     >
@@ -55,7 +55,7 @@
                         @click='onShowCreateTreatmentLibraryDialog(false)'
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
-                        outline
+                        variant = "outlined"
 
                     >
                         Create New Library
@@ -72,7 +72,7 @@
                                 <span>Shared</span>
                             </template>
                         </v-badge>
-                        <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                                v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -88,7 +88,7 @@
                <v-btn
                     id="TreatmentEditor-addTreatment-btn"
                     @click='showCreateTreatmentDialog = true'
-                    depressed
+                    variant = "flat"
                     class='ghd-white-bg ghd-blue ghd-button-text ghd-text-padding'                              
                     style='float:left;'
                 >
@@ -96,21 +96,21 @@
                     <v-icon>fas fa-plus</v-icon>
                 </v-btn>                
                 <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
-                    flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
                     >
                     Download Template
                 </v-btn> 
                 <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
                 <v-btn :disabled='false' @click='OnExportTreamentsClick()'
-                    flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
                     >
                     Download
                 </v-btn> 
                 <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
                 <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
-                    flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
                     >
                     Upload
@@ -152,7 +152,7 @@
                                         {{ treatmentTab }}
                                     </v-tab>
                                     <v-tabs-items v-model='activeTab'>
-                                        <v-tab-item>
+                                        <v-window-item>
                                             <v-card style="border:none;">
                                                 <v-card-text
                                                     class='card-tab-content'
@@ -166,8 +166,8 @@
                                                     />
                                                 </v-card-text>
                                             </v-card>
-                                        </v-tab-item>
-                                        <v-tab-item>
+                                        </v-window-item>
+                                        <v-window-item>
                                             <v-card>
                                                 <v-card-text
                                                     class='card-tab-content'
@@ -182,8 +182,8 @@
                                                     />
                                                 </v-card-text>
                                             </v-card>
-                                        </v-tab-item>
-                                        <v-tab-item>
+                                        </v-window-item>
+                                        <v-window-item>
                                             <v-card>
                                                 <v-card-text
                                                     class='card-tab-content'
@@ -199,8 +199,8 @@
                                                     />
                                                 </v-card-text>
                                             </v-card>
-                                        </v-tab-item>
-                                        <v-tab-item>
+                                        </v-window-item>
+                                        <v-window-item>
                                             <v-card>
                                                 <v-card-text
                                                     class='card-tab-content'
@@ -216,8 +216,8 @@
                                                     />
                                                 </v-card-text>
                                             </v-card>
-                                        </v-tab-item>
-                                        <v-tab-item>
+                                        </v-window-item>
+                                        <v-window-item>
                                             <v-card>
                                                 <v-card-text class='card-tab-content'>
                                                     <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
@@ -226,7 +226,7 @@
                                                                 @onModifyBudgets='modifySelectedTreatmentBudgets' />
                                                 </v-card-text>
                                             </v-card>
-                                        </v-tab-item>
+                                        </v-window-item>
                                     </v-tabs-items>
                                 </v-tabs>
                             </div>                                             
@@ -246,7 +246,7 @@
                         outline
                         rows='2'
                         v-model='selectedTreatmentLibrary.description'
-                        @input='checkHasUnsavedChanges()'
+                        @update:model-value="checkHasUnsavedChanges()"
                     />
                 </v-flex>
             </v-layout>
@@ -256,15 +256,15 @@
                 <v-btn :disabled='!hasUnsavedChanges'
                     @click='onDiscardChanges'
                     class='ghd-white-bg ghd-blue ghd-button-text'
-                    depressed
+                    variant = "flat"
                     v-show='hasScenario'
                 >
                     Cancel
                 </v-btn>
-                <v-btn id='TreatmentEditor-deleteLibrary-btn' outline
+                <v-btn id='TreatmentEditor-deleteLibrary-btn' variant = "outline"
                     @click='onShowConfirmDeleteAlert'
                     class='ghd-white-bg ghd-blue ghd-button-text'
-                    depressed
+
                     v-show='!hasScenario'
                     :disabled='!hasLibraryEditPermission'
                 >
@@ -273,7 +273,7 @@
                 <v-btn
                     @click='onShowCreateTreatmentLibraryDialog(true)'
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    outline
+                    variant = "outlined"
                     :disabled='disableCrudButtons()'
                 >
                     Create as New Library
@@ -281,7 +281,7 @@
                 <v-btn
                     @click='onUpsertScenarioTreatments'
                     class='ghd-blue-bg ghd-white ghd-button-text'
-                    depressed
+                    variant = "flat"
                     v-show='hasScenario'
                     :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
@@ -290,7 +290,7 @@
                     id="TreatmentEditor-updateLibrary-btn"
                     @click='onUpsertTreatmentLibrary'
                     class='ghd-blue-bg ghd-white ghd-button-text  ghd-text-padding'
-                    depressed
+                    variant = "flat"
                     v-show='!hasScenario'
                     :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                 >

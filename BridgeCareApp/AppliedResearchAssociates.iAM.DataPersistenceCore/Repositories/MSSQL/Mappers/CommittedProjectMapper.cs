@@ -56,21 +56,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     throw new InvalidOperationException($"Scenario budget is not present in committed project.");
                 }
 
-                    var commit = new SectionCommittedProjectDTO()
-                    {
-                        Id = entity.Id,
-                        Cost = entity.Cost,
-                        ScenarioBudgetId = entity.ScenarioBudgetId,
-                        SimulationId = entity.SimulationId,
-                        Treatment = entity.Name,
-                        Year = entity.Year,
-                        ProjectSource = Enum.Parse<ProjectSourceDTO>(entity.ProjectSource),
-                        ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
-                        ShadowForSameTreatment= entity.ShadowForSameTreatment,
-                        Category = convertedCategory,
-                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
-                    };
-                    return commit;
+                if (string.IsNullOrEmpty(entity.ProjectSource) || !Enum.TryParse(entity.ProjectSource, out ProjectSourceDTO projectSourceDTO))
+                {
+                    projectSourceDTO = ProjectSourceDTO.None;
+                }
+
+                var commit = new SectionCommittedProjectDTO()
+                {
+                    Id = entity.Id,
+                    Cost = entity.Cost,
+                    ScenarioBudgetId = entity.ScenarioBudgetId,
+                    SimulationId = entity.SimulationId,
+                    Treatment = entity.Name,
+                    Year = entity.Year,
+                    ProjectSource = projectSourceDTO,
+                    ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
+                    ShadowForSameTreatment = entity.ShadowForSameTreatment,
+                    Category = convertedCategory,
+                    LocationKeys = entity.CommittedProjectLocation?.ToLocationKeys(networkKeyAttribute)
+                };
+                return commit;
                 default:
                     throw new ArgumentException($"Location type of {entity.CommittedProjectLocation.Discriminator} is not supported.");
             }

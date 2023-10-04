@@ -69,6 +69,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Name = "Something",
             ShadowForAnyTreatment = 1,
             ShadowForSameTreatment = 1,
+            ProjectSource = "Committed",
             Cost = 10000,
             SimulationId = simulationId,
             ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Local").Id,

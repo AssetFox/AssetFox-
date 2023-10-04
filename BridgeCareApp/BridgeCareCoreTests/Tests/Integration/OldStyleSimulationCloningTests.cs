@@ -331,6 +331,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                     Cost = 500000,
                     Name = "Committed Project",
                     Year = DateTime.Now.Year,
+                    ProjectSource = "Committed",
                     ShadowForAnyTreatment = 1,
                     ShadowForSameTreatment = 1,
                     ScenarioBudgetId = budgetId

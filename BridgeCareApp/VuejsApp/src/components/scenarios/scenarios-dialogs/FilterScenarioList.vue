@@ -20,8 +20,8 @@
                     v-model="FilterCategory"
                     return-object
                     v-on:change="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
-                    dense
-                    variant="outlined"
+                    density="default"
+                    variant = "outlined"
                 ></v-select>
                 <v-text-field
                     id="CreateScenarioDialog-scenarioName-textField"

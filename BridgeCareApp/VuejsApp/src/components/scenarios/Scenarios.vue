@@ -98,7 +98,7 @@
                                         <td>
                                         
                                             <v-edit-dialog
-                                                large
+                                                size="large"
                                                 lazy
                                                 persistent
                                                 :return-value.sync="
@@ -173,19 +173,18 @@
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.reportStatus }}</td>
                                         <td>
-                                            <v-menu offset left>
+                                            <v-menu offset location="left">
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
+
                                                 >
                                                     <v-btn
                                                         id="Scenarios-actionMenu-vbtn"
                                                         color="text-green darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -212,7 +211,7 @@
                                         </td>
                                     </template>
                                     <v-alert
-                                        :value="hasMineSearch()"
+                                        :model-value="hasMineSearch()"
                                         class="ara-orange-bg"
                                         icon="fas fa-exclamation"
                                         slot="no-data"
@@ -290,7 +289,7 @@
 
                                         <td>
                                             <v-edit-dialog
-                                                large
+                                                size="large"
                                                 lazy
                                                 persistent
                                                 :return-value.sync="
@@ -365,19 +364,17 @@
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.reportStatus }}</td>
                                         <td>
-                                            <v-menu offset left>
+                                            <v-menu offset location="left">
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
                                                 >
                                                     <v-btn
                                                         id="Scenarios-shared-actionMenu-vbtn"
                                                         color="text-green darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -400,7 +397,7 @@
                                     </template>
                                     <template v-slot:no-data v-if="hasSharedSearch()">
                                         <v-alert
-                                            :value="true"
+                                            :model-value="true"
                                             class="ara-orange-bg"
                                             icon="fas fa-exclamation">
                                             Your search for "{{ currentSearchShared }}"
@@ -450,18 +447,16 @@
                                         <td>{{ props.item.previousRunTime }}</td>
                                         <td>{{ props.item.status }}</td>  
                                         <td>
-                                            <v-menu offset left>
+                                            <v-menu offset location="left">
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
                                                 >
                                                     <v-btn
                                                         color="text-green darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -524,15 +519,13 @@
                                             <v-menu offset left>
                                                 <template
                                                     v-slot:activator="{
-                                                        on,
-                                                        attrs,
+                                                        props
                                                     }"
                                                 >
                                                     <v-btn
                                                         color="text-green darken-1"
                                                         icon
-                                                        v-bind="attrs"
-                                                        v-on="on"
+                                                        v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
@@ -1446,7 +1439,7 @@ import { useRouter } from 'vue-router';
     function onStartDataMigration() {
         // the legacy scenario id is hardcoded to our test scenario "JML Run District 8"
         migrateLegacySimulationDataAction({
-            simulationId: import.meta.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
+            simulationId: import.meta.env.VITE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
         }).then(() => initializeScenarioPages());
     }
 

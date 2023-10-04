@@ -27,7 +27,7 @@
                                     <v-menu
                                         min-height="500px"
                                         min-width="500px"
-                                        right
+                                        location="right"
                                     >
                                         <template slot="activator">
                                             <v-btn class="ghd-blue" tooltip variant = "flat" icon>
@@ -38,7 +38,7 @@
                                             <v-card-text>
                                                 <v-textarea
                                                     class="sm-txt Montserrat-font-family"
-                                                    :value=props.item.mergedExpression
+                                                    :model-value=props.item.mergedExpression
                                                     full-width
                                                     no-resize
                                                     outline

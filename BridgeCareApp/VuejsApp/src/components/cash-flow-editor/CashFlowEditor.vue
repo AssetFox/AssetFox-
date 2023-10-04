@@ -72,7 +72,7 @@
                         </td>
                         <td>
                             <v-edit-dialog
-                                :return-value.sync="item.name"
+                                :return-value.sync="item.value.name"
                                 large
                                 lazy
                                 @save="onEditSelectedLibraryListData(item,'description')"
@@ -82,7 +82,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
-                                    :value="item.name"
+                                    :model-value="item.value.name"
                                     :rules="[inputRules.generalRules.valueIsNotEmpty]"/>
                                 <template slot="input">
                                     <v-textarea
@@ -91,14 +91,14 @@
                                         outline
                                         rows="5"
                                         :rules="[inputRules.generalRules.valueIsNotEmpty]"
-                                        v-model="item.name"/>
+                                        v-model="item.value.name"/>
                                 </template>
                             </v-edit-dialog>
                         </td>
                         <td>
                             <v-layout align-center style='flex-wrap:nowrap'>
                                 <v-menu
-                                bottom
+                                location="bottom"
                                 min-height="500px"
                                 min-width="500px">
                                 <template slot="activator">
@@ -107,13 +107,13 @@
                                         readonly
                                         single-line
                                         class="sm-txt"
-                                        :value="item.criterionLibrary.mergedCriteriaExpression"/>
+                                        :model-value="item.value.criterionLibrary.mergedCriteriaExpression"/>
                                 </template>
                                 <v-card>
                                     <v-card-text>
                                         <v-textarea
-                                            :value="
-                                                item.criterionLibrary.mergedCriteriaExpression"
+                                            :model-value="
+                                                item.value.criterionLibrary.mergedCriteriaExpression"
                                             full-width
                                             no-resize
                                             outline
@@ -169,7 +169,8 @@
                         outline
                         rows="4"
                         v-model="selectedCashFlowRuleLibrary.description"
-                        @input='checkHasUnsavedChanges()'>
+                        @update:model-value="checkHasUnsavedChanges()">
+
                     </v-textarea>
                 </v-flex>
             </v-layout>

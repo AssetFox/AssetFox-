@@ -37,9 +37,9 @@
                             <td>
                                 <v-edit-dialog id="EditBudgetsDialog-budget-editDialog"
                                                :return-value.sync='props.item.name' persistent
-                                               @save='onEditBudgetName(props.item)' large lazy>
+                                               @save='onEditBudgetName(props.item)' size="large" lazy>
                                     <v-text-field id="EditBudgetsDialog-budget-textField"
-                                                  readonly single-line class='sm-txt' :value='props.item.name'
+                                                  readonly single-line class='sm-txt' :model-value='props.item.name'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
                                     <template slot='input'>
                                         <v-text-field label='Edit' single-line v-model='props.item.name'
@@ -49,7 +49,7 @@
                             </td>
                             <td>
                                 <v-text-field readonly single-line class='sm-txt'
-                                              :value='props.criterionLibrary.mergedCriteriaExpression'>
+                                              :model-value='props.criterionLibrary.mergedCriteriaExpression'>
                                     <template slot='append-inner'>
                                         <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" icon style="margin-top:-6px;">
                                             <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>

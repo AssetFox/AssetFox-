@@ -13,12 +13,12 @@
                                 v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
                                 :return-value.sync='props.item[header.value]'
                                 @save='onEditConsequenceProperty(props.item, header.value, props.item[header.value])'
-                                large lazy persistent>
+                                size="large" lazy persistent>
                                 <v-text-field v-if="header.value === 'attribute'" readonly single-line class='ghd-control-text-sm'
-                                              :value='props.item.attribute'
+                                              :model-value='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                 <v-text-field v-if="header.value === 'changeValue'" readonly single-line class='ghd-control-text-sm'
-                                              :value='props.item.changeValue'
+                                              :model-value='props.item.changeValue'
                                               :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]" />
                                 <template slot='input'>
                                     <v-select v-if="header.value === 'attribute'" :items='attributeSelectItems'
@@ -33,7 +33,7 @@
                             </v-edit-dialog>
 
                             <v-menu
-                                left
+                                location="left"
                                 min-height="500px"
                                 min-width="500px"
                                 v-show="header.value === 'equation'"
@@ -47,7 +47,7 @@
                                     <v-card-text>
                                         <v-textarea
                                             class="sm-txt"
-                                            :value="
+                                            :model-value="
                                                 props.item.equation.expression
                                             "
                                             full-width
@@ -65,7 +65,7 @@
                             </v-btn>                       
 
                             <v-menu
-                                left
+                                location="left"
                                 min-height="500px"
                                 min-width="500px"
                                 v-show="header.value === 'criterionLibrary'"
@@ -79,7 +79,7 @@
                                     <v-card-text>
                                         <v-textarea
                                             class="sm-txt"
-                                            :value="
+                                            :model-value="
                                                 props.item.criterionLibrary.mergedCriteriaExpression
                                             "
                                             full-width

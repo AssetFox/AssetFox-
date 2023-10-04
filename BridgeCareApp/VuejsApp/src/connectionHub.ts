@@ -17,7 +17,7 @@ export default {
     install(Vue: any) {
         const connection = new HubConnectionBuilder()
             .withUrl(
-                `${import.meta.env.VUE_APP_BRIDGECARE_CORE_URL}/bridgecarehub/`,
+                `${import.meta.env.VITE_APP_BRIDGECARE_CORE_URL}/bridgecarehub/`,
                 {
                     transport: HttpTransportType.LongPolling,
                 },

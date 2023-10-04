@@ -142,7 +142,7 @@
                         <v-text-field
                             readonly
                             class="sm-txt"
-                            :value="props.item.equation"
+                            :model-value="props.item.equation"
                             :disabled="!hasAdminAccess">
                             <template slot="append">
                                 <v-btn
@@ -159,7 +159,7 @@
                         <v-text-field 
                             readonly
                             class="sm-txt"
-                            :value="props.item.criteriaExpression"
+                            :model-value="props.item.criteriaExpression"
                             :disabled="!hasAdminAccess">
                             <template slot="append">
                                 <v-btn
@@ -204,7 +204,7 @@
                 class="ghd-text-field-border"
                 rows="4"
                 v-model="selectedCalculatedAttributeLibrary.description"
-                @input='checkHasUnsavedChanges()'/>
+                @update:model-value="checkHasUnsavedChanges()"/>
         </v-flex>
         <!-- buttons -->
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">

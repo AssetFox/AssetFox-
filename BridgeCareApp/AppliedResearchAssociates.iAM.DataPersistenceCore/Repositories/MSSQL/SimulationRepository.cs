@@ -15,6 +15,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Information;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using System.Threading;
 using AppliedResearchAssociates.iAM.Common;
+using Microsoft.Data.SqlClient;
 
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -1331,6 +1332,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteSimulation(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
+            _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(3600));
             queueLog ??= new DoNothingWorkQueueLog();
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
@@ -1348,6 +1350,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
+
+
                 queueLog.UpdateWorkQueueStatus("Deleting Budgets");
                 _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
                     _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
@@ -1380,13 +1384,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.Entry(committedEntities[index]).Reload();
                     index++;
                 }
+
                 if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 {
                     _unitOfWork.Rollback();
                     return;
                 }
+
                 queueLog.UpdateWorkQueueStatus("Deleting Simulation");
-                _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
+
+                //old code
+                //_unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
+
+                // Initialize output parameters
+                var retMessage = "";
+
+                // Create parameters for the stored procedure
+                var simGuidListParam = new SqlParameter("@SimGuidList", simulationId.ToString());
+                var retMessageParam = new SqlParameter("@RetMessage", SqlDbType.VarChar, 250);
+                retMessageParam.Direction = ParameterDirection.Output;
+
+                // Execute the stored procedure
+                _unitOfWork.Context.Database.ExecuteSqlRaw("EXEC usp_delete_simulation @SimGuidList, @RetMessage OUTPUT", simGuidListParam, retMessageParam);
+
+                // Capture the output values
+                retMessage = retMessageParam.Value as string;
+
                 _unitOfWork.Commit();
             }
             catch

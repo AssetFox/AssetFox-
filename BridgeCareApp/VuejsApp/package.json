@@ -33,6 +33,7 @@
         "moment": "^2.24.0",
         "msal": "^1.4.16",
         "popper.js": "^1.15.0",
+        "primevue": "^3.35.0",
         "ramda": "0.26.1",
         "socket.io-client": "^2.2.0",
         "typescript": "^5.2.2",

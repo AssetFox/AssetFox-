@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="65%" min persistent v-bind:show="showDialog">
+  <Dialog max-width="65%" v-bind="showDialog">
     <v-container fluid grid-list-xl>
         <v-layout>
             <v-flex xs12>
@@ -94,6 +94,9 @@
             </v-flex>
         </v-layout>
     </v-container>
+
+  </Dialog>
+  <v-dialog max-width="65%" min persistent v-bind:show="showDialog">
   </v-dialog>
 </template>
 
@@ -105,6 +108,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 const emit = defineEmits(['close'])
 let store = useStore();

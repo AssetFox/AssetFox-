@@ -29,6 +29,7 @@ import authenticationModule from './store-modules/authentication.module';
 import { ap } from 'ramda';
 import { IconProps, IconSet, createVuetify } from 'vuetify';
 import { fa } from 'vuetify/iconsets/fa'
+import PrimeVue from 'primevue/config';
 
 const ghdSearchIconSet: IconSet = {
   component: (props: IconProps) => {
@@ -63,9 +64,9 @@ icons: {
 app.use(router);
 app.use(store);
 app.use(vuetify);
+app.use(PrimeVue);
 
 //app.use(VueWorker);
-
 app.use(KendoChartInstaller);
 
 //app.use(VueCurrencyInput);

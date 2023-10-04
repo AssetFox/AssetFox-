@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,31 +9,27 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Reporting.Services;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Treatments;
-using BridgeCareCore.Services;
 using OfficeOpenXml;
+using System.Data;
+using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.Reporting.Services.NetworkExportReport;
+using Newtonsoft.Json.Linq;
+using AppliedResearchAssociates.iAM.Reporting.Services;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
-    public class BAMSPBExportReport : IReport
+    public class RawDataNetworkExportReport : IReport
     {
         protected readonly IHubService _hubService;
         private readonly IUnitOfWork _unitOfWork;
-        private Guid _networkId;                
+        private readonly NetworkTab _networkTab;
+        private Guid _networkId;
 
-        private readonly TreatmentForPBExportReport _treatmentForPBExportReportReport;
-
-        public BAMSPBExportReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
+        public RawDataNetworkExportReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
-            ReportTypeName = name;
-
-            //create summary report objects
-            _treatmentForPBExportReportReport = new TreatmentForPBExportReport(_unitOfWork);
-            if (_treatmentForPBExportReportReport == null) { throw new ArgumentNullException(nameof(_treatmentForPBExportReportReport)); }
+            _networkTab = new NetworkTab();
 
             // Check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -45,6 +41,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Report definition created.";
             Results = string.Empty;
             IsComplete = false;
+            Suffix = string.Empty;
+            Criteria = string.Empty;
         }
 
         public Guid ID { get; set; }
@@ -67,41 +65,36 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public string Suffix => throw new NotImplementedException();
-                
+        public string Suffix { get; private set; }
+
         public string Criteria { get; set; }
 
         public async Task Run(string parameters, CancellationToken? cancellationToken = null, IWorkQueueLog workQueueLog = null)
         {
             workQueueLog ??= new DoNothingWorkQueueLog();
-            // Check for the parameters
             if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
             {
-                Errors.Add("No simulation ID provided in the parameters of BAMS Simulation Report runner");
+                Errors.Add("No simulation ID provided in the parameters of PAMS Simulation Report runner");
                 IndicateError();
                 return;
             }
 
-            // Set simulation id
-            string simulationId = ReportHelper.GetSimulationId(parameters);
-            if (!Guid.TryParse(simulationId, out Guid _simulationId))
+            var scenarioId = ReportHelper.GetSimulationId(parameters);
+            if (!Guid.TryParse(scenarioId, out Guid _scenarioId))
             {
                 Errors.Add("Provided simulation ID is not a GUID");
                 IndicateError();
                 return;
             }
-            SimulationID = _simulationId;
 
-            var simulationName = string.Empty;
+            List<MaintainableAsset> maintainableAssets;
+            List<AggregatedResultDTO> aggregatedResults;
             try
             {
-                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-                {
-                    throw new Exception("Report was cancelled");
-                }
-                var simulationObject = _unitOfWork.SimulationRepo.GetSimulation(_simulationId);
-                simulationName = simulationObject.Name;
-                _networkId = simulationObject.NetworkId;
+                var networkObject = _unitOfWork.NetworkRepo.GetRawNetwork();
+                _networkId = networkObject.Id;
+                maintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(_networkId);
+                aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAllAggregatedResultsForNetwork(_networkId);
             }
             catch (Exception e)
             {
@@ -111,35 +104,31 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 return;
             }
 
-            // Check for simulation existence                        
-            if (simulationName == null)
+            if (maintainableAssets == null || aggregatedResults == null)
             {
                 IndicateError();
-                Errors.Add($"Failed to find name using simulation ID {_simulationId}.");
+                Errors.Add($"Failed to find MaintainableAssets or AggregatedResults using simulation ID {_scenarioId}.");
                 return;
             }
 
-            // Generate report 
             var reportPath = string.Empty;
             try
             {
                 if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-                {
                     throw new Exception("Report was cancelled");
-                }
-                reportPath = GenerateBAMSPBExportReport(_networkId, _simulationId, workQueueLog, cancellationToken);
+                reportPath = GenerateNetworkExportReport(workQueueLog, maintainableAssets, _networkId, aggregatedResults, cancellationToken);
             }
             catch (Exception e)
             {
                 IndicateError();
-                Errors.Add("Failed to generate BAMS PB Export report");
+                Errors.Add("Failed to generate Network Export report");
                 Errors.Add(e.Message);
                 return;
             }
 
             if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
             {
-                Errors.Add("BAMS PB Export report path is missing or not set");
+                Errors.Add("Network Export report path is missing or not set");
                 IndicateError();
                 return;
             }
@@ -148,71 +137,42 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Results = reportPath;
             IsComplete = true;
             Status = "File generated.";
+            SimulationID = _scenarioId;
+            NetworkID = _networkId;
+            ReportTypeName = "RawDataNetworkExportReport";
             return;
         }
 
-        private string GenerateBAMSPBExportReport(Guid networkId, Guid simulationId, IWorkQueueLog workQueueLog, CancellationToken? cancellationToken = null)
+        private string GenerateNetworkExportReport(IWorkQueueLog workQueueLog, List<MaintainableAsset> maintainableAssets, Guid networkId, List<AggregatedResultDTO> aggregatedResults, CancellationToken? cancellationToken = null)
         {
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-            {
                 throw new Exception("Report was cancelled");
-            }
             var reportPath = string.Empty;
             var reportDetailDto = new SimulationReportDetailDTO
             {
-                SimulationId = simulationId,
+                SimulationId = Guid.Empty,
                 Status = $"Generating..."
             };
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
-            UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);          
-
-            var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
-
-            //Get Simulation object
-            var explorerObject = _unitOfWork.AttributeRepo.GetExplorer();
-            var networkObject = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorerObject);
-            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, networkObject);
-            var simulationObject = networkObject.Simulations?.First();
-
-            //include treatments in simulation
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationObject);
-
-            // Report
-            using var excelPackage = new ExcelPackage(new FileInfo("BAMSPBExportReportData.xlsx"));
-
-            // BAMS Treatment TAB
-            reportDetailDto.Status = $"Creating BAMS Treatment TAB";
-            UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PBExportReportTabNames.Treatments);
-            _treatmentForPBExportReportReport.Fill(treatmentsWorksheet, simulationObject, reportOutputData);
+            using var excelPackage = new ExcelPackage(new FileInfo("RawDataNetworkExportReportData.xlsx"));
+            var worksheet = excelPackage.Workbook.Worksheets.Add("Aggregated Results");
+            _networkTab.Fill(worksheet, maintainableAssets, aggregatedResults);
 
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-            {
                 throw new Exception("Report was cancelled");
-            }
-            // Check and generate folder
             reportDetailDto.Status = $"Creating Report file";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
-            UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);          
-            var folderPathForSimulation = $"Reports\\{simulationId}";
+            var folderPathForSimulation = $"Reports\\{networkId}";
             Directory.CreateDirectory(folderPathForSimulation);
-            reportPath = Path.Combine(folderPathForSimulation, "BAMSPBExportReport.xlsx");
+            reportPath = Path.Combine(folderPathForSimulation, "RawDataNetworkExportReport.xlsx");
 
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-            {
                 throw new Exception("Report was cancelled");
-            }
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(reportPath, bin);
 
             reportDetailDto.Status = $"Report generation completed";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
-            UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);           
 
             return reportPath;
         }
@@ -228,7 +188,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private void IndicateError()
         {
-            Status = "BAMS PB Export output report completed with errors";
+            Status = "Network Export output report completed with errors";
             IsComplete = true;
         }
 

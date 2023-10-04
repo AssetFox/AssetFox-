@@ -29,7 +29,7 @@
                                 <span>Shared</span>
                             </template>
                         </v-badge>
-                        <v-btn @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn id="RemainingLifeLimitEditor-shareLibrary-vbtn" @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -39,7 +39,7 @@
                 <v-layout justify-end align-end style="padding-top: 18px !important;">
                     <div>
                         <v-btn id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn" class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" outline>Add Remaining Life Limit</v-btn>
-                        <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style ="ri"  @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" outline>Create New Library</v-btn>
+                        <v-btn id="RemainingLifeLimitEditor-createNewLibrary-vbtn" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style ="ri"  @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" outline>Create New Library</v-btn>
                     </div>
                 </v-layout>
                 </v-flex>
@@ -149,7 +149,7 @@
                         <td v-else>-
                         </td>
                         <td class="px-0">
-                            <v-btn @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
+                            <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                             </v-btn>   
                         </td>

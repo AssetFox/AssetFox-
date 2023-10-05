@@ -361,8 +361,8 @@ namespace BridgeCareCore.Controllers
             try
             {
                 await Task.Factory.StartNew(() =>
-                {
-                    var libraryAccess = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
+                {                    
+                    var libraryAccess = UnitOfWork.SelectableTreatmentRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
                     if (libraryAccess.LibraryExists == upsertRequest.IsNewLibrary)
                     {
                         var errorMessage = libraryAccess.LibraryExists ? RequestedToCreateExistingLibraryErrorMessage : RequestedToModifyNonexistentLibraryErrorMessage;
@@ -375,7 +375,7 @@ namespace BridgeCareCore.Controllers
                         _claimHelper.CheckUserLibraryModifyAuthorization(libraryAccess, UserId);
                         dto.Treatments = items;
                     }
-                    UnitOfWork.TreatmentLibraryUserRepo.UpsertTreatmentLibraryUser(dto, UserId);
+                    UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(dto,upsertRequest.IsNewLibrary, UserId);
                 });
 
                 return Ok();

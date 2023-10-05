@@ -11,6 +11,7 @@ using BridgeCareCore.Models;
 using BridgeCareCoreTests.Helpers;
 using BridgeCareCoreTests.Tests.Treatment;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Graph.Models;
 using Microsoft.SqlServer.Dac.Model;
 using Moq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
@@ -117,7 +118,7 @@ namespace BridgeCareCoreTests.Tests
                 IsNewLibrary = false,
                 Library = dto,
             };
-            treatementLibraryUserRepo.SetupGetLibraryAccess(libraryRequest.Library.Id, libraryExists);
+            treatmentRepo.SetupGetLibraryAccess(libraryRequest.Library.Id, libraryExists);
             pagingService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(new List<TreatmentDTO>()); // correct? Merge build error here.
             var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
             // Act
@@ -239,7 +240,7 @@ namespace BridgeCareCoreTests.Tests
             var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);            
             var treatmentLibraryRepo = TreatmentLibraryUserMocks.New(unitOfWork);
             var treatmentService = TreatmentServiceMocks.EmptyMock;
-            var pagingService = TreatmentPagingServiceMocks.EmptyMock;            
+            var pagingService = TreatmentPagingServiceMocks.EmptyMock;           
             var libraryId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
             var treatmentBefore = new TreatmentDTO
@@ -281,6 +282,7 @@ namespace BridgeCareCoreTests.Tests
             var libraryUser = LibraryUserDtos.Modify(user.Id);
             var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             treatmentLibraryRepo.SetupGetLibraryAccess(libraryId, libraryExists);
+            treatmentRepo.SetupGetLibraryAccess(libraryRequest.Library.Id, libraryExists);           
             var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
 
             // Act

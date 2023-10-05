@@ -241,7 +241,7 @@ namespace BridgeCareCore.Controllers
                         var isCompatible = _completeSimulationCloningService.CheckCompatibleNetworkAttributes(dto);
                         if (!isCompatible)
                         {
-                            //Give error message when networks are not compatible
+                            //Provide error message when networks are not compatible
                             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::CloneSimulation - destination network is not compatible.");
                             return null;
                         }

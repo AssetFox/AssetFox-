@@ -1333,7 +1333,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void DeleteSimulation(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(3600));
+
+            // Create parameters for the stored procedure
+            var retMessageParam = new SqlParameter("@RetMessage", SqlDbType.VarChar, 250);
+            string retMessage = "";
+
             queueLog ??= new DoNothingWorkQueueLog();
+
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 return;
@@ -1351,70 +1357,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     return;
                 }
 
-
-                queueLog.UpdateWorkQueueStatus("Deleting Budgets");
-                _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
-                    _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-                {
-                    _unitOfWork.Rollback();
-                    return;
-                }
-                _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
-                    _.ScenarioSelectableTreatment.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-                var count = _unitOfWork.Context.CommittedProject.Where(_ =>
-                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).Count();
-
-                var committedEntities = _unitOfWork.Context.CommittedProject.Where(_ =>
-                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).ToList();
-                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-                {
-                    _unitOfWork.Rollback();
-                    return;
-                }
-                queueLog.UpdateWorkQueueStatus("Deleting Committed Projects");
-                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
-                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-                var index = 0;
-                while (index < committedEntities.Count)
-                {
-                    _unitOfWork.Context.Entry(committedEntities[index]).Reload();
-                    index++;
-                }
-
-                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-                {
-                    _unitOfWork.Rollback();
-                    return;
-                }
-
                 queueLog.UpdateWorkQueueStatus("Deleting Simulation");
 
-                //old code
-                //_unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
-
-                // Initialize output parameters
-                var retMessage = "";
+                string tmpsimulationId = simulationId.ToString();
+                // RegEx Explained: \s means "match any whitespace token", and + means "match one or more of the proceeding token
+                tmpsimulationId = System.Text.RegularExpressions.Regex.Replace(tmpsimulationId, @"\s+", string.Empty);
 
                 // Create parameters for the stored procedure
-                var simGuidListParam = new SqlParameter("@SimGuidList", simulationId.ToString());
-                var retMessageParam = new SqlParameter("@RetMessage", SqlDbType.VarChar, 250);
+                var simGuidListParam = new SqlParameter("@SimGuidList", tmpsimulationId.ToString());
                 retMessageParam.Direction = ParameterDirection.Output;
 
                 // Execute the stored procedure
                 _unitOfWork.Context.Database.ExecuteSqlRaw("EXEC usp_delete_simulation @SimGuidList, @RetMessage OUTPUT", simGuidListParam, retMessageParam);
 
-                // Capture the output values
+                // Capture the success output value
                 retMessage = retMessageParam.Value as string;
 
                 _unitOfWork.Commit();
+
             }
             catch
             {
-                _unitOfWork.Rollback();
+                // Capture the fail output value
+                retMessage = retMessageParam.Value as string;
+               _unitOfWork.Rollback();
                 throw;
             }
         }

@@ -1372,6 +1372,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 // Capture the success output value
                 retMessage = retMessageParam.Value as string;
+
                 _unitOfWork.Commit();
 
             }

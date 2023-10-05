@@ -1,5 +1,6 @@
 ﻿<template>
-    <v-dialog max-width="450px" persistent v-model="showDialog">
+    <Dialog>
+    <!-- <v-dialog max-width="450px" persistent v-model="showDialog"> -->
         <v-card elevation="5" variant = "outlined" class="modal-pop-up-padding">
             <v-card-title>
                 <h3 class="dialog-header">
@@ -50,7 +51,8 @@
                 </v-layout>
             </v-card-actions>
         </v-card>
-    </v-dialog>
+    <!-- </v-dialog> -->
+    </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -66,6 +68,7 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { useStore } from 'vuex'; 
+import Dialog from 'primevue/dialog';
 
   let store = useStore(); 
 

@@ -1,5 +1,6 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="showDialog">
+  <Dialog>
+  <!-- <v-dialog max-width="450px" persistent v-model="showDialog"> -->
     <v-card>
       <v-card-title>
         <v-layout justify-center>
@@ -21,11 +22,13 @@
         </v-layout>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  <!-- </v-dialog> -->
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
 import Vue from 'vue'; 
+import Dialog from 'primevue/dialog';
 
   const emit = defineEmits(['submit'])
   const props = defineProps<{showDialog: boolean}>();

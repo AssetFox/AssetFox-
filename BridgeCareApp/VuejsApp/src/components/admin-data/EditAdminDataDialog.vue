@@ -1,5 +1,6 @@
 <template>
-    <v-dialog max-width="600px" persistent v-model="DialogData.showDialog">
+    <Dialog>
+    <!-- <v-dialog max-width="600px" persistent v-model="DialogData.showDialog"> -->
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
             <v-layout justify-space-between align-center>
@@ -48,7 +49,8 @@
             </v-layout>
             </v-card-actions>
         </v-card>
-    </v-dialog>
+    <!-- </v-dialog> -->
+    </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -61,6 +63,7 @@ import { clone, empty, isNil } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
     let InputRules: InputValidationRules = rules;
     let DialogData: EditAdminDataDialogData = emptyEditAdminDataDialogData ;

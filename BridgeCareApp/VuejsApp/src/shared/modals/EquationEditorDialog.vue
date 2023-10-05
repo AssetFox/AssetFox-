@@ -131,7 +131,7 @@
                                           sort-icon=$vuetify.icons.ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
-                              <template slot="items" slot-scope="props"  v-slot:items="props">
+                              <template slot="items" slot-scope="props"  v-slot:item="props">
                                 <td v-for="header in piecewiseGridHeaders">
                                   <div v-if="header.value !== ''">
                                     <div v-if="props.item.timeValue === 0">
@@ -202,7 +202,7 @@
                                           sort-icon=$vuetify.icons.ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
-                              <template slot="items" slot-scope="props"  v-slot:items="props">
+                              <template slot="items" slot-scope="props"  v-slot:item="props">
                                 <td v-for="header in timeInRatingGridHeaders">
                                   <div v-if="header.value !== ''">
                                     <div @click="onEditDataPoint(props.item, header.value)"

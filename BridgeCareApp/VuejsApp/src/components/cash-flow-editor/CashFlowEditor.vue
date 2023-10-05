@@ -84,7 +84,7 @@
                                     class="sm-txt"
                                     :model-value="item.value.name"
                                     :rules="[inputRules.generalRules.valueIsNotEmpty]"/>
-                                <template slot="input">
+                                <template v-slot:input>
                                     <v-textarea
                                         label="Description"
                                         no-resize
@@ -101,7 +101,7 @@
                                 location="bottom"
                                 min-height="500px"
                                 min-width="500px">
-                                <template slot="activator">
+                                <template v-slot:activator>
                                     <v-text-field
                                         id="CashFlowEditor-criteria-text"
                                         readonly

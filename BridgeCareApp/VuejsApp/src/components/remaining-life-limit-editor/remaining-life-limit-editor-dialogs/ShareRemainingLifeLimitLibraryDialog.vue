@@ -14,7 +14,7 @@
                       :items="remainingLifeLimitLibraryUserGridRows"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
-          <template slot="items" slot-scope="props">
+          <template slot="items" slot-scope="props" v-slot:item="props">
             <td>
               {{ props.item.username }}
             </td>

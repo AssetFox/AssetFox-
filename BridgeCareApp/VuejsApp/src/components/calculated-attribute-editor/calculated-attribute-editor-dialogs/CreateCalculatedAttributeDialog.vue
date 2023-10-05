@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-dialog v-model="showDialog"
+    <v-dialog v-bind:show="showDialog"
               max-width="250px"
               persistent>
       <v-card>

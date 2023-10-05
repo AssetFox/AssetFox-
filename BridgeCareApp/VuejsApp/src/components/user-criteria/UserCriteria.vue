@@ -67,14 +67,13 @@
                 </v-icon>
               </span>
             </template>
-            <template v-slot:items="props" slot='items' 
-            slot-scope='props'>
+            <template v-slot:item="props" slot='items' slot-scope='props'>
               <td style='width: 15%; font-size: 1.2em; padding-top: 0.4em'>{{ props.item.userName }}</td>
               <td style='width: 35%'>
                 <v-layout align-center style='flex-wrap:nowrap; margin-left: 0; width: 100%'>
                   <v-menu bottom 
                       min-height='500px' min-width='500px' v-if='props.item.hasCriteria' style='width: 100%'>
-                    <template slot='activator'>
+                    <template v-slot:activator>
                       <v-text-field class='sm-txt' :model-value='props.item.criteria' readonly style='width: 100%' type='text' />
                     </template>
                     <v-card>
@@ -132,7 +131,7 @@
               </td>
               <td>
                 <v-menu bottom min-height='200px' min-width='200px'>
-                  <template slot='activator'>
+                  <template v-slot:activator>
                     <v-text-field v-model='props.item.description' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' class='text-center' />
                   </template>
                   <v-card>

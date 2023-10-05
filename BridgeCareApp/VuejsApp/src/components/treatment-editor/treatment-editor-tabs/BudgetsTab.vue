@@ -20,9 +20,9 @@
                                           hide-actions
                                           item-key='id' select-all
                                           v-model='selectedBudgets'>
-                                <template slot='items' slot-scope='props'  v-slot:items="props">
+                                <template slot='items' slot-scope='props'  v-slot:item="props">
                                     <td>
-                                        <v-checkbox hide-details primary v-model='props.selected' />
+                                        <v-checkbox hide-details primary v-model='props.item.selected' />
                                     </td>
                                     <td style="width:400px;">
                                         {{ props.item.name }}

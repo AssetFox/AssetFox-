@@ -175,7 +175,7 @@
                                                     .valueIsNotEmpty,
                                             ]"
                                         />
-                                        <template slot="input">
+                                        <template v-slot:input>
                                             <v-text-field
                                                 label="Edit"
                                                 single-line
@@ -213,7 +213,7 @@
                                                     .valueIsNotEmpty,
                                             ]"
                                         />
-                                        <template slot="input">
+                                        <template v-slot:input>
                                             <v-select
                                                 :items="attributeSelectItems"
                                                 append-icon=$vuetify.icons.ghd-down
@@ -237,7 +237,7 @@
                                                 ''
                                         "
                                     >
-                                        <template slot="activator">
+                                        <template v-slot:activator>
                                             <v-btn id="PerformanceCurveEditor-checkEquationEye-vbtn" class="ghd-blue" icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
@@ -282,7 +282,7 @@
                                                 .mergedCriteriaExpression !== ''
                                         "
                                     >
-                                        <template slot="activator">
+                                        <template v-slot:activator>
                                             <v-btn id="PerformanceCurveEditor-checkCriteriaEye-vbtn" class="ghd-blue" variant = "flat" icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
@@ -471,6 +471,7 @@
 </template>
 
 <script  lang="ts" setup>
+import Vue from 'vue';
 import CreatePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
 import CreatePerformanceCurveDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';

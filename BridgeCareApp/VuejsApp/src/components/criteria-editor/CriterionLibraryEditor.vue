@@ -22,7 +22,7 @@
                         v-model="selectedCriterionLibrary.name"
                         @change="canUpdateOrCreate = true"
                     >
-                        <template slot="append-inner">
+                        <template v-slot:append-inner>
                             <v-btn
                                 @click="librarySelectItemValue = ''"
                                 class="ara-orange"

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="850px" persistent v-model="showDialog">
+  <v-dialog max-width="850px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-layout justify-space-between align-center>
@@ -37,7 +37,7 @@
                                     rules[
                                         'cashFlowRules'
                                     ].isDurationGreaterThanPreviousDuration(item,selectedCashFlowRule)]"/>
-                            <template slot="input">
+                            <template v-slot:input>
                                 <v-text-field
                                     id="CashFlowRuleEditDialog-yearEdit-vtextfield"
                                     label="Edit"
@@ -83,7 +83,7 @@
                                         selectedCashFlowRule
                                     )
                                 ]"/>
-                            <template slot="input">
+                            <template v-slot:input>
                                 <v-text-field
                                     name="CashFlowRuleEditDialog-dollarEdit-vtextfield"
                                     label="Edit"
@@ -132,7 +132,7 @@
                                     rules['cashFlowRules']
                                         .doesTotalOfPercentsEqualOneHundred
                                 ]"/>
-                            <template slot="input">
+                            <template v-slot:input>
                                 <v-text-field
                                     id="CashFlowRuleEditDialog-distributionEdit-vtextfield"
                                     label="Edit"

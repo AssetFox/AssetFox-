@@ -37,7 +37,7 @@
                                     rules[
                                         'cashFlowRules'
                                     ].isDurationGreaterThanPreviousDuration(item,selectedCashFlowRule)]"/>
-                            <template slot="input">
+                            <template v-slot:input>
                                 <v-text-field
                                     id="CashFlowRuleEditDialog-yearEdit-vtextfield"
                                     label="Edit"
@@ -83,7 +83,7 @@
                                         selectedCashFlowRule
                                     )
                                 ]"/>
-                            <template slot="input">
+                            <template v-slot:input>
                                 <v-text-field
                                     name="CashFlowRuleEditDialog-dollarEdit-vtextfield"
                                     label="Edit"
@@ -132,7 +132,7 @@
                                     rules['cashFlowRules']
                                         .doesTotalOfPercentsEqualOneHundred
                                 ]"/>
-                            <template slot="input">
+                            <template v-slot:input>
                                 <v-text-field
                                     id="CashFlowRuleEditDialog-distributionEdit-vtextfield"
                                     label="Edit"

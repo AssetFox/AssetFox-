@@ -80,7 +80,7 @@
                                     readonly
                                     rows="3"
                                 >
-                                    <template slot="append">
+                                    <template v-slot:append>
                                         <v-btn
                                             @click="onRemoveSubCriteria(index)"
                                             class="ghd-blue"

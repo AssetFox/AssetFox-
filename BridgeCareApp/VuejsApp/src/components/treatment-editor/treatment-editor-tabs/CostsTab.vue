@@ -10,7 +10,7 @@
                     class="elevation-1 v-table__overflow ghd-padding-top"
                     hide-actions
                 >
-                    <template slot="items" slot-scope="props" v-slot:items="props">
+                    <template slot="items" slot-scope="props" v-slot:item="props">
                         <tr style="border:none">
                             <td xs5>                            
                                 <v-layout xs6 align-center>                                

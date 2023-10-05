@@ -17,7 +17,7 @@
                             class="fixed-header ghd-table v-table__overflow"
                             item-key="id"
                         >
-                            <template slot="items" slot-scope="props">
+                            <template slot="items" slot-scope="props" v-slot:item="props">
                                 <td class="text-xs-left">
                                     <div>
                                         <span class='lg-txt'>{{props.item.name}}</span>
@@ -29,7 +29,7 @@
                                         min-width="500px"
                                         location="right"
                                     >
-                                        <template slot="activator">
+                                        <template v-slot:activator>
                                             <v-btn class="ghd-blue" tooltip variant = "flat" icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>

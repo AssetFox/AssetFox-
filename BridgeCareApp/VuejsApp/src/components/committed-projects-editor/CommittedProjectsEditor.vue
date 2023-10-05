@@ -76,7 +76,7 @@
                         :rows-per-page-items=[5,10,25]
                         v-model="selectedCpItems"
                         class=" fixed-header v-table__overflow">
-                            <template slot="items" slot-scope="props">
+                            <template slot="items" slot-scope="props" v-slot:item="props">
                                 <td v-for="header in cpGridHeaders">
                                     <div>
                                         <v-combobox v-if="header.value === 'treatment'"
@@ -126,7 +126,7 @@
                                                 :model-value='formatAsCurrency(props.item[header.value])'
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
-                                            <template slot="input">
+                                            <template v-slot:input>
                                                 <v-text-field v-if="header.value === 'keyAttr'"
                                                     label="Edit"
                                                     single-line

@@ -94,7 +94,7 @@
                                     
                                     calculate-widths
                                 >
-                                    <template slot="items" slot-scope="props">
+                                    <template slot="items" slot-scope="props" v-slot:item="props">
                                         <td>
                                         
                                             <v-edit-dialog
@@ -117,7 +117,7 @@
                                                 "
                                             >
                                                 {{ props.item.name }}
-                                                <template slot="input">
+                                                <template v-slot:input>
                                                     <v-text-field
                                                         label="Edit"
                                                         single-line
@@ -285,7 +285,7 @@
                                     :headers="scenarioGridHeaders"
                                     sort-icon=$vuetify.icons.ghd-table-sort
                                 >
-                                    <template slot="items" slot-scope="props">
+                                    <template slot="items" slot-scope="props" v-slot:item="props">
 
                                         <td>
                                             <v-edit-dialog
@@ -308,7 +308,7 @@
                                                 "
                                             >
                                                 {{ props.item.name }}
-                                                <template slot="input">
+                                                <template v-slot:input>
                                                     <v-text-field
                                                         label="Edit"
                                                         single-line
@@ -424,7 +424,7 @@
                                     :pagination.sync="workQueuePagination"
                                     sort-icon=$vuetify.icons.ghd-table-sort
                                 >                           
-                                    <template slot="items" slot-scope="props">
+                                    <template slot="items" slot-scope="props" v-slot:item="props">
                                         <td>{{ props.item.queuePosition }}</td>
                                         <td>
                                             {{ props.item.name }}
@@ -476,7 +476,7 @@
                                             </v-menu>
                                         </td>
                                     </template>                                         
-                                    <template slot="no-data">
+                                    <template v-slot:no-data>
                                         {{ getEmptyWorkQueueMessage() }}
                                     </template>
                                 </v-data-table>
@@ -493,7 +493,7 @@
                                     :pagination.sync="fastWorkQueuePagination"
                                     sort-icon=$vuetify.icons.ghd-table-sort
                                 >                           
-                                    <template slot="items" slot-scope="props">
+                                    <template slot="items" slot-scope="props" v-slot:item="props">
                                         <td>{{ props.item.queuePosition }}</td>
                                         <td>
                                             {{ props.item.name }}
@@ -545,7 +545,7 @@
                                             </v-menu>
                                         </td>
                                     </template>                                         
-                                    <template slot="no-data">
+                                    <template v-slot:no-data>
                                         {{ getEmptyWorkQueueMessage() }}
                                     </template>
                                 </v-data-table>

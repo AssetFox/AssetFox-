@@ -1043,7 +1043,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
         {
-            var exists = _unitOfWork.Context.BudgetPriorityLibrary.Any(bl => bl.Id == libraryId);
+            var exists = _unitOfWork.Context.TreatmentLibrary.Any(bl => bl.Id == libraryId);
             if (!exists)
             {
                 return LibraryAccessModels.LibraryDoesNotExist();
@@ -1053,10 +1053,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
 
-        private List<LibraryUserDTO> GetAccessForUser(Guid budgetPriorityLibraryId, Guid userId)
+        private List<LibraryUserDTO> GetAccessForUser(Guid treatmentLibraryId, Guid userId)
         {
-            var dtos = _unitOfWork.Context.BudgetPriorityLibraryUser
-                .Where(u => u.LibraryId == budgetPriorityLibraryId && u.UserId == userId)
+            var dtos = _unitOfWork.Context.TreatmentLibraryUser
+                .Where(u => u.LibraryId == treatmentLibraryId && u.UserId == userId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;

@@ -140,7 +140,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             catch (Exception e)
             {
-                throw;
+                return "";
             }
         }
 

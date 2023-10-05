@@ -25,8 +25,8 @@ export default {
             .configureLogging(LogLevel.Information)
             .build();
 
-        const statusHub = new Vue();
-        Vue.prototype.$statusHub = statusHub;
+        const { statusHub } = Vue;
+        //Vue.prototype.$statusHub = statusHub;
 
         connection.on(
             Hub.BroadcastType.BroadcastAssignDataStatus,

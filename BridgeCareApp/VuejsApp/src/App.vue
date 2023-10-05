@@ -400,6 +400,7 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
     function authenticatedWithRole() {
         return authenticated && hasRole;
     }
+    
     watch(stateSelectedScenario, () => onStateSelectedScenarioChanged)
     function onStateSelectedScenarioChanged() {
         selectedScenario = clone(stateSelectedScenario.value);

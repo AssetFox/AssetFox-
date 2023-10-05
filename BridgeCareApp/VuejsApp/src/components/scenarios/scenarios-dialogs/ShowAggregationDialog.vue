@@ -159,9 +159,11 @@ import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
 import { Hub } from '@/connectionHub';
 import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject } from 'vue'; 
 import { useStore } from 'vuex'; 
+import mitt from 'mitt';
 
     let store = useStore(); 
     const $statusHub = inject('$statusHub') as any
+    const $emitter = mitt()
 
     const props = defineProps<{dialogData: any}>();
 
@@ -231,7 +233,7 @@ import { useStore } from 'vuex';
     function mounted() {
         networks = clone(stateNetworks);
 
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
             getDataAggregationStatus,
         );
@@ -304,7 +306,7 @@ import { useStore } from 'vuex';
 
     onBeforeUnmount(() => beforeDestroy); 
     function beforeDestroy() {
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
             getDataAggregationStatus,
         );

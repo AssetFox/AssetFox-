@@ -700,10 +700,12 @@ import { PagingRequest } from '@/shared/models/iAM/paging';
 import ScenarioService from '@/services/scenario.service';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
+import mitt from 'mitt';
 
     let store = useStore(); 
     const $router = useRouter(); 
     const $statusHub = inject('$statusHub') as any;
+    const $emitter = mitt()
 
     const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
     const stateScenarios: Scenario[] = shallowReactive(store.state.scenarioModule.scenarios); 
@@ -1219,32 +1221,32 @@ import { useRouter } from 'vue-router';
             initializeScenarioPages();
         } 
         
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             getDataMigrationStatus,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent,
             getScenarioAnalysisDetailUpdate,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent,
             updateWorkQueue,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent,
             getWorkQueueUpdate,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastFastWorkQueueUpdateEvent,
             updateFastWorkQueue,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent,
             getFastWorkQueueUpdate,
         );
 
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
@@ -1340,31 +1342,31 @@ import { useRouter } from 'vue-router';
 
     onBeforeUnmount(()=> beforeDestroy); 
     function beforeDestroy() {
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             getDataMigrationStatus,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent,
             getScenarioAnalysisDetailUpdate,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent,
             updateWorkQueue,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent,
             getWorkQueueUpdate,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastFastWorkQueueUpdateEvent,
             updateFastWorkQueue,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent,
             getFastWorkQueueUpdate,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );

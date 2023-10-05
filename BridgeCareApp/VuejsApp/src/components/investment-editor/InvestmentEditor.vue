@@ -342,6 +342,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import mitt from 'mitt';
 
 let store = useStore();
 const emit = defineEmits(['submit'])
@@ -349,6 +350,7 @@ const $vuetify = inject('$vuetify') as any
     const $router = useRouter();
     const $statusHub = inject('$statusHub') as any
     const $config = inject('$config') as any
+    const $emitter = mitt()
 let stateBudgetLibraries = ref<BudgetLibrary[]>(store.state.investmentModule.budgetLibraries);
 let stateSelectedBudgetLibrary = ref<BudgetLibrary>(store.state.investmentModule.selectedBudgetLibrary)
 let stateInvestmentPlan = ref<InvestmentPlan>(store.state.investmentModule.investmentPlan);
@@ -494,7 +496,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         }
     onMounted(()=>mounted)
     function mounted() {
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             importCompleted,
         );
@@ -502,7 +504,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     onBeforeUnmount(() => beforeDestroy());
     function beforeDestroy() {
         setHasUnsavedChangesAction({ value: false });
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             importCompleted,
         );

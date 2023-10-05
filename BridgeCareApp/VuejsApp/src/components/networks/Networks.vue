@@ -199,6 +199,7 @@ import { Hub } from '@/connectionHub';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
+import mitt from 'mitt';
 
     let store = useStore();
     let stateNetworks: ShallowRef<Network[]> = (store.state.networkModule.networks) ;
@@ -259,6 +260,7 @@ import { useStore } from 'vuex';
     );
 
     const $statusHub = inject('$statusHub') as any
+    const $emitter = mitt()
 
     created();
     function created() {
@@ -268,7 +270,7 @@ import { useStore } from 'vuex';
     }
     onMounted(() => mounted); 
     function mounted() {
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
             getDataAggregationStatus,
         );
@@ -276,7 +278,7 @@ import { useStore } from 'vuex';
 
     onBeforeUnmount(() => beforeDestroy)
     function beforeDestroy() {
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
             getDataAggregationStatus,
         );

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
+  <Dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
     <v-card>
       <v-card-title>
         <v-layout justify-center>
@@ -44,7 +44,7 @@
         </v-layout>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -61,7 +61,8 @@ import {BudgetPriorityLibraryUserGridRow, ShareBudgetPriorityLibraryDialogData }
 import BudgetPriorityService from '@/services/budget-priority.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
-  
+import Dialog from 'primevue/dialog';
+
   let store = useStore();
   let stateUsers = store.state.userModule.users;
   const props = defineProps<{

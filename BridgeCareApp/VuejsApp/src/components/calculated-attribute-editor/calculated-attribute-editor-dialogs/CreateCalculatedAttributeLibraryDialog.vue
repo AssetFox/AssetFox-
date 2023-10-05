@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="dialogData.showDialog" max-width="450px" persistent>
+    <Dialog v-bind:show="dialogData.showDialog" max-width="450px" persistent>
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
                 <v-layout justify-space-between align-center >
@@ -44,7 +44,7 @@
                 </v-layout>
             </v-card-actions>
         </v-card>
-    </v-dialog>
+    </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -63,6 +63,7 @@ import {
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 const emit = defineEmits(['submit'])
 const props = defineProps<{

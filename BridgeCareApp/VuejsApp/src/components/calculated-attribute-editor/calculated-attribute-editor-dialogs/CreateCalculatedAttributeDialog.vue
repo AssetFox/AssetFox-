@@ -1,8 +1,6 @@
 <template>
   <v-layout>
-    <v-dialog v-bind:show="showDialog"
-              max-width="250px"
-              persistent>
+    <Dialog v-bind:show="showDialog" max-width="250px" persistent>
       <v-card>
         <v-card-title>
           <v-layout justify-center>
@@ -37,7 +35,7 @@
           </v-layout>
         </v-card-actions>
       </v-card>
-    </v-dialog>
+    </Dialog>
   </v-layout>
 </template>
 
@@ -53,6 +51,7 @@ import { CalculatedAttribute, emptyCalculatedAttribute } from '@/shared/models/i
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
   let showDialog : boolean = false;
   let store = useStore();

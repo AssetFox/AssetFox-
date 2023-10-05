@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="850px" persistent v-bind:show="showDialog">
+    <Dialog max-width="850px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-layout justify-space-between align-center>
@@ -182,7 +182,7 @@
         </v-layout>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -203,6 +203,7 @@ import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 //import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { getLastPropertyValue } from '@/shared/utils/getter-utils';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import Dialog from 'primevue/dialog';
 
   const props = defineProps<{showDialog: boolean, selectedCashFlowRule: CashFlowRule}>()
   const emit = defineEmits(['submit']);

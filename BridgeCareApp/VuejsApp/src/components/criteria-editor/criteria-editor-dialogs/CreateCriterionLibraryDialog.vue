@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialogData.showDialog" max-width="450px" persistent>
+  <Dialog v-bind:show="dialogData.showDialog" max-width="450px" persistent>
     <v-card>
       <v-card-title>
         <v-layout justify-left>
@@ -43,7 +43,7 @@
           </v-layout>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -53,6 +53,7 @@ import {CreateCriterionLibraryDialogData} from '@/shared/models/modals/create-cr
 import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import Dialog from 'primevue/dialog';
 
 const props = defineProps<{dialogData: CreateCriterionLibraryDialogData}>()
 let newCriterionLibrary: CriterionLibrary = {...emptyCriterionLibrary, id: getNewGuid(), isSingleUse: false};

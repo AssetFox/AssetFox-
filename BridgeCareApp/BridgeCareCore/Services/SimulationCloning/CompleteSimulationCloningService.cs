@@ -86,7 +86,7 @@ namespace BridgeCareCore.Services
             var keyAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.NetworkId);
             var destinationKeyAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.DestinationNetworkId);
 
-            if (destinationKeyAttributes.Any(c => !keyAttributes.Contains(c)) && destinationKeyAttributes.Count > 0)
+            if (destinationKeyAttributes.Any(c => !keyAttributes.Contains(c)) && destinationKeyAttributes.Count > 0 || destinationKeyAttributes.Count() == 0)
             {
                 return false;
             }

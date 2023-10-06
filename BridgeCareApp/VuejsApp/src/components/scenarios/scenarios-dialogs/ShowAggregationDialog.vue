@@ -1,8 +1,8 @@
 <template>
-    <v-dialog
+    <Dialog         
         scrollable
         persistent
-        v-model="dialogData.showDialog"
+        v-bind:show="dialogData.showDialog"
         max-width="60%"
         transition="dialog-bottom-transition"
     >
@@ -139,7 +139,7 @@
                 />
             </v-flex>
         </v-card>
-    </v-dialog>
+    </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -159,6 +159,7 @@ import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
 import { Hub } from '@/connectionHub';
 import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject } from 'vue'; 
 import { useStore } from 'vuex'; 
+import Dialog from 'primevue/dialog';
 
     let store = useStore(); 
     const $statusHub = inject('$statusHub') as any

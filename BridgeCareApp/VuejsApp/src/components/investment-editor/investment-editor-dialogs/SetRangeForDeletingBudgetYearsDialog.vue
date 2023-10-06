@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="200px" persistent v-bind:show="showDialog">
+  <Dialog max-width="200px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title>
         <v-layout justify-center>
@@ -19,7 +19,7 @@
         <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script lang="ts" setup >
@@ -28,6 +28,7 @@ import {InputValidationRules, rules as validationRules} from '@/shared/utils/inp
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 const emit = defineEmits(['submit'])
 const props = defineProps<{

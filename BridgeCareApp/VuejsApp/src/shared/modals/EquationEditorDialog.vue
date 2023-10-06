@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-dialog max-width="900px" persistent scrollable v-model="dialogData.showDialog">
+    <Dialog max-width="900px" persistent scrollable v-bind:show="dialogData.showDialog">
       <v-card class="equation-container-card Montserrat-font-family">
         <v-card-title class="ghd-dialog-box-padding-top">
           <v-flex xs12>
@@ -280,9 +280,8 @@
           </v-layout>
         </v-card-actions>
       </v-card>
-    </v-dialog>
-
-    <v-dialog max-width="250px" persistent v-model="showAddDataPointPopup">
+    </Dialog>
+    <Dialog max-width="250px" persistent v-bind:show="showAddDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-layout column justify-center>
@@ -321,9 +320,8 @@
           </v-layout>
         </v-card-actions>
       </v-card>
-    </v-dialog>
-
-    <v-dialog max-width="400px" persistent v-model="showAddMultipleDataPointsPopup">
+    </Dialog>
+    <Dialog max-width="400px" persistent v-bind:show="showAddMultipleDataPointsPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-layout column justify-center>
@@ -351,9 +349,8 @@
           </v-layout>
         </v-card-actions>
       </v-card>
-    </v-dialog>
-
-    <v-dialog max-width="250px" persistent v-model="showEditDataPointPopup">
+    </Dialog>
+    <Dialog max-width="250px" persistent v-bind:show="showEditDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-layout column justify-center>
@@ -392,7 +389,7 @@
           </v-layout>
         </v-card-actions>
       </v-card>
-    </v-dialog>
+    </Dialog>
   </v-layout>
 </template>
 
@@ -416,6 +413,7 @@ import { emptyUserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 let store = useStore();
 const emit = defineEmits(['submit'])

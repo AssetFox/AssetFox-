@@ -1,5 +1,5 @@
 <template>
-  <v-dialog persistent fullscreen v-model="dialogData.showDialog" class="criterion-library-editor-dialog">
+  <Dialog persistent maximizable v-bind:show="dialogData.showDialog" class="criterion-library-editor-dialog">
     <v-card>
       <v-card-text>
         <v-layout justify-center column>
@@ -27,9 +27,8 @@
         </v-layout>
       </v-card-actions>
     </v-card>
-
     <HasUnsavedChangesAlert :dialogData="hasUnsavedChangesAlertData" @submit="onCloseHasUnsavedChangesAlert"/>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -51,6 +50,7 @@ import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 let store = useStore();
 const emit = defineEmits(['submitCriteriaEditorDialogResult'])

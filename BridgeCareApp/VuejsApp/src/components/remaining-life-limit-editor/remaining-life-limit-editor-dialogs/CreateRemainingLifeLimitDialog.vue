@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+  <Dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
     <v-card>
             <v-card-title class="ghd-dialog-padding-top-title">
         <v-layout justify-start>
@@ -36,7 +36,7 @@
         </v-layout>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -47,6 +47,7 @@ import {InputValidationRules, rules as validationRules} from '@/shared/utils/inp
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {clone} from 'ramda';
+import Dialog from 'primevue/dialog';
 
   const props = defineProps<{
     dialogData: CreateRemainingLifeLimitDialogData

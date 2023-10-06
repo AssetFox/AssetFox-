@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="350" persistent v-model="dialogDataWithButtons.showDialog">
+    <Dialog max-width="350" persistent v-bind:show="dialogDataWithButtons.showDialog">
         <v-card>
             <v-card-title class="headline">
                 <v-layout justify-center>
@@ -34,7 +34,7 @@
                 </v-layout>
             </v-card-actions>
         </v-card>
-    </v-dialog>
+    </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -43,6 +43,7 @@
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
     import { useStore } from 'vuex';
     import { useRouter } from 'vue-router';
+    import Dialog from 'primevue/dialog';
 
     const props = defineProps<{
         dialogDataWithButtons: AlertDataWithButtons

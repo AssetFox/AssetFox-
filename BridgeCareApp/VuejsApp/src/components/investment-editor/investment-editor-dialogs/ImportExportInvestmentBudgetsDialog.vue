@@ -1,6 +1,6 @@
 <template>
     <v-layout>
-        <v-dialog width="768px" height="540px" persistent v-model='showDialog'>
+        <Dialog width="768px" height="540px" persistent v-bind:show='showDialog'>
             <v-card class="div-padding">
                 <v-card-title class="pa-2">
                     <v-layout justify-start>
@@ -27,9 +27,8 @@
                     </v-layout>
                 </v-card-actions>
             </v-card>
-        </v-dialog>
-
-        <v-dialog max-width='400px' persistent v-model='isSuccessfulImport'>
+        </Dialog>
+        <Dialog max-width='400px' persistent v-bind='isSuccessfulImport'>
             <v-card>
                 <v-card-title class="title-padding">
                     <v-layout justify-center>
@@ -43,7 +42,7 @@
                 </v-card-actions>
                 
             </v-card>
-        </v-dialog>
+        </Dialog>
     </v-layout>
 </template>
 
@@ -55,6 +54,7 @@ import InvestmentBudgetsFileSelector from '@/shared/components/FileSelector.vue'
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref,shallowRef} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 let store = useStore();
 const emit = defineEmits(['submit'])

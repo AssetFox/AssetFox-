@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+  <Dialog max-width="450px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-layout justify-space-between align-center>
@@ -31,7 +31,7 @@
         </v-layout>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -39,6 +39,7 @@ import Vue from 'vue';
 import {BudgetPriority, emptyBudgetPriority} from '@/shared/models/iAM/budget-priority';
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import Dialog from 'primevue/dialog';
 
   const props = defineProps({
     showDialog: Boolean

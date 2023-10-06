@@ -1,5 +1,5 @@
 <template>
-    <v-dialog width="768px" height="540px" persistent v-model='showDialog'>
+    <Dialog width="768px" height="540px" persistent v-bind:show='showDialog'>
         <v-card class="div-padding">
             <v-card-title class="pa-2">
                 <v-layout justify-start>
@@ -21,7 +21,7 @@
                 </v-layout>
             </v-card-actions>
         </v-card>
-    </v-dialog>
+    </Dialog>
 </template>
 
 <script lang='ts' setup>
@@ -32,6 +32,7 @@ import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/impor
 import {clone} from 'ramda';
 import { useStore } from 'vuex';
 import TreatmentsFileSelector from '@/shared/components/FileSelector.vue';
+import Dialog from 'primevue/dialog';
 
     const props = defineProps<{showDialog: Boolean}>()
     const showDialog = props.showDialog;

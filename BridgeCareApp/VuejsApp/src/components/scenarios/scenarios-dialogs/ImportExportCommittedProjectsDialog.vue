@@ -1,7 +1,5 @@
 <template>
     <Dialog  width="768px" height="540px" persistent v-bind:show="showDialog">
-    <!-- <v-dialog  width="768px" height="540px" persistent v-model='showDialog'> -->
-    <!-- <v-dialog  width="768px" height="540px" persistent v-bind:show="showDialog"> -->
         <v-card class="div-padding">
             <v-card-title class="pa-2">
                 <v-layout justify-start>
@@ -34,7 +32,6 @@
                 </v-layout>
             </v-card-actions>
         </v-card>
-    <!-- </v-dialog> -->
     </Dialog>
 </template>
 

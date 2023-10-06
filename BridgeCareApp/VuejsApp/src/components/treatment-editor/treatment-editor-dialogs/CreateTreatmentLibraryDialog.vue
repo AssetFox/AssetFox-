@@ -1,6 +1,6 @@
 <template>
     <v-layout>
-        <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+        <Dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
             <v-card class="ghd-padding">
                 <v-card-title>
                     <v-layout justify-left>
@@ -43,7 +43,7 @@
                     </v-layout>
                 </v-card-actions>
             </v-card>
-        </v-dialog>
+        </Dialog>
     </v-layout>
 </template>
 
@@ -62,6 +62,7 @@ import { getUserName } from '@/shared/utils/get-user-info';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
     const props = defineProps<{dialogData: CreateTreatmentLibraryDialogData}>()
     const dialogData = props.dialogData;

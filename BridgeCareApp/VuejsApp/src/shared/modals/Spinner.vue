@@ -1,6 +1,6 @@
 ﻿<template>
     <v-layout>
-        <v-dialog content content-class="centered-dialog" persistent v-model="loading">
+        <Dialog content content-class="centered-dialog" persistent v-bind:show="loading">
             <v-container>
                 <v-layout align-center column justify-center>
                     <v-progress-circular :size="70" :width="7" class="ara-blue-pantone-281"
@@ -8,7 +8,7 @@
                     <h1>Please wait</h1>
                 </v-layout>
             </v-container>
-        </v-dialog>
+        </Dialog>
     </v-layout>
 </template>
 
@@ -17,6 +17,7 @@
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 let store = useStore();
 let loading = ref<boolean>(store.state.busyModule.isBusy);

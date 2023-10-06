@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+  <Dialog max-width="450px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-padding-top-title">
         <v-layout justify-start>
@@ -42,7 +42,7 @@
         </v-layout>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -57,6 +57,7 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
   const props = defineProps<{
           showDialog: boolean,

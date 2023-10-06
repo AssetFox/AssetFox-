@@ -1,8 +1,6 @@
 <template>
   <v-layout>
-    <v-dialog v-bind:show="showDialog"
-              max-width="434px"
-              persistent>
+    <Dialog v-bind:show="showDialog" max-width="434px" persistent>
       <v-card  height="411px" class="ghd-dialog">
         <v-card-title class="ghd-dialog">
           <v-layout justify-left>
@@ -63,7 +61,7 @@
           </v-layout>
         </v-card-actions>
       </v-card>
-    </v-dialog>
+    </Dialog>
   </v-layout>
 </template>
 
@@ -80,6 +78,7 @@ import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { on } from 'events';
+import Dialog from 'primevue/dialog';
 
 let store = useStore();
 const emit = defineEmits(['submit'])

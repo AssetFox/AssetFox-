@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+  <Dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
          <v-layout justify-space-between align-center>
@@ -28,7 +28,7 @@
         </v-layout>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -37,6 +37,7 @@ import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { clone } from 'ramda';
 import { AddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
 import { ref, Ref, watch } from 'vue';
+import Dialog from 'primevue/dialog';
 
   const props = defineProps<{
     dialogData: AddNetworkDialogData

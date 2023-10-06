@@ -1,10 +1,5 @@
 <template>
-    <v-dialog
-        persistent
-        fullscreen
-        v-model="dialogData.showDialog"
-        class="criterion-library-editor-dialog"
-    >
+    <Dialog persistent maximizable v-model="dialogData.showDialog" class="criterion-library-editor-dialog">
         <v-card>
             <v-card-text>
                 <v-layout justify-center column>
@@ -46,7 +41,7 @@
             :dialogData="hasUnsavedChangesAlertData"
             @submit="onCloseHasUnsavedChangesAlert"
         />
-    </v-dialog>
+    </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -66,6 +61,7 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 let store = useStore();
 const emit = defineEmits(['submit'])

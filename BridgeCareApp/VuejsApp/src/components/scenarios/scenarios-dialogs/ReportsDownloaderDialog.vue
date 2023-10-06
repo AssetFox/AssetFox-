@@ -1,7 +1,5 @@
 ﻿<template>
-  <v-dialog max-width="500px"
-            scrollable
-            v-model="dialogData.showModal">
+  <Dialog max-width="500px" scrollable v-bind:show="dialogData.showModal">
     <v-card>
       <v-card-title primary-title>
         <v-layout column>
@@ -47,7 +45,7 @@
           </v-chip>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+    </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -64,6 +62,7 @@ import { SelectItem } from '@/shared/models/vue/select-item';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { clone } from 'ramda';
 import { useStore } from 'vuex'; 
+import Dialog from 'primevue/dialog';
 
     let store = useStore(); 
 

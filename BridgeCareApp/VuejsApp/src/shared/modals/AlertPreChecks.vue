@@ -1,6 +1,6 @@
 <template>
     <v-layout>
-        <v-dialog style="overflow-y: auto" max-width='800px' persistent scrollable v-model="dialogDataPreChecks.showDialog">
+        <Dialog style="overflow-y: auto" max-width='800px' persistent scrollable v-bind:show="dialogDataPreChecks.showDialog">
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-layout justify-space-between align-center>
@@ -46,7 +46,7 @@
                     </v-layout>
                 </v-card-actions>
             </v-card>
-        </v-dialog>
+        </Dialog>
     </v-layout>
 </template>
 
@@ -56,6 +56,7 @@
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
     import { useStore } from 'vuex';
     import { useRouter } from 'vue-router';
+    import Dialog from 'primevue/dialog';
 
     const props = defineProps<{
         dialogDataPreChecks: AlertPreChecksData

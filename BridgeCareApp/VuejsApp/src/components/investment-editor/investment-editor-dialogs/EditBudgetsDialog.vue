@@ -1,6 +1,6 @@
 <template>
     <v-layout>
-        <v-dialog max-width='800px' persistent scrollable v-model='dialogData.showDialog'>
+        <Dialog max-width='800px' persistent scrollable v-bind:show='dialogData.showDialog'>
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-layout justify-space-between align-center>
@@ -82,7 +82,7 @@
                     </v-layout>
                 </v-card-actions>
             </v-card>
-        </v-dialog>
+        </Dialog>
         <GeneralCriterionEditorDialog :dialogData='criterionLibraryEditorDialogData'
                                       @submit='onSubmitCriterionLibraryEditorDialogResult' />
     </v-layout>
@@ -106,6 +106,7 @@ import { isNull, isNullOrUndefined } from 'util';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 let store = useStore();
 const emit = defineEmits(['submit'])

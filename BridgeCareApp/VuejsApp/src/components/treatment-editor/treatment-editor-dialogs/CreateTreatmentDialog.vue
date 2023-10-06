@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+    <Dialog max-width="450px" persistent v-bind:show="showDialog">
       <v-card class="ghd-padding">
         <v-card-title>
             <v-layout justify-left>
@@ -31,7 +31,7 @@
           </v-layout>
         </v-card-actions>
       </v-card>
-    </v-dialog>
+    </Dialog>
   </v-layout>
 </template>
 
@@ -41,6 +41,7 @@ import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vu
 import { useStore } from 'vuex';
 import {emptyTreatment, Treatment} from '@/shared/models/iAM/treatment';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import Dialog from 'primevue/dialog';
 
 const props = defineProps<{showDialog: Boolean}>()
 const showDialog = props.showDialog;

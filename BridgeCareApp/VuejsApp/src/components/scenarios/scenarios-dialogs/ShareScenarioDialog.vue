@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
+  <Dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
     <v-card>
       <v-card-title>
         <v-layout justify-center>
@@ -40,7 +40,7 @@
         </v-layout>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -54,6 +54,7 @@ import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {ScenarioUserGridRow, ShareScenarioDialogData} from '@/shared/models/modals/share-scenario-dialog-data';
 import { useStore } from 'vuex'; 
+import Dialog from 'primevue/dialog';
 
   let store = useStore(); 
 

@@ -1,5 +1,5 @@
 <template>
-    <v-dialog  width="768px" height="540px" persistent v-model='showDialog'>
+    <Dialog width="768px" height="540px" persistent v-bind:show='showDialog'>
         <v-card class="div-padding">
             <v-card-title class="pa-2">
                 <v-layout justify-start>
@@ -21,7 +21,7 @@
                 </v-layout>
             </v-card-actions>
         </v-card>
-    </v-dialog>
+    </Dialog>
 </template>
 
 <script lang='ts' setup>
@@ -33,6 +33,7 @@ import PerformanceCurvesFileSelector from '@/shared/components/FileSelector.vue'
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 const emit = defineEmits(['submit'])
 let store = useStore();

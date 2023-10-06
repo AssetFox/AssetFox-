@@ -495,6 +495,13 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet("projectsources")]
+        public IActionResult GetProjectSources()
+        {
+            var projectSources = Enum.GetNames(typeof(ProjectSourceDTO)).ToList();
+            return Ok(projectSources);
+        }
+
         private void CheckUpsertPermit(List<SectionCommittedProjectDTO> projects)
         {
             if (_claimHelper.RequirePermittedCheck())

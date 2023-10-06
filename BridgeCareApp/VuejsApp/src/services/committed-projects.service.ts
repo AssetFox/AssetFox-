@@ -120,6 +120,10 @@ export default class CommittedProjectsService {
         );
     }
 
+    static getProjectSources(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.CommittedProject}/projectsources`);
+    }
+       
     static FillTreatmentValues(data: CommittedProjectFillTreatmentValues){
         return coreAxiosInstance.post(
             `${API.CommittedProject}/FillTreatmentValues`, data

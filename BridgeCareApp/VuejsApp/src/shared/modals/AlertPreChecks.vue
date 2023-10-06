@@ -17,9 +17,8 @@
                     <div style='max-height: 450px; overflow-y:auto;'>
                         <v-card-text style="border:1px solid black;" class="px-4">
                             <ul>
-                                <li class="text--primary" v-for="(key, index) in dialogDataPreChecks.message" :key="index">
-                                {{key}}
-                                </li>
+                                <li class="text--primary" v-for="(key, index) in filteredMessage" :key="index">
+            {{ key }}                                </li>
                             </ul>
                          </v-card-text>
                     </div>
@@ -40,7 +39,7 @@
                         </v-btn>
                     </v-layout>
                     <v-layout justify-center v-if="!dialogDataPreChecks.choice">
-                        <v-btn @click="onSubmit(true)" class="ara-blue-bg white--text">
+                        <v-btn @click="onSubmit(false)" class="ara-blue-bg white--text">
                             OK
                         </v-btn>
                     </v-layout>
@@ -59,6 +58,10 @@
     export default class AlertPreChecks extends Vue {
         @Prop() dialogDataPreChecks: AlertPreChecksData;
 
+        get filteredMessage() {
+            // Split the message by periods and filter out empty strings
+            return this.dialogDataPreChecks.message.split('.').filter(sentence => sentence.trim() !== '');
+        }
         /**
          * Emits a boolean result to the parent component
          * @param submit

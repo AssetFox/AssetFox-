@@ -94,10 +94,7 @@
             </v-flex>
         </v-layout>
     </v-container>
-
   </Dialog>
-  <v-dialog max-width="65%" min persistent v-bind:show="showDialog">
-  </v-dialog>
 </template>
 
 <script lang="ts" setup>

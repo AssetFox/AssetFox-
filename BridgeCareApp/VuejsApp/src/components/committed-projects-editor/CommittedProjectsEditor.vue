@@ -5,7 +5,7 @@
                 <v-flex xs12>
                     <v-layout>
                         <v-btn @click='OnGetTemplateClick' 
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Get Template</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Get Default Template</v-btn>
                             <input
                             id="committedProjectTemplateUpload"
                             type="file"
@@ -13,8 +13,8 @@
                             ref="committedProjectTemplateInput"
                             @change="handleCommittedProjectTemplateUpload"
                             hidden/>
-                        <v-btn @click="onUploadCommittedProjectTemplate"
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Upload Committed Project Template</v-btn>
+                        <v-btn @click="onUploadCommittedProjectTemplate" style="margin-right: auto;"
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Change Default Template</v-btn>
                         <v-btn @click='showImportExportCommittedProjectsDialog = true' 
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Import Projects</v-btn>
                         <v-btn @click='OnExportProjectsClick' 
@@ -23,7 +23,30 @@
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Delete All</v-btn>
                     </v-layout>
                 </v-flex>
-
+                <v-flex xs12>
+                    <vlayout>
+                             <v-select
+                                :items= 'templateSelectItems'
+                                append-icon=$vuetify.icons.ghd-down
+                                class='ghd-control-border ghd-control-text ghd-select'
+                                label='Select a Template'
+                                style="width: 20% !important;"
+                                v-model="templateItemSelected"
+                                outline>
+                             </v-select>
+                             <v-btn @click='onDownloadSelectedTemplate' 
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Download Selected Template</v-btn>
+                            <input
+                            id="addCommittedProjectTemplate"
+                            type="file"
+                            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                            ref="committedProjectTemplateInput"
+                            @change="handleAddCommittedProjectTemplateUpload"
+                            hidden/>
+                            <v-btn @click='onAddSelectedTemplate'  
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Upload New Template</v-btn>
+                    </vlayout>
+                </v-flex>
                 <v-flex xs12>
                     <v-checkbox 
                     id="CommittedProjectsEditor-noTreatmentsBeforeCommittedProjects-ghdcheckbox"
@@ -89,6 +112,17 @@
                                                     @change="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])">
                                             
                                         </v-combobox>
+                                        <v-combobox
+                                            v-else-if="header.value === 'projectSource'"
+                                            :items="projectSourceOptions"
+                                            append-icon="$vuetify.icons.ghd-down"
+                                            class="ghd-down-small"
+                                            label="Select Project Source"
+                                            v-model="props.item.projectSource"
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                            @change="onEditCommittedProjectProperty(props.item, header.value, props.item.projectSource)"
+                                            
+                                        ></v-combobox>
                                         <v-edit-dialog v-if="header.value !== 'actions' && header.value !== 'selection'"
                                             :return-value.sync="props.item[header.value]"
                                             @save="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])"
@@ -99,7 +133,8 @@
                                                 && header.value !== 'year' 
                                                 && header.value !== 'keyAttr' 
                                                 && header.value !== 'treatment'
-                                                && header.value !== 'cost'"
+                                                && header.value !== 'cost'
+                                                && header.value !== 'projectSource'"
                                                 readonly
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"
@@ -125,7 +160,7 @@
                                             <v-text-field v-if="header.value === 'cost'"
                                                 :value='formatAsCurrency(props.item[header.value])'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-
+                                                
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'keyAttr'"
                                                     label="Edit"
@@ -160,7 +195,7 @@
                                                     v-model.number="props.item[header.value]"
                                                     v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-
+                                                
                                             </template>
                                         </v-edit-dialog>
                                 
@@ -225,7 +260,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
+import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, CommittedProjectTemplates, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { Action, Getter, State } from 'vuex-class';
 import { Watch } from 'vue-property-decorator';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
@@ -261,6 +296,16 @@ import { stat } from 'fs';
 import { Hub } from '@/connectionHub';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
+import TreatmentService from '@/services/treatment.service';
+
+const projectSourceMap = new Map<number, string>([
+    [0, "None"],
+    [1, "iAMPick"],
+    [2, "Committed"],
+    [3, "SAP"],
+    [4, "ProjectBuilder"]
+]);
+
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -274,7 +319,11 @@ export default class CommittedProjectsEditor extends Vue  {
     librarySelectItemValue: string | null = null;
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
+    templateSelectItems: string[] = [];
+    templateItemSelected: string = "";
     attributeSelectItems: SelectItem[] = [];
+    treatmentSelectItems: string[] = [];
+    projectSourceOptions: string [] = [];
     budgetSelectItems: SelectItem[] = [];
     categorySelectItems: SelectItem[] = [];
     categories: string[] = [];
@@ -282,7 +331,9 @@ export default class CommittedProjectsEditor extends Vue  {
     networkId: string = getBlankGuid();
     rules: InputValidationRules = rules;
     network: Network = clone(emptyNetwork);
+    selectedLibraryTreatments: Treatment[];
     isAdminTemplateUploaded: Boolean
+    fileData: AxiosResponse
 
     addedRows: SectionCommittedProject[] = [];
     updatedRowsMap:Map<string, [SectionCommittedProject, SectionCommittedProject]> = new Map<string, [SectionCommittedProject, SectionCommittedProject]>();//0: original value | 1: updated value
@@ -400,6 +451,14 @@ export default class CommittedProjectsEditor extends Vue  {
             class: '',
             width: '10%',
         },
+        { 
+        text: 'Project Source', 
+        value: 'projectSource',
+        align: 'left',
+        sortable: false,
+        class: '',
+        width: '10%'
+      },
         {
             text: 'Actions',
             value: 'actions',
@@ -409,7 +468,7 @@ export default class CommittedProjectsEditor extends Vue  {
             width: '10%',
         },
     ];
-    
+
     mounted() {
         this.reverseCatMap.forEach(cat => {
             this.categorySelectItems.push({text: cat, value: cat})        
@@ -420,6 +479,7 @@ export default class CommittedProjectsEditor extends Vue  {
             this.importCompleted,
         );
     }   
+
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
 
@@ -435,6 +495,7 @@ export default class CommittedProjectsEditor extends Vue  {
             vm.scenarioId = to.query.scenarioId;
             vm.networkId = to.query.networkId;
             vm.librarySelectItemValue = null;
+            vm.templateSelectItems = null;
             
             if (vm.scenarioId === vm.uuidNIL || vm.networkId == vm.uuidNIL) {
                 vm.addErrorNotificationAction({
@@ -465,6 +526,11 @@ export default class CommittedProjectsEditor extends Vue  {
                     }
                 })
                 await vm.initializePages()
+                await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
+                    if(!isNil(response.data)){
+                            vm.templateSelectItems = response.data;
+                        }
+           });
             })();                    
         });
     }
@@ -508,6 +574,13 @@ export default class CommittedProjectsEditor extends Vue  {
             
     }
 
+    @Watch('selectedLibraryTreatments', {deep: true})
+    onSelectedLibraryTreatmentsChanged(){
+        this.treatmentSelectItems = this.selectedLibraryTreatments.map(
+            (treatment: Treatment) => (treatment.name)
+        );
+    }
+
     @Watch('stateScenarioSimpleBudgetDetails')
     onStateScenarioSimpleBudgetDetailsChanged(){
         this.budgetSelectItems = this.stateScenarioSimpleBudgetDetails.map(
@@ -527,8 +600,6 @@ export default class CommittedProjectsEditor extends Vue  {
             this.sectionCommittedProjects = clone(this.stateSectionCommittedProjects);
             this.setCpItems();
     }
-
-
 
     @Watch('sectionCommittedProjects')
     onSectionCommittedProjectsChanged() {  
@@ -613,24 +684,25 @@ export default class CommittedProjectsEditor extends Vue  {
             });
      }
 
-     OnGetTemplateClick(){
-        CommittedProjectsService.getUploadedCommittedProjectTemplate()
+      async OnGetTemplateClick(){
+       await CommittedProjectsService.getUploadedCommittedProjectTemplate()
             .then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    FileDownload(convertBase64ToArrayBuffer(response.data), 'Committed Project Template', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                    this.isAdminTemplateUploaded = true;
-                }
-            });
-
-            if(this.isAdminTemplateUploaded = false){
-                 CommittedProjectsService.getCommittedProjectTemplate(this.networkId)
-                 .then((response: AxiosResponse) => {
+                    if(response.data.toString() != ""){
+                        FileDownload(convertBase64ToArrayBuffer(response.data), 'Committed Project Template', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                        this.isAdminTemplateUploaded = true;
+                    }
+                    else{
+                         CommittedProjectsService.getCommittedProjectTemplate(this.networkId)
+                            .then((response: AxiosResponse) => {
                         if (hasValue(response, 'data')) {
                           const fileInfo: FileInfo = response.data as FileInfo;  
                           FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
                         }
                 });
-            }
+                    }
+            });
+
+    
      }
 
      OnAddCommittedProjectClick(){
@@ -640,8 +712,9 @@ export default class CommittedProjectsEditor extends Vue  {
         newRow.locationKeys[this.keyattr] = '';
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = this.scenarioId;
+        newRow.projectSource = 'None';
         this.addedRows.push(newRow)
-        this.onPaginationChanged();
+        this.onPaginationChanged();   
      }
 
      OnSaveClick(){
@@ -688,6 +761,31 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.resetPage()
             })   
      }
+
+    handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
+    row.treatment = treatmentName;
+    this.updateCommittedProject(row, treatmentName, 'treatment')  
+    CommittedProjectsService.FillTreatmentValues({
+        committedProjectId: row.id,
+        treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : getBlankGuid(),
+        treatmentName: treatmentName,
+        KeyAttributeValue: row.locationKeys[this.keyattr],
+        networkId: this.networkId
+    })
+    .then((response: AxiosResponse) => {
+        if (hasValue(response, 'data')) {
+            var values = response.data as CommittedProjectFillTreatmentReturnValues;
+            row.cost = values.treatmentCost;
+            row.category = values.treatmentCategory;
+            scp.cost = row.cost;
+            let cat = this.reverseCatMap.get(row.category);
+            if (!isNil(cat))
+                scp.category = cat;
+            this.updateCommittedProject(row, row.cost, 'cost')  
+            this.onPaginationChanged();
+        }
+    });
+}
 
      updateNoTreatment(){
         if(this.isNoTreatmentBefore)
@@ -738,6 +836,9 @@ export default class CommittedProjectsEditor extends Vue  {
             else if(property === 'budget'){
                 this.handleBudgetChange(row, scp, value)
             }
+            else if(property === 'projectSource') {
+            this.handleProjectSourceChange(row, scp, value)
+            }
             else{
                 if(property === 'category')
                     value = this.catMap.get(value);
@@ -780,7 +881,30 @@ export default class CommittedProjectsEditor extends Vue  {
                 "You are about to delete all of this scenario's committed projects.",
             choice: true,
         };
-    }   
+    }
+
+    handleAddCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
+             const file = event.target.files[0];
+             CommittedProjectsService.addCommittedProjectTemplate(file).then((response: AxiosResponse) => {
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    this.addSuccessNotificationAction({message:'Uploaded Template'})      
+                }
+            });
+    }
+
+    onAddSelectedTemplate(){
+        document.getElementById("addCommittedProjectTemplate")?.click();
+    }
+    
+    onDownloadSelectedTemplate(){
+        CommittedProjectsService.getSelectedCommittedProjectTemplate(this.templateItemSelected)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    FileDownload(convertBase64ToArrayBuffer(response.data), this.templateItemSelected, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                    this.isAdminTemplateUploaded = true;
+                }
+            });
+    }
 
     onDeleteCommittedProjectsSubmit(doDelete: boolean) {
         this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
@@ -804,34 +928,36 @@ export default class CommittedProjectsEditor extends Vue  {
         return null;
     }
     disableCrudButtons() {
-        const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+    const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
-            (scp: SectionCommittedProject) => {
-                return (
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.simulationId,
-                    ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.year,
-                    ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.cost,
-                    ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.treatment
-                    ) == true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
-                        scp.locationKeys[this.keyattr]
-                    ) == true &&
-                    this.rules['generalRules'].valueIsWithinRange(
-                        scp.year, [this.firstYear, this.lastYear],
-                    ) === true
-                );
-            },
-        );
+        (scp: SectionCommittedProject) => {
+            return (
+                this.rules['generalRules'].valueIsNotEmpty(
+                    scp.simulationId,
+                ) === true &&
+                this.rules['generalRules'].valueIsNotEmpty(
+                    scp.year,
+                ) === true &&
+                this.rules['generalRules'].valueIsNotEmpty(
+                    scp.cost,
+                ) === true &&
+                this.rules['generalRules'].valueIsNotEmpty(
+                    scp.treatment
+                ) == true &&
+                this.rules['generalRules'].valueIsNotEmpty(
+                    scp.locationKeys[this.keyattr]
+                ) == true &&
+                this.rules['generalRules'].valueIsWithinRange(
+                    scp.year, [this.firstYear, this.lastYear],
+                ) === true &&
+                scp.projectSource !== ""
+                
+            );
+        },
+    );
         this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
-    }
+}
 
 
     setCpItems(){
@@ -863,7 +989,8 @@ export default class CommittedProjectsEditor extends Vue  {
             id: scp.id,
             errors: [],
             yearErrors: [],
-            category: value
+            category: value,
+            projectSource: projectSourceMap.get(+scp.projectSource) || scp.projectSource
         }
         return row
     }
@@ -893,6 +1020,12 @@ export default class CommittedProjectsEditor extends Vue  {
         this.onPaginationChanged();
     }
 
+    handleProjectSourceChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSource: string) {
+        row.projectSource = projectSource;
+    this.updateCommittedProject(row, projectSource, 'projectSource');
+    this.onPaginationChanged();
+    }
+
     onUploadCommittedProjectTemplate(){
       document.getElementById("committedProjectTemplateUpload")?.click();
    }
@@ -916,6 +1049,14 @@ export default class CommittedProjectsEditor extends Vue  {
             }
         });
     }
+
+    fetchProjectSources() {
+    CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
+        if (hasValue(response, 'data')) {
+            this.projectSourceOptions = response.data.filter((option: string) => option !== "None");
+        }
+    });
+}
 
     checkExistenceOfAssets(){//todo: refine this
         const uncheckKeys = this.currentPage.map(scp => scp.keyAttr).filter(key => isNil(this.isKeyAttributeValidMap.get(key)))
@@ -1072,6 +1213,34 @@ export default class CommittedProjectsEditor extends Vue  {
             })
         }        
     }
+
+    async fetchTreatmentLibrary(simulationId: string) {
+        try {
+            const response = await TreatmentService.getTreatmentLibraryBySimulationId(simulationId);
+
+            if (hasValue(response, 'data')) {
+                const treatmentLibrary = response.data as TreatmentLibrary;
+                this.$store.commit('scenarioTreatmentLibraryMutator', treatmentLibrary);
+                this.handleLibrarySelectChange(treatmentLibrary.id);
+            }
+        } catch (error) {
+            this.addErrorNotificationAction({
+                message: 'Error fetching treatment library.',
+                longMessage: 'There was an issue fetching the treatment library. Please try again.'
+            });
+        }
+    }
+
+handleLibrarySelectChange(libraryId: string) {
+    this.selectTreatmentLibraryAction(libraryId);
+    this.hasSelectedLibrary = true;
+    const library = this.stateTreatmentLibraries.find((o) => o.id === libraryId);
+
+    if (!isNil(library)) {
+      this.selectedLibraryTreatments = library.treatments;
+      this.onSelectedLibraryTreatmentsChanged();
+    } 
+}
 
     async initializePages(){
         const request: PagingRequest<SectionCommittedProject>= {

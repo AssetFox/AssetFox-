@@ -45,6 +45,7 @@ namespace BridgeCareCore.Services
             "YEARSAME",
             "BUDGET",
             "COST",
+            "PROJECTSOURCE",
             "AREA",
             "CATEGORY"
         };
@@ -134,6 +135,7 @@ namespace BridgeCareCore.Services
                         }
                         worksheet.Cells[row, column++].Value = budgetName;
                         worksheet.Cells[row, column++].Value = project.Cost;
+                        worksheet.Cells[row, column++].Value = project.ProjectSource;
                         worksheet.Cells[row, column++].Value = string.Empty; // AREA
                         worksheet.Cells[row, column++].Value = project.Category.ToString();
 
@@ -415,6 +417,7 @@ namespace BridgeCareCore.Services
                             LocationKeys = project.LocationKeys,
                             Treatment = NoTreatment,
                             Year = year,
+                            ProjectSource = project.ProjectSource,
                             ShadowForAnyTreatment = 0,
                             ShadowForSameTreatment = 0,
                             Cost = 0,

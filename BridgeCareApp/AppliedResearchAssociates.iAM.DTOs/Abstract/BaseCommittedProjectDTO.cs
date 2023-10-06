@@ -59,6 +59,11 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         public int Year { get; set; }
 
         /// <summary>
+        /// Project source associated with the committed project
+        /// </summary>
+        public ProjectSourceDTO ProjectSource { get; set; }
+
+        /// <summary>
         /// The number of years until any other treatment may be performed
         /// </summary>
         public int ShadowForAnyTreatment { get; set; }
@@ -77,13 +82,16 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// </returns>
         public abstract bool VerifyLocation(string networkKeyAttribute);
         /// <summary>
-        /// Visitor pattern is to define a new operation without introducing the modifications to an existing object structure.
-        /// It is a generic way of defining behavior on subclasses and accessing it on the superclass.
+        /// The Accept method is a key component of the Visitor pattern, enabling encapsulation of operations on objects without altering the objects themselves. 
+        /// In this superclass (`BaseCommittedProjectDTO`), the Accept method provides a mechanism for external entities (visitors) to perform specific operations 
+        /// on its instances and those of its subclasses. The actual operation executed is determined by the visitor's implementation.
+        /// Refer to implementations of the <see cref="IBaseCommittedProjectDtoVisitor{THelper, TOutput}"/> interface for the specific operations that can be performed.
         /// </summary>
-        /// <returns>
-        /// TOutput is type parameter for whatever is being returned.  THelper is type parameter for whatever type the helper has.
-        /// </returns>
+        /// <typeparam name="TOutput">Return type of the operation.</typeparam>
+        /// <typeparam name="THelper">Auxiliary data or context for the operation.</typeparam>
+        /// <param name="visitor">The visitor defining the set of operations.</param>
+        /// <param name="helper">Contextual data required for the operation.</param>
+        /// <returns>Result of the operation executed by the visitor.</returns>
         public abstract TOutput Accept<TOutput, THelper>(IBaseCommittedProjectDtoVisitor<THelper, TOutput> visitor, THelper helper);
-
     }
 }

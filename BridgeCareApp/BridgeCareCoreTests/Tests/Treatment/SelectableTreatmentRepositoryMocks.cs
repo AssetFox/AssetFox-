@@ -21,9 +21,5 @@ namespace BridgeCareCoreTests.Tests.Treatment
             }
             return mock;
         }
-        public static void SetupGetLibraryAccess(this Mock<ISelectableTreatmentRepository> mock, Guid libraryId, LibraryUserAccessModel accessModel)
-        {
-            mock.Setup(r => r.GetLibraryAccess(libraryId, It.IsAny<Guid>())).Returns(accessModel);
-        }
     }
 }

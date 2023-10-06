@@ -118,7 +118,7 @@ namespace BridgeCareCoreTests.Tests
                 IsNewLibrary = false,
                 Library = dto,
             };
-            treatmentRepo.SetupGetLibraryAccess(libraryRequest.Library.Id, libraryExists);
+            treatementLibraryUserRepo.SetupGetLibraryAccess(libraryRequest.Library.Id, libraryExists);
             pagingService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(new List<TreatmentDTO>()); // correct? Merge build error here.
             var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
             // Act
@@ -281,8 +281,7 @@ namespace BridgeCareCoreTests.Tests
             var user = UserDtos.Admin();
             var libraryUser = LibraryUserDtos.Modify(user.Id);
             var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
-            treatmentLibraryRepo.SetupGetLibraryAccess(libraryId, libraryExists);
-            treatmentRepo.SetupGetLibraryAccess(libraryRequest.Library.Id, libraryExists);           
+            treatmentLibraryRepo.SetupGetLibraryAccess(libraryId, libraryExists);              
             var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
 
             // Act

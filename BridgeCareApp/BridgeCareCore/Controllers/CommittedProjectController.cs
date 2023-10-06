@@ -260,6 +260,59 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("getUploadedCommittedProjectTemplates")]
+        [Authorize]
+        public async Task<IActionResult> getUploadedCommittedProjectTemplates()
+        {
+            var result = await Task.Factory.StartNew(() => UnitOfWork.CommittedProjectRepo.getUploadedCommittedProjectTemplates());
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("AddCommittedProjectTemplate")]
+        [Authorize(Policy = Policy.ModifyCommittedProjects)]
+        public async Task<IActionResult> AddCommittedProjectTemplate()
+        {
+            Stream stream = ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream();
+            String filename = ContextAccessor.HttpContext.Request.Form.Files[0].FileName;
+            int fileExtPos = filename.LastIndexOf(".");
+            if (fileExtPos >= 0)
+                filename = filename.Substring(0, fileExtPos);
+
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.CommittedProjectRepo.AddCommittedProjectTemplate(stream, filename);
+                });
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, "Successfully Updated Implementation Name");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"::Unable to Upload Template - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("DownloadSelectedCommittedProjectTemplate/{filename}")]
+        [Authorize]
+        public async Task<IActionResult> DownloadSelectedCommittedProjectTemplate(string filename)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.CommittedProjectRepo.DownloadSelectedCommittedProjectTemplate(filename));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"::Unable to DownloadedTemplate - {e.Message}");
+                throw;
+            }
+        }
+
         [HttpDelete]
         [Route("DeleteSimulationCommittedProjects/{simulationId}")]
         [Authorize(Policy = Policy.ModifyCommittedProjects)]

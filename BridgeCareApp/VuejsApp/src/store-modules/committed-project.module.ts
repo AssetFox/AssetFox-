@@ -50,6 +50,14 @@ const actions = {
                 }
         });
     },
+    async getUploadedCommittedProjectTemplates({ commit }: any) {
+        await CommittedProjectsService.getUploadedCommittedProjectTemplates()
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('getCommittedProjectsCloneMutator',response.data as string[]);
+                }
+        });
+    },
     async deleteSpecificCommittedProjects({commit, dispatch}: any, ids: string[]){
         await CommittedProjectsService.deleteSpecificCommittedProjects(ids)
             .then((response: AxiosResponse) => {
@@ -66,7 +74,18 @@ const actions = {
         .then(async (response: AxiosResponse) => {
             if (response.status >= 200 && response.status < 300) {
                 const base64 = await convertFileToBase64(payload);
-                commit('agencyLogoMutator', base64);
+                commit('isSuccessfulImportMutator', true);
+                dispatch('addSuccessNotification',{
+                    message: 'Committed Project Template imported'
+                });
+            }
+        });
+    },
+    async addCommittedProjectTemplate({commit, dispatch}: any, payload: File) {
+        await CommittedProjectsService.addCommittedProjectTemplate(payload)
+        .then(async (response: AxiosResponse) => {
+            if (response.status >= 200 && response.status < 300) {
+                const base64 = await convertFileToBase64(payload);
                 commit('isSuccessfulImportMutator', true);
                 dispatch('addSuccessNotification',{
                     message: 'Committed Project Template imported'

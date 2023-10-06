@@ -66,6 +66,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<CommittedProjectSettingsEntity> CommittedProjectSettings{ get; set; }
 
+        public virtual DbSet<CommittedProjectTreatmentEntity> CommittedProjectTemplates { get; set; }
+
         public virtual DbSet<AggregatedResultEntity> AggregatedResult { get; set; }
 
         public virtual DbSet<AnalysisMethodEntity> AnalysisMethod { get; set; }
@@ -2221,6 +2223,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 
             });
             modelBuilder.Entity<CommittedProjectSettingsEntity>(entity =>
+            {
+                entity.Property(e => e.Value)
+                .HasColumnType("nvarchar(max)")
+                .IsRequired();
+                entity.HasIndex(p => p.Key).IsUnique();
+                entity.HasKey(p => p.Key);
+
+            });
+            modelBuilder.Entity<CommittedProjectTreatmentEntity>(entity =>
             {
                 entity.Property(e => e.Value)
                 .HasColumnType("nvarchar(max)")

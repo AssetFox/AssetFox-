@@ -23,7 +23,7 @@
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Delete All</v-btn>
                     </v-layout>
                 </v-flex>
-                <v-flex xs12>
+                <v-flex xs12>                   
                     <vlayout>
                              <v-select
                                 :items= 'templateSelectItems'
@@ -478,6 +478,7 @@ export default class CommittedProjectsEditor extends Vue  {
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             this.importCompleted,
         );
+        this.fetchTreatmentLibrary(this.scenarioId);
     }   
 
     beforeDestroy() {

@@ -30,7 +30,7 @@
                                         right
                                     >
                                         <template slot="activator">
-                                            <v-btn class="ghd-blue" tooltip flat icon>
+                                            <v-btn v-if="props.item.name.includes('Summary')" class="ghd-blue" tooltip flat icon>
                                                 <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
@@ -48,10 +48,8 @@
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn
-                        @click="
-                            onShowCriterionEditorDialog(props.item.id)
-                        "
+                                    <v-btn v-if="props.item.name.includes('Summary')"
+                                        @click="onShowCriterionEditorDialog(props.item.id)"
                                         class="ghd-blue"
                                         icon
                                     >

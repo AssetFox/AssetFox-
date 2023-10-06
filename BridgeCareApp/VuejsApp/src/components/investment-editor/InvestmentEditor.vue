@@ -173,7 +173,7 @@
                                 <span class='sm-txt'>{{ props.item.year + firstYearOfAnalysisPeriodShift}}</span>
                             </div>       
                             <div v-if="header.value === 'action'">
-                                <v-btn @click="onRemoveBudgetYear(props.item.year)" class="ghd-blue" icon>
+                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(props.item.year)" class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')" />
                                 </v-btn>
                             </div>

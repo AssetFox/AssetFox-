@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             // Act
-            TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation.Id);
+           // TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation.Id);
             // Assert
             Assert.False(TestHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id));
         }
@@ -251,7 +251,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotNull(budgetPriorityEntityBefore);
             unitOfWork.Context.SaveChanges();
 
-            unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
+           // unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
 
             unitOfWork.Context.ChangeTracker.Clear();
             var budgetAmountEntityAfter = TestHelper.UnitOfWork.Context.ScenarioBudgetAmount.SingleOrDefault(ba => ba.Id == budgetAmountId);

@@ -37,14 +37,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         /// dto's list of users is empty, the users are unaffected.</summary> 
         void UpdateSimulationAndPossiblyUsers(SimulationDTO dto);
 
-        void DeleteSimulation(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
-
+        void DeleteSimulation(string simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
         void DeleteSimulationsByNetworkId(Guid networkId);
 
         void UpdateLastModifiedDate(SimulationEntity entity);
 
         string GetSimulationName(Guid simulationId);
-
         SimulationDTO GetCurrentUserOrSharedScenario(Guid simulationId, bool hasAdminAccess, bool hasSimulationAccess);
         
         bool GetNoTreatmentBeforeCommitted(Guid simulationId);

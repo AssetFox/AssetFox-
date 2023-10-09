@@ -288,6 +288,9 @@ import NewsDialog from '@/components/NewsDialog.vue'
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import { useStore } from 'vuex';
 import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import mitt from 'mitt'
+
+
 
 
     let store = useStore();
@@ -367,6 +370,7 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
     const $vuetify = inject('$vuetify') as any
     const $router = useRouter();
     const $statusHub = inject('$statusHub') as any
+    const $emitter = mitt()
     const $config = inject('$config') as any
 
     created();
@@ -565,19 +569,19 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
     onMounted(() => mounted());
     function mounted() {
 
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastErrorEvent,
             onAddErrorNotification,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastWarningEvent,
             onAddWarningNotification,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastInfoEvent,
             onAddInfoNotification,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastTaskCompletedEvent,
             onAddTaskCompletedNotification
         );
@@ -602,7 +606,7 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
 
     onBeforeUnmount(() => beforeDestroy());
     function beforeDestroy() {
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastErrorEvent,
             onAddErrorNotification,
         );

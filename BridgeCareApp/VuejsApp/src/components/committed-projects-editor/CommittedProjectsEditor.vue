@@ -259,10 +259,12 @@ import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import { storeKey, useStore } from 'vuex';
 import { createDecipheriv } from 'crypto';
+import mitt from 'mitt';
 
     let store = useStore();
     const $router = useRouter();
     const $statusHub = inject('$statusHub') as any
+    const $emitter = mitt()
     created();
 
     let searchItems = '';
@@ -415,7 +417,7 @@ import { createDecipheriv } from 'crypto';
             categorySelectItems.push({text: cat, value: cat})        
         });    
 
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             importCompleted,
         );
@@ -459,7 +461,7 @@ import { createDecipheriv } from 'crypto';
     function beforeDestroy() {
         setHasUnsavedChangesAction({ value: false });
 
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             importCompleted,
         );

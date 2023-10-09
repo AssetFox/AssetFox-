@@ -160,9 +160,11 @@ import { Hub } from '@/connectionHub';
 import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject } from 'vue'; 
 import { useStore } from 'vuex'; 
 import Dialog from 'primevue/dialog';
+import mitt from 'mitt';
 
     let store = useStore(); 
     const $statusHub = inject('$statusHub') as any
+    const $emitter = mitt()
 
     const props = defineProps<{dialogData: any}>();
 
@@ -232,7 +234,7 @@ import Dialog from 'primevue/dialog';
     function mounted() {
         networks = clone(stateNetworks);
 
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
             getDataAggregationStatus,
         );
@@ -305,7 +307,7 @@ import Dialog from 'primevue/dialog';
 
     onBeforeUnmount(() => beforeDestroy); 
     function beforeDestroy() {
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
             getDataAggregationStatus,
         );

@@ -485,7 +485,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     ];
     const $vuetify = inject('$vuetify') as any
     const $router = useRouter();
-    const $statusHub = inject('$statusHub') as any
+    const $emitter = mitt();
     const $config = inject('$config') as any
     beforeRouteEnter();
     function beforeRouteEnter(){

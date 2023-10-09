@@ -77,20 +77,21 @@
                                 icon
                             >
                                 <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
-                                <!-- <notification-bell
+                                <notification-bell
                                     :size="30"
                                     :count="notificationCounter"
                                     :upperLimit="50"
-                                    left="8px"
-                                    top="8px"
-                                    counterPadding="2px"
-                                    fontSize="10px"
-                                    counterStyle="roundRectangle"
+                                    :animated="true"
+                                    left="13px"
+                                    top="6px"
+                                    fontSize="12px"
+                                    counterStyle="round"
+                                    counterLocation="upperRight"
                                     counterBackgroundColor="#FF0000"
                                     counterTextColor="#FFFFFF"
                                     iconColor="#002E6C"
                                     class="hide-bell-svg"
-                                /> -->
+                                /> 
                             </button>
                         </template>
                         <v-card class="mx-auto" max-width="100%">

@@ -35,7 +35,7 @@
             <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
                         sort-icon=$vuetify.icons.ghd-table-sort
                           hide-actions>
-                <template slot="items" slot-scope="props" v-slot:items="props">
+                <template slot="items" slot-scope="props" v-slot:item="props">
                     <td>
                         {{props.item.name}}
                     </td>

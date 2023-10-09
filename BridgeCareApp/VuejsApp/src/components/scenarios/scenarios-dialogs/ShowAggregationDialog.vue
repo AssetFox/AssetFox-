@@ -31,7 +31,7 @@
                             class="elevation-1"
                             hide-actions
                         >
-                            <template slot="items" slot-scope="props">
+                            <template slot="items" slot-scope="props" v-slot:item="props">
                                 <td>{{ props.item.name }}</td>
                                 <td>{{ props.item.createdDate }}</td>
                                 <td class="text-xs-center">
@@ -40,7 +40,7 @@
                                         min-height="500px"
                                         min-width="500px"
                                     >
-                                        <template slot="activator">
+                                        <template v-slot:activator>
                                             <v-btn class="ara-blue" icon>
                                                 <v-icon>fas fa-eye</v-icon>
                                             </v-btn>

@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-dialog max-width="450px" persistent v-model="showDialog">
+    <v-dialog max-width="450px" persistent v-bind:show="showDialog">
       <v-card>
         <v-card-title class="ghd-dialog-box-padding-top">
          <v-layout justify-space-between align-center>

@@ -1330,9 +1330,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
         }
 
-        public void DeleteSimulation(string simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        public void DeleteSimulation(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(3600));
 
             // Create parameters for the stored procedure
             var retMessageParam = new SqlParameter("@RetMessage", SqlDbType.VarChar, 250);
@@ -1355,12 +1354,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 queueLog.UpdateWorkQueueStatus("Deleting Simulation");
 
-                string tmpsimulationId = simulationId.ToString();
-                // RegEx Explained: \s means "match any whitespace token", and + means "match one or more of the proceeding token
-                tmpsimulationId = System.Text.RegularExpressions.Regex.Replace(tmpsimulationId, @"\s+", string.Empty);
-
                 // Create parameters for the stored procedure
-                var simGuidListParam = new SqlParameter("@SimGuidList", tmpsimulationId.ToString());
+                var simGuidListParam = new SqlParameter("@SimGuidList", simulationId.ToString());
                 retMessageParam.Direction = ParameterDirection.Output;
 
                 // Execute the stored procedure

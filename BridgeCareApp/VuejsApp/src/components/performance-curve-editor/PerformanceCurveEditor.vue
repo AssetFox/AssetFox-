@@ -547,6 +547,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, shallowRef, ShallowRef} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import mitt from 'mitt';
 
 const emit = defineEmits(['submit'])
 let store = useStore();
@@ -650,6 +651,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let hasSelectedPerformanceCurve: boolean = false;
     const $router = useRouter();
     const $statusHub = inject('$statusHub') as any
+    const $emitter = mitt()
     let unsavedDialogAllowed: boolean = true;
     let trueLibrarySelectItemValue: string | null = ''
     let librarySelectItemValueAllowedChanged: boolean = true;
@@ -728,7 +730,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function mounted() {
         setAttributeSelectItems();
         
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             importCompleted,
         );
@@ -737,7 +739,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function beforeDestroy() {
         setHasUnsavedChangesAction({ value: false });
 
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             importCompleted,
         );

@@ -414,9 +414,11 @@ import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import { ImportNewTreatmentDialogResult } from '@/shared/models/modals/import-new-treatment-dialog-result';
 import { useRouter } from 'vue-router';
+import mitt from 'mitt';
 
     const emit = defineEmits(['submit'])
     const $statusHub = inject('$statusHub') as any
+    const $emitter = mitt()
     const $router = useRouter();
     let store = useStore();
     let stateTreatmentLibraries = ref<TreatmentLibrary[]>(store.state.attributeModule.attributes);
@@ -643,7 +645,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
 
     onMounted(() => mounted());
     function mounted() {
-            $statusHub.$on(
+            $emitter.on(
                 Hub.BroadcastEventType.BroadcastImportCompletionEvent,
                 importCompleted,
             );
@@ -651,7 +653,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     onBeforeUnmount(() => beforeDestroy());
      function beforeDestroy() {
         setHasUnsavedChangesAction({ value: false });
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             importCompleted,
         );

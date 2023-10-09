@@ -1,5 +1,9 @@
 <template>
-  <Dialog max-width="65%" v-bind:show="showDialog">
+    <div>
+        <Button @click="visible=!visible" label="Warning" severity="warning">{{visible}}</Button>
+        <Dialog v-model:visible="visible" header="Header" :maximizable="true" :modal="true" :style="{width: '50vw'}"><p>Test Dialog Paragraph</p>></Dialog>
+    </div>
+  <!-- <Dialog max-width="65%" v-bind:show="showDialog">
     <v-container fluid grid-list-xl>
         <v-layout>
             <v-flex xs12>
@@ -94,7 +98,7 @@
             </v-flex>
         </v-layout>
     </v-container>
-  </Dialog>
+  </Dialog> -->
 </template>
 
 <script lang="ts" setup>
@@ -106,7 +110,7 @@ import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Dialog from 'primevue/dialog';
-
+import ConfirmDialog from 'primevue/confirmdialog';
 const emit = defineEmits(['close'])
 let store = useStore();
 const props = defineProps<{
@@ -115,7 +119,7 @@ const props = defineProps<{
 
 let announcements = ref<Announcement[]>(store.state.announcementModule.announcements);
 let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
-
+const visible = ref(false); 
 async function upsertAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('upsertAnnouncement');}
 async function deleteAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('deleteAnnouncement');}
  

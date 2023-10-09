@@ -30,6 +30,9 @@ import { ap } from 'ramda';
 import { IconProps, IconSet, createVuetify } from 'vuetify';
 import { fa } from 'vuetify/iconsets/fa'
 import PrimeVue from 'primevue/config';
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
+import Ripple from 'primevue/ripple';
 
 const ghdSearchIconSet: IconSet = {
   component: (props: IconProps) => {
@@ -64,8 +67,7 @@ icons: {
 app.use(router);
 app.use(store);
 app.use(vuetify);
-app.use(PrimeVue);
-
+app.use(PrimeVue, { ripple: true });
 //app.use(VueWorker);
 app.use(KendoChartInstaller);
 
@@ -95,6 +97,9 @@ var defaultOptions = {
 
 app.use(VueSanitize, defaultOptions);
 
+app.component("Dialog",Dialog);
+app.component("Button", Button);
+app.component("Ripple", Ripple);
 app.config.globalProperties.productionTip = false;
 //app.use(VuejsDialog);
 //app.config.globalProperties.$config = config;

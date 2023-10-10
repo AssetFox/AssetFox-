@@ -1810,8 +1810,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.Network)
                     .WithMany(p => p.Simulations)
-                    .HasForeignKey(d => d.NetworkId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .HasForeignKey(d => d.NetworkId);
             });
 
             modelBuilder.Entity<SimulationLogEntity>(entity =>

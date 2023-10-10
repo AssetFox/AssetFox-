@@ -11,7 +11,8 @@ export interface BaseCommittedProject {
     shadowForAnyTreatment: number;
     shadowForSameTreatment: number;
     locationKeys: { [key: string]: string; }; 
-    category: TreatmentCategory
+    category: TreatmentCategory;
+    projectSource: string;
 }
 export interface SectionCommittedProjectTableData {
     id: string;
@@ -25,6 +26,7 @@ export interface SectionCommittedProjectTableData {
     errors: string[];
     yearErrors: string[];
     category: string;
+    projectSource: string;
 }
 export interface SectionCommittedProject extends BaseCommittedProject{
     name: string;
@@ -50,6 +52,7 @@ export const emptySectionCommittedProject = {
     shadowForSameTreatment: 0,
     locationKeys: {},
     name: '',
+    projectSource: '',
     category: TreatmentCategory.other
 }
 
@@ -59,6 +62,11 @@ export const emptyCommittedProjectConsequence ={
     attribute: '',
     performanceFactor: 1.2,
     changeValue: ''
+}
+
+export interface CommittedProjectTemplates{
+    templateName: string;
+    templateData: string;
 }
 
 export interface CommittedProjectFillTreatmentReturnValues {

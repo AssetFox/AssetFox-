@@ -34,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public string Suffix { get; private set; }
         public Guid ID { get; set; }
         public Guid? SimulationID { get => null; set { } }
+        public Guid? NetworkID { get; set; }
         public string Results { get; private set; }
         public ReportType Type => ReportType.HTML;
         public string ReportTypeName { get; private set; }

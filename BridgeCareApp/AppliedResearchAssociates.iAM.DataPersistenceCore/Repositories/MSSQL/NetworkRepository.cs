@@ -207,9 +207,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             try
             {
                 queueLog ??= new DoNothingWorkQueueLog();
-                _unitOfWork.BeginTransaction();
-                                   
-                if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                _unitOfWork.BeginTransaction(); 
+                //_unitOfWork.Context.Database.BeginTransaction(IsolationLevel.ReadUncommitted); locks
+
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 {
                     _unitOfWork.Rollback();
                     return;
@@ -241,9 +242,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 queueLog.UpdateWorkQueueStatus("Deleting Maintainable Assets");
 
+                //Slow Starts here
                 _unitOfWork.Context.DeleteEntity<NetworkEntity>(_ => _.Id == networkId);
                 
-
                 if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 {
                     _unitOfWork.Rollback();

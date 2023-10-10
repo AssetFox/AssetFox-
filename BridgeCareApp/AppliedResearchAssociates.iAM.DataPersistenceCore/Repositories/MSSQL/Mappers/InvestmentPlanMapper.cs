@@ -21,8 +21,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldAccumulateUnusedBudgetAmounts = domain.ShouldAccumulateUnusedBudgetAmounts
             };
 
-        public static InvestmentPlanEntity ToEntity(this InvestmentPlanDTO dto, Guid simulationId) =>
-            new InvestmentPlanEntity
+        public static InvestmentPlanEntity ToEntity(this InvestmentPlanDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties = null)
+        {
+            var entity = new InvestmentPlanEntity
             {
                 Id = dto.Id,
                 SimulationId = simulationId,
@@ -32,6 +33,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 NumberOfYearsInAnalysisPeriod = dto.NumberOfYearsInAnalysisPeriod,
                 ShouldAccumulateUnusedBudgetAmounts = dto.ShouldAccumulateUnusedBudgetAmounts
             };
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties); 
+            return entity;
+        }
+        public static InvestmentPlanEntity ToEntityNullPropagating(this InvestmentPlanDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties)
+        {
+            if (dto == null)
+            {
+                return null;
+            }
+            return ToEntity(dto, simulationId, baseEntityProperties);
+        }
+
+
 
         public static InvestmentPlanDTO ToDto(this InvestmentPlanEntity entity) =>
             new InvestmentPlanDTO

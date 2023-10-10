@@ -788,6 +788,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ProjectSource")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid?>("ScenarioBudgetId")
                         .HasColumnType("uniqueidentifier");
 
@@ -880,6 +883,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsUnique();
 
                     b.ToTable("CommittedProjectSettings");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectTreatmentEntity", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Key");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("CommittedProjectTemplates");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryAnalysisMethodEntity", b =>
@@ -3052,6 +3072,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("NetworkID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ReportTypeName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -5110,7 +5133,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", "CommittedProject")
-                        .WithMany("CommittedProjectConsequences")
+                        .WithMany()
                         .HasForeignKey("CommittedProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -6868,8 +6891,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", b =>
                 {
-                    b.Navigation("CommittedProjectConsequences");
-
                     b.Navigation("CommittedProjectLocation");
                 });
 

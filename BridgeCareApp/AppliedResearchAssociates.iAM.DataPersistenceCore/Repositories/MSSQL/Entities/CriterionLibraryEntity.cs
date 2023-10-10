@@ -35,6 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             CriterionLibraryCashFlowRuleJoins = new HashSet<CriterionLibraryCashFlowRuleEntity>();
             CriterionLibraryScenarioCashFlowRuleJoins = new HashSet<CriterionLibraryScenarioCashFlowRuleEntity>();
             CriterionLibraryDeficientConditionGoalJoins = new HashSet<CriterionLibraryDeficientConditionGoalEntity>();
+            CriterionLibraryScenarioDeficientConditionGoalJoins = new HashSet<CriterionLibraryScenarioDeficientConditionGoalEntity>();
             CriterionLibraryPerformanceCurveJoins = new HashSet<CriterionLibraryPerformanceCurveEntity>();
             CriterionLibraryScenarioPerformanceCurveJoins = new HashSet<CriterionLibraryScenarioPerformanceCurveEntity>();
             CriterionLibraryCalculatedAttributePairJoins = new HashSet<CriterionLibraryCalculatedAttributePairEntity>();
@@ -44,6 +45,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             CriterionLibrarySelectableTreatmentJoins = new HashSet<CriterionLibrarySelectableTreatmentEntity>();
             CriterionLibraryScenarioSelectableTreatmentJoins = new HashSet<CriterionLibraryScenarioSelectableTreatmentEntity>();
             CriterionLibraryTreatmentConsequenceJoins = new HashSet<CriterionLibraryConditionalTreatmentConsequenceEntity>();
+            CriterionLibraryTargetConditionGoalJoins = new HashSet<CriterionLibraryTargetConditionGoalEntity>();
+            CriterionLibraryScenarioTargetConditionGoalJoins = new HashSet<CriterionLibraryScenarioTargetConditionGoalEntity>();
             CriterionLibraryScenarioTreatmentConsequenceJoins = new HashSet<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>();
             CriterionLibraryTreatmentCostJoins = new HashSet<CriterionLibraryTreatmentCostEntity>();
             CriterionLibraryScenarioTreatmentCostJoins = new HashSet<CriterionLibraryScenarioTreatmentCostEntity>();

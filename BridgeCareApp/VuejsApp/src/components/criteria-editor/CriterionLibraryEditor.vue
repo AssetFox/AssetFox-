@@ -1,8 +1,8 @@
 <template>
     <v-row column>
-        <v-flex v-if="false">
+        <v-col v-if="false">
             <v-row justify-center>
-                <v-flex xs3>
+                <v-col cols = "3">
                     <v-btn
                         @click="onShowCreateCriterionLibraryDialog(false)"
                         class="ara-blue-bg text-white"
@@ -42,26 +42,26 @@
                         label="Shared"
                         @change="canUpdateOrCreate = true"
                     />
-                </v-flex>
+                </v-col>
             </v-row>
-        </v-flex>
+        </v-col>
         <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion" />
-        <v-flex v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion">
+        <v-col v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion">
             <v-row justify-center>
-                <v-flex xs10>
+                <v-col cols = "10">
                     <CriteriaEditor
                         :criteriaEditorData="criteriaEditorData"
                         @submitCriteriaEditorResult="
                             onSubmitCriteriaEditorResult
                         "
                     />
-                </v-flex>
+                </v-col>
             </v-row>
-        </v-flex>
+        </v-col>
         <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion" />
-        <v-flex v-show="hasSelectedCriterionLibrary">
+        <v-col v-show="hasSelectedCriterionLibrary">
             <v-row justify-center>
-                <v-flex xs6>
+                <v-col xs6>
                     <v-textarea
                         v-model="selectedCriterionLibrary.description"
                         label="Description"
@@ -70,10 +70,10 @@
                         rows="4"
                     >
                     </v-textarea>
-                </v-flex>
+                </v-col>
             </v-row>
-        </v-flex>
-        <v-flex>
+        </v-col>
+        <v-col>
             <v-row justify-end row v-show="hasSelectedCriterionLibrary">
                 <v-btn
                     @click="onUpsertCriterionLibrary(selectedCriterionLibrary)"
@@ -97,7 +97,7 @@
                     Delete Library
                 </v-btn>
             </v-row>
-        </v-flex>
+        </v-col>
 
         <CreateCriterionLibraryDialog
             :dialogData="createCriterionLibraryDialogData"

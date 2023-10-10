@@ -1,10 +1,10 @@
 <template>
     <v-form ref="form" v-model="valid" lazy-validation>
         <v-row column>
-            <v-flex xs6>
+            <v-col cols = "6">
                 <v-row column>
                     <v-row justify-center>
-                        <v-flex id="EditAnalysisMethod-weightingParent-vflex" xs4>
+                        <v-col id="EditAnalysisMethod-weightingParent-vflex" xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
                                 id="EditAnalysisMethod-weighting-vselect"
@@ -23,8 +23,8 @@
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
-                        </v-flex>
-                        <v-flex id="EditAnalysisMethod-optimizationStrategyParent-vflex" xs4>
+                        </v-col>
+                        <v-col id="EditAnalysisMethod-optimizationStrategyParent-vflex" xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
                             <v-select 
                                 id="EditAnalysisMethod-optimizationStrategy-select"
@@ -42,8 +42,8 @@
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
-                        </v-flex>
-                        <v-flex xs4 id="EditAnalysisMethod-spendingStrategyParent-vflex">
+                        </v-col>
+                        <v-col cols = "4" id="EditAnalysisMethod-spendingStrategyParent-vflex">
                             <v-subheader class="ghd-control-label ghd-md-gray">Spending Strategy</v-subheader>
                             <v-select
                                 id="EditAnalysisMethod-spendingStrategy-select"
@@ -60,11 +60,11 @@
                                 :model-value="analysisMethod.spendingStrategy"
                             >
                             </v-select>
-                        </v-flex>                        
+                        </v-col>                        
                     </v-row>
                     <v-row justify-center>
                         <v-spacer />
-                         <v-flex xs4>
+                         <v-col cols = "4">
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
                             <v-select
                                 id="EditAnalysisMethod-benefitAttribute-select"
@@ -79,8 +79,8 @@
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
-                        </v-flex>
-                        <v-flex xs4>
+                        </v-col>
+                        <v-col cols = "4">
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
                             <v-text-field
                                 id="EditAnalysisMethod-benefitLimit-textField"
@@ -100,8 +100,8 @@
                                 :disabled="!hasAdminAccess"
                             >
                             </v-text-field>
-                        </v-flex>
-                        <v-flex xs4 class="ghd-constant-header">
+                        </v-col>
+                        <v-col cols = "4" class="ghd-constant-header">
                             <v-switch style="margin-left:10px;margin-top:30px;"
                                 id="EditAnalysisMethod-allowMultiBudgetFunding-switch"
                                 class="ghd-checkbox"
@@ -109,12 +109,12 @@
                                 :disabled="!hasAdminAccess"
                                 v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"
                                 @change='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
-                        </v-flex>
+                        </v-col>
                         <v-spacer />
                     </v-row>
                     <v-row justify-center>
                         <v-spacer></v-spacer>
-                        <v-flex xs6>
+                        <v-col cols = "6">
                             <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                             <v-textarea
                                 id="EditAnalysisMethod-description-textArea"
@@ -126,14 +126,14 @@
                                 :model-value="analysisMethod.description"
                             >
                             </v-textarea>
-                        </v-flex>
-                        <v-flex xs6>
+                        </v-col>
+                        <v-col cols = "6">
                             <v-row style="height=12px;padding-bottom:0px;">
-                                <v-flex xs12 style="height=12px;padding-bottom:0px">
+                                <v-col cols = "12" style="height=12px;padding-bottom:0px">
                                     <v-subheader class="ghd-control-label ghd-md-gray">                             
                                         Criteria</v-subheader>
-                                </v-flex>
-                                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
+                                </v-col>
+                                <v-col cols = "1" style="height=12px;padding-bottom:0px;padding-top:0px;">
                                     <v-btn
                                         id="EditAnalysisMethod-criteriaEditor-btn"
                                         style="padding-right:20px !important;"
@@ -145,7 +145,7 @@
                                     >
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
-                                </v-flex>
+                                </v-col>
                             </v-row>
                             <v-textarea
                                 id="EditAnalysisMethod-criteria-textArea"
@@ -170,13 +170,13 @@
                                 v-show="criteriaIsEmpty()"
                             >
                             </v-checkbox>
-                        </v-flex>
+                        </v-col>
                         <v-spacer></v-spacer>
                     </v-row>
                 </v-row>
-            </v-flex>
+            </v-col>
 
-            <v-flex xs6>
+            <v-col cols = "6">
                 <v-row justify-center row>
                     <v-btn
                         id="EditAnalysisMethod-cancel-btn"
@@ -193,7 +193,7 @@
                         >Save</v-btn
                     >
                 </v-row>
-            </v-flex>
+            </v-col>
 
             <GeneralCriterionEditorDialog
                 :dialogData="criterionEditorDialogData"

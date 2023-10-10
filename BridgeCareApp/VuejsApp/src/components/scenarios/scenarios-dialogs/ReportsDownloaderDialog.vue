@@ -5,15 +5,15 @@
     <v-card>
       <v-card-title primary-title>
         <v-row column>
-          <v-flex>
+          <v-col>
             <v-row justify-center>
               <h3 class="text-grey">Available Reports</h3>
             </v-row>
-          </v-flex>
+          </v-col>
           <v-progress-linear :indeterminate="true" v-if="isDownloading"></v-progress-linear>
-          <v-flex>
+          <v-col>
             <span class="text-grey" v-if="isDownloading">Downloading... You can close this window, it will not stop the report generation</span>
-          </v-flex>
+          </v-col>
         </v-row>
       </v-card-title>
       <v-divider></v-divider>

@@ -1,9 +1,9 @@
 <template>
     <v-container fluid grid-list-xl>
         <v-row class="budgets-tab-content">
-            <v-flex xs12>
+            <v-col cols = "12">
                 <v-row>
-                    <v-flex xs10>
+                    <v-col cols = "10">
                         <v-row column v-if='budgets?.values.length === 0'>
                             <h3>Investment Library Not Found</h3>
                             <div>
@@ -31,9 +31,9 @@
                                 </template>
                             </v-data-table>
                         </v-row>
-                    </v-flex>
+                    </v-col>
                 </v-row>
-            </v-flex>
+            </v-col>
         </v-row>
     </v-container>
 </template>

@@ -1,8 +1,8 @@
 <template>
     <v-row column>
-        <v-flex xs12>
+        <v-col cols = "12">
         <v-row justify-space-between>
-            <v-flex xs4 class="ghd-constant-header">
+            <v-col cols = "4" class="ghd-constant-header">
                 <v-row column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
                     <v-select
@@ -15,8 +15,8 @@
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                 </v-row>
-            </v-flex>
-            <v-flex xs4 class="ghd-constant-header">
+            </v-col>
+            <v-col cols = "4" class="ghd-constant-header">
                 <div style="padding-top: 15px !important">
                     <v-btn v-if="hasScenario" 
                         class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
@@ -43,8 +43,8 @@
                             Share Library
                     </v-btn>
                 </v-row>
-            </v-flex>
-            <v-flex xs4 class="ghd-constant-header">
+            </v-col>
+            <v-col cols = "4" class="ghd-constant-header">
                 <v-row align-end style="padding-top: 18px !important;">
                     <v-spacer></v-spacer>
                     <v-btn
@@ -62,11 +62,11 @@
                         Create New Library        
                     </v-btn>
                 </v-row>
-            </v-flex>
+            </v-col>
                    
         </v-row>
-        </v-flex>
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+        </v-col>
+        <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
             <div class="deficients-data-table">
                 <v-data-table
                     id="DeficientConditionGoalEditor-deficientConditionGoals-vdatatable"
@@ -203,11 +203,11 @@
             </v-btn>              
             </div>
            
-        </v-flex>
+        </v-col>
         
-        <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
+        <v-col v-show="hasSelectedLibrary && !hasScenario" xs12>
             <v-row justify-center>
-                <v-flex>
+                <v-col>
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea
                         class="ghd-text-field-border"
@@ -218,10 +218,10 @@
                         @update:model-value="checkHasUnsavedChanges()"
                     >
                     </v-textarea>
-                </v-flex>
+                </v-col>
             </v-row>
-        </v-flex>
-        <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
+        </v-col>
+        <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-row justify-center>
                 <v-btn
                     @click="onDiscardChanges"
@@ -265,7 +265,7 @@
                 </v-btn>               
                        
             </v-row>
-        </v-flex>
+        </v-col>
 
         <ConfirmBeforeDeleteAlert
             :dialogData="confirmDeleteAlertData"

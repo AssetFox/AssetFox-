@@ -34,11 +34,11 @@
                     </v-list-item>
                 </v-list>
             </v-card>
-            <v-flex xs12 class="ghd-content">
+            <v-col cols = "12" class="ghd-content">
                 <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
                     <router-view></router-view>
                 </v-container>
-            </v-flex>
+            </v-col>
         </v-row>
     </v-row>
 </template>

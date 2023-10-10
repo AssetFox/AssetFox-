@@ -36,11 +36,11 @@
                         @click="onEditKeyFieldsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row>
+                    <v-col cols = "2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Key Field(s): </v-subheader> 
                     </v-col>
                     <v-col cols="5">
@@ -51,11 +51,11 @@
                         @click="onEditRawDataKeyFieldsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row>
+                    <v-col cols = "2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Inventory Report(s): </v-subheader> 
                     </v-col>
                     <v-col cols="5">
@@ -66,11 +66,11 @@
                         @click="onEditInventoryReportsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row>
+                    <v-col cols = "2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Simulation Report(s): </v-subheader> 
                     </v-col>
                     <v-col cols="5">
@@ -81,11 +81,11 @@
                         @click="onEditSimulationReportsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>            
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>            
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row>
+                    <v-col cols = "2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Constraint Type: </v-subheader> 
                     </v-col>
                     <v-col cols="5">
@@ -93,11 +93,11 @@
                             <v-radio class="admin-radio" label="OR" value="OR"></v-radio>
                             <v-radio class="admin-radio" label="AND" value="AND"></v-radio>
                         </v-radio-group>
-                    </v-flex>                     
-                </v-layout>
-            </v-flex>     
+                    </v-col>                     
+                </v-row>
+            </v-col>     
         </v-col>  
-        <v-flex xs12>
+        <v-col cols = "12">
             <v-row justify-center>
                 <v-col cols="7">
                     <v-btn style="margin-top: 5px !important;" 
@@ -105,9 +105,9 @@
                         @click="onSaveClick" :disabled='disableCrudButtons() || !hasUnsavedChanges'>
                         Save
                     </v-btn>
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
         <EditAdminDataDialog :DialogData='editAdminDataDialogData'
                                      @submit='onSubmitEditAdminDataDialogResult' />
     </v-row>

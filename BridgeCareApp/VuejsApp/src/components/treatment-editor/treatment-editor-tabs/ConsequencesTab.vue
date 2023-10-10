@@ -1,6 +1,6 @@
 <template>
     <v-row class='consequences-tab-content'>
-        <v-flex xs12>            
+        <v-col cols = "12">            
             <div class='consequences-data-table'>
                 <v-data-table :headers='consequencesGridHeaders' :items='consequencesGridData'
                               id="ConsequencesTab-Consequences-vDataTable"
@@ -106,7 +106,7 @@
                 </v-data-table>
             </div>
             <v-btn @click='onAddConsequence' class='ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding'>Add Consequence</v-btn>
-        </v-flex>
+        </v-col>
 
         <ConsequenceEquationEditorDialog :dialogData='consequenceEquationEditorDialogData'
                                          :isFromPerformanceCurveEditor=false

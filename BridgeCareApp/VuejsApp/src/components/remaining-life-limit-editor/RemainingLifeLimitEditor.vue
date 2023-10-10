@@ -1,8 +1,8 @@
 <template>
     <v-row column>
-      <v-flex xs12>
+      <v-col cols = "12">
         <v-row justify-space-between>
-          <v-flex xs3 class="ghd-constant-header">
+          <v-col cols = "3" class="ghd-constant-header">
               <v-row column>
                   <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
                   <v-select id="RemainingLifeLimitEditor-lifeLimitLibrary-select"
@@ -15,8 +15,8 @@
                   </v-select>
                   <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
               </v-row>
-          </v-flex>
-          <v-flex xs4 class="ghd-constant-header">
+          </v-col>
+          <v-col cols = "4" class="ghd-constant-header">
                     <v-row v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 18px; padding-left: 5px" align-center>
                         <div class="header-text-content owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
@@ -34,17 +34,17 @@
                             Share Library
                         </v-btn>
                     </v-row>
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">
+                </v-col>
+                <v-col cols = "4" class="ghd-constant-header">
                 <v-row justify-end align-end style="padding-top: 18px !important;">
                     <div>
                         <v-btn id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn" class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" variant = "outlined">Add Remaining Life Limit</v-btn>
                         <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style ="ri"  @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" variant = "outlined">Create New Library</v-btn>
                     </div>
                 </v-row>
-                </v-flex>
+                </v-col>
             </v-row>
-        </v-flex>
+        </v-col>
         <div v-show="librarySelectItemValue != null || hasScenario">
             <v-data-table
             id="RemainingLifeLimitEditor-attributes-dataTable"
@@ -164,7 +164,7 @@
                 <v-row justify-start align-center class="pa-2">
                 </v-row>
                 <v-divider></v-divider>
-                <v-flex v-show="!hasScenario" xs12 class="px-0">
+                <v-col v-show="!hasScenario" xs12 class="px-0">
                     <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                     <v-textarea
                         class="ghd-control-text ghd-control-border"
@@ -173,7 +173,7 @@
                         outline
                     >
                     </v-textarea>
-                </v-flex>
+                </v-col>
                 <v-row justify-center row>
                     <v-btn id="RemainingLifeLimitEditor-cancel-btn" class="ghd-blue" variant = "outlined" v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
                     <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" class="ghd-blue" variant = "outlined" v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>

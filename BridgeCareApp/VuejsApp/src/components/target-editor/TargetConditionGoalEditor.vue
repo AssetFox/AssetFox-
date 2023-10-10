@@ -1,8 +1,8 @@
 <template>
     <v-row column>
-        <v-flex xs12>
+        <v-col cols = "12">
            <v-row justify-space-between>
-                <v-flex xs4 class="ghd-constant-header">
+                <v-col cols = "4" class="ghd-constant-header">
                     <v-row column>
                         <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
                         <v-select
@@ -16,8 +16,8 @@
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                     </v-row>
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">
+                </v-col>
+                <v-col cols = "4" class="ghd-constant-header">
                     <v-row v-if="hasSelectedLibrary && ! hasScenario" style="padding-top: 10px; padding-left: 10px">
                         <div v-if="hasSelectedLibrary && !hasScenario" class="header-text-content owner-padding" style="padding-top: 7px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
@@ -37,8 +37,8 @@
                             Share Library
                         </v-btn>
                     </v-row>
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">
+                </v-col>
+                <v-col cols = "4" class="ghd-constant-header">
                     <v-row justify-end align-end style="padding-top: 18px !important;">
                         <v-spacer></v-spacer>
                         <v-btn variant = "outlined"
@@ -57,11 +57,11 @@
                         Create New Library
                         </v-btn>
                     </v-row>
-                </v-flex>
+                </v-col>
            </v-row>
-        </v-flex>
-        <!-- </v-flex> -->
-        <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
+        </v-col>
+        <!-- </v-col> -->
+        <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="targets-data-table">
                 <v-data-table
                     id="TargetConditionGoalEditor-targetConditionGoals-vdatatable"
@@ -198,7 +198,7 @@
                     </template>
                 </v-data-table>
             </div>
-        </v-flex>
+        </v-col>
 
         <v-row justify-start align-center v-show="hasSelectedLibrary || hasScenario">
             <v-btn variant = "flat" right
@@ -209,7 +209,7 @@
             </v-btn>
         </v-row>
 
-        <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
+        <v-col v-show="hasSelectedLibrary && !hasScenario" xs12>
             <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
             <v-textarea
                 class="ghd-control-text ghd-control-border"
@@ -217,8 +217,8 @@
                 v-model="selectedTargetConditionGoalLibrary.description"
                 @update:model-value="checkHasUnsavedChanges()">
             </v-textarea>
-        </v-flex>
-        <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
+        </v-col>
+        <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-row justify-center row>
                 <v-btn variant = "outlined"
                     id="TargetConditionGoalEditor-deleteLibrary-btn"
@@ -262,7 +262,7 @@
                     Update Library
                 </v-btn>
             </v-row>
-        </v-flex>
+        </v-col>
     
         <ConfirmDeleteAlert :is="Alert"
             :dialogData="confirmDeleteAlertData"

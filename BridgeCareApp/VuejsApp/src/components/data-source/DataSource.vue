@@ -1,7 +1,7 @@
 <template>
     <v-row>
             <v-row>
-                <v-flex xs12>
+                <v-col cols = "12">
                 <v-row>
                     <v-subheader id="DataSource-headerText-vsubheader" class="ghd-control-label ghd-md-gray Montserrat-font-family">Data Source</v-subheader>
                     <v-select
@@ -15,7 +15,7 @@
                     >
                     </v-select>
                 </v-row>
-                </v-flex>
+                </v-col>
                 <v-btn id="DataSource-AddDataSource-vbtn" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" outline>Add Data Source</v-btn>
             </v-row>
             <v-divider v-show="showMssql || showExcel"></v-divider>
@@ -84,7 +84,7 @@
             <v-subheader v-show="showMssql" class="ghd-control-label ghd-md-gray Montserrat-font-family">Connection String            
             </v-subheader>
             <v-row>
-                    <v-flex xs8>
+                    <v-col cols = "8">
                         <v-textarea
                           id="DataSource-ConnectionString-vtextarea"
                           class="ghd-control-border Montserrat-font-family"
@@ -100,18 +100,18 @@
                         <p class="p-success Montserrat-font-family" v-show="showSaveMessage">Successfully saved.</p>
                         <p class="ara-blue Montserrat-font-family" v-show="isNewDataSource && showExcel">Save new data source before loading file.</p>
                         <p class="p-fail Montserrat-font-family" v-show="false">Error! {{invalidColumn}} Column is invalid</p>
-                    </v-flex>
+                    </v-col>
             </v-row>
         </v-row>
         <v-row> 
-            <v-flex xs6>
+            <v-col cols = "6">
                 <v-btn id="DataSource-Cancel-vbtn" v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
                 <v-btn id="DataSource-Test-vbtn" v-show="showMssql" @click="checkSQLConnection" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
                 <v-btn id="DataSource-Save-vbtn" v-show="showMssql || showExcel" :disabled="disableCrudButtons() || !hasUnsavedChanges" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
                 <v-btn id="DataSource-Load-vbtn" v-show="showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
                 <v-btn id="DataSource-Delete-vbtn" v-show="showMssql || showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onDeleteClick">Delete</v-btn>
 
-            </v-flex>
+            </v-col>
         </v-row>
 
         <CreateDataSourceDialog :dialogData='createDataSourceDialogData'

@@ -1,8 +1,8 @@
 <template>
     <v-row class="Montserrat-font-family">
-        <v-flex xs12>
+        <v-col cols = "12">
             <v-row column >
-                <v-flex xs12>
+                <v-col cols = "12">
                     <v-row>
                         <v-btn @click='OnGetTemplateClick' 
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Get Template</v-btn>
@@ -22,17 +22,17 @@
                         <v-btn @click='OnDeleteAllClick' 
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Delete All</v-btn>
                     </v-row>
-                </v-flex>
+                </v-col>
 
-                <v-flex xs12>
+                <v-col cols = "12">
                     <v-checkbox 
                     id="CommittedProjectsEditor-noTreatmentsBeforeCommittedProjects-ghdcheckbox"
                     class='ghd-checkbox' label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
-                </v-flex>
+                </v-col>
 
-                <v-flex xs12 class="ghd-constant-header">
+                <v-col cols = "12" class="ghd-constant-header">
                     <v-row>
-                        <v-flex xs6 style="margin-left: 5px">
+                        <v-col cols = "6" style="margin-left: 5px">
                             <v-subheader class="ghd-control-label ghd-md-gray"></v-subheader>
                             <v-row>                                
                                 <v-text-field
@@ -53,17 +53,17 @@
                                 style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
                             </v-row>
                            
-                        </v-flex>
+                        </v-col>
                     </v-row>
-                </v-flex>
-                <v-flex xs12>
+                </v-col>
+                <v-col cols = "12">
                     <v-row justify-end class="px-4">
                         <p>Commited Projects: {{totalItems}}</p>
                     </v-row>
                     
-                </v-flex>       
+                </v-col>       
                 
-                <v-flex xs12 >
+                <v-col cols = "12">
                     <v-row column>
                         <v-data-table
                         id="CommittedProjectsEditor-committedProjects-vdatatable"
@@ -181,11 +181,11 @@
                         @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
                         class="ghd-white-bg ghd-blue ghd-button btn-style" variant = "outlined">Add Committed Project</v-btn> 
                     </v-row>
-                </v-flex>
+                </v-col>
 
                 <v-divider></v-divider>
 
-                <v-flex xs12>
+                <v-col cols = "12">
                     <v-row justify-center>
                         <v-btn 
                         id="CommittedProjectsEditor-cancel-vbtn"
@@ -194,21 +194,21 @@
                         id="CommittedProjectsEditor-save-vbtn"
                         @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
                     </v-row>
-                </v-flex> 
+                </v-col> 
             </v-row>
-        </v-flex>
-        <v-flex xs8 style="border:1px solid #999999 !important;" v-if="selectedCommittedProject !== ''">
+        </v-col>
+        <v-col cols = "8" style="border:1px solid #999999 !important;" v-if="selectedCommittedProject !== ''">
             <v-row column>
-                <v-flex xs12>
+                <v-col cols = "12">
                     <v-btn 
                        id="CommittedProjectsEditor-closeSelectedCommitedProject-vbtn"
                        @click="selectedCommittedProject = ''" variant = "flat" class="ghd-close-button">
                         X
                     </v-btn>
-                </v-flex>
+                </v-col>
               
             </v-row>
-        </v-flex>
+        </v-col>
         <CommittedProjectsFileUploaderDialog :is="ImportExportCommittedProjectsDialog"
             :showDialog="showImportExportCommittedProjectsDialog"
             @submit="onSubmitImportExportCommittedProjectsDialogResult"

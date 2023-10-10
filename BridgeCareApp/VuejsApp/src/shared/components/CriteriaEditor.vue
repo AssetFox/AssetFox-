@@ -2,7 +2,7 @@
     <v-row justify-center column class="criteria-editor-card-text">
         <div>
             <v-row justify-space-between>
-                <v-flex xs6>
+                <v-col cols = "6">
                     <v-row justify-start
                     >
                         <h3 class="ghd-dialog">Output</h3>
@@ -16,7 +16,7 @@
                                         criteriaEditorData.isLibraryContext,
                                 }"
                             >
-                            <v-flex xs2>
+                            <v-col cols = "2">
                                 <v-row>
                                 <v-select
                                     :items="conjunctionSelectListItems"
@@ -38,7 +38,7 @@
                                     </template>                                    
                                 </v-select>
                                 </v-row>
-                            </v-flex>
+                            </v-col>
                                 <v-btn
                                     id="CriteriaEditor-addSubCriteria-btn"
                                     @click="onAddSubCriteria"
@@ -133,8 +133,8 @@
                             </v-row>
                         </v-card-actions>
                     </v-card>
-                </v-flex>
-                <v-flex xs6>
+                </v-col>
+                <v-col cols = "6">
                     <v-row justify-start
                     >
                         <h3 class="ghd-dialog">Criteria Editor</h3>
@@ -230,11 +230,11 @@
                             </v-row>
                         </v-card-actions>
                     </v-card>
-                </v-flex>
+                </v-col>
             </v-row>
         </div>
         <div class="main-criteria-check-output-container">
-            <v-flex
+            <v-col
                 v-show="!criteriaEditorData.isLibraryContext"
                 class="save-cancel-flex"
             >
@@ -254,7 +254,7 @@
                         >Cancel</v-btn
                     >
                 </v-row>
-            </v-flex>
+            </v-col>
         </div>
     </v-row>
 </template>

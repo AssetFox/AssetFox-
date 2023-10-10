@@ -1,7 +1,7 @@
 <template>
     <v-row column class="Montserrat-font-family">
-        <v-flex xs12>
-            <v-flex xs8 class="ghd-constant-header">
+        <v-col cols = "12">
+            <v-col cols = "8" class="ghd-constant-header">
                 <v-row>
                     <v-row column>
                         <v-subheader id="Networks-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Network</v-subheader>
@@ -19,12 +19,12 @@
                         Add Network
                     </v-btn>
                 </v-row>
-            </v-flex>
-        </v-flex>
+            </v-col>
+        </v-col>
         <v-divider />
-        <v-flex xs12 class="ghd-constant-header" v-show="hasSelectedNetwork">
+        <v-col cols = "12" class="ghd-constant-header" v-show="hasSelectedNetwork">
             <v-row justify-space-between>
-                <v-flex xs6>
+                <v-col cols = "6">
                     <v-row column>
                         <v-subheader class="ghd-md-gray ghd-control-label">
                             Key Attribute
@@ -38,8 +38,8 @@
                             :items='selectKeyAttributeItems'>
                         </v-select>  
                     </v-row>                         
-                </v-flex>
-                <v-flex xs5>
+                </v-col>
+                <v-col cols = "5">
                 <v-row v-show="!isNewNetwork">
                     <v-select
                         id="Networks-DataSource-vselect"
@@ -57,20 +57,20 @@
                         Select All From Source
                     </v-btn>                            
                 </v-row>  
-                </v-flex>       
+                </v-col>       
             </v-row>
-        </v-flex>
+        </v-col>
         <!-- Data source combobox -->
-        <v-flex xs12 v-show="hasSelectedNetwork">
+        <v-col cols = "12" v-show="hasSelectedNetwork">
             <v-row justify-space-between>
-                <v-flex xs5 >
+                <v-col cols = "5" >
                     <v-row column>
                         <v-row style="height=12px;padding-bottom:0px;">
-                                <v-flex xs12 class="ghd-constant-header" style="height=12px;padding-bottom:0px">
+                                <v-col cols = "12" class="ghd-constant-header" style="height=12px;padding-bottom:0px">
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="padding-top: 14px !important">                             
                                         Spatial Weighting Equation</v-subheader>
-                                </v-flex>
-                                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
+                                </v-col>
+                                <v-col xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
                                     <v-btn
                                         id="Networks-EditSpatialWeightingEquation-vbtn"
                                         style="padding-right:20px !important;"
@@ -80,13 +80,13 @@
                                         @click="onShowEquationEditorDialog">
                                         <v-icon class="ghd-blue">fas fa-edit</v-icon>
                                     </v-btn>
-                                </v-flex>
+                                </v-col>
                             </v-row>
                         <v-text-field id="Networks-EditSpatialWeightingEquation-vtextfield" outline class="ghd-text-field-border ghd-text-field" 
                            :disabled="!isNewNetwork" v-model="spatialWeightingEquationValue.expression"/>                         
                     </v-row>
                     <v-row v-show="hasStartedAggregation">
-                        <v-flex>
+                        <v-col>
                             <v-subheader class="ghd-control-label ara-black" v-text="networkDataAssignmentStatus" ></v-subheader>
                             <v-progress-linear
                                             v-model="
@@ -103,10 +103,10 @@
                                                 }}%</strong
                                             >
                                         </v-progress-linear>
-                        </v-flex>
+                        </v-col>
                     </v-row>
-                </v-flex>
-                <v-flex xs5>
+                </v-col>
+                <v-col cols = "5">
                     <v-row column>
                         <div class='priorities-data-table' v-show="!isNewNetwork">
                             <v-row justify-center>
@@ -143,11 +143,11 @@
                             </div>
                         </div>               
                     </v-row>
-                </v-flex>
+                </v-col>
             </v-row>
-        </v-flex>
+        </v-col>
         <!-- The Buttons  -->
-        <v-flex xs12 v-show="hasSelectedNetwork">        
+        <v-col cols = "12" v-show="hasSelectedNetwork">        
             <v-row justify-center style="padding-top: 30px !important">
                 <v-btn id="Networks-Cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
@@ -165,7 +165,7 @@
                     Create
                 </v-btn>            
             </v-row>
-        </v-flex>
+        </v-col>
         <EquationEditorDialog
             :dialogData="equationEditorDialogData"
             :isFromPerformanceCurveEditor=false

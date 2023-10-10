@@ -5,10 +5,10 @@
         <v-row justify-center column>
           <div>
             <v-row justify-center>
-        <v-flex xs10>
+        <v-col cols = "10">
           <CriteriaEditor :criteriaEditorData="criteriaEditorData"
                           @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
-        </v-flex>
+        </v-col>
       </v-row>
           </div>
         </v-row>

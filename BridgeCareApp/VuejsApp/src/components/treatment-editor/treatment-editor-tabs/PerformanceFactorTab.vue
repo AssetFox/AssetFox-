@@ -1,6 +1,6 @@
 <template>
     <v-row class='factor-tab-content'>
-        <v-flex xs12>            
+        <v-col cols = "12">            
             <div class='factor-data-table'>
                 <v-data-table :headers='factorGridHeaders' :items='factorGridData'
                               class='elevation-1 fixed-header v-table__overflow'
@@ -34,7 +34,7 @@
                     </template>
                 </v-data-table>
             </div>
-        </v-flex>
+        </v-col>
     </v-row>
 </template>
 

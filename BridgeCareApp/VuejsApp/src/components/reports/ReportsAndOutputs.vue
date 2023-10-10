@@ -1,8 +1,8 @@
 <template>
     <v-row column class="Montserrat-font-family" justify-start>
-        <v-flex xs12>
+        <v-col cols = "12">
             <v-row class="data-table" justify-left>
-                <v-flex xs12>
+                <v-col cols = "12">
                     <v-subheader>
                         Available Reports
                     </v-subheader>
@@ -79,12 +79,12 @@
                             </template>                               
                         </v-data-table>
                     </v-card>
-                </v-flex>
+                </v-col>
             </v-row>
-        </v-flex>
-        <v-flex>
+        </v-col>
+        <v-col>
         <v-row column>
-            <v-flex>
+            <v-col>
                 <v-subheader class="ghd-md-gray ghd-control-label">
                     Diagnostics & Logging
                 </v-subheader>
@@ -92,12 +92,12 @@
                 <v-row style="margin:0px;">
                     <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" variant = "flat">Simulation Log</v-btn>
                 </v-row>
-            </v-flex>
+            </v-col>
 
         </v-row>
-        </v-flex>
+        </v-col>
         <!-- <v-row align-center>
-            <v-flex xs4 class="ghd-constant-header">
+            <v-col cols = "4" class="ghd-constant-header">
                 <v-subheader class="ghd-md-gray ghd-control-label">Select a Report</v-subheader>
                 <v-select
                     :items='reports'
@@ -106,8 +106,8 @@
                     outline
                     class="ghd-select ghd-text-field ghd-text-field-border">
                 </v-select>
-            </v-flex>
-            <v-flex>
+            </v-col>
+            <v-col>
                 <v-btn 
                     class="ghd-white-bg ghd-blue ghd-button-text ghd-button" 
                     depressed
@@ -119,14 +119,14 @@
                     @click="onDownloadReport()"
                     outline
                 >Download Report</v-btn>
-            </v-flex>
+            </v-col>
         </v-row>
         <v-row style="margin:10px; padding-left:0px" column>
             <v-row justify-space-between align-center>
                 <v-subheader class="ghd-control-label ghd-md-gray">                             
                     Report Criteria
                 </v-subheader>
-                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
+                <v-col cols = "1" style="height=12px;padding-bottom:0px;padding-top:0px;">
                     <v-btn
                         id="SummaryReport-criteriaEditor-btn"
                         style="!important;"
@@ -138,7 +138,7 @@
                     >
                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                     </v-btn>
-                </v-flex>
+                </v-col>
             </v-row>
             <v-row>
                <v-textarea

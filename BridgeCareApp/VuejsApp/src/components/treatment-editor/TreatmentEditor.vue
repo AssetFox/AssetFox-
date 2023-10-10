@@ -1,8 +1,8 @@
 <template>
     <v-row column>
-        <v-flex style="margin-top: -20px;">
+        <v-col style="margin-top: -20px;">
             <v-row>
-                <v-flex xs6>
+                <v-col cols = "6">
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
                         id="TreatmentEditor-treatmentLibrary-select"
@@ -15,8 +15,8 @@
                     >
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
-                </v-flex>
-                <v-flex xs6>                       
+                </v-col>
+                <v-col cols = "6">                       
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
                     <v-select
                     id="TreatmentEditor-treatment-select"
@@ -28,8 +28,8 @@
                         v-model='treatmentSelectItemValue'
                     >
                     </v-select>
-                </v-flex>
-                <v-flex style="padding-right: 5px">
+                </v-col>
+                <v-col style="padding-right: 5px">
                     <v-btn
                         @click='showImportTreatmentDialog = true'
                         variant = "flat"
@@ -38,8 +38,8 @@
                     >
                         Import Treatment
                     </v-btn>
-                </v-flex>
-                <v-flex style="padding-right: 5px">
+                </v-col>
+                <v-col style="padding-right: 5px">
                     <v-btn
                         @click='onShowConfirmDeleteTreatmentAlert'
                         variant = "flat"
@@ -48,8 +48,8 @@
                     >
                         Delete Treatment
                     </v-btn>
-                </v-flex>
-                <v-flex justify-right align-end style="padding-top: 38px !important;" >
+                </v-col>
+                <v-col justify-right align-end style="padding-top: 38px !important;" >
                     <v-btn
                         id="TreatmentEditor-createLibrary-btn"
                         @click='onShowCreateTreatmentLibraryDialog(false)'
@@ -60,10 +60,10 @@
                     >
                         Create New Library
                     </v-btn>                                                          
-                </v-flex>
+                </v-col>
             </v-row>
 
-            <v-flex xs6>
+            <v-col cols = "6">
                     <v-row v-if='hasSelectedLibrary && !hasScenario' style="padding-bottom: 50px !important">
                         <div class="ghd-control-label">
                         Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> | Date Modified: {{ modifiedDate }}   
@@ -79,10 +79,10 @@
 
                         </div>  
                     </v-row>
-            </v-flex>
+            </v-col>
 
 
-        </v-flex>
+        </v-col>
         <v-divider style="margin-top:-10px" v-show='hasSelectedLibrary || hasScenario'></v-divider>        
         <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top:-20px;margin-bottom:-15px;">                
                <v-btn
@@ -116,10 +116,10 @@
                     Upload
                 </v-btn>
             </div>    
-        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
+        <v-col v-show='hasSelectedLibrary || hasScenario' xs12>
             <v-row>
                 <div xs2>
-                    <v-flex>
+                    <v-col>
                         <v-list class='treatments-list'>
                             <template v-for='treatmentSelectItem in treatmentSelectItems' :key='treatmentSelectItem.value'>
                                 <v-list-tile ripple :class="{'selected-treatment-item': isSelectedTreatmentItem(treatmentSelectItem.value)}"
@@ -135,11 +135,11 @@
                                 </v-list-tile>
                             </template>
                         </v-list>
-                    </v-flex>
+                    </v-col>
                 </div>
                 <div class='treatments-div' xs10>
                     <v-row column> 
-                        <v-flex xs12>               
+                        <v-col cols = "12">               
                             <div v-show='selectedTreatment.id !== uuidNIL'>                                                
                                 <v-tabs v-model='activeTab' id='TreatmentEditor-treatmenttabs'>
                                     <v-tab 
@@ -230,15 +230,15 @@
                                     </v-tabs-items>
                                 </v-tabs>
                             </div>                                             
-                        </v-flex>                    
+                        </v-col>                    
                     </v-row>
                 </div>
             </v-row>
-        </v-flex>        
-        <v-flex xs12>
+        </v-col>        
+        <v-col cols = "12">
             <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
             <v-row justify-center v-show='hasSelectedLibrary && !hasScenario'>
-                <v-flex xs12>
+                <v-col cols = "12">
                     <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                     <v-textarea                        
                         class='ghd-control-border ghd-control-text'
@@ -248,10 +248,10 @@
                         v-model='selectedTreatmentLibrary.description'
                         @update:model-value="checkHasUnsavedChanges()"
                     />
-                </v-flex>
+                </v-col>
             </v-row>
-        </v-flex>
-        <v-flex xs9>
+        </v-col>
+        <v-col cols = "9">
             <v-row justify-center row v-show='(hasSelectedLibrary || hasScenario)'>
                 <v-btn :disabled='!hasUnsavedChanges'
                     @click='onDiscardChanges'
@@ -297,7 +297,7 @@
                     Update Library
                 </v-btn>
             </v-row>
-        </v-flex>
+        </v-col>
 
         <ConfirmDeleteAlert
             :dialogData='confirmBeforeDeleteAlertData'

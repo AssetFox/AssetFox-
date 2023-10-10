@@ -17,7 +17,7 @@
                         </v-row>
                 </div>
             </div>
-            <v-flex xs12>
+            <v-col cols = "12">
                 <v-row justify-start>     
                     <v-switch
                         v-show="useTreatment"
@@ -26,7 +26,7 @@
                         v-model="applyNoTreatment"
                     />
                 </v-row>
-            </v-flex>
+            </v-col>
             <div v-show="true">
                 <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
             </div>

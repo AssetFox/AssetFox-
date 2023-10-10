@@ -1,6 +1,6 @@
 <template>
   <v-row column style='width: 90%; margin: auto'>
-    <v-flex xs12>
+    <v-col cols = "12">
       <v-card class='test1'>
         <div v-if='unassignedUsersCriteriaFilter.length > 0'>
           <v-card-title class='userCriteriaTableHeader'>
@@ -12,13 +12,13 @@
           <v-divider style='margin: 0' />
           <div v-for='user in unassignedUsersCriteriaFilter'>
             <v-row row class='unassigned-user-layout'>
-              <v-flex class='unassigned-user-layout-username-flex' xs3>
+              <v-col class='unassigned-user-layout-username-flex' xs3>
                 {{ user.userName }}
-              </v-flex>
-              <v-flex xs3>
+              </v-col>
+              <v-col cols = "3">
                 {{ user.description }}
-              </v-flex>
-              <v-flex style='padding: 0' xs4>
+              </v-col>
+              <v-col style='padding: 0' xs4>
                 <v-row align-center>
                   <v-btn @click='onEditCriteria(user)' class='ara-blue-bg text-white' 
                           title='Give the user limited access to the bridge inventory'>
@@ -26,14 +26,14 @@
                     Assign Criteria Filter
                   </v-btn>
                 </v-row>
-              </v-flex>
-              <v-flex justify-center style='padding: 0' xs2>
+              </v-col>
+              <v-col justify-center style='padding: 0' xs2>
                 <v-row align-center>
                   <v-btn @click='onDeleteUser(user)' class='ara-orange' icon title='Delete User'>
                     <v-icon>fas fa-trash</v-icon>
                   </v-btn>
                 </v-row>
-              </v-flex>
+              </v-col>
             </v-row>
             <v-divider style='margin: 0' />
           </div>
@@ -146,7 +146,7 @@
           </v-data-table>
         </div>
       </v-card>
-    </v-flex>
+    </v-col>
     <CriteriaFilterEditorDialog :dialogData='criteriaFilterEditorDialogData' 
                                 @submitCriteriaEditorDialogResult='onSubmitCriteria' />
 

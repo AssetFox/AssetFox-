@@ -1,6 +1,6 @@
 <template>
     <v-row class="costs-tab-content">
-        <v-flex xs12>              
+        <v-col cols = "12">              
             <div class="costs-data-table">                
                 <v-data-table
                     hide-default-header             
@@ -13,7 +13,7 @@
                     <template slot="items" slot-scope="props" v-slot:item="props">
                         <tr style="border:none">
                             <td xs5>                            
-                                <v-row xs6 align-center>                                
+                                <v-row  rows = "6"  align-center>                                
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Equation</v-subheader>
                                     <v-btn
                                         @click="
@@ -27,7 +27,7 @@
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>                                
                                 </v-row>
-                                <v-row xs6 align-center>  
+                                <v-row  rows = "6" align-center>  
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
                                         full-width
@@ -41,7 +41,7 @@
                                 </v-row>                          
                             </td>
                             <td xs5>
-                                <v-row xs6 align-center>
+                                <v-row  rows = "6"align-center>
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Criteria</v-subheader>
                                     <v-btn
                                         @click="
@@ -55,7 +55,7 @@
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row> 
-                                <v-row xs6 align-center>              
+                                <v-row  rows = "6" align-center>              
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
                                         full-width
@@ -89,7 +89,7 @@
             <v-chip class="ma-2 ara-blue" @click="showExampleFunction">
                 Equation - Use Max(,) to enforce minimum costs
             </v-chip>            
-        </v-flex>
+        </v-col>
 
         <CostEquationEditorDialog
             :dialogData="costEquationEditorDialogData"

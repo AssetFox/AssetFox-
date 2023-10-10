@@ -13,11 +13,11 @@
                 <v-card-text class="pa-0">
                     <v-row column>
                         <InvestmentBudgetsFileSelector :closed='closed' @submit='onFileSelectorChange' />
-                        <v-flex xs12>
+                        <v-col cols = "12">
                             <v-row justify-start>
                                 <v-checkbox class="Montserrat-font-family" label='Overwrite budgets' v-model='overwriteBudgets'></v-checkbox>
                             </v-row>
-                        </v-flex>
+                        </v-col>
                     </v-row>
                 </v-card-text>
                 <v-card-actions>

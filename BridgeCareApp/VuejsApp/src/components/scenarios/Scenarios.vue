@@ -1,6 +1,6 @@
 <template>
     <v-row column>
-        <v-flex x12>
+        <v-col cols = "12">
             <v-card elevation="5" color="blue lighten-5">
                 <v-tabs center-active v-model="tab">
                     <v-tabs-slider color="blue"></v-tabs-slider>
@@ -15,14 +15,14 @@
                         {{ item.name }} ( {{ item.count }} )
                     </v-tab>
                     <v-spacer></v-spacer>
-                    <v-flex xs1></v-flex>
+                    <v-col cols = "1"></v-col>
                 </v-tabs>
                 <v-tabs-items v-model="tab">
                     <v-window-item>
-                        <v-flex x12>
+                        <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title>
-                                    <v-flex xs6>
+                                    <v-col cols = "6">
                                         <v-row style = "margin-right: -100px;">
                                             <v-text-field
                                                 id="Scenarios-searchScenarios-textField"
@@ -70,8 +70,8 @@
                                                 </div>
                                             </span>
                                         </v-row>
-                                    </v-flex>
-                                    <v-flex xs4></v-flex>
+                                    </v-col>
+                                    <v-col cols = "4"></v-col>
                                     <v-row class="flex-end xs2" style="justify-content: end; padding-right: 70px">
                                         <v-btn
                                            id="Scenarios-createScenario-btn"
@@ -221,13 +221,13 @@
                                     </v-alert>
                                 </v-data-table>
                             </v-card>
-                        </v-flex>
+                        </v-col>
                     </v-window-item>
                     <v-window-item>
-                        <v-flex xs12>
+                        <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title>
-                                    <v-flex xs6>
+                                    <v-col cols = "6">
                                         <v-row style = "margin-right:-200px">
                                             <v-text-field
                                                 id="Scenarios-shared-searchScenarios-textField"
@@ -276,7 +276,7 @@
                                             </span>
                                         </v-row>
                                         
-                                    </v-flex>
+                                    </v-col>
                                 </v-card-title>
                                 <v-data-table
                                     :items="currentSharedScenariosPage"                      
@@ -406,10 +406,10 @@
                                     </template>                                 
                                 </v-data-table>
                             </v-card>
-                        </v-flex>
+                        </v-col>
                     </v-window-item>
                     <v-window-item>
-                        <v-flex xs12>
+                        <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title class="ghd-dialog-padding-top-title">
                                     <v-row justify-start>
@@ -550,11 +550,11 @@
                                     </template>
                                 </v-data-table>
                             </v-card>
-                        </v-flex>
+                        </v-col>
                     </v-window-item>
                 </v-tabs-items>
             </v-card>
-        </v-flex>
+        </v-col>
         <!-- missing implemtation
          <ConfirmAnalysisRunAlertPrehecks
             :dialogDataPreChecks="onSecondConfirmAnalysisRunAlertData"

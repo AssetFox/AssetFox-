@@ -12,14 +12,14 @@
         </v-card-title>
         <v-card-text class="ghd-dialog-box-padding-center">
           <v-row column>
-            <v-flex>
+            <v-col>
               <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-name-vtextfield"
                             outline v-model="newDeficientConditionGoal.name"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                             class="ghd-text-field-border ghd-text-field"></v-text-field>
-            </v-flex>
-            <v-flex>
+            </v-col>
+            <v-col>
               <v-subheader class="ghd-md-gray ghd-control-label">Select Attribute</v-subheader>
               <v-select id="CreateDeficientConditionGoalDialog-attribute-vselect"
                         :items="numericAttributeNames"
@@ -28,16 +28,16 @@
                         v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-select ghd-text-field ghd-text-field-border">
               </v-select>
-            </v-flex>
-            <v-flex>
+            </v-col>
+            <v-col>
               <v-subheader class="ghd-md-gray ghd-control-label">Deficient Limit</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-limit-vtextfield"
                             outline
                             v-model.number="newDeficientConditionGoal.deficientLimit" :mask="'##########'"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                             class="ghd-text-field-border ghd-text-field"></v-text-field>
-            </v-flex>
-            <v-flex>
+            </v-col>
+            <v-col>
               <v-subheader class="ghd-md-gray ghd-control-label">Allowed Deficient Percentage</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-percentage-vtextfield"
                             outline
@@ -46,7 +46,7 @@
                             :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.allowedDeficientPercentage, [0, 100])]"
                             class="ghd-text-field-border ghd-text-field">
               </v-text-field>
-            </v-flex>
+            </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">

@@ -2,16 +2,16 @@
   <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-        <v-layout justify-space-between align-center >
+        <v-row justify-space-between align-center >
           <div class="ghd-control-dialog-header">New Budget Priority Library</div>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
-        </v-layout>
+        </v-row>
 
       </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center">
-        <v-layout column >
+        <v-row column >
           <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
           <v-text-field id="CreateBudgetPriorityLibraryDialog-name-vtextfield" outline v-model="newBudgetPriorityLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
@@ -20,16 +20,16 @@
           <v-textarea id="CreateBudgetPriorityLibraryDialog-description-vtextfield" no-resize outline :rows="5"
                       v-model="newBudgetPriorityLibrary.description"
                       class="ghd-text-field-border"/>
-        </v-layout>
+        </v-row>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-layout justify-center row >       
+        <v-row justify-center row >       
           <v-btn id="CreateBudgetPriorityLibraryDialog-cancel-vbtn" @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button-text ghd-button'>Cancel </v-btn>
           <v-btn id="CreateBudgetPriorityLibraryDialog-save-vbtn" :disabled="newBudgetPriorityLibrary.name === ''" @click="onSubmit(true)"
           variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>

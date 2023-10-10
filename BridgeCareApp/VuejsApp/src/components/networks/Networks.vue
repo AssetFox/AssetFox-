@@ -1,9 +1,9 @@
 <template>
-    <v-layout column class="Montserrat-font-family">
+    <v-row column class="Montserrat-font-family">
         <v-flex xs12>
             <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-layout column>
+                <v-row>
+                    <v-row column>
                         <v-subheader id="Networks-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Network</v-subheader>
                         <v-select :items='selectNetworkItems'
                             id="Networks-selectNetwork-vselect"
@@ -11,21 +11,21 @@
                             v-model='selectNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
-                    </v-layout>
+                    </v-row>
                     <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
                         id="Networks-addNetwork-vbtn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onAddNetworkDialog">
                         Add Network
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-flex>
         </v-flex>
         <v-divider />
         <v-flex xs12 class="ghd-constant-header" v-show="hasSelectedNetwork">
-            <v-layout justify-space-between>
+            <v-row justify-space-between>
                 <v-flex xs6>
-                    <v-layout column>
+                    <v-row column>
                         <v-subheader class="ghd-md-gray ghd-control-label">
                             Key Attribute
                         </v-subheader>
@@ -37,10 +37,10 @@
                             v-model="selectedKeyAttributeItem"
                             :items='selectKeyAttributeItems'>
                         </v-select>  
-                    </v-layout>                         
+                    </v-row>                         
                 </v-flex>
                 <v-flex xs5>
-                <v-layout v-show="!isNewNetwork">
+                <v-row v-show="!isNewNetwork">
                     <v-select
                         id="Networks-DataSource-vselect"
                         variant="outlined"
@@ -56,16 +56,16 @@
                         @click="selectAllFromSource">
                         Select All From Source
                     </v-btn>                            
-                </v-layout>  
+                </v-row>  
                 </v-flex>       
-            </v-layout>
+            </v-row>
         </v-flex>
         <!-- Data source combobox -->
         <v-flex xs12 v-show="hasSelectedNetwork">
-            <v-layout justify-space-between>
+            <v-row justify-space-between>
                 <v-flex xs5 >
-                    <v-layout column>
-                        <v-layout style="height=12px;padding-bottom:0px;">
+                    <v-row column>
+                        <v-row style="height=12px;padding-bottom:0px;">
                                 <v-flex xs12 class="ghd-constant-header" style="height=12px;padding-bottom:0px">
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="padding-top: 14px !important">                             
                                         Spatial Weighting Equation</v-subheader>
@@ -81,11 +81,11 @@
                                         <v-icon class="ghd-blue">fas fa-edit</v-icon>
                                     </v-btn>
                                 </v-flex>
-                            </v-layout>
+                            </v-row>
                         <v-text-field id="Networks-EditSpatialWeightingEquation-vtextfield" outline class="ghd-text-field-border ghd-text-field" 
                            :disabled="!isNewNetwork" v-model="spatialWeightingEquationValue.expression"/>                         
-                    </v-layout>
-                    <v-layout v-show="hasStartedAggregation">
+                    </v-row>
+                    <v-row v-show="hasStartedAggregation">
                         <v-flex>
                             <v-subheader class="ghd-control-label ara-black" v-text="networkDataAssignmentStatus" ></v-subheader>
                             <v-progress-linear
@@ -104,12 +104,12 @@
                                             >
                                         </v-progress-linear>
                         </v-flex>
-                    </v-layout>
+                    </v-row>
                 </v-flex>
                 <v-flex xs5>
-                    <v-layout column>
+                    <v-row column>
                         <div class='priorities-data-table' v-show="!isNewNetwork">
-                            <v-layout justify-center>
+                            <v-row justify-center>
                                 <v-btn id="Networks-AddAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onAddAll">
                                     Add All
@@ -120,7 +120,7 @@
                                     @click="onRemoveAll">
                                     Remove All
                                 </v-btn>
-                            </v-layout>
+                            </v-row>
                             <v-data-table id="Networks-Attributes-vdatatable" :headers='dataSourceGridHeaders' :items='attributeRows'
                                 class='v-table__overflow ghd-table' item-key='id' select-all
                                 v-model="selectedAttributeRows"
@@ -142,13 +142,13 @@
                                     ></v-pagination>
                             </div>
                         </div>               
-                    </v-layout>
+                    </v-row>
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <!-- The Buttons  -->
         <v-flex xs12 v-show="hasSelectedNetwork">        
-            <v-layout justify-center style="padding-top: 30px !important">
+            <v-row justify-center style="padding-top: 30px !important">
                 <v-btn id="Networks-Cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
@@ -164,7 +164,7 @@
                     class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Create
                 </v-btn>            
-            </v-layout>
+            </v-row>
         </v-flex>
         <EquationEditorDialog
             :dialogData="equationEditorDialogData"
@@ -173,7 +173,7 @@
         />
         <AddNetworkDialog :dialogData='addNetworkDialogData'
                                 @submit='addNetwork' />
-    </v-layout>
+    </v-row>
 </template>
 
 <script setup lang='ts'>
@@ -199,6 +199,7 @@ import { Hub } from '@/connectionHub';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
+import mitt from 'mitt';
 
     let store = useStore();
     let stateNetworks: ShallowRef<Network[]> = (store.state.networkModule.networks) ;
@@ -259,6 +260,7 @@ import { useStore } from 'vuex';
     );
 
     const $statusHub = inject('$statusHub') as any
+    const $emitter = mitt()
 
     created();
     function created() {
@@ -268,7 +270,7 @@ import { useStore } from 'vuex';
     }
     onMounted(() => mounted); 
     function mounted() {
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
             getDataAggregationStatus,
         );
@@ -276,7 +278,7 @@ import { useStore } from 'vuex';
 
     onBeforeUnmount(() => beforeDestroy)
     function beforeDestroy() {
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
             getDataAggregationStatus,
         );

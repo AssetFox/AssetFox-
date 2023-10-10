@@ -32,7 +32,7 @@
                 <v-checkbox v-model="shared" label="Share with all?" />
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-space-between row>
+                <v-row justify-space-between row>
                     <v-btn
                         id="CreateScenarioDialog-save-btn"
                         :disabled="newScenario.name === '' || !isNetworkSelected"
@@ -47,7 +47,7 @@
                         class="ara-orange-bg text-white"
                         >Cancel</v-btn
                     >
-                </v-layout>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>

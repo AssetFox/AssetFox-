@@ -2,30 +2,30 @@
   <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-         <v-layout justify-space-between align-center>
+         <v-row justify-space-between align-center>
             <div class="ghd-control-dialog-header">New Network</div>
             <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
-          </v-layout>
+          </v-row>
         </v-card-title>           
       <v-card-text class="ghd-dialog-box-padding-center">
-        <v-layout column>
+        <v-row column>
           <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
           <v-text-field outline 
             id="AddNetworkDialog-NetworkName-vtextfield"
             v-model="networkName"
             class="ghd-text-field-border ghd-text-field"/>
-        </v-layout>
+        </v-row>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-layout justify-center row>
+        <v-row justify-center row>
           <v-btn id="AddNetworkDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' variant = "flat">Cancel</v-btn>
           <v-btn id="AddNetworkDialog-Save-vbtn" @click="onSubmit(true)"
                  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
             Save
           </v-btn>          
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>

@@ -1,10 +1,10 @@
 <template>
-    <v-layout column>
+    <v-row column>
         <!-- top row -->
-        <v-col cols="12">
-            <v-layout justify-space-between>
-                <v-col cols="5" class="ghd-constant-header" style="margin-right: 10px">
-                    <v-layout column>
+        <v-flex xs12>
+            <v-row justify-space-between>
+                <v-flex xs5 class="ghd-constant-header" style="margin-right: 10px">
+                    <v-row column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Calculated Attribute</v-subheader>
                         <v-select
                                   id="CalculatedAttribute-CalculatedAttribute-select"
@@ -15,10 +15,10 @@
                                   class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
-                    </v-layout>
-                </v-col>
-                <v-col cols="7" class="ghd-constant-header" style="margin-right: 10px">
-                    <v-layout align-end>
+                    </v-row>
+                </v-flex>
+                <v-flex xs7 class="ghd-constant-header" style="margin-right: 10px">
+                    <v-row align-end>
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
                                     prepend-inner-icon=$vuetify.icons.ghd-search
@@ -42,12 +42,12 @@
                             style="top: 2px !important; position: relative">
                             Create New Library
                         </v-btn>
-                    </v-layout>
-                </v-col>
-            </v-layout>
-        </v-col>
-        <v-col cols="6" class="ghd-constant-header" style="margin-bottom: 15px">
-            <v-layout v-if='hasSelectedLibrary && !hasScenario' align-center>
+                    </v-row>
+                </v-flex>
+            </v-row>
+        </v-flex>
+        <v-flex xs6 class="ghd-constant-header" style="margin-bottom: 15px">
+            <v-row v-if='hasSelectedLibrary && !hasScenario' align-center>
                 <div class="header-text-content owner-padding">
                      Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                 </div>
@@ -61,13 +61,13 @@
                 v-show='!hasScenario'>
                 Share Library
             </v-btn>
-        </v-layout>
-        </v-col>
+        </v-row>
+        </v-flex>
         <!-- attributes and timing -->
-        <v-col cols="12" v-show="hasSelectedLibrary || hasScenario">
-            <v-layout justify-space-between>
-                <v-col cols="6">
-                <v-layout column style="float:left; width: 100%">
+        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+            <v-row justify-space-between>
+                <v-flex xs6>
+                <v-row column style="float:left; width: 100%">
                     <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                     <v-select
                         id="CalculatedAttribute-Attribute-select"   
@@ -77,12 +77,12 @@
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         v-model="attributeSelectItemValue">
                     </v-select>
-                </v-layout>
-                <v-col cols="2">
-                </v-col>
-                </v-col>
-                <v-col cols="6">
-                <v-layout column style="float:right; width: 100%">
+                </v-row>
+                <v-flex xs2>
+                </v-flex>
+                </v-flex>
+                <v-flex xs6>
+                <v-row column style="float:right; width: 100%">
                     <v-subheader class="ghd-md-gray ghd-control-label">Timing</v-subheader>
                     <v-select
                         id="CalculatedAttribute-Timing-select"
@@ -94,15 +94,15 @@
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         v-on:change="setTiming">
                     </v-select>
-                </v-layout>
-                </v-col>
-            </v-layout>
-        </v-col>
+                </v-row>
+                </v-flex>
+            </v-row>
+        </v-flex>
         <!-- Default Equation -->
-        <v-col cols="12" v-show="hasSelectedLibrary || hasScenario">
-            <v-layout justify-center>
-                <v-col cols="6">
-                    <v-layout column>
+        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+            <v-row justify-center>
+                <v-flex xs6>
+                    <v-row column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
                         <v-text-field
                             id="CalculatedAttribute-defaultEquation-textfield"
@@ -121,10 +121,10 @@
                                 </v-btn>
                             </template>
                         </v-text-field>
-                    </v-layout>
-                </v-col>
-            </v-layout>
-        </v-col>
+                    </v-row>
+                </v-flex>
+            </v-row>
+        </v-flex>
         <!-- data table -->
         <v-col cols="12" v-show="hasSelectedLibrary || hasScenario">
             <v-data-table
@@ -207,8 +207,8 @@
                 @update:model-value="checkHasUnsavedChanges()"/>
         </v-col>
         <!-- buttons -->
-        <v-col cols="12" v-show="hasSelectedLibrary || hasScenario">
-            <v-layout justify-center v-show='hasSelectedLibrary || hasScenario'>
+        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+            <v-row justify-center v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn
                     :disabled="!hasUnsavedChanges"
                     v-if="hasAdminAccess && hasScenario"
@@ -249,8 +249,8 @@
                     :disabled="disableCrudButton() || !hasUnsavedChanges">
                     Save
                 </v-btn> 
-            </v-layout>
-        </v-col>
+            </v-row>
+        </v-flex>
      
         <ConfirmDeleteAlert
             :dialogData="confirmDeleteAlertData"
@@ -275,7 +275,7 @@
             :dialogData="criterionEditorDialogData"
             @submit="onSubmitCriterionEditorDialogResult"
         />
-    </v-layout>
+    </v-row>
 </template>
 <script lang="ts" setup>
 import Vue, { shallowRef } from 'vue';
@@ -485,7 +485,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     ];
     const $vuetify = inject('$vuetify') as any
     const $router = useRouter();
-    const $statusHub = inject('$statusHub') as any
+    const $emitter = mitt();
     const $config = inject('$config') as any
     beforeRouteEnter();
     function beforeRouteEnter(){

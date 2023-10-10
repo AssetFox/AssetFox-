@@ -1,6 +1,6 @@
 <template>
-    <v-layout column>
-        <v-layout>
+    <v-row column>
+        <v-row>
             <v-card
                 class="mx-auto ghd-sidebar-raw-data"
                 height="100%"
@@ -34,7 +34,7 @@
                 <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
                     <router-view></router-view>
                 </v-container>
-            </v-col>
+            </v-row>
         </v-layout>
     </v-layout>
 </template>

@@ -2,19 +2,19 @@
   <v-dialog persistent fullscreen v-model="dialogData.showDialog" class="criterion-library-editor-dialog">
     <v-card>
       <v-card-text>
-        <v-layout justify-center column>
+        <v-row justify-center column>
           <div>
-            <v-layout justify-center>
+            <v-row justify-center>
         <v-flex xs10>
           <CriteriaEditor :criteriaEditorData="criteriaEditorData"
                           @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
         </v-flex>
-      </v-layout>
+      </v-row>
           </div>
-        </v-layout>
+        </v-row>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
+        <v-row justify-space-between row>
             <v-btn
                  class="ara-blue-bg text-white"
                  @click="onBeforeSubmit(true)">
@@ -24,7 +24,7 @@
                  @click="onSubmit(false)">
             Cancel
           </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
 

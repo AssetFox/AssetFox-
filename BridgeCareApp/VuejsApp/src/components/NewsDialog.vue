@@ -2,8 +2,8 @@
   <v-dialog max-width="65%" min persistent v-bind:show="showDialog">
     <v-container fluid grid-list-xl>
         <v-row>
-            <v-col cols ="12">
-                <v-layout justify-center>
+            <v-flex xs12>
+                <v-row justify-center>
                     <v-card class='announcement-dialog'>
                         <v-toolbar
                         color="#002E6C"
@@ -90,8 +90,8 @@
                             </v-btn>
                         </div>
                     </v-card>
-                </v-layout>
-            </v-col>
+                </v-row>
+            </v-flex>
         </v-row>
     </v-container>
   </v-dialog>

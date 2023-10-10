@@ -1,9 +1,9 @@
 <template>
-    <v-layout column>
+    <v-row column>
         <v-flex xs12>
-           <v-layout justify-space-between>
+           <v-row justify-space-between>
                 <v-flex xs4 class="ghd-constant-header">
-                    <v-layout column>
+                    <v-row column>
                         <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
                         <v-select
                             id="TargetConditionGoalEditor-SelectLibrary-select"
@@ -15,10 +15,10 @@
                         >
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
-                    </v-layout>
+                    </v-row>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
-                    <v-layout v-if="hasSelectedLibrary && ! hasScenario" style="padding-top: 10px; padding-left: 10px">
+                    <v-row v-if="hasSelectedLibrary && ! hasScenario" style="padding-top: 10px; padding-left: 10px">
                         <div v-if="hasSelectedLibrary && !hasScenario" class="header-text-content owner-padding" style="padding-top: 7px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
@@ -36,10 +36,10 @@
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
-                    <v-layout justify-end align-end style="padding-top: 18px !important;">
+                    <v-row justify-end align-end style="padding-top: 18px !important;">
                         <v-spacer></v-spacer>
                         <v-btn variant = "outlined"
                             id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
@@ -56,9 +56,9 @@
                         >
                         Create New Library
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-flex>
-           </v-layout>
+           </v-row>
         </v-flex>
         <!-- </v-flex> -->
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
@@ -154,7 +154,7 @@
                                     </template>
                                 </v-edit-dialog>
                                 
-                                <v-layout
+                                <v-row
                                     v-if="header.value === 'criterionLibrary'"
                                     align-center
                                     style="flex-wrap:nowrap">
@@ -187,7 +187,7 @@
                                         icon>
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
-                                </v-layout>
+                                </v-row>
                                 <div v-if="header.value === 'actions'">
                                     <v-btn id="TargetConditionGoalEditor-deleteTargetConditionGoal-vbtn" @click="onRemoveTargetConditionGoalsIcon(item.value)"  class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
@@ -200,14 +200,14 @@
             </div>
         </v-flex>
 
-        <v-layout justify-start align-center v-show="hasSelectedLibrary || hasScenario">
+        <v-row justify-start align-center v-show="hasSelectedLibrary || hasScenario">
             <v-btn variant = "flat" right
                 id="TargetConditionGoalEditor-deleteSelected-vbtn"
                 class="ghd-control-label ghd-blue"
                 @click="onRemoveTargetConditionGoals"> 
                 Delete Selected 
             </v-btn>
-        </v-layout>
+        </v-row>
 
         <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
             <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
@@ -219,7 +219,7 @@
             </v-textarea>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
-            <v-layout justify-center row>
+            <v-row justify-center row>
                 <v-btn variant = "outlined"
                     id="TargetConditionGoalEditor-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
@@ -261,7 +261,7 @@
                 >
                     Update Library
                 </v-btn>
-            </v-layout>
+            </v-row>
         </v-flex>
     
         <ConfirmDeleteAlert :is="Alert"
@@ -290,7 +290,7 @@
             :dialogData="criterionEditorDialogData"
             @submit="onEditTargetConditionGoalCriterionLibrary"
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

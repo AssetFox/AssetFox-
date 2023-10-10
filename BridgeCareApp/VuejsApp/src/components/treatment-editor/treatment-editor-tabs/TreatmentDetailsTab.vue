@@ -1,7 +1,7 @@
 <template>
-    <v-layout class="treatment-details-tab-content">
+    <v-row class="treatment-details-tab-content">
         <v-flex xs12>
-            <v-layout column>                
+            <v-row column>                
                 <v-flex>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Description</v-subheader>
                     <v-textarea  
@@ -14,7 +14,7 @@
                         @update:model-value="onEditTreatmentDetails('description', selectedTreatmentDetails.description)"
                     />
                 </v-flex>                
-                <v-layout xs12 row class="ghd-left-padding ghd-right-padding">
+                <v-row xs12 row class="ghd-left-padding ghd-right-padding">
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Category</v-subheader>
                         <v-select id="TreatmentDetailsTab-category-vselect"
@@ -70,7 +70,7 @@
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
                     </v-flex>
-                </v-layout>                
+                </v-row>                
                 <v-flex class="criteria-flex">
                     <v-menu
                         full-width
@@ -79,8 +79,8 @@
                         min-width="1000px"
                     >   
                         <template v-slot:activator>                                                                                       
-                            <v-layout column class="ghd-left-padding">  
-                                <v-layout xs12 align-center style="height:50px;">                                    
+                            <v-row column class="ghd-left-padding">  
+                                <v-row xs12 align-center style="height:50px;">                                    
                                     <v-flex xs11>
                                         <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
                                     </v-flex>
@@ -105,8 +105,8 @@
                                             <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-btn>   
                                     </v-flex>                                    
-                                </v-layout>       
-                                <v-layout align-center class="ghd-right-padding">  
+                                </v-row>       
+                                <v-row align-center class="ghd-right-padding">  
                                     <v-flex>
                                         <v-textarea
                                             class="ghd-control-border sm-txt"                                            
@@ -121,8 +121,8 @@
                                         >
                                         </v-textarea>         
                                     </v-flex>      
-                                </v-layout>                            
-                            </v-layout>        
+                                </v-row>                            
+                            </v-row>        
                         </template>                
                         <v-card>
                             <v-card-text>
@@ -148,13 +148,13 @@
                         style="margin-left: 10px; margin-top: 30px;"
                     ></v-switch>    
                 </v-flex>              
-            </v-layout>
+            </v-row>
         </v-flex>   
         <GeneralCriterionEditorDialog
             :dialogData="treatmentCriterionEditorDialogData"
             @submit="onSubmitTreatmentCriterionEditorDialogResult"
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

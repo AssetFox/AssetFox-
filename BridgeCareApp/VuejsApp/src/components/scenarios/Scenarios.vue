@@ -1,5 +1,5 @@
 <template>
-    <v-layout column>
+    <v-row column>
         <v-flex x12>
             <v-card elevation="5" color="blue lighten-5">
                 <v-tabs center-active v-model="tab">
@@ -23,7 +23,7 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-layout style = "margin-right: -100px;">
+                                        <v-row style = "margin-right: -100px;">
                                             <v-text-field
                                                 id="Scenarios-searchScenarios-textField"
                                                 type="text"
@@ -69,10 +69,10 @@
                                                 </v-chip>
                                                 </div>
                                             </span>
-                                        </v-layout>
+                                        </v-row>
                                     </v-flex>
                                     <v-flex xs4></v-flex>
-                                    <v-layout class="flex-end xs2" style="justify-content: end; padding-right: 70px">
+                                    <v-row class="flex-end xs2" style="justify-content: end; padding-right: 70px">
                                         <v-btn
                                            id="Scenarios-createScenario-btn"
                                             @click="
@@ -82,7 +82,7 @@
                                         >
                                             Create new scenario
                                         </v-btn>
-                                    </v-layout>
+                                    </v-row>
                                 </v-card-title>
                                 <v-data-table
                                     id="Scenarios-scenarios-datatable"
@@ -228,7 +228,7 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-layout style = "margin-right:-200px">
+                                        <v-row style = "margin-right:-200px">
                                             <v-text-field
                                                 id="Scenarios-shared-searchScenarios-textField"
                                                 label="Search"
@@ -274,7 +274,7 @@
                                                 </v-chip>
                                                 </div>
                                             </span>
-                                        </v-layout>
+                                        </v-row>
                                         
                                     </v-flex>
                                 </v-card-title>
@@ -412,9 +412,9 @@
                         <v-flex xs12>
                             <v-card elevation="5">
                                 <v-card-title class="ghd-dialog-padding-top-title">
-                                    <v-layout justify-start>
+                                    <v-row justify-start>
                                     <div class="dialog-header"><h5>Work Queue</h5></div>
-                                    </v-layout>
+                                    </v-row>
 
                                 </v-card-title>
                                 <v-data-table
@@ -481,9 +481,9 @@
                                     </template>
                                 </v-data-table>
                                 <v-card-title class="ghd-dialog-padding-top-title">
-                                    <v-layout justify-start>
+                                    <v-row justify-start>
                                     <div class="dialog-header"><h5>Fast Queue</h5></div>
-                                    </v-layout>
+                                    </v-row>
 
                                 </v-card-title>
                                 <v-data-table
@@ -627,7 +627,7 @@
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
             @delete="onDeleteCommittedProjects"
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>
@@ -693,10 +693,12 @@ import { PagingRequest } from '@/shared/models/iAM/paging';
 import ScenarioService from '@/services/scenario.service';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
+import mitt from 'mitt';
 
     let store = useStore(); 
     const $router = useRouter(); 
     const $statusHub = inject('$statusHub') as any;
+    const $emitter = mitt()
 
     const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
     const stateScenarios: Scenario[] = shallowReactive(store.state.scenarioModule.scenarios); 
@@ -1212,32 +1214,32 @@ import { useRouter } from 'vue-router';
             initializeScenarioPages();
         } 
         
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             getDataMigrationStatus,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent,
             getScenarioAnalysisDetailUpdate,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent,
             updateWorkQueue,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent,
             getWorkQueueUpdate,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastFastWorkQueueUpdateEvent,
             updateFastWorkQueue,
         );
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent,
             getFastWorkQueueUpdate,
         );
 
-        $statusHub.$on(
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
@@ -1333,31 +1335,31 @@ import { useRouter } from 'vue-router';
 
     onBeforeUnmount(()=> beforeDestroy); 
     function beforeDestroy() {
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             getDataMigrationStatus,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent,
             getScenarioAnalysisDetailUpdate,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent,
             updateWorkQueue,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent,
             getWorkQueueUpdate,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastFastWorkQueueUpdateEvent,
             updateFastWorkQueue,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent,
             getFastWorkQueueUpdate,
         );
-        $statusHub.$off(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );

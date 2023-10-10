@@ -1,7 +1,7 @@
 <template>  
     <v-row>
-        <v-col cols ="12">
-            <v-row justify-space-between >
+        <v-col cols="12"">
+            <v-row justify-space-between row>
                 <v-subheader v-if="stateInventoryReportNames.length > 1" class="ghd-select ghd-text-field ghd-text-field-border">
                     <v-select
                         v-model="inventoryReportName" 
@@ -10,7 +10,7 @@
                     </v-select>
                 </v-subheader>
            </v-row>
-            <v-row justify-space-between >
+            <v-row justify-space-between row>
                 <v-spacer></v-spacer>
                 <v-row>
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
@@ -40,8 +40,8 @@
            </v-row>
             <v-divider></v-divider>
             <div class="container" v-html="sanitizedHTML"></div>
-        </v-col>
-    </v-row>
+        </row>
+    </v-layout>
 </template>
 
 <script lang="ts" setup>

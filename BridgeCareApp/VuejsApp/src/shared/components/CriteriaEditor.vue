@@ -1,15 +1,15 @@
 <template>
-    <v-layout justify-center column class="criteria-editor-card-text">
+    <v-row justify-center column class="criteria-editor-card-text">
         <div>
-            <v-layout justify-space-between>
+            <v-row justify-space-between>
                 <v-flex xs6>
-                    <v-layout justify-start
+                    <v-row justify-start
                     >
                         <h3 class="ghd-dialog">Output</h3>
-                    </v-layout>
+                    </v-row>
                     <v-card class="elevation-0" style="border: 1px solid;">
                         <div class="conjunction-and-messages-container" style="margin-top:4px;">
-                            <v-layout
+                            <v-row
                                 :class="{
                                     'justify-space-between': !criteriaEditorData.isLibraryContext,
                                     'justify-start':
@@ -17,7 +17,7 @@
                                 }"
                             >
                             <v-flex xs2>
-                                <v-layout>
+                                <v-row>
                                 <v-select
                                     :items="conjunctionSelectListItems"
                                     append-icon=$vuetify.icons.ghd-down
@@ -37,7 +37,7 @@
                                         </v-list-item>
                                     </template>                                    
                                 </v-select>
-                                </v-layout>
+                                </v-row>
                             </v-flex>
                                 <v-btn
                                     id="CriteriaEditor-addSubCriteria-btn"
@@ -46,7 +46,7 @@
                                     variant = "flat"                                
                                     >Add Subcriteria
                                 </v-btn>
-                            </v-layout>
+                            </v-row>
                         </div>
                         <v-card-text
                             :class="{
@@ -98,7 +98,7 @@
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <v-layout>
+                            <v-row>
                                 <div class="validation-check-btn-container">
                                     <v-btn
                                         id="CriteriaEditor-checkOutput-btn"
@@ -130,15 +130,15 @@
                                         Please click here to check entire rule
                                     </p>
                                 </div>
-                            </v-layout>
+                            </v-row>
                         </v-card-actions>
                     </v-card>
                 </v-flex>
                 <v-flex xs6>
-                    <v-layout justify-start
+                    <v-row justify-start
                     >
                         <h3 class="ghd-dialog">Criteria Editor</h3>
-                    </v-layout>
+                    </v-row>
                     <v-card class="elevation-0" style="border: 1px solid;height:682px;">                  
                         <v-card-text
                             :class="{
@@ -148,14 +148,14 @@
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <v-layout
+                            <v-row
                                 :class="{
                                     'justify-space-between': !criteriaEditorData.isLibraryContext,
                                     'justify-end':
                                         criteriaEditorData.isLibraryContext,
                                 }"
                             >                        
-                            </v-layout>                     
+                            </v-row>                     
                             <v-tabs class="ghd-control-text" style="margin-left:4px;margin-right:4px;"
                                 v-if="selectedSubCriteriaClauseIndex !== -1"
                             >
@@ -195,7 +195,7 @@
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <v-layout column>          
+                            <v-row column>          
                                 <div class="validation-messages-container">
                                     <p
                                         class="invalid-message"
@@ -227,18 +227,18 @@
                                         Update Subcriteria
                                     </v-btn>
                                 </div>                                                         
-                            </v-layout>
+                            </v-row>
                         </v-card-actions>
                     </v-card>
                 </v-flex>
-            </v-layout>
+            </v-row>
         </div>
         <div class="main-criteria-check-output-container">
             <v-flex
                 v-show="!criteriaEditorData.isLibraryContext"
                 class="save-cancel-flex"
             >
-                <v-layout justify-center wrap>
+                <v-row justify-center wrap>
                     <v-btn
                         id="CriteriaEditor-save-btn"
                         :disabled="cannotSubmit"
@@ -253,10 +253,10 @@
                         class="ara-orange-bg text-white"
                         >Cancel</v-btn
                     >
-                </v-layout>
+                </v-row>
             </v-flex>
         </div>
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

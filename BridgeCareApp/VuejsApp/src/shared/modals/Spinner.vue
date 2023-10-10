@@ -1,15 +1,15 @@
 ﻿<template>
-    <v-layout>
+    <v-row>
         <v-dialog content content-class="centered-dialog" persistent v-model="loading">
             <v-container>
-                <v-layout align-center column justify-center>
+                <v-row align-center column justify-center>
                     <v-progress-circular :size="70" :width="7" class="ara-blue-pantone-281"
                                          indeterminate></v-progress-circular>
                     <h1>Please wait</h1>
-                </v-layout>
+                </v-row>
             </v-container>
         </v-dialog>
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

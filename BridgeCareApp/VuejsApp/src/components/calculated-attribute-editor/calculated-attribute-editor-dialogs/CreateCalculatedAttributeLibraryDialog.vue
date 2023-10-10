@@ -2,15 +2,15 @@
     <v-dialog v-model="dialogData.showDialog" max-width="450px" persistent>
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
-                <v-layout justify-space-between align-center >
+                <v-row justify-space-between align-center >
                     <div class="ghd-control-dialog-header">New Calculated Attribute Library</div>
                     <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                         X
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-card-title>
             <v-card-text class="ghd-dialog-box-padding-center">
-                <v-layout column>
+                <v-row column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
                     <v-text-field
                         v-model="newCalculatedAttributeLibrary.name"
@@ -24,10 +24,10 @@
                       outline
                         rows="3"
                         class="ghd-text-field-border"/>
-                </v-layout>
+                </v-row>
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
-                <v-layout justify-center>
+                <v-row justify-center>
                     <v-btn
                     variant = "outlined" 
                         class='ghd-blue ghd-button-text ghd-button'
@@ -41,7 +41,7 @@
                         @click="onSubmit(true)">
                         Save
                     </v-btn> 
-                </v-layout>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>

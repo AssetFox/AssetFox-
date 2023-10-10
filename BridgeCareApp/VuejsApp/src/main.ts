@@ -27,39 +27,10 @@ import GhdDownSvg from '@/shared/icons/GhdDownSvg.vue';
 import GhdTableSortSvg from '@/shared/icons/GhdTableSortSvg.vue';
 import authenticationModule from './store-modules/authentication.module';
 import { ap } from 'ramda';
-import { IconProps, IconSet, createVuetify } from 'vuetify';
-import { fa } from 'vuetify/iconsets/fa'
+import vuetify from '@/plugins/vuetify.ts';
 
-const ghdSearchIconSet: IconSet = {
-  component: (props: IconProps) => {
-    return h(GhdSearchSvg, {
-      name: 'ghd-search'
-    });
-  }
-}
-
-const ghdDownIconSet: IconSet = {
-  component: (props: IconProps) => {
-    return h(GhdDownSvg, {
-      name: 'ghd-down' 
-    });
-  }
-}
-
-const ghdTableSortIconSet: IconSet = {
-  component: (props: IconProps) => {
-    return h(GhdTableSortSvg, {
-      name: 'ghd-table-sort'
-    });
-  }
-}
 const app = createApp(App);
-const vuetify = createVuetify({ 
-icons: { 
-  defaultSet: 'fa', 
-  sets: { fa, ghdSearchIconSet, ghdTableSortIconSet, ghdDownIconSet },
-},
-});
+
 app.use(router);
 app.use(store);
 app.use(vuetify);

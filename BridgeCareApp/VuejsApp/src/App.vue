@@ -287,10 +287,10 @@ import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 import NewsDialog from '@/components/NewsDialog.vue'
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import { useStore } from 'vuex';
-import { useRouter, onBeforeRouteLeave } from 'vue-router';
+//import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import router from './router';
 import mitt from 'mitt'
-
-
+import vuetify from '@/plugins/vuetify';
 
 
     let store = useStore();
@@ -367,8 +367,8 @@ import mitt from 'mitt'
     let inventoryReportName: string = '';
     let alert: Ref<boolean> = ref(false);
 
-    const $vuetify = inject('$vuetify') as any
-    const $router = useRouter();
+    //const $vuetify = vuetify();
+    const $router = router.useRouter();
     const $statusHub = inject('$statusHub') as any
     const $emitter = mitt()
     const $config = inject('$config') as any
@@ -378,23 +378,23 @@ import mitt from 'mitt'
     function container() {
         const container: any = {};
 
-        if ($vuetify.display.xs) {
+        if (vuetify.display.xs) {
             container['grid-list-xs'] = true;
         }
 
-        if ($vuetify.display.sm) {
+        if (vuetify.display.sm) {
             container['grid-list-sm'] = true;
         }
 
-        if ($vuetify.display.md) {
+        if (vuetify.display.md) {
             container['grid-list-md'] = true;
         }
 
-        if ($vuetify.display.lg) {
+        if (vuetify.display.lg) {
             container['grid-list-lg'] = true;
         }
 
-        if ($vuetify.display.xl) {
+        if (vuetify.display.xl) {
             container['grid-list-xl'] = true;
         }
 

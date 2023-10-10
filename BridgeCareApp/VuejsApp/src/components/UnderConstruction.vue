@@ -1,7 +1,7 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout>
-            <v-flex xs12>
+        <v-row>
+            <v-col xs12>
                 <v-layout justify-center>
                     <v-card class="under-construction-card">
                         <div class="under-construction-img-div">
@@ -17,8 +17,8 @@
                         </v-card-text>
                     </v-card>
                 </v-layout>
-            </v-flex>
-        </v-layout>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 

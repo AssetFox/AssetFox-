@@ -1,7 +1,7 @@
 <template>
     <v-container fluid grid-list-xl>
         <v-layout>
-            <v-flex xs12>
+            <v-col cols="12">
                 <v-layout justify-center>
                     <v-card class="no-role-container">
                         <div class="bridgecare-logo-img-div">
@@ -19,7 +19,7 @@
                         </v-card-text>
                     </v-card>
                 </v-layout>
-            </v-flex>
+            </v-col>
         </v-layout>
     </v-container>
 </template>

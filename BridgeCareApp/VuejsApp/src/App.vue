@@ -232,13 +232,13 @@
             </v-container>
             <v-footer app class="ara-blue-pantone-289-bg white--text" fixed>
                 <v-spacer></v-spacer>
-                <v-flex xs2>
+                <v-col cols = "2">
                     <div class="dev-and-ver-div">
                         <div class="font-weight-light">iAM</div>
                         <div>{{implementationName}}</div>
                         <div>{{ packageVersion }}</div>
                     </div>
-                </v-flex>
+                </v-col>
                 <v-spacer></v-spacer>
             </v-footer>
             <Spinner />

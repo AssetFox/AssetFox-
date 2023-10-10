@@ -1,8 +1,8 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout>
-            <v-flex xs12>
-                <v-layout justify-center>
+        <v-row>
+            <v-col cols ="12">
+                <v-row justify-center>
                     <v-card class="logged-out-card">
                         <div class="bridgecare-logo-img-div">
                             <v-img :src="require('@/assets/images/logos/Banner-logo.jpg')"
@@ -16,9 +16,9 @@
                             <p>You have been logged out. Log back in to gain full access to the site.</p>
                         </v-card-text>
                     </v-card>
-                </v-layout>
-            </v-flex>
-        </v-layout>
+                </v-row>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 

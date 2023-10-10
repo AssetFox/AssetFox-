@@ -1,9 +1,9 @@
 <template>
     <v-layout column>
         <!-- top row -->
-        <v-flex xs12>
+        <v-col cols="12">
             <v-layout justify-space-between>
-                <v-flex xs5 class="ghd-constant-header" style="margin-right: 10px">
+                <v-col cols="5" class="ghd-constant-header" style="margin-right: 10px">
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Calculated Attribute</v-subheader>
                         <v-select
@@ -16,8 +16,8 @@
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
                     </v-layout>
-                </v-flex>
-                <v-flex xs7 class="ghd-constant-header" style="margin-right: 10px">
+                </v-col>
+                <v-col cols="7" class="ghd-constant-header" style="margin-right: 10px">
                     <v-layout align-end>
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
@@ -43,10 +43,10 @@
                             Create New Library
                         </v-btn>
                     </v-layout>
-                </v-flex>
+                </v-col>
             </v-layout>
-        </v-flex>
-        <v-flex xs6 class="ghd-constant-header" style="margin-bottom: 15px">
+        </v-col>
+        <v-col cols="6" class="ghd-constant-header" style="margin-bottom: 15px">
             <v-layout v-if='hasSelectedLibrary && !hasScenario' align-center>
                 <div class="header-text-content owner-padding">
                      Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
@@ -62,11 +62,11 @@
                 Share Library
             </v-btn>
         </v-layout>
-        </v-flex>
+        </v-col>
         <!-- attributes and timing -->
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+        <v-col cols="12" v-show="hasSelectedLibrary || hasScenario">
             <v-layout justify-space-between>
-                <v-flex xs6>
+                <v-col cols="6">
                 <v-layout column style="float:left; width: 100%">
                     <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                     <v-select
@@ -78,10 +78,10 @@
                         v-model="attributeSelectItemValue">
                     </v-select>
                 </v-layout>
-                <v-flex xs2>
-                </v-flex>
-                </v-flex>
-                <v-flex xs6>
+                <v-col cols="2">
+                </v-col>
+                </v-col>
+                <v-col cols="6">
                 <v-layout column style="float:right; width: 100%">
                     <v-subheader class="ghd-md-gray ghd-control-label">Timing</v-subheader>
                     <v-select
@@ -95,13 +95,13 @@
                         v-on:change="setTiming">
                     </v-select>
                 </v-layout>
-                </v-flex>
+                </v-col>
             </v-layout>
-        </v-flex>
+        </v-col>
         <!-- Default Equation -->
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+        <v-col cols="12" v-show="hasSelectedLibrary || hasScenario">
             <v-layout justify-center>
-                <v-flex xs6>
+                <v-col cols="6">
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
                         <v-text-field
@@ -122,14 +122,14 @@
                             </template>
                         </v-text-field>
                     </v-layout>
-                </v-flex>
+                </v-col>
             </v-layout>
-        </v-flex>
+        </v-col>
         <!-- data table -->
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+        <v-col cols="12" v-show="hasSelectedLibrary || hasScenario">
             <v-data-table
                 id="CalculatedAttribute-equation-table"    
-                :headers="calculatedAttributeGridHeaders"
+                :header="calculatedAttributeGridHeaders"
                 :items="selectedGridItem"
                 :pagination.sync="pagination"
                 :total-items="totalItems"
@@ -194,9 +194,9 @@
                     attributeSelectItemValue == ''">
                 Add New Equation
             </v-btn>
-        </v-flex>
+        </v-col>
         <!-- description -->
-        <v-flex v-show='hasSelectedLibrary && !hasScenario' xs12>
+        <v-col v-show='hasSelectedLibrary && !hasScenario' cols="12">
             <v-subheader class="ghd-subheader ">Description</v-subheader>
             <v-textarea
                 no-resize
@@ -205,9 +205,9 @@
                 rows="4"
                 v-model="selectedCalculatedAttributeLibrary.description"
                 @update:model-value="checkHasUnsavedChanges()"/>
-        </v-flex>
+        </v-col>
         <!-- buttons -->
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+        <v-col cols="12" v-show="hasSelectedLibrary || hasScenario">
             <v-layout justify-center v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn
                     :disabled="!hasUnsavedChanges"
@@ -250,7 +250,7 @@
                     Save
                 </v-btn> 
             </v-layout>
-        </v-flex>
+        </v-col>
      
         <ConfirmDeleteAlert
             :dialogData="confirmDeleteAlertData"

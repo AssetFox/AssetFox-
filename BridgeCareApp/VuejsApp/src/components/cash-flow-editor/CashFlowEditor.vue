@@ -1,8 +1,8 @@
 <template>
     <v-layout column class="Montserrat-font-family">
-        <v-flex xs12>
+        <v-col cols="12">
             <v-layout justify-space-between>
-                <v-flex xs4 class="ghd-constant-header">
+                <v-col cols="4" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Cash Flow Library</v-subheader>
                     <v-select
                         :items="librarySelectItems"
@@ -13,8 +13,8 @@
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>{{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">    
+                </v-col>
+                <v-col cols="4" class="ghd-constant-header">    
                     <v-layout row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 28px !important">
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content" style="padding-top: 7px !important">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}

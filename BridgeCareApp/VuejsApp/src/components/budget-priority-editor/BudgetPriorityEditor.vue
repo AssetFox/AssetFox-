@@ -1,8 +1,8 @@
 <template>
     <v-layout column class="Montserrat-font-family">
-        <v-flex xs12>
+        <v-col cols="12">
             <v-layout justify-space-between row >              
-                <v-flex xs4 class="ghd-constant-header">
+                <v-col cols="4" class="ghd-constant-header">
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Select Budget Priority Library</v-subheader>
                             <v-select id="BudgetPriorityEditor-library-vselect"
@@ -13,8 +13,8 @@
                             </v-select>    
                              <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       
                     </v-layout>
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">
+                </v-col>
+                <v-col cols="4" class="ghd-constant-header">
                     <v-layout row v-show='hasSelectedLibrary || hasScenario' class="shared-owner-flex-padding">
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
@@ -32,8 +32,8 @@
                             Share Library
                         </v-btn>
                     </v-layout>                               
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">
+                </v-col>
+                <v-col cols="4" class="ghd-constant-header">
                     <v-layout row align-end class="left-buttons-padding">
                         <v-spacer></v-spacer>
                         <v-btn id="BudgetPriorityEditor-addBudgetPriority-vbtn" @click='showCreateBudgetPriorityDialog = true' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
@@ -44,13 +44,13 @@
                             Create New Library
                         </v-btn>
                     </v-layout>
-                </v-flex>
+                </v-col>
             </v-layout>
 
-        </v-flex>
-        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
+        </v-col>
+        <v-col v-show='hasSelectedLibrary || hasScenario' cols="12">
             <div class='priorities-data-table'>
-                <v-data-table :headers='budgetPriorityGridHeaders' 
+                <v-data-table :header='budgetPriorityGridHeaders' 
                               :items='budgetPriorityGridRows'
                               :pagination.sync="pagination"
                               :must-sort='true'
@@ -140,20 +140,20 @@
                     Delete Selected
                 </v-btn>
             </div>
-        </v-flex>
-        <v-flex v-show='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                xs12>
+        </v-col>
+        <v-col v-show='hasSelectedLibrary && selectedScenarioId === uuidNIL'
+                cols="12">
             <v-layout justify-center>
-                <v-flex >
+                <v-col >
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea no-resize outline rows='4' class="ghd-text-field-border"
                                 v-model='selectedBudgetPriorityLibrary.description'
                                 @update:model-value="checkHasUnsavedChanges()">
                     </v-textarea>
-                </v-flex>
+                </v-col>
             </v-layout>
-        </v-flex>
-        <v-flex xs12>           
+        </v-col>
+        <v-col cols="12">           
             <v-layout justify-center row v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn  variant = "flat" @click='onDiscardChanges'
                        v-show='hasScenario' :disabled='!hasUnsavedChanges' class='ghd-blue ghd-button-text ghd-button'>
@@ -178,7 +178,7 @@
                     Update Library
                 </v-btn>
             </v-layout>
-        </v-flex>
+        </v-col>
         <ShareBudgetPriorityLibraryDialog 
             :dialogData='shareBudgetPriorityLibraryDialogData' 
             @submit='onShareBudgetPriorityLibraryDialogSubmit'

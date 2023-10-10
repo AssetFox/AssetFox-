@@ -1,116 +1,116 @@
 <template>
-    <v-layout column class="Montserrat-font-family">
-        <v-flex xs12>
-            <v-flex xs6 class="ghd-constant-header">
-                <v-layout>
-                    <v-layout column>
+    <v-row column class="Montserrat-font-family">
+        <v-col cols="12">
+            <v-col cols="6" class="ghd-constant-header">
+                <v-row>
+                    <v-row column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
                         <v-select :items='selectPrimaryNetworkItems'
                             variant="outlined"
                             v-model='selectPrimaryNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
-                    </v-layout>
-                </v-layout>
-                <v-layout>
-                    <v-layout column>
+                    </v-row>
+                </v-row>
+                <v-row>
+                    <v-row column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Network</v-subheader>
                         <v-select :items="selectRawDataNetworkItems"
                             variant="outlined"
                             v-model="selectRawdataNetworkItemValue"
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>
-                    </v-layout>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                    </v-row>
+                </v-row>
+            </v-col>
+            <v-col cols="8" class="ghd-constant-header">
+                <v-row>
+                    <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Key Field(s): </v-subheader> 
-                    </v-flex>
-                    <v-flex xs5>
+                    </v-col>
+                    <v-col cols="5">
                         <div class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
-                    </v-flex>                        
+                    </v-col>                        
                     <v-btn style="margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onEditKeyFieldsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>
+            <v-col cols="8" class="ghd-constant-header">
+                <v-row>
+                    <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Key Field(s): </v-subheader> 
-                    </v-flex>
-                    <v-flex xs5>
+                    </v-col>
+                    <v-col cols="5">
                         <div class="ghd-md-gray ghd-control-label elipsisList">{{rawDataKeyFieldsDelimited}}</div>  
-                    </v-flex>                        
+                    </v-col>                        
                     <v-btn style="margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onEditRawDataKeyFieldsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>
+            <v-col cols="8" class="ghd-constant-header">
+                <v-row>
+                    <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Inventory Report(s): </v-subheader> 
-                    </v-flex>
-                    <v-flex xs5>
+                    </v-col>
+                    <v-col cols="5">
                          <div class="ghd-md-gray ghd-control-label elipsisList">{{inventoryReportsDelimited}}</div> 
-                    </v-flex>                 
+                    </v-col>                 
                     <v-btn style="margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onEditInventoryReportsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>
+            <v-col cols="8" class="ghd-constant-header">
+                <v-row>
+                    <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Simulation Report(s): </v-subheader> 
-                    </v-flex>
-                    <v-flex xs5>
+                    </v-col>
+                    <v-col cols="5">
                         <div class="ghd-md-gray ghd-control-label elipsisList">{{simulationReportsDelimited}}</div> 
-                    </v-flex>                     
+                    </v-col>                     
                     <v-btn style="margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onEditSimulationReportsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>            
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>            
+            <v-col cols="8" class="ghd-constant-header">
+                <v-row>
+                    <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Constraint Type: </v-subheader> 
-                    </v-flex>
-                    <v-flex xs5>
+                    </v-col>
+                    <v-col cols="5">
                         <v-radio-group v-model="constraintTypeRadioGroup" row>
                             <v-radio class="admin-radio" label="OR" value="OR"></v-radio>
                             <v-radio class="admin-radio" label="AND" value="AND"></v-radio>
                         </v-radio-group>
-                    </v-flex>                     
-                </v-layout>
-            </v-flex>     
-        </v-flex>  
-        <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs7>
+                    </v-col>                     
+                </v-row>
+            </v-col>     
+        </v-col>  
+        <v-col cols="12">
+            <v-row justify-center>
+                <v-col cols="7">
                     <v-btn style="margin-top: 5px !important;" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onSaveClick" :disabled='disableCrudButtons() || !hasUnsavedChanges'>
                         Save
                     </v-btn>
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
         <EditAdminDataDialog :DialogData='editAdminDataDialogData'
                                      @submit='onSubmitEditAdminDataDialogResult' />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang='ts' setup>

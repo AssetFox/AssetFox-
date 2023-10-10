@@ -99,14 +99,30 @@ namespace BridgeCareCore.Controllers
                         assetKeyData[assetId].Add(value);
                     }
                 }
-            }            
-
-            List<InventoryItem> inventoryItems = new List<InventoryItem>();
-            foreach(var assetKeyDataValue in  assetKeyData.Values)
-            {
-                inventoryItems.Add(new InventoryItem { keyProperties = assetKeyDataValue });
             }
-
+            List<InventoryItem> inventoryItems = new List<InventoryItem>();
+            var reportTypeParam = _adminSettingsRepository.GetInventoryReports();
+            if(reportTypeParam != null)
+            {
+                if(reportTypeParam.Count() > 0)
+                {
+                    if (reportTypeParam[0].Contains("(R)"))
+                    {
+                        var assetKeyDataValues = assetKeyData.Select(_ => _.Value.FirstOrDefault()).ToList();
+                        foreach (var assetKeyDataValue in assetKeyDataValues)
+                        {
+                            inventoryItems.Add(new InventoryItem { keyProperties = new List<string> { assetKeyDataValue } });
+                        }
+                    }
+                    else
+                    {
+                        foreach (var assetKeyDataValue in assetKeyData.Values)
+                        {
+                            inventoryItems.Add(new InventoryItem { keyProperties = assetKeyDataValue });
+                        }
+                    }
+                }
+            }
             return Ok(inventoryItems);
         }
 

@@ -2,23 +2,23 @@
     <v-dialog  width="768px" height="540px" persistent v-model='showDialog'>
         <v-card class="div-padding">
             <v-card-title class="pa-2">
-                <v-layout justify-start>
+                <v-row justify-start>
                     <h3 class="Montserrat-font-family">Performance Curves Upload</h3>
-                </v-layout>
+                </v-row>
                 <v-btn @click="onSubmit(false)" icon>
                     <i class="fas fa-times fa-2x"></i>
                 </v-btn>
             </v-card-title>
             <v-card-text class="pa-0">
-                <v-layout column>
+                <v-row column>
                     <PerformanceCurvesFileSelector :closed='closed' @submit='onFileSelectorChange' />                    
-                </v-layout>
+                </v-row>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-center>
+                <v-row justify-center>
                     <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' variant = "flat">Cancel</v-btn>
                     <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
-                </v-layout>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>

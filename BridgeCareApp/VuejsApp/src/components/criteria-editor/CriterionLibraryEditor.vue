@@ -1,7 +1,7 @@
 <template>
-    <v-layout column>
+    <v-row column>
         <v-flex v-if="false">
-            <v-layout justify-center>
+            <v-row justify-center>
                 <v-flex xs3>
                     <v-btn
                         @click="onShowCreateCriterionLibraryDialog(false)"
@@ -43,11 +43,11 @@
                         @change="canUpdateOrCreate = true"
                     />
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion" />
         <v-flex v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion">
-            <v-layout justify-center>
+            <v-row justify-center>
                 <v-flex xs10>
                     <CriteriaEditor
                         :criteriaEditorData="criteriaEditorData"
@@ -56,11 +56,11 @@
                         "
                     />
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion" />
         <v-flex v-show="hasSelectedCriterionLibrary">
-            <v-layout justify-center>
+            <v-row justify-center>
                 <v-flex xs6>
                     <v-textarea
                         v-model="selectedCriterionLibrary.description"
@@ -71,10 +71,10 @@
                     >
                     </v-textarea>
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <v-flex>
-            <v-layout justify-end row v-show="hasSelectedCriterionLibrary">
+            <v-row justify-end row v-show="hasSelectedCriterionLibrary">
                 <v-btn
                     @click="onUpsertCriterionLibrary(selectedCriterionLibrary)"
                     class="ara-blue-bg text-white"
@@ -96,7 +96,7 @@
                 >
                     Delete Library
                 </v-btn>
-            </v-layout>
+            </v-row>
         </v-flex>
 
         <CreateCriterionLibraryDialog
@@ -108,7 +108,7 @@
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

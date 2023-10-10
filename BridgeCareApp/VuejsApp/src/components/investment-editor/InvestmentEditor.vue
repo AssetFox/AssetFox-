@@ -1,7 +1,7 @@
 <template>
-    <v-layout column>
+    <v-row column>
         <v-flex xs12>
-            <v-layout row style="margin-top:-40px;">
+            <v-row row style="margin-top:-40px;">
                 <v-flex xs4 class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
                     <v-select 
@@ -17,7 +17,7 @@
 
                 <!-- these are only in library -->
                 <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
-                    <v-layout v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
+                    <v-row v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
                         <div class="header-text-content invest-owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                         </div>
@@ -28,21 +28,21 @@
                                v-show='!hasScenario'>
                             Share Library
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-flex>
                 <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
-                    <v-layout row align-end justify-end class="header-alignment-padding-right">
+                    <v-row row align-end justify-end class="header-alignment-padding-right">
                         <v-spacer></v-spacer>
                         <v-btn id="InvestmentEditor-CreateNewLibrary-vbtn" @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
                         variant = "outlined">
                             Create New Library
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-flex>
-            </v-layout>
+            </v-row>
             <!-- only for scenario -->
-            <v-layout row style="margin-top:-20px;">
+            <v-row row style="margin-top:-20px;">
                 <!-- text boxes for scenario only -->
                 <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-subheader"><span>First Year of Analysis Period</span></v-subheader>
@@ -93,11 +93,11 @@
                               v-model="investmentPlan.shouldAccumulateUnusedBudgetAmounts"
                               @change='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)' />
                 </v-flex>
-            </v-layout>
+            </v-row>
             <v-divider v-if='hasScenario || hasSelectedLibrary' />
-            <v-layout row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
+            <v-row row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
                 <v-flex xs4>
-                    <v-layout row>
+                    <v-row row>
                         <v-btn id="InvestmentEditor-editBudgets-btn"
                             @click='onShowEditBudgetsDialog'
                             variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
@@ -114,16 +114,16 @@
                                class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' variant = "outlined">
                             Add Year(s)
                         </v-btn>
-                    </v-layout>
-                    <v-layout row>
+                    </v-row>
+                    <v-row row>
                         <div class = "ghd-md-gray ghd-control-subheader" style="margin-left:2% !important;"> 
                             Number of Budgets: {{ currentPage.length }}
                         </div>
-                    </v-layout>
+                    </v-row>
                 </v-flex>
                 <v-spacer></v-spacer>
                 <v-flex xs4>
-                    <v-layout row align-end>
+                    <v-row row align-end>
                         <v-spacer></v-spacer>
                         <v-btn id="InvestmentEditor-upload-btn"
                             :disabled='false' @click='showImportExportInvestmentBudgetsDialog = true;'
@@ -144,9 +144,9 @@
                                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Download Template
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>            
         <!-- datatable -->
@@ -204,7 +204,7 @@
             </v-flex>
         </v-flex>
         <v-flex v-show='hasSelectedLibrary && !hasScenario' xs12>
-            <v-layout justify-center>
+            <v-row justify-center>
                 <v-flex>
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea no-resize outline rows='4'
@@ -213,10 +213,10 @@
                                 class="ghd-text-field-border">
                     </v-textarea>
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <v-flex xs12>
-            <v-layout justify-center row v-show='hasSelectedLibrary || hasScenario'>
+            <v-row justify-center row v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn id="InvestmentEditor-cancel-btn"
                        :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'
                        v-show='hasScenario'>
@@ -247,7 +247,7 @@
                        v-show='hasScenario'>
                     Save
                 </v-btn>
-            </v-layout>
+            </v-row>
         </v-flex>
 
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
@@ -272,7 +272,7 @@
 
         <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang='ts' setup>

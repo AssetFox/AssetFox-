@@ -1,9 +1,9 @@
 <template>
-    <v-layout column class="Montserrat-font-family">
+    <v-row column class="Montserrat-font-family">
         <v-flex xs12>
             <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-layout column>
+                <v-row>
+                    <v-row column>
                         <v-subheader id="Attributes-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                         <v-select :items='selectAttributeItems'
                             id="Attributes-selectAttribute-vselect"
@@ -11,16 +11,16 @@
                             append-icon=$vuetify.icons.ghd-down                           
                             v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
-                    </v-layout>
+                    </v-row>
                     <v-btn id="Attributes-addAttribute-vbtn" style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                         Add Attribute
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-flex>
         </v-flex>
         <v-divider v-if="hasSelectedAttribute" />
         <v-flex xs12 v-if="hasSelectedAttribute" class="ghd-constant-header" >
-            <v-layout>
+            <v-row>
                 <v-flex xs2> 
                     <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                     <v-text-field id="Attributes-attributeName-vtextfield" outline class="ghd-text-field-border ghd-text-field"
@@ -50,11 +50,11 @@
                         v-model='selectedAttribute.aggregationRuleType'>
                     </v-select>                           
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <v-flex xs12 v-if="hasSelectedAttribute">
             <v-flex xs10>
-                <v-layout>
+                <v-row>
                     <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Default Value</v-subheader>
                         <v-text-field id="Attributes-attributeDefaultString-vtextfield" v-if="selectedAttribute.type == 'STRING'" outline class="ghd-text-field-border ghd-text-field"
@@ -76,20 +76,20 @@
                             :mask="'#############'"/>
                     </v-flex>
                     <v-flex xs4 style="padding-top:50px;">
-                        <v-layout>
+                        <v-row>
                         <v-switch id="Attributes-attributeCalculated-vswitch" class='sharing header-text-content' label='Calculated' 
                             v-model='selectedAttribute.isCalculated'/>
                         <v-switch id="Attributes-attributeAscending-vswitch" class='sharing header-text-content' label='Ascending' 
                             v-model='selectedAttribute.isAscending'/>
-                        </v-layout>
+                        </v-row>
                     </v-flex>
-                </v-layout>
+                </v-row>
             </v-flex>
         </v-flex>
         <!-- Data source combobox -->
         <v-flex xs12 v-if="hasSelectedAttribute">
             <v-flex xs6>
-                <v-layout column>
+                <v-row column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
                     <v-select
                         id="Attributes-attributeDataSource-vselect"
@@ -99,12 +99,12 @@
                         :items='selectDatasourceItems'                     
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>                           
-                </v-layout>
+                </v-row>
             </v-flex>
         </v-flex>
         <!-- Command text area -->
         <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'SQL'">
-            <v-layout justify-center>
+            <v-row justify-center>
                 <v-flex >
                     <v-subheader class="ghd-subheader ">Command</v-subheader>
                     <v-textarea no-resize outline rows='4' class="ghd-text-field-border" v-model='selectedAttribute.command'>
@@ -120,12 +120,12 @@
                         {{ValidationSuccessMessage}}
                     </v-subheader>
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <!-- Data source combobox -->
         <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'Excel'">
             <v-flex xs6>
-                <v-layout column>
+                <v-row column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Column Name</v-subheader>
                     <v-select
                         id="Attributes-attributeColumnName-vselect"
@@ -135,12 +135,12 @@
                         :items='selectExcelColumns'
                         v-model='selectedAttribute.command'>
                     </v-select>                           
-                </v-layout>
+                </v-row>
             </v-flex>
         </v-flex>
         <!-- The Buttons  -->
         <v-flex xs12 v-if="hasSelectedAttribute">        
-            <v-layout justify-center>
+            <v-row justify-center>
                 <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
@@ -152,9 +152,9 @@
                 <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Save
                 </v-btn>               
-            </v-layout>
+            </v-row>
         </v-flex>
-    </v-layout>
+    </v-row>
 </template>
 
 <script setup lang='ts'>

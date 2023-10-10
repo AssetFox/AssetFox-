@@ -2,12 +2,12 @@
   <v-dialog v-model="dialogData.showDialog" max-width="450px" persistent>
     <v-card>
       <v-card-title>
-        <v-layout justify-left>
+        <v-row justify-left>
           <h3 class="ghd-dialog">New Criteria Library</h3>
-        </v-layout>
+        </v-row>
       </v-card-title>
       <v-card-text>
-        <v-layout column>
+        <v-row column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>            
           <v-text-field
             class="ghd-control-text ghd-control-border"
@@ -23,10 +23,10 @@
             outline
             rows="3">
           </v-textarea>
-        </v-layout>
+        </v-row>
       </v-card-text>
       <v-card-actions>
-          <v-layout justify-center row>
+          <v-row justify-center row>
             <v-btn
                    class="ghd-white-bg ghd-blue ghd-button-text"
                    variant = "flat"
@@ -40,7 +40,7 @@
                    >
               Save
             </v-btn>
-          </v-layout>
+          </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>

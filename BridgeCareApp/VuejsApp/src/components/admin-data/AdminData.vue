@@ -1,30 +1,30 @@
 <template>
-    <v-layout column class="Montserrat-font-family">
+    <v-row column class="Montserrat-font-family">
         <v-flex xs12>
             <v-flex xs6 class="ghd-constant-header">
-                <v-layout>
-                    <v-layout column>
+                <v-row>
+                    <v-row column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
                         <v-select :items='selectPrimaryNetworkItems'
                             variant="outlined"
                             v-model='selectPrimaryNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
-                    </v-layout>
-                </v-layout>
-                <v-layout>
-                    <v-layout column>
+                    </v-row>
+                </v-row>
+                <v-row>
+                    <v-row column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Network</v-subheader>
                         <v-select :items="selectRawDataNetworkItems"
                             variant="outlined"
                             v-model="selectRawdataNetworkItemValue"
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>
-                    </v-layout>
-                </v-layout>
+                    </v-row>
+                </v-row>
             </v-flex>
             <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
+                <v-row>
                     <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Key Field(s): </v-subheader> 
                     </v-flex>
@@ -36,10 +36,10 @@
                         @click="onEditKeyFieldsClick">
                         Edit
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-flex>
             <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
+                <v-row>
                     <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Key Field(s): </v-subheader> 
                     </v-flex>
@@ -51,10 +51,10 @@
                         @click="onEditRawDataKeyFieldsClick">
                         Edit
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-flex>
             <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
+                <v-row>
                     <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Inventory Report(s): </v-subheader> 
                     </v-flex>
@@ -66,10 +66,10 @@
                         @click="onEditInventoryReportsClick">
                         Edit
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-flex>
             <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
+                <v-row>
                     <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Simulation Report(s): </v-subheader> 
                     </v-flex>
@@ -81,10 +81,10 @@
                         @click="onEditSimulationReportsClick">
                         Edit
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-flex>            
             <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
+                <v-row>
                     <v-flex xs2>
                         <v-subheader class="ghd-md-gray ghd-control-label">Constraint Type: </v-subheader> 
                     </v-flex>
@@ -94,11 +94,11 @@
                             <v-radio class="admin-radio" label="AND" value="AND"></v-radio>
                         </v-radio-group>
                     </v-flex>                     
-                </v-layout>
+                </v-row>
             </v-flex>     
         </v-flex>  
         <v-flex xs12>
-            <v-layout justify-center>
+            <v-row justify-center>
                 <v-flex xs7>
                     <v-btn style="margin-top: 5px !important;" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
@@ -106,11 +106,11 @@
                         Save
                     </v-btn>
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <EditAdminDataDialog :DialogData='editAdminDataDialogData'
                                      @submit='onSubmitEditAdminDataDialogResult' />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang='ts' setup>

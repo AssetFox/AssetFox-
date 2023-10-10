@@ -31,7 +31,7 @@
                 ></v-text-field>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-space-between row>
+                <v-row justify-space-between row>
                     <v-btn
                         id="CreateScenarioDialog-save-btn"
                         @click="onSubmit(true)"
@@ -45,7 +45,7 @@
                         class="ara-orange-bg text-white"
                         >Cancel</v-btn
                     >
-                </v-layout>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>

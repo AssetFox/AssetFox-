@@ -1,6 +1,6 @@
 <template>
-    <v-layout column>
-        <v-layout>
+    <v-row column>
+        <v-row>
             <v-card
                 class="mx-auto ghd-sidebar-raw-data"
                 height="100%"
@@ -35,8 +35,8 @@
                     <router-view></router-view>
                 </v-container>
             </v-flex>
-        </v-layout>
-    </v-layout>
+        </v-row>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

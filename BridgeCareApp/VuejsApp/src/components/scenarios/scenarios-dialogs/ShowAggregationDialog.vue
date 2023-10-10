@@ -21,7 +21,7 @@
                 </v-btn>
             </v-card-title>
             <v-flex xs10>
-                <v-layout>
+                <v-row>
                     <div class="network-min-width">
                         <v-data-table
                             :headers="networkGridHeaders"
@@ -97,7 +97,7 @@
                                     </v-progress-linear>
                                 </td>
                                 <td>
-                                    <v-layout row wrap>
+                                    <v-row row wrap>
                                         <v-flex class="play-button-center">
                                             <v-btn
                                                 @click="
@@ -123,12 +123,12 @@
                                                 <v-icon>fas fa-play</v-icon>
                                             </v-btn>
                                         </v-flex>
-                                    </v-layout>
+                                    </v-row>
                                 </td>
                             </template>
                         </v-data-table>
                     </div>
-                </v-layout>
+                </v-row>
                 <EquationEditorDialog
                     :dialogData="equationEditorDialogData"
                     @submit="onSubmitEquationEditorDialogSubmit"

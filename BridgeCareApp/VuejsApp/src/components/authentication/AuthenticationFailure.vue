@@ -1,8 +1,8 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout>
+        <v-row>
             <v-flex xs12>
-                <v-layout justify-center>
+                <v-row justify-center>
                     <v-card>
                         <v-card-title>
                             <h3>Authentication Failed</h3>
@@ -11,9 +11,9 @@
                             Try Again
                         </v-btn>
                     </v-card>
-                </v-layout>
+                </v-row>
             </v-flex>
-        </v-layout>
+        </v-row>
     </v-container>
 </template>
 

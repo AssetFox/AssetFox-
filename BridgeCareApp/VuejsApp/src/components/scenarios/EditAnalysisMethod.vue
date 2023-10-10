@@ -1,9 +1,9 @@
 <template>
     <v-form ref="form" v-model="valid" lazy-validation>
-        <v-layout column>
+        <v-row column>
             <v-flex xs6>
-                <v-layout column>
-                    <v-layout justify-center>
+                <v-row column>
+                    <v-row justify-center>
                         <v-flex id="EditAnalysisMethod-weightingParent-vflex" xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
@@ -61,8 +61,8 @@
                             >
                             </v-select>
                         </v-flex>                        
-                    </v-layout>
-                    <v-layout justify-center>
+                    </v-row>
+                    <v-row justify-center>
                         <v-spacer />
                          <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
@@ -111,8 +111,8 @@
                                 @change='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
                         </v-flex>
                         <v-spacer />
-                    </v-layout>
-                    <v-layout justify-center>
+                    </v-row>
+                    <v-row justify-center>
                         <v-spacer></v-spacer>
                         <v-flex xs6>
                             <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
@@ -128,7 +128,7 @@
                             </v-textarea>
                         </v-flex>
                         <v-flex xs6>
-                            <v-layout style="height=12px;padding-bottom:0px;">
+                            <v-row style="height=12px;padding-bottom:0px;">
                                 <v-flex xs12 style="height=12px;padding-bottom:0px">
                                     <v-subheader class="ghd-control-label ghd-md-gray">                             
                                         Criteria</v-subheader>
@@ -146,7 +146,7 @@
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-flex>
-                            </v-layout>
+                            </v-row>
                             <v-textarea
                                 id="EditAnalysisMethod-criteria-textArea"
                                 class="ghd-control-text ghd-control-border"
@@ -172,12 +172,12 @@
                             </v-checkbox>
                         </v-flex>
                         <v-spacer></v-spacer>
-                    </v-layout>
-                </v-layout>
+                    </v-row>
+                </v-row>
             </v-flex>
 
             <v-flex xs6>
-                <v-layout justify-center row>
+                <v-row justify-center row>
                     <v-btn
                         id="EditAnalysisMethod-cancel-btn"
                         @click="onDiscardChanges"
@@ -192,14 +192,14 @@
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
                         >Save</v-btn
                     >
-                </v-layout>
+                </v-row>
             </v-flex>
 
             <GeneralCriterionEditorDialog
                 :dialogData="criterionEditorDialogData"
                 @submit="onCriterionEditorDialogSubmit"
             />
-        </v-layout>
+        </v-row>
     </v-form>
 </template>
 

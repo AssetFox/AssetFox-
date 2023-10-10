@@ -1,8 +1,8 @@
 <template>
-    <v-layout column class="Montserrat-font-family ma-0">
-            <v-layout align-center class="vl-style">
+    <v-row>
+            <v-row>
                 <v-flex xs12>
-                <v-layout column>
+                <v-row>
                     <v-subheader id="DataSource-headerText-vsubheader" class="ghd-control-label ghd-md-gray Montserrat-font-family">Data Source</v-subheader>
                     <v-select
                       id="DataSource-DataSourceSelect-vselect"
@@ -10,21 +10,22 @@
                       :items="dsItems"
                       append-icon=$vuetify.icons.ghd-down
                       v-model="sourceTypeItem"
-                      variant="outlined"
+                      outline
+                      variant = "outlined"
                     >
                     </v-select>
-                </v-layout>
+                </v-row>
                 </v-flex>
-                <v-btn id="DataSource-AddDataSource-vbtn" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" variant = "outlined">Add Data Source</v-btn>
-            </v-layout>
+                <v-btn id="DataSource-AddDataSource-vbtn" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" outline>Add Data Source</v-btn>
+            </v-row>
             <v-divider v-show="showMssql || showExcel"></v-divider>
-            <v-layout column>
+            <v-row>
                 <div v-show="showMssql && !isNewDataSource" style="margin-top:5px;margin-bottom:12px;" class="ghd-control-label ghd-md-gray"
                 > 
                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                 </div>
-            </v-layout>
-        <v-layout column>
+            </v-row>
+        <v-row>
             <v-subheader v-show="showMssql || showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Source Type</v-subheader>
             <v-select
               id="DataSource-SourceType-vselect"
@@ -33,14 +34,15 @@
               :items="dsTypeItems"
               append-icon=$vuetify.icons.ghd-down
               v-model="dataSourceTypeItem"
-              variant="outlined"
+              outline
+              variant = "outlined"
             >
             </v-select>
-        </v-layout>
-        <v-layout column class="cs-style">
+        </v-row>
+        <v-row>
             <div v-show="!isNewDataSource">                
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">FileName</v-subheader>
-                <v-layout class="txt-style" row>
+                <v-row>
                     <v-text-field
                         id="DataSource-fileName-vtextfield"
                         v-show="showExcel"
@@ -51,7 +53,7 @@
                     ></v-text-field>
                     <v-btn id="DataSource-AddFile-vbtn" v-show="showExcel" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="chooseFiles()">Add File</v-btn>
                     <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
-                </v-layout>
+                </v-row>
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
                 <v-select
                 id="DataSource-Location-vselect"
@@ -60,7 +62,8 @@
                 v-model="currentExcelLocationColumn"
                 v-show="showExcel"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
-                variant="outlined"
+                outline
+                variant = "outlined"
                 >
                 </v-select>
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
@@ -71,15 +74,16 @@
                 v-show="showExcel"
                 v-model="currentExcelDateColumn"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
-                variant="outlined"
+                outline
+                variant = "outlined"
                 >
                 </v-select>
             </div>
-        </v-layout>
-        <v-layout column>
+        </v-row>
+        <v-row>
             <v-subheader v-show="showMssql" class="ghd-control-label ghd-md-gray Montserrat-font-family">Connection String            
             </v-subheader>
-            <v-layout justify-start>
+            <v-row>
                     <v-flex xs8>
                         <v-textarea
                           id="DataSource-ConnectionString-vtextarea"
@@ -97,22 +101,22 @@
                         <p class="ara-blue Montserrat-font-family" v-show="isNewDataSource && showExcel">Save new data source before loading file.</p>
                         <p class="p-fail Montserrat-font-family" v-show="false">Error! {{invalidColumn}} Column is invalid</p>
                     </v-flex>
-            </v-layout>
-        </v-layout>
-        <v-layout justify-center> 
+            </v-row>
+        </v-row>
+        <v-row> 
             <v-flex xs6>
-                <v-btn id="DataSource-Cancel-vbtn" v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" variant = "flat">Cancel</v-btn>
+                <v-btn id="DataSource-Cancel-vbtn" v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
                 <v-btn id="DataSource-Test-vbtn" v-show="showMssql" @click="checkSQLConnection" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
                 <v-btn id="DataSource-Save-vbtn" v-show="showMssql || showExcel" :disabled="disableCrudButtons() || !hasUnsavedChanges" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
                 <v-btn id="DataSource-Load-vbtn" v-show="showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
                 <v-btn id="DataSource-Delete-vbtn" v-show="showMssql || showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onDeleteClick">Delete</v-btn>
 
             </v-flex>
-        </v-layout>
+        </v-row>
 
         <CreateDataSourceDialog :dialogData='createDataSourceDialogData'
                                 @submit='onCreateNewDataSource' />
-    </v-layout>
+    </v-row>
 </template>
 
 <script setup lang='ts'>
@@ -523,6 +527,7 @@ import { useStore } from 'vuex';
     
     align-self: start;
 }
+
 .tx-style {
     width: 50%;
     padding: 10px;

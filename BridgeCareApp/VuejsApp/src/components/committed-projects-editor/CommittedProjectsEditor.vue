@@ -1,9 +1,9 @@
 <template>
-    <v-layout class="Montserrat-font-family">
+    <v-row class="Montserrat-font-family">
         <v-flex xs12>
-            <v-layout column >
+            <v-row column >
                 <v-flex xs12>
-                    <v-layout>
+                    <v-row>
                         <v-btn @click='OnGetTemplateClick' 
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Get Template</v-btn>
                             <input
@@ -21,7 +21,7 @@
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Export Projects</v-btn>
                         <v-btn @click='OnDeleteAllClick' 
                             class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Delete All</v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-flex>
 
                 <v-flex xs12>
@@ -31,10 +31,10 @@
                 </v-flex>
 
                 <v-flex xs12 class="ghd-constant-header">
-                    <v-layout>
+                    <v-row>
                         <v-flex xs6 style="margin-left: 5px">
                             <v-subheader class="ghd-control-label ghd-md-gray"></v-subheader>
-                            <v-layout>                                
+                            <v-row>                                
                                 <v-text-field
                                     id="CommittedProjectsEditor-search-vtextfield"
                                     prepend-inner-icon=$vuetify.icons.ghd-search
@@ -51,20 +51,20 @@
                                 <v-btn 
                                 id="CommittedProjectsEditor-performSearch-vbtn"
                                 style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
-                            </v-layout>
+                            </v-row>
                            
                         </v-flex>
-                    </v-layout>
+                    </v-row>
                 </v-flex>
                 <v-flex xs12>
-                    <v-layout justify-end class="px-4">
+                    <v-row justify-end class="px-4">
                         <p>Commited Projects: {{totalItems}}</p>
-                    </v-layout>
+                    </v-row>
                     
                 </v-flex>       
                 
                 <v-flex xs12 >
-                    <v-layout column>
+                    <v-row column>
                         <v-data-table
                         id="CommittedProjectsEditor-committedProjects-vdatatable"
                         :headers="cpGridHeaders"
@@ -165,13 +165,13 @@
                                         </v-edit-dialog>
                                 
                                         <div v-if="header.value === 'actions'">
-                                            <v-layout style='flex-wrap:nowrap'>
+                                            <v-row style='flex-wrap:nowrap'>
                                                 <v-btn 
                                                     id="CommittedProjectsEditor-deleteCommittedProject-vbtn"
                                                     @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
                                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
-                                            </v-layout>
+                                            </v-row>
                                         </div>                            
                                     </div>
                                 </td>
@@ -180,25 +180,25 @@
                         <v-btn id="CommittedProjectsEditor-addCommittedProject-vbtn" 
                         @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
                         class="ghd-white-bg ghd-blue ghd-button btn-style" variant = "outlined">Add Committed Project</v-btn> 
-                    </v-layout>
+                    </v-row>
                 </v-flex>
 
                 <v-divider></v-divider>
 
                 <v-flex xs12>
-                    <v-layout justify-center>
+                    <v-row justify-center>
                         <v-btn 
                         id="CommittedProjectsEditor-cancel-vbtn"
                         @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>    
                         <v-btn 
                         id="CommittedProjectsEditor-save-vbtn"
                         @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
-                    </v-layout>
+                    </v-row>
                 </v-flex> 
-            </v-layout>
+            </v-row>
         </v-flex>
         <v-flex xs8 style="border:1px solid #999999 !important;" v-if="selectedCommittedProject !== ''">
-            <v-layout column>
+            <v-row column>
                 <v-flex xs12>
                     <v-btn 
                        id="CommittedProjectsEditor-closeSelectedCommitedProject-vbtn"
@@ -207,7 +207,7 @@
                     </v-btn>
                 </v-flex>
               
-            </v-layout>
+            </v-row>
         </v-flex>
         <CommittedProjectsFileUploaderDialog :is="ImportExportCommittedProjectsDialog"
             :showDialog="showImportExportCommittedProjectsDialog"
@@ -219,7 +219,7 @@
             @submit="onDeleteCommittedProjectsSubmit"
         />
 
-    </v-layout>
+    </v-row>
 </template>
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';

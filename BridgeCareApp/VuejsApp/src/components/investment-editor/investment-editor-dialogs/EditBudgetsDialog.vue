@@ -1,14 +1,14 @@
 <template>
-    <v-layout>
+    <v-row>
         <v-dialog max-width='800px' persistent scrollable v-model='dialogData.showDialog'>
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
-                    <v-layout justify-space-between align-center>
+                    <v-row justify-space-between align-center>
                         <div class="ghd-control-dialog-header">Edit Budget Criteria</div>
                         <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                             X
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-card-title>
                 <div style='height: 500px; max-width:800px' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
@@ -22,17 +22,17 @@
                                   class="ghd-table">
                         <template slot='items' slot-scope='props' v-slot:item="props">
                             <td>
-                                <v-layout row>
+                                <v-row row>
                                 <v-text-field v-model="props.item.budgetOrder" @change="reorderList(props.item)" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
                                 <v-btn class="ghd-blue" icon>
-                                    <v-layout column>
+                                    <v-row column>
                                     <v-icon title="up" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-up
                                     </v-icon>
                                     <v-icon title="down" @click="swapItemOrder(props.item, 'down')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-down
                                     </v-icon>
-                                    </v-layout>
+                                    </v-row>
                                 </v-btn>
-                                </v-layout>
+                                </v-row>
                             </td>
                             <td>
                                 <v-edit-dialog id="EditBudgetsDialog-budget-editDialog"
@@ -65,27 +65,27 @@
                         </template>
                     </v-data-table>
                     </div>
-                    <v-layout row align-end style="margin:0 !important">
+                    <v-row row align-end style="margin:0 !important">
                         <v-btn id="EditBudgetsDialog-add-btn" @click='onAddBudget' class='ghd-blue ghd-button' variant = "flat">
                             Add
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </div>
                 
                 <v-card-actions class="ghd-dialog-box-padding-bottom">
-                    <v-layout justify-center>
+                    <v-row justify-center>
                         <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">Cancel</v-btn>
                         <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' variant = "flat"
                                :disabled='disableSubmitButton()'>
                             Save
                         </v-btn>                        
-                    </v-layout>
+                    </v-row>
                 </v-card-actions>
             </v-card>
         </v-dialog>
         <GeneralCriterionEditorDialog :dialogData='criterionLibraryEditorDialogData'
                                       @submit='onSubmitCriterionLibraryEditorDialogResult' />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang='ts' setup>

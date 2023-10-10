@@ -1,5 +1,5 @@
 <template>
-    <v-layout class='consequences-tab-content'>
+    <v-row class='consequences-tab-content'>
         <v-flex xs12>            
             <div class='consequences-data-table'>
                 <v-data-table :headers='consequencesGridHeaders' :items='consequencesGridData'
@@ -96,11 +96,11 @@
                                 <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                             </v-btn>
 
-                            <v-layout v-if="header.value === ''" align-start>
+                            <v-row v-if="header.value === ''" align-start>
                                 <v-btn @click='onRemoveConsequence(props.item.id)' icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
-                            </v-layout>
+                            </v-row>
                         </td>
                     </template>
                 </v-data-table>
@@ -114,7 +114,7 @@
 
         <GeneralCriterionEditorDialog :dialogData='consequenceCriterionEditorDialogData'
                                                  @submit='onSubmitConsequenceCriterionEditorDialogResult' />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang='ts' setup>

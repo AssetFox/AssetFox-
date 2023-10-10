@@ -1,9 +1,9 @@
 <template>
-    <v-layout column>
+    <v-row column>
         <v-flex xs12>
-        <v-layout justify-space-between>
+        <v-row justify-space-between>
             <v-flex xs4 class="ghd-constant-header">
-                <v-layout column>
+                <v-row column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
                     <v-select
                         id="DeficientConditionGoalEditor-librarySelect-vselect"
@@ -14,7 +14,7 @@
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
-                </v-layout>
+                </v-row>
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
                 <div style="padding-top: 15px !important">
@@ -26,7 +26,7 @@
                     </v-btn>
                 </div>
                 
-                <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 11px; padding-left: 10px">
+                <v-row v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 11px; padding-left: 10px">
                     <div class="header-text-content owner-padding" style="padding-top: 7px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                     </div>
@@ -42,10 +42,10 @@
                             v-show='!hasScenario'>
                             Share Library
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
-                <v-layout align-end style="padding-top: 18px !important;">
+                <v-row align-end style="padding-top: 18px !important;">
                     <v-spacer></v-spacer>
                     <v-btn
                         id="DeficientConditionGoalEditor-addDeficientConditionGoal-vbtn"
@@ -61,10 +61,10 @@
                         variant = "outlined">    
                         Create New Library        
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-flex>
                    
-        </v-layout>
+        </v-row>
         </v-flex>
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
             <div class="deficients-data-table">
@@ -150,7 +150,7 @@
                                     </template>
                                 </v-edit-dialog>
                                 
-                                <v-layout
+                                <v-row
                                     v-if="header.value === 'criterionLibrary'"
                                     align-center
                                     style="flex-wrap:nowrap">
@@ -183,7 +183,7 @@
                                         icon>
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
-                                </v-layout>
+                                </v-row>
                                 <div v-if="header.value === 'action'">
                                     <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.value.id)"  class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
@@ -206,7 +206,7 @@
         </v-flex>
         
         <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
-            <v-layout justify-center>
+            <v-row justify-center>
                 <v-flex>
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea
@@ -219,10 +219,10 @@
                     >
                     </v-textarea>
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
-            <v-layout justify-center>
+            <v-row justify-center>
                 <v-btn
                     @click="onDiscardChanges"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
@@ -264,7 +264,7 @@
                     Update Library
                 </v-btn>               
                        
-            </v-layout>
+            </v-row>
         </v-flex>
 
         <ConfirmBeforeDeleteAlert
@@ -292,7 +292,7 @@
             :dialogData="criterionEditorDialogData"
             @submit="onEditDeficientConditionGoalCriterionLibrary"
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script setup lang="ts">

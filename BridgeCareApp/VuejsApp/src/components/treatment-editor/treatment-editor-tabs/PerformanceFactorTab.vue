@@ -1,5 +1,5 @@
 <template>
-    <v-layout class='factor-tab-content'>
+    <v-row class='factor-tab-content'>
         <v-flex xs12>            
             <div class='factor-data-table'>
                 <v-data-table :headers='factorGridHeaders' :items='factorGridData'
@@ -35,7 +35,7 @@
                 </v-data-table>
             </div>
         </v-flex>
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang='ts' setup>

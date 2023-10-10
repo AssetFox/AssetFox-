@@ -1,8 +1,8 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout>
+        <v-row>
             <v-flex xs12>
-                <v-layout justify-center>
+                <v-row justify-center>
                     <v-card class="no-role-container">
                         <div class="bridgecare-logo-img-div">
                             <v-img :src="require('@/assets/images/logos/Banner-logo.jpg')"
@@ -18,9 +18,9 @@
                             <a href="mailto:jbruner@pa.gov">jbruner@pa.gov</a>
                         </v-card-text>
                     </v-card>
-                </v-layout>
+                </v-row>
             </v-flex>
-        </v-layout>
+        </v-row>
     </v-container>
 </template>
 

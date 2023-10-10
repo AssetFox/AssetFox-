@@ -1,7 +1,7 @@
 <template>
-    <v-layout column>
+    <v-row column>
         <v-flex style="margin-top: -20px;">
-            <v-layout>
+            <v-row>
                 <v-flex xs6>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
@@ -61,10 +61,10 @@
                         Create New Library
                     </v-btn>                                                          
                 </v-flex>
-            </v-layout>
+            </v-row>
 
             <v-flex xs6>
-                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-bottom: 50px !important">
+                    <v-row v-if='hasSelectedLibrary && !hasScenario' style="padding-bottom: 50px !important">
                         <div class="ghd-control-label">
                         Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> | Date Modified: {{ modifiedDate }}   
                         <v-badge v-show="isShared">
@@ -78,7 +78,7 @@
                         </v-btn>
 
                         </div>  
-                    </v-layout>
+                    </v-row>
             </v-flex>
 
 
@@ -117,7 +117,7 @@
                 </v-btn>
             </div>    
         <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
-            <v-layout>
+            <v-row>
                 <div xs2>
                     <v-flex>
                         <v-list class='treatments-list'>
@@ -138,7 +138,7 @@
                     </v-flex>
                 </div>
                 <div class='treatments-div' xs10>
-                    <v-layout column> 
+                    <v-row column> 
                         <v-flex xs12>               
                             <div v-show='selectedTreatment.id !== uuidNIL'>                                                
                                 <v-tabs v-model='activeTab' id='TreatmentEditor-treatmenttabs'>
@@ -231,13 +231,13 @@
                                 </v-tabs>
                             </div>                                             
                         </v-flex>                    
-                    </v-layout>
+                    </v-row>
                 </div>
-            </v-layout>
+            </v-row>
         </v-flex>        
         <v-flex xs12>
             <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
-            <v-layout justify-center v-show='hasSelectedLibrary && !hasScenario'>
+            <v-row justify-center v-show='hasSelectedLibrary && !hasScenario'>
                 <v-flex xs12>
                     <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                     <v-textarea                        
@@ -249,10 +249,10 @@
                         @update:model-value="checkHasUnsavedChanges()"
                     />
                 </v-flex>
-            </v-layout>
+            </v-row>
         </v-flex>
         <v-flex xs9>
-            <v-layout justify-center row v-show='(hasSelectedLibrary || hasScenario)'>
+            <v-row justify-center row v-show='(hasSelectedLibrary || hasScenario)'>
                 <v-btn :disabled='!hasUnsavedChanges'
                     @click='onDiscardChanges'
                     class='ghd-white-bg ghd-blue ghd-button-text'
@@ -296,7 +296,7 @@
                 >
                     Update Library
                 </v-btn>
-            </v-layout>
+            </v-row>
         </v-flex>
 
         <ConfirmDeleteAlert
@@ -328,7 +328,7 @@
             :dialogData='confirmBeforeDeleteTreatmentAlertData'
             @submit='onSubmitConfirmDeleteTreatmentAlertResult'
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang='ts' setup>

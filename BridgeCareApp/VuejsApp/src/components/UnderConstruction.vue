@@ -1,8 +1,8 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout>
+        <v-row>
             <v-flex xs12>
-                <v-layout justify-center>
+                <v-row justify-center>
                     <v-card class="under-construction-card">
                         <div class="under-construction-img-div">
                             <v-img :src="require('@/assets/images/under-construction.png')"
@@ -16,9 +16,9 @@
                             <p>The page you are viewing has not yet been developed, but we are hard at work on it.</p>
                         </v-card-text>
                     </v-card>
-                </v-layout>
+                </v-row>
             </v-flex>
-        </v-layout>
+        </v-row>
     </v-container>
 </template>
 

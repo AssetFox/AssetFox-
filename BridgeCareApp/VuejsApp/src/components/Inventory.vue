@@ -1,7 +1,7 @@
 <template>  
-    <v-layout>
+    <v-row>
         <v-flex xs12>
-            <v-layout justify-space-between row>
+            <v-row justify-space-between row>
                 <v-subheader v-if="stateInventoryReportNames.length > 1" class="ghd-select ghd-text-field ghd-text-field-border">
                     <v-select
                         v-model="inventoryReportName" 
@@ -9,10 +9,10 @@
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
                 </v-subheader>
-           </v-layout>
-            <v-layout justify-space-between row>
+           </v-row>
+            <v-row justify-space-between row>
                 <v-spacer></v-spacer>
-                <v-layout>
+                <v-row>
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
                         <v-autocomplete :items="keyAttributeValues[index]" @change="onSelectInventoryItem(index)" item-title="identifier" item-value="identifier"
                                         :label="`Select by ${key} Key`" outline
@@ -30,18 +30,18 @@
                             </template>
                         </v-autocomplete>
                     </div>
-                </v-layout>
+                </v-row>
                 <v-spacer></v-spacer>
                     <v-btn style="padding-top: 15px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                     variant ="outlined" 
                     @click="resetDropdowns()">
                     Reset Key Fields
                     </v-btn>
-           </v-layout>
+           </v-row>
             <v-divider></v-divider>
             <div class="container" v-html="sanitizedHTML"></div>
         </v-flex>
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
     <v-card>
       <v-card-title>
         <v-layout justify-center>

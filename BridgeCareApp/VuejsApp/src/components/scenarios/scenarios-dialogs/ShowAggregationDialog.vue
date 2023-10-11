@@ -2,7 +2,7 @@
     <v-dialog
         scrollable
         persistent
-        v-model="dialogData.showDialog"
+        v-bind:show="dialogData.showDialog"
         max-width="60%"
         transition="dialog-bottom-transition"
     >

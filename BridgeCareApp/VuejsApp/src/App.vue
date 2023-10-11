@@ -287,11 +287,10 @@ import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 import NewsDialog from '@/components/NewsDialog.vue'
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import { useStore } from 'vuex';
-//import { useRouter, onBeforeRouteLeave } from 'vue-router';
 import router from './router';
 import mitt from 'mitt'
 import vuetify from '@/plugins/vuetify';
-
+import config from '../public/config.json';
 
     let store = useStore();
     let authenticated = ref<boolean>(store.state.authenticationModule.authenticated);

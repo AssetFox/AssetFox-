@@ -219,11 +219,8 @@ import { useRouter } from 'vue-router';
     );
     let hasCreatedLibrary = shallowRef<boolean>(false);
     let hasLibraryEditPermission = shallowRef<boolean>(false);
-    const emit = defineEmits(['submit'])
-    const $vuetify = inject('$vuetify') as any
+    const emit = defineEmits(['submit'])    
     const $router = useRouter();
-    const $statusHub = inject('$statusHub') as any
-    const $config = inject('$config') as any
 
    created();
    function created() {

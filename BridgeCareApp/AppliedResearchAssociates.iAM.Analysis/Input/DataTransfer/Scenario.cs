@@ -566,6 +566,7 @@ public sealed class Scenario
                 Budget = BudgetByName[source.NameOfUsableBudget],
                 Cost = source.Cost,
                 Name = source.Name,
+                treatmentCategory = source.Category,
                 TemplateTreatment = TreatmentByName[source.NameOfTemplateTreatment],
                 ProjectSource = Enum.TryParse<ProjectSourceDTO>(source.ProjectSource, out var projectSourceEnum)
                             ? projectSourceEnum

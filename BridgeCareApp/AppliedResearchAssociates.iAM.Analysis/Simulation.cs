@@ -57,12 +57,7 @@ public sealed class Simulation : WeakEntity, IValidator
 
     public PerformanceCurve AddPerformanceCurve() => _PerformanceCurves.GetAdd(new PerformanceCurve(Network.Explorer));
 
-    public SelectableTreatment AddTreatment()
-    {
-        var added = _Treatments.GetAdd(new SelectableTreatment(this));
-        _TreatmentByName[added.Name] = added;
-        return added;
-    }
+    public SelectableTreatment AddTreatment() => _Treatments.GetAdd(new SelectableTreatment(this));
 
     public void ClearResults() => ResultsOnDisk.Clear();
 
@@ -135,13 +130,7 @@ public sealed class Simulation : WeakEntity, IValidator
         return results;
     }
 
-    public SelectableTreatment GetTreatmentByName(string treatmentName) => _TreatmentByName[treatmentName];
-
-    public void Remove(SelectableTreatment treatment)
-    {
-        _ = _Treatments.Remove(treatment);
-        _ = _TreatmentByName.Remove(treatment.Name);
-    }
+    public void Remove(SelectableTreatment treatment) => _Treatments.Remove(treatment);
 
     public void Remove(PerformanceCurve performanceCurve) => _PerformanceCurves.Remove(performanceCurve);
 
@@ -189,5 +178,4 @@ public sealed class Simulation : WeakEntity, IValidator
     private readonly List<PerformanceCurve> _PerformanceCurves = new();
     private readonly WeakReference<SimulationOutput> _Results = new(null);
     private readonly List<SelectableTreatment> _Treatments = new();
-    private readonly Dictionary<string, SelectableTreatment> _TreatmentByName = new();
 }

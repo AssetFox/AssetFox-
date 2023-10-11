@@ -1,6 +1,6 @@
 //import '@babel/polyfill';
 import '@fortawesome/fontawesome-free/css/all.css';
-import Vue, { h, createApp, defineComponent, watch, reactive } from 'vue';
+import Vue, { reateApp, defineComponent, watch, reactive } from 'vue';
 import 'vuetify/dist/vuetify.min.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -27,7 +27,8 @@ import GhdDownSvg from '@/shared/icons/GhdDownSvg.vue';
 import GhdTableSortSvg from '@/shared/icons/GhdTableSortSvg.vue';
 import authenticationModule from './store-modules/authentication.module';
 import { ap } from 'ramda';
-import vuetify from '@/plugins/vuetify.ts';
+import vuetify from '@/plugins/vuetify';
+import '../public/config.json';
 
 const app = createApp(App);
 

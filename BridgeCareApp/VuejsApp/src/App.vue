@@ -365,14 +365,10 @@ import vuetify from '@/plugins/vuetify';
     let agencyLogo: string = '';
     let productLogo: string = '';
     let inventoryReportName: string = '';
-    let alert: Ref<boolean> = ref(false);
+    let alert: Ref<boolean> = ref(false);   
 
-    //const $vuetify = vuetify();
-    const $router = router.useRouter();
-    const $statusHub = inject('$statusHub') as any
     const $emitter = mitt()
-    const $config = inject('$config') as any
-
+    
     created();
 
     function container() {
@@ -555,7 +551,7 @@ import vuetify from '@/plugins/vuetify';
         if (
             securityType === SecurityTypes.esec &&
             UnsecuredRoutePathNames.indexOf(
-                $router.currentRoute.value.name as string,
+                router.currentRoute.value.name as string,
             ) === -1
         ) {
             // Upon opening the page, and every 30 seconds, check if authentication data
@@ -586,22 +582,22 @@ import vuetify from '@/plugins/vuetify';
             onAddTaskCompletedNotification
         );
         
-        currentURL = $router.currentRoute.value.name;
+        currentURL = router.currentRoute.value.name;
 
-        if($config.agencyLogo.trim() === "")
+        if(config.agencyLogo.trim() === "")
             agencyLogo = require(`@/assets/images/generic/IAM_Main.jpg`)
         else
-            agencyLogo = $config.agencyLogo
+            agencyLogo = config.agencyLogo
 
-        if($config.productLogo.trim() === "")
+        if(config.productLogo.trim() === "")
             productLogo = require(`@/assets/images/generic/IAM_Banner.jpg`)
         else
-            productLogo = $config.productLogo
+            productLogo = config.productLogo
 
         if(implementationName === "")
             implementationName = "BridgeCare"
         else
-            implementationName = $config.implementationName
+            implementationName = config.implementationName
     }
 
     onBeforeUnmount(() => beforeDestroy());
@@ -669,10 +665,10 @@ import vuetify from '@/plugins/vuetify';
     }
 
     function onAzureLogin() {
-        if ($router.currentRoute.value.name === 'AuthenticationStart') {
+        if (router.currentRoute.value.name === 'AuthenticationStart') {
             azureB2CLoginAction();
         } else {
-            $router.push('/AuthenticationStart');
+            router.push('/AuthenticationStart');
         }
     }
 
@@ -730,8 +726,8 @@ import vuetify from '@/plugins/vuetify';
      * @param route The route name to use when navigating a user
      */
     function onNavigate(route: any) {
-        if ($router.currentRoute.value.path !== route.path) {
-            $router.push(route).catch(() => {});
+        if (router.currentRoute.value.path !== route.path) {
+            router.push(route).catch(() => {});
         }
     }
 

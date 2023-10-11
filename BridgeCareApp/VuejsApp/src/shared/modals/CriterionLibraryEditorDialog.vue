@@ -1,5 +1,5 @@
 <template>
-    <Dialog persistent maximizable v-model="dialogData.showDialog" class="criterion-library-editor-dialog">
+    <Dialog persistent maximizable v-bind:show="dialogData.showDialog" class="criterion-library-editor-dialog">
         <v-card>
             <v-card-text>
                 <v-layout justify-center column>

@@ -93,9 +93,9 @@ namespace BridgeCareCore.Services
             else
             {
                 return true;
-            }
-           
+            }           
         }
+
 
         public bool IsCompleteSimulation(CloneSimulationDTO dto) => throw new NotImplementedException();
     }

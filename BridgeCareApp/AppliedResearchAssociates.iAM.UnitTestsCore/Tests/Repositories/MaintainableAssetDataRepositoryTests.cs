@@ -89,7 +89,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         }
 
         [Fact]
-        public void failedReport()
+        public void FailedReportWithExpectedNoResult()
         {
             Setup();
             var failedRepo = new MaintainableAssetDataRepository(_failedRepo);

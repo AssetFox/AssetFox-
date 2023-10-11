@@ -88,7 +88,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             MainNetworkKeyTable.Add(queryData);
                         }
                     }
-                    else
+                    else if(reportTypeParam[0].Contains("(R)"))
                     {
                         // Populate raw key data table
                         RawNetworkKeyTable = new List<MaintainableAssetQueryDTO>();

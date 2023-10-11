@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = domain.ShadowForSameTreatment,
                 Cost = domain.Cost,
                 Year = domain.Year,
-                treatmentCategory = domain.TemplateTreatment.Category,
+                treatmentCategory = domain.treatmentCategory,
                 ProjectSource = domain.ProjectSource.ToString()
             };
 

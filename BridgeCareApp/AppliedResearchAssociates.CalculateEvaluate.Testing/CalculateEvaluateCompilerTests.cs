@@ -174,7 +174,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
 
         private static readonly DateTime d0 = new DateTime(2000, 1, 1), d1 = new DateTime(2020, 1, 1);
 
-        private void MultipleNumberParameterEvaluation(string inputExpression, Action<bool> assert, params double[] parameterValues)
+        private static void MultipleNumberParameterEvaluation(string inputExpression, Action<bool> assert, params double[] parameterValues)
         {
             var parameters = parameterValues.Select(ValueTuple.Create<double, int>).ToArray();
             var compiler = new CalculateEvaluateCompiler();
@@ -192,7 +192,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             assert(result);
         }
 
-        private void MultipleParameterCalculation(string inputExpression, double expectedOutput, params double[] parameterValues)
+        private static void MultipleParameterCalculation(string inputExpression, double expectedOutput, params double[] parameterValues)
         {
             var parameters = parameterValues.Select(ValueTuple.Create<double, int>).ToArray();
             var compiler = new CalculateEvaluateCompiler();
@@ -210,7 +210,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             Assert.Equal(expectedOutput, result);
         }
 
-        private void ParameterlessCalculation(string inputExpression, double expectedOutput)
+        private static void ParameterlessCalculation(string inputExpression, double expectedOutput)
         {
             var compiler = new CalculateEvaluateCompiler();
             var calculator = compiler.GetCalculator(inputExpression);
@@ -218,7 +218,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             Assert.Equal(expectedOutput, result);
         }
 
-        private void SingleNumberParameterEvaluation(string inputExpression, Action<bool> assert)
+        private static void SingleNumberParameterEvaluation(string inputExpression, Action<bool> assert)
         {
             var compiler = new CalculateEvaluateCompiler();
             compiler.ParameterTypes["PARAM"] = CalculateEvaluateParameterType.Number;
@@ -229,7 +229,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             assert(result);
         }
 
-        private void SingleTextParameterEvaluation(string inputExpression, Action<bool> assert)
+        private static void SingleTextParameterEvaluation(string inputExpression, Action<bool> assert)
         {
             var compiler = new CalculateEvaluateCompiler();
             compiler.ParameterTypes["PARAM"] = CalculateEvaluateParameterType.Text;
@@ -240,7 +240,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             assert(result);
         }
 
-        private void SingleTimestampParameterEvaluation(string inputExpression, Action<bool> assert)
+        private static void SingleTimestampParameterEvaluation(string inputExpression, Action<bool> assert)
         {
             var compiler = new CalculateEvaluateCompiler();
             compiler.ParameterTypes["PARAM"] = CalculateEvaluateParameterType.Timestamp;

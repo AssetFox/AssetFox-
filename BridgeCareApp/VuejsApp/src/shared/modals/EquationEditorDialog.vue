@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-dialog max-width="900px" persistent scrollable v-model="dialogData.showDialog">
+    <v-dialog max-width="900px" persistent scrollable v-bind:show="dialogData.showDialog">
       <v-card class="equation-container-card Montserrat-font-family">
         <v-card-title class="ghd-dialog-box-padding-top">
           <v-flex xs12>

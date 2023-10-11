@@ -32,7 +32,10 @@ import { fa } from 'vuetify/iconsets/fa'
 import PrimeVue from 'primevue/config';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
-import Ripple from 'primevue/ripple';
+import ConfirmationService from 'primevue/confirmationservice';
+import "primevue/resources/themes/saga-blue/theme.css"; 
+import 'primevue/resources/primevue.min.css'
+import 'primeicons/primeicons.css';
 
 const ghdSearchIconSet: IconSet = {
   component: (props: IconProps) => {
@@ -67,7 +70,7 @@ icons: {
 app.use(router);
 app.use(store);
 app.use(vuetify);
-app.use(PrimeVue, { ripple: true });
+app.use(PrimeVue);
 //app.use(VueWorker);
 app.use(KendoChartInstaller);
 
@@ -96,10 +99,9 @@ var defaultOptions = {
 };
 
 app.use(VueSanitize, defaultOptions);
-
-app.component("Dialog",Dialog);
-app.component("Button", Button);
-app.component("Ripple", Ripple);
+app.use(ConfirmationService);
+app.component("Dialog",Dialog)
+   .component("Button", Button);
 app.config.globalProperties.productionTip = false;
 //app.use(VuejsDialog);
 //app.config.globalProperties.$config = config;

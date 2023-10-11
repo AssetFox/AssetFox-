@@ -1,7 +1,9 @@
 <template>
-    <div>
-        <Button @click="visible=!visible" label="Warning" severity="warning">{{visible}}</Button>
-        <Dialog v-model:visible="visible" header="Header" :maximizable="true" :modal="true" :style="{width: '50vw'}"><p>Test Dialog Paragraph</p>></Dialog>
+    <div class="card">
+        <ConfirmPopup/>
+        <v-btn @click="visible=true" variant="text">Vuetify button</v-btn>
+        <Button @click="visible=!visible" label="Warning" severity="warning" >{{visible}}</Button>
+        <Dialog v-model:visible="visible" :maximizable="true" :modal="true"><p>Test Dialog Paragraph</p>></Dialog>
     </div>
   <!-- <Dialog max-width="65%" v-bind:show="showDialog">
     <v-container fluid grid-list-xl>
@@ -110,6 +112,7 @@ import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
 import ConfirmDialog from 'primevue/confirmdialog';
 const emit = defineEmits(['close'])
 let store = useStore();
@@ -119,7 +122,7 @@ const props = defineProps<{
 
 let announcements = ref<Announcement[]>(store.state.announcementModule.announcements);
 let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
-const visible = ref(false); 
+let visible = ref(false); 
 async function upsertAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('upsertAnnouncement');}
 async function deleteAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('deleteAnnouncement');}
  
@@ -223,7 +226,15 @@ async function deleteAnnouncementAction(payload?: any): Promise<any> {await stor
 
 </script>
 
-<style>
+<style scoped>
+html {
+    font-size: 14px;
+}
+
+body {
+    background: #eff3f8;
+    padding: 1rem;
+}
 .announcement-dialog {
     width: 100%;
     justify-content: center;
@@ -249,5 +260,12 @@ async function deleteAnnouncementAction(payload?: any): Promise<any> {await stor
     font-size: 1.2em;
     padding-top: 0.75em;
     padding-bottom: 1em;
+}
+
+.card {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
 }
 </style>

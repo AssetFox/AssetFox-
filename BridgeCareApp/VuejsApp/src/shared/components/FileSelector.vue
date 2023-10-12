@@ -1,36 +1,36 @@
 <template>
-    <v-layout column>
-        <v-layout column>        
+    <v-row column>
+        <v-row column>        
             <div class="div-border align-start">   
                 <div id="app" class="ghd-white-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
-                    <v-layout fill-height justify-center>
+                    <v-row fill-height justify-center>
                         <div class="drag-drop-area">
-                            <v-layout fill-height align-center justify-center>
+                            <v-row fill-height align-center justify-center>
                                 <img :src="require('@/assets/icons/upload.svg')"/>
-                                <v-layout column align-center>
+                                <v-row column align-center>
                                     <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
                                     <!--<span class="span-center Montserrat-font-family">or</span>
                                     <v-btn class="ghd-blue Montserrat-font-family a-0 ma-0" @click="chooseFiles()" flat> Click here to select files </v-btn>-->
-                                </v-layout>
-                            </v-layout>
+                                </v-row>
+                            </v-row>
                         </div>
-                        </v-layout>
+                        </v-row>
                 </div>
             </div>
-            <v-flex xs12>
-                <v-layout justify-start>     
+            <v-col cols = "12">
+                <v-row justify-start>     
                     <v-switch
                         v-show="useTreatment"
                         label="No Treatment"
                         class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
                         v-model="applyNoTreatment"
                     />
-                </v-layout>
-            </v-flex>
+                </v-row>
+            </v-col>
             <div v-show="true">
                 <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
             </div>
-        </v-layout>        
+        </v-row>        
         <div class="files-table">
             <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
                         sort-icon=$vuetify.icons.ghd-table-sort
@@ -50,7 +50,7 @@
                 </template>
             </v-data-table>
         </div>
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

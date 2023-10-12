@@ -1,14 +1,14 @@
 <template>
-  <v-layout>
+  <v-row>
     <Dialog v-bind:show="showDialog" max-width="434px" persistent>
       <v-card  height="411px" class="ghd-dialog">
         <v-card-title class="ghd-dialog">
-          <v-layout justify-left>
+          <v-row justify-left>
             <h3 class="ghd-dialog">Add New Deterioration Equation</h3>
-          </v-layout>
+          </v-row>
         </v-card-title>
         <v-card-text class="ghd-dialog">
-          <v-layout column>
+          <v-row column>
             <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>            
             <v-text-field
               id="CreatePerformanceCurveDialog-name-text"
@@ -39,10 +39,10 @@
                 </v-list-item>
               </template>
             </v-select>                      
-          </v-layout>
+          </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-layout justify-center row>
+          <v-row justify-center row>
             <v-btn
               id="CreatePerformanceCurveDialog-cancel-button"
               class="ghd-white-bg ghd-blue ghd-button-text"
@@ -58,11 +58,11 @@
               variant = "flat">
               Save
             </v-btn>
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </Dialog>
-  </v-layout>
+  </v-row>
 </template>
 
 <script lang="ts" setup>

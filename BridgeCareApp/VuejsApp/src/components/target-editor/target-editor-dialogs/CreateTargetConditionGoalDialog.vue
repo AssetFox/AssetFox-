@@ -2,15 +2,15 @@
   <Dialog max-width="450px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-padding-top-title">
-        <v-layout justify-start>
+        <v-row justify-start>
           <div class="dialog-header"><h5>Add New Target Condition Goal</h5></div>
-        </v-layout>
+        </v-row>
                 <v-btn @click="onSubmit(false)" icon>
                     <i class="fas fa-times fa-2x"></i>
         </v-btn>
       </v-card-title>
       <v-card-text class="ghd-dialog-text-field-padding">
-        <v-layout column>
+        <v-row column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
           <v-text-field id="CreateTargetConditionGoalDialog-name-vtextfield"
                         outline v-model="newTargetConditionGoal.name"
@@ -29,17 +29,17 @@
           <v-text-field id="CreateTargetConditionGoalDialog-target-vtextfield" outline :mask="'##########'" v-model.number="newTargetConditionGoal.target"
                         class="ghd-control-text ghd-control-border"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-        </v-layout>
+        </v-row>
       </v-card-text>
       <v-card-actions class="py-0">
-        <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
+        <v-row justify-center row class="ghd-dialog-padding-bottom-buttons">
           <v-btn id="CreateTargetConditionGoalDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue" variant = "outlined">
             Cancel
           </v-btn>
           <v-btn id="CreateTargetConditionGoalDialog-save-vbtn" :disabled="disableSubmitButton()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue" variant = "outlined">
             Save
           </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </Dialog>

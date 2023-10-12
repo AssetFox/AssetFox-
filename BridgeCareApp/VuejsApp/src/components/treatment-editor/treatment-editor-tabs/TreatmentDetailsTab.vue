@@ -1,8 +1,8 @@
 <template>
-    <v-layout class="treatment-details-tab-content">
-        <v-flex xs12>
-            <v-layout column>                
-                <v-flex>
+    <v-row class="treatment-details-tab-content">
+        <v-col cols = "12">
+            <v-row column>                
+                <v-col>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Description</v-subheader>
                     <v-textarea  
                         id ="TreatmentDetailsTab-desc-vtextarea"                      
@@ -13,9 +13,9 @@
                         v-model="selectedTreatmentDetails.description"
                         @update:model-value="onEditTreatmentDetails('description', selectedTreatmentDetails.description)"
                     />
-                </v-flex>                
-                <v-layout xs12 row class="ghd-left-padding ghd-right-padding">
-                    <v-flex xs3>
+                </v-col>                
+                <v-row  rows = "12" row class="ghd-left-padding ghd-right-padding">
+                    <v-col cols = "3">
                         <v-subheader class="ghd-control-label ghd-md-gray">Category</v-subheader>
                         <v-select id="TreatmentDetailsTab-category-vselect"
                         class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
@@ -27,8 +27,8 @@
                             v-model="treatmentCategoryBinding"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
-                    </v-flex>
-                    <v-flex xs3>
+                    </v-col>
+                    <v-col cols = "3">
                         <v-subheader class="ghd-control-label ghd-md-gray">Asset type</v-subheader>
                         <v-select id="TreatmentDetailsTab-assetType-vselect"
                         class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
@@ -40,8 +40,8 @@
                         v-model="assetTypeBinding"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
-                    </v-flex>
-                    <v-flex xs3>
+                    </v-col>
+                    <v-col cols = "3">
                         <v-subheader class="ghd-control-label ghd-md-gray">Years Before Any</v-subheader>
                         <v-text-field id="TreatmentDetailsTab-yearsBeforeAny-vtext"
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
@@ -54,8 +54,8 @@
                             "
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
-                    </v-flex>
-                    <v-flex xs3>
+                    </v-col>
+                    <v-col cols = "3">
                         <v-subheader class="ghd-control-label ghd-md-gray">Years Before Same</v-subheader>
                         <v-text-field id="TreatmentDetailsTab-yearsBeforeSame-vtext"
                             class='ghd-control-border ghd-control-text ghd-control-width-sm'
@@ -69,9 +69,9 @@
                             "
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
-                    </v-flex>
-                </v-layout>                
-                <v-flex class="criteria-flex">
+                    </v-col>
+                </v-row>                
+                <v-col class="criteria-flex">
                     <v-menu
                         full-width
                         location="bottom"
@@ -79,12 +79,12 @@
                         min-width="1000px"
                     >   
                         <template v-slot:activator>                                                                                       
-                            <v-layout column class="ghd-left-padding">  
-                                <v-layout xs12 align-center style="height:50px;">                                    
-                                    <v-flex xs11>
+                            <v-row column class="ghd-left-padding">  
+                                <v-row  rows = "12" align-center style="height:50px;">                                    
+                                    <v-col cols = "11">
                                         <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
-                                    </v-flex>
-                                    <v-flex xs2>                                 
+                                    </v-col>
+                                    <v-col cols = "2">                                 
                                         <v-btn id="TreatmentDetailsTab-RemoveCriteria-vbtn"
                                             @click="
                                                 onRemoveTreatmentCriterion
@@ -104,10 +104,10 @@
                                         >
                                             <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-btn>   
-                                    </v-flex>                                    
-                                </v-layout>       
-                                <v-layout align-center class="ghd-right-padding">  
-                                    <v-flex>
+                                    </v-col>                                    
+                                </v-row>       
+                                <v-row align-center class="ghd-right-padding">  
+                                    <v-col>
                                         <v-textarea
                                             class="ghd-control-border sm-txt"                                            
                                             no-resize
@@ -120,9 +120,9 @@
                                             "
                                         >
                                         </v-textarea>         
-                                    </v-flex>      
-                                </v-layout>                            
-                            </v-layout>        
+                                    </v-col>      
+                                </v-row>                            
+                            </v-row>        
                         </template>                
                         <v-card>
                             <v-card-text>
@@ -147,14 +147,14 @@
                         label="Mark treatment as unselectable by scenario engine"
                         style="margin-left: 10px; margin-top: 30px;"
                     ></v-switch>    
-                </v-flex>              
-            </v-layout>
-        </v-flex>   
+                </v-col>              
+            </v-row>
+        </v-col>   
         <GeneralCriterionEditorDialog
             :dialogData="treatmentCriterionEditorDialogData"
             @submit="onSubmitTreatmentCriterionEditorDialogResult"
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

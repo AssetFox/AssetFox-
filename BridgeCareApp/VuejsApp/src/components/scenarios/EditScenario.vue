@@ -1,6 +1,6 @@
 <template>
-    <v-layout column>
-        <v-layout>
+    <v-row column>
+        <v-row>
             <v-card
                 class="mx-auto ghd-sidebar-scenario"
                 height="100%"
@@ -48,12 +48,12 @@
                     </v-btn>
                 </div>
             </v-card>
-            <v-flex xs12 class="ghd-content">
+            <v-col cols = "12" class="ghd-content">
                 <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
                     <router-view></router-view>
                 </v-container>
-            </v-flex>
-        </v-layout>
+            </v-col>
+        </v-row>
         <Alert :dialogData="alertData" @submit="onSubmitAlertResult" />
 
         <Alert
@@ -66,7 +66,7 @@
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
             @delete="onDeleteCommittedProjects"
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

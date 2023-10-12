@@ -1,6 +1,6 @@
 <template>
-    <v-layout column>
-        <v-flex x12>
+    <v-row column>
+        <v-col cols = "12">
             <v-card elevation="5" color="blue lighten-5">
                 <v-tabs center-active v-model="tab">
                     <v-tabs-slider color="blue"></v-tabs-slider>
@@ -15,15 +15,15 @@
                         {{ item.name }} ( {{ item.count }} )
                     </v-tab>
                     <v-spacer></v-spacer>
-                    <v-flex xs1></v-flex>
+                    <v-col cols = "1"></v-col>
                 </v-tabs>
                 <v-tabs-items v-model="tab">
                     <v-window-item>
-                        <v-flex x12>
+                        <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title>
-                                    <v-flex xs6>
-                                        <v-layout style = "margin-right: -100px;">
+                                    <v-col cols = "6">
+                                        <v-row style = "margin-right: -100px;">
                                             <v-text-field
                                                 id="Scenarios-searchScenarios-textField"
                                                 type="text"
@@ -69,10 +69,10 @@
                                                 </v-chip>
                                                 </div>
                                             </span>
-                                        </v-layout>
-                                    </v-flex>
-                                    <v-flex xs4></v-flex>
-                                    <v-layout class="flex-end xs2" style="justify-content: end; padding-right: 70px">
+                                        </v-row>
+                                    </v-col>
+                                    <v-col cols = "4"></v-col>
+                                    <v-row class="flex-end xs2" style="justify-content: end; padding-right: 70px">
                                         <v-btn
                                            id="Scenarios-createScenario-btn"
                                             @click="
@@ -82,7 +82,7 @@
                                         >
                                             Create new scenario
                                         </v-btn>
-                                    </v-layout>
+                                    </v-row>
                                 </v-card-title>
                                 <v-data-table
                                     id="Scenarios-scenarios-datatable"
@@ -221,14 +221,14 @@
                                     </v-alert>
                                 </v-data-table>
                             </v-card>
-                        </v-flex>
+                        </v-col>
                     </v-window-item>
                     <v-window-item>
-                        <v-flex xs12>
+                        <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title>
-                                    <v-flex xs6>
-                                        <v-layout style = "margin-right:-200px">
+                                    <v-col cols = "6">
+                                        <v-row style = "margin-right:-200px">
                                             <v-text-field
                                                 id="Scenarios-shared-searchScenarios-textField"
                                                 label="Search"
@@ -274,9 +274,9 @@
                                                 </v-chip>
                                                 </div>
                                             </span>
-                                        </v-layout>
+                                        </v-row>
                                         
-                                    </v-flex>
+                                    </v-col>
                                 </v-card-title>
                                 <v-data-table
                                     :items="currentSharedScenariosPage"                      
@@ -406,15 +406,15 @@
                                     </template>                                 
                                 </v-data-table>
                             </v-card>
-                        </v-flex>
+                        </v-col>
                     </v-window-item>
                     <v-window-item>
-                        <v-flex xs12>
+                        <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title class="ghd-dialog-padding-top-title">
-                                    <v-layout justify-start>
+                                    <v-row justify-start>
                                     <div class="dialog-header"><h5>Work Queue</h5></div>
-                                    </v-layout>
+                                    </v-row>
 
                                 </v-card-title>
                                 <v-data-table
@@ -481,9 +481,9 @@
                                     </template>
                                 </v-data-table>
                                 <v-card-title class="ghd-dialog-padding-top-title">
-                                    <v-layout justify-start>
+                                    <v-row justify-start>
                                     <div class="dialog-header"><h5>Fast Queue</h5></div>
-                                    </v-layout>
+                                    </v-row>
 
                                 </v-card-title>
                                 <v-data-table
@@ -550,11 +550,11 @@
                                     </template>
                                 </v-data-table>
                             </v-card>
-                        </v-flex>
+                        </v-col>
                     </v-window-item>
                 </v-tabs-items>
             </v-card>
-        </v-flex>
+        </v-col>
         <!-- missing implemtation
          <ConfirmAnalysisRunAlertPrehecks
             :dialogDataPreChecks="onSecondConfirmAnalysisRunAlertData"
@@ -627,7 +627,7 @@
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
             @delete="onDeleteCommittedProjects"
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

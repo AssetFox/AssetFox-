@@ -2,9 +2,9 @@
   <Dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-row justify-center>
           <h5>Deficient Condition Goal Library Sharing</h5>
-        </v-layout>
+        </v-row>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
@@ -36,12 +36,12 @@
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-layout row justify-center>
+        <v-row row justify-center>
           <v-btn id="ShareDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
           <v-btn id="ShareDeficientConditionGoalLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </Dialog>

@@ -1,18 +1,18 @@
 <template>
-    <v-layout>
+    <v-row>
         <Dialog style="overflow-y: auto" max-width='800px' persistent scrollable v-bind:show="dialogDataPreChecks.showDialog">
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
-                    <v-layout justify-space-between align-center>
+                    <v-row justify-space-between align-center>
                         <div class="ghd-control-dialog-header">Interactive pre-checks</div>
                         <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                             X
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-card-title>
-                    <v-layout justify-center style="font-weight: 500">
+                    <v-row justify-center style="font-weight: 500">
                         {{dialogDataPreChecks.heading}}
-                    </v-layout>
+                    </v-row>
                 <div style='height: 100%; max-width:100%' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
                         <v-card-text style="border:1px solid black;" class="px-4">
@@ -25,7 +25,7 @@
                     </div>
                 </div>
                 <v-card-actions>
-                    <v-layout justify-center row v-if="dialogDataPreChecks.choice">
+                    <v-row justify-center row v-if="dialogDataPreChecks.choice">
                         <v-btn 
                         id="Alert-Cancel-vbtn"
                         @click="onSubmit(false)" 
@@ -38,16 +38,16 @@
                         class="ghd-blue-bg ghd-white ghd-button">
                             Proceed
                         </v-btn>
-                    </v-layout>
-                    <v-layout justify-center v-if="!dialogDataPreChecks.choice">
+                    </v-row>
+                    <v-row justify-center v-if="!dialogDataPreChecks.choice">
                         <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
                             OK
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-card-actions>
             </v-card>
         </Dialog>
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

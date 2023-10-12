@@ -1,6 +1,6 @@
 <template>
-  <v-layout column style='width: 90%; margin: auto'>
-    <v-flex xs12>
+  <v-row column style='width: 90%; margin: auto'>
+    <v-col cols = "12">
       <v-card class='test1'>
         <div v-if='unassignedUsersCriteriaFilter.length > 0'>
           <v-card-title class='userCriteriaTableHeader'>
@@ -11,30 +11,30 @@
           </v-card-text>
           <v-divider style='margin: 0' />
           <div v-for='user in unassignedUsersCriteriaFilter'>
-            <v-layout row class='unassigned-user-layout'>
-              <v-flex class='unassigned-user-layout-username-flex' xs3>
+            <v-row row class='unassigned-user-layout'>
+              <v-col class='unassigned-user-layout-username-flex' xs3>
                 {{ user.userName }}
-              </v-flex>
-              <v-flex xs3>
+              </v-col>
+              <v-col cols = "3">
                 {{ user.description }}
-              </v-flex>
-              <v-flex style='padding: 0' xs4>
-                <v-layout align-center>
+              </v-col>
+              <v-col style='padding: 0' xs4>
+                <v-row align-center>
                   <v-btn @click='onEditCriteria(user)' class='ara-blue-bg text-white' 
                           title='Give the user limited access to the bridge inventory'>
                     <v-icon size='1.5em' style='padding-right: 0.5em'>fas fa-edit</v-icon>
                     Assign Criteria Filter
                   </v-btn>
-                </v-layout>
-              </v-flex>
-              <v-flex justify-center style='padding: 0' xs2>
-                <v-layout align-center>
+                </v-row>
+              </v-col>
+              <v-col justify-center style='padding: 0' xs2>
+                <v-row align-center>
                   <v-btn @click='onDeleteUser(user)' class='ara-orange' icon title='Delete User'>
                     <v-icon>fas fa-trash</v-icon>
                   </v-btn>
-                </v-layout>
-              </v-flex>
-            </v-layout>
+                </v-row>
+              </v-col>
+            </v-row>
             <v-divider style='margin: 0' />
           </div>
         </div>
@@ -70,7 +70,7 @@
             <template v-slot:item="props" slot='items' slot-scope='props'>
               <td style='width: 15%; font-size: 1.2em; padding-top: 0.4em'>{{ props.item.userName }}</td>
               <td style='width: 35%'>
-                <v-layout align-center style='flex-wrap:nowrap; margin-left: 0; width: 100%'>
+                <v-row align-center style='flex-wrap:nowrap; margin-left: 0; width: 100%'>
                   <v-menu bottom 
                       min-height='500px' min-width='500px' v-if='props.item.hasCriteria' style='width: 100%'>
                     <template v-slot:activator>
@@ -94,7 +94,7 @@
                           v-if='props.item.hasCriteria'>
                     <v-icon>fas fa-edit</v-icon>
                   </v-btn>
-                </v-layout>
+                </v-row>
               </td>
               <td class='d-flex'>
                 <v-btn @click='onEditCriteria(props.item)' class='ara-blue' icon 
@@ -146,12 +146,12 @@
           </v-data-table>
         </div>
       </v-card>
-    </v-flex>
+    </v-col>
     <CriteriaFilterEditorDialog :dialogData='criteriaFilterEditorDialogData' 
                                 @submitCriteriaEditorDialogResult='onSubmitCriteria' />
 
     <Alert :dialogData='beforeDeleteAlertData' @submit='onSubmitDeleteUserResponse' />
-  </v-layout>
+  </v-row>
 </template>
 
 <script lang='ts' setup>

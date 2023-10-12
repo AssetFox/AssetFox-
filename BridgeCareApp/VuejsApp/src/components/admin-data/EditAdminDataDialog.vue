@@ -2,12 +2,12 @@
     <Dialog max-width="600px" persistent v-bind:show="DialogData.showDialog">
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
-            <v-layout justify-space-between align-center>
+            <v-row justify-space-between align-center>
                 <div class="ghd-control-dialog-header">Change {{DialogData.settingName}}</div>
-            </v-layout>
+            </v-row>
             </v-card-title>
             <v-card-text class="ghd-dialog-box-padding-center">
-                <v-layout>
+                <v-row>
                     <v-select :items='settingItems'
                     variant="outlined"
                     v-model='settingSelectItemValue'                         
@@ -19,7 +19,7 @@
                     :disabled='isAddDisabled()'>
                         Add
                     </v-btn>
-                </v-layout>
+                </v-row>
                 <v-list>
                     <v-list-tile
                     v-for="setting in selectedSettings"
@@ -38,14 +38,14 @@
                 </v-list>
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
-            <v-layout justify-center row>
+            <v-row justify-center row>
                 <v-btn @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                 Cancel
                 </v-btn >
                 <v-btn @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                 Save
                 </v-btn>         
-            </v-layout>
+            </v-row>
             </v-card-actions>
         </v-card>
     </Dialog>

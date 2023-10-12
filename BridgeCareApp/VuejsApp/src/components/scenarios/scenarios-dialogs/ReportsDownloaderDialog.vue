@@ -2,21 +2,21 @@
   <Dialog max-width="500px" scrollable v-bind:show="dialogData.showModal">
     <v-card>
       <v-card-title primary-title>
-        <v-layout column>
-          <v-flex>
-            <v-layout justify-center>
+        <v-row column>
+          <v-col>
+            <v-row justify-center>
               <h3 class="text-grey">Available Reports</h3>
-            </v-layout>
-          </v-flex>
+            </v-row>
+          </v-col>
           <v-progress-linear :indeterminate="true" v-if="isDownloading"></v-progress-linear>
-          <v-flex>
+          <v-col>
             <span class="text-grey" v-if="isDownloading">Downloading... You can close this window, it will not stop the report generation</span>
-          </v-flex>
-        </v-layout>
+          </v-col>
+        </v-row>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
-          <v-layout align-start row>
+          <v-row align-start row>
             <v-select style="padding:0px !important"
                 :items='reports'
                 v-model='selectedReport'>
@@ -34,7 +34,7 @@
             <v-chip color='ara-blue-bg' text-color='white' @click="onDownloadSimulationLog(true)">
                 Simulation Log
             </v-chip>
-          </v-layout>
+          </v-row>
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions>

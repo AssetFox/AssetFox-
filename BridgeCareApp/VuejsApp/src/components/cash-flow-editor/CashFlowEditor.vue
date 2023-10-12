@@ -1,8 +1,8 @@
 <template>
-    <v-layout column class="Montserrat-font-family">
-        <v-flex xs12>
-            <v-layout justify-space-between>
-                <v-flex xs4 class="ghd-constant-header">
+    <v-row column class="Montserrat-font-family">
+        <v-col cols = "12">
+            <v-row justify-space-between>
+                <v-col cols = "4" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Cash Flow Library</v-subheader>
                     <v-select
                         :items="librarySelectItems"
@@ -13,9 +13,9 @@
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>{{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">    
-                    <v-layout row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 28px !important">
+                </v-col>
+                <v-col cols = "4" class="ghd-constant-header">    
+                    <v-row row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 28px !important">
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content" style="padding-top: 7px !important">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
@@ -31,10 +31,10 @@
                             v-show='!hasScenario'>
                             Share Library
                     </v-btn>
-                    </v-layout>  
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">                   
-                    <v-layout row align-end style="padding-top: 22px !important">
+                    </v-row>  
+                </v-col>
+                <v-col cols = "4" class="ghd-constant-header">                   
+                    <v-row row align-end style="padding-top: 22px !important">
                         <v-spacer></v-spacer>
                         <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
                             id="CashFlowEditor-addCashFlowRule-btn" 
@@ -47,11 +47,11 @@
                             v-show="!hasScenario">
                             Create New Library
                         </v-btn>
-                    </v-layout>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
+                    </v-row>
+                </v-col>
+            </v-row>
+        </v-col>
+        <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="cash-flow-library-tables">
                 <v-data-table
                     id="CashFlowEditor-cashFlowRules-table"
@@ -96,7 +96,7 @@
                             </v-edit-dialog>
                         </td>
                         <td>
-                            <v-layout align-center style='flex-wrap:nowrap'>
+                            <v-row align-center style='flex-wrap:nowrap'>
                                 <v-menu
                                 location="bottom"
                                 min-height="500px"
@@ -129,11 +129,11 @@
                                 icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                             </v-btn>
-                            </v-layout>
+                            </v-row>
                                                    
                         </td>
                         <td>
-                            <v-layout style='flex-wrap:nowrap'>
+                            <v-row style='flex-wrap:nowrap'>
                                 <v-btn
                                 @click="onDeleteCashFlowRule(item.id)"
                                 id="CashFlowEditor-deleteCashFlowRule-btn"
@@ -148,7 +148,7 @@
                                 icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit-cash.svg')"/>
                             </v-btn>
-                            </v-layout>                          
+                            </v-row>                          
                         </td>
                     </template>
                 </v-data-table>
@@ -158,10 +158,10 @@
                     Delete Selected
                 </v-btn>
             </div>
-        </v-flex>
-        <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
-            <v-layout justify-center>
-                <v-flex>
+        </v-col>
+        <v-col v-show="hasSelectedLibrary && !hasScenario" xs12>
+            <v-row justify-center>
+                <v-col>
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea
                         class="ghd-text-field-border"
@@ -172,11 +172,11 @@
                         @update:model-value="checkHasUnsavedChanges()">
 
                     </v-textarea>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex xs12>
-            <v-layout
+                </v-col>
+            </v-row>
+        </v-col>
+        <v-col cols = "12">
+            <v-row
                 justify-center
                 row
                 v-show="hasSelectedLibrary || hasScenario">
@@ -215,8 +215,8 @@
                     v-show="!hasScenario">
                     Update Library
                 </v-btn>                                       
-            </v-layout>
-        </v-flex>
+            </v-row>
+        </v-col>
 
         <ConfirmDeleteAlert
             :dialogData="confirmDeleteAlertData"
@@ -244,7 +244,7 @@
         <AddCashFlowRuleDialog
             :showDialog="showAddCashFlowRuleDialog"
             @submit="onSubmitAddCashFlowRule"/>
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

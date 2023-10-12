@@ -1,8 +1,8 @@
 <template>
-    <v-layout column>
-        <v-flex v-if="false">
-            <v-layout justify-center>
-                <v-flex xs3>
+    <v-row column>
+        <v-col v-if="false">
+            <v-row justify-center>
+                <v-col cols = "3">
                     <v-btn
                         @click="onShowCreateCriterionLibraryDialog(false)"
                         class="ara-blue-bg text-white"
@@ -42,26 +42,26 @@
                         label="Shared"
                         @change="canUpdateOrCreate = true"
                     />
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
         <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion" />
-        <v-flex v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion">
-            <v-layout justify-center>
-                <v-flex xs10>
+        <v-col v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion">
+            <v-row justify-center>
+                <v-col cols = "10">
                     <CriteriaEditor
                         :criteriaEditorData="criteriaEditorData"
                         @submitCriteriaEditorResult="
                             onSubmitCriteriaEditorResult
                         "
                     />
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
         <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion" />
-        <v-flex v-show="hasSelectedCriterionLibrary">
-            <v-layout justify-center>
-                <v-flex xs6>
+        <v-col v-show="hasSelectedCriterionLibrary">
+            <v-row justify-center>
+                <v-col xs6>
                     <v-textarea
                         v-model="selectedCriterionLibrary.description"
                         label="Description"
@@ -70,11 +70,11 @@
                         rows="4"
                     >
                     </v-textarea>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex>
-            <v-layout justify-end row v-show="hasSelectedCriterionLibrary">
+                </v-col>
+            </v-row>
+        </v-col>
+        <v-col>
+            <v-row justify-end row v-show="hasSelectedCriterionLibrary">
                 <v-btn
                     @click="onUpsertCriterionLibrary(selectedCriterionLibrary)"
                     class="ara-blue-bg text-white"
@@ -96,8 +96,8 @@
                 >
                     Delete Library
                 </v-btn>
-            </v-layout>
-        </v-flex>
+            </v-row>
+        </v-col>
 
         <CreateCriterionLibraryDialog
             :dialogData="createCriterionLibraryDialogData"
@@ -108,7 +108,7 @@
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

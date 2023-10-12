@@ -1,8 +1,8 @@
 <template>
-    <v-layout column class="Montserrat-font-family" justify-start>
-        <v-flex xs12>
-            <v-layout class="data-table" justify-left>
-                <v-flex xs12>
+    <v-row column class="Montserrat-font-family" justify-start>
+        <v-col cols = "12">
+            <v-row class="data-table" justify-left>
+                <v-col cols = "12">
                     <v-subheader>
                         Available Reports
                     </v-subheader>
@@ -79,25 +79,25 @@
                             </template>                               
                         </v-data-table>
                     </v-card>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex>
-        <v-layout column>
-            <v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
+        <v-col>
+        <v-row column>
+            <v-col>
                 <v-subheader class="ghd-md-gray ghd-control-label">
                     Diagnostics & Logging
                 </v-subheader>
                 <v-divider style="margin:0px;" />
-                <v-layout style="margin:0px;">
+                <v-row style="margin:0px;">
                     <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" variant = "flat">Simulation Log</v-btn>
-                </v-layout>
-            </v-flex>
+                </v-row>
+            </v-col>
 
-        </v-layout>
-        </v-flex>
-        <!-- <v-layout align-center>
-            <v-flex xs4 class="ghd-constant-header">
+        </v-row>
+        </v-col>
+        <!-- <v-row align-center>
+            <v-col cols = "4" class="ghd-constant-header">
                 <v-subheader class="ghd-md-gray ghd-control-label">Select a Report</v-subheader>
                 <v-select
                     :items='reports'
@@ -106,8 +106,8 @@
                     outline
                     class="ghd-select ghd-text-field ghd-text-field-border">
                 </v-select>
-            </v-flex>
-            <v-flex>
+            </v-col>
+            <v-col>
                 <v-btn 
                     class="ghd-white-bg ghd-blue ghd-button-text ghd-button" 
                     depressed
@@ -119,14 +119,14 @@
                     @click="onDownloadReport()"
                     outline
                 >Download Report</v-btn>
-            </v-flex>
-        </v-layout>
-        <v-layout style="margin:10px; padding-left:0px" column>
-            <v-layout justify-space-between align-center>
+            </v-col>
+        </v-row>
+        <v-row style="margin:10px; padding-left:0px" column>
+            <v-row justify-space-between align-center>
                 <v-subheader class="ghd-control-label ghd-md-gray">                             
                     Report Criteria
                 </v-subheader>
-                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
+                <v-col cols = "1" style="height=12px;padding-bottom:0px;padding-top:0px;">
                     <v-btn
                         id="SummaryReport-criteriaEditor-btn"
                         style="!important;"
@@ -138,9 +138,9 @@
                     >
                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                     </v-btn>
-                </v-flex>
-            </v-layout>
-            <v-layout>
+                </v-col>
+            </v-row>
+            <v-row>
                <v-textarea
                    id="SummaryReport-criteria-textArea"
                    class="ghd-control-text ghd-control-border"
@@ -152,13 +152,13 @@
                    v-model=mergedCriteriaExpression
                >
                </v-textarea>
-            </v-layout>
-        </v-layout> -->
+            </v-row>
+        </v-row> -->
         <GeneralCriterionEditorDialog
             :dialogData="criterionEditorDialogData"
             @submit="onCriterionEditorDialogSubmit"
         />
-    </v-layout>
+    </v-row>
 </template>
 
 <script setup lang='ts'>

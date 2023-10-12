@@ -2,23 +2,23 @@
   <Dialog max-width="450px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-row justify-center>
           <h3>Id of Legacy Simulation to Migrate</h3>
-        </v-layout>
+        </v-row>
       </v-card-title>
       <v-card-text>
-        <v-layout column>
+        <v-row column>
           <v-text-field label="Legacy Simulation Id" outline v-model="legacySimulationId"></v-text-field>
-        </v-layout>
+        </v-row>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
+        <v-row justify-space-between row>
           <v-btn :disabled="!(legacySimulationId > 0)" @click="onSubmit(true)"
                  class="ara-blue-bg text-white">
             Migrate
           </v-btn>
           <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   <!-- </v-dialog> -->

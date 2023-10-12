@@ -1,8 +1,8 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout>
-            <v-flex xs12>
-                <v-layout justify-center>
+        <v-row>
+            <v-col cols ="12">
+                <v-row justify-center>
                     <v-card class="no-role-container">
                         <div class="bridgecare-logo-img-div">
                             <v-img :src="require('@/assets/images/logos/Banner-logo.jpg')"
@@ -19,7 +19,7 @@
                         </v-card-text>
                     </v-card>
                 </v-layout>
-            </v-flex>
+            </v-col>
         </v-layout>
     </v-container>
 </template>

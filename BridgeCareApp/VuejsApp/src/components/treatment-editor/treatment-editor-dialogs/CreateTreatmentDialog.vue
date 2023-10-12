@@ -1,23 +1,23 @@
 <template>
-  <v-layout>
+  <v-row>
     <Dialog max-width="450px" persistent v-bind:show="showDialog">
       <v-card class="ghd-padding">
         <v-card-title>
-            <v-layout justify-left>
+            <v-row justify-left>
               <h3 class="ghd-title">Create New Treatment</h3>
-            </v-layout>
+            </v-row>
             <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
               X
             </v-btn>          
         </v-card-title>
         <v-card-text>
-          <v-layout column>
+          <v-row column>
             <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
             <v-text-field id="CreateTreatmentDialog-name-textField" class="ghd-control-border ghd-control-text ghd-control-width-lg" outline v-model="newTreatment.name"></v-text-field>
-          </v-layout>
+          </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-layout row justify-center>
+          <v-row row justify-center>
             <v-btn
               id="CreateTreatmentDialog-cancel-btn"
               @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel
@@ -28,11 +28,11 @@
               @click="onSubmit(true)" 
               class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">Save
             </v-btn>            
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </Dialog>
-  </v-layout>
+  </v-row>
 </template>
 
 <script lang="ts" setup>

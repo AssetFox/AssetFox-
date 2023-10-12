@@ -1,37 +1,37 @@
 <template>
-  <v-layout>
+  <v-row>
     <Dialog max-width="900px" persistent scrollable v-bind:show="dialogData.showDialog">
       <v-card class="equation-container-card Montserrat-font-family">
         <v-card-title class="ghd-dialog-box-padding-top">
-          <v-flex xs12>
-            <v-layout justify-space-between >
+          <v-col cols = "12">
+            <v-row justify-space-between >
               <div class="ghd-control-dialog-header">Equation Editor</div>
               <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                 X
             </v-btn>
-            </v-layout>
-          </v-flex>
+            </v-row>
+          </v-col>
         </v-card-title>
         <v-card-text class="equation-content ghd-dialog-box-padding-center">
-          <v-layout column>
-            <v-flex xs12>
+          <v-row column>
+            <v-col cols = "12">
               <div class="validation-message-div">
-                <v-layout justify-center>
+                <v-row justify-center>
                   <p class="invalid-message" v-if="invalidExpressionMessage !== ''">{{ invalidExpressionMessage }}</p>
                   <p class="valid-message" v-if="validExpressionMessage !== ''">{{ validExpressionMessage }}</p>
-                </v-layout>
+                </v-row>
               </div>
-            </v-flex>
-            <v-flex xs12>
+            </v-col>
+            <v-col cols = "12">
               <v-tabs v-model="selectedTab">
                 <v-tab :key="0" @click="isPiecewise = false">Equation</v-tab>
                 <v-tab :key="1" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Piecewise</v-tab>
                 <v-tab :key="2" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Time In Rating</v-tab>
                 <v-window-item>
                   <div class="equation-container-div">
-                    <v-layout column>
+                    <v-row column>
                       <div>
-                        <v-layout justify-space-between row>
+                        <v-row justify-space-between row>
                           <div>
                             <v-list>
                               <template>
@@ -73,12 +73,12 @@
                               </template>
                             </v-list>
                           </div>
-                        </v-layout>
+                        </v-row>
                       </div>
                       <div>
-                        <v-layout justify-center>
+                        <v-row justify-center>
                           <div class="math-buttons-container">
-                            <v-layout justify-space-between row>
+                            <v-row justify-space-between row>
                               <v-btn @click="onAddValueToExpression('+')" class="math-button add circular-button" icon
                                      size="small">
                                 <span>+</span>
@@ -103,27 +103,27 @@
                               size="small">
                                 <span>)</span>
                               </v-btn>
-                            </v-layout>
+                            </v-row>
                           </div>
-                        </v-layout>
+                        </v-row>
                       </div>
                       <div>
-                        <v-layout justify-center>
+                        <v-row justify-center>
                           <v-textarea :rows="5" @blur="setCursorPosition" @focus="setTextareaCursorPosition" full-width
                                       id="equation_textarea"
                                       no-resize outline
                                       spellcheck="false"
                                       v-model="expression" class="ghd-text-field-border">
                           </v-textarea>
-                        </v-layout>
+                        </v-row>
                       </div>
-                    </v-layout>
+                    </v-row>
                   </div>
                 </v-window-item>
                 <v-window-item>
                   <div class="equation-container-div">
-                    <v-layout>
-                      <v-flex xs5 >
+                    <v-row>
+                      <v-col cols = "5" >
                         <div>                 
                           <div class="data-points-grid">
                             <v-data-table :headers="piecewiseGridHeaders"
@@ -153,7 +153,7 @@
                               </template>
                             </v-data-table>
                           </div>
-                          <v-layout justify-space-between class="add-addmulti-container">
+                          <v-row justify-space-between class="add-addmulti-container">
                             <v-btn @click="onAddTimeAttributeDataPoint"
                             variant = "flat"  class='ghd-blue ghd-button ghd-button-text'>
                               Add
@@ -162,10 +162,10 @@
                             variant = "flat" class="ghd-blue ghd-button ghd-button-text">
                               Add Multi
                             </v-btn>
-                          </v-layout>
+                          </v-row>
                         </div>
-                      </v-flex>
-                      <v-flex xs7 >
+                      </v-col>
+                      <v-col cols = "7" >
                         <div class="kendo-chart-container">
                           <kendo-chart :data-source="piecewiseGridData"
                                        :pannable-lock="'y'"
@@ -187,14 +187,14 @@
                             </kendo-chart-series-item>
                           </kendo-chart>
                         </div>
-                      </v-flex>
-                    </v-layout>
+                      </v-col>
+                    </v-row>
                   </div>
                 </v-window-item>
                 <v-window-item>
                   <div class="equation-container-div">
-                    <v-layout>
-                      <v-flex xs5>
+                    <v-row>
+                      <v-col cols = "5">
                         <div>
                           <div class="data-points-grid">
                             <v-data-table :headers="timeInRatingGridHeaders"
@@ -220,7 +220,7 @@
                               </template>
                             </v-data-table>
                           </div>
-                          <v-layout justify-space-between class="add-addmulti-container">
+                          <v-row justify-space-between class="add-addmulti-container">
                             <v-btn @click="onAddTimeAttributeDataPoint"
                             variant = "flat" class='ghd-blue ghd-button ghd-button-text' >
                               Add
@@ -229,10 +229,10 @@
                             variant = "flat" class='ghd-blue ghd-button ghd-button-text'>
                               Add Multi
                             </v-btn>
-                          </v-layout>
+                          </v-row>
                         </div>
-                      </v-flex>
-                      <v-flex xs7 >
+                      </v-col>
+                      <v-col cols = "7" >
                         <div class="kendo-chart-container">
                           <kendo-chart :data-source="piecewiseGridData"
                                        :pannable-lock="'y'"
@@ -254,43 +254,43 @@
                             </kendo-chart-series-item>
                           </kendo-chart>
                         </div>
-                      </v-flex>
-                    </v-layout>
+                      </v-col>
+                    </v-row>
                   </div>
                 </v-window-item>
               </v-tabs>
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-layout>
-            <v-flex xs12>
+          <v-row>
+            <v-col cols = "12">
               <div>
-                 <v-layout justify-center row>
+                 <v-row justify-center row>
                   <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" variant = "flat" class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
-                </v-layout>
-                <v-layout justify-center row>
+                </v-row>
+                <v-row justify-center row>
                   <v-btn @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>
                   <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
                          class="text-white ghd-blue ghd-button ghd-button-text">Save
                   </v-btn>                  
-                </v-layout>
+                </v-row>
               </div>
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
         </v-card-actions>
       </v-card>
     </Dialog>
     <Dialog max-width="250px" persistent v-bind:show="showAddDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
-          <v-layout column justify-center>
+          <v-row column justify-center>
             <div>
-              <v-flex xs12>
-                <v-layout justify-space-between >
+              <v-col cols = "12">
+                <v-row justify-space-between >
                   <h6 class="header-title">Time Value</h6>
-                </v-layout>
-              </v-flex>
+                </v-row>
+              </v-col>
               <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]"
                             outline
                             type="number"
@@ -298,47 +298,47 @@
               </v-text-field>
             </div>
             <div>
-              <v-flex xs12>
-                <v-layout justify-space-between >
+              <v-col cols = "12">
+                <v-row justify-space-between >
                   <h6 class="header-title">Condition Value</h6>
-                </v-layout>
-              </v-flex>
+                </v-row>
+              </v-col>
               <v-text-field :rules="[conditionValueIsNotEmpty, conditionValueIsNew]" outline
                             type="number" v-model="newDataPoint.conditionValue" class="ghd-text-field ghd-text-field-border">
               </v-text-field>
             </div>
-          </v-layout>
+          </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-layout justify-center row>
+          <v-row justify-center row>
             <v-btn @click="onSubmitNewDataPoint(false)" variant = "flat" size="small" class="ghd-blue ghd-button ghd-button-text">Cancel</v-btn>
             <v-btn :disabled="disableNewDataPointSubmit()" @click="onSubmitNewDataPoint(true)"
             variant = "outlined"
             size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>            
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </Dialog>
     <Dialog max-width="400px" persistent v-bind:show="showAddMultipleDataPointsPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
-          <v-layout column justify-center>
+          <v-row column justify-center>
             <p>Data point entries must follow the format <strong>#,#</strong> (time,attribute) with each entry on a
               separate line.</p>
-            <v-flex xs2>
+            <v-col cols = "2">
               <v-textarea
                   :rules="[multipleDataPointsFormIsNotEmpty, isCorrectMultipleDataPointsFormat, timeValueIsGreaterThanZero, multipleDataPointsAreNew]"
                   no-resize outline rows="10"
                   v-model="multipleDataPoints" class="ghd-text-field-border">
               </v-textarea>
-            </v-flex>
+            </v-col>
 
-          </v-layout>
+          </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-layout justify-center row>
+          <v-row justify-center row>
             <v-btn @click="onSubmitNewDataPointMulti(false)" variant = "flat" size="small" class="ghd-blue ghd-button ghd-button-text">Cancel
             </v-btn>
             <v-btn :disabled="disableMultipleDataPointsSubmit()" @click="onSubmitNewDataPointMulti(true)"
@@ -346,20 +346,20 @@
             size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>           
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </Dialog>
     <Dialog max-width="250px" persistent v-bind:show="showEditDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
-          <v-layout column justify-center>
+          <v-row column justify-center>
             <div>
-              <v-flex xs12>
-                <v-layout justify-space-between >
+              <v-col cols = "12">
+                <v-row justify-space-between >
                   <h6 class="header-title">Time Value</h6>
-                </v-layout>
-              </v-flex>
+                </v-row>
+              </v-col>
               <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]"
                             outline
                             type="number"
@@ -367,30 +367,30 @@
               </v-text-field>
             </div>
             <div>
-              <v-flex xs12>
-                <v-layout justify-space-between >
+              <v-col cols = "12">
+                <v-row justify-space-between >
                   <h6 class="header-title">Condition Value</h6>
-                </v-layout>
-              </v-flex>
+                </v-row>
+              </v-col>
               <v-text-field :rules="[conditionValueIsNotEmpty, conditionValueIsNew]" outline
                             type="number" v-model="editedDataPoint.conditionValue" class="ghd-text-field ghd-text-field-border">
               </v-text-field>
             </div>
-          </v-layout>
+          </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-layout justify-center row>
+          <v-row justify-center row>
             <v-btn @click="onSubmitEditedDataPointValue(false)" variant = "flat" size="small" class="ghd-blue ghd-button-text">Cancel</v-btn>
             <v-btn :disabled="disableEditDataPointSubmit()" @click="onSubmitEditedDataPointValue(true)"
             variant = "outlined"
             size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>            
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </Dialog>
-  </v-layout>
+  </v-row>
 </template>
 
 <script lang="ts" setup>

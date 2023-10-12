@@ -2,17 +2,17 @@
   <Dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-        <v-layout justify-space-between align-center>
+        <v-row justify-space-between align-center>
           <div class="ghd-control-dialog-header">New Cash Flow Rule Library</div>
           <v-btn @click="onSubmit(false)" variant = "flat" 
               id="CreateCashFlowRuleLibraryDialog-Close-vbtn"
               class="ghd-close-button">
               X
             </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center">
-        <v-layout column>
+        <v-row column>
           <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
           <v-text-field outline 
                         id="CreateCashFlowRuleLibraryDialog-Name-vTextField"
@@ -24,10 +24,10 @@
                       id="CreateCashFlowRuleLibraryDialog-Description-vtextarea"
                       v-model="newCashFlowRuleLibrary.description"
                       class="ghd-text-field-border"/>
-        </v-layout>
+        </v-row>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-layout justify-space-between row>
+        <v-row justify-space-between row>
           <v-btn @click="onSubmit(false)" variant = "outlined" 
                  id="CreateCashFlowRuleLibraryDialog-Cancel-vbtn"
                  class='ghd-blue ghd-button-text ghd-button'>
@@ -38,7 +38,7 @@
                  id="CreateCashFlowRuleLibraryDialog-Create-vbtn">
             Submit
           </v-btn>        
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </Dialog>

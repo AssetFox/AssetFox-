@@ -2,12 +2,12 @@
     <Dialog max-width="850px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-        <v-layout justify-space-between align-center>
+        <v-row justify-space-between align-center>
           <div class="ghd-control-dialog-header">Cash Flow Rule Settings: {{selectedCashFlowRule.name}}</div>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-title>
             <div style='height: 500px; max-width:850px' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
@@ -169,7 +169,7 @@
 
                             
       <v-card-actions>
-        <v-layout justify-center row>
+        <v-row justify-center row>
             <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" id="CashFlowRuleEditDialog-cancel-btn">
             Cancel
           </v-btn>
@@ -179,7 +179,7 @@
                  class='ghd-blue hd-button-text ghd-button' variant = "flat">
             Submit
           </v-btn>         
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </Dialog>

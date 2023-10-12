@@ -1,9 +1,9 @@
 <template>
-    <v-layout column class="Montserrat-font-family">
-        <v-flex xs12>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-layout column>
+    <v-row column class="Montserrat-font-family">
+        <v-col cols = "12">
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row>
+                    <v-row column>
                         <v-subheader id="Networks-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Network</v-subheader>
                         <v-select :items='selectNetworkItems'
                             id="Networks-selectNetwork-vselect"
@@ -11,21 +11,21 @@
                             v-model='selectNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
-                    </v-layout>
+                    </v-row>
                     <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
                         id="Networks-addNetwork-vbtn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onAddNetworkDialog">
                         Add Network
                     </v-btn>
-                </v-layout>
-            </v-flex>
-        </v-flex>
+                </v-row>
+            </v-col>
+        </v-col>
         <v-divider />
-        <v-flex xs12 class="ghd-constant-header" v-show="hasSelectedNetwork">
-            <v-layout justify-space-between>
-                <v-flex xs6>
-                    <v-layout column>
+        <v-col cols = "12" class="ghd-constant-header" v-show="hasSelectedNetwork">
+            <v-row justify-space-between>
+                <v-col cols = "6">
+                    <v-row column>
                         <v-subheader class="ghd-md-gray ghd-control-label">
                             Key Attribute
                         </v-subheader>
@@ -37,10 +37,10 @@
                             v-model="selectedKeyAttributeItem"
                             :items='selectKeyAttributeItems'>
                         </v-select>  
-                    </v-layout>                         
-                </v-flex>
-                <v-flex xs5>
-                <v-layout v-show="!isNewNetwork">
+                    </v-row>                         
+                </v-col>
+                <v-col cols = "5">
+                <v-row v-show="!isNewNetwork">
                     <v-select
                         id="Networks-DataSource-vselect"
                         variant="outlined"
@@ -56,21 +56,21 @@
                         @click="selectAllFromSource">
                         Select All From Source
                     </v-btn>                            
-                </v-layout>  
-                </v-flex>       
-            </v-layout>
-        </v-flex>
+                </v-row>  
+                </v-col>       
+            </v-row>
+        </v-col>
         <!-- Data source combobox -->
-        <v-flex xs12 v-show="hasSelectedNetwork">
-            <v-layout justify-space-between>
-                <v-flex xs5 >
-                    <v-layout column>
-                        <v-layout style="height=12px;padding-bottom:0px;">
-                                <v-flex xs12 class="ghd-constant-header" style="height=12px;padding-bottom:0px">
+        <v-col cols = "12" v-show="hasSelectedNetwork">
+            <v-row justify-space-between>
+                <v-col cols = "5" >
+                    <v-row column>
+                        <v-row style="height=12px;padding-bottom:0px;">
+                                <v-col cols = "12" class="ghd-constant-header" style="height=12px;padding-bottom:0px">
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="padding-top: 14px !important">                             
                                         Spatial Weighting Equation</v-subheader>
-                                </v-flex>
-                                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
+                                </v-col>
+                                <v-col xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
                                     <v-btn
                                         id="Networks-EditSpatialWeightingEquation-vbtn"
                                         style="padding-right:20px !important;"
@@ -80,13 +80,13 @@
                                         @click="onShowEquationEditorDialog">
                                         <v-icon class="ghd-blue">fas fa-edit</v-icon>
                                     </v-btn>
-                                </v-flex>
-                            </v-layout>
+                                </v-col>
+                            </v-row>
                         <v-text-field id="Networks-EditSpatialWeightingEquation-vtextfield" outline class="ghd-text-field-border ghd-text-field" 
                            :disabled="!isNewNetwork" v-model="spatialWeightingEquationValue.expression"/>                         
-                    </v-layout>
-                    <v-layout v-show="hasStartedAggregation">
-                        <v-flex>
+                    </v-row>
+                    <v-row v-show="hasStartedAggregation">
+                        <v-col>
                             <v-subheader class="ghd-control-label ara-black" v-text="networkDataAssignmentStatus" ></v-subheader>
                             <v-progress-linear
                                             v-model="
@@ -103,13 +103,13 @@
                                                 }}%</strong
                                             >
                                         </v-progress-linear>
-                        </v-flex>
-                    </v-layout>
-                </v-flex>
-                <v-flex xs5>
-                    <v-layout column>
+                        </v-col>
+                    </v-row>
+                </v-col>
+                <v-col cols = "5">
+                    <v-row column>
                         <div class='priorities-data-table' v-show="!isNewNetwork">
-                            <v-layout justify-center>
+                            <v-row justify-center>
                                 <v-btn id="Networks-AddAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onAddAll">
                                     Add All
@@ -120,7 +120,7 @@
                                     @click="onRemoveAll">
                                     Remove All
                                 </v-btn>
-                            </v-layout>
+                            </v-row>
                             <v-data-table id="Networks-Attributes-vdatatable" :headers='dataSourceGridHeaders' :items='attributeRows'
                                 class='v-table__overflow ghd-table' item-key='id' select-all
                                 v-model="selectedAttributeRows"
@@ -142,13 +142,13 @@
                                     ></v-pagination>
                             </div>
                         </div>               
-                    </v-layout>
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                    </v-row>
+                </v-col>
+            </v-row>
+        </v-col>
         <!-- The Buttons  -->
-        <v-flex xs12 v-show="hasSelectedNetwork">        
-            <v-layout justify-center style="padding-top: 30px !important">
+        <v-col cols = "12" v-show="hasSelectedNetwork">        
+            <v-row justify-center style="padding-top: 30px !important">
                 <v-btn id="Networks-Cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
@@ -164,8 +164,8 @@
                     class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Create
                 </v-btn>            
-            </v-layout>
-        </v-flex>
+            </v-row>
+        </v-col>
         <EquationEditorDialog
             :dialogData="equationEditorDialogData"
             :isFromPerformanceCurveEditor=false
@@ -173,7 +173,7 @@
         />
         <AddNetworkDialog :dialogData='addNetworkDialogData'
                                 @submit='addNetwork' />
-    </v-layout>
+    </v-row>
 </template>
 
 <script setup lang='ts'>

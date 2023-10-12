@@ -2,9 +2,9 @@
   <Dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-row justify-center>
           <h3>Scenario Sharing</h3>
-        </v-layout>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-data-table :headers="scenarioUserGridHeaders"
@@ -32,12 +32,12 @@
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
+        <v-row justify-space-between row>
           <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
             Save
           </v-btn>
           <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </Dialog>

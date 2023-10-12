@@ -306,18 +306,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public List<Guid> GetMaintableAssetsAttributeByNetworkId(Guid networkId)
-        {
-                    
+        {            
             var assetIds = _unitOfWork.Context.AggregatedResult
-                .Join(_unitOfWork.Context.MaintainableAsset,
-                ar => ar.MaintainableAssetId,
-                ma => ma.Id,
-                (ar, ma) => new { ar, ma})
-               .Where(joinData => joinData.ma.NetworkId == networkId)
-               .Select(joinedData => joinedData.ar.AttributeId)
-               .Distinct()
-               .ToList();
-
+                .Include(_ => _.MaintainableAsset)
+                .Where(ar => ar.MaintainableAsset.NetworkId == networkId)
+                .Select(ar => ar.AttributeId)
+                .Distinct()
+                .ToList();
 
             return (List<Guid>)assetIds;
         }

@@ -6,6 +6,7 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import App from './App.vue';
 import router from './router';
+import { useRoute, useRouter } from 'vue-router';
 import store from './store/root-store';
 import './assets/css/main.css';
 import VueScreen from 'vue-screen';
@@ -32,11 +33,11 @@ import { fa } from 'vuetify/iconsets/fa'
 import PrimeVue from 'primevue/config';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
-import ConfirmationService from 'primevue/confirmationservice';
+import Dropdown from 'primevue/dropdown';
 import "primevue/resources/themes/saga-blue/theme.css"; 
 import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css';
-
+import "primeflex/primeflex.css";
 const ghdSearchIconSet: IconSet = {
   component: (props: IconProps) => {
     return h(GhdSearchSvg, {
@@ -67,7 +68,8 @@ icons: {
   sets: { fa, ghdSearchIconSet, ghdTableSortIconSet, ghdDownIconSet },
 },
 });
-app.use(router);
+const vRouter = useRouter();
+app.use(vRouter);
 app.use(store);
 app.use(vuetify);
 app.use(PrimeVue);
@@ -99,9 +101,10 @@ var defaultOptions = {
 };
 
 app.use(VueSanitize, defaultOptions);
-app.use(ConfirmationService);
+
 app.component("Dialog",Dialog)
-   .component("Button", Button);
+   .component("Button", Button)
+   .component("DropDown", Dropdown);
 app.config.globalProperties.productionTip = false;
 //app.use(VuejsDialog);
 //app.config.globalProperties.$config = config;

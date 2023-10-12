@@ -2,9 +2,9 @@
     <v-dialog max-width="290" persistent v-bind:show="dialogData.showDialog">
         <v-card>
             <v-card-title class="headline">
-                <v-layout justify-center>
+                <v-row justify-center>
                     {{dialogData.heading}}
-                </v-layout>
+                </v-row>
             </v-card-title>
             <v-card-text class="px-4">
                 <div class="text--primary">
@@ -12,7 +12,7 @@
                 </div>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-center row v-if="dialogData.choice">
+                <v-row justify-center row v-if="dialogData.choice">
                     <v-btn 
                     id="Alert-Cancel-vbtn"
                     @click="onSubmit(false)" 
@@ -25,12 +25,12 @@
                     class="ghd-blue-bg ghd-white ghd-button">
                         Proceed
                     </v-btn>
-                </v-layout>
-                <v-layout justify-center v-if="!dialogData.choice">
+                </v-row>
+                <v-row justify-center v-if="!dialogData.choice">
                     <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
                         OK
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>

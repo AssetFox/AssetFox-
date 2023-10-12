@@ -1,16 +1,16 @@
 <template>
-  <v-layout>
+  <v-row>
     <v-dialog v-bind:show="showDialog"
               max-width="250px"
               persistent>
       <v-card>
         <v-card-title>
-          <v-layout justify-center>
+          <v-row justify-center>
             <h3>New Equation</h3>
-          </v-layout>
+          </v-row>
         </v-card-title>
         <v-card-text>
-          <v-layout column>
+          <v-row column>
             <v-text-field v-model="newCalculatedAttribute.name"
                           :rules="[rules['generalRules'].valueIsNotEmpty]"
                           label="Name"
@@ -21,10 +21,10 @@
                       :rules="[rules['generalRules'].valueIsNotEmpty]"
                       label="Select Attribute"
                       variant="outlined" />
-          </v-layout>
+          </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-layout justify-space-between row>
+          <v-row justify-space-between row>
             <v-btn :disabled="newCalculatedAttribute.name === '' || newCalculatedAttribute.attribute === ''"
                    class="ara-blue-bg text-white"
                    @click="onSubmit(true)">
@@ -34,11 +34,11 @@
                    @click="onSubmit(false)">
               Cancel
             </v-btn>
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </v-row>
 </template>
 
 <script lang="ts" setup>

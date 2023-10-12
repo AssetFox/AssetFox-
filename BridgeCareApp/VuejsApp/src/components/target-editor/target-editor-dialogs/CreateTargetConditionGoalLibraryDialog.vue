@@ -2,9 +2,9 @@
   <v-dialog width="444px" height="437px" persistent v-bind:show="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-padding-top-title">
-        <v-layout justify-start>
+        <v-row justify-start>
           <div class="dialog-header"><h5>Create New Target Condition Goal Library</h5></div>
-        </v-layout>
+        </v-row>
         <v-btn @click="onSubmit(false)" 
                     id="CreateTargetConditionGoalLibraryDialog-Close-btn"
                     icon>
@@ -12,7 +12,7 @@
         </v-btn>
       </v-card-title>
       <v-card-text  class="ghd-dialog-text-field-padding">
-        <v-layout column>
+        <v-row column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
           <v-text-field  outline 
                         id="CreateTargetConditionGoalLibraryDialog-Name-textField"
@@ -25,10 +25,10 @@
                       rows="3"
                       class="ghd-control-text ghd-control-border" height="100px"
                       v-model="newTargetConditionGoalLibrary.description"/>
-        </v-layout>
+        </v-row>
       </v-card-text>
       <v-card-actions class="py-0">
-        <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
+        <v-row justify-center row class="ghd-dialog-padding-bottom-buttons">
           <v-btn @click="onSubmit(false)"
            id="CreateTargetConditionGoalLibraryDialog-Cancel-btn"
            class="ghd-white-bg ghd-blue" variant = "outlined">Cancel</v-btn>
@@ -38,7 +38,7 @@
             Save
           </v-btn>
 
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>

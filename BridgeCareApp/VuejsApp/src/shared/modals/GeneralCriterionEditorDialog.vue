@@ -7,19 +7,19 @@
     >
         <v-card>
             <v-card-text>
-                <v-layout justify-center column>
+                <v-row justify-center column>
                     <div>
-                        <v-layout justify-center>
-                            <v-flex xs10>
+                        <v-row justify-center>
+                            <v-col cols = "10">
                             <CriteriaEditor :criteriaEditorData="criteriaEditorData"
                                             @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
-                            </v-flex>
-                        </v-layout>
+                            </v-col>
+                        </v-row>
                     </div>
-                </v-layout>
+                </v-row>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-center>
+                <v-row justify-center>
                     <v-btn
                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
                         variant = "flat"
@@ -35,7 +35,7 @@
                     >
                         Save
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>

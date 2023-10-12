@@ -2,9 +2,9 @@
   <v-dialog max-width="200px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-row justify-center>
           <h3>Set Number of Years to Add</h3>
-        </v-layout>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-text-field type="number" min=1 :mask="'##########'" label="Edit" outline v-model.number="range"/>

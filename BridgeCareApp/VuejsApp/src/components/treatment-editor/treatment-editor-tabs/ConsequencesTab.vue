@@ -1,6 +1,6 @@
 <template>
-    <v-layout class='consequences-tab-content'>
-        <v-flex xs12>            
+    <v-row class='consequences-tab-content'>
+        <v-col cols = "12">            
             <div class='consequences-data-table'>
                 <v-data-table :headers='consequencesGridHeaders' :items='consequencesGridData'
                               id="ConsequencesTab-Consequences-vDataTable"
@@ -96,17 +96,17 @@
                                 <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                             </v-btn>
 
-                            <v-layout v-if="header.value === ''" align-start>
+                            <v-row v-if="header.value === ''" align-start>
                                 <v-btn @click='onRemoveConsequence(props.item.id)' icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
-                            </v-layout>
+                            </v-row>
                         </td>
                     </template>
                 </v-data-table>
             </div>
             <v-btn @click='onAddConsequence' class='ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding'>Add Consequence</v-btn>
-        </v-flex>
+        </v-col>
 
         <ConsequenceEquationEditorDialog :dialogData='consequenceEquationEditorDialogData'
                                          :isFromPerformanceCurveEditor=false
@@ -114,7 +114,7 @@
 
         <GeneralCriterionEditorDialog :dialogData='consequenceCriterionEditorDialogData'
                                                  @submit='onSubmitConsequenceCriterionEditorDialogResult' />
-    </v-layout>
+    </v-row>
 </template>
 
 <script lang='ts' setup>

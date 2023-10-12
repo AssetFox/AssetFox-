@@ -1,10 +1,10 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout class="budgets-tab-content">
-            <v-flex xs12>
-                <v-layout>
-                    <v-flex xs10>
-                        <v-layout column v-if='budgets?.values.length === 0'>
+        <v-row class="budgets-tab-content">
+            <v-col cols = "12">
+                <v-row>
+                    <v-col cols = "10">
+                        <v-row column v-if='budgets?.values.length === 0'>
                             <h3>Investment Library Not Found</h3>
                             <div>
                                 No investmentModule library data was found for the selected scenario.
@@ -12,8 +12,8 @@
                             <div>
                                 To add investmentModule library data, go to the scenario's investmentModule plan editor.
                             </div>
-                        </v-layout>
-                        <v-layout v-else>
+                        </v-row>
+                        <v-row v-else>
                             <v-data-table :headers='budgetHeaders' :items='budgets'
                                           class='elevation-1 v-table__overflow budgets-data-table ghd-control-text'
                                           sort-icon=$vuetify.icons.ghd-table-sort
@@ -30,11 +30,11 @@
                                     <td></td>
                                 </template>
                             </v-data-table>
-                        </v-layout>
-                    </v-flex>
-                </v-layout>
-            </v-flex>
-        </v-layout>
+                        </v-row>
+                    </v-col>
+                </v-row>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 

@@ -2,30 +2,30 @@
     <v-dialog  width="768px" height="540px" persistent v-model='showDialog'>
         <v-card class="div-padding">
             <v-card-title class="pa-2">
-                <v-layout justify-start>
+                <v-row justify-start>
                     <h3 class="Montserrat-font-family">Committed Projects</h3>
-                </v-layout>
+                </v-row>
                 <v-btn @click="onSubmit(false)" icon>
                     <i class="fas fa-times fa-2x"></i>
                 </v-btn>
             </v-card-title>
             <v-card-text class="pa-0">
-                <v-layout column>
+                <v-row column>
                     <CommittedProjectsFileSelector :closed='closed' useTreatment='true' @treatment='onTreatmentChanged' @submit='onSubmitFileSelectorFile' />
                     <span class="div-warning-border">
-                        <v-layout align-start>
+                        <v-row align-start>
                             <v-icon class="px-2 icon-color">fas fa-exclamation-triangle</v-icon>
                             <h3 class="h3-color">Warning</h3>
-                        </v-layout>
+                        </v-row>
                         <p class="Montserrat-font-family">
                             Uploading new committed projects will override ALL previous commitments.
                             Committed projects may take a few minutes to process. You will receive an email when this process is complete.
                         </p>
                     </span>
-                </v-layout>
+                </v-row>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-center row>
+                <v-row justify-center row>
                     <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' variant = "flat">Cancel</v-btn>
                     <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
                     <!-- <v-tooltip top>
@@ -34,7 +34,7 @@
                         </template>
                         <span>Delete scenario's current committed projects</span>
                     </v-tooltip> -->
-                </v-layout>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>

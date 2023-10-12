@@ -1,9 +1,9 @@
 <template>
-    <v-layout column class="Montserrat-font-family">
-        <v-flex xs12>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-layout column>
+    <v-row column class="Montserrat-font-family">
+        <v-col cols="12">
+            <v-col cols ="8" class="ghd-constant-header">
+                <v-row>
+                    <v-row column>
                         <v-subheader id="Attributes-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                         <v-select :items='selectAttributeItems'
                             id="Attributes-selectAttribute-vselect"
@@ -11,22 +11,22 @@
                             append-icon=$vuetify.icons.ghd-down                           
                             v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
-                    </v-layout>
+                    </v-row>
                     <v-btn id="Attributes-addAttribute-vbtn" style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                         Add Attribute
                     </v-btn>
-                </v-layout>
-            </v-flex>
-        </v-flex>
+                </v-row>
+            </v-col>
+        </v-col>
         <v-divider v-if="hasSelectedAttribute" />
-        <v-flex xs12 v-if="hasSelectedAttribute" class="ghd-constant-header" >
-            <v-layout>
-                <v-flex xs2> 
+        <v-col cols="12" v-if="hasSelectedAttribute" class="ghd-constant-header" >
+            <v-row>
+                <v-col cols="2"> 
                     <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                     <v-text-field id="Attributes-attributeName-vtextfield" outline class="ghd-text-field-border ghd-text-field"
                         placeholder="Name" v-model='selectedAttribute.name'/>
-                </v-flex>
-                <v-flex xs2>
+                </v-col>
+                <v-col cols="2">
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Type</v-subheader>
                     <v-select
                         id="Attributes-attributeDataType-vselect"
@@ -36,8 +36,8 @@
                         :items='typeSelectValues'
                         v-model='selectedAttribute.type'>
                     </v-select>                           
-                </v-flex>
-                <v-flex xs4>
+                </v-col>
+                <v-col cols="4">
                     <v-subheader class="ghd-md-gray ghd-control-label">
                         Aggregation Rule
                     </v-subheader>
@@ -49,47 +49,47 @@
                         :items='aggregationRuleSelectValues'
                         v-model='selectedAttribute.aggregationRuleType'>
                     </v-select>                           
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex xs12 v-if="hasSelectedAttribute">
-            <v-flex xs10>
-                <v-layout>
-                    <v-flex xs2>
+                </v-col>
+            </v-row>
+        </v-col>
+        <v-col cols="12" v-if="hasSelectedAttribute">
+            <v-col cols="10">
+                <v-row>
+                    <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Default Value</v-subheader>
                         <v-text-field id="Attributes-attributeDefaultString-vtextfield" v-if="selectedAttribute.type == 'STRING'" outline class="ghd-text-field-border ghd-text-field"
                             v-model='selectedAttribute.defaultValue'/>
                         <v-text-field id="Attributes-attributeDefaultNumber-vtextfield" v-if="selectedAttribute.type != 'STRING'" outline class="ghd-text-field-border ghd-text-field"
                             v-model.number='selectedAttribute.defaultValue'
                             :mask="'#############'"/>
-                    </v-flex>
-                    <v-flex xs2>
+                    </v-col>
+                    <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Minimum Value</v-subheader>
                         <v-text-field id="Attributes-attributeMinimumValue-vtextfield" outline class="ghd-text-field-border ghd-text-field"                            
                             v-model.number='selectedAttribute.minimum'
                             :mask="'#############'"/>
-                    </v-flex>
-                    <v-flex xs2>
+                    </v-col>
+                    <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Maximum Value</v-subheader>
                         <v-text-field id="Attributes-attributeMaximumValue-vtextfield" outline class="ghd-text-field-border ghd-text-field"
                             v-model.number='selectedAttribute.maximum'
                             :mask="'#############'"/>
-                    </v-flex>
-                    <v-flex xs4 style="padding-top:50px;">
-                        <v-layout>
+                    </v-col>
+                    <v-col cols="4" style="padding-top:50px;">
+                        <v-row>
                         <v-switch id="Attributes-attributeCalculated-vswitch" class='sharing header-text-content' label='Calculated' 
                             v-model='selectedAttribute.isCalculated'/>
                         <v-switch id="Attributes-attributeAscending-vswitch" class='sharing header-text-content' label='Ascending' 
                             v-model='selectedAttribute.isAscending'/>
-                        </v-layout>
-                    </v-flex>
-                </v-layout>
-            </v-flex>
-        </v-flex>
+                        </v-row>
+                    </v-col>
+                </v-row>
+            </v-col>
+        </v-col>
         <!-- Data source combobox -->
-        <v-flex xs12 v-if="hasSelectedAttribute">
-            <v-flex xs6>
-                <v-layout column>
+        <v-col cols="12" v-if="hasSelectedAttribute">
+            <v-col cols="6">
+                <v-row column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
                     <v-select
                         id="Attributes-attributeDataSource-vselect"
@@ -99,13 +99,13 @@
                         :items='selectDatasourceItems'                     
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>                           
-                </v-layout>
-            </v-flex>
-        </v-flex>
+                </v-row>
+            </v-col>
+        </v-col>
         <!-- Command text area -->
-        <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'SQL'">
-            <v-layout justify-center>
-                <v-flex >
+        <v-col cols="12" v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'SQL'">
+            <v-row justify-center>
+                <v-col >
                     <v-subheader class="ghd-subheader ">Command</v-subheader>
                     <v-textarea no-resize outline rows='4' class="ghd-text-field-border" v-model='selectedAttribute.command'>
                     </v-textarea>
@@ -119,13 +119,13 @@
                         style="top: -24px; position: relative; color: green">
                         {{ValidationSuccessMessage}}
                     </v-subheader>
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
         <!-- Data source combobox -->
-        <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'Excel'">
-            <v-flex xs6>
-                <v-layout column>
+        <v-col cols="12" v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'Excel'">
+            <v-col cols="6">
+                <v-row column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Column Name</v-subheader>
                     <v-select
                         id="Attributes-attributeColumnName-vselect"
@@ -135,12 +135,12 @@
                         :items='selectExcelColumns'
                         v-model='selectedAttribute.command'>
                     </v-select>                           
-                </v-layout>
-            </v-flex>
-        </v-flex>
+                </v-row>
+            </v-col>
+        </v-col>
         <!-- The Buttons  -->
-        <v-flex xs12 v-if="hasSelectedAttribute">        
-            <v-layout justify-center>
+        <v-col cols="12" v-if="hasSelectedAttribute">        
+            <v-row justify-center>
                 <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
@@ -152,9 +152,9 @@
                 <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' class='ghd-blue-bg text-white ghd-button-text ghd-button'>
                     Save
                 </v-btn>               
-            </v-layout>
-        </v-flex>
-    </v-layout>
+            </v-row>
+        </v-col>
+    </v-row>
 </template>
 
 <script setup lang='ts'>

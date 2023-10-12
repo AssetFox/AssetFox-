@@ -2,22 +2,22 @@
   <v-dialog max-width="450px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-        <v-layout justify-space-between align-center>
+        <v-row justify-space-between align-center>
           <div class="ghd-control-dialog-header">Add Consequence</div>
           <v-btn 
               id="CreateCommittedProjectConsequenceDialog-close-vbtn"
               @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
           </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center"
         id="CreateCommittedProjectConsequenceDialog-content-vCardText"
       >
-        <v-layout column
+        <v-row column
           id="CreateCommittedProjectConsequenceDialog-content-vLayout"
           >
-          <v-flex
+          <v-col
             id="CreateCommittedProjectConsequenceDialog-attribute-vFlex">
             <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
             <v-select :items="attributeNames"
@@ -26,25 +26,25 @@
               v-model="newConsequence.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
               class="ghd-select ghd-text-field ghd-text-field-border">
             </v-select>
-          </v-flex>
-          <v-flex
+          </v-col>
+          <v-col
             id="CreateCommittedProjectConsequenceDialog-changeValue-vFlex">
             <v-subheader class="ghd-md-gray ghd-control-label">Change Value</v-subheader>
             <v-text-field outline v-model="newConsequence.changeValue"
               :rules="[rules['generalRules'].valueIsNotEmpty]"
               class="ghd-text-field-border ghd-text-field"></v-text-field>
-          </v-flex>         
-        </v-layout>
+          </v-col>         
+        </v-row>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-layout justify-center row>
+        <v-row justify-center row>
           <v-btn @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn >
           <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>         
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>

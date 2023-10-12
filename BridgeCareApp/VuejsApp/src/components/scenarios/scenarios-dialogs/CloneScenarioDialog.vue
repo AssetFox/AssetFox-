@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+    <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
         <v-card elevation="5" variant = "outlined"
          class="modal-pop-up-padding">
             <v-card-title>

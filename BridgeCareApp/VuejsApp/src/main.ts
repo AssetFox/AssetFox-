@@ -1,6 +1,6 @@
 //import '@babel/polyfill';
 import '@fortawesome/fontawesome-free/css/all.css';
-import Vue, { h, createApp, defineComponent, watch, reactive } from 'vue';
+import Vue, { createApp, defineComponent, watch, reactive } from 'vue';
 import 'vuetify/dist/vuetify.min.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -22,44 +22,11 @@ import VueSanitize from 'vue-3-sanitize';
 import VuejsDialog from 'vuejs-dialog';
 // @ts-ignore
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
-import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
-import GhdDownSvg from '@/shared/icons/GhdDownSvg.vue';
-import GhdTableSortSvg from '@/shared/icons/GhdTableSortSvg.vue';
-import authenticationModule from './store-modules/authentication.module';
 import { ap } from 'ramda';
-import { IconProps, IconSet, createVuetify } from 'vuetify';
-import { fa } from 'vuetify/iconsets/fa'
+import vuetify from '@/plugins/vuetify';
 
-const ghdSearchIconSet: IconSet = {
-  component: (props: IconProps) => {
-    return h(GhdSearchSvg, {
-      name: 'ghd-search'
-    });
-  }
-}
-
-const ghdDownIconSet: IconSet = {
-  component: (props: IconProps) => {
-    return h(GhdDownSvg, {
-      name: 'ghd-down' 
-    });
-  }
-}
-
-const ghdTableSortIconSet: IconSet = {
-  component: (props: IconProps) => {
-    return h(GhdTableSortSvg, {
-      name: 'ghd-table-sort'
-    });
-  }
-}
 const app = createApp(App);
-const vuetify = createVuetify({ 
-icons: { 
-  defaultSet: 'fa', 
-  sets: { fa, ghdSearchIconSet, ghdTableSortIconSet, ghdDownIconSet },
-},
-});
+
 app.use(router);
 app.use(store);
 app.use(vuetify);
@@ -70,7 +37,8 @@ app.use(KendoChartInstaller);
 
 //app.use(VueCurrencyInput);
 //authenticationModule.state.securityType = config.securityType as string;
-//app.use(connectionHub);
+
+app.use(connectionHub);
 
 // app.use(VueScreen, {
 //     sm: 576,

@@ -262,8 +262,7 @@ import { createDecipheriv } from 'crypto';
 import mitt from 'mitt';
 
     let store = useStore();
-    const $router = useRouter();
-    const $statusHub = inject('$statusHub') as any
+    const $router = useRouter();    
     const $emitter = mitt()
     created();
 

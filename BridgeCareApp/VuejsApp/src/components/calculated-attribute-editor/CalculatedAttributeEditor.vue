@@ -9,7 +9,7 @@
                         <v-select
                                   id="CalculatedAttribute-CalculatedAttribute-select"
                                   :items="librarySelectItems"
-                                  append-icon=$vuetify.icons.ghd-down
+                                  append-icon=vuetify.icons.ghd-down
                                   variant="outlined"
                                   v-model="librarySelectItemValue"
                                   class="ghd-select ghd-text-field ghd-text-field-border">
@@ -21,7 +21,7 @@
                     <v-row align-end>
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
-                                    prepend-inner-icon=$vuetify.icons.ghd-search
+                                    prepend-inner-icon=vuetify.icons.ghd-search
                                     hide-details
                                     lablel="Search"
                                     placeholder="Search Calcultated Attribute"
@@ -72,7 +72,7 @@
                     <v-select
                         id="CalculatedAttribute-Attribute-select"   
                         :items="attributeSelectItems"
-                        append-icon=$vuetify.icons.ghd-down
+                        append-icon=vuetify.icons.ghd-down
                         variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         v-model="attributeSelectItemValue">
@@ -87,7 +87,7 @@
                     <v-select
                         id="CalculatedAttribute-Timing-select"
                         :items="attributeTimingSelectItems"
-                        append-icon=$vuetify.icons.ghd-down
+                        append-icon=vuetify.icons.ghd-down
                         variant="outlined"
                         v-model="attributeTimingSelectItemValue"
                         :disabled="!hasAdminAccess"
@@ -135,7 +135,7 @@
                 :total-items="totalItems"
                 :rows-per-page-items=[5,10,25]
                 class="v-table__overflow ghd-table"
-                sort-icon=$vuetify.icons.ghd-table-sort
+                sort-icon=vuetify.icons.ghd-table-sort
                 item-key="calculatedAttributeLibraryEquationId">
                 <template slot="items" slot-scope="props" v-slot:item="props">
                     <td class="text-xs-center">
@@ -344,6 +344,7 @@ import { LibraryUser } from '@/shared/models/iAM/user';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import vuetify from '@/plugins/vuetify';
 
 let store = useStore();
 let stateCalculatedAttributeLibraries = ref<CalculatedAttributeLibrary[]>(store.state.calculatedAttributeModule.calculatedAttributeLibraries);
@@ -483,10 +484,10 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
             width: '',
         },
     ];
-    const $vuetify = inject('$vuetify') as any
+    
     const $router = useRouter();
     const $emitter = mitt();
-    const $config = inject('$config') as any
+    
     beforeRouteEnter();
     function beforeRouteEnter(){
         (() => {

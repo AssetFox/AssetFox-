@@ -27,7 +27,7 @@ export default {
             .build();
 
         const emitter = mitt()
-        Vue.prototype.$emiiter = emitter;
+        //Vue.prototype.$emiiter = emitter;
 
         connection.on(
             Hub.BroadcastType.BroadcastAssignDataStatus,

@@ -2,7 +2,7 @@
     <v-dialog
         persistent
         fullscreen
-        v-model="dialogData.showDialog"
+        v-bind:show="dialogData.showDialog"
         class="criterion-library-editor-dialog"
     >
         <v-card>

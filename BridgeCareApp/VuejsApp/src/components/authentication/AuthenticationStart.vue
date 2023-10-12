@@ -35,6 +35,7 @@
     } from '@/shared/utils/authentication-utils';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import config from '@/../public/config.json';
 
     let store = useStore();
     let authenticated: boolean = (store.state.authenticationModule.authenticated);
@@ -49,7 +50,6 @@ import { useRouter } from 'vue-router';
     let b2cSecurityType: string = SecurityTypes.b2c;
 
     const $router = useRouter();
-    const $config = inject('$config') as any
 
     onMounted(() => mounted)
     function mounted() {
@@ -76,9 +76,9 @@ import { useRouter } from 'vue-router';
     }
 
     function onRedirect() { 
-        let href: string = `${$config.authorizationEndpoint}?response_type=code&scope=openid&scope=BAMS`;
-        href += `&client_id=${$config.clientId}`;
-        href += `&redirect_uri=${$config.redirectUri}`;
+        let href: string = `${config.authorizationEndpoint}?response_type=code&scope=openid&scope=BAMS`;
+        href += `&client_id=${config.clientId}`;
+        href += `&redirect_uri=${config.redirectUri}`;
 
         // The 'state' query parameter that is sent to ESEC will be sent back to
         // the /Authentication page of the iam-deploy app.

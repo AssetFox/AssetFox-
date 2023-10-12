@@ -1,5 +1,5 @@
 <template>
-  <v-dialog persistent fullscreen v-model="dialogData.showDialog" class="criterion-library-editor-dialog">
+  <v-dialog persistent fullscreen v-bind:show="dialogData.showDialog" class="criterion-library-editor-dialog">
     <v-card>
       <v-card-text>
         <v-row justify-center column>

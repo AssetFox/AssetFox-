@@ -346,11 +346,8 @@ import mitt from 'mitt';
 
 let store = useStore();
 const emit = defineEmits(['submit'])
-const $vuetify = inject('$vuetify') as any
-    const $router = useRouter();
-    const $statusHub = inject('$statusHub') as any
-    const $config = inject('$config') as any
-    const $emitter = mitt()
+const $router = useRouter();
+const $emitter = mitt()
 let stateBudgetLibraries = ref<BudgetLibrary[]>(store.state.investmentModule.budgetLibraries);
 let stateSelectedBudgetLibrary = ref<BudgetLibrary>(store.state.investmentModule.selectedBudgetLibrary)
 let stateInvestmentPlan = ref<InvestmentPlan>(store.state.investmentModule.investmentPlan);

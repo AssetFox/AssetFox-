@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialogData.showDialog" max-width="450px" persistent>
+  <v-dialog v-bind:show="dialogData.showDialog" max-width="450px" persistent>
     <v-card>
       <v-card-title>
         <v-row justify-left>

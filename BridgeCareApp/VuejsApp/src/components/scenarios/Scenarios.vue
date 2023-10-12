@@ -696,8 +696,7 @@ import { useRouter } from 'vue-router';
 import mitt from 'mitt';
 
     let store = useStore(); 
-    const $router = useRouter(); 
-    const $statusHub = inject('$statusHub') as any;
+    const $router = useRouter();     
     const $emitter = mitt()
 
     const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;

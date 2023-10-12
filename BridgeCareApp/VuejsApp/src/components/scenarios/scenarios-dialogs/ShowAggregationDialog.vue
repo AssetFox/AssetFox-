@@ -2,7 +2,7 @@
     <v-dialog
         scrollable
         persistent
-        v-model="dialogData.showDialog"
+        v-bind:show="dialogData.showDialog"
         max-width="60%"
         transition="dialog-bottom-transition"
     >
@@ -161,8 +161,7 @@ import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeU
 import { useStore } from 'vuex'; 
 import mitt from 'mitt';
 
-    let store = useStore(); 
-    const $statusHub = inject('$statusHub') as any
+    let store = useStore();     
     const $emitter = mitt()
 
     const props = defineProps<{dialogData: any}>();

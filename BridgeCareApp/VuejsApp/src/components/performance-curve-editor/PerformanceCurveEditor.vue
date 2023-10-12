@@ -649,8 +649,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let attributeSelectItems: SelectItem[] = [];
     let selectedPerformanceCurve: PerformanceCurve = clone(emptyPerformanceCurve);
     let hasSelectedPerformanceCurve: boolean = false;
-    const $router = useRouter();
-    const $statusHub = inject('$statusHub') as any
+    const $router = useRouter();    
     const $emitter = mitt()
     let unsavedDialogAllowed: boolean = true;
     let trueLibrarySelectItemValue: string | null = ''

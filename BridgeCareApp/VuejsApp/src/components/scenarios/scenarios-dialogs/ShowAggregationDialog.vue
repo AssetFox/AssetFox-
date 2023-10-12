@@ -162,8 +162,7 @@ import { useStore } from 'vuex';
 import Dialog from 'primevue/dialog';
 import mitt from 'mitt';
 
-    let store = useStore(); 
-    const $statusHub = inject('$statusHub') as any
+    let store = useStore();     
     const $emitter = mitt()
 
     const props = defineProps<{dialogData: any}>();

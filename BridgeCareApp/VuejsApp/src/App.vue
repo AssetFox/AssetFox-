@@ -287,11 +287,10 @@ import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 import NewsDialog from '@/components/NewsDialog.vue'
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import { useStore } from 'vuex';
-import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import router from './router';
 import mitt from 'mitt'
-
-
-
+import vuetify from '@/plugins/vuetify';
+import config from '../public/config.json';
 
     let store = useStore();
     let authenticated = ref<boolean>(store.state.authenticationModule.authenticated);
@@ -365,36 +364,32 @@ import mitt from 'mitt'
     let agencyLogo: string = '';
     let productLogo: string = '';
     let inventoryReportName: string = '';
-    let alert: Ref<boolean> = ref(false);
+    let alert: Ref<boolean> = ref(false);   
 
-    const $vuetify = inject('$vuetify') as any
-    const $router = useRouter();
-    const $statusHub = inject('$statusHub') as any
     const $emitter = mitt()
-    const $config = inject('$config') as any
-
+    
     created();
 
     function container() {
         const container: any = {};
 
-        if ($vuetify.display.xs) {
+        if (vuetify.display.xs) {
             container['grid-list-xs'] = true;
         }
 
-        if ($vuetify.display.sm) {
+        if (vuetify.display.sm) {
             container['grid-list-sm'] = true;
         }
 
-        if ($vuetify.display.md) {
+        if (vuetify.display.md) {
             container['grid-list-md'] = true;
         }
 
-        if ($vuetify.display.lg) {
+        if (vuetify.display.lg) {
             container['grid-list-lg'] = true;
         }
 
-        if ($vuetify.display.xl) {
+        if (vuetify.display.xl) {
             container['grid-list-xl'] = true;
         }
 
@@ -404,6 +399,7 @@ import mitt from 'mitt'
     function authenticatedWithRole() {
         return authenticated && hasRole;
     }
+    
     watch(stateSelectedScenario, () => onStateSelectedScenarioChanged)
     function onStateSelectedScenarioChanged() {
         selectedScenario = clone(stateSelectedScenario.value);
@@ -554,7 +550,7 @@ import mitt from 'mitt'
         if (
             securityType === SecurityTypes.esec &&
             UnsecuredRoutePathNames.indexOf(
-                $router.currentRoute.value.name as string,
+                router.currentRoute.value.name as string,
             ) === -1
         ) {
             // Upon opening the page, and every 30 seconds, check if authentication data
@@ -585,22 +581,22 @@ import mitt from 'mitt'
             onAddTaskCompletedNotification
         );
         
-        currentURL = $router.currentRoute.value.name;
+        currentURL = router.currentRoute.value.name;
 
-        if($config.agencyLogo.trim() === "")
+        if(config.agencyLogo.trim() === "")
             agencyLogo = require(`@/assets/images/generic/IAM_Main.jpg`)
         else
-            agencyLogo = $config.agencyLogo
+            agencyLogo = config.agencyLogo
 
-        if($config.productLogo.trim() === "")
+        if(config.productLogo.trim() === "")
             productLogo = require(`@/assets/images/generic/IAM_Banner.jpg`)
         else
-            productLogo = $config.productLogo
+            productLogo = config.productLogo
 
         if(implementationName === "")
             implementationName = "BridgeCare"
         else
-            implementationName = $config.implementationName
+            implementationName = config.implementationName
     }
 
     onBeforeUnmount(() => beforeDestroy());
@@ -668,10 +664,10 @@ import mitt from 'mitt'
     }
 
     function onAzureLogin() {
-        if ($router.currentRoute.value.name === 'AuthenticationStart') {
+        if (router.currentRoute.value.name === 'AuthenticationStart') {
             azureB2CLoginAction();
         } else {
-            $router.push('/AuthenticationStart');
+            router.push('/AuthenticationStart');
         }
     }
 
@@ -729,8 +725,8 @@ import mitt from 'mitt'
      * @param route The route name to use when navigating a user
      */
     function onNavigate(route: any) {
-        if ($router.currentRoute.value.path !== route.path) {
-            $router.push(route).catch(() => {});
+        if (router.currentRoute.value.path !== route.path) {
+            router.push(route).catch(() => {});
         }
     }
 

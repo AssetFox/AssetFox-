@@ -258,8 +258,7 @@ import mitt from 'mitt';
     let equationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
     );
-
-    const $statusHub = inject('$statusHub') as any
+    
     const $emitter = mitt()
 
     created();

@@ -416,8 +416,7 @@ import { ImportNewTreatmentDialogResult } from '@/shared/models/modals/import-ne
 import { useRouter } from 'vue-router';
 import mitt from 'mitt';
 
-    const emit = defineEmits(['submit'])
-    const $statusHub = inject('$statusHub') as any
+    const emit = defineEmits(['submit'])    
     const $emitter = mitt()
     const $router = useRouter();
     let store = useStore();

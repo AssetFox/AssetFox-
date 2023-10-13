@@ -77,7 +77,7 @@
                                 icon
                             >
                                 <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
-                                <notification-bell
+                                <notifications
                                     :size="30"
                                     :count="notificationCounter"
                                     :upperLimit="50"
@@ -252,6 +252,7 @@
 <script setup lang="ts">
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import NotificationBell from 'vue-notification-bell';
+import Notifications from '@kyvg/vue3-notification'
 import Spinner from './shared/modals/Spinner.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';

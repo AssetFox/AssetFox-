@@ -122,10 +122,8 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public async void DownloadSpreadsheet_ThenReupload_Ok()
+        public void DownloadSpreadsheet_ThenReupload_Ok()
         {
-            var memos = EventMemoModelLists.Default;
-            memos.Mark("start");
             var networkId = Guid.NewGuid();
             var treatmentLibraryId = Guid.NewGuid();
             var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
@@ -147,6 +145,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             maintainableAssets.Add(maintainableAsset);
             var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
+            AdminSettingsTestSetup.SetupBamsAdminSettings(TestHelper.UnitOfWork, network.Name, keyAttributeName, keyAttributeName);
             var attributes = new List<IamAttribute> { keyAttribute, resultAttribute };
             AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork,
                 maintainableAssets, attributes, assetKeyData);
@@ -166,6 +165,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var keyAttributes = new List<IamAttribute> { keyAttribute };
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
+            InvestmentPlanTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, null, 2023);
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(
                TestHelper.UnitOfWork, new List<BudgetDTO> { budget }, simulationId);
             var committedProjectId = Guid.NewGuid();
@@ -184,16 +184,19 @@ namespace BridgeCareCoreTests.Tests.Integration
             List<SectionCommittedProjectDTO> sectionCommittedProjects = new List<SectionCommittedProjectDTO> { committedProject };
 
             TestHelper.UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(sectionCommittedProjects);
-            AdminSettingsTestSetup.SetupBamsAdminSettings(TestHelper.UnitOfWork, network.Name, keyAttributeName, keyAttributeName);
+            var committedProjectsBefore = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
             var service = CreateCommittedProjectService();
             var fileInfo = service.ExportCommittedProjectsFile(simulationId);
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("zzzzz.xlsx", bytes);
+       //     File.WriteAllBytes("zzzzz.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             service.ImportCommittedProjectFiles(simulationId, excelPackage, fileInfo.FileName, true);
-            var output = memos.ToMultilineString();
+            var committedProjectsAfter = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
+            var id1 = committedProjectsBefore[0].LocationKeys["ID"];
+            var id2 = committedProjectsAfter[0].LocationKeys["ID"];
+            ObjectAssertions.EquivalentExcluding(committedProjectsBefore, committedProjectsAfter, x => x[0].LocationKeys, x => x[0].Id);
         }
     }
 }

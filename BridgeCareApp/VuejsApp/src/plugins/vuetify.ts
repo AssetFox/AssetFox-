@@ -11,6 +11,11 @@ import { h } from 'vue';
 import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 import GhdDownSvg from '@/shared/icons/GhdDownSvg.vue';
 import GhdTableSortSvg from '@/shared/icons/GhdTableSortSvg.vue';
+import {
+  VDataTable,
+  VDataTableServer,
+  VDataTableVirtual,
+} from "vuetify/labs/VDataTable";
 
 const ghdSearchIconSet: IconSet = {
     component: (props: IconProps) => {
@@ -37,12 +42,18 @@ const ghdTableSortIconSet: IconSet = {
   }
 
 const vuetify = createVuetify({ 
+  components: {
+    VDataTable,
+    VDataTableServer,
+    VDataTableVirtual,
+    components
+  },
     icons: { 
       defaultSet: 'fa', 
       sets: { fa, ghdSearchIconSet, ghdTableSortIconSet, ghdDownIconSet },  
     },
-    components,
     directives,
+    
     });
 
 export default vuetify;

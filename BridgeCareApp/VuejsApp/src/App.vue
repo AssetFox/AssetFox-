@@ -584,12 +584,12 @@ import config from '../public/config.json';
         currentURL = router.currentRoute.value.name;
 
         if(config.agencyLogo.trim() === "")
-            agencyLogo = new URL(`@/assets/images/generic/IAM_Main.jpg`, import.meta.url).href;
+            agencyLogo = new URL(`assets/images/generic/IAM_Main.jpg`, import.meta.url).href;
         else
             agencyLogo = config.agencyLogo
 
         if(config.productLogo.trim() === "")
-            productLogo = new URL(`@/assets/images/generic/IAM_Banner.jpg`, import.meta.url).href;
+            productLogo = new URL(`assets/images/generic/IAM_Banner.jpg`, import.meta.url).href;
         else
             productLogo = config.productLogo
 

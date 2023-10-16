@@ -151,7 +151,7 @@
                                     >
                                         {{ treatmentTab }}
                                     </v-tab>
-                                    <v-tabs-items v-model='activeTab'>
+                                    <v-window v-model='activeTab'>
                                         <v-window-item>
                                             <v-card style="border:none;">
                                                 <v-card-text
@@ -227,7 +227,7 @@
                                                 </v-card-text>
                                             </v-card>
                                         </v-window-item>
-                                    </v-tabs-items>
+                                    </v-window>
                                 </v-tabs>
                             </div>                                             
                         </v-col>                    

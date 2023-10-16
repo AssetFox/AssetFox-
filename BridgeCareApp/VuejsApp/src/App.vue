@@ -695,6 +695,7 @@ import config from '../public/config.json';
         getImplementationNameAction().then(() =>
         getAgencyLogoAction().then(() => {getProductLogoAction();}
         )))))));
+        console.log("called all this stuff");
     }
   function $forceUpdate() {
     throw new Error('Method not implemented.');

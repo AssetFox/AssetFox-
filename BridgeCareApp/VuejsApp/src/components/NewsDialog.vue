@@ -1,43 +1,45 @@
 <template>
-  <Dialog :style="{ width: '50vw', height: '50vw'}" v-model:visible="showDialog" :closable="false">
+  <Dialog :style="{ width: '50vw', height: '40vw'}" block-scroll modal v-model:visible="showDialog" :closable="false">
     <v-container fluid grid-list-xl>
         <v-row>
             <v-col cols = "12">
                 <v-row justify-center>
-                    <!-- <v-card class='announcement-dialog'> -->
+                    <v-card class='announcement-dialog'>
                         <v-toolbar
                         color="#002E6C"
                         dark
                         >
                             <v-app-bar-nav-icon></v-app-bar-nav-icon>
-
                             <v-toolbar-title>Latest News</v-toolbar-title>
-
                             <v-spacer></v-spacer>
                             <v-btn icon @click="closeDialog()">
                                 <v-icon>fas fa-times-circle</v-icon>
                             </v-btn>
-                        </v-toolbar>    
-                        <div class='announcement' style='padding-bottom: 0; margin-bottom: 0' v-if='hasAdminAccess'>
-                            <!-- <v-card style='margin-bottom: 0; padding-bottom: 0'> -->
-                                <!-- <v-card-title style='padding-top: 0; padding-bottom: 0'> -->
+                        </v-toolbar>
+                        <v-container>
+                            <v-row no-gutters>
+                        <!-- <div class='announcement' style='width: 100%; padding-bottom: 0; margin-bottom: 0' v-if='hasAdminAccess'> -->
+                                <v-col>
                                     <v-icon v-if='isEditingAnnouncement()' class='ara-orange'
                                             style='padding-right: 1em'
                                             title='Stop Editing'
                                             @click='onStopEditing()'>
                                         fas fa-times-circle
                                     </v-icon>
-                                    <v-text-field class='announcement-title' label='Title' single-line
-                                                  tabindex='1' :model-value='newAnnouncementTitle' />
-                                    <v-spacer />
-                                    <v-btn @click='onSendAnnouncement' class='ara-blue' icon
+                                    <v-col>
+                                        <v-text-field class='announcement-title' label='Title' single-line variant="underlined"
+                                                      tabindex='1' :model-value='newAnnouncementTitle' />
+                                        <v-card-text style='padding-top: 0; padding-bottom: 0'>{{ formatDate(new Date()) }}
+                                        </v-card-text>
+                                    </v-col>
+                                </v-col>
+                                <v-btn @click='onSendAnnouncement' class='ara-blue' icon
                                            tabindex='3' title='Send Announcement'>
                                         <v-icon>fas fa-paper-plane</v-icon>
                                     </v-btn>
-                                <!-- </v-card-title> -->
-                                <v-card-text style='padding-top: 0; padding-bottom: 0'>{{ formatDate(new Date()) }}
-                                </v-card-text>
-                                <v-textarea
+                                </v-row>
+                        </v-container>    
+                        <v-textarea
                                     auto-grow
                                     class='announcement-content'
                                     density="default" label='Announcement Text (HTML tags can be used for detailed formatting.)'
@@ -45,12 +47,14 @@
                                     style='padding-left: 1em; padding-right: 1em; padding-top: 0.2em'
                                     tabindex='2'
                                     v-model='newAnnouncementContent' />
-                            <!-- </v-card> -->
-                        </div>
+
+                        <!-- </div> -->
+
+
                         <div style='display: flex; align-items: center; justify-content: center'>
                             <v-btn @click='seeNewerAnnouncements()' class='ara-blue-bg text-white' round
-                                   style='margin-top: 10px; margin-bottom: 0'
-                                   v-if='announcementListOffset > 0'>
+                                   style='margin-top: 10px; margin-bottom: 0'>
+                                   <!-- v-if='announcementListOffset > 0'> -->
                                 See Newer Announcements
                             </v-btn>
                         </div>
@@ -89,7 +93,7 @@
                                 See Older Announcements
                             </v-btn>
                         </div>
-                    <!-- </v-card> -->
+                    </v-card>
                 </v-row>
             </v-col>
         </v-row>
@@ -98,18 +102,13 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import moment from 'moment';
 import { hasValue } from '@/shared/utils/has-value-util';
-import {inject, reactive, ref, onMounted, onUpdated, toRefs, onBeforeUnmount, watch, Ref} from 'vue';
+import { inject, reactive, ref, onMounted, onUpdated, toRefs, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Dialog from 'primevue/dialog';
-import Button from 'primevue/button';
-import Checkbox from 'primevue/checkbox';
-import ColorPicker from 'primevue/colorpicker';
-import Dropdown from 'primevue/dropdown';
 
 const emit = defineEmits(['close'])
 let store = useStore();

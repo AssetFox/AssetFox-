@@ -95,10 +95,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .SelectMany(_ => _.Schedulings.Select(scheduling => scheduling.ToScenarioEntity(_.Id))).ToList());
             }
 
-            if (selectableTreatments.Any(_ => _.Supersessions.Any()))
+            if (selectableTreatments.Any(_ => _.SupersedeRules.Any()))
             {
-                _unitOfWork.Context.AddAll(selectableTreatments.Where(_ => _.Supersessions.Any())
-                    .SelectMany(_ => _.Supersessions.Select(session => session.ToScenarioEntity(_.Id))).ToList());
+                _unitOfWork.Context.AddAll(selectableTreatments.Where(_ => _.SupersedeRules.Any())
+                    .SelectMany(_ => _.SupersedeRules.Select(session => session.ToScenarioEntity(_.Id))).ToList());
             }
 
             // Update last modified date

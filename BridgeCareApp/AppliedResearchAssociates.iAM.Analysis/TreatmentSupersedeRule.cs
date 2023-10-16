@@ -3,9 +3,9 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis;
 
-public sealed class TreatmentSupersession : WeakEntity, IValidator
+public sealed class TreatmentSupersedeRule : WeakEntity, IValidator
 {
-    internal TreatmentSupersession(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+    internal TreatmentSupersedeRule(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
 
     public Criterion Criterion { get; }
 
@@ -25,5 +25,5 @@ public sealed class TreatmentSupersession : WeakEntity, IValidator
         return results;
     }
 
-    public string ShortDescription => nameof(TreatmentSupersession);
+    public string ShortDescription => nameof(TreatmentSupersedeRule);
 }

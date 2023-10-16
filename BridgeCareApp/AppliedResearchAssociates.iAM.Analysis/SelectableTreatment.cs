@@ -19,7 +19,7 @@ public sealed class SelectableTreatment : Treatment
 
     private readonly List<Criterion> _FeasibilityCriteria = new();
 
-    private readonly List<TreatmentSupersession> _Supersessions = new();
+    private readonly List<TreatmentSupersedeRule> _SupersedeRules = new();
 
     private readonly Simulation Simulation;
 
@@ -63,9 +63,9 @@ public sealed class SelectableTreatment : Treatment
 
     public override int ShadowForSameTreatment => _ShadowForSameTreatment;
 
-    public override ValidatorBag Subvalidators => base.Subvalidators.Add(Consequences).Add(Costs).Add(FeasibilityCriteria).Add(Schedulings).Add(Supersessions);
+    public override ValidatorBag Subvalidators => base.Subvalidators.Add(Consequences).Add(Costs).Add(FeasibilityCriteria).Add(Schedulings).Add(SupersedeRules);
 
-    public IReadOnlyCollection<TreatmentSupersession> Supersessions => _Supersessions;
+    public IReadOnlyCollection<TreatmentSupersedeRule> SupersedeRules => _SupersedeRules;
 
     public ConditionalTreatmentConsequence AddConsequence() => _Consequences.GetAdd(new ConditionalTreatmentConsequence(Simulation.Network.Explorer));
 
@@ -73,7 +73,7 @@ public sealed class SelectableTreatment : Treatment
 
     public Criterion AddFeasibilityCriterion() => _FeasibilityCriteria.GetAdd(new Criterion(Simulation.Network.Explorer));
 
-    public TreatmentSupersession AddSupersession() => _Supersessions.GetAdd(new TreatmentSupersession(Simulation.Network.Explorer));
+    public TreatmentSupersedeRule AddSupersedeRule() => _SupersedeRules.GetAdd(new TreatmentSupersedeRule(Simulation.Network.Explorer));
 
     public void DesignateAsPassiveForSimulation()
     {
@@ -108,13 +108,13 @@ public sealed class SelectableTreatment : Treatment
             results.Add(ValidationStatus.Error, "At least one text attribute is unconditionally acted on by more than one consequence.", this, nameof(Consequences));
         }
 
-        var unconditionalSupersessionsPerTreatment = Supersessions
-            .Where(supersession => supersession.Criterion.ExpressionIsBlank)
-            .GroupBy(supersession => supersession.Treatment);
+        var unconditionalSupersedeRulesPerTreatment = SupersedeRules
+            .Where(supersedeRule => supersedeRule.Criterion.ExpressionIsBlank)
+            .GroupBy(supersedeRule => supersedeRule.Treatment);
 
-        if (unconditionalSupersessionsPerTreatment.Any(group => group.Count() > 1))
+        if (unconditionalSupersedeRulesPerTreatment.Any(group => group.Count() > 1))
         {
-            results.Add(ValidationStatus.Warning, "At least one treatment is unconditionally superseded more than once.", this, nameof(Supersessions));
+            results.Add(ValidationStatus.Warning, "At least one treatment is unconditionally superseded more than once.", this, nameof(SupersedeRules));
         }
 
         foreach (var (attribute, factor) in PerformanceCurveAdjustmentFactors)
@@ -131,7 +131,7 @@ public sealed class SelectableTreatment : Treatment
         return results;
     }
 
-    public void Remove(TreatmentSupersession supersession) => _Supersessions.Remove(supersession);
+    public void Remove(TreatmentSupersedeRule supersedeRule) => _SupersedeRules.Remove(supersedeRule);
 
     public void Remove(ConditionalTreatmentConsequence consequence) => _Consequences.Remove(consequence);
 

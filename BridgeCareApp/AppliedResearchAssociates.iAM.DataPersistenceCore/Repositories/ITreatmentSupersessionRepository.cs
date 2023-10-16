@@ -7,6 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public interface ITreatmentSupersessionRepository
     {
         void CreateTreatmentSupersessions(
-            Dictionary<Guid, List<TreatmentSupersession>> treatmentSupersessionsPerTreatmentId, string simulationName);
+            Dictionary<Guid, List<TreatmentSupersedeRule>> treatmentSupersessionsPerTreatmentId, string simulationName);
     }
 }

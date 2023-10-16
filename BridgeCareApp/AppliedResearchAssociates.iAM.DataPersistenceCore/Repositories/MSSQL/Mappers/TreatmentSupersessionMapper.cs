@@ -7,13 +7,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class TreatmentSupersessionMapper
     {
-        public static TreatmentSupersessionEntity ToLibraryEntity(this TreatmentSupersession domain, Guid treatmentId) =>
+        public static TreatmentSupersessionEntity ToLibraryEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
             new TreatmentSupersessionEntity
             {
                 Id = domain.Id,
                 TreatmentId = treatmentId
             };
-        public static ScenarioTreatmentSupersessionEntity ToScenarioEntity(this TreatmentSupersession domain, Guid treatmentId) =>
+        public static ScenarioTreatmentSupersessionEntity ToScenarioEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
             new ScenarioTreatmentSupersessionEntity
             {
                 Id = domain.Id,
@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreateTreatmentSupersession(this ScenarioTreatmentSupersessionEntity entity,
             SelectableTreatment selectableTreatment)
         {
-            var supersession = selectableTreatment.AddSupersession();
+            var supersession = selectableTreatment.AddSupersedeRule();
             supersession.Treatment = selectableTreatment;
             supersession.Criterion.Expression =
                 entity.CriterionLibraryScenarioTreatmentSupersessionJoin?.CriterionLibrary.MergedCriteriaExpression ??

@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public TreatmentSupersessionRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateTreatmentSupersessions(Dictionary<Guid, List<TreatmentSupersession>> treatmentSupersessionsPerTreatmentId,
+        public void CreateTreatmentSupersessions(Dictionary<Guid, List<TreatmentSupersedeRule>> treatmentSupersessionsPerTreatmentId,
             string simulationName)
         {
             var supersessionEntityIdsPerExpression = new Dictionary<string, List<Guid>>();

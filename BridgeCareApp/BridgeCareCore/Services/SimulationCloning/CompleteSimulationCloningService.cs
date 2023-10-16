@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using System.Linq;
 using System;
 using AppliedResearchAssociates.iAM.Common;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Services
 {
@@ -80,5 +81,20 @@ namespace BridgeCareCore.Services
             var clone = _unitOfWork.SimulationRepo.CreateSimulation(cloneSimulation, keyAttribute, simulationCloningCommittedProjectErrors, baseEntityProperties);
             return clone;
         }
+        public bool CheckCompatibleNetworkAttributes(CloneSimulationDTO dto)
+        {
+            var scenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.NetworkId);
+            var destinationScenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.DestinationNetworkId);
+
+            if (destinationScenarioAttributes.Any(c => !scenarioAttributes.Contains(c)) && destinationScenarioAttributes.Count > 0 || destinationScenarioAttributes.Count() == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }           
+        }
+
     }
 }

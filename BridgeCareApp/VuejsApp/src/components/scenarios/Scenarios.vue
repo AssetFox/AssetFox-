@@ -17,7 +17,7 @@
                     <v-spacer></v-spacer>
                     <v-col cols = "1"></v-col>
                 </v-tabs>
-                <v-tabs-items v-model="tab">
+                <v-window v-model="tab">
                     <v-window-item>
                         <v-col cols = "12">
                             <v-card elevation="5">
@@ -552,7 +552,7 @@
                             </v-card>
                         </v-col>
                     </v-window-item>
-                </v-tabs-items>
+                </v-window>
             </v-card>
         </v-col>
         <!-- missing implemtation
@@ -713,7 +713,7 @@ import mitt from 'mitt';
     const stateFastWorkQueuePage: QueuedWork[] = shallowReactive(store.state.scenarioModule.currentFastWorkQueuePage);
     let stateTotalFastQueuedItems: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalFastQueuedItems);
 
-    let navigation: any[] = (store.state.breadcrumbModule.navigation) ; 
+    // let navigation: any[] = (store.state.breadcrumbModule.navigation) ; 
 
     let authenticated:boolean = (store.state.authenticationModule.authenticated);
     let userId: string = (store.state.authenticationModule.userId);

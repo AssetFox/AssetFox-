@@ -740,7 +740,9 @@ import config from '../public/config.json';
 
     function onShowNewsDialog() {
         showNewsDialog = true;
-        updateUserLastNewsAccessDateAction({id: currentUser.value.id, accessDate: latestNewsDate});
+        if (currentUser.value.id != getBlankGuid()) {
+            updateUserLastNewsAccessDateAction({id: currentUser.value.id, accessDate: latestNewsDate});
+        }
         hasUnreadNewsItem = false;
     }
 

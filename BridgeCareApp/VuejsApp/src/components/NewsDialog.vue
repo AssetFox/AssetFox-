@@ -1,10 +1,13 @@
 <template>
-  <Dialog max-width="65%" v-bind:show="showDialog">
+    <div>test</div>
+    <!-- <Button label="Show" @click="visible = !visible">{{visible}}</Button>
+    <Dialog v-model:visible="visible"><p>This is a test</p></Dialog> -->
+  <Dialog :style="{ width: '50vw', height: '50vw'}" v-model:visible="props.showDialog" >
     <v-container fluid grid-list-xl>
         <v-row>
             <v-col cols = "12">
                 <v-row justify-center>
-                    <v-card class='announcement-dialog'>
+                    <!-- <v-card class='announcement-dialog'> -->
                         <v-toolbar
                         color="#002E6C"
                         dark
@@ -19,8 +22,8 @@
                             </v-btn>
                         </v-toolbar>    
                         <div class='announcement' style='padding-bottom: 0; margin-bottom: 0' v-if='hasAdminAccess'>
-                            <v-card style='margin-bottom: 0; padding-bottom: 0'>
-                                <v-card-title style='padding-top: 0; padding-bottom: 0'>
+                            <!-- <v-card style='margin-bottom: 0; padding-bottom: 0'> -->
+                                <!-- <v-card-title style='padding-top: 0; padding-bottom: 0'> -->
                                     <v-icon v-if='isEditingAnnouncement()' class='ara-orange'
                                             style='padding-right: 1em'
                                             title='Stop Editing'
@@ -28,13 +31,13 @@
                                         fas fa-times-circle
                                     </v-icon>
                                     <v-text-field class='announcement-title' label='Title' single-line
-                                                  tabindex='1' v-model='newAnnouncementTitle' />
+                                                  tabindex='1' :model-value='newAnnouncementTitle' />
                                     <v-spacer />
                                     <v-btn @click='onSendAnnouncement' class='ara-blue' icon
                                            tabindex='3' title='Send Announcement'>
                                         <v-icon>fas fa-paper-plane</v-icon>
                                     </v-btn>
-                                </v-card-title>
+                                <!-- </v-card-title> -->
                                 <v-card-text style='padding-top: 0; padding-bottom: 0'>{{ formatDate(new Date()) }}
                                 </v-card-text>
                                 <v-textarea
@@ -45,7 +48,7 @@
                                     style='padding-left: 1em; padding-right: 1em; padding-top: 0.2em'
                                     tabindex='2'
                                     v-model='newAnnouncementContent' />
-                            </v-card>
+                            <!-- </v-card> -->
                         </div>
                         <div style='display: flex; align-items: center; justify-content: center'>
                             <v-btn @click='seeNewerAnnouncements()' class='ara-blue-bg text-white' round
@@ -89,7 +92,7 @@
                                 See Older Announcements
                             </v-btn>
                         </div>
-                    </v-card>
+                    <!-- </v-card> -->
                 </v-row>
             </v-col>
         </v-row>
@@ -116,9 +119,9 @@ let store = useStore();
 const props = defineProps<{
     showDialog: boolean
     }>()
-
+const visible = ref(false);
 let announcements = ref<Announcement[]>(store.state.announcementModule.announcements);
-let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
+let hasAdminAccess = ref<boolean>(true);//(store.state.authenticationModule.hasAdminAccess);
 async function upsertAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('upsertAnnouncement');}
 async function deleteAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('deleteAnnouncement');}
  
@@ -128,6 +131,10 @@ async function deleteAnnouncementAction(payload?: any): Promise<any> {await stor
     let newAnnouncementContent: string = '';
 
     let selectedAnnouncementForEdit: Announcement|undefined = undefined;
+
+    onMounted(() => {
+        console.log("showDialog: " + props.showDialog);
+    });
 
     function getVisibleAnnouncements() {
         return announcements.value.slice(announcementListOffset, announcementListOffset + (hasAdminAccess ? 9 : 10));
@@ -244,7 +251,7 @@ body {
     margin-bottom: 1rem;
 }
     
-/* .announcement-dialog {
+.announcement-dialog {
     width: 100%;
     justify-content: center;
 }
@@ -271,10 +278,4 @@ body {
     padding-bottom: 1em;
 }
 
-.card {
-    background: #ffffff;
-    padding: 2rem;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-} */
 </style>

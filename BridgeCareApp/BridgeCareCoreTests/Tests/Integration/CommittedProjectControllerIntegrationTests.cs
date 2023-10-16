@@ -1,4 +1,5 @@
-﻿using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.Data;
+using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -12,7 +13,6 @@ using BridgeCareCoreTests.Tests.General_Work_Queue;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Xunit;
 using IamAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
-
 
 namespace BridgeCareCoreTests.Tests.Integration
 {
@@ -59,7 +59,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var resultAttributeId = Guid.NewGuid();
             var resultAttribute = AttributeTestSetup.Text(resultAttributeId, resultAttributeName); ;
             AttributeTestSetup.CreateSingleTextAttribute(TestHelper.UnitOfWork,
-                resultAttributeId, resultAttributeName);
+                resultAttributeId, resultAttributeName, ConnectionType.EXCEL, keyAttributeName);
             maintainableAssets.Add(maintainableAsset);
             var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -173,14 +174,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             attributeLibrary.Add(new AttributeEntity
             {
                 Id = new Guid("2e3ae9ac-c14c-46ab-8e4b-f93312bc8637"),
-                Name = "BMSID",
+                Name = TestAttributeNames.BmsId,
                 DataType = "STRING",
                 AggregationRuleType = "PREDOMINANT"
             });
             attributeLibrary.Add(new AttributeEntity
             {
                 Id = new Guid("104bd958-8e0a-403c-b065-07d5e91eb27b"),
-                Name = "BRKEY_",
+                Name = TestAttributeNames.BrKey,
                 DataType = "NUMBER",
                 AggregationRuleType = "AVERAGE"
             });
@@ -284,7 +285,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         private void AssignKeyAttributes(MaintainableAssetEntity asset)
         {
-            var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BRKEY_");
+            var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == TestAttributeNames.BrKey);
             var brKey = new AggregatedResultEntity
             {
                 Id = Guid.NewGuid(),
@@ -298,7 +299,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             };
             asset.AggregatedResults.Add(brKey);
 
-            var bmsidAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BMSID");
+            var bmsidAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == TestAttributeNames.BmsId);
             var bmsid = new AggregatedResultEntity
             {
                 Id = Guid.NewGuid(),

@@ -89,7 +89,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         }
 
         [Fact]
-        public void failedReport()
+        public void GenerateReport_ReportNameIsEmpty_KeyPropertiesAreEmpty()
         {
             Setup();
             var failedRepo = new MaintainableAssetDataRepository(_failedRepo);

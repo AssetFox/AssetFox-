@@ -356,7 +356,9 @@ import config from '../public/config.json';
     ];
     let esecSecurityType: string = SecurityTypes.esec;
     let b2cSecurityType: string = SecurityTypes.b2c;
-    let showNewsDialog: boolean = false;
+    
+    let showNewsDialog= ref(false);
+
     let hasUnreadNewsItem: boolean = false;
     let currentURL: any = '';
     let unauthorizedError: string = '';
@@ -739,7 +741,7 @@ import config from '../public/config.json';
     }
 
     function onShowNewsDialog() {
-        showNewsDialog = true;
+        showNewsDialog.value = true;
         if (currentUser.value.id != getBlankGuid()) {
             updateUserLastNewsAccessDateAction({id: currentUser.value.id, accessDate: latestNewsDate});
         }
@@ -747,7 +749,7 @@ import config from '../public/config.json';
     }
 
     function onCloseNewsDialog() {
-        showNewsDialog = false;
+        showNewsDialog.value = false;
     }
 
     function checkLastNewsAccessDate () {

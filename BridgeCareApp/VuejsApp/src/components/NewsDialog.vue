@@ -1,8 +1,5 @@
 <template>
-    <div>test</div>
-    <!-- <Button label="Show" @click="visible = !visible">{{visible}}</Button>
-    <Dialog v-model:visible="visible"><p>This is a test</p></Dialog> -->
-  <Dialog :style="{ width: '50vw', height: '50vw'}" v-model:visible="props.showDialog" >
+  <Dialog :style="{ width: '50vw', height: '50vw'}" v-model:visible="showDialog" :closable="false">
     <v-container fluid grid-list-xl>
         <v-row>
             <v-col cols = "12">
@@ -105,7 +102,7 @@ import Vue from 'vue';
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import moment from 'moment';
 import { hasValue } from '@/shared/utils/has-value-util';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, ref, onMounted, onUpdated, toRefs, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Dialog from 'primevue/dialog';
@@ -116,10 +113,10 @@ import Dropdown from 'primevue/dropdown';
 
 const emit = defineEmits(['close'])
 let store = useStore();
-const props = defineProps<{
+let props = defineProps<{
     showDialog: boolean
-    }>()
-const visible = ref(false);
+}>()
+const { showDialog } = toRefs(props);
 let announcements = ref<Announcement[]>(store.state.announcementModule.announcements);
 let hasAdminAccess = ref<boolean>(true);//(store.state.authenticationModule.hasAdminAccess);
 async function upsertAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('upsertAnnouncement');}
@@ -133,9 +130,9 @@ async function deleteAnnouncementAction(payload?: any): Promise<any> {await stor
     let selectedAnnouncementForEdit: Announcement|undefined = undefined;
 
     onMounted(() => {
-        console.log("showDialog: " + props.showDialog);
     });
-
+    onUpdated(() => {
+    });
     function getVisibleAnnouncements() {
         return announcements.value.slice(announcementListOffset, announcementListOffset + (hasAdminAccess ? 9 : 10));
     }

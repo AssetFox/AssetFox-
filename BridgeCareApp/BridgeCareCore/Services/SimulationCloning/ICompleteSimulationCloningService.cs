@@ -6,7 +6,7 @@ namespace BridgeCareCore.Services
     {
         SimulationCloningResultDTO Clone(CloneSimulationDTO dto);
         CompleteSimulationDTO GetSimulation(string simulationId);
-        bool IsCompleteSimulation(CloneSimulationDTO dto);
+     
         bool CheckCompatibleNetworkAttributes(CloneSimulationDTO dto);
     }
 }

@@ -83,10 +83,10 @@ namespace BridgeCareCore.Services
         }
         public bool CheckCompatibleNetworkAttributes(CloneSimulationDTO dto)
         {
-            var keyAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.NetworkId);
-            var destinationKeyAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.DestinationNetworkId);
+            var scenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.NetworkId);
+            var destinationScenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.DestinationNetworkId);
 
-            if (destinationKeyAttributes.Any(c => !keyAttributes.Contains(c)) && destinationKeyAttributes.Count > 0 || destinationKeyAttributes.Count() == 0)
+            if (destinationScenarioAttributes.Any(c => !scenarioAttributes.Contains(c)) && destinationScenarioAttributes.Count > 0 || destinationScenarioAttributes.Count() == 0)
             {
                 return false;
             }
@@ -96,7 +96,5 @@ namespace BridgeCareCore.Services
             }           
         }
 
-
-        public bool IsCompleteSimulation(CloneSimulationDTO dto) => throw new NotImplementedException();
     }
 }

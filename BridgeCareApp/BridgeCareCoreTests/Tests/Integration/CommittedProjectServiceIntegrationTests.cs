@@ -122,6 +122,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
+        //[Fact (Skip ="Resurrect while fixing committed project spreadsheet upload")]
         public void DownloadSpreadsheet_ThenReupload_Ok()
         {
             var networkId = Guid.NewGuid();

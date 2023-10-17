@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Channels;
@@ -87,6 +88,7 @@ namespace BridgeCareCore.Controllers
                 AggregationWorkitem workItem = new AggregationWorkitem(networkId, UserInfo.Name, networkName, specificAttributes);
                 var analysisHandle = _generalWorkQueueService.CreateAndRun(workItem);
 
+                Debug.WriteLine($"Aggregation started at {DateTime.Now}");
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, networkId.ToString());
 
                 return Ok();

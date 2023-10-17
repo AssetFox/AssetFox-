@@ -675,6 +675,7 @@ export default class CalculatedAttributeEditor extends Vue {
     //but only when in libraries
     @Watch('librarySelectItemValue')
     onLibrarySelectItemValueChangedCheckUnsaved(){
+        this.defaultEquation.equation.expression = "";
         if(this.hasScenario){
             this.onLibrarySelectItemValueChanged();
             this.unsavedDialogAllowed = false;

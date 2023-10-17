@@ -4,7 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment
 {
-    public class TreatmentSupersessionEntity : BaseEntity
+    public class TreatmentSupersedeRuleEntity : BaseEntity
     {
         public Guid Id { get; set; }
 
@@ -12,8 +12,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual SelectableTreatmentEntity SelectableTreatment { get; set; }
 
-        public virtual CriterionLibraryTreatmentSupersessionEntity CriterionLibraryTreatmentSupersessionJoin { get; set; }
-
-        public virtual CriterionLibraryScenarioTreatmentSupersessionEntity CriterionLibraryScenarioTreatmentSupersessionJoin { get; set; }
+        public virtual CriterionLibraryTreatmentSupersedeRuleEntity CriterionLibraryTreatmentSupersedeRuleJoin { get; set; }
     }
 }

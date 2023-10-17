@@ -171,9 +171,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 entity.ScenarioTreatmentSchedulings.ForEach(_ => _.CreateTreatmentScheduling(selectableTreatment));
             }
 
-            if (entity.ScenarioTreatmentSupersessions.Any())
+            if (entity.ScenarioTreatmentSupersedeRules.Any())
             {
-                entity.ScenarioTreatmentSupersessions.ForEach(_ => _.CreateTreatmentSupersession(selectableTreatment));
+                entity.ScenarioTreatmentSupersedeRules.ForEach(_ => _.CreateTreatmentSupersedeRule(selectableTreatment));
             }
         }
 

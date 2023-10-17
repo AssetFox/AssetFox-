@@ -162,7 +162,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentSchedulings)
-                .Include(_ => _.ScenarioTreatmentSupersessions)
+                .Include(_ => _.ScenarioTreatmentSupersedeRules)
                 .Include(_ => _.ScenarioTreatmentPerformanceFactors)
                 .ToList();
 

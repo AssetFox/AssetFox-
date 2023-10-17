@@ -357,8 +357,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
                 .Include(_ => _.SelectableTreatments)
-                .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
-                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
+                .ThenInclude(_ => _.ScenarioTreatmentSupersedeRules)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
@@ -875,31 +875,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                     }
 
-                    if (treatment.ScenarioTreatmentSupersessions.Any())
+                    if (treatment.ScenarioTreatmentSupersedeRules.Any())
                     {
-                        treatment.ScenarioTreatmentSupersessions.ForEach(supersession =>
+                        treatment.ScenarioTreatmentSupersedeRules.ForEach(supersedeRule =>
                         {
-                            supersession.Id = Guid.NewGuid();
-                            supersession.TreatmentId = treatment.Id;
-                            _unitOfWork.Context.ReInitializeAllEntityBaseProperties(supersession,
+                            supersedeRule.Id = Guid.NewGuid();
+                            supersedeRule.TreatmentId = treatment.Id;
+                            _unitOfWork.Context.ReInitializeAllEntityBaseProperties(supersedeRule,
                                 _unitOfWork.UserEntity?.Id);
-
-                            if (supersession.CriterionLibraryScenarioTreatmentSupersessionJoin != null)
+                            // TODO supersedeRule.ScenarioSelectableTreatment = ??
+                            if (supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin != null)
                             {
                                 var criterionId = Guid.NewGuid();
-                                supersession.CriterionLibraryScenarioTreatmentSupersessionJoin.CriterionLibrary.Id =
+                                supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.Id =
                                     criterionId;
-                                supersession.CriterionLibraryScenarioTreatmentSupersessionJoin.CriterionLibrary
+                                supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary
                                     .IsSingleUse = true;
-                                supersession.CriterionLibraryScenarioTreatmentSupersessionJoin.CriterionLibraryId =
+                                supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibraryId =
                                     criterionId;
-                                supersession.CriterionLibraryScenarioTreatmentSupersessionJoin.TreatmentSupersessionId =
-                                    supersession.Id;
+                                supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.TreatmentSupersedeRuleId =
+                                    supersedeRule.Id;
                                 _unitOfWork.Context.ReInitializeAllEntityBaseProperties(
-                                    supersession.CriterionLibraryScenarioTreatmentSupersessionJoin.CriterionLibrary,
+                                    supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary,
                                     _unitOfWork.UserEntity?.Id);
                                 _unitOfWork.Context.ReInitializeAllEntityBaseProperties(
-                                    supersession.CriterionLibraryScenarioTreatmentSupersessionJoin,
+                                    supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin,
                                     _unitOfWork.UserEntity?.Id);
                             }
                         });
@@ -1248,26 +1248,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .ToList());
                 }
 
-                // add treatment supersessions
-                if (simulationToClone.SelectableTreatments.Any(_ => _.ScenarioTreatmentSupersessions.Any()))
+                // add treatment supersedeRules
+                if (simulationToClone.SelectableTreatments.Any(_ => _.ScenarioTreatmentSupersedeRules.Any()))
                 {
-                    var treatmentSupersessions = simulationToClone.SelectableTreatments
-                        .Where(_ => _.ScenarioTreatmentSupersessions.Any())
-                        .SelectMany(_ => _.ScenarioTreatmentSupersessions
+                    var treatmentSupersedeRules = simulationToClone.SelectableTreatments
+                        .Where(_ => _.ScenarioTreatmentSupersedeRules.Any())
+                        .SelectMany(_ => _.ScenarioTreatmentSupersedeRules
                             .Select(scheduling => scheduling))
                         .ToList();
-                    _unitOfWork.Context.AddAll(treatmentSupersessions);
-                    // add treatment supersession criteria
-                    if (treatmentSupersessions.Any(_ =>
-                        _.CriterionLibraryScenarioTreatmentSupersessionJoin?.CriterionLibrary != null))
+                    _unitOfWork.Context.AddAll(treatmentSupersedeRules);
+                    // add treatment supersedeRule criteria
+                    if (treatmentSupersedeRules.Any(_ =>
+                        _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin?.CriterionLibrary != null))
                     {
-                        var treatmentSupersessionCriteriaJoins = treatmentSupersessions
-                            .Where(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin?.CriterionLibrary != null)
-                            .Select(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
+                        var treatmentSupersedeRuleCriteriaJoins = treatmentSupersedeRules
+                            .Where(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin?.CriterionLibrary != null)
+                            .Select(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
                             .ToList();
-                        _unitOfWork.Context.AddAll(treatmentSupersessionCriteriaJoins.Select(_ => _.CriterionLibrary)
+                        _unitOfWork.Context.AddAll(treatmentSupersedeRuleCriteriaJoins.Select(_ => _.CriterionLibrary)
                             .ToList());
-                        _unitOfWork.Context.AddAll(treatmentSupersessionCriteriaJoins);
+                        _unitOfWork.Context.AddAll(treatmentSupersedeRuleCriteriaJoins);
                     }
                 }
 

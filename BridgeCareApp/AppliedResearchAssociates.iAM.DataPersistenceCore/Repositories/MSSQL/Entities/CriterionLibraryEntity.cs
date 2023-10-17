@@ -50,8 +50,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             CriterionLibraryScenarioTreatmentConsequenceJoins = new HashSet<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>();
             CriterionLibraryTreatmentCostJoins = new HashSet<CriterionLibraryTreatmentCostEntity>();
             CriterionLibraryScenarioTreatmentCostJoins = new HashSet<CriterionLibraryScenarioTreatmentCostEntity>();
-            CriterionLibraryTreatmentSupersessionJoins = new HashSet<CriterionLibraryTreatmentSupersessionEntity>();
-            CriterionLibraryScenarioTreatmentSupersessionJoins = new HashSet<CriterionLibraryScenarioTreatmentSupersessionEntity>();
+            CriterionLibraryTreatmentSupersedeRuleJoins = new HashSet<CriterionLibraryTreatmentSupersedeRuleEntity>();
+            CriterionLibraryScenarioTreatmentSupersedeRuleJoins = new HashSet<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>();
             AttributeEquationCriterionLibraryJoins = new HashSet<AttributeEquationCriterionLibraryEntity>();
             CriterionLibraryUserJoins = new HashSet<CriterionLibraryUserEntity>();
         }
@@ -105,9 +105,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<CriterionLibraryScenarioTreatmentCostEntity> CriterionLibraryScenarioTreatmentCostJoins { get; set; }
 
-        public virtual ICollection<CriterionLibraryTreatmentSupersessionEntity> CriterionLibraryTreatmentSupersessionJoins { get; set; }
+        public virtual ICollection<CriterionLibraryTreatmentSupersedeRuleEntity> CriterionLibraryTreatmentSupersedeRuleJoins { get; set; }
 
-        public virtual ICollection<CriterionLibraryScenarioTreatmentSupersessionEntity> CriterionLibraryScenarioTreatmentSupersessionJoins { get; set; }
+        public virtual ICollection<CriterionLibraryScenarioTreatmentSupersedeRuleEntity> CriterionLibraryScenarioTreatmentSupersedeRuleJoins { get; set; }
 
         public virtual ICollection<AttributeEquationCriterionLibraryEntity> AttributeEquationCriterionLibraryJoins { get; set; }
 

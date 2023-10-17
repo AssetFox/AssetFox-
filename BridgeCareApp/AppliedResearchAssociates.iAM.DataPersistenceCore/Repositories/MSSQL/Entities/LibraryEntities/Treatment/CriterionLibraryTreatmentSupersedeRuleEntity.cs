@@ -3,14 +3,14 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment
 {
-    public class CriterionLibraryTreatmentSupersessionEntity : BaseEntity
+    public class CriterionLibraryTreatmentSupersedeRuleEntity : BaseEntity
     {
         public Guid CriterionLibraryId { get; set; }
 
-        public Guid TreatmentSupersessionId { get; set; }
+        public Guid TreatmentSupersedeRuleId { get; set; }
 
         public virtual CriterionLibraryEntity CriterionLibrary { get; set; }
 
-        public virtual TreatmentSupersessionEntity TreatmentSupersession { get; set; }
+        public virtual TreatmentSupersedeRuleEntity TreatmentSupersedeRule { get; set; }
     }
 }

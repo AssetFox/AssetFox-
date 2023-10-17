@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
             public const string TargetConditionGoal = "TargetConditionGoalEntity";
             public const string ConditionalTreatmentConsequence = "ConditionalTreatmentConsequenceEntity";
             public const string TreatmentCost = "TreatmentCostEntity";
-            public const string TreatmentSupersession = "TreatmentSupersessionEntity";
+            public const string TreatmentSupersedeRule = "TreatmentSupersedeRuleEntity";
 
             public static readonly Dictionary<string, string> NameConventionPerEntityType = new Dictionary<string, string>
             {
@@ -48,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
                 {TargetConditionGoal, "Target Condition Goal"},
                 {ConditionalTreatmentConsequence, "Treatment Consequence"},
                 {TreatmentCost, "Treatment Cost"},
-                {TreatmentSupersession, "Treatment Supersession"}
+                {TreatmentSupersedeRule, "Treatment SupersedeRule"}
             };
         }
 

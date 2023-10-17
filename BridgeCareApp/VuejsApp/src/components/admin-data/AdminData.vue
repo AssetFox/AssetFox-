@@ -5,7 +5,7 @@
                 <v-layout>
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
-                        <v-select :items='selectPrimaryNetworkItems'
+                        <v-select id="AdminData-PrimaryNetwork-select" :items='selectPrimaryNetworkItems'
                             outline  
                             v-model='selectPrimaryNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">

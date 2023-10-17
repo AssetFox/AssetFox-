@@ -16,7 +16,7 @@
         <v-flex xs12>
           <v-layout column style="padding-right: 100px">
             <v-text-field
-              class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family search-icon-general"
+              id="AdminSiteSettingsEditor-EditImplementationName-textfield" class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family search-icon-general"
               v-model="ImplementationID"
               type="text"
               hide-details

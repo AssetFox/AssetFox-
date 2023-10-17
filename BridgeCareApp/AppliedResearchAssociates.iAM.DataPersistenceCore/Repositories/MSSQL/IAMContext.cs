@@ -1213,13 +1213,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(entity =>
             {
-                entity.HasKey(e => new { e.CriterionLibraryId, e.TreatmentSupersedeRuleId });
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioTreatmentSupersedeRuleId });
 
                 entity.ToTable("CriterionLibrary_ScenarioTreatmentSupersedeRule");
 
                 entity.HasIndex(e => e.CriterionLibraryId);
 
-                entity.HasIndex(e => e.TreatmentSupersedeRuleId).IsUnique();
+                entity.HasIndex(e => e.ScenarioTreatmentSupersedeRuleId).IsUnique();
 
                 entity.HasOne(d => d.CriterionLibrary)
                     .WithMany(p => p.CriterionLibraryScenarioTreatmentSupersedeRuleJoins)
@@ -1228,7 +1228,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.ScenarioTreatmentSupersedeRule)
                     .WithOne(p => p.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
-                    .HasForeignKey<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(d => d.TreatmentSupersedeRuleId)
+                    .HasForeignKey<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(d => d.ScenarioTreatmentSupersedeRuleId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 

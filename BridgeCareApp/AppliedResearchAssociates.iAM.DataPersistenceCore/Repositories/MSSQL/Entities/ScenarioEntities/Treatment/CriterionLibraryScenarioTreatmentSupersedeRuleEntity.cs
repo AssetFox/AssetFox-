@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class CriterionLibraryScenarioTreatmentSupersedeRuleEntity : BaseCriterionLibraryJoinEntity
     {
-        public Guid TreatmentSupersedeRuleId { get; set; }
+        public Guid ScenarioTreatmentSupersedeRuleId { get; set; }
 
         public virtual ScenarioTreatmentSupersedeRuleEntity ScenarioTreatmentSupersedeRule { get; set; }
     }

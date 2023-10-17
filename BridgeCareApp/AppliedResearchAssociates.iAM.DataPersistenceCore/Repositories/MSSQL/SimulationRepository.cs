@@ -893,7 +893,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                     .IsSingleUse = true;
                                 supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibraryId =
                                     criterionId;
-                                supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.TreatmentSupersedeRuleId =
+                                supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.ScenarioTreatmentSupersedeRuleId =
                                     supersedeRule.Id;
                                 _unitOfWork.Context.ReInitializeAllEntityBaseProperties(
                                     supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary,

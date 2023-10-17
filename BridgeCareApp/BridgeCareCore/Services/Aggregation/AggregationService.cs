@@ -126,9 +126,9 @@ namespace BridgeCareCore.Services.Aggregation
                     var directory = Directory.GetCurrentDirectory();
                     var path = Path.Combine(directory, "Logs");
                     // Set up the log
-                    var stringBuilder = new StringBuilder();
-                    stringBuilder.AppendLine("Datum Name, Location Id, Datum Id");
-                    StreamWriter streamWriter = new StreamWriter(path + "\\UnmatchedDatum.txt");
+                    //var stringBuilder = new StringBuilder();
+                    //stringBuilder.AppendLine("Datum Name, Location Id, Datum Id");
+                    //StreamWriter streamWriter = new StreamWriter(path + "\\UnmatchedDatum.txt");
                     if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                     {
                         _unitOfWork.Rollback();
@@ -153,17 +153,18 @@ namespace BridgeCareCore.Services.Aggregation
                         i++;
                         maintainableAsset.AssignedData.RemoveAll(_ =>
                             attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
-                        List<DatumLog> unmatchedDatum = maintainableAsset.AssignAttributeData(attributeData);
-                        if (unmatchedDatum.Count > 0)
-                        {
-                            isUnmatchedDatum = true;
-                            foreach(var datum in unmatchedDatum)
-                            {
-                                stringBuilder.AppendLine(datum.ToString());
-                            }
-                            streamWriter.WriteLine(stringBuilder);
-                            stringBuilder.Clear();
-                        }
+                        //List<DatumLog> unmatchedDatum = maintainableAsset.AssignAttributeData(attributeData);
+                        maintainableAsset.AssignAttributeData(attributeData);
+                        //if (unmatchedDatum.Count > 0)
+                        //{
+                        //    isUnmatchedDatum = true;
+                        //    foreach(var datum in unmatchedDatum)
+                        //    {
+                        //        stringBuilder.AppendLine(datum.ToString());
+                        //    }
+                        //    streamWriter.WriteLine(stringBuilder);
+                        //    stringBuilder.Clear();
+                        //}
 
                         //maintainableAsset.AssignSpatialWeighting(benefitQuantifierEquation.Equation.Expression);
                         try
@@ -206,7 +207,7 @@ namespace BridgeCareCore.Services.Aggregation
                     state.Status = "Saving";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
 
-                    streamWriter.Close();
+                    //streamWriter.Close();
 
                     try
                     {

@@ -252,6 +252,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 ScenarioId = simulationId,
                 NetworkId = networkId,
+                DestinationNetworkId = networkId,
                 ScenarioName = SimulationName,
             };
             completeSimulationCloningServiceMock.Setup(r => r.Clone(cloneSimulationDto)).Returns(cloneResult);

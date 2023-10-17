@@ -100,7 +100,7 @@ namespace BridgeCareCore.Services
                             locationValue = project.LocationKeys[_networkKeyField];
                             worksheet.Cells[row, column++].Value = locationValue;
                         }
-                                            
+
                         // Add other data from key fields based on ID
                         var otherData = _keyFields.Where(_ => _ != _networkKeyField);
                         if (!String.IsNullOrEmpty(locationValue) && otherData.Count() > 0)
@@ -284,6 +284,20 @@ namespace BridgeCareCore.Services
             // Get the location => asset ID lookup for all maintainable assets in the network
             var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulation.NetworkId);
 
+            int treatmentCategoryIndex = headers.IndexOf("CATEGORY") + 1;
+
+            if (treatmentCategoryIndex == 0)
+            {
+                throw new InvalidOperationException("Required 'TreatmentCategory' column is missing in the Excel sheet.");
+            }
+
+            int projectSourceIndex = headers.IndexOf("PROJECTSOURCE") + 1;
+
+            if (projectSourceIndex == 0)
+            {
+                throw new InvalidOperationException("Required 'ProjectSource' column is missing in the Excel sheet.");
+            }
+
             // Get the column ID for the network's key field
             if (!headers.Contains(_networkKeyField))
             {
@@ -324,6 +338,16 @@ namespace BridgeCareCore.Services
                 // Get the project year for this work
                 var projectYear = worksheet.GetCellValue<int>(row, _keyFields.Count + 2);  // Assumes that InitialHeaders stays constant
 
+                //Get project source 
+                var projectSourceValue = worksheet.Cells[row, projectSourceIndex].Text;
+
+                // Attempt to convert the string to enum
+                ProjectSourceDTO projectSource;
+                if (!Enum.TryParse(projectSourceValue, true, out projectSource))
+                {
+                    projectSource = ProjectSourceDTO.None; // Default value if parsing fails
+                }
+
                 // Get the location information of the project.  This must include the maintainable asset ID using the "ID" key
                 var locationInformation = new Dictionary<string, string>();
                 var locationIdentifier = worksheet.GetCellValue<string>(row, keyColumn);
@@ -355,11 +379,13 @@ namespace BridgeCareCore.Services
                     budgetId = budgets.Single(_ => _.Name == budgetName).Id;
                 }
 
+                var treatmentCategoryValue = worksheet.Cells[row, treatmentCategoryIndex].GetValue<string>();
+
                 // This to convert the incoming string to a TreatmentCategory
-                var convertedCategory = new TreatmentCategory();
+                TreatmentCategory convertedCategory;
                 try
                 {
-                    convertedCategory = EnumDeserializer.Deserialize<TreatmentCategory>(worksheet.GetCellValue<string>(row, _keyFields.Count + 8));// Assumes that InitialHeaders stays constant
+                    convertedCategory = EnumDeserializer.Deserialize<TreatmentCategory>(treatmentCategoryValue);
                 }
                 catch
                 {
@@ -375,6 +401,7 @@ namespace BridgeCareCore.Services
                     LocationKeys = locationInformation,
                     Treatment = worksheet.GetCellValue<string>(row, _keyFields.Count + 1), // Assumes that InitialHeaders stays constant
                     Year = projectYear,
+                    ProjectSource = projectSource,
                     ShadowForAnyTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 3), // Assumes that InitialHeaders stays constant
                     ShadowForSameTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 4), // Assumes that InitialHeaders stays constant
                     Cost = worksheet.GetCellValue<double>(row, _keyFields.Count + 6), // Assumes that InitialHeaders stays constant
@@ -455,11 +482,11 @@ namespace BridgeCareCore.Services
             queueLog.UpdateWorkQueueStatus("Upserting Created Committed Projects");
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
-        
+
         public double GetTreatmentCost(Guid treatmentLibraryId, string assetKeyData, string treatment, Guid networkId)
         {
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
-            
+
             if (asset == null)
                 return 0;
             var treatmentCosts = _unitOfWork.TreatmentCostRepo.GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName(treatmentLibraryId, treatment);
@@ -471,9 +498,9 @@ namespace BridgeCareCore.Services
             {
                 var compiler = new CalculateEvaluateCompiler();
 
-                if (cost.CriterionLibrary.Id != Guid.Empty && !IsCriteriaValid(compiler, cost.CriterionLibrary.MergedCriteriaExpression, asset.Id))               
+                if (cost.CriterionLibrary.Id != Guid.Empty && !IsCriteriaValid(compiler, cost.CriterionLibrary.MergedCriteriaExpression, asset.Id))
                     continue;
-                
+
                 compiler = new CalculateEvaluateCompiler();
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.Equation.Expression, compiler);
                 var attributeIds = attributes.Select(a => a.Id).ToList();
@@ -487,7 +514,7 @@ namespace BridgeCareCore.Services
                     var latestYear = attrs.Max(_ => _.Year);
                     var latestAggResult = attrs.FirstOrDefault(_ => _.Year == latestYear);
                     latestAggResults.Add(latestAggResult);
-                }                             
+                }
                 var calculator = compiler.GetCalculator(cost.Equation.Expression);
                 var scope = new CalculateEvaluateScope();
                 if (latestAggResults.Count != attributes.Count)
@@ -520,7 +547,7 @@ namespace BridgeCareCore.Services
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute, ChangeValue = consequence.ChangeValue});
             }
             return consequencesToReturn;
-        }   
+        }
 
         private bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId)
         {

@@ -63,22 +63,25 @@ import {
     emptyScenario,
     Scenario,
     ScenarioUser,
+    CloneScenario,
+    emptyCloneScenario,
 } from '@/shared/models/iAM/scenario';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { find, isNil, propEq, clone } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
-import {CloneScenarioDialogData} from '@/shared/models/modals/clone-scenario-dialog-data';
+import {CloneScenarioDialogData, CloneSimulationDialogData} from '@/shared/models/modals/clone-scenario-dialog-data';
 
 @Component
 export default class CloneScenarioDialog extends Vue {
-    @Prop() dialogData: CloneScenarioDialogData;
+    @Prop() dialogData: CloneSimulationDialogData;
 
     @State(state => state.userModule.users) stateUsers: User[];
     @State(state => state.networkModule.networks) stateNetworks: Network[];
 
     @Action("getNetworks") getNetworksAction: any;
+    @Action('cloneScenarioWithDestinationNetwork') cloneScenarioWithDestinationNetworkAction: any; 
 
-    newScenario: Scenario = { ...emptyScenario, id: getNewGuid() };
+    newScenario: CloneScenario = { ...emptyCloneScenario, id: getNewGuid() };
     shared: boolean = false;
     selectedNetworkId: string = getBlankGuid();
     isNetworkSelected: boolean = false;
@@ -134,7 +137,8 @@ export default class CloneScenarioDialog extends Vue {
 
             this.newScenario = {
                 ...this.dialogData.scenario,
-                networkId: this.selectedNetworkId,
+                destinationNetworkId: this.selectedNetworkId,
+                networkId: this.dialogData.scenario.networkId,
                 users: this.shared
                     ? [
                           owner,
@@ -152,22 +156,24 @@ export default class CloneScenarioDialog extends Vue {
                       ]
                     : [owner]
             };
-
             this.getNetworksAction({networkId: this.dialogData.scenario.networkId});
         }
     }
 
     onSubmit(submit: boolean) {
         if (submit) {
-            this.newScenario.networkId = this.selectedNetworkId;
+
+            this.newScenario.destinationNetworkId = this.selectedNetworkId;
+            this.newScenario.networkId = this.dialogData.scenario.networkId;
             this.newScenario.networkName = this.selectedNetworkName;      
             this.newScenario.name = this.dialogData.scenario.name;
-            this.$emit('submit', this.newScenario);
+            this.cloneScenarioWithDestinationNetworkAction(this.newScenario);
+            this.$emit('submit');
         } else {
             this.$emit('submit', null);
         }
 
-        this.newScenario = { ...emptyScenario, id: getNewGuid() };
+        this.newScenario = { ...emptyCloneScenario, id: getNewGuid() };
         this.shared = false;
         this.hasCompatibleNetworks = false;
     }

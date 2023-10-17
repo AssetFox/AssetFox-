@@ -527,6 +527,10 @@ export default class CommittedProjectsEditor extends Vue  {
                     }
                 })
                 await vm.initializePages()
+                if (vm.scenarioId !== undefined) {                
+                            await vm.fetchTreatmentLibrary(vm.scenarioId);
+                            await vm.fetchProjectSources();
+                        }
                 await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
                     if(!isNil(response.data)){
                             vm.templateSelectItems = response.data;

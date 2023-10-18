@@ -60,7 +60,6 @@ import {RemainingLifeLimitLibraryUserGridRow, ShareRemainingLifeLimitLibraryDial
 import RemainingLifeLimitService from '@/services/remaining-life-limit.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
-import Dialog from 'primevue/dialog';
 
   const props = defineProps<{
     dialogData: ShareRemainingLifeLimitLibraryDialogData

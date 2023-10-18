@@ -68,7 +68,6 @@ import { find, isNil, propEq, clone } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import {CloneScenarioDialogData} from '@/shared/models/modals/clone-scenario-dialog-data';
 import { useStore } from 'vuex'; 
-import Dialog from 'primevue/dialog';
 
     let store = useStore(); 
     const props = defineProps<{dialogData: CloneScenarioDialogData}>();

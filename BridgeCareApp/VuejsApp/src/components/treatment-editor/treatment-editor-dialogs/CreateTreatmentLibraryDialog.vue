@@ -62,7 +62,6 @@ import { getUserName } from '@/shared/utils/get-user-info';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import Dialog from 'primevue/dialog';
 
     const props = defineProps<{dialogData: CreateTreatmentLibraryDialogData}>()
     const dialogData = props.dialogData;

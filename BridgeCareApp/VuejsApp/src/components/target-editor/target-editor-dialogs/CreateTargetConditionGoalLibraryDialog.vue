@@ -59,7 +59,6 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import Dialog from 'primevue/dialog';
 
   let store = useStore();
   const emit = defineEmits(['submit'])

@@ -32,7 +32,6 @@ import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/impor
 import {clone} from 'ramda';
 import { useStore } from 'vuex';
 import TreatmentsFileSelector from '@/shared/components/FileSelector.vue';
-import Dialog from 'primevue/dialog';
 
     const props = defineProps<{showDialog: Boolean}>()
     const showDialog = props.showDialog;

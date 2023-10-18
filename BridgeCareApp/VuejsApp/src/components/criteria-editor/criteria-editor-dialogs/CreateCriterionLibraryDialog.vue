@@ -53,7 +53,6 @@ import {CreateCriterionLibraryDialogData} from '@/shared/models/modals/create-cr
 import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
-import Dialog from 'primevue/dialog';
 
 const props = defineProps<{dialogData: CreateCriterionLibraryDialogData}>()
 let newCriterionLibrary: CriterionLibrary = {...emptyCriterionLibrary, id: getNewGuid(), isSingleUse: false};

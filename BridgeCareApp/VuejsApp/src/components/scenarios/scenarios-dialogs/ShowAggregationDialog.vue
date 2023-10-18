@@ -159,7 +159,6 @@ import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
 import { Hub } from '@/connectionHub';
 import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject } from 'vue'; 
 import { useStore } from 'vuex'; 
-import Dialog from 'primevue/dialog';
 import mitt from 'mitt';
 
     let store = useStore();     

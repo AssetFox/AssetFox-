@@ -63,7 +63,6 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { CreateCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/create-calculated-attribute-library-dialog-data';
-import Dialog from 'primevue/dialog';
 
 const emit = defineEmits(['submit'])
 let store = useStore();

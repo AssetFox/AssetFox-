@@ -38,7 +38,6 @@ import { Datasource, emptyDatasource, DSSQL } from '../../../shared/models/iAM/d
 import { CreateDataSourceDialogData} from '@/shared/models/modals/data-source-dialog-data'
 import { getUserName } from '@/shared/utils/get-user-info';
 import { useStore } from 'vuex';
-import Dialog from 'primevue/dialog';
 
   let store = useStore();
   let getIdByUserNameGetter: any = store.getters.getIdByUserName ;

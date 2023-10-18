@@ -43,7 +43,6 @@ import FileSelector from '@/shared/components/FileSelector.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { clone } from 'ramda';
 import { useStore } from 'vuex'; 
-import Dialog from 'primevue/dialog';
 
     let store = useStore(); 
     const props = defineProps<{showDialog: boolean}>();

@@ -61,7 +61,6 @@ import {BudgetPriorityLibraryUserGridRow, ShareBudgetPriorityLibraryDialogData }
 import BudgetPriorityService from '@/services/budget-priority.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
-import Dialog from 'primevue/dialog';
 
   let store = useStore();
   let stateUsers = store.state.userModule.users;

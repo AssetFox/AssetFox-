@@ -42,7 +42,6 @@ import {
 } from '@/shared/models/iAM/cash-flow';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
-import Dialog from 'primevue/dialog';
 
 const props = defineProps<{showDialog: boolean}>()
 const emit = defineEmits(['submit']);

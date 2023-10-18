@@ -59,7 +59,6 @@ import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules
 import {clone} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
-import Dialog from 'primevue/dialog';
 
   let store = useStore();
 

@@ -28,7 +28,6 @@
 import Vue from 'vue';
 import {emptyNetwork, Network} from '@/shared/models/iAM/network';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
-import Dialog from 'primevue/dialog';
 
   const props = defineProps<{showDialog: boolean}>();
   const emit = defineEmits(['submit'])

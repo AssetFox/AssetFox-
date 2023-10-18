@@ -61,7 +61,6 @@ import { clone, empty, isNil } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import Dialog from 'primevue/dialog';
 
     let InputRules: InputValidationRules = rules;
     let DialogData: EditAdminDataDialogData = emptyEditAdminDataDialogData ;

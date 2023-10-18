@@ -46,7 +46,6 @@ import {InputValidationRules, rules as validationRules} from '@/shared/utils/inp
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { useStore } from 'vuex';
-import Dialog from 'primevue/dialog';
 
   let store = useStore();
 

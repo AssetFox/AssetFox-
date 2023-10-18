@@ -42,8 +42,7 @@
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
     import { useStore } from 'vuex';
     import { useRouter } from 'vue-router';
-    import Dialog from 'primevue/dialog';
-
+    
 const emit = defineEmits(['submit'])
 const props = defineProps<{
     dialogData: AlertData

@@ -62,7 +62,6 @@ import { SelectItem } from '@/shared/models/vue/select-item';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { clone } from 'ramda';
 import { useStore } from 'vuex'; 
-import Dialog from 'primevue/dialog';
 
     let store = useStore(); 
 

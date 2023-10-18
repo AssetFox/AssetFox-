@@ -37,7 +37,6 @@ import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { clone } from 'ramda';
 import { AddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
 import { ref, Ref, watch } from 'vue';
-import Dialog from 'primevue/dialog';
 
   const props = defineProps<{
     dialogData: AddNetworkDialogData

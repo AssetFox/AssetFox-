@@ -60,7 +60,6 @@ import {CashFlowRuleLibraryUserGridRow, ShareCashFlowRuleLibraryDialogData } fro
 import CashFlowRuleService from '@/services/cash-flow.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
-import Dialog from 'primevue/dialog';
 
   let store = useStore();
 

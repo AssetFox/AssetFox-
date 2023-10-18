@@ -61,7 +61,6 @@ import {DeficientConditionGoalLibraryUserGridRow, ShareDeficientConditionGoalLib
 import DeficientConditionGoalService from '@/services/deficient-condition-goal.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
-import Dialog from 'primevue/dialog';
 
 let store = useStore();
 

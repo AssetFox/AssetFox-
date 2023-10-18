@@ -54,7 +54,6 @@ import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {ScenarioUserGridRow, ShareScenarioDialogData} from '@/shared/models/modals/share-scenario-dialog-data';
 import { useStore } from 'vuex'; 
-import Dialog from 'primevue/dialog';
 
   let store = useStore(); 
 

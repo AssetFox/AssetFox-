@@ -27,7 +27,6 @@
 
 <script lang="ts" setup>
 import Vue from 'vue'; 
-import Dialog from 'primevue/dialog';
 
   const emit = defineEmits(['submit'])
   const props = defineProps<{showDialog: boolean}>();

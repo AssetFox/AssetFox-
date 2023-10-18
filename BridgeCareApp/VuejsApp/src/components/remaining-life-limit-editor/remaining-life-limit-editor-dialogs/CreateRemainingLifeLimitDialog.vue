@@ -47,7 +47,6 @@ import {InputValidationRules, rules as validationRules} from '@/shared/utils/inp
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {clone} from 'ramda';
-import Dialog from 'primevue/dialog';
 
   const props = defineProps<{
     dialogData: CreateRemainingLifeLimitDialogData

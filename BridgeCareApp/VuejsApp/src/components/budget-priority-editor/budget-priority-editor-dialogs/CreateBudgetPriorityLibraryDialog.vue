@@ -49,7 +49,7 @@ import {InputValidationRules, rules as validationRules} from '@/shared/utils/inp
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { nextTick } from 'process';
 import { useStore } from 'vuex';
-import Dialog from 'primevue/dialog';
+
   let store = useStore();
   const props = defineProps<{
     dialogData: CreateBudgetPriorityLibraryDialogData

@@ -54,7 +54,6 @@ import InvestmentBudgetsFileSelector from '@/shared/components/FileSelector.vue'
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref,shallowRef} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import Dialog from 'primevue/dialog';
 
 let store = useStore();
 const emit = defineEmits(['submit'])

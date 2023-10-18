@@ -57,7 +57,6 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import Dialog from 'primevue/dialog';
 
   const props = defineProps<{
           showDialog: boolean,

@@ -64,7 +64,6 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { useStore } from 'vuex'; 
-import Dialog from 'primevue/dialog';
 
   let store = useStore(); 
 

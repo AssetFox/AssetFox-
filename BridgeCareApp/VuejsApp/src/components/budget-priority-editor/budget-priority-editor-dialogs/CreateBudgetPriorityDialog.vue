@@ -39,7 +39,6 @@ import Vue from 'vue';
 import {BudgetPriority, emptyBudgetPriority} from '@/shared/models/iAM/budget-priority';
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
-import Dialog from 'primevue/dialog';
 
   const props = defineProps({
     showDialog: Boolean

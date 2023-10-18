@@ -32,7 +32,6 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportNewTreatmentDialogResult } from '@/shared/models/modals/import-new-treatment-dialog-result';
 import {clone} from 'ramda';
 import TreatmentsFileSelector from '@/shared/components/FileSelector.vue';
-import Dialog from 'primevue/dialog';
 
     const props = defineProps<{showDialog: Boolean}>()
     const showDialog = reactive(props.showDialog);

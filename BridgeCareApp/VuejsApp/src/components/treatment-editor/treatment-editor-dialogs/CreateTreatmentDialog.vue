@@ -41,7 +41,6 @@ import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vu
 import { useStore } from 'vuex';
 import {emptyTreatment, Treatment} from '@/shared/models/iAM/treatment';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
-import Dialog from 'primevue/dialog';
 
 const props = defineProps<{showDialog: Boolean}>()
 const showDialog = props.showDialog;

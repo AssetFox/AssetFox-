@@ -51,7 +51,6 @@ import { CalculatedAttribute, emptyCalculatedAttribute } from '@/shared/models/i
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import Dialog from 'primevue/dialog';
 
   let showDialog : boolean = false;
   let store = useStore();

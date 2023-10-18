@@ -61,7 +61,6 @@ import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {TreatmentLibraryUserGridRow, ShareTreatmentLibraryDialogData } from '@/shared/models/modals/share-treatment-library-dialog-data';
 import TreatmentService from '@/services/treatment.service';
 import { http2XX } from '@/shared/utils/http-utils';
-import Dialog from 'primevue/dialog';
 
     const props = defineProps<{dialogData: ShareTreatmentLibraryDialogData}>()
     const dialogData = reactive(props.dialogData);

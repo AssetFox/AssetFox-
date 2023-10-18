@@ -21,7 +21,7 @@
                                     </v-icon>
                                     <v-col>
                                         <v-text-field class='announcement-title' label='Title' single-line variant="underlined"
-                                                      tabindex='1' :model-value='newAnnouncementTitle' />
+                                                      tabindex='1' v-model='newAnnouncementTitle' />
                                         <v-card-text style='padding-top: 0; padding-bottom: 0'>{{ formatDate(new Date()) }}
                                         </v-card-text>
                                     </v-col>
@@ -52,13 +52,13 @@
                     </div>
                         <div v-for='announcement in getVisibleAnnouncements()'>
                             <v-card style="padding: 10px; margin: 10px;">
-                                <v-row justify="space-between">
+                                <v-row justify="space-between" no-gutters>
                                     <v-card-title class='announcement-title'>
                                         <v-icon @click='onStopEditing()' class='ara-orange'
-                                                style='padding-right: 1em'
+                                                style='padding: 1em'
                                                 title='Stop Editing'
                                                 v-if='isEditingAnnouncement(announcement)'>
-                                    fas fa-times-circle
+                                            fas fa-times-circle
                                     </v-icon>
                                     {{ announcement.title }}
                                     </v-card-title>
@@ -97,7 +97,7 @@
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import moment from 'moment';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { toRefs, computed, watch} from 'vue';
+import { toRefs, computed, watch } from 'vue';
 import { useStore } from 'vuex';
 import Dialog from 'primevue/dialog';
 
@@ -107,11 +107,10 @@ let props = defineProps<{
     showDialog: boolean
 }>()
 const { showDialog } = toRefs(props);
-let announcements = computed(() => store.state.announcementModule.announcements);
-let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
-async function upsertAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('upsertAnnouncement');}
-async function deleteAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('deleteAnnouncement');}
- 
+let announcements = computed<Announcement[]>(() => store.state.announcementModule.announcements);
+let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+async function upsertAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('upsertAnnouncement', payload);}
+async function deleteAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('deleteAnnouncement', payload);}
 let announcementListOffset: number = 0;
 let newAnnouncementTitle: string = '';
 let newAnnouncementContent: string = '';
@@ -152,7 +151,6 @@ let selectedAnnouncementForEdit: Announcement|undefined = undefined;
                 createdDate: new Date(),
             },
         });
-
         newAnnouncementContent = newAnnouncementTitle = '';
     }
 

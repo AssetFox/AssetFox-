@@ -239,6 +239,9 @@ namespace BridgeCareCore.Services
             var libraryId = importResult.TreatmentLibrary.Id;
             var importedTreatments = importResult.TreatmentLibrary.Treatments;
             _unitOfWork.SelectableTreatmentRepo.ReplaceTreatmentLibrary(libraryId, importedTreatments);
-        }       
+        }
+
+        public void ImportScenarioTreatmentSupersedeRuleFileSingle(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null) => throw new NotImplementedException();
+        public FileInfoDTO ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId) => throw new NotImplementedException();
     }
 }

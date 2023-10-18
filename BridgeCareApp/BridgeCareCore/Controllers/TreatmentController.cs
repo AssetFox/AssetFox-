@@ -826,6 +826,114 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        //[HttpPost]
+        //[Route("ImportScenarioTreatmentSupersedeRuleFile")]
+        //[Authorize(Policy = Policy.ImportTreatmentFromScenario)]
+        //public async Task<IActionResult> ImportScenarioTreatmentSupersedeRuleFile()
+        //{
+        //    try
+        //    {
+        //        if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+        //        {
+        //            throw new ConstraintException("Request MIME type is invalid.");
+        //        }
+
+        //        if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+        //        {
+        //            throw new ConstraintException("TreatmentSupersedeRule file not found.");
+        //        }
+
+        //        if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("simulationId", out var id))
+        //        {
+        //            throw new ConstraintException("Request contained no simulation id.");
+        //        }
+
+        //        var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+        //        var simulationId = Guid.Parse(id.ToString());
+
+        //        var simulationName = "";
+        //        await Task.Factory.StartNew(() =>
+        //        {
+        //            _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+        //            simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
+        //        });
+
+        //        ImportScenarioTreatmentWorkitem workItem = new ImportScenarioTreatmentWorkitem(simulationId, excelPackage, UserInfo.Name, simulationName);
+        //        var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
+
+        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, simulationId.ToString());
+
+        //        return Ok();
+        //    }
+        //    catch (UnauthorizedAccessException)
+        //    {
+        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportScenarioTreatmentSupersedeRuleFile - {HubService.errorList["Unauthorized"]}");
+        //        throw;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportScenarioTreatmentSupersedeRuleFile - {e.Message}");
+        //        throw;
+        //    }
+        //}
+
+        //[HttpGet]
+        //[Route("ExportScenarioTreatmentSupersedeRuleExcelFile/{simulationId}")]
+        //[Authorize]
+        //public async Task<IActionResult> ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId)
+        //{
+        //    try
+        //    {
+        //        // Rename
+        //        var result =
+        //            await Task.Factory.StartNew(() => _treatmentService.ExportScenarioTreatmentSupersedeRuleExcelFile(simulationId));
+
+        //        return Ok(result);
+        //    }
+        //    catch (UnauthorizedAccessException)
+        //    {
+        //        var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioScenarioTreatmentSupersedeRuleFile for {simulationName} - {HubService.errorList["Unauthorized"]}");
+        //        throw;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentSupersedeRuleExcelFile for {simulationName} - {e.Message}");
+        //        throw;
+        //    }
+        //}
+
+        [HttpGet]
+        [Route("DownloadScenarioTreatmentSupersedeRuleTemplate")]
+        [Authorize]
+        public async Task<IActionResult> DownloadScenarioTreatmentSupersedeRuleTemplate()
+        {
+            try
+            {
+                var filePath = AppDomain.CurrentDomain.BaseDirectory + "DownloadTemplates\\Scenario_treatment_supersede_rule_template.xlsx";
+                var fileData = System.IO.File.ReadAllBytes(filePath);
+                var result = await Task.Factory.StartNew(() => new FileInfoDTO
+                {
+                    FileName = "Scenario_treatment_supersede_rule_template",
+                    FileData = Convert.ToBase64String(fileData),
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadScenarioTreatmentSupersedeRuleTemplate - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadScenarioTreatmentSupersedeRuleTemplate - {e.Message}");
+                throw;
+            }
+        }
+
         [HttpGet]
         [Route("DownloadLibraryTreatmentsTemplate")]
         [Authorize]

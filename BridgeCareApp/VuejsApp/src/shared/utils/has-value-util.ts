@@ -13,7 +13,7 @@ export const hasValue = (item: any, itemProp: string = '') => {
     let itemPropHasValue = true;
     if (itemHasValue && itemProp !== '') {
         itemPropHasValue = item.hasOwnProperty(itemProp) && item[itemProp] !== null && item[itemProp] !== undefined &&
-            item[itemProp] !== '';
+        item[itemProp] !== '' && item[itemProp] !== [];
     }
 
     return itemHasValue && itemPropHasValue;

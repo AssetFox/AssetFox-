@@ -1,5 +1,5 @@
 <template>
-  <Dialog max-width="200px" persistent v-bind:show="showDialog">
+  <v-dialog max-width="200px" persistent v-bind:show="showDialog">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -19,7 +19,7 @@
         <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
       </v-card-actions>
     </v-card>
-  </Dialog>
+  </v-dialog>
 </template>
 
 <script lang="ts" setup >

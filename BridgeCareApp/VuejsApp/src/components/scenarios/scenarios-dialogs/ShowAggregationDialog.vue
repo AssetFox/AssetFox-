@@ -1,5 +1,5 @@
 <template>
-    <Dialog         
+    <v-dialog         
         scrollable
         persistent
         v-bind:show="dialogData.showDialog"
@@ -139,7 +139,7 @@
                 />
             </v-col>
         </v-card>
-    </Dialog>
+    </v-dialog>
 </template>
 
 <script lang="ts" setup>

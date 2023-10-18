@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <Dialog width="768px" height="540px" persistent v-bind:show='showDialog'>
+        <v-dialog width="768px" height="540px" persistent v-bind:show='showDialog'>
             <v-card class="div-padding">
                 <v-card-title class="pa-2">
                     <v-row justify-start>
@@ -27,8 +27,8 @@
                     </v-row>
                 </v-card-actions>
             </v-card>
-        </Dialog>
-        <Dialog max-width='400px' persistent v-bind='isSuccessfulImport'>
+        </v-dialog>
+        <v-dialog max-width='400px' persistent v-bind='isSuccessfulImport'>
             <v-card>
                 <v-card-title class="title-padding">
                     <v-row justify-center>
@@ -42,7 +42,7 @@
                 </v-card-actions>
                 
             </v-card>
-        </Dialog>
+        </v-dialog>
     </v-row>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-    <Dialog max-width="450px" persistent v-bind:show="showDialog">
+    <v-dialog max-width="450px" persistent v-bind:show="showDialog">
         <v-card elevation="5" variant = "outlined" class="modal-pop-up-padding">
             <v-card-title>
                 <h3 class="dialog-header">
@@ -48,7 +48,7 @@
                 </v-row>
             </v-card-actions>
         </v-card>
-    </Dialog>
+    </v-dialog>
 </template>
 
 <script lang="ts" setup>

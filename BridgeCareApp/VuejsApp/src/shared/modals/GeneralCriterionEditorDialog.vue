@@ -1,5 +1,5 @@
 <template>
-    <Dialog
+    <v-dialog
         persistent
         maximizable
         v-bind:show="dialogData.showDialog"
@@ -38,7 +38,7 @@
                 </v-row>
             </v-card-actions>
         </v-card>
-    </Dialog>
+    </v-dialog>
 </template>
 
 <script lang="ts" setup>

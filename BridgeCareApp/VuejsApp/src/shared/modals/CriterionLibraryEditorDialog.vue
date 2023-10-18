@@ -1,5 +1,5 @@
 <template>
-    <Dialog persistent maximizable v-bind:show="dialogData.showDialog" class="criterion-library-editor-dialog">
+    <v-dialog persistent maximizable v-bind:show="dialogData.showDialog" class="criterion-library-editor-dialog">
         <v-card>
             <v-card-text>
                 <v-row justify-center column>
@@ -41,7 +41,7 @@
             :dialogData="hasUnsavedChangesAlertData"
             @submit="onCloseHasUnsavedChangesAlert"
         />
-    </Dialog>
+    </v-dialog>
 </template>
 
 <script lang="ts" setup>

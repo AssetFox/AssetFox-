@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <Dialog v-bind:show="showDialog" max-width="434px" persistent>
+    <v-dialog v-bind:show="showDialog" max-width="434px" persistent>
       <v-card  height="411px" class="ghd-dialog">
         <v-card-title class="ghd-dialog">
           <v-row justify-left>
@@ -61,7 +61,7 @@
           </v-row>
         </v-card-actions>
       </v-card>
-    </Dialog>
+    </v-dialog>
   </v-row>
 </template>
 

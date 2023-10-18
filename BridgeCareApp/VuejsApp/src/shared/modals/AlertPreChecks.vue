@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <Dialog style="overflow-y: auto" max-width='800px' persistent scrollable v-bind:show="dialogDataPreChecks.showDialog">
+        <v-dialog style="overflow-y: auto" max-width='800px' persistent scrollable v-bind:show="dialogDataPreChecks.showDialog">
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-row justify-space-between align-center>
@@ -46,7 +46,7 @@
                     </v-row>
                 </v-card-actions>
             </v-card>
-        </Dialog>
+        </v-dialog>
     </v-row>
 </template>
 

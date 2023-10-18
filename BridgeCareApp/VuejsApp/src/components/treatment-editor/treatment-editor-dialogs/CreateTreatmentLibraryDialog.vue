@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <Dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
+        <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
             <v-card class="ghd-padding">
                 <v-card-title>
                     <v-row justify-left>
@@ -43,7 +43,7 @@
                     </v-row>
                 </v-card-actions>
             </v-card>
-        </Dialog>
+        </v-dialog>
     </v-row>
 </template>
 

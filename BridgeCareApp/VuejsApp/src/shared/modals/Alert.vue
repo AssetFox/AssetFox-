@@ -1,5 +1,5 @@
 ﻿<template>
-    <Dialog max-width="290" persistent v-bind:show="dialogData.showDialog">
+    <v-dialog max-width="290" persistent v-bind:show="dialogData.showDialog">
         <v-card>
             <v-card-title class="headline">
                 <v-row justify-center>
@@ -33,7 +33,7 @@
                 </v-row>
             </v-card-actions>
         </v-card>
-    </Dialog>
+    </v-dialog>
 </template>
 
 <script lang="ts" setup>

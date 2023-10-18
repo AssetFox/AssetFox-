@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <Dialog max-width="900px" persistent scrollable v-bind:show="dialogData.showDialog">
+    <v-dialog max-width="900px" persistent scrollable v-bind:show="dialogData.showDialog">
       <v-card class="equation-container-card Montserrat-font-family">
         <v-card-title class="ghd-dialog-box-padding-top">
           <v-col cols = "12">
@@ -280,8 +280,8 @@
           </v-row>
         </v-card-actions>
       </v-card>
-    </Dialog>
-    <Dialog max-width="250px" persistent v-bind:show="showAddDataPointPopup">
+    </v-dialog>
+    <v-dialog max-width="250px" persistent v-bind:show="showAddDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-row column justify-center>
@@ -320,8 +320,8 @@
           </v-row>
         </v-card-actions>
       </v-card>
-    </Dialog>
-    <Dialog max-width="400px" persistent v-bind:show="showAddMultipleDataPointsPopup">
+    </v-dialog>
+    <v-dialog max-width="400px" persistent v-bind:show="showAddMultipleDataPointsPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-row column justify-center>
@@ -349,8 +349,8 @@
           </v-row>
         </v-card-actions>
       </v-card>
-    </Dialog>
-    <Dialog max-width="250px" persistent v-bind:show="showEditDataPointPopup">
+    </v-dialog>
+    <v-dialog max-width="250px" persistent v-bind:show="showEditDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-row column justify-center>
@@ -389,7 +389,7 @@
           </v-row>
         </v-card-actions>
       </v-card>
-    </Dialog>
+    </v-dialog>
   </v-row>
 </template>
 

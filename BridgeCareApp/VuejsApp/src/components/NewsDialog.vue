@@ -10,35 +10,35 @@
                             </v-btn>
                         </v-toolbar>
                     <v-card style="margin: 10px;" v-if="hasAdminAccess">
-                        <v-container>
+                        <v-container style="padding:0%">
                             <v-row no-gutters>
                                 <v-col>
                                     <v-icon v-if='isEditingAnnouncement()' class='ara-orange'
-                                            style='padding-right: 1em'
+                                            style='padding-right: 1em; padding-left: 1em;'
                                             title='Stop Editing'
                                             @click='onStopEditing()'>
                                         fas fa-times-circle
                                     </v-icon>
-                                    <v-col>
+                                    <v-col style="padding: 10px;">
                                         <v-text-field class='announcement-title' label='Title' single-line variant="underlined"
                                                       tabindex='1' v-model='newAnnouncementTitle' />
-                                        <v-card-text style='padding-top: 0; padding-bottom: 0'>{{ formatDate(new Date()) }}
+                                        <v-card-text style='padding-top: 0; padding-bottom: 0; padding-left: 0%;'>{{ formatDate(new Date()) }}
                                         </v-card-text>
                                     </v-col>
                                 </v-col>
-                                <v-btn @click='onSendAnnouncement' class='ara-blue' icon
+                                <v-btn @click='onSendAnnouncement' class='ara-blue' flat
                                            tabindex='3' title='Send Announcement'>
                                         <v-icon>fas fa-paper-plane</v-icon>
                                 </v-btn>
                             </v-row>
                         </v-container>    
-                        <v-container>
+                        <v-container style="padding:0%">
                             <v-textarea
                                 auto-grow
                                 class='announcement-content'
                                 density="default" label='Announcement Text (HTML tags can be used for detailed formatting.)'
                                 rows='1' single-line
-                                style='padding-left: 1em; padding-right: 1em; padding-top: 0.2em'
+                                style='padding: 0.4em;'
                                 tabindex='2'
                                 v-model='newAnnouncementContent' />
                         </v-container>
@@ -62,15 +62,14 @@
                                     </v-icon>
                                     {{ announcement.title }}
                                     </v-card-title>
-                                    <div style="padding:10px;">
+                                    <div style="padding: 10px;">
                                         <v-btn @click='onSetAnnouncementForEdit(announcement)' class='ara-blue'
-                                                   icon
-                                                   style="margin: 10px;"
+                                                   flat
                                                    title='Edit Announcement' v-if='hasAdminAccess'>
                                                 <v-icon>fas fa-edit</v-icon>
                                         </v-btn>
                                         <v-btn @click='onDeleteAnnouncement(announcement.id)' class='ara-orange'
-                                                   icon
+                                                   flat
                                                    title='Delete Announcement' v-if='hasAdminAccess'>
                                                 <v-icon>fas fa-trash</v-icon>
                                         </v-btn>

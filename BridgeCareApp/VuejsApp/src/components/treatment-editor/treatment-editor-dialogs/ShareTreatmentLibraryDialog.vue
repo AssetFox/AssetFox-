@@ -62,7 +62,6 @@ import {TreatmentLibraryUserGridRow, ShareTreatmentLibraryDialogData } from '@/s
 import TreatmentService from '@/services/treatment.service';
 import { http2XX } from '@/shared/utils/http-utils';
 
-
     const props = defineProps<{dialogData: ShareTreatmentLibraryDialogData}>()
     const dialogData = reactive(props.dialogData);
     const emit = defineEmits(['submit'])

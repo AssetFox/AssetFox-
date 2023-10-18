@@ -1,88 +1,87 @@
 <template>
-  <v-dialog max-width="65%" min persistent v-bind:show="showDialog">
-    <v-container fluid grid-list-xl>
-        <v-row>
-            <v-col cols = "12">
-                <v-row justify-center>
+  <Dialog :style="{ width: 'auto', height: 'auto'}" block-scroll modal v-model:visible="showDialog" :closable="false">
                     <v-card class='announcement-dialog'>
-                        <v-toolbar
-                        color="#002E6C"
-                        dark
-                        >
+                        <v-toolbar color="#002E6C" dark>
                             <v-app-bar-nav-icon></v-app-bar-nav-icon>
-
                             <v-toolbar-title>Latest News</v-toolbar-title>
-
                             <v-spacer></v-spacer>
                             <v-btn icon @click="closeDialog()">
                                 <v-icon>fas fa-times-circle</v-icon>
                             </v-btn>
-                        </v-toolbar>    
-                        <div class='announcement' style='padding-bottom: 0; margin-bottom: 0' v-if='hasAdminAccess'>
-                            <v-card style='margin-bottom: 0; padding-bottom: 0'>
-                                <v-card-title style='padding-top: 0; padding-bottom: 0'>
+                        </v-toolbar>
+                    <v-card style="margin: 10px;" v-if="hasAdminAccess">
+                        <v-container style="padding:0%">
+                            <v-row no-gutters>
+                                <v-col>
                                     <v-icon v-if='isEditingAnnouncement()' class='ara-orange'
-                                            style='padding-right: 1em'
+                                            style='padding-right: 1em; padding-left: 1em;'
                                             title='Stop Editing'
                                             @click='onStopEditing()'>
                                         fas fa-times-circle
                                     </v-icon>
-                                    <v-text-field class='announcement-title' label='Title' single-line
-                                                  tabindex='1' v-model='newAnnouncementTitle' />
-                                    <v-spacer />
-                                    <v-btn @click='onSendAnnouncement' class='ara-blue' icon
+                                    <v-col style="padding: 10px;">
+                                        <v-text-field class='announcement-title' label='Title' single-line variant="underlined"
+                                                      tabindex='1' v-model='newAnnouncementTitle' />
+                                        <v-card-text style='padding-top: 0; padding-bottom: 0; padding-left: 0%;'>{{ formatDate(new Date()) }}
+                                        </v-card-text>
+                                    </v-col>
+                                </v-col>
+                                <v-btn @click='onSendAnnouncement' class='ara-blue' flat
                                            tabindex='3' title='Send Announcement'>
                                         <v-icon>fas fa-paper-plane</v-icon>
-                                    </v-btn>
-                                </v-card-title>
-                                <v-card-text style='padding-top: 0; padding-bottom: 0'>{{ formatDate(new Date()) }}
-                                </v-card-text>
-                                <v-textarea
-                                    auto-grow
-                                    class='announcement-content'
-                                    density="default" label='Announcement Text (HTML tags can be used for detailed formatting.)'
-                                    rows='1' single-line
-                                    style='padding-left: 1em; padding-right: 1em; padding-top: 0.2em'
-                                    tabindex='2'
-                                    v-model='newAnnouncementContent' />
-                            </v-card>
-                        </div>
-                        <div style='display: flex; align-items: center; justify-content: center'>
-                            <v-btn @click='seeNewerAnnouncements()' class='ara-blue-bg text-white' round
-                                   style='margin-top: 10px; margin-bottom: 0'
-                                   v-if='announcementListOffset > 0'>
-                                See Newer Announcements
-                            </v-btn>
-                        </div>
-                        <div class='announcement' v-for='announcement in getVisibleAnnouncements()'>
-                            <v-card>
-                                <v-card-title class='announcement-title'>
-                                    <v-icon @click='onStopEditing()' class='ara-orange'
-                                            style='padding-right: 1em'
-                                            title='Stop Editing'
-                                            v-if='isEditingAnnouncement(announcement)'>
-                                        fas fa-times-circle
+                                </v-btn>
+                            </v-row>
+                        </v-container>    
+                        <v-container style="padding:0%">
+                            <v-textarea
+                                auto-grow
+                                class='announcement-content'
+                                density="default" label='Announcement Text (HTML tags can be used for detailed formatting.)'
+                                rows='1' single-line
+                                style='padding: 0.4em;'
+                                tabindex='2'
+                                v-model='newAnnouncementContent' />
+                        </v-container>
+                    </v-card>
+                    <div style='display: flex; align-items: center; justify-content: center'>
+                        <v-btn @click='seeNewerAnnouncements()' class='ara-blue-bg text-white' round
+                               style='margin-top: 10px; margin-bottom: 0'
+                               v-if='announcementListOffset > 0'>
+                            See Newer Announcements
+                        </v-btn>
+                    </div>
+                        <div v-for='announcement in getVisibleAnnouncements()'>
+                            <v-card style="padding: 10px; margin: 10px;">
+                                <v-row justify="space-between" no-gutters>
+                                    <v-card-title class='announcement-title'>
+                                        <v-icon @click='onStopEditing()' class='ara-orange'
+                                                style='padding: 1em'
+                                                title='Stop Editing'
+                                                v-if='isEditingAnnouncement(announcement)'>
+                                            fas fa-times-circle
                                     </v-icon>
                                     {{ announcement.title }}
-                                    <v-spacer />
-                                    <v-btn @click='onSetAnnouncementForEdit(announcement)' class='ara-blue'
-                                           icon
-                                           title='Edit Announcement' v-if='hasAdminAccess'>
-                                        <v-icon>fas fa-edit</v-icon>
-                                    </v-btn>
-                                    <v-btn @click='onDeleteAnnouncement(announcement.id)' class='ara-orange'
-                                           icon
-                                           title='Delete Announcement' v-if='hasAdminAccess'>
-                                        <v-icon>fas fa-trash</v-icon>
-                                    </v-btn>
-                                </v-card-title>
+                                    </v-card-title>
+                                    <div style="padding: 10px;">
+                                        <v-btn @click='onSetAnnouncementForEdit(announcement)' class='ara-blue'
+                                                   flat
+                                                   title='Edit Announcement' v-if='hasAdminAccess'>
+                                                <v-icon>fas fa-edit</v-icon>
+                                        </v-btn>
+                                        <v-btn @click='onDeleteAnnouncement(announcement.id)' class='ara-orange'
+                                                   flat
+                                                   title='Delete Announcement' v-if='hasAdminAccess'>
+                                                <v-icon>fas fa-trash</v-icon>
+                                        </v-btn>
+                                    </div>
+                                </v-row>
                                 <v-card-text class='announcement-date'>{{ formatDate(announcement.createdDate) }}
                                 </v-card-text>
                                 <v-card-text class='announcement-content'
                                              v-html="announcement.content.replace(/(\r)*\n/g, '<br/>')"></v-card-text>
                             </v-card>
                         </div>
-                        <div style='display: flex; align-items: center; justify-content: center;'>
+                    <div style='display: flex; align-items: center; justify-content: center;'>
                             <v-btn @click='seeOlderAnnouncements()' class='ara-blue-bg text-white' round
                                    style='margin-top: 0; margin-bottom: 10px'
                                    v-if='announcementListOffset < announcements.length - (hasAdminAccess ? 9 : 10)'>
@@ -90,41 +89,34 @@
                             </v-btn>
                         </div>
                     </v-card>
-                </v-row>
-            </v-col>
-        </v-row>
-    </v-container>
-  </v-dialog>
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import moment from 'moment';
 import { hasValue } from '@/shared/utils/has-value-util';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { toRefs, computed, watch } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import Dialog from 'primevue/dialog';
 
 const emit = defineEmits(['close'])
 let store = useStore();
-const props = defineProps<{
+let props = defineProps<{
     showDialog: boolean
-    }>()
+}>()
+const { showDialog } = toRefs(props);
+let announcements = computed<Announcement[]>(() => store.state.announcementModule.announcements);
+let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+async function upsertAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('upsertAnnouncement', payload);}
+async function deleteAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('deleteAnnouncement', payload);}
+let announcementListOffset: number = 0;
+let newAnnouncementTitle: string = '';
+let newAnnouncementContent: string = '';
+let selectedAnnouncementForEdit: Announcement|undefined = undefined;
 
-let announcements = ref<Announcement[]>(store.state.announcementModule.announcements);
-let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
-
-async function upsertAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('upsertAnnouncement');}
-async function deleteAnnouncementAction(payload?: any): Promise<any> {await store.dispatch('deleteAnnouncement');}
- 
-    let announcementListOffset: number = 0;
-
-    let newAnnouncementTitle: string = '';
-    let newAnnouncementContent: string = '';
-
-    let selectedAnnouncementForEdit: Announcement|undefined = undefined;
-
+    watch(announcements, () => {
+    });
     function getVisibleAnnouncements() {
         return announcements.value.slice(announcementListOffset, announcementListOffset + (hasAdminAccess ? 9 : 10));
     }
@@ -158,7 +150,6 @@ async function deleteAnnouncementAction(payload?: any): Promise<any> {await stor
                 createdDate: new Date(),
             },
         });
-
         newAnnouncementContent = newAnnouncementTitle = '';
     }
 
@@ -218,7 +209,28 @@ async function deleteAnnouncementAction(payload?: any): Promise<any> {await stor
 
 </script>
 
-<style>
+<style scoped>
+html {
+    font-size: 14px;
+}
+
+body {
+    font-family: var(--font-family);
+    font-weight: normal;
+    background: var(--surface-ground);
+    color: var(--text-color);
+    padding: 1rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.card {
+    background: var(--surface-card);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+    
 .announcement-dialog {
     width: 100%;
     justify-content: center;
@@ -245,4 +257,5 @@ async function deleteAnnouncementAction(payload?: any): Promise<any> {await stor
     padding-top: 0.75em;
     padding-bottom: 1em;
 }
+
 </style>

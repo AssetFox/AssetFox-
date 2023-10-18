@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-dialog style="overflow-y: auto" max-width='800px' persistent scrollable v-model="dialogDataPreChecks.showDialog">
+        <v-dialog style="overflow-y: auto" max-width='800px' persistent scrollable v-bind:show="dialogDataPreChecks.showDialog">
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-row justify-space-between align-center>
@@ -56,7 +56,7 @@
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
     import { useStore } from 'vuex';
     import { useRouter } from 'vue-router';
-
+    
     const props = defineProps<{
         dialogDataPreChecks: AlertPreChecksData
     }>()

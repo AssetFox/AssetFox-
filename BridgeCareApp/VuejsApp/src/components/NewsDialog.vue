@@ -1,5 +1,5 @@
 <template>
-  <Dialog :style="{ width: '50vw', height: '50vw'}" block-scroll modal v-model:visible="showDialog" :closable="false">
+  <Dialog :style="{ width: 'auto', height: 'auto'}" block-scroll modal v-model:visible="showDialog" :closable="false">
                     <v-card class='announcement-dialog'>
                         <v-toolbar color="#002E6C" dark>
                             <v-app-bar-nav-icon></v-app-bar-nav-icon>

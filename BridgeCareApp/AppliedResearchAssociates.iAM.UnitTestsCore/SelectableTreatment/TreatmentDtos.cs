@@ -34,6 +34,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
                 Costs = new List<TreatmentCostDTO>(),
                 Consequences = new List<TreatmentConsequenceDTO>(),
                 PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
+                ShadowForAnyTreatment = 2,
+                ShadowForSameTreatment = 5,
             };
             return dto;
         }

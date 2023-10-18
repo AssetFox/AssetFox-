@@ -1,0 +1,68 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using BridgeCareCore.Services;
+using BridgeCareCore.Services.Treatment;
+using BridgeCareCoreTests.Helpers;
+using OfficeOpenXml;
+using Xunit;
+
+namespace BridgeCareCoreTests.Tests.Integration
+{
+    public class TreatmentServiceIntegrationTests
+    {
+        private TreatmentService CreateTreatmentService(UnitOfDataPersistenceWork unitOfWork)
+        {
+            var expressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid().Object;
+            var treatmentLoader = new ExcelTreatmentLoader(expressionValidationService);
+            var service = new TreatmentService(unitOfWork, treatmentLoader);
+            return service;
+        }
+
+        [Fact]
+        public void DownloadLibraryTreatmentSpreadsheet_ThenUpload_SameTreatments()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var libraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryId);
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(TestHelper.UnitOfWork, libraryId, treatmentId);
+            var cost = TreatmentCostTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentId, libraryId);
+            var consequence = TreatmentConsequenceTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryId, treatmentId,
+                attribute: "AGE");
+            var treatments1 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(libraryId);
+            var service = CreateTreatmentService(TestHelper.UnitOfWork);
+            var fileInfo = service.ExportLibraryTreatmentsExcelFile(libraryId);
+            var dataAsString = fileInfo.FileData;
+            var bytes = Convert.FromBase64String(dataAsString);
+            var stream = new MemoryStream(bytes);
+            File.WriteAllBytes("zzzzz.xlsx", bytes);
+            var excelPackage = new ExcelPackage(stream);
+            var userCriteria = new UserCriteriaDTO();
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatment, libraryId);
+            var treatments2 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(libraryId);
+            Assert.Empty(treatments2);
+            service.ImportLibraryTreatmentsFile(libraryId, excelPackage);
+            var treatments3 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(libraryId);
+            var treatment1 = treatments1.Single();
+            var treatment3 = treatments3.Single();
+            ObjectAssertions.EquivalentExcluding(treatment1, treatment3,
+                t => t.Id,
+                t => t.Costs[0].Id,
+                t => t.Costs[0].Equation.Id,
+                t => t.Costs[0].CriterionLibrary.Id,
+                t => t.Consequences[0].Id,
+                t => t.Consequences[0].Equation.Id,
+                t => t.Consequences[0].CriterionLibrary.Id);
+        }
+    }
+}

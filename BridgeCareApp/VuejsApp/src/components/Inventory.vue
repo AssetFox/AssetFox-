@@ -1,6 +1,6 @@
 <template>  
     <v-row>
-        <v-col cols="12"">
+        <v-col cols="12">
             <v-row justify-space-between row>
                 <v-subheader v-if="stateInventoryReportNames.length > 1" class="ghd-select ghd-text-field ghd-text-field-border">
                     <v-select
@@ -40,8 +40,8 @@
            </v-row>
             <v-divider></v-divider>
             <div class="container" v-html="sanitizedHTML"></div>
-        </row>
-    </v-layout>
+        </v-col>
+    </v-row>
 </template>
 
 <script lang="ts" setup>

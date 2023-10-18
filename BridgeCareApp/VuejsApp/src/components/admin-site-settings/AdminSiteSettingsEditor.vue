@@ -127,11 +127,11 @@
       document.getElementById("agencyImageUpload")?.click();
    }
    function handleImplementationLogoUpload(payload: any){
-    const file = payload.files[0];
+    const file = payload.files;
     importProductLogoAction(file);  
 }
   function handleAgencyLogoUpload(payload: any){
-    const file = payload.files[0];
+    const file = payload.files;
     importAgencyLogoAction(file);
   }
   </script>

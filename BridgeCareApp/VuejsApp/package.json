@@ -16,6 +16,7 @@
         "stage": "vite build --mode staging"
     },
     "dependencies": {
+        "@kyvg/vue3-notification": "^3.0.2",
         "@microsoft/signalr": "^3.1.22",
         "@progress/kendo-charts-vue-wrapper": "2023.2.718",
         "@progress/kendo-grid-vue-wrapper": "2023.2.718",

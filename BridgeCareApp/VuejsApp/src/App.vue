@@ -79,20 +79,21 @@
                                 icon
                             >
                                 <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
-                                <!-- <notification-bell
+                                <notifications
                                     :size="30"
                                     :count="notificationCounter"
                                     :upperLimit="50"
-                                    left="8px"
-                                    top="8px"
-                                    counterPadding="2px"
-                                    fontSize="10px"
-                                    counterStyle="roundRectangle"
+                                    :animated="true"
+                                    left="13px"
+                                    top="6px"
+                                    fontSize="12px"
+                                    counterStyle="round"
+                                    counterLocation="upperRight"
                                     counterBackgroundColor="#FF0000"
                                     counterTextColor="#FFFFFF"
                                     iconColor="#002E6C"
                                     class="hide-bell-svg"
-                                /> -->
+                                /> 
                             </button>
                         </template>
                         <v-card class="mx-auto" max-width="100%">
@@ -253,6 +254,7 @@
 <script setup lang="ts">
 import {inject, reactive, computed, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import NotificationBell from 'vue-notification-bell';
+import Notifications from '@kyvg/vue3-notification'
 import Spinner from './shared/modals/Spinner.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';

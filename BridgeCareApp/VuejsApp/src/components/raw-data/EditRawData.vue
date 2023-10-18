@@ -16,12 +16,12 @@
                         :model-value="navigationTab"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
-                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;" @click="onNavigate(navigationTab.navigation)">
                             <v-list-tile-action>
                                 <v-list-tile-icon class="sidebar-icon">
-                                    <AttributesSvg id="EditRawData-attributes-button" style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Attributes'"/>    
-                                    <DataSourceSvg id="EditRawData-dataSource-button" style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'DataSource'"/>
-                                    <NetworksSvg  id="EditRawData-networks-button" style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Networks'"/>                            
+                                    <AttributesSvg id="EditRawData-attributes-button" style="height: 38px; width: 34px"  class="raw-data-icon"  v-if="navigationTab.tabName === 'Attributes'"/>    
+                                    <DataSourceSvg id="EditRawData-dataSource-button" style="height: 30px; width: 36px" class="raw-data-icon"  v-if="navigationTab.tabName === 'DataSource'"/>
+                                    <NetworksSvg  id="EditRawData-networks-button" style="height: 34px; width: 34px" class="raw-data-icon"  v-if="navigationTab.tabName === 'Networks'"/>                            
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>                         
@@ -48,10 +48,14 @@ import AttributesSvg from '@/shared/icons/AttributesSvg.vue';
 import DataSourceSvg from '@/shared/icons/DataSourceSvg.vue';
 import NetworksSvg from '@/shared/icons/NetworksSvg.vue';
 import { useStore } from 'vuex';
+import {useRouter} from 'vue-router'
+import router from '@/router';
+
 
     let store = useStore();
     let hasAdminAccess: boolean = store.state.authenticationModule.hasAdminAccess;
     let userId: string = store.state.authenticationModule.userId;
+
 
     let networkId: string = getBlankGuid();
     let networkName: string = '';
@@ -113,7 +117,12 @@ import { useStore } from 'vuex';
         );
 
     }
-
+    
+    function onNavigate(route: any) {
+        if (router.currentRoute.value.path !== route.path) {
+            router.push(route).catch(() => {});
+        }
+    }
 
     function visibleNavigationTabs() {
         return navigationTabs.filter(

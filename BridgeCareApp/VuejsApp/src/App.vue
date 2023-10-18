@@ -28,7 +28,7 @@
                         @click="onNavigate('/EditRawData/')"
                         class="ara-blue-pantone-281"
                         variant = "flat"
-                        v-if="hasAdminAccess"
+                        
                     >
                         Raw Data
                     </v-btn>

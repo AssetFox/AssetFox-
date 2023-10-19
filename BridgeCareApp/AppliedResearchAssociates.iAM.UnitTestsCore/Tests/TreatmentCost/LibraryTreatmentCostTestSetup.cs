@@ -9,7 +9,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore
 {
-    public static class TreatmentCostTestSetup
+    public static class LibraryTreatmentCostTestSetup
     {
         public static TreatmentCostDTO ModelForEntityInDb(IUnitOfWork unitOfWork, Guid treatmentId, Guid treatmentLibraryId, Guid? id = null, string mergedCriteriaExpression = null)
         {

@@ -69,7 +69,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var treatmentId = Guid.NewGuid();
             var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, treatmentName);
-            var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
+            var treatmentCost = LibraryTreatmentCostTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, treatmentId, treatmentLibraryId, mergedCriteriaExpression: $"[{resultAttributeName}]='ok'");
             var keyAttributes = new List<IamAttribute> { keyAttribute };
             var resultAttributes = new List<IamAttribute> { resultAttribute };

@@ -52,7 +52,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var treatmentId = Guid.NewGuid();
             var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
-            var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
+            var treatmentCost = LibraryTreatmentCostTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, treatmentId, treatmentLibraryId, mergedCriteriaExpression: "ThrowingCriteria");
 
             var exception = Assert.Throws<CalculateEvaluateCompilationException>(() => service.GetTreatmentCost(
@@ -96,7 +96,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var treatmentId = Guid.NewGuid();
             var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
-            var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
+            var treatmentCost = LibraryTreatmentCostTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, treatmentId, treatmentLibraryId, mergedCriteriaExpression: $"[{resultAttributeName}]='ok'");
             var keyAttributes = new List<IamAttribute> { keyAttribute };
             var resultAttributes = new List<IamAttribute> { resultAttribute };
@@ -157,7 +157,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var treatmentId = Guid.NewGuid();
             var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, treatmentName);
-            var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
+            var treatmentCost = LibraryTreatmentCostTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, treatmentId, treatmentLibraryId, mergedCriteriaExpression: $"[{resultAttributeName}]='ok'");
             var keyAttributes = new List<IamAttribute> { keyAttribute };
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);

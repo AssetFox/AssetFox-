@@ -25,6 +25,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
             return dto;
         }
+        public static TreatmentDTO ModelForSingleTreatmentOfSimulationInDb2(IUnitOfWork unitOfWork, Guid simulationId, Guid? id = null, string name = "Treatment name")
+        {
+            var dto = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(id, name);
+            dto.Budgets = new List<TreatmentBudgetDTO>();
+            dto.BudgetIds = new List<Guid>();
+            var dtos = new List<TreatmentDTO> { dto };
+            unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
+            return dto;
+        }
     }
 
    

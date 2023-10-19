@@ -91,7 +91,7 @@ let inventorySelectListsWorker: any = null;
 let inventoryData: any  = null;
 let sanitizedHTML: any = null;
 const $sanitize = inject('$sanitize') as any
-const $worker = inject('$worker') as any
+const worker = inject('$worker') as any
 let inventoryReportName: string = '';
 
         /**
@@ -196,7 +196,7 @@ let inventoryReportName: string = '';
         }
 
         function initializeLists() {
-            inventorySelectListsWorker = $worker.create(
+            inventorySelectListsWorker = worker.create(
                 [
                     {
                         message: 'setInventorySelectLists', func: (data: any) => {

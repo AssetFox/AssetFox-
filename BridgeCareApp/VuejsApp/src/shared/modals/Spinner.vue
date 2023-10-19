@@ -1,6 +1,6 @@
 ﻿<template>
     <v-row>
-        <v-dialog content content-class="centered-dialog" persistent v-model="loading">
+        <v-dialog content content-class="centered-dialog" persistent v-bind:show="loading">
             <v-container>
                 <v-row align-center column justify-center>
                     <v-progress-circular :size="70" :width="7" class="ara-blue-pantone-281"

@@ -21,6 +21,7 @@
         </v-row>
       </v-card-actions>
     </v-card>
+  <!-- </v-dialog> -->
   </v-dialog>
 </template>
 

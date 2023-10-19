@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="350" persistent v-model="dialogDataWithButtons.showDialog">
+    <v-dialog max-width="350" persistent v-bind:show="dialogDataWithButtons.showDialog">
         <v-card>
             <v-card-title class="headline">
                 <v-row justify-center>
@@ -43,7 +43,7 @@
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
     import { useStore } from 'vuex';
     import { useRouter } from 'vue-router';
-
+    
     const props = defineProps<{
         dialogDataWithButtons: AlertDataWithButtons
     }>()

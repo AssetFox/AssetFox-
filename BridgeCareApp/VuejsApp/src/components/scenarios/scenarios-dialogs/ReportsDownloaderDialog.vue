@@ -1,7 +1,5 @@
 ﻿<template>
-  <v-dialog max-width="500px"
-            scrollable
-            v-model="dialogData.showModal">
+  <v-dialog max-width="500px" scrollable v-bind:show="dialogData.showModal">
     <v-card>
       <v-card-title primary-title>
         <v-row column>
@@ -47,7 +45,7 @@
           </v-chip>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+    </v-dialog>
 </template>
 
 <script lang="ts" setup>

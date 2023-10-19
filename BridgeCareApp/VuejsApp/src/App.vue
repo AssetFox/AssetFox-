@@ -3,8 +3,10 @@
         <v-main>
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
-                    <img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" /> 
-                    <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
+                    <v-row no-gutters>
+                    <div><img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')" style="width: auto;" /></div>
+                    <div><img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')" style="width: auto;" /></div>
+                </v-row>
                 </v-toolbar-title>
                 <v-toolbar-items>
                     <v-btn
@@ -250,7 +252,7 @@
 </template>
 
 <script setup lang="ts">
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, computed, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import NotificationBell from 'vue-notification-bell';
 import Notifications from '@kyvg/vue3-notification'
 import Spinner from './shared/modals/Spinner.vue';
@@ -295,10 +297,11 @@ import vuetify from '@/plugins/vuetify';
 import config from '../public/config.json';
 
     let store = useStore();
-    let authenticated = ref<boolean>(store.state.authenticationModule.authenticated);
+    let authenticated = computed(() => store.state.authenticationModule.authenticated);
     let hasRole = ref<boolean>(store.state.authenticationModule.hasRole);
     let username = ref<string>(store.state.authenticationModule.username);
-    let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
+    let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
+
     let refreshing = ref<boolean>(store.state.authenticationModule.refreshing);
     //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
     let notifications = ref<Notification[]>(store.state.notificationModule.notifications);
@@ -306,16 +309,19 @@ import config from '../public/config.json';
     let stateSelectedScenario = ref<Scenario>(store.state.scenarioModule.selectedScenario);
     let packageVersion = ref<string>(store.state.announcementModule.packageVersion);
     let securityType = ref<string>(store.state.authenticationModule.securityType);
-    let announcements = ref<Announcement[]>(store.state.announcementModule.announcements);
+    let announcements = computed(() => store.state.announcementModule.announcements);
     let currentUser = ref<User>(store.state.userModule.currentUser);
     let stateImplementationName = ref<string>(store.state.adminSiteSettingsModule.implementationName);
-    let agencyLogoBase64 = ref<string>(store.state.adminSiteSettingsModule.agencyLogo);
-    let productLogoBase64 = ref<string>(store.state.adminSiteSettingsModule.productLogo);
+    let agencyLogoBase64 = computed(() => store.state.adminSiteSettingsModule.agencyLogo);
+    let productLogoBase64 = computed(() => store.state.adminSiteSettingsModule.productLogo);
     let stateInventoryReportNames = ref<string[]>(store.state.adminDataModule.inventoryReportNames);
     let stateAlertMessage = ref<string>(store.state.alertModule.alertMessage);
     let stateAlert = ref<boolean>(store.state.alertModule.alert);
     async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut');}
+
     async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy');}
+    //async function setIsBusyAction(payload?: any) { () => store.dispatch('setIsBusy');}
+
     async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks');}
     async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes');}
     async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements');}
@@ -358,7 +364,9 @@ import config from '../public/config.json';
     ];
     let esecSecurityType: string = SecurityTypes.esec;
     let b2cSecurityType: string = SecurityTypes.b2c;
-    let showNewsDialog: boolean = false;
+    
+    let showNewsDialog= ref(false);
+
     let hasUnreadNewsItem: boolean = false;
     let currentURL: any = '';
     let unauthorizedError: string = '';
@@ -409,23 +417,20 @@ import config from '../public/config.json';
         selectedScenarioHasStatus = hasValue(selectedScenario.status);
     }
 
-    watch(authenticated, () => onAuthenticationChange)
-    function onAuthenticationChange() {
+    watch(authenticated, () => {
         if (authenticated) {
             onAuthenticate();
         }
-    }
+    });
 
-    watch(announcements, () => onAnnouncementsChange)
-    function onAnnouncementsChange() {
+    watch(announcements, () => {
         latestNewsDate = getDateOnly(announcements.value[0].createdDate.toString()); 
-    }
+    });
 
-    watch(currentUser, () => onCurrentUserChange)
-    function onCurrentUserChange() {
+    watch(currentUser, () => {
         currentUserLastNewsAccessDate = getDateOnly(currentUser.value.lastNewsAccessDate);
         checkLastNewsAccessDate();
-    }
+    });
 
     watch(stateImplementationName, () => onimplementationNameChange)
     function onimplementationNameChange() {
@@ -681,7 +686,7 @@ import config from '../public/config.json';
      * Sets up a recurring attempt at refreshing user tokens, and fetches network and attribute data
      */
     function onAuthenticate() {
-        $forceUpdate();
+        //$forceUpdate();
         getNetworksAction().then(() =>
         getAttributesAction().then(() =>
         getAllUsersAction().then(() =>
@@ -741,13 +746,15 @@ import config from '../public/config.json';
     }
 
     function onShowNewsDialog() {
-        showNewsDialog = true;
-        updateUserLastNewsAccessDateAction({id: currentUser.value.id, accessDate: latestNewsDate});
+        showNewsDialog.value = true;
+        if (currentUser.value.id != getBlankGuid()) {
+            updateUserLastNewsAccessDateAction({id: currentUser.value.id, accessDate: latestNewsDate});
+        }
         hasUnreadNewsItem = false;
     }
 
     function onCloseNewsDialog() {
-        showNewsDialog = false;
+        showNewsDialog.value = false;
     }
 
     function checkLastNewsAccessDate () {

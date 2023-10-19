@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
 .theme--dark.v-table thead th {
     background-color: #424242;
 }
@@ -739,7 +741,6 @@ display: none !important;
     margin-top: 25px !important;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 .ghd-content{
     padding-left: 295px !important;
 }

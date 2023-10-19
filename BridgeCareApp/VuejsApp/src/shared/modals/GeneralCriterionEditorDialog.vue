@@ -1,7 +1,7 @@
 <template>
     <v-dialog
         persistent
-        fullscreen
+        maximizable
         v-bind:show="dialogData.showDialog"
         class="criterion-library-editor-dialog"
     >
@@ -62,6 +62,7 @@ import CriteriaEditor from '../components/CriteriaEditor.vue';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+
 let store = useStore();
 const emit = defineEmits(['submit'])
 const props = defineProps<{

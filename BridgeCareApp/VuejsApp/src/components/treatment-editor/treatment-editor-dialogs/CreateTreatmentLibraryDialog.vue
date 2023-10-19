@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+        <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
             <v-card class="ghd-padding">
                 <v-card-title>
                     <v-row justify-left>

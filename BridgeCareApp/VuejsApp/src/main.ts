@@ -1,11 +1,13 @@
 //import '@babel/polyfill';
 import '@fortawesome/fontawesome-free/css/all.css';
-import Vue, { createApp, defineComponent, watch, reactive } from 'vue';
+import Vue, { createApp, h, defineComponent, watch, reactive } from 'vue';
+import vuetify from '@/plugins/vuetify';
 import 'vuetify/dist/vuetify.min.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import App from './App.vue';
 import router from './router';
+import { useRoute, useRouter } from 'vue-router';
 import store from './store/root-store';
 import './assets/css/main.css';
 import VueScreen from 'vue-screen';
@@ -23,16 +25,24 @@ import VuejsDialog from 'vuejs-dialog';
 // @ts-ignore
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
 import { ap } from 'ramda';
-import vuetify from '@/plugins/vuetify';
+import { IconProps, IconSet, createVuetify } from 'vuetify';
+import { fa } from 'vuetify/iconsets/fa'
+import PrimeVue from 'primevue/config';
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
+import "primevue/resources/themes/saga-blue/theme.css"; 
+import 'primevue/resources/primevue.min.css'
+import 'primeicons/primeicons.css';
+import "primeflex/primeflex.css";
 
 const app = createApp(App);
+
 
 app.use(router);
 app.use(store);
 app.use(vuetify);
-
+app.use(PrimeVue);
 //app.use(VueWorker);
-
 app.use(KendoChartInstaller);
 
 //app.use(VueCurrencyInput);
@@ -62,6 +72,8 @@ var defaultOptions = {
 
 app.use(VueSanitize, defaultOptions);
 
+app.component("Dialog",Dialog)
+   .component("Button", Button);
 app.config.globalProperties.productionTip = false;
 //app.use(VuejsDialog);
 //app.config.globalProperties.$config = config;

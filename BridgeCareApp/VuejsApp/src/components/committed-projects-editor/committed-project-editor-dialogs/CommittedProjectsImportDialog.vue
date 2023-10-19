@@ -1,5 +1,5 @@
 <template>
-    <v-dialog  width="768px" height="540px" persistent v-model='showDialog'>
+    <v-dialog width="768px" height="540px" persistent v-bind:show="showDialog">
         <v-card class="div-padding">
             <v-card-title class="pa-2">
                 <v-row justify-start>
@@ -47,7 +47,7 @@ import FileSelector from '@/shared/components/FileSelector.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { clone } from 'ramda';
 import { useStore } from 'vuex';
-
+import Dialog from 'primevue/dialog';
 
     let store = useStore();
     const props = defineProps({showDialog: Boolean});

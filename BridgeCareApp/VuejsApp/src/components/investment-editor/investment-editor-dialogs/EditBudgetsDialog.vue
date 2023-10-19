@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-dialog max-width='800px' persistent scrollable v-model='dialogData.showDialog'>
+        <v-dialog max-width='800px' persistent scrollable v-bind:show='dialogData.showDialog'>
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-row justify-space-between align-center>

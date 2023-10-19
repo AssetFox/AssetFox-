@@ -1,8 +1,6 @@
 <template>
   <v-row>
-    <v-dialog v-bind:show="showDialog"
-              max-width="250px"
-              persistent>
+    <v-dialog v-bind:show="showDialog" max-width="250px" persistent>
       <v-card>
         <v-card-title>
           <v-row justify-center>

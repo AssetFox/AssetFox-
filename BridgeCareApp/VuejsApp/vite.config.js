@@ -3,7 +3,8 @@ import path from "path"
 import vue from '@vitejs/plugin-vue'
 import { viteCommonjs, esbuildCommonjs } from '@originjs/vite-plugin-commonjs'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
- 
+
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue({

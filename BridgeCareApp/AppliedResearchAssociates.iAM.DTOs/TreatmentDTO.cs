@@ -98,6 +98,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// <summary>
         /// List of SupersedeRules for a Treatment
         /// </summary>
-        public List<TreatmentSupersedeRuleDTO> TreatmentSupersedeRules { get; set; }
+        public List<TreatmentSupersedeRuleDTO> SupersedeRules { get; set; }
     }
 }

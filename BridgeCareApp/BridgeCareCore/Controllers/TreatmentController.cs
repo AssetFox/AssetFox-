@@ -877,32 +877,32 @@ namespace BridgeCareCore.Controllers
         //    }
         //}
 
-        //[HttpGet]
-        //[Route("ExportScenarioTreatmentSupersedeRuleExcelFile/{simulationId}")]
-        //[Authorize]
-        //public async Task<IActionResult> ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId)
-        //{
-        //    try
-        //    {
-        //        // Rename
-        //        var result =
-        //            await Task.Factory.StartNew(() => _treatmentService.ExportScenarioTreatmentSupersedeRuleExcelFile(simulationId));
+        [HttpGet]
+        [Route("ExportScenarioTreatmentSupersedeRuleExcelFile/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId)
+        {
+            try
+            {
+                // Rename
+                var result =
+                    await Task.Factory.StartNew(() => _treatmentService.ExportScenarioTreatmentSupersedeRuleExcelFile(simulationId));
 
-        //        return Ok(result);
-        //    }
-        //    catch (UnauthorizedAccessException)
-        //    {
-        //        var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioScenarioTreatmentSupersedeRuleFile for {simulationName} - {HubService.errorList["Unauthorized"]}");
-        //        throw;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentSupersedeRuleExcelFile for {simulationName} - {e.Message}");
-        //        throw;
-        //    }
-        //}
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioScenarioTreatmentSupersedeRuleFile for {simulationName} - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentSupersedeRuleExcelFile for {simulationName} - {e.Message}");
+                throw;
+            }
+        }
 
         [HttpGet]
         [Route("DownloadScenarioTreatmentSupersedeRuleTemplate")]

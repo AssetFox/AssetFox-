@@ -241,7 +241,30 @@ namespace BridgeCareCore.Services
             _unitOfWork.SelectableTreatmentRepo.ReplaceTreatmentLibrary(libraryId, importedTreatments);
         }
 
-        public void ImportScenarioTreatmentSupersedeRuleFileSingle(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null) => throw new NotImplementedException();
-        public FileInfoDTO ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId) => throw new NotImplementedException();
+   
+        public FileInfoDTO ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId)
+        {
+            var fileInfoResult = new FileInfoDTO();
+            var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
+            var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            if (scenarioTreatments.Any())
+            {
+                var dateString = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
+                var filename = $"Export scenario {scenarioName} treatments {dateString}";
+                var fileInfo = new FileInfo(filename);
+                using var package = new ExcelPackage(fileInfo);
+                var workbook = package.Workbook;
+                TreatmentWorksheetGenerator.Fill(workbook, scenarioTreatments);
+                var bytes = package.GetAsByteArray();
+                var fileData = Convert.ToBase64String(bytes);
+                fileInfoResult = new FileInfoDTO
+                {
+                    FileData = fileData,
+                    FileName = filename,
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                };
+            }
+            return fileInfoResult;
+        }
     }
 }

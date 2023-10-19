@@ -8,9 +8,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using Microsoft.Extensions.DependencyModel;
-using MathNet.Numerics.Statistics.Mcmc;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums;
 using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -53,6 +50,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             BaseEntityPropertySetter.SetBaseEntityProperties(treatment, baseEntityProperties);
             return treatment;
         }
+
         public static ScenarioSelectableTreatmentEntity ToScenarioEntityWithCriterionLibraryWithChildren(this TreatmentDTO dto, Guid simulationId, IEnumerable<AttributeEntity> attributes, BaseEntityProperties baseEntityProperties = null)
         {
             var entity = ToScenarioEntity(dto, simulationId);
@@ -89,9 +87,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             entity.ScenarioTreatmentConsequences = consequencetEntities;
+
+            var supersedeRuleEntities = new List<ScenarioTreatmentSupersedeRuleEntity>();
+            foreach(var supersedeRule in dto.SupersedeRules)
+            {
+                var supersedeRuleEntity = supersedeRule.ToScenarioTreatmentSupersedeRuleEntity(baseEntityProperties, dto.Id, simulationId);
+                supersedeRuleEntities.Add(supersedeRuleEntity);
+            }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            entity.ScenarioTreatmentSupersedeRules = supersedeRuleEntities;
+
             return entity;
         }
-
 
         public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this Treatment domain, Guid simulationId) =>
             new ScenarioSelectableTreatmentEntity
@@ -173,7 +180,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.ScenarioTreatmentSupersedeRules.Any())
             {
-                entity.ScenarioTreatmentSupersedeRules.ForEach(_ => _.CreateTreatmentSupersedeRule(selectableTreatment));
+                entity.ScenarioTreatmentSupersedeRules.ForEach(_ => _.CreateTreatmentSupersedeRule(selectableTreatment, simulation));
             }
         }
 
@@ -198,6 +205,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CriterionLibrary = entity.CriterionLibrarySelectableTreatmentJoin != null
                     ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),
+                SupersedeRules = entity.TreatmentSupersedeRules.Any()
+                    ? entity.TreatmentSupersedeRules.Select(_ => _.ToDto()).ToList()
+                    : new List<TreatmentSupersedeRuleDTO>(),
                 Category = (TreatmentCategory)entity.Category,
                 AssetType = (AssetCategories)entity.AssetType,
 
@@ -214,6 +224,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Treatment = treatmentDto,
             };
         }
+
         public static List<ScenarioTreatmentPerformanceFactorEntity> ToScenarioSelectableTreatmentPerformanceFactorEntity(this TreatmentDTO dto, BaseEntityProperties baseEntityProperties)
         {
             List<ScenarioTreatmentPerformanceFactorEntity> treatmentPerformanceFactors = new List<ScenarioTreatmentPerformanceFactorEntity>();
@@ -231,6 +242,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             });
             return treatmentPerformanceFactors;
         }
+
         public static TreatmentLibraryDTO ToDto(this TreatmentLibraryEntity entity) =>
             new TreatmentLibraryDTO
             {
@@ -287,7 +299,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 AssetType = (AssetCategories)entity.AssetType,
 
-                IsUnselectable = entity.IsUnselectable
+                IsUnselectable = entity.IsUnselectable,
+                SupersedeRules = entity.ScenarioTreatmentSupersedeRules.Any()
+                                ? entity.ScenarioTreatmentSupersedeRules.Select(_ => _.ToDto()).ToList()
+                                : new List<TreatmentSupersedeRuleDTO>()
             };
     }
 }

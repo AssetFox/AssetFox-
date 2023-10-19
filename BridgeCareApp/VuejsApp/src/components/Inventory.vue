@@ -3,7 +3,7 @@
         <v-flex xs12>
             <v-layout justify-space-between row>
                 <v-subheader v-if="stateInventoryReportNames.length > 1" class="ghd-select ghd-text-field ghd-text-field-border">
-                    <v-select
+                    <v-select id="Inventory-reportSelection-select"
                         v-model="inventoryReportName" 
                         :items="stateInventoryReportNames"
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -14,7 +14,7 @@
                 <v-spacer></v-spacer>
                 <v-layout>
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
-                        <v-autocomplete :items="keyAttributeValues[index]" @change="onSelectInventoryItem(index)" item-text="identifier" item-value="identifier"
+                        <v-autocomplete id="Inventory-dropdowns-autocomplete" :items="keyAttributeValues[index]" @change="onSelectInventoryItem(index)" item-text="identifier" item-value="identifier"
                                         :label="`Select by ${key} Key`" outline
                                         v-model="selectedKeys[index]"
                                         :disabled = "isDisabled(index)">
@@ -32,14 +32,14 @@
                     </div>
                 </v-layout>
                 <v-spacer></v-spacer>
-                    <v-btn style="padding-top: 15px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                    <v-btn id="Inventory-resetKeyFields-btn" style="padding-top: 15px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                     outline 
                     @click="resetDropdowns()">
                     Reset Key Fields
                     </v-btn>
            </v-layout>
             <v-divider></v-divider>
-            <div class="container" v-html="sanitizedHTML"></div>
+            <div id="Inventory-report-div" class="container" v-html="sanitizedHTML"></div>
         </v-flex>
     </v-layout>
 </template>

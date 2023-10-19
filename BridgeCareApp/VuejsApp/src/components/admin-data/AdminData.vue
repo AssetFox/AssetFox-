@@ -29,7 +29,7 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Key Field(s): </v-subheader> 
                     </v-flex>
                     <v-flex xs5>
-                        <div class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
+                        <div id="AdminData-keyFields-div" class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
                     </v-flex>                        
                     <v-btn style="margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline

@@ -89,10 +89,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             entity.ScenarioTreatmentConsequences = consequencetEntities;
 
             var supersedeRuleEntities = new List<ScenarioTreatmentSupersedeRuleEntity>();
-            foreach(var supersedeRule in dto.SupersedeRules)
+            if (dto.SupersedeRules != null)
             {
-                var supersedeRuleEntity = supersedeRule.ToScenarioTreatmentSupersedeRuleEntity(baseEntityProperties, dto.Id, simulationId);
-                supersedeRuleEntities.Add(supersedeRuleEntity);
+                foreach (var supersedeRule in dto.SupersedeRules)
+                {
+                    var supersedeRuleEntity = supersedeRule.ToScenarioTreatmentSupersedeRuleEntity(baseEntityProperties, dto.Id, simulationId);
+                    supersedeRuleEntities.Add(supersedeRuleEntity);
+                }                
             }
             BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             entity.ScenarioTreatmentSupersedeRules = supersedeRuleEntities;

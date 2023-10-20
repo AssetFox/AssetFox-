@@ -15,14 +15,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public TreatmentSupersedeRuleRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateTreatmentSupersedeRules(Dictionary<Guid, List<TreatmentSupersedeRule>> treatmentSupersedeRulesPerTreatmentId,
-            string simulationName)
+            string simulationName, Guid simulationId)
         {
             var supersedeRuleEntityIdsPerExpression = new Dictionary<string, List<Guid>>();
 
             var supersedeRuleEntities = treatmentSupersedeRulesPerTreatmentId.SelectMany(_ =>
                 _.Value.Select(__ =>
                 {
-                    var entity = __.ToScenarioEntity(_.Key);
+                    var entity = __.ToScenarioTreatmentSupersedeRuleEntity(_.Key, simulationId);
 
                     if (!__.Criterion.ExpressionIsBlank)
                     {

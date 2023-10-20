@@ -98,7 +98,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (selectableTreatments.Any(_ => _.SupersedeRules.Any()))
             {
                 _unitOfWork.Context.AddAll(selectableTreatments.Where(_ => _.SupersedeRules.Any())
-                    .SelectMany(_ => _.SupersedeRules.Select(session => session.ToScenarioEntity(_.Id))).ToList());
+                    .SelectMany(_ => _.SupersedeRules.Select(supersedeRules => supersedeRules.ToScenarioTreatmentSupersedeRuleEntity(_.Id, simulationId))).ToList());
             }
 
             // Update last modified date

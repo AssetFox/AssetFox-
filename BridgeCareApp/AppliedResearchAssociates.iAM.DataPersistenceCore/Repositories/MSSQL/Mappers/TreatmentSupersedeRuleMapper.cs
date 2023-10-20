@@ -3,24 +3,43 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using MathNet.Numerics.Statistics.Mcmc;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
     public static class TreatmentSupersedeRuleMapper
     {
-        public static TreatmentSupersedeRuleEntity ToLibraryEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
+        public static TreatmentSupersedeRuleEntity ToTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
             new TreatmentSupersedeRuleEntity
             {
                 Id = domain.Id,
                 TreatmentId = treatmentId
             };
 
-        public static ScenarioTreatmentSupersedeRuleEntity ToScenarioEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
-            new ScenarioTreatmentSupersedeRuleEntity
+        public static ScenarioTreatmentSupersedeRuleEntity ToScenarioTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId, Guid simulationId)
+        {
+            var entity = new ScenarioTreatmentSupersedeRuleEntity
             {
                 Id = domain.Id,
-                TreatmentId = treatmentId
+                TreatmentId = treatmentId,
+                ScenarioSelectableTreatment = domain.Treatment.ToScenarioEntity(simulationId),
+
             };
+
+            var criterion = domain.Criterion;
+            if (criterion != null) // TODO test and update as required
+            {
+                var criterionLibrary = criterion.ToEntity("");
+                var join = new CriterionLibraryScenarioTreatmentSupersedeRuleEntity
+                {
+                    ScenarioTreatmentSupersedeRuleId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin = join;
+            }
+
+            return entity;
+        }
 
         public static ScenarioTreatmentSupersedeRuleEntity ToScenarioTreatmentSupersedeRuleEntity(this TreatmentSupersedeRuleDTO treatmentSupersedeRuleDto, BaseEntityProperties baseEntityProperties, Guid treatmentId, Guid simulationId)
         {

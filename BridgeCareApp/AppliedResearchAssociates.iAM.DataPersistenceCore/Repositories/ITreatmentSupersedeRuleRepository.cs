@@ -7,6 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public interface ITreatmentSupersedeRuleRepository
     {
         void CreateTreatmentSupersedeRules(
-            Dictionary<Guid, List<TreatmentSupersedeRule>> treatmentSupersedeRulesPerTreatmentId, string simulationName);
+            Dictionary<Guid, List<TreatmentSupersedeRule>> treatmentSupersedeRulesPerTreatmentId, string simulationName, Guid simulationId);
     }
 }

@@ -1,11 +1,49 @@
 <template>
-    <div>Analysis Method</div>
-    <v-form ref="form" v-model="valid" lazy-validation>
-        <!-- <v-row column>
-            <v-col cols = "6">
-                <v-row column>
-                    <v-row justify-center> -->
-                        <v-col id="EditAnalysisMethod-weightingParent-vflex" xs4>
+    <div>
+        <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
+
+        <v-select
+            id="EditAnalysisMethod-weighting-vselect"
+            class="ghd-select ghd-control-border ghd-control-text"
+            :items="weightingAttributes"
+            variant="outlined"
+            clearable
+            item-title="text"
+            item-value="value"
+            v-model="analysisMethod.attribute"
+            :disabled="!hasAdminAccess"
+        >
+        </v-select>
+
+        <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
+        <v-select 
+            id="EditAnalysisMethod-optimizationStrategy-select"
+            class="ghd-select ghd-control-border ghd-control-text"
+            :items="optimizationStrategy"
+            item-title="text"
+            item-value="value"
+            variant="outlined"
+            v-model="analysisMethod.optimizationStrategy"
+            :disabled="!hasAdminAccess"
+        >
+        </v-select>
+
+        <v-col cols = "4" id="EditAnalysisMethod-spendingStrategyParent-vflex">
+                            <v-subheader class="ghd-control-label ghd-md-gray">Spending Strategy</v-subheader>
+                            <v-select
+                                id="EditAnalysisMethod-spendingStrategy-select"
+                                class="ghd-select ghd-control-border ghd-control-text"
+                                :items="spendingStrategy"
+                                variant="outlined"
+                                item-title="text"
+                                item-value="value"
+                                v-model="analysisMethod.spendingStrategy"
+                            >
+                            </v-select>
+                        </v-col>                      
+
+    </div>
+                        <!-- <v-col id="EditAnalysisMethod-weightingParent-vflex" xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
                                 id="EditAnalysisMethod-weighting-vselect"
@@ -62,7 +100,6 @@
                             >
                             </v-select>
                         </v-col>                        
-                    <!-- </v-row> -->
                     <v-row justify-center>
                         <v-spacer />
                          <v-col cols = "4">
@@ -174,9 +211,6 @@
                         </v-col>
                         <v-spacer></v-spacer>
                     </v-row>
-                <!-- </v-row>
-            </v-col> -->
-
             <v-col cols = "6">
                 <v-row justify-center row>
                     <v-btn
@@ -194,14 +228,12 @@
                         >Save</v-btn
                     >
                 </v-row>
-            </v-col>
+            </v-col> -->
 
             <GeneralCriterionEditorDialog
                 :dialogData="criterionEditorDialogData"
                 @submit="onCriterionEditorDialogSubmit"
             />
-        <!-- </v-row> -->
-    </v-form>
 </template>
 
 <script lang="ts" setup>
@@ -248,7 +280,7 @@ import { useRouter } from 'vue-router';
     async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario')} 
 
     let selectedScenarioId: string = getBlankGuid();
-    let analysisMethod: AnalysisMethod = shallowReactive(clone(emptyAnalysisMethod));
+    const analysisMethod = ref<AnalysisMethod>(clone(emptyAnalysisMethod));
     let optimizationStrategy: SelectItem[] = [
         { text: 'Benefit', value: OptimizationStrategy.Benefit },
         {
@@ -338,7 +370,7 @@ import { useRouter } from 'vue-router';
 
     watch(stateAnalysisMethod, () => onStateAnalysisChanged)
     function onStateAnalysisChanged() {
-        analysisMethod = {
+        analysisMethod.value = {
             ...stateAnalysisMethod,
             benefit: {
                 ...stateAnalysisMethod.benefit,
@@ -354,7 +386,7 @@ import { useRouter } from 'vue-router';
     function onAnalysisChanged() {
         setHasUnsavedChangesAction({
             value:
-                !equals(analysisMethod, stateAnalysisMethod),
+                !equals(analysisMethod.value, stateAnalysisMethod),
         });
 
         setBenefitAttributeIfEmpty();        
@@ -370,15 +402,15 @@ import { useRouter } from 'vue-router';
 
     function setBenefitAttributeIfEmpty() {
         if (
-            !hasValue(analysisMethod.benefit.attribute) &&
+            !hasValue(analysisMethod.value.benefit.attribute) &&
             hasValue(benefitAttributes)
         ) {
-            analysisMethod.benefit.attribute = benefitAttributes.value[0].value.toString();
+            analysisMethod.value.benefit.attribute = benefitAttributes.value[0].value.toString();
         }
     }
 
     function onSetAnalysisMethodProperty(property: string, value: any) {
-        analysisMethod = setItemPropertyValue(
+        analysisMethod.value = setItemPropertyValue(
             property,
             value,
             analysisMethod,
@@ -386,10 +418,10 @@ import { useRouter } from 'vue-router';
     }
 
     function onSetBenefitProperty(property: string, value: any) {
-        analysisMethod.benefit = setItemPropertyValue(
+        analysisMethod.value.benefit = setItemPropertyValue(
             property,
             value,
-            analysisMethod.benefit,
+            analysisMethod.value.benefit,
         );
     }
 
@@ -410,7 +442,7 @@ import { useRouter } from 'vue-router';
     function onShowCriterionEditorDialog() {
         criterionEditorDialogData.value = {
             showDialog: true,
-            CriteriaExpression: analysisMethod.criterionLibrary.mergedCriteriaExpression,
+            CriteriaExpression: analysisMethod.value.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
@@ -420,20 +452,20 @@ import { useRouter } from 'vue-router';
         );
 
         if (!isNil(criterionexpression)) {
-            if(analysisMethod.criterionLibrary.id == getBlankGuid())
-                analysisMethod.criterionLibrary.id = getNewGuid();
-            analysisMethod = {
-                ...analysisMethod,
-                criterionLibrary: {...analysisMethod.criterionLibrary, mergedCriteriaExpression: criterionexpression} as CriterionLibrary,
+            if(analysisMethod.value.criterionLibrary.id == getBlankGuid())
+                analysisMethod.value.criterionLibrary.id = getNewGuid();
+            analysisMethod.value = {
+                ...analysisMethod.value,
+                criterionLibrary: {...analysisMethod.value.criterionLibrary, mergedCriteriaExpression: criterionexpression} as CriterionLibrary,
             };
         }
     }
 
     function criteriaIsEmpty()
     {
-        return (isNil(analysisMethod.criterionLibrary) ||
-                isNil(analysisMethod.criterionLibrary.mergedCriteriaExpression) ||
-                analysisMethod.criterionLibrary.mergedCriteriaExpression == ""
+        return (isNil(analysisMethod.value.criterionLibrary) ||
+                isNil(analysisMethod.value.criterionLibrary.mergedCriteriaExpression) ||
+                analysisMethod.value.criterionLibrary.mergedCriteriaExpression == ""
                 );
     }
 
@@ -461,7 +493,7 @@ import { useRouter } from 'vue-router';
     }
 
     function onDiscardChanges() {
-        analysisMethod = clone(stateAnalysisMethod);
+        analysisMethod.value = clone(stateAnalysisMethod);
     }
 
 </script>

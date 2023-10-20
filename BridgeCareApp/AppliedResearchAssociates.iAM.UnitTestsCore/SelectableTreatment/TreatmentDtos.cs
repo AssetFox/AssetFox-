@@ -22,10 +22,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             return dto;
         }
 
-        public static TreatmentDTO DtoWithEmptyCostsAndConsequencesLists(Guid? id = null, string name = "Treatment name")
+        public static TreatmentDTO DtoWithEmptyCostsAndConsequencesLists(
+            Guid? id = null,
+            string name = "Treatment name",
+            string treatmentCriterionExpression = null)
         {
-
             var resolveId = id ?? Guid.NewGuid();
+            var treatmentCriterion = treatmentCriterionExpression == null ? null :
+                CriterionLibraryDtos.Dto(null, treatmentCriterionExpression);
             var dto = new TreatmentDTO
             {
                 Id = resolveId,
@@ -36,6 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
                 PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
                 ShadowForAnyTreatment = 2,
                 ShadowForSameTreatment = 5,
+                CriterionLibrary = treatmentCriterion,
             };
             return dto;
         }

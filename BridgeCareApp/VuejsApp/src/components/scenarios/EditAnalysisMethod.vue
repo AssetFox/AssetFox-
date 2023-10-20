@@ -1,9 +1,10 @@
 <template>
+    <div>Analysis Method</div>
     <v-form ref="form" v-model="valid" lazy-validation>
-        <v-row column>
+        <!-- <v-row column>
             <v-col cols = "6">
                 <v-row column>
-                    <v-row justify-center>
+                    <v-row justify-center> -->
                         <v-col id="EditAnalysisMethod-weightingParent-vflex" xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
@@ -61,7 +62,7 @@
                             >
                             </v-select>
                         </v-col>                        
-                    </v-row>
+                    <!-- </v-row> -->
                     <v-row justify-center>
                         <v-spacer />
                          <v-col cols = "4">
@@ -173,8 +174,8 @@
                         </v-col>
                         <v-spacer></v-spacer>
                     </v-row>
-                </v-row>
-            </v-col>
+                <!-- </v-row>
+            </v-col> -->
 
             <v-col cols = "6">
                 <v-row justify-center row>
@@ -199,7 +200,7 @@
                 :dialogData="criterionEditorDialogData"
                 @submit="onCriterionEditorDialogSubmit"
             />
-        </v-row>
+        <!-- </v-row> -->
     </v-form>
 </template>
 
@@ -228,7 +229,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'; 
 
     let store = useStore(); 
-    const $router = useRouter(); 
+    const router = useRouter(); 
     // ToDo - verify if below is correct. Its used in onUpsertAnalysisMethod()
     const $refs = inject('$refs') as any
 
@@ -280,30 +281,39 @@ import { useRouter } from 'vue-router';
         },
         { text: 'As Budget Permits', value: SpendingStrategy.AsBudgetPermits },
     ];
-    let benefitAttributes: SelectItem[] = [];
-    let weightingAttributes: SelectItem[] = [{ text: '', value: '' }];
-    let simulationName: string;
-    let networkName: string = '';
-    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-        emptyGeneralCriterionEditorDialogData,
-    );
-    let rules: InputValidationRules = validationRules;
-    let valid: boolean = true;
-    let criteriaIsIntentionallyEmpty: boolean = false;
+    // let benefitAttributes: SelectItem[] = [];
+    const benefitAttributes = ref<SelectItem[]>([]);
+    // let weightingAttributes: SelectItem[] = [{ text: '', value: '' }];
+    const weightingAttributes = ref<SelectItem[]>([{ text: '', value: '' }]);
+    // let simulationName: string;
+    const simulationName = ref<string>();
+    // let networkName: string = '';
+    const networkName = ref<string>();
+    // let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    //     emptyGeneralCriterionEditorDialogData,
+    // );
+    const criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
+
+    // let rules: InputValidationRules = validationRules;
+    const rules = ref<InputValidationRules>(validationRules);
+    // let valid: boolean = true;
+    const valid = ref<boolean>(true);
+    // let criteriaIsIntentionallyEmpty: boolean = false;
+    const criteriaIsIntentionallyEmpty = ref<boolean>(false);
 
     //beforeRouteEnter(to: any, from: any, next: any) {
        //next((vm: any) => {
     created(); 
     function created() { 
-            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
-            simulationName = $router.currentRoute.value.query.simulationName as string;
-            networkName = $router.currentRoute.value.query.networkName as string;
+            selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
+            simulationName.value = router.currentRoute.value.query.simulationName as string;
+            networkName.value = router.currentRoute.value.query.networkName as string;
             if (selectedScenarioId === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
                 addErrorNotificationAction({
                     message: 'Found no selected scenario for edit',
                 });
-                $router.push('/Scenarios/');
+                router.push('/Scenarios/');
             }
 
             // get the selected scenario's analysisMethod data
@@ -315,12 +325,11 @@ import { useRouter } from 'vue-router';
         //});
     }
 
-    onMounted(() => mounted);
-    function mounted() {
+    onMounted(() => {
         if (hasValue(stateNumericAttributes)) {
             setBenefitAndWeightingAttributes();
         }
-    }
+    });
 
     onBeforeUnmount(() => beforeDestroy );
     function beforeDestroy() {
@@ -364,7 +373,7 @@ import { useRouter } from 'vue-router';
             !hasValue(analysisMethod.benefit.attribute) &&
             hasValue(benefitAttributes)
         ) {
-            analysisMethod.benefit.attribute = benefitAttributes[0].value.toString();
+            analysisMethod.benefit.attribute = benefitAttributes.value[0].value.toString();
         }
     }
 
@@ -391,22 +400,22 @@ import { useRouter } from 'vue-router';
                 value: attribute.name,
             }),
         );
-        benefitAttributes = [...numericAttributeSelectItems];
-        weightingAttributes = [
-            weightingAttributes[0],
+        benefitAttributes.value = [...numericAttributeSelectItems];
+        weightingAttributes.value = [
+            weightingAttributes.value[0],
             ...numericAttributeSelectItems,
         ];
     }
 
     function onShowCriterionEditorDialog() {
-        criterionEditorDialogData = {
+        criterionEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: analysisMethod.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
     function onCriterionEditorDialogSubmit(criterionexpression: string) {
-        criterionEditorDialogData = clone(
+        criterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 

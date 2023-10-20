@@ -3,10 +3,10 @@
         <v-col cols = "12">
             <v-card elevation="5" color="blue lighten-5">
                 <v-tabs center-active v-model="tab">
-                    <v-tabs-slider color="blue"></v-tabs-slider>
                     <v-tab
                         v-for="item in tabItems"
                         :key="item.name"
+                        :value="item.name"
                         class="tab-theme"
                     >
                         <GhdQueueSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Work queue'"/> 
@@ -17,9 +17,9 @@
                     <v-spacer></v-spacer>
                     <v-col cols = "1"></v-col>
                 </v-tabs>
-                <v-window v-model="tab">
-                    <v-window-item>
-                        <v-col cols = "12">
+                <v-window v-model="tab" >
+                    <v-window-item value="My scenarios">
+                         <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-col cols = "6">
@@ -28,7 +28,6 @@
                                                 id="Scenarios-searchScenarios-textField"
                                                 type="text"
                                                 placeholder="Search in scenarios"
-                                                prepend-inner-icon=$vuetify.icons.ghd-search
                                                 hide-details
                                                 single-line
                                                 v-model="searchMine"
@@ -90,14 +89,13 @@
                                     :totalItems="totalUserScenarios"
                                     :pagination.sync="userScenariosPagination"
                                     :headers="scenarioGridHeaders"
-                                    sort-icon=$vuetify.icons.ghd-table-sort
                                     
                                     calculate-widths
                                 >
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                         <td>
                                         
-                                            <v-edit-dialog
+                                            <v-dialog
                                                 size="large"
                                                 lazy
                                                 persistent
@@ -129,7 +127,7 @@
                                                         ]"
                                                     />
                                                 </template>
-                                            </v-edit-dialog>
+                                            </v-dialog>
                                         </td>
                                         <td>
                                             {{
@@ -191,7 +189,7 @@
                                                 </template>
 
                                                 <v-list>
-                                                    <v-list-tile
+                                                    <v-list-item
                                                         v-for="(item,i) in actionItems"
                                                         :key="i"
                                                         @click="OnActionTaken(
@@ -200,17 +198,17 @@
                                                                 props.item,
                                                                 true) "
                                                         class="menu-style">
-                                                        <v-list-tile-title icon>
+                                                        <v-list-item-title icon>
                                                             <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
                                                             <v-icon v-else class="action-icon-padding">{{ item.icon}}</v-icon> 
                                                             {{item.title}}
-                                                        </v-list-tile-title>
-                                                    </v-list-tile>
+                                                        </v-list-item-title>
+                                                    </v-list-item>
                                                 </v-list>
                                             </v-menu>
                                         </td>
                                     </template>
-                                    <v-alert
+                                    <!-- <v-alert
                                         :model-value="hasMineSearch()"
                                         class="ara-orange-bg"
                                         icon="fas fa-exclamation"
@@ -218,13 +216,13 @@
                                     >
                                         Your search for "{{ currentSearchMine }}" found
                                         no results.
-                                    </v-alert>
+                                    </v-alert> -->
                                 </v-data-table>
                             </v-card>
                         </v-col>
                     </v-window-item>
-                    <v-window-item>
-                        <v-col cols = "12">
+                    <v-window-item value="Shared with me">
+                       <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-col cols = "6">
@@ -234,7 +232,6 @@
                                                 label="Search"
                                                 placeholder="Search in scenarios"
                                                 outline
-                                                prepend-inner-icon=$vuetify.icons.ghd-search
                                                 hide-details
                                                 single-line
                                                 v-model="searchShared"
@@ -381,35 +378,28 @@
                                                 </template>
 
                                                 <v-list>
-                                                    <v-list-tile v-for="(item,i) in actionItemsForSharedScenario"
+                                                    <v-list-item v-for="(item,i) in actionItemsForSharedScenario"
                                                         :key="i"
                                                         @click="OnActionTaken(item.action,props.item.users,props.item,false)"
                                                         class="menu-style">
-                                                        <v-list-tile-title icon>                                                        
+                                                        <v-list-item-title icon>                                                        
                                                             <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
                                                             <v-icon v-else class="action-icon-padding">{{ item.icon}}</v-icon>  
                                                             {{item.title}}
-                                                        </v-list-tile-title>
-                                                    </v-list-tile>
+                                                        </v-list-item-title>
+                                                    </v-list-item>
                                                 </v-list>
                                             </v-menu>
                                         </td>
                                     </template>
-                                    <template v-slot:no-data v-if="hasSharedSearch()">
-                                        <v-alert
-                                            :model-value="true"
-                                            class="ara-orange-bg"
-                                            icon="fas fa-exclamation">
-                                            Your search for "{{ currentSearchShared }}"
-                                            found no results.
-                                        </v-alert>
-                                    </template>                                 
+                                                                 
                                 </v-data-table>
                             </v-card>
                         </v-col>
+                     two
                     </v-window-item>
-                    <v-window-item>
-                        <v-col cols = "12">
+                    <v-window-item value="Work queue">
+                        <!-- <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title class="ghd-dialog-padding-top-title">
                                     <v-row justify-start>
@@ -550,7 +540,8 @@
                                     </template>
                                 </v-data-table>
                             </v-card>
-                        </v-col>
+                        </v-col> -->
+                        three
                     </v-window-item>
                 </v-window>
             </v-card>
@@ -631,7 +622,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted, inject } from 'vue'; 
+import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted, inject, readonly, computed, reactive } from 'vue'; 
 import moment from 'moment';
 import {
     emptyScenario,
@@ -694,26 +685,26 @@ import ScenarioService from '@/services/scenario.service';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
 import mitt from 'mitt';
+import $vuetify from '@/plugins/vuetify';
+import { onBeforeMount } from 'vue';
 
     let store = useStore(); 
     const $router = useRouter();     
     const $emitter = mitt()
 
-    const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
-    const stateScenarios: Scenario[] = shallowReactive(store.state.scenarioModule.scenarios); 
+    const stateNetworks = computed<Network[]>(() => store.state.networkModule.networks) ;
+    const stateScenarios = computed<Scenario[]>(() => store.state.scenarioModule.scenarios); 
 
-    const stateSharedScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentSharedScenariosPage) ;
-    const stateUserScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentUserScenarioPage) ;
+    const stateSharedScenariosPage = computed<Scenario[]>(() => store.state.scenarioModule.currentSharedScenariosPage) ;
+    const stateUserScenariosPage = computed<Scenario[]>(() => store.state.scenarioModule.currentUserScenarioPage) ;
 
-    let stateTotalSharedScenarios: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalSharedScenarios) ;
-    let stateTotalUserScenarios: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalUserScenarios) ;
+    let stateTotalSharedScenarios = computed<number>(() => store.state.scenarioModule.totalSharedScenarios) ;
+    let stateTotalUserScenarios = computed<number>(() => store.state.scenarioModule.totalUserScenarios) ;
 
-    const stateWorkQueuePage: QueuedWork[] = shallowReactive(store.state.scenarioModule.currentWorkQueuePage) ;
-    let stateTotalQueuedSimulations: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalQueuedSimulations) ;
-    const stateFastWorkQueuePage: QueuedWork[] = shallowReactive(store.state.scenarioModule.currentFastWorkQueuePage);
-    let stateTotalFastQueuedItems: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalFastQueuedItems);
-
-    // let navigation: any[] = (store.state.breadcrumbModule.navigation) ; 
+    const stateWorkQueuePage = computed<QueuedWork[]>(() => store.state.scenarioModule.currentWorkQueuePage) ;
+    let stateTotalQueuedSimulations = computed<number>(() => store.state.scenarioModule.totalQueuedSimulations) ;
+    const stateFastWorkQueuePage = computed<QueuedWork[]>(() => store.state.scenarioModule.currentFastWorkQueuePage);
+    let stateTotalFastQueuedItems = computed<number>(() => store.state.scenarioModule.totalFastQueuedItems);
 
     let authenticated:boolean = (store.state.authenticationModule.authenticated);
     let userId: string = (store.state.authenticationModule.userId);
@@ -725,12 +716,12 @@ import mitt from 'mitt';
     async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
     async function addInfoNotificationAction(payload?: any): Promise<any>{await store.dispatch('addInfoNotification')}
     async function getScenariosAction(payload?: any): Promise<any>{await store.dispatch('getScenarios')}
-    async function getSharedScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getSharedScenariosPage')}
-    async function createScenarioAction(payload?: any): Promise<any>{await store.dispatch('createScenario')}
-    async function cloneScenarioAction(payload?: any): Promise<any>{await store.dispatch('cloneScenario')}
+    async function getSharedScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getSharedScenariosPage', payload)}
+    async function createScenarioAction(payload?: any): Promise<any>{await store.dispatch('createScenario', payload)}
+    async function cloneScenarioAction(payload?: any): Promise<any>{await store.dispatch('cloneScenario', payload)}
 
-    async function updateScenarioAction(payload?: any): Promise<any>{await store.dispatch('updateScenario')}
-    async function deleteScenarioAction(payload?: any): Promise<any>{await store.dispatch('deleteScenario')}
+    async function updateScenarioAction(payload?: any): Promise<any>{await store.dispatch('updateScenario', payload)}
+    async function deleteScenarioAction(payload?: any): Promise<any>{await store.dispatch('deleteScenario', payload)}
     async function cancelWorkQueueItemAction(payload?: any): Promise<any>{await store.dispatch('cancelWorkQueueItem')}
     async function cancelFastQueueItemAction(payload?: any): Promise<any>{await store.dispatch('cancelFastQueueItem')}
     async function runSimulationAction(payload?: any): Promise<any>{await store.dispatch('runSimulation')}
@@ -740,109 +731,109 @@ import mitt from 'mitt';
     async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail')}
     async function updateNetworkRollupDetailAction(payload?: any): Promise<any>{await store.dispatch('updateNetworkRollupDetail')}
 
-    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario')} 
+    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)} 
     async function upsertBenefitQuantifierAction(payload?: any): Promise<any>{await store.dispatch('upsertBenefitQuantifier')} 
     async function aggregateNetworkDataAction(payload?: any): Promise<any>{await store.dispatch('aggregateNetworkData')} 
-    async function getUserScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getUserScenariosPage')}
+    async function getUserScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getUserScenariosPage', payload)}
 
-    async function updateQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateQueuedWorkStatus')} 
-    async function getWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getWorkQueuePage')} 
-    async function getFastWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getFastWorkQueuePage')} 
-    async function updateFastQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateFastQueuedWorkStatus')} 
+    async function updateQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateQueuedWorkStatus', payload)} 
+    async function getWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getWorkQueuePage', payload)} 
+    async function getFastWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getFastWorkQueuePage', payload)} 
+    async function updateFastQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateFastQueuedWorkStatus', payload)} 
     
     let networks: Network[] = [];
-    let scenarioGridHeaders: DataTableHeader[] = [
+    let scenarioGridHeaders: any = [
         {
-            text: 'Scenario',
-            value: 'name',
+            title: 'Scenario',
+            key: 'name',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Creator',
-            value: 'creator',
+            title: 'Creator',
+            key: 'creator',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Owner',
-            value: 'owner',
+            title: 'Owner',
+            key: 'owner',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Network',
-            value: 'network',
+            title: 'Network',
+            key: 'network',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Date Created',
-            value: 'createdDate',
+            title: 'Date Created',
+            key: 'createdDate',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Date Last Modified',
-            value: 'lastModifiedDate',
+            title: 'Date Last Modified',
+            key: 'lastModifiedDate',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Date Last Run',
-            value: 'lastRun',
+            title: 'Date Last Run',
+            key: 'lastRun',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Status',
-            value: 'status',
+            title: 'Status',
+            key: 'status',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Run Time',
-            value: 'runTime',
+            title: 'Run Time',
+            key: 'runTime',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Report Status',
-            value: 'reportStatus',
+            title: 'Report Status',
+            key: 'reportStatus',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Action',
-            value: 'actions',
+            title: 'Action',
+            key: 'actions',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: '',
-            value: '',
+            title: '',
+            key: '',
             align: 'left',
             sortable: false,
             class: 'header-border',
@@ -944,8 +935,8 @@ import mitt from 'mitt';
     let actionItemsForSharedScenario: ScenarioActions[] = [];
     let actionItemsForWorkQueue: ScenarioActions[] = [];
     let actionItemsForFastWorkQueue: ScenarioActions[] = [];
-    let tabItems: TabItems[] = [];
-    let tab: string = '';
+    const tabItems: TabItems[] = reactive([]);
+    let tab = ref('');
     let availableActions: any;
     let availableSimulationActions: any;
     let nameUpdate: string = '';
@@ -1007,27 +998,27 @@ import mitt from 'mitt';
 
     let aggragateDialogData: any = { showDialog: false };
 
-    watch(stateNetworks, onStateNetworksChanged) 
-    function onStateNetworksChanged() {
-        networks = clone(stateNetworks);
+    watch(stateNetworks, onstateNetworksChanged) 
+    function onstateNetworksChanged() {
+        networks = clone(stateNetworks.value);
         if (hasValue(networks)) {
             initializeScenarioPages()
         }
     }
  
-    watch(stateScenarios, onStateScenariosChanged) 
-    function onStateScenariosChanged() {
-        scenarios = clone(stateScenarios);
+    watch(stateScenarios, onstateScenariosChanged) 
+    function onstateScenariosChanged() {
+        scenarios = clone(stateScenarios.value);
     }
 
-    watch(stateSharedScenariosPage, onStateSharedScenariosPageChanged) 
-    function onStateSharedScenariosPageChanged(){
-        currentSharedScenariosPage = clone(stateSharedScenariosPage);
+    watch(stateSharedScenariosPage, onstateSharedScenariosPageChanged) 
+    function onstateSharedScenariosPageChanged(){
+        currentSharedScenariosPage = clone(stateSharedScenariosPage.value);
     }
 
     watch(stateTotalSharedScenarios, onStateTotalSharedScenariosChanged) 
     function onStateTotalSharedScenariosChanged(){
-        totalSharedScenarios = stateTotalSharedScenarios;
+        totalSharedScenarios.value = stateTotalSharedScenarios.value;
     }
     watch(totalSharedScenarios, onTotalSharedScenariosChanged) 
     function onTotalSharedScenariosChanged(){
@@ -1036,12 +1027,12 @@ import mitt from 'mitt';
 
     watch(stateUserScenariosPage, onStateUserScenariosPageChanged) 
     function onStateUserScenariosPageChanged(){
-        currentUserScenariosPage = clone(stateUserScenariosPage);
+        currentUserScenariosPage = clone(stateUserScenariosPage.value);
     }
 
     watch(stateTotalUserScenarios, onStateTotalUserScenariosChanged) 
     function onStateTotalUserScenariosChanged(){
-        totalUserScenarios = stateTotalUserScenarios;
+        totalUserScenarios.value = stateTotalUserScenarios.value;
     }
     watch(totalUserScenarios, onTotalUserScenariosChanged) 
     function onTotalUserScenariosChanged(){
@@ -1050,12 +1041,12 @@ import mitt from 'mitt';
     
     watch(stateWorkQueuePage, onStateWorkQueuePageChanged) 
     function onStateWorkQueuePageChanged(){
-        currentWorkQueuePage = clone(stateWorkQueuePage);
+        currentWorkQueuePage = clone(stateWorkQueuePage.value);
     }
 
     watch(stateTotalQueuedSimulations, onStateTotalQueuedSimulations) 
     function onStateTotalQueuedSimulations(){
-        totalQueuedSimulations = stateTotalQueuedSimulations;
+        totalQueuedSimulations.value = stateTotalQueuedSimulations.value;
     }
     watch(totalQueuedSimulations, onTotalQueuedSimulationsChanged) 
     function onTotalQueuedSimulationsChanged(){
@@ -1064,12 +1055,12 @@ import mitt from 'mitt';
 
     watch(stateFastWorkQueuePage, onStateFastWorkQueuePageChanged) 
     function onStateFastWorkQueuePageChanged(){
-        currentFastWorkQueuePage = clone(stateFastWorkQueuePage);
+        currentFastWorkQueuePage = clone(stateFastWorkQueuePage.value);
     }
 
     watch(stateTotalFastQueuedItems, onStateTotalFastQueuedItemsChanged) 
     function onStateTotalFastQueuedItemsChanged(){
-        totalFastQueuedItems = stateTotalFastQueuedItems;
+        totalFastQueuedItems.value = stateTotalFastQueuedItems.value;
     }
   
     watch(totalFastQueuedItems, onTotalFastQueuedItemsChanged) 
@@ -1206,9 +1197,8 @@ import mitt from 'mitt';
         getFastWorkQueuePageAction(workQueueRequest);    
     }
 
-    onMounted(() => mounted);
-    function mounted() {
-        networks = clone(stateNetworks);
+    onBeforeMount(() => {
+        networks = clone(stateNetworks.value);
         if (hasValue(networks) ) {
             initializeScenarioPages();
         } 
@@ -1329,11 +1319,10 @@ import mitt from 'mitt';
             { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: totalSharedScenarios.value },
             { name: 'General work queue', icon: require("@/assets/icons/queue.svg"), count: totalQueuedSimulations.value },
         );
-        tab = 'My scenarios';
-    }
+        tab.value = 'My scenarios';
+    });
 
-    onBeforeUnmount(()=> beforeDestroy); 
-    function beforeDestroy() {
+    onBeforeUnmount(()=> {
         $emitter.off(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             getDataMigrationStatus,
@@ -1362,7 +1351,7 @@ import mitt from 'mitt';
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
-    }
+    }); 
 
     function initializeScenarioPages(){
         const { sortBy, descending, page, rowsPerPage } = sharedScenariosPagination;
@@ -1402,14 +1391,14 @@ import mitt from 'mitt';
             initializing = false;
             initializingWorkQueue = false;
             initializingFastWorkQueue = false;
-            totalUserScenarios = stateTotalUserScenarios;
-            totalSharedScenarios = stateTotalSharedScenarios;
-            totalQueuedSimulations = stateTotalQueuedSimulations;
-            totalFastQueuedItems = stateTotalFastQueuedItems;
-            currentUserScenariosPage = clone(stateUserScenariosPage);
-            currentSharedScenariosPage = clone(stateSharedScenariosPage);
-            currentWorkQueuePage = clone(stateWorkQueuePage);
-            currentFastWorkQueuePage = clone(stateFastWorkQueuePage);
+            totalUserScenarios.value = stateTotalUserScenarios.value;
+            totalSharedScenarios.value = stateTotalSharedScenarios.value;
+            totalQueuedSimulations.value = stateTotalQueuedSimulations.value;
+            totalFastQueuedItems.value = stateTotalFastQueuedItems.value;
+            currentUserScenariosPage = clone(stateUserScenariosPage.value);
+            currentSharedScenariosPage = clone(stateSharedScenariosPage.value);
+            currentWorkQueuePage = clone(stateWorkQueuePage.value);
+            currentFastWorkQueuePage = clone(stateFastWorkQueuePage.value);
         })))); 
     }
 
@@ -1448,14 +1437,14 @@ import mitt from 'mitt';
         scenario.name = name;
         if (hasValue(scenario.name)) {
             updateScenarioAction({ scenario: scenario }).then(() => {
-                if(tab == '0')
+                if(tab.value == '0')
                     onUserScenariosPagination();
                 else
                     onSharedScenariosPagination();
             });
         } else {
             scenarios = [];
-            setTimeout(() => (scenarios = clone(stateScenarios)));
+            setTimeout(() => (scenarios = clone(stateScenarios.value)));
         }
     }
 
@@ -1594,7 +1583,7 @@ import mitt from 'mitt';
                 scenarioId: selectedScenario.id,
             }).then(() => {
                 selectedScenario = clone(emptyScenario)
-                if(tab == '0')
+                if(tab.value == '0')
                     onUserScenariosPagination();
                 else
                     onSharedScenariosPagination();
@@ -1717,7 +1706,7 @@ import mitt from 'mitt';
             var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
             if(isNil(updatedQueueItem))
                 return;
-            var queueItem = stateWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
+            var queueItem = stateWorkQueuePage.value.find(_ => _.id === updatedQueueItem.id)
             if(!isNil(queueItem)){
                 updateQueuedWorkStatusAction({
                     workQueueStatusUpdate: updatedQueueItem
@@ -1736,7 +1725,7 @@ import mitt from 'mitt';
             var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
             if(isNil(updatedQueueItem))
                 return;
-            var queueItem = stateFastWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
+            var queueItem = stateFastWorkQueuePage.value.find(_ => _.id === updatedQueueItem.id)
             if(!isNil(queueItem)){
                 updateFastQueuedWorkStatusAction({
                     workQueueStatusUpdate: updatedQueueItem

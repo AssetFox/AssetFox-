@@ -67,6 +67,8 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact(Skip = "Fails until bug 23588 is fixed.")]
+        // Once 23588 is fixed and this passes, treatment performance factors
+        // need to be added to this test.
         public void DownloadScenarioTreatmentSpreadsheet_ThenUpload_SameTreatments()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);

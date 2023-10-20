@@ -273,6 +273,7 @@
         <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
     </v-row>
+    <ConfirmDialog></ConfirmDialog>
 </template>
 
 <script lang='ts' setup>
@@ -343,8 +344,11 @@ import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import mitt from 'mitt';
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmDialog from 'primevue/confirmdialog';
 
 let store = useStore();
+const confirm = useConfirm();
 const emit = defineEmits(['submit'])
 const $router = useRouter();
 const $emitter = mitt()
@@ -1450,14 +1454,14 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
         if (hasUnsavedChanges && unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
+ 
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                header: "Unsaved Changes",
+                icon: 'pi pi-question-circle',
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
             unsavedDialogAllowed = true;

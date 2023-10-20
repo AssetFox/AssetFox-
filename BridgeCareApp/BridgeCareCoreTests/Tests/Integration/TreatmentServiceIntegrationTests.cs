@@ -91,6 +91,12 @@ namespace BridgeCareCoreTests.Tests.Integration
 
             var consequence = ScenarioTreatmentConsequenceTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, treatmentId,
                 attribute: "AGE", equation: "[AGE]", criterion: "[AGE] > 10");
+            var performanceFactor = TreatmentPerformanceFactorDtos.Dto("AGE");
+            var performanceFactors = new List<TreatmentPerformanceFactorDTO> { performanceFactor };
+            var performanceFactorDictionary = new Dictionary<Guid, List<TreatmentPerformanceFactorDTO>>
+                { { treatment.Id, performanceFactors } };
+            TestHelper.UnitOfWork.TreatmentPerformanceFactorRepo.UpsertScenarioTreatmentPerformanceFactors(
+                performanceFactorDictionary, simulationId);
             var treatments1 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             var service = CreateTreatmentService(TestHelper.UnitOfWork);
             var fileInfo = service.ExportScenarioTreatmentsExcelFile(simulationId);
@@ -115,7 +121,8 @@ namespace BridgeCareCoreTests.Tests.Integration
                 t => t.Costs[0].CriterionLibrary.Id,
                 t => t.Consequences[0].Id,
                 t => t.Consequences[0].Equation.Id,
-                t => t.Consequences[0].CriterionLibrary.Id);
+                t => t.Consequences[0].CriterionLibrary.Id,
+                t => t.PerformanceFactors[0].Id);
         }
     }
 }

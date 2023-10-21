@@ -1,7 +1,8 @@
 <template>
     <div>
+        <v-row>
+            <v-col id="EditAnalysisMethod-weightingParent-vflex" xs4>
         <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
-
         <v-select
             id="EditAnalysisMethod-weighting-vselect"
             class="ghd-select ghd-control-border ghd-control-text"
@@ -14,7 +15,8 @@
             :disabled="!hasAdminAccess"
         >
         </v-select>
-
+        </v-col>
+        <v-col id="EditAnalysisMethod-optimizationStrategyParent-vflex" xs4>
         <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
         <v-select 
             id="EditAnalysisMethod-optimizationStrategy-select"
@@ -27,7 +29,7 @@
             :disabled="!hasAdminAccess"
         >
         </v-select>
-
+        </v-col>    
         <v-col cols = "4" id="EditAnalysisMethod-spendingStrategyParent-vflex">
                             <v-subheader class="ghd-control-label ghd-md-gray">Spending Strategy</v-subheader>
                             <v-select
@@ -41,7 +43,129 @@
                             >
                             </v-select>
                         </v-col>                      
-
+                    </v-row>
+                    <v-row>
+                        <v-col cols = "4">
+                            <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
+                            <v-select
+                                id="EditAnalysisMethod-benefitAttribute-select"
+                                class="ghd-select ghd-control-text ghd-control-border"
+                                :items="benefitAttributes"
+                                item-title="text"
+                                item-value="value"
+                                variant="outlined"
+                                v-model="analysisMethod.benefit.attribute"
+                                :disabled="!hasAdminAccess"
+                            >
+                            </v-select>
+                        </v-col>
+                        <v-col cols = "4">
+                            <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
+                            <v-text-field
+                                id="EditAnalysisMethod-benefitLimit-textField"
+                                style="margin:0px"
+                                class="ghd-control-text ghd-control-border"
+                                @update:model-value="onSetBenefitProperty('limit',$event)"
+                                outline
+                                type="number"
+                                min="0"
+                                :value.number="analysisMethod.benefit.limit"
+                                :rules="[
+                                    rules['generalRules'].valueIsNotEmpty,
+                                    rules['generalRules'].valueIsNotNegative(
+                                        analysisMethod.benefit.limit,
+                                    ),
+                                ]"
+                                :disabled="!hasAdminAccess"
+                            >
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols = "4" class="ghd-constant-header">
+                            <v-switch style="margin-left:10px;margin-top:30px;"
+                                id="EditAnalysisMethod-allowMultiBudgetFunding-switch"
+                                class="ghd-checkbox"
+                                label="Allow Multi Budget Funding"
+                                :disabled="!hasAdminAccess"
+                                v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"
+                                @change='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols = "6">
+                            <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+                            <v-textarea
+                                id="EditAnalysisMethod-description-textArea"
+                                class="ghd-control-text ghd-control-border"
+                                @update:model-value="onSetAnalysisMethodProperty('description', $event)"
+                                no-resize
+                                outline
+                                rows="6"
+                                :model-value="analysisMethod.description"
+                            >
+                            </v-textarea>
+                        </v-col>
+                        <v-col cols = "6">
+                            <v-row style="height=12px;padding-bottom:0px;">
+                                <v-col cols = "12" style="height=12px;padding-bottom:0px">
+                                    <v-subheader class="ghd-control-label ghd-md-gray">                             
+                                        Criteria</v-subheader>
+                                </v-col>
+                                <v-col cols = "1" style="height=12px;padding-bottom:0px;padding-top:0px;">
+                                    <v-btn
+                                        id="EditAnalysisMethod-criteriaEditor-btn"
+                                        style="padding-right:20px !important;"
+                                        @click="
+                                            onShowCriterionEditorDialog
+                                        "
+                                        class="edit-icon ghd-control-label"
+                                        icon
+                                    >
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                    </v-btn>
+                                </v-col>
+                            </v-row>
+                            <v-textarea
+                                id="EditAnalysisMethod-criteria-textArea"
+                                class="ghd-control-text ghd-control-border"
+                                style="padding-bottom: 0px; height: 90px;"
+                                no-resize
+                                outline
+                                readonly
+                                :rows="criteriaRows()"
+                                v-model="
+                                    analysisMethod.criterionLibrary
+                                        .mergedCriteriaExpression
+                                "
+                            >
+                            </v-textarea>
+                            <v-checkbox
+                                id="EditAnalysisMethod-criteria-checkbox"
+                                style="padding-top: 0px; margin-top: 4px;"
+                                class="ghd-checkbox ghd-md-gray"
+                                label="Criteria is intentionally empty (MUST check to Save)" 
+                                v-model="criteriaIsIntentionallyEmpty"
+                                v-show="criteriaIsEmpty()"
+                            >
+                            </v-checkbox>
+                        </v-col>
+                    </v-row>
+                
+                <v-row justify-center>
+                    <v-btn
+                        id="EditAnalysisMethod-cancel-btn"
+                        @click="onDiscardChanges"
+                        class="ghd-white-bg ghd-blue ghd-button-text ghd-button"
+                        variant = "flat"
+                        >Cancel</v-btn
+                    >
+                    <v-btn
+                        id="EditAnalysisMethod-save-btn"
+                        @click="onUpsertAnalysisMethod"
+                        variant = "flat"
+                        class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
+                        >Save</v-btn
+                    >
+                </v-row>
     </div>
                         <!-- <v-col id="EditAnalysisMethod-weightingParent-vflex" xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>

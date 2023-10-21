@@ -1,4 +1,5 @@
 <template>
+    <div>test</div>
     <v-row column>
         <v-col cols = "12">
             <v-row row style="margin-top:-40px;">
@@ -7,7 +8,6 @@
                     <v-select 
                         id="InvestmentEditor-investmentLibrary-select"
                         :items='librarySelectItems'
-                        append-icon=$vuetify.icons.ghd-down
                         variant="outlined"
                         v-model='librarySelectItemValue'
                         class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
@@ -150,7 +150,7 @@
         </v-col>
         <v-col v-show='hasSelectedLibrary || hasScenario' xs12>            
         <!-- datatable -->
-            <v-col >
+            <!-- <v-col >
                 <v-data-table 
                     id="InvestmentEditor-investmentsDataTable-dataTable"
                     :headers='budgetYearsGridHeaders' 
@@ -201,7 +201,7 @@
                        class='ghd-blue ghd-button' variant = "flat">
                     Delete Selected
                 </v-btn>
-            </v-col>
+            </v-col> -->
         </v-col>
         <v-col v-show='hasSelectedLibrary && !hasScenario' xs12>
             <v-row justify-center>
@@ -275,8 +275,8 @@
     </v-row>
 </template>
 
-<script lang='ts' setup>
-import Vue, { shallowRef } from 'vue';
+<script setup lang='ts'>
+import { shallowRef } from 'vue';
 import SetRangeForAddingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForAddingBudgetYearsDialog.vue';
 import SetRangeForDeletingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForDeletingBudgetYearsDialog.vue';
 import EditBudgetsDialog from './investment-editor-dialogs/EditBudgetsDialog.vue';

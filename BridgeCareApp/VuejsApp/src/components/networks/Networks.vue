@@ -8,7 +8,10 @@
                         <v-select :items='selectNetworkItems'
                             id="Networks-selectNetwork-vselect"
                             variant="outlined"
-                            v-model='selectNetworkItemValue'                         
+                            item-title = "text"
+                            item-value = "value"
+                            v-model='selectNetworkItemValue' 
+                            reactive                        
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
                     </v-row>
@@ -35,6 +38,7 @@
                             class="ghd-select ghd-text-field ghd-text-field-border"
                             :disabled="!isNewNetwork"
                             v-model="selectedKeyAttributeItem"
+                            reactive 
                             :items='selectKeyAttributeItems'>
                         </v-select>  
                     </v-row>                         
@@ -181,7 +185,7 @@ import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { SelectItem } from '@/shared/models/vue/select-item';
-import Vue, { inject, onBeforeUnmount, onMounted, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
+import Vue, { DeepReadonly, inject, onBeforeUnmount, onMounted, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import {
     emptyEquationEditorDialogData,
@@ -227,11 +231,13 @@ import mitt from 'mitt';
         { text: 'Data Source', value: 'data source', align: 'left', sortable: true, class: '', width: '' },
     ];
 
+
+
     let addNetworkDialogData: AddNetworkDialogData = clone(emptyAddNetworkDialogData);
     let pagination: Pagination = emptyPagination;
-    let selectNetworkItems: SelectItem[] = [];
-    let selectKeyAttributeItems: SelectItem[] = [];
-    let selectDataSourceItems: SelectItem[] = [];
+    let selectNetworkItems = ref<SelectItem[]>([]);
+    let selectKeyAttributeItems = ref<SelectItem[]>([]);
+    let selectDataSourceItems = ref<SelectItem[]>([]);
     let attributeRows: Attribute[] =[];
     let cleanAttributes: Attribute[] = [];
     let attributes: Attribute[] = [];
@@ -248,7 +254,7 @@ import mitt from 'mitt';
     let selectedKeyAttributeItem: Ref<string> = ref('');
     let selectedKeyAttribute: Attribute = clone(emptyAttribute);
     let selectedNetwork: Ref<Network> = ref(clone(emptyNetwork));
-    let selectNetworkItemValue: Ref<string> = ref('');
+    let selectNetworkItemValue = ref<string>('');
     let selectDataSourceId: string = '';
     let hasSelectedNetwork: boolean = false;
     let isNewNetwork: boolean = false;
@@ -285,7 +291,7 @@ import mitt from 'mitt';
     
     watch(stateNetworks, () => onStateNetworksChanged)
     function onStateNetworksChanged() {
-        selectNetworkItems = stateNetworks.value.map((network: Network) => ({
+        selectNetworkItems.value = stateNetworks.value.map((network: Network) => ({
             text: network.name,
             value: network.id,
         }));
@@ -294,7 +300,7 @@ import mitt from 'mitt';
     watch(stateAttributes, () => onStateAttributesChanged)
     function onStateAttributesChanged() {
         attributeRows = clone(stateAttributes.value);
-        selectKeyAttributeItems = stateAttributes.value.map((attribute: Attribute) => ({
+        selectKeyAttributeItems.value = stateAttributes.value.map((attribute: Attribute) => ({
             text: attribute.name,
             value: attribute.id,
         }));
@@ -302,7 +308,7 @@ import mitt from 'mitt';
 
     watch(stateDataSources, () => onStateDataSourcesChanges)
     function onStateDataSourcesChanges() {
-        selectDataSourceItems = stateDataSources.value.map((dataSource: Datasource) => ({
+        selectDataSourceItems.value = stateDataSources.value.map((dataSource: Datasource) => ({
             text: dataSource.name,
             value: dataSource.id,
         }));
@@ -361,7 +367,7 @@ import mitt from 'mitt';
 
     function addNetwork(network: Network)
     {
-        selectNetworkItems.push({
+        selectNetworkItems.value.push({
             text: network.name,
             value: network.id
         });

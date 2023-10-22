@@ -52,7 +52,7 @@
                         variant = "outlined"
                     ></v-text-field>
                     <v-btn id="DataSource-AddFile-vbtn" v-show="showExcel" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="chooseFiles()">Add File</v-btn>
-                    <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
+                    <input @change="" id="file-select" type="file" hidden />
                 </v-row>
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
                 <v-select
@@ -177,7 +177,7 @@ import { useStore } from 'vuex';
     let sqlResponse: string | null = '';
     let sqlValid: boolean = false;
 
-    let sourceTypeItem: ShallowRef<string | null> = shallowRef('');
+    const sourceTypeItem = ref<string>('');
     let dataSourceTypeItem: ShallowRef<string | null> = shallowRef('');
     let datasourceNames: string[] = [];
     let dataSourceExcelColumns: DataSourceExcelColumns = { locationColumn: [], dateColumn: []};

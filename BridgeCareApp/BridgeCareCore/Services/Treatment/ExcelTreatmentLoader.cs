@@ -323,7 +323,7 @@ namespace BridgeCareCore.Services.Treatment
         public TreatmentLoadResult LoadScenarioTreatment(ExcelWorksheet worksheet, List<BudgetDTO> scenarioBudgets)
         {
             var treatmentLoadResult = LoadTreatment(worksheet);
-             var loadBudgets = LoadBudgets(worksheet, scenarioBudgets);
+            var loadBudgets = LoadBudgets(worksheet, scenarioBudgets);
 
             treatmentLoadResult.Treatment.BudgetIds = loadBudgets.budgetIds;                        
             treatmentLoadResult.ValidationMessages.AddRange(loadBudgets.ValidationMessages);

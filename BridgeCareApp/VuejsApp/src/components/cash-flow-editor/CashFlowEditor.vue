@@ -6,7 +6,6 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Cash Flow Library</v-subheader>
                     <v-select
                         :items="librarySelectItems"
-                        append-icon=$vuetify.icons.ghd-down
                         id="CashFlowEditor-SelectLibrary-vselect"
                         variant="outlined"
                         v-model="librarySelectItemValue"
@@ -53,7 +52,35 @@
         </v-col>
         <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="cash-flow-library-tables">
-                <v-data-table
+                <DataTable
+                        striped-rows
+                        :rows="5"
+                        :rows-per-page-options="[5,10,25]"
+                        id="CashflowEditor-datatable"
+                        class="fixed-header ghd-table v-table__overflow"
+                        :value="currentPage"
+                        paginator
+                        paginator-template="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                        currentPageReportTemplate="{first} to {last} of {totalRecords}"
+                        
+                        selection-mode="single"
+                        table-style="min-width: 50rem"
+                        >
+                        <Column sortable field="name" header="Name"></Column>
+                        <Column field="criterionLibrary" header="Criteria"></Column> 
+                        <Column field="action" header="Action">
+                                <template #body="slotProps">
+                                    <v-btn flat>
+                                      <img class="img-general" :src="require('@/assets/icons/edit.svg')"/>
+                                    </v-btn>
+                                    <v-btn flat>
+                                      <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                    </v-btn>
+                                </template>
+                            </Column>
+                    </DataTable>
+
+                <!-- <v-data-table
                     id="CashFlowEditor-cashFlowRules-table"
                     :headers="cashFlowRuleGridHeaders"
                     :items="currentPage"  
@@ -156,7 +183,7 @@
                 <v-btn :disabled='selectedCashRuleGridRows.length === 0' @click='onDeleteSelectedCashFlowRules'
                     class='ghd-blue ghd-button' variant = "flat">
                     Delete Selected
-                </v-btn>
+                </v-btn> -->
             </div>
         </v-col>
         <v-col v-show="hasSelectedLibrary && !hasScenario" xs12>
@@ -248,8 +275,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { onBeforeUnmount } from 'vue';
-import { ref, watch, nextTick, shallowRef, Ref } from 'vue';
+import { watch, nextTick, shallowRef, onBeforeUnmount, ref, computed } from 'vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
     clone,
@@ -299,10 +325,12 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { LibraryUser } from '@/shared/models/iAM/user';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-
-
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 let store = useStore();
-let stateCashFlowRuleLibraries = ref<CashFlowRuleLibrary[]>(store.state.cashFlowModule.cashFlowRuleLibraries);
+// const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
+
+const stateCashFlowRuleLibraries = computed<CashFlowRuleLibrary[]>(() => store.state.cashFlowModule.cashFlowRuleLibraries);
 let stateSelectedCashRuleFlowLibrary = ref<CashFlowRuleLibrary>(store.state.cashFlowModule.selectedCashFlowRuleLibrary);
 let stateScenarioCashFlowRules = ref<CashFlowRule[]>(store.state.cashFlowModule.scenarioCashFlowRules);
 let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
@@ -357,32 +385,32 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
 
     const $router = useRouter();
 
-    const cashFlowRuleGridHeaders: DataTableHeader[] = [
-        {
-            text: 'Rule Name',
-            value: 'name',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '25%',
-        },
-        {
-            text: 'Criteria',
-            value: 'criterionLibrary',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '65%',
-        },
-        {
-            text: 'Action',
-            value: '',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '10%',
-        },
-    ];
+    // const cashFlowRuleGridHeaders: DataTableHeader[] = [
+    //     {
+    //         text: 'Rule Name',
+    //         value: 'name',
+    //         align: 'left',
+    //         sortable: false,
+    //         class: '',
+    //         width: '25%',
+    //     },
+    //     {
+    //         text: 'Criteria',
+    //         value: 'criterionLibrary',
+    //         align: 'left',
+    //         sortable: false,
+    //         class: '',
+    //         width: '65%',
+    //     },
+    //     {
+    //         text: 'Action',
+    //         value: '',
+    //         align: 'left',
+    //         sortable: false,
+    //         class: '',
+    //         width: '10%',
+    //     },
+    // ];
     let cashFlowRuleGridData = ref<CashFlowRule[]>([]);
     let selectedCashRuleGridRows: CashFlowRule[] = [];
     let cashFlowRuleRadioBtnValue: string = '';
@@ -453,64 +481,66 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     created();
     function created() {
         librarySelectItemValue.value = "";
-        getCashFlowRuleLibrariesAction().then(() => {
-            getHasPermittedAccessAction().then(() => {
-                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
-                    selectedScenarioId = $router.currentRoute.value.query.scenarioId;
-                    if (selectedScenarioId === uuidNIL) {
-                        addErrorNotificationAction({
-                            message: 'Unable to identify selected scenario.',
-                        });
-                        $router.push('/Scenarios/');
-                    }
+        getCashFlowRuleLibrariesAction();
+        getHasPermittedAccessAction();
+        hasScenario = true;
+        selectedScenarioId = "26C23F48-9B5C-4AEC-BDE0-0778AA512E10";
+        initializePages();
 
-                    hasScenario = true;
-                    getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                        selectScenarioAction({ scenarioId: selectedScenarioId });        
-                        initializePages();
-                    });                                                
-                }
-            });
-        });
+        // librarySelectItemValue.value = "";
+        // getCashFlowRuleLibrariesAction().then(() => {
+        //     getHasPermittedAccessAction().then(() => {
+        //         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
+        //             selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+        //             if (selectedScenarioId === uuidNIL) {
+        //                 addErrorNotificationAction({
+        //                     message: 'Unable to identify selected scenario.',
+        //                 });
+        //                 $router.push('/Scenarios/');
+        //             }
+
+        //             hasScenario = true;
+        //             getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+        //                 selectScenarioAction({ scenarioId: selectedScenarioId });        
+        //                 initializePages();
+        //             });                                                
+        //         }
+        //     });
+        // });
     }
 
-    onBeforeUnmount(() => beforeDestroy());
-    function beforeDestroy() {
+    onBeforeUnmount(() => {
         setHasUnsavedChangesAction({ value: false });
-    }
+    });
 
-    watch(stateCashFlowRuleLibraries, () => onStateCashFlowRuleLibrariesChanged)
-    function onStateCashFlowRuleLibrariesChanged(){
+    watch(stateCashFlowRuleLibraries, () => {
         librarySelectItems = stateCashFlowRuleLibraries.value.map(
             (library: CashFlowRuleLibrary) => ({
                 text: library.name,
                 value: library.id,
             }),
         );
-    }
+    });
 
-    watch(stateSelectedCashRuleFlowLibrary, () => onStateSelectedCashFlowRuleLibraryChanged)
-    function onStateSelectedCashFlowRuleLibraryChanged(){
+    watch(stateSelectedCashRuleFlowLibrary, () => {
         selectedCashFlowRuleLibrary = clone(
             stateSelectedCashRuleFlowLibrary,
         );
-    }
+    });
 
-    watch(stateScenarioCashFlowRules, () => onStateScenarioCashFlowRulesChanged)
-    function onStateScenarioCashFlowRulesChanged() {
+    watch(stateScenarioCashFlowRules, () => {
         if (hasScenario) {
             cashFlowRuleGridData = clone(stateScenarioCashFlowRules);
         }
-    }
+    });
 
-    watch(selectedCashFlowRule, () => onSelectedSplitTreatmentIdChanged)
-    function onSelectedSplitTreatmentIdChanged() {
+    watch(selectedCashFlowRule, () => {
         cashFlowDistributionRuleGridData = hasValue(
         selectedCashFlowRule.value.cashFlowDistributionRules,
     )
         ? clone(selectedCashFlowRule.value.cashFlowDistributionRules)
         : [];
-    }
+    });
     watch(pagination, () => onPaginationChanged)
     async function onPaginationChanged() {
         if(initializing)
@@ -1065,6 +1095,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     }
 
     function initializePages(){
+        
         const request: PagingRequest<CashFlowRule>= {
             page: 1,
             rowsPerPage: 5,
@@ -1079,7 +1110,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
             isDescending: false,
             search: ''
         };
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL) {
             CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
                 initializing = false
                 if(response.data){
@@ -1093,6 +1124,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
                     scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
                 }
             });
+        }
     }
 
     function onShowShareCashFlowRuleLibraryDialog(cashFlowRuleLibrary: CashFlowRuleLibrary) {

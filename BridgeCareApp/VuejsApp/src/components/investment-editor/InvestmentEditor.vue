@@ -1,5 +1,4 @@
 <template>
-    <div>test</div>
     <v-row column>
         <v-col cols = "12">
             <v-row row style="margin-top:-40px;">

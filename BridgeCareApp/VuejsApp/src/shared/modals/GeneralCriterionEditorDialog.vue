@@ -11,8 +11,8 @@
                     <div>
                         <v-row justify-center>
                             <v-col cols = "10">
-                            <!-- <CriteriaEditor :criteriaEditorData="criteriaEditorData"
-                                            @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/> -->
+                            <CriteriaEditor :criteriaEditorData="criteriaEditorData"
+                                            @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
                             </v-col>
                         </v-row>
                     </div>
@@ -70,46 +70,46 @@ let stateCriterionLibraries = ref<CriterionLibrary[]>(store.state.criterionModul
 let stateSelectedCriterionLibrary = ref<CriterionLibrary>(store.state.criterionModule.selectedCriterionLibrary);
 let stateSelectedCriterionIsValid = ref<boolean>(store.state.criterionModule.selectedCriterionIsValid);
 
-let criteriaEditorData: CriteriaEditorData = {
+const criteriaEditorData = ref<CriteriaEditorData>({
     ...emptyCriteriaEditorData,
     isLibraryContext: true
-  };
+  });
 
-  let uuidNIL: string = getBlankGuid();
-  let canUpdateOrCreate: boolean = false;
+  const canUpdateOrCreate = ref<boolean>(false);
 
   let CriteriaExpressionToReturn: string | null = "";
 
   watch(dialogData,()=> {
-        console.log("here in dialog: " + dialogData.value.showDialog);
-        // const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
-        // const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
+        const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
+        const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
 
-        // if (dialogData.value.showDialog) {    
-        //     criteriaEditorData = {
-        //             ...criteriaEditorData,
-        //             mergedCriteriaExpression: props.dialogData.CriteriaExpression,
-        //             isLibraryContext: true
-        //         };
+        if (dialogData.value.showDialog) {    
+            criteriaEditorData.value = {
+                    ...criteriaEditorData.value,
+                    mergedCriteriaExpression: props.dialogData.CriteriaExpression,
+                    isLibraryContext: true
+                };
 
-        //     canUpdateOrCreate = false;
+                console.log("here in dialog: " + dialogData.value.showDialog);
 
-        //     if (hasValue(htmlTag)) {
-        //         htmlTag[0].setAttribute('style', 'overflow:hidden;');
-        //     }
+            canUpdateOrCreate.value = false;
 
-        //     if (hasValue(criteriaEditorCard)) {
-        //         criteriaEditorCard[0].setAttribute('style', 'height:100%');
-        //     }
-        //     } else {
-        //     if (hasValue(htmlTag)) {
-        //         htmlTag[0].setAttribute('style', 'overflow:auto;');
-        //     }
-        // }
+            // if (hasValue(htmlTag)) {
+            //     htmlTag[0].setAttribute('style', 'overflow:hidden;');
+            // }
+
+            // if (hasValue(criteriaEditorCard)) {
+            //     criteriaEditorCard[0].setAttribute('style', 'height:100%');
+            // }
+            // } else {
+            // if (hasValue(htmlTag)) {
+            //     htmlTag[0].setAttribute('style', 'overflow:auto;');
+            // }
+        }
     });
 
     function onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
-        canUpdateOrCreate = result.validated;
+        canUpdateOrCreate.value = result.validated;
 
         if (result.validated) {
             CriteriaExpressionToReturn = result.criteria

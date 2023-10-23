@@ -66,8 +66,8 @@ namespace BridgeCareCoreTests.Tests.Integration
                 t => t.Consequences[0].CriterionLibrary.Id);
         }
 
-        [Fact(Skip = "Fails until bug 23588 is fixed.")]
-        // Once 23588 is fixed and this passes, treatment performance factors
+        [Fact]
+        // treatment performance factors
         // need to be added to this test.
         public void DownloadScenarioTreatmentSpreadsheet_ThenUpload_SameTreatments()
         {

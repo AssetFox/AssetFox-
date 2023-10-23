@@ -301,7 +301,7 @@ import {
 } from '@/shared/models/iAM/expression-validation';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 import { getBlankGuid } from '../utils/uuid-utils';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, toRefs, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { on } from 'events';
@@ -312,7 +312,7 @@ const emit = defineEmits(['submit','submitCriteriaEditorResult'])
 const props = defineProps<{
     criteriaEditorData: CriteriaEditorData
     }>()
-
+    const { criteriaEditorData } = toRefs(props);
 let stateAttributes = ref<Attribute[]>(store.state.attributeModule.attributes);
 let stateAttributesSelectValues = ref<AttributeSelectValues[]>(store.state.attributeModule.attributesSelectValues);
 let stateNetworks = ref<Network[]>(store.state.networkModule.networks);
@@ -353,13 +353,13 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     let activeTab = 'tree-view';
     let checkOutput: boolean = false;
 
-    onMounted(()=>mounted())
-    function mounted() {
+    onMounted(()=> {
+        console.log("here in dialog: " + criteriaEditorData.value.networkId);
         if (hasValue(stateAttributes)) {
             setQueryBuilderRules();
             
         }     
-    }
+    });
 
     watch(()=>props.criteriaEditorData,()=>onCriteriaEditorDataChanged())
     function onCriteriaEditorDataChanged() {

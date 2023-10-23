@@ -8,7 +8,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class TreatmentConsequenceTestSetup
+    public static class LibraryTreatmentConsequenceTestSetup
     {
         public static TreatmentConsequenceDTO ModelForEntityInDb(
             IUnitOfWork unitOfWork,

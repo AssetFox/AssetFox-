@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
@@ -113,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 }
                 else
                 {
-                    throw new ArgumentException($"The necessary key location fields are not present in {dto.Id}");
+                    throw new ArgumentException($"The necessary key location fields are not present in committed project {dto.Id}");
                 }
             }
             else
@@ -135,17 +135,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
+        public static Dictionary<string, string> SectionLocationKeys(
+            string idKey,
+            Guid id,
+            string networkKeyAttribute,
+            string locationIdentifier)
+        {
+            var dictionary = new Dictionary<string, string>
+            {
+                { idKey, id.ToString() },
+                    { networkKeyAttribute, locationIdentifier }
+                };
+            return dictionary;
+        }
+
         public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity, string networkKeyAttribute)
         {
             const string IdKey = "ID";
             switch (entity.Discriminator)
             {
             case DataPersistenceConstants.SectionLocation:
-                var result = new Dictionary<string, string>
-                {
-                    { IdKey, entity.Id.ToString() },
-                    { networkKeyAttribute, entity.LocationIdentifier }
-                };
+                var result = SectionLocationKeys(IdKey, entity.Id, networkKeyAttribute, entity.LocationIdentifier);
                 return result;
             default:
                 throw new ArgumentException($"Location type of {entity.Discriminator} is not supported.");

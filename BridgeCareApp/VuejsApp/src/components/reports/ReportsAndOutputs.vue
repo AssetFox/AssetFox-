@@ -17,7 +17,7 @@
                         class="fixed-header ghd-table v-table__overflow"
                         :value="currentPage"
                         paginator
-                        paginator-template="RowsPerPageDropdown FirstPageLink PrevPageLink CurrenPageReport NextPageLink LastPageLink"
+                        paginator-template="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                         currentPageReportTemplate="{first} to {last} of {totalRecords}"
                         @row-select="onRowSelect"
                         selection-mode="single"

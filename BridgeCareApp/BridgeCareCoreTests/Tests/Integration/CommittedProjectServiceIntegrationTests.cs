@@ -146,6 +146,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var attributes = new List<IamAttribute> { keyAttribute, resultAttribute };
             AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork,
                 maintainableAssets, attributes, assetKeyData);
+
             var budgetLibraryId = Guid.NewGuid();
             var budgetLibraryName = RandomStrings.WithPrefix("BudgetLibrary ");
             var budgetLibrary = BudgetLibraryTestSetup.ModelForEntityInDb(
@@ -154,17 +155,20 @@ namespace BridgeCareCoreTests.Tests.Integration
             var budget = BudgetTestSetup.AddBudgetToLibrary(TestHelper.UnitOfWork, budgetLibraryId, budgetId);
             var scenarioBudgetId = Guid.NewGuid();
             budget.Id = scenarioBudgetId;
+
             var treatmentId = Guid.NewGuid();
             var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, treatmentName);
             var treatmentCost = LibraryTreatmentCostTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, treatmentId, treatmentLibraryId, mergedCriteriaExpression: $"[{resultAttributeName}]='ok'");
+
             var keyAttributes = new List<IamAttribute> { keyAttribute };
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             InvestmentPlanTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, null, 2023);
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(
                TestHelper.UnitOfWork, new List<BudgetDTO> { budget }, simulationId);
+
             var committedProjectId = Guid.NewGuid();
             var committedProject = SectionCommittedProjectDtos.Dto(
                 committedProjectId,
@@ -180,7 +184,10 @@ namespace BridgeCareCoreTests.Tests.Integration
             committedProject.ShadowForSameTreatment = 10;
             List<SectionCommittedProjectDTO> sectionCommittedProjects = new List<SectionCommittedProjectDTO> { committedProject };
 
+            //act
             TestHelper.UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(sectionCommittedProjects);
+
+            //assert
             var committedProjects1 = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
             var committedProjectIds = new List<Guid> { committedProject.Id };
             TestHelper.UnitOfWork.CommittedProjectRepo.DeleteSpecificCommittedProjects(committedProjectIds);

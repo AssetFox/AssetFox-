@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void SetCommittedProjectTemplate(Stream name);
 
-        void AddCommittedProjectTemplate(Stream name, string filename);
+        void AddCommittedProjectTemplate(Stream stream, string filename);
 
         List<String> getUploadedCommittedProjectTemplates();
 

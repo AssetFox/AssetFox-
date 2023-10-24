@@ -93,7 +93,7 @@
                                     ]"
                                 />
                                 <template slot="input">
-                                    <v-select
+                                    <v-select id="RemainingLifeLimitEditor-editAttribute-select"
                                         :items="numericAttributeSelectItems"
                                         append-icon=$vuetify.icons.ghd-down
                                         label="Select an Attribute"
@@ -154,7 +154,7 @@
                             </v-btn>   
                         </td>
                         <td justify-end>
-                            <v-btn @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
+                            <v-btn id="RemainingLifeLimitEditor-deleteAttribute-btn" @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
                                 <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>                          
                         </td>

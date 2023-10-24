@@ -10,7 +10,7 @@
           </v-btn>
       </v-card-title>
       <v-card-text>
-        <v-data-table :headers="shareCashFlowRuleLibraryUserGridHeaders"
+        <v-data-table id="ShareCashFlowRuleLibraryDialog-table-vdatatable" :headers="shareCashFlowRuleLibraryUserGridHeaders"
                       :items="shareCashFlowRuleLibraryUserGridRows"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
@@ -19,11 +19,11 @@
               {{ props.item.username }}
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="props.item.isShared"
+              <v-checkbox id="ShareCashFlowRuleLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="props.item.isShared"
                           @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox id="ShareCashFlowRuleLibraryDialog-canModify-vcheckbox" :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
             </td>
           </template>
           <v-alert :value="true"
@@ -36,8 +36,8 @@
       </v-card-text>
       <v-card-actions>
         <v-layout row justify-center>
-          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel</v-btn>
-          <v-btn @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+          <v-btn id="ShareCashFlowRuleLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel</v-btn>
+          <v-btn id="ShareCashFlowRuleLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>
         </v-layout>

@@ -140,12 +140,14 @@
                 <template slot="items" slot-scope="props">
                     <td class="text-xs-center">
                         <v-text-field
+                            id="CalculatedAttribute-equation-textfield"
                             readonly
                             class="sm-txt"
                             :value="props.item.equation"
                             :disabled="!hasAdminAccess">
                             <template slot="append-outer">
                                 <v-btn
+                                    id="CalculatedAttribute-editEquation-btn"
                                     @click="onShowEquationEditorDialog(props.item.id)"
                                     class="ghd-blue"
                                     icon
@@ -157,12 +159,14 @@
                     </td>
                     <td class="text-xs-center">
                         <v-text-field
+                            id="CalculatedAttribute-EquationCriteria-textfield"
                             readonly
                             class="sm-txt"
                             :value="props.item.criteriaExpression"
                             :disabled="!hasAdminAccess">
                             <template slot="append-outer">
                                 <v-btn
+                                    id="CalculatedAttribute-changeEquationCriteria-btn"
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
                                     class="ghd-blue"
                                     icon
@@ -174,6 +178,7 @@
                     </td>
                     <td class="text-xs-center">
                         <v-btn
+                            id="CalculatedAttribute-RemoveEquation-btn"
                             @click="
                                 onRemoveCalculatedAttribute(props.item.id)"
                             class="ghd-blue"
@@ -185,6 +190,7 @@
                 </template>
             </v-data-table>
             <v-btn
+                id="CalculatedAttribute-AddNewEquation-btn"
                 @click="onAddCriterionEquationSet()"
                 class='ghd-blue ghd-button'
                 outline

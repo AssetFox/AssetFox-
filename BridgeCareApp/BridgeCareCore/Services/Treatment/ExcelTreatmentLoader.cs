@@ -223,13 +223,13 @@ namespace BridgeCareCore.Services.Treatment
             var validationMessages = new List<string>();
 
             var budgetsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Budgets, 2);
-            var PfLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Budgets, budgetsLineIndex);
+            var PfLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.PerformanceFactors, budgetsLineIndex);
             if (budgetsLineIndex == 0)
             {
                 throw new Exception($"Cell with content {TreatmentExportStringConstants.Budgets} not found!");
             }
 
-            for (var i = budgetsLineIndex + 2; i <= PfLineIndex; i++)
+            for (var i = budgetsLineIndex + 2; i < PfLineIndex; i++)
             {
                 var budgetName = worksheet.Cells[i, 1].Text;
                 if (!string.IsNullOrEmpty(budgetName))
@@ -323,7 +323,7 @@ namespace BridgeCareCore.Services.Treatment
         public TreatmentLoadResult LoadScenarioTreatment(ExcelWorksheet worksheet, List<BudgetDTO> scenarioBudgets)
         {
             var treatmentLoadResult = LoadTreatment(worksheet);
-             var loadBudgets = LoadBudgets(worksheet, scenarioBudgets);
+            var loadBudgets = LoadBudgets(worksheet, scenarioBudgets);
 
             treatmentLoadResult.Treatment.BudgetIds = loadBudgets.budgetIds;                        
             treatmentLoadResult.ValidationMessages.AddRange(loadBudgets.ValidationMessages);

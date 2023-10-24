@@ -301,5 +301,18 @@ namespace BridgeCareCoreTests.Tests
             var actual = page.Items.Single();
             ObjectAssertions.Equivalent(curve, actual);
         }
+
+        [Fact]
+        public async Task DownloadPerformanceCurvesTemplate_ValidExcelPackage()
+        {
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = CreateController(unitOfWork);
+
+            var actionResult = await controller.DownloadPerformanceCurvesTemplate();
+
+            var value = ActionResultAssertions.OkObject(actionResult);
+            var fileInfo = value as FileInfoDTO;
+            ExcelPackageAsserts.ValidExcelPackageData(fileInfo);
+        }
     }
 }

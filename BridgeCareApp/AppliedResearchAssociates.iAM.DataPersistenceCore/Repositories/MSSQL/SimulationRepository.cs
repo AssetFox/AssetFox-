@@ -15,6 +15,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Information;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using System.Threading;
 using AppliedResearchAssociates.iAM.Common;
+using Microsoft.Data.SqlClient;
 
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -1331,11 +1332,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteSimulation(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
+
+            // Create parameters for the stored procedure
+            var retMessageParam = new SqlParameter("@RetMessage", SqlDbType.VarChar, 250);
+            string retMessage = "";
+
             queueLog ??= new DoNothingWorkQueueLog();
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                return;
-            }
+
             if (_unitOfWork.Context.Database.CurrentTransaction != null)
             {
                 throw new InvalidOperationException(UnitOfDataPersistenceWorkExtensions.CannotStartTransactionWhileAnotherTransactionIsInProgress);
@@ -1348,50 +1351,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Rollback();
                     return;
                 }
-                queueLog.UpdateWorkQueueStatus("Deleting Budgets");
-                _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
-                    _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
-                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-                {
-                    _unitOfWork.Rollback();
-                    return;
-                }
-                _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
-                    _.ScenarioSelectableTreatment.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-                var count = _unitOfWork.Context.CommittedProject.Where(_ =>
-                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).Count();
-
-                var committedEntities = _unitOfWork.Context.CommittedProject.Where(_ =>
-                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).ToList();
-                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-                {
-                    _unitOfWork.Rollback();
-                    return;
-                }
-                queueLog.UpdateWorkQueueStatus("Deleting Committed Projects");
-                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
-                    _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
-
-                var index = 0;
-                while (index < committedEntities.Count)
-                {
-                    _unitOfWork.Context.Entry(committedEntities[index]).Reload();
-                    index++;
-                }
-                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
-                {
-                    _unitOfWork.Rollback();
-                    return;
-                }
                 queueLog.UpdateWorkQueueStatus("Deleting Simulation");
-                _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
+
+                // Create parameters for the stored procedure
+                var simGuidListParam = new SqlParameter("@SimGuidList", simulationId.ToString());
+                retMessageParam.Direction = ParameterDirection.Output;
+
+                // Execute the stored procedure
+                _unitOfWork.Context.Database.ExecuteSqlRaw("EXEC usp_delete_simulation @SimGuidList, @RetMessage OUTPUT", simGuidListParam, retMessageParam);
+
+                // Capture the success output value
+                retMessage = retMessageParam.Value as string;
+
                 _unitOfWork.Commit();
+
             }
             catch
             {
-                _unitOfWork.Rollback();
+                // Capture the fail output value
+                retMessage = retMessageParam.Value as string;
+               _unitOfWork.Rollback();
                 throw;
             }
         }
@@ -1403,31 +1383,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
+            _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(3600));
+
             var ids = _unitOfWork.Context.Simulation.Where(_ => _.NetworkId == networkId).Select(_ => _.Id);
 
-            _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
-                ids.Contains(_.ScenarioBudgetPriority.SimulationId) || ids.Contains(_.ScenarioBudget.SimulationId));
+            string tmpguidstr = string.Join(",", ids.Select(g => g.ToString()));
 
-            _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
-                ids.Contains(_.ScenarioSelectableTreatment.SimulationId) || ids.Contains(_.ScenarioBudget.SimulationId));
+            // RegEx Explained: \s means "match any whitespace token", and + means "match one or more of the proceeding token
+            tmpguidstr = System.Text.RegularExpressions.Regex.Replace(tmpguidstr, @"\s+", string.Empty);
 
-            var count = _unitOfWork.Context.CommittedProject.Where(_ =>
-                ids.Contains(_.SimulationId) || ids.Contains(_.ScenarioBudget.SimulationId)).Count();
+            // Create parameters for the stored procedure
+            var retMessageParam = new SqlParameter("@RetMessage", SqlDbType.VarChar, 250);
+            string retMessage = "";
+            var simGuidListParam = new SqlParameter("@SimGuidList", tmpguidstr);
+            retMessageParam.Direction = ParameterDirection.Output;
 
-            var committedEntities = _unitOfWork.Context.CommittedProject.Where(_ =>
-                ids.Contains(_.SimulationId) || ids.Contains(_.ScenarioBudget.SimulationId)).ToList();
+            // Execute the stored procedure
+            _unitOfWork.Context.Database.ExecuteSqlRaw("EXEC usp_delete_simulation @SimGuidList, @RetMessage OUTPUT", simGuidListParam, retMessageParam);
 
-            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
-                ids.Contains(_.SimulationId) || ids.Contains(_.ScenarioBudget.SimulationId));
+            // Capture the success output value
+            retMessage = retMessageParam.Value as string;
 
-            var index = 0;
-            while (index < committedEntities.Count)
-            {
-                _unitOfWork.Context.Entry(committedEntities[index]).Reload();
-                index++;
-            }
-
-            _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => ids.Contains(_.Id));
         }
 
         // the method is used only by other repositories.

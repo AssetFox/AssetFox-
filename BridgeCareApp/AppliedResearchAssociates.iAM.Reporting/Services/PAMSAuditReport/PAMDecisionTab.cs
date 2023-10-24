@@ -67,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 var yearZeroRow = currentCell.Row++;
                 foreach (var year in years)
                 {
-                    var section = year.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "CRS") == CRS);
+                    var section = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == CRS);
                     if (section.TreatmentCause == TreatmentCause.CommittedProject)
                     {
                         continue;
@@ -153,6 +153,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
         }
 
         private double CheckGetValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);
+        private string CheckGetTextValue(Dictionary<string, string> valuePerTextAttribute, string attribute) => _reportHelper.CheckAndGetValue<string>(valuePerTextAttribute, attribute);
 
         private CurrentCell FillDataInWorksheet(ExcelWorksheet decisionsWorksheet, PAMSDecisionDataModel decisionsDataModel, int budgetsCount, HashSet<string> currentAttributes, CurrentCell currentCell)
         {

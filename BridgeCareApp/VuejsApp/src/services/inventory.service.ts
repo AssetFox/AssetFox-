@@ -3,13 +3,8 @@ import {axiosInstance, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import { InventoryParam, InventoryItem } from '@/shared/models/iAM/inventory';
 
 export default class InventoryService {
-    static getInventory(keyProperties: any[]) {
-        return coreAxiosInstance.get('/api/Inventory/GetInventory',
-        {   
-            params: {                
-                keyProperties: JSON.stringify(keyProperties),
-            }
-        });
+    static getInventory(keyProperties: any[]) {        
+        return coreAxiosInstance.post(`/api/Inventory/GetInventory`, keyProperties);
     }
     static getKeyProperties(): AxiosPromise {
         return coreAxiosInstance.get('/api/Inventory/GetKeyProperties');

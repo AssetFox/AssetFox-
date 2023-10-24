@@ -119,6 +119,7 @@ namespace BridgeCareCore.Services
                 {
                     Id = reportObject.ID,
                     SimulationId = reportObject.SimulationID,
+                    NetworkId = (reportObject.NetworkID != Guid.Empty) ? reportObject.NetworkID : null,
                     Type = reportObject.ReportTypeName,
                     Result = reportObject.Results,
                     ExpirationDate = DateTime.Now.AddDays(30),

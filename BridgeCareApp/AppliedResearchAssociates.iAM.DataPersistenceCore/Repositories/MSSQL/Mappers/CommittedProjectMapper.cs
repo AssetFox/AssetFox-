@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
@@ -32,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Cost = domain.Cost,
                 Year = domain.Year,
                 treatmentCategory = domain.treatmentCategory,
+                ProjectSource = domain.ProjectSource.ToString()
             };
 
             entity.CommittedProjectLocation = maintainableAsset.MaintainableAssetLocation.ToCommittedProjectLocation(entity);
@@ -55,6 +56,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     throw new InvalidOperationException($"Scenario budget is not present in committed project.");
                 }
 
+                if (string.IsNullOrEmpty(entity.ProjectSource) || !Enum.TryParse(entity.ProjectSource, out ProjectSourceDTO projectSourceDTO))
+                {
+                    projectSourceDTO = ProjectSourceDTO.None;
+                }
+
                 var commit = new SectionCommittedProjectDTO()
                 {
                     Id = entity.Id,
@@ -63,14 +69,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     SimulationId = entity.SimulationId,
                     Treatment = entity.Name,
                     Year = entity.Year,
+                    ProjectSource = projectSourceDTO,
                     ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                     ShadowForSameTreatment = entity.ShadowForSameTreatment,
                     Category = convertedCategory,
-                    LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
+                    LocationKeys = entity.CommittedProjectLocation?.ToLocationKeys(networkKeyAttribute)
                 };
                 return commit;
-            default:
-                throw new ArgumentException($"Location type of {entity.CommittedProjectLocation.Discriminator} is not supported.");
+                default:
+                    throw new ArgumentException($"Location type of {entity.CommittedProjectLocation.Discriminator} is not supported.");
             }
         }
 
@@ -87,6 +94,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Category = dto.Category.ToString(),
                 Year = dto.Year,
+                ProjectSource = dto.ProjectSource.ToString()
             };
 
             if (dto is SectionCommittedProjectDTO)
@@ -105,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 }
                 else
                 {
-                    throw new ArgumentException($"The necessary key location fields are not present in {dto.Id}");
+                    throw new ArgumentException($"The necessary key location fields are not present in committed project {dto.Id}");
                 }
             }
             else
@@ -127,17 +135,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
+        public static Dictionary<string, string> SectionLocationKeys(
+            string idKey,
+            Guid id,
+            string networkKeyAttribute,
+            string locationIdentifier)
+        {
+            var dictionary = new Dictionary<string, string>
+            {
+                { idKey, id.ToString() },
+                    { networkKeyAttribute, locationIdentifier }
+                };
+            return dictionary;
+        }
+
         public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity, string networkKeyAttribute)
         {
             const string IdKey = "ID";
             switch (entity.Discriminator)
             {
             case DataPersistenceConstants.SectionLocation:
-                var result = new Dictionary<string, string>
-                {
-                    { IdKey, entity.Id.ToString() },
-                    { networkKeyAttribute, entity.LocationIdentifier }
-                };
+                var result = SectionLocationKeys(IdKey, entity.Id, networkKeyAttribute, entity.LocationIdentifier);
                 return result;
             default:
                 throw new ArgumentException($"Location type of {entity.Discriminator} is not supported.");
@@ -238,7 +256,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         }
                     }
                 }
-
+                
             }
         }
     }

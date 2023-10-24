@@ -270,16 +270,6 @@ public interface ICalculateEvaluateParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitGreaterThan([NotNull] CalculateEvaluateParser.GreaterThanContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="CalculateEvaluateParser.parameterReference"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterParameterReference([NotNull] CalculateEvaluateParser.ParameterReferenceContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="CalculateEvaluateParser.parameterReference"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitParameterReference([NotNull] CalculateEvaluateParser.ParameterReferenceContext context);
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="CalculateEvaluateParser.comparisonOperand"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -289,6 +279,16 @@ public interface ICalculateEvaluateParserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitComparisonOperand([NotNull] CalculateEvaluateParser.ComparisonOperandContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="CalculateEvaluateParser.parameterReference"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterParameterReference([NotNull] CalculateEvaluateParser.ParameterReferenceContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="CalculateEvaluateParser.parameterReference"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitParameterReference([NotNull] CalculateEvaluateParser.ParameterReferenceContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="CalculateEvaluateParser.literal"/>.
 	/// </summary>

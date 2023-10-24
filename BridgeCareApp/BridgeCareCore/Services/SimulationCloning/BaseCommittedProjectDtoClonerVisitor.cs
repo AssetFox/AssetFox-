@@ -26,6 +26,7 @@ namespace BridgeCareCore.Services
             clone.ShadowForSameTreatment = dto.ShadowForSameTreatment;
             clone.Category = dto.Category;
             clone.Year = dto.Year;
+            clone.ProjectSource = dto.ProjectSource;
             clone.SimulationId = dto.SimulationId;
             if (dto.ScenarioBudgetId != null)
             {

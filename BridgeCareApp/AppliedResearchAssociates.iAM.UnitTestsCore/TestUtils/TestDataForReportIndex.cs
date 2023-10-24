@@ -97,6 +97,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public Guid ID { get => _id; set { } }
         public Guid? SimulationID { get => _sid; set { } }
+        public Guid? NetworkID { get; set; }
         public string Results { get => $"C:\\fakepath\\filename.xlsx"; set { } }
 
         public ReportType Type => ReportType.File;
@@ -154,6 +155,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public Guid ID { get => _id; set { } }
         public Guid? SimulationID { get => _sid; set { } }
+        public Guid? NetworkID { get; set; }
         public string Results { get => $"<p>Hello, World!</p>"; set { } }
 
         public ReportType Type => ReportType.HTML;
@@ -201,6 +203,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public Guid ID { get => _id; set { } }
         public Guid? SimulationID { get => null; set { } }
+        public Guid? NetworkID { get; set; }
         public string Results { get => $"<p>Hello, World!</p>"; set { } }
 
         public ReportType Type => ReportType.HTML;

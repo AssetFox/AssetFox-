@@ -67,18 +67,16 @@ namespace BridgeCareCore.Controllers
             return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
         }
 
-
-        [HttpGet]
+        [HttpPost]
         [Route("GetInventory")]
         [Authorize]
-        public async Task<IActionResult> GetInventory(string keyProperties)
+        public async Task<IActionResult> GetInventory([FromBody] List<string> keyProperties)
         {
             var assetKeyData = new Dictionary<Guid, List<string>>();
             var keySegmentDatums = new List<List<KeySegmentDatum>>();
             var dictionaryProperties = new Dictionary<Guid, List<string>>();
-
-            var keyPropertiesList = JsonConvert.DeserializeObject<List<string>>(keyProperties);
-            foreach (var keyProperty in keyPropertiesList)
+                        
+            foreach (var keyProperty in keyProperties)
             {
                 if (_assetData.KeyProperties.ContainsKey(keyProperty))
                 {
@@ -101,14 +99,30 @@ namespace BridgeCareCore.Controllers
                         assetKeyData[assetId].Add(value);
                     }
                 }
-            }            
-
-            List<InventoryItem> inventoryItems = new List<InventoryItem>();
-            foreach(var assetKeyDataValue in  assetKeyData.Values)
-            {
-                inventoryItems.Add(new InventoryItem { keyProperties = assetKeyDataValue });
             }
-
+            List<InventoryItem> inventoryItems = new List<InventoryItem>();
+            var reportTypeParam = _adminSettingsRepository.GetInventoryReports();
+            if(reportTypeParam != null)
+            {
+                if(reportTypeParam.Count() > 0)
+                {
+                    if (reportTypeParam[0].Contains("(R)"))
+                    {
+                        var assetKeyDataValues = assetKeyData.Select(_ => _.Value.FirstOrDefault()).ToList();
+                        foreach (var assetKeyDataValue in assetKeyDataValues)
+                        {
+                            inventoryItems.Add(new InventoryItem { keyProperties = new List<string> { assetKeyDataValue } });
+                        }
+                    }
+                    else
+                    {
+                        foreach (var assetKeyDataValue in assetKeyData.Values)
+                        {
+                            inventoryItems.Add(new InventoryItem { keyProperties = assetKeyDataValue });
+                        }
+                    }
+                }
+            }
             return Ok(inventoryItems);
         }
 

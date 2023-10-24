@@ -54,6 +54,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public Guid? SimulationID { get; set; }
 
+        public Guid? NetworkID { get; set; }
+
         public string Results { get; private set; }
 
         public ReportType Type => ReportType.File;
@@ -193,8 +195,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var pavementWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSAuditReportConstants.PavementTab);
-            var dataTabRequiredAttributes = DataTab.GetRequiredAttributes();
-            //ValidateSections(simulationOutput, reportDetailDto, simulationId, dataTabRequiredAttributes);
+            var dataTabRequiredAttributes = PAMSDataTab.GetRequiredAttributes();
+            ValidateSections(simulationOutput, reportDetailDto, simulationId, dataTabRequiredAttributes);
             _dataTab.Fill(pavementWorksheet, simulationOutput);
 
             checkCancelled(cancellationToken, simulationId);
@@ -205,7 +207,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var decisionsWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.DecisionsTab);
             var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
-            //ValidateSections(simulationOutput, reportDetailDto, simulationId, new HashSet<string>(performanceCurvesAttributes.Except(dataTabRequiredAttributes)));
+            ValidateSections(simulationOutput, reportDetailDto, simulationId, new HashSet<string>(performanceCurvesAttributes.Except(dataTabRequiredAttributes)));
             _decisionTab.Fill(decisionsWorksheet, simulationOutput, simulation, performanceCurvesAttributes);
 
             checkCancelled(cancellationToken, simulationId);
@@ -243,7 +245,31 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, dto.Status, dto.SimulationId);
         }
 
+        private void ValidateSections(SimulationOutput simulationOutput, SimulationReportDetailDTO reportDetailDto, Guid simulationId, HashSet<string> requiredAttributes)
+        {
+            var initialSectionValues = simulationOutput.InitialAssetSummaries[0].ValuePerNumericAttribute;
+            var sectionValueAttribute = simulationOutput.Years[0].Assets[0].ValuePerNumericAttribute;
+            foreach (var item in requiredAttributes)
+            {
+                if (!initialSectionValues.ContainsKey(item))
+                {
+                    reportDetailDto.Status = $"{item} was not found in initial section";
+                    UpsertSimulationReportDetail(reportDetailDto);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+                    Errors.Add(reportDetailDto.Status);
+                    throw new KeyNotFoundException($"{item} was not found in initial section");
+                }
 
+                if (!sectionValueAttribute.ContainsKey(item))
+                {
+                    reportDetailDto.Status = $"{item} was not found in sections";
+                    UpsertSimulationReportDetail(reportDetailDto);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+                    Errors.Add(reportDetailDto.Status);
+                    throw new KeyNotFoundException($"{item} was not found in sections");
+                }
+            }
+        }
         private void checkCancelled(CancellationToken? cancellationToken, Guid simulationId)
         {
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)

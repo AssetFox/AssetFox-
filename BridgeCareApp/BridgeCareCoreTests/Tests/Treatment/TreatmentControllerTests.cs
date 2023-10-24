@@ -18,7 +18,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class TreatmentTests
+    public class TreatmentControllerTests
     {
         [Fact]
         public async Task ShouldGetSelectedTreatmentByIdWithData()
@@ -97,8 +97,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldReturnOkResultOnLibraryPost()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
-            var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);            
             var treatementLibraryUserRepo = TreatmentLibraryUserMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
@@ -110,12 +109,15 @@ namespace BridgeCareCoreTests.Tests
                 Name = "",
                 Treatments = new List<TreatmentDTO>()
             };
-
+            var user = UserDtos.Admin();
+            var libraryUser = LibraryUserDtos.Modify(user.Id);
+            var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             var libraryRequest = new LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>()
             {
-                IsNewLibrary = true,
+                IsNewLibrary = false,
                 Library = dto,
             };
+            treatementLibraryUserRepo.SetupGetLibraryAccess(libraryRequest.Library.Id, libraryExists);
             pagingService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(new List<TreatmentDTO>()); // correct? Merge build error here.
             var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
             // Act
@@ -234,12 +236,10 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldModifyLibraryTreatmentData()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
-            var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);            
             var treatmentLibraryRepo = TreatmentLibraryUserMocks.New(unitOfWork);
             var treatmentService = TreatmentServiceMocks.EmptyMock;
-            var pagingService = TreatmentPagingServiceMocks.EmptyMock;
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
+            var pagingService = TreatmentPagingServiceMocks.EmptyMock;            
             var libraryId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
             var treatmentBefore = new TreatmentDTO
@@ -281,12 +281,13 @@ namespace BridgeCareCoreTests.Tests
             var libraryUser = LibraryUserDtos.Modify(user.Id);
             var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             treatmentLibraryRepo.SetupGetLibraryAccess(libraryId, libraryExists);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
 
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);
 
             // Assert
-            var libraryInvocation = treatmentRepo.SingleInvocationWithName(nameof(ISelectableTreatmentRepository.UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers));
+            var libraryInvocation = treatmentLibraryRepo.SingleInvocationWithName(nameof(ITreatmentLibraryUserRepository.UpsertTreatmentLibraryUser));
             ObjectAssertions.Equivalent(libraryAfter, libraryInvocation.Arguments[0]);
             var libraryArgument = libraryInvocation.Arguments[0] as TreatmentLibraryDTO;
             Assert.Equal(treatmentsAfter, libraryArgument.Treatments);
@@ -338,6 +339,33 @@ namespace BridgeCareCoreTests.Tests
             var call = pagingService.SingleInvocationWithName(nameof(ITreatmentPagingService.GetSyncedScenarioDataSet));
             Assert.Equal(simulationId, call.Arguments[0]);
             Assert.Equal(sync, call.Arguments[1]);
+        }
+
+        [Fact]
+        public async Task DownloadScenarioTreatmentsTemplate_IsValidExcelFile()
+        {
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork);
+
+            var actionResult = await controller.DownloadScenarioTreatmentsTemplate();
+
+            var value = ActionResultAssertions.OkObject(actionResult);
+            var fileInfo = value as FileInfoDTO;
+            ExcelPackageAsserts.ValidExcelPackageData(fileInfo);
+        }
+
+
+        [Fact]
+        public async Task DownloadLibraryTreatmentsTemplate_IsValidExcelFile()
+        {
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork);
+
+            var actionResult = await controller.DownloadLibraryTreatmentsTemplate();
+
+            var value = ActionResultAssertions.OkObject(actionResult);
+            var fileInfo = value as FileInfoDTO;
+            ExcelPackageAsserts.ValidExcelPackageData(fileInfo);
         }
     }
 }

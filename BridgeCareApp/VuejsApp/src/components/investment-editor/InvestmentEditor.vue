@@ -599,43 +599,48 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
    
 
-    watch(deletionBudgetIds,()=> onDeletionBudgetIdsChanged)
-    function onDeletionBudgetIdsChanged() {
+    watch(deletionBudgetIds, () => {
         checkHasUnsavedChanges();
-    }
+    });
 
-    watch(addedBudgets,()=>onAddedBudgetsChanged)
-    function onAddedBudgetsChanged() {
+    watch(addedBudgets, () => {
         checkHasUnsavedChanges();
-    }
+    });
 
-    watch(deletionYears,()=> onDeletionyearsChanged)
-    function onDeletionyearsChanged() {
+    watch(deletionYears, () => {
         checkHasUnsavedChanges();
-    }
+    });
 
-    watch(addedBudgetAmounts,()=>onAddedBudgetAmountsChanged)
-    function onAddedBudgetAmountsChanged() {
+    watch(addedBudgetAmounts, () => {
         checkHasUnsavedChanges();
-    }
+    });
 
-    watch(stateBudgetLibraries,()=> onStateBudgetLibrariesChanged)
-    function onStateBudgetLibrariesChanged() {
-        librarySelectItems = stateBudgetLibraries.value
-            .map((library: BudgetLibrary) => ({
-                text: library.name,
-                value: library.id,
-            }));
-        librarySelectItemNames = librarySelectItems.map((library: SelectItem) => library.text)
-    }
+    // watch(stateBudgetLibraries,()=> onStateBudgetLibrariesChanged)
+    // function onStateBudgetLibrariesChanged() {
+    //     librarySelectItems = stateBudgetLibraries.value
+    //         .map((library: BudgetLibrary) => ({
+    //             text: library.name,
+    //             value: library.id,
+    //         }));
+    //     librarySelectItemNames = librarySelectItems.map((library: SelectItem) => library.text)
+    // }
 
-    watch(selectedBudgetYearsGridData,()=> onSelectedRowsChanged)
-    function onSelectedRowsChanged() {
+    let libraryItems =  ref<BudgetLibrary[]>([]);
+    
+    watch(stateBudgetLibraries, ()=> {
+        libraryItems.value = clone(stateBudgetLibraries.value);
+
+        libraryItems.value.forEach(_=> {
+            librarySelectItems.value.push({text:_.name,value:_.id})
+            librarySelectItemNames.value.push(_.name)
+        })
+    });
+
+    watch(selectedBudgetYearsGridData,()=> {
         selectedBudgetYears = getPropertyValues('year', selectedBudgetYearsGridData) as number[];
-    }
+    });
 
-    watch(librarySelectItemValue,()=> onLibrarySelectItemValueChangedCheckUnsaved)
-    function onLibrarySelectItemValueChangedCheckUnsaved(){
+    watch(librarySelectItemValue,() => {
         if(hasScenario){
             onSelectItemValueChanged();
             unsavedDialogAllowed = false;

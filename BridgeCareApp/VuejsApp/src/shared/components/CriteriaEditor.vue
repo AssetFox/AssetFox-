@@ -1,14 +1,14 @@
 <template>
-    <v-row justify-center column class="criteria-editor-card-text">
+    <div class="criteria-editor-card-text">
+    <v-row style="padding:1em">
         <div>
-            <v-row justify-space-between>
-                <v-col cols = "6">
-                    <v-row justify-start
-                    >
+            <v-row justify-space-between style="padding: 10px; width: 100em; height: 48em;">
+                <v-col > 
+                    <v-row justify-start style="padding: 10px"> 
                         <h3 class="ghd-dialog">Output</h3>
                     </v-row>
                     <v-card class="elevation-0" style="border: 1px solid;">
-                        <div class="conjunction-and-messages-container" style="margin-top:4px;">
+                        <div class="conjunction-and-messages-container" >
                             <v-row
                                 :class="{
                                     'justify-space-between': !criteriaEditorData.isLibraryContext,
@@ -17,12 +17,13 @@
                                 }"
                             >
                             <v-col cols = "2">
-                                <v-row>
+                                <v-row style="padding: 15px;">
                                 <v-select
                                     :items="conjunctionSelectListItems"
-                                    append-icon=$vuetify.icons.ghd-down
                                     class="ghd-control-border ghd-control-text ghd-select"
                                     v-model="selectedConjunction"
+                                    density="compact"
+                                    variant="outlined"
                                 >
                                     <template v-slot:selection="{ item }">
                                         <span class="ghd-control-text">{{ item.raw.text }}</span>
@@ -39,6 +40,7 @@
                                 </v-select>
                                 </v-row>
                             </v-col>
+                            <div style="padding:20px">
                                 <v-btn
                                     id="CriteriaEditor-addSubCriteria-btn"
                                     @click="onAddSubCriteria"
@@ -46,6 +48,7 @@
                                     variant = "flat"                                
                                     >Add Subcriteria
                                 </v-btn>
+                            </div>
                             </v-row>
                         </div>
                         <v-card-text
@@ -134,12 +137,12 @@
                         </v-card-actions>
                     </v-card>
                 </v-col>
-                <v-col cols = "6">
-                    <v-row justify-start
+                <v-col>
+                    <v-row justify-start style="padding: 10px;"
                     >
                         <h3 class="ghd-dialog">Criteria Editor</h3>
                     </v-row>
-                    <v-card class="elevation-0" style="border: 1px solid;height:682px;">                  
+                    <v-card class="elevation-0" style="border: 1px solid;">                  
                         <v-card-text
                             :class="{
                                 'criteria-editor-card-dialog':
@@ -157,16 +160,19 @@
                             >                        
                             </v-row>                     
                             <v-tabs class="ghd-control-text" style="margin-left:4px;margin-right:4px;"
-                                v-if="selectedSubCriteriaClauseIndex !== -1"
+                                v-if="selectedSubCriteriaClauseIndex !== -1" v-model="tab"
                             >
-                                <v-tab @click="onParseRawSubCriteria" ripple  id="CriteriaEditor-treeView-tab">
+                                <v-tab @click="onParseRawSubCriteria"   id="CriteriaEditor-treeView-tab" value="tree">
                                     Tree View
                                 </v-tab>
-                                <v-tab @click="onParseSubCriteriaJson" ripple id="CriteriaEditor-rawView-tab">
+                                <v-tab @click="onParseSubCriteriaJson"  id="CriteriaEditor-rawView-tab" value="raw">
                                     Raw Criteria
                                 </v-tab>
-                                <v-window-item>
-                                    <vue-query-builder 
+                           </v-tabs>
+                            <v-window v-model="tab">
+                                <v-window-item value="tree">
+                                    query here
+                                    <!-- <VueQueryBuilder
                                         id="CriteriaEditor-criteria-vuequerybuilder"
                                         :labels="queryBuilderLabels"
                                         :maxDepth="25"
@@ -175,19 +181,20 @@
                                         v-if="queryBuilderRules.length > 0"
                                         v-model="selectedSubCriteriaClause"
                                     >
-                                    </vue-query-builder>
+                                    </VueQueryBuilder> -->
                                 </v-window-item>
-                                <v-window-item>
+                                <v-window-item value="raw">
                                     <v-textarea
                                         id="CriteriaEditor-rawText-vtextarea"
                                         no-resize
-                                        outline
+                                        variant="outlined"
                                         rows="23"
                                         v-model="selectedRawSubCriteriaClause"
                                         class="ghd-control-text"
                                     ></v-textarea>
                                 </v-window-item>
-                            </v-tabs>
+                            </v-window>
+
                         </v-card-text>
                         <v-card-actions
                             :class="{
@@ -251,16 +258,15 @@
                         id="CriteriaEditor-cancel-btn"
                         @click="onSubmitCriteriaEditorResult(false)"
                         class="ara-orange-bg text-white"
-                        >Cancel</v-btn
-                    >
+                        >Cancel</v-btn>
                 </v-row>
             </v-col>
         </div>
     </v-row>
+</div>
 </template>
 
 <script lang="ts" setup>
-import Vue, { shallowRef } from 'vue';
 import VueQueryBuilder from "vue-query-builder/src/VueQueryBuilder.vue";
 import {
     Criteria,
@@ -301,10 +307,9 @@ import {
 } from '@/shared/models/iAM/expression-validation';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 import { getBlankGuid } from '../utils/uuid-utils';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { ref, onMounted, computed, toRefs, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { on } from 'events';
 
 let store = useStore();
 const $router = useRouter();
@@ -312,16 +317,16 @@ const emit = defineEmits(['submit','submitCriteriaEditorResult'])
 const props = defineProps<{
     criteriaEditorData: CriteriaEditorData
     }>()
-
-let stateAttributes = ref<Attribute[]>(store.state.attributeModule.attributes);
-let stateAttributesSelectValues = ref<AttributeSelectValues[]>(store.state.attributeModule.attributesSelectValues);
-let stateNetworks = ref<Network[]>(store.state.networkModule.networks);
-let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
+const { criteriaEditorData } = toRefs(props);
+const stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
+const stateAttributesSelectValues = computed<AttributeSelectValues[]>(() => store.state.attributeModule.attributesSelectValues);
+const stateNetworks = computed<Network[]>(() => store.state.networkModule.networks);
+const currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
 
 async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
 async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues');}
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-
+const tab = ref<any>(null);
     let queryBuilderRules: any[] = [];
     let queryBuilderLabels: object = {
         matchType: '',
@@ -335,39 +340,36 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         removeGroup: `<img class='img-general' src="${require("@/assets/icons/trash-ghd-blue.svg")}"/>`,
         textInputPlaceholder: 'value',
     };
-
-    let cannotSubmit: boolean = true;
-    let validCriteriaMessage: string | null = null;
-    let invalidCriteriaMessage: string | null = null;
-    let validSubCriteriaMessage: string | null = null;
-    let invalidSubCriteriaMessage: string | null = null;
-    let conjunctionSelectListItems: SelectItem[] = [
+    const cannotSubmit = ref<boolean>(true);
+    const validCriteriaMessage = ref<string | null>(null);
+    const invalidCriteriaMessage = ref<string | null>(null);
+    const validSubCriteriaMessage = ref<string | null>(null);
+    const invalidSubCriteriaMessage = ref<string | null>(null);
+    const conjunctionSelectListItems = ref<SelectItem[]>([
         { text: 'OR', value: 'OR' },
         { text: 'AND', value: 'AND' },
-    ];
-    let selectedConjunction: string = 'OR';
-    let subCriteriaClauses= shallowRef<string[]>([]);
-    let selectedSubCriteriaClauseIndex: number = -1;
-    let selectedSubCriteriaClause= shallowRef<Criteria |null>(null);
-    let selectedRawSubCriteriaClause = shallowRef<string>('');
+    ]);
+    const selectedConjunction = ref<string>('OR');
+    const subCriteriaClauses= ref<string[]>([]);
+    const selectedSubCriteriaClauseIndex = ref<number>(-1);
+    const selectedSubCriteriaClause= ref<Criteria |null>(null);
+    const selectedRawSubCriteriaClause = ref<string>('');
     let activeTab = 'tree-view';
-    let checkOutput: boolean = false;
+    const checkOutput = ref<boolean>(false);
 
-    onMounted(()=>mounted())
-    function mounted() {
+    onMounted(()=> {
         if (hasValue(stateAttributes)) {
             setQueryBuilderRules();
             
         }     
-    }
+    });
 
-    watch(()=>props.criteriaEditorData,()=>onCriteriaEditorDataChanged())
-    function onCriteriaEditorDataChanged() {
+    watch(()=>criteriaEditorData,() => {
         //TODO
         /*const mainCriteria: Criteria = parseCriteriaString(
       this.criteriaEditorData.mergedCriteriaExpression != null ? this.criteriaEditorData.mergedCriteriaExpression : ''
       ) as Criteria;*/
-        selectedSubCriteriaClauseIndex = -1;
+        selectedSubCriteriaClauseIndex.value = -1;
         const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
             props.criteriaEditorData.mergedCriteriaExpression != null
                 ? props.criteriaEditorData.mergedCriteriaExpression
@@ -396,29 +398,26 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                 mainCriteria.logicalOperator = 'OR';
             }
 
-            selectedConjunction = mainCriteria.logicalOperator;
+            selectedConjunction.value = mainCriteria.logicalOperator;
 
              const andArray = props.criteriaEditorData.mergedCriteriaExpression ? props.criteriaEditorData.mergedCriteriaExpression.split(' AND ') : [];
             const orArray  = props.criteriaEditorData.mergedCriteriaExpression ? props.criteriaEditorData.mergedCriteriaExpression.split(' OR ') : [];
 
             setSubCriteriaClauses(mainCriteria);
         }
-    }
+    });
 
-    watch(stateAttributes,()=> onStateAttributesChanged)
-    function onStateAttributesChanged() {
+    watch(stateAttributes,()=> {
         if (hasValue(stateAttributes.value)) {
             setQueryBuilderRules();
         }
-    }
+    });
 
-    watch(subCriteriaClauses,()=>onSubCriteriaClausesChanged())
-    function onSubCriteriaClausesChanged() {
+    watch(subCriteriaClauses,()=> {
         resetCriteriaValidationProperties();
-    }
+    });
 
-    watch(selectedSubCriteriaClause,()=>onSelectedClauseChanged())
-    function onSelectedClauseChanged() {
+    watch(selectedSubCriteriaClause,()=> {
         resetSubCriteriaValidationProperties();
         if (
             hasValue(selectedSubCriteriaClause) &&
@@ -443,15 +442,13 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                 });
             }
         }
-    }
+    });
 
-    watch(selectedRawSubCriteriaClause,()=>onSelectedClauseRawChanged())
-    function onSelectedClauseRawChanged() {
+    watch(selectedRawSubCriteriaClause,()=> {
         resetSubCriteriaValidationProperties();
-    }
+    });
 
-    watch(stateAttributesSelectValues,()=> onStateAttributesSelectValuesChanged())
-    function onStateAttributesSelectValuesChanged() {
+    watch(stateAttributesSelectValues,()=> {
         if (
             hasValue(queryBuilderRules) &&
             hasValue(stateAttributesSelectValues)
@@ -483,7 +480,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                 );
             }
         }
-    }
+    });
     function setQueryBuilderRules() {
         queryBuilderRules = stateAttributes.value.map(
             (attribute: Attribute) => ({
@@ -510,21 +507,21 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     }
 
     function resetCriteriaValidationProperties() {
-        validCriteriaMessage = null;
-        invalidCriteriaMessage = null;
-        cannotSubmit = !isEmpty(
+        validCriteriaMessage.value = null;
+        invalidCriteriaMessage.value = null;
+        cannotSubmit.value = !isEmpty(
             convertCriteriaObjectToCriteriaExpression(getMainCriteria()),
         );
     }
 
     function resetSubCriteriaValidationProperties() {
-        validSubCriteriaMessage = null;
-        invalidSubCriteriaMessage = null;
-        checkOutput = false;
+        validSubCriteriaMessage.value = null;
+        invalidSubCriteriaMessage.value = null;
+        checkOutput.value = false;
     }
 
     function resetSubCriteriaSelectedProperties() {
-        selectedSubCriteriaClauseIndex = -1;
+        selectedSubCriteriaClauseIndex.value = -1;
         selectedSubCriteriaClause.value = null;
         selectedRawSubCriteriaClause.value = '';
     }
@@ -537,7 +534,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                 subCriteriaClauses.value.length,
             );
             subCriteriaClauses.value.push('');
-            selectedSubCriteriaClauseIndex =
+            selectedSubCriteriaClauseIndex.value =
                 subCriteriaClauses.value.length - 1;
             selectedSubCriteriaClause.value = clone(emptyCriteria);
             resetCriteriaValidationProperties();
@@ -550,7 +547,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     ) {
         resetSubCriteriaSelectedProperties();
         setTimeout(() => {
-            selectedSubCriteriaClauseIndex = subCriteriaClauseIndex;
+            selectedSubCriteriaClauseIndex.value = subCriteriaClauseIndex;
             // TODO
             //selectedSubCriteriaClause = parseCriteriaString(subCriteriaClause);
             selectedSubCriteriaClause.value = convertCriteriaExpressionToCriteriaObject(
@@ -562,7 +559,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                     selectedSubCriteriaClause.value!.logicalOperator = 'AND';
                 }
             } else {
-                invalidSubCriteriaMessage =
+                invalidSubCriteriaMessage.value =
                     'Unable to parse selected criteria';
             }
         });
@@ -579,10 +576,10 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
             subCriteriaClauses.value,
         );
 
-        if (selectedSubCriteriaClauseIndex === subCriteriaClauseIndex) {
+        if (selectedSubCriteriaClauseIndex.value === subCriteriaClauseIndex) {
             resetSubCriteriaSelectedProperties();
         } else {
-            selectedSubCriteriaClauseIndex = findIndex(
+            selectedSubCriteriaClauseIndex.value = findIndex(
                 (subCriteriaClause: string) => {
                     const parsedCriteriaJson = convertCriteriaObjectToCriteriaExpression(
                         selectedSubCriteriaClause.value as Criteria,
@@ -632,7 +629,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                 selectedSubCriteriaClause.value.logicalOperator = 'OR';
             }
         } else {
-            invalidSubCriteriaMessage =
+            invalidSubCriteriaMessage.value =
                 'The raw criteria string is invalid';
         }
     }
@@ -646,12 +643,12 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         if (parsedSubCriteria) {
             selectedRawSubCriteriaClause.value = parsedSubCriteria.join('');
         } else {
-            invalidSubCriteriaMessage = 'The criteria json is invalid';
+            invalidSubCriteriaMessage.value = 'The criteria json is invalid';
         }
     }
 
     function onCheckCriteria() {
-        checkOutput = false;
+        checkOutput.value = false;
         resetSubCriteriaSelectedProperties();
 
         const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
@@ -663,7 +660,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
             else
                 criteriaValidationNoCount(parsedCriteria)
         } else {
-            invalidCriteriaMessage = 'Unable to parse criteria';
+            invalidCriteriaMessage.value = 'Unable to parse criteria';
         }
     }
 
@@ -683,8 +680,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                     const result: CriterionValidationResult = response.data as CriterionValidationResult;
                     const message = `${result.resultsCount} result(s) returned`;
                     if (result.isValid) {
-                        validCriteriaMessage = message;
-                        cannotSubmit = false;
+                        validCriteriaMessage.value = message;
+                        cannotSubmit.value = false;
 
                         if (props.criteriaEditorData.isLibraryContext) {
                             const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
@@ -696,7 +693,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                                     criteria: parsedCriteria.join(''),
                                 });
                             } else {
-                                invalidCriteriaMessage =
+                                invalidCriteriaMessage.value =
                                     'Unable to parse the criteria';
                             }
                         }
@@ -704,10 +701,10 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                         resetCriteriaValidationProperties();
                         setTimeout(() => {
                             if (result.resultsCount === 0) {
-                                invalidCriteriaMessage = message;
-                                cannotSubmit = false;
+                                invalidCriteriaMessage.value = message;
+                                cannotSubmit.value = false;
                             } else {
-                                invalidCriteriaMessage =
+                                invalidCriteriaMessage.value =
                                     result.validationMessage;
                             }
                         });
@@ -737,8 +734,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                     const result: CriterionValidationResult = response.data as CriterionValidationResult;
                     const message = `Criterion is Valid`;
                     if (result.isValid) {
-                        validCriteriaMessage = message;
-                        cannotSubmit = false;
+                        validCriteriaMessage.value = message;
+                        cannotSubmit.value = false;
 
                         if (props.criteriaEditorData.isLibraryContext) {
                             const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
@@ -750,7 +747,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                                     criteria: parsedCriteria.join(''),
                                 });
                             } else {
-                                invalidCriteriaMessage =
+                                invalidCriteriaMessage.value =
                                     'Unable to parse the criteria';
                             }
                         }
@@ -758,10 +755,10 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                         resetCriteriaValidationProperties();
                         setTimeout(() => {
                             if (result.resultsCount === 0) {
-                                invalidCriteriaMessage = message;
-                                cannotSubmit = false;
+                                invalidCriteriaMessage.value = message;
+                                cannotSubmit.value = false;
                             } else {
-                                invalidCriteriaMessage =
+                                invalidCriteriaMessage.value =
                                     result.validationMessage;
                             }
                         });
@@ -781,21 +778,21 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         const criteria = getSubCriteriaValueToCheck();
 
         if (isNil(criteria)) {
-            invalidSubCriteriaMessage = 'Unable to parse criteria';
+            invalidSubCriteriaMessage.value = 'Unable to parse criteria';
             return;
         }
         if (isEmpty(criteria)) {
-            invalidSubCriteriaMessage = 'No criteria to evaluate';
+            invalidSubCriteriaMessage.value = 'No criteria to evaluate';
             return;
         }
 
         subCriteriaClauses.value= update(
-            selectedSubCriteriaClauseIndex,
+            selectedSubCriteriaClauseIndex.value,
             criteria as any,
             subCriteriaClauses.value,
         );
         resetCriteriaValidationProperties();
-        checkOutput = true;
+        checkOutput.value = true;
         resetSubCriteriaValidationProperties();
 
         if (props.criteriaEditorData.isLibraryContext) {
@@ -828,16 +825,16 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
                 getMainCriteria(),
             );
             if (parsedCriteria) {
-                selectedConjunction = 'OR';
+                selectedConjunction.value = 'OR';
                 emit(
                     'submitCriteriaEditorResult',
                     parsedCriteria.join(''),
                 );
             } else {
-                invalidCriteriaMessage = 'Unable to parse the criteria';
+                invalidCriteriaMessage.value = 'Unable to parse the criteria';
             }
         } else {
-            selectedConjunction = 'OR';
+            selectedConjunction.value = 'OR';
             emit('submitCriteriaEditorResult', null);
         }
     }
@@ -872,7 +869,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         );
 
         const disable: boolean =
-            selectedSubCriteriaClauseIndex === -1 ||
+            selectedSubCriteriaClauseIndex.value === -1 ||
             (activeTab === 'tree-view' &&
                 (parsedSelectedSubCriteriaClause === null ||
                     equals(selectedSubCriteriaClause.value, emptyCriteria))) ||
@@ -894,7 +891,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
 
         if (hasValue(filteredSubCriteria)) {
             return {
-                logicalOperator: selectedConjunction,
+                logicalOperator: selectedConjunction.value,
                 children: subCriteriaClauses.value
                     .filter(
                         (subCriteriaClause: string) =>

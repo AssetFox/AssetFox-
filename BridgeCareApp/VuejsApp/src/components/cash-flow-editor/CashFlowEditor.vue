@@ -53,6 +53,7 @@
         <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="cash-flow-library-tables">
                 <DataTable
+                :first="0"
                         striped-rows
                         :rows="5"
                         :rows-per-page-options="[5,10,25]"
@@ -62,9 +63,12 @@
                         paginator
                         paginator-template="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                         currentPageReportTemplate="{first} to {last} of {totalRecords}"
-                        
+                        lazy
+                        @page="onPaginationChanged($event)"
+                        :totalRecords="totalItems"
                         selection-mode="single"
                         table-style="min-width: 50rem"
+                        
                         >
                         <Column sortable field="name" header="Name"></Column>
                         <Column field="criterionLibrary" header="Criteria"></Column> 
@@ -275,7 +279,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, nextTick, shallowRef, onBeforeUnmount, ref, computed } from 'vue';
+import { watch, nextTick, shallowRef, onBeforeUnmount, ref, computed, onMounted, onBeforeMount} from 'vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
     clone,
@@ -331,26 +335,26 @@ let store = useStore();
 // const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
 
 const stateCashFlowRuleLibraries = computed<CashFlowRuleLibrary[]>(() => store.state.cashFlowModule.cashFlowRuleLibraries);
-let stateSelectedCashRuleFlowLibrary = ref<CashFlowRuleLibrary>(store.state.cashFlowModule.selectedCashFlowRuleLibrary);
-let stateScenarioCashFlowRules = ref<CashFlowRule[]>(store.state.cashFlowModule.scenarioCashFlowRules);
-let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
-let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
-let hasPermittedAccess = ref<boolean>(store.state.cashFlowModule.hasPermittedAccess);
-let isSharedLibrary = ref<boolean>(store.state.cashFlowModule.isSharedLibrary);
+let stateSelectedCashRuleFlowLibrary = computed<CashFlowRuleLibrary>(() => store.state.cashFlowModule.selectedCashFlowRuleLibrary);
+let stateScenarioCashFlowRules = computed<CashFlowRule[]>(() => store.state.cashFlowModule.scenarioCashFlowRules);
+let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+let hasPermittedAccess = computed<boolean>(() => store.state.cashFlowModule.hasPermittedAccess);
+let isSharedLibrary = computed<boolean>(() => store.state.cashFlowModule.isSharedLibrary);
 
-async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedCashFlowRuleLibrary');}
-async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess');}
-async function getCashFlowRuleLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCashFlowRuleLibraries');}
-async function selectedCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectedCashFlowRuleLibrary');}
-async function upsertCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertCashFlowRuleLibrary');}
-async function deleteCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteCashFlowRuleLibrary');}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
-async function getScenarioCashFlowRulesAction(payload?: any): Promise<any> {await store.dispatch('getScenarioCashFlowRules');}
-async function upsertScenarioCashFlowRulesAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioCashFlowRules');}
-async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
-async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario');}
-async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario');}
+async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedCashFlowRuleLibrary', payload);}
+async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
+async function getCashFlowRuleLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCashFlowRuleLibraries', payload);}
+async function selectedCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectedCashFlowRuleLibrary', payload);}
+async function upsertCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertCashFlowRuleLibrary', payload);}
+async function deleteCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteCashFlowRuleLibrary', payload);}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+async function getScenarioCashFlowRulesAction(payload?: any): Promise<any> {await store.dispatch('getScenarioCashFlowRules', payload);}
+async function upsertScenarioCashFlowRulesAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioCashFlowRules', payload);}
+async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
+async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
 
 function cashFlowRuleLibraryMutator(payload: any){store.commit('');}
 function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
@@ -463,12 +467,12 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     let inputRules: InputValidationRules = clone(rules);
     let uuidNIL: string = getBlankGuid();
-    let hasScenario: boolean = false;
+    let hasScenario = ref(false);
     let hasCreatedLibrary: boolean = false;
     let disableCrudButtonsResult: boolean = false;
     let hasLibraryEditPermission: boolean = false;
     let showRuleEditorDialog: boolean = false;
-    let showAddCashFlowRuleDialog: boolean = false;
+    let showAddCashFlowRuleDialog= ref(false);
     let importLibraryDisabled: boolean = true;
     let scenarioHasCreatedNew: boolean = false;
     let loadedParentName: string = "";
@@ -481,33 +485,29 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     created();
     function created() {
         librarySelectItemValue.value = "";
-        getCashFlowRuleLibrariesAction();
-        getHasPermittedAccessAction();
-        hasScenario = true;
-        selectedScenarioId = "26C23F48-9B5C-4AEC-BDE0-0778AA512E10";
-        initializePages();
+        
+        getCashFlowRuleLibrariesAction().then(() => {
+            getHasPermittedAccessAction().then(() => {
+                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
+                    selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+                    if (selectedScenarioId === uuidNIL) {
+                        addErrorNotificationAction({
+                            message: 'Unable to identify selected scenario.',
+                        });
+                        $router.push('/Scenarios/');
+                        return;
+                    }
 
-        // librarySelectItemValue.value = "";
-        // getCashFlowRuleLibrariesAction().then(() => {
-        //     getHasPermittedAccessAction().then(() => {
-        //         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
-        //             selectedScenarioId = $router.currentRoute.value.query.scenarioId;
-        //             if (selectedScenarioId === uuidNIL) {
-        //                 addErrorNotificationAction({
-        //                     message: 'Unable to identify selected scenario.',
-        //                 });
-        //                 $router.push('/Scenarios/');
-        //             }
-
-        //             hasScenario = true;
-        //             getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-        //                 selectScenarioAction({ scenarioId: selectedScenarioId });        
-        //                 initializePages();
-        //             });                                                
-        //         }
-        //     });
-        // });
+                    hasScenario.value = true;
+                    getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+                        selectScenarioAction({ scenarioId: selectedScenarioId });        
+                        initializePages();
+                    });                                                
+                }
+            });
+        });
     }
+
 
     onBeforeUnmount(() => {
         setHasUnsavedChangesAction({ value: false });
@@ -542,10 +542,12 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
         : [];
     });
     watch(pagination, () => onPaginationChanged)
-    async function onPaginationChanged() {
+    async function onPaginationChanged(event?: any) {
         if(initializing)
             return;
         checkHasUnsavedChanges();
+        if(!isNil(event))
+            pagination.value.page = event.page + 1;
         const { sortBy, descending, page, rowsPerPage } = pagination.value;
         const request: PagingRequest<CashFlowRule>= {
             page: page,
@@ -699,7 +701,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
             addedRows.value.push(newCashFlowRule);
             onPaginationChanged()
         }
-        showAddCashFlowRuleDialog = false;
+        showAddCashFlowRuleDialog.value = false;
     }
 
     function onDeleteCashFlowRule(cashFlowRuleId: string) {

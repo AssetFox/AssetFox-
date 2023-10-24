@@ -121,7 +121,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         [Fact]
         // treatment performance factors
         // need to be added to this test.
-        public void DownloadScenarioTreatmentSpreadsheet_ThenUpload_SameTreatments()
+        public void DownloadTreatmentSupersedeRuleSpreadsheet_ThenUpload_SameTreatmentSupersedeRule()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);

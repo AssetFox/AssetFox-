@@ -117,5 +117,58 @@ namespace BridgeCareCoreTests.Tests.Integration
                 t => t.Consequences[0].Equation.Id,
                 t => t.Consequences[0].CriterionLibrary.Id);
         }
+
+        [Fact]
+        // treatment performance factors
+        // need to be added to this test.
+        public void DownloadScenarioTreatmentSpreadsheet_ThenUpload_SameTreatments()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulationName = RandomStrings.WithPrefix("Simulation");
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName);
+            var budget = BudgetDtos.New();
+            var budgets = new List<BudgetDTO> { budget };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
+            var treatmentId = Guid.NewGuid();
+            var treatmentBudget = TreatmentBudgetDtos.Dto(budget.Name);
+            var treatmentBudgets = new List<TreatmentBudgetDTO> { treatmentBudget };
+            var budgetIds = new List<Guid> { budget.Id };
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulationInDb(TestHelper.UnitOfWork, simulationId, treatmentId, criterionExpression: "treatment criterion", budgets: treatmentBudgets, budgetIds: budgetIds);
+            var initialTreatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(initialTreatments, simulationId);
+            var cost = ScenarioTreatmentCostTestSetup.CostForTreatmentInDb(TestHelper.UnitOfWork, treatmentId, simulationId);
+
+
+            var consequence = ScenarioTreatmentConsequenceTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, treatmentId,
+                attribute: "AGE", equation: "[AGE]", criterion: "[AGE] > 10");
+            var treatments1 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            var service = CreateTreatmentService(TestHelper.UnitOfWork);
+            var fileInfo = service.ExportScenarioTreatmentsExcelFile(simulationId);
+            var dataAsString = fileInfo.FileData;
+            var bytes = Convert.FromBase64String(dataAsString);
+            var stream = new MemoryStream(bytes);
+            File.WriteAllBytes("zzzzz.xlsx", bytes);
+            var excelPackage = new ExcelPackage(stream);
+            var userCriteria = new UserCriteriaDTO();
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatment(treatment, simulationId);
+            var treatments2 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            Assert.Empty(treatments2);
+            service.ImportScenarioTreatmentsFile(simulationId, excelPackage);
+            var treatments3 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            var treatment1 = treatments1.Single();
+            var treatment3 = treatments3.Single();
+            ObjectAssertions.EquivalentExcluding(treatment1, treatment3,
+                t => t.Id,
+                t => t.CriterionLibrary.Id,
+                t => t.Costs[0].Id,
+                t => t.Costs[0].Equation.Id,
+                t => t.Costs[0].CriterionLibrary.Id,
+                t => t.Consequences[0].Id,
+                t => t.Consequences[0].Equation.Id,
+                t => t.Consequences[0].CriterionLibrary.Id);
+        }
+
     }
 }

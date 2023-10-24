@@ -202,6 +202,7 @@
           :dialogData="criterionEditorDialogData"
           @submit="onEditRemainingLifeLimitCriterionLibrary"
         />
+        <ConfirmDialog></ConfirmDialog>
     </v-row>
 </template>
 
@@ -253,8 +254,11 @@ import { isNullOrUndefined } from 'util';
 import { LibraryUser } from '@/shared/models/iAM/user';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore();
+    const confirm = useConfirm();
     const $router = useRouter();
 
     const stateRemainingLifeLimitLibraries: RemainingLifeLimitLibrary[] = shallowReactive(store.state.remainingLifeLimitModule.remainingLifeLimitLibraries);
@@ -848,14 +852,13 @@ import { useRouter } from 'vue-router';
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
         if (hasUnsavedChanges && unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                header: "Unsaved Changes",
+                icon: 'pi pi-question-circle',
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
             unsavedDialogAllowed = true;

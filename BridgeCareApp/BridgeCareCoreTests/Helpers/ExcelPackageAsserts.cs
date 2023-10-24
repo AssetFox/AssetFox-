@@ -18,7 +18,6 @@ namespace BridgeCareCoreTests
         public static void ValidExcelPackageData(byte[] bytes)
         {
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("zzzzz.xlsx", bytes);
             ValidExcelPackageData(stream);
         }
 

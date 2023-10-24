@@ -199,8 +199,9 @@ namespace BridgeCareCoreTests.Tests.Integration
             service.ImportCommittedProjectFiles(simulationId, excelPackage, fileInfo.FileName, true);
             var committedProjects3 = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
             var id1 = committedProjects1[0].LocationKeys["ID"];
-            var id2 = committedProjects3[0].LocationKeys["ID"];
+            var id3 = committedProjects3[0].LocationKeys["ID"];
             ObjectAssertions.EquivalentExcluding(committedProjects1, committedProjects3, x => x[0].LocationKeys, x => x[0].Id);
+            Assert.NotEqual(id1, id3);
         }
 
         [Fact]

@@ -88,13 +88,13 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(
                 new List<PerformanceCurveDTO>(), libraryId);
             var curves2 = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(libraryId);
+            Assert.Empty(curves2);
             var excelPackage = new ExcelPackage(stream);
             var userCriteria = new UserCriteriaDTO();
 
             service.ImportLibraryPerformanceCurvesFile(libraryId, excelPackage, userCriteria);
 
             var curves3 = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(libraryId);
-            Assert.Empty(curves2);
             var curve1 = curves1.Single();
             var curve3 = curves3.Single();
             ObjectAssertions.EquivalentExcluding(curve1, curve3, c => c.Id, c => c.Equation.Id);

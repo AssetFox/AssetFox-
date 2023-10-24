@@ -13,8 +13,9 @@
                         :key="navigationTab.tabName"
                         :model-value="navigationTab"
                         v-for="navigationTab in visibleNavigationTabs()"
+                        :to="navigationTab.navigation"               
                     >
-                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                        <v-list-tile style="border-bottom: 1px solid #CCCCCC;">
                             <v-list-tile-action>
                                 <v-list-tile-icon>
                                     <!-- <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon> -->
@@ -71,7 +72,7 @@ import { useStore } from 'vuex';
             tabName: 'Investment',
             tabIcon: 'fas fa-dollar-sign',
             navigation: {
-                path: '/InvestmentEditor/Library',
+                path: '/InvestmentEditor/Library/',
             },
         },
         {

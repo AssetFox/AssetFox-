@@ -18,7 +18,7 @@
   </v-dialog>
 </template>
 
-<script lang="ts"setup>
+<script lang="ts" setup>
 import Vue from 'vue';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';

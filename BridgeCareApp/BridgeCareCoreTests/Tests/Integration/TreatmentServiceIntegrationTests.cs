@@ -46,7 +46,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("zzzzz.xlsx", bytes);
+            //File.WriteAllBytes("zzzzz.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             var userCriteria = new UserCriteriaDTO();
             TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatment, libraryId);
@@ -67,8 +67,6 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        // treatment performance factors
-        // need to be added to this test.
         public void DownloadScenarioTreatmentSpreadsheet_ThenUpload_SameTreatments()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -87,17 +85,22 @@ namespace BridgeCareCoreTests.Tests.Integration
             var initialTreatments = new List<TreatmentDTO> { treatment };
             TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(initialTreatments, simulationId);
             var cost = ScenarioTreatmentCostTestSetup.CostForTreatmentInDb(TestHelper.UnitOfWork, treatmentId, simulationId);
-           
 
             var consequence = ScenarioTreatmentConsequenceTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, treatmentId,
                 attribute: "AGE", equation: "[AGE]", criterion: "[AGE] > 10");
+            var performanceFactor = TreatmentPerformanceFactorDtos.Dto("AGE");
+            var performanceFactors = new List<TreatmentPerformanceFactorDTO> { performanceFactor };
+            var performanceFactorDictionary = new Dictionary<Guid, List<TreatmentPerformanceFactorDTO>>
+                { { treatment.Id, performanceFactors } };
+            TestHelper.UnitOfWork.TreatmentPerformanceFactorRepo.UpsertScenarioTreatmentPerformanceFactors(
+                performanceFactorDictionary, simulationId);
             var treatments1 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             var service = CreateTreatmentService(TestHelper.UnitOfWork);
             var fileInfo = service.ExportScenarioTreatmentsExcelFile(simulationId);
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("zzzzz.xlsx", bytes);
+            //File.WriteAllBytes("zzzzz.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             var userCriteria = new UserCriteriaDTO();
             TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatment(treatment, simulationId);
@@ -115,7 +118,8 @@ namespace BridgeCareCoreTests.Tests.Integration
                 t => t.Costs[0].CriterionLibrary.Id,
                 t => t.Consequences[0].Id,
                 t => t.Consequences[0].Equation.Id,
-                t => t.Consequences[0].CriterionLibrary.Id);
+                t => t.Consequences[0].CriterionLibrary.Id,
+                t => t.PerformanceFactors[0].Id);
         }
     }
 }

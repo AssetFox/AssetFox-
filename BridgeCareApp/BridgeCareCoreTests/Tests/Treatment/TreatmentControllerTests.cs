@@ -18,7 +18,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class TreatmentTests
+    public class TreatmentControllerTests
     {
         [Fact]
         public async Task ShouldGetSelectedTreatmentByIdWithData()
@@ -339,6 +339,33 @@ namespace BridgeCareCoreTests.Tests
             var call = pagingService.SingleInvocationWithName(nameof(ITreatmentPagingService.GetSyncedScenarioDataSet));
             Assert.Equal(simulationId, call.Arguments[0]);
             Assert.Equal(sync, call.Arguments[1]);
+        }
+
+        [Fact]
+        public async Task DownloadScenarioTreatmentsTemplate_IsValidExcelFile()
+        {
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork);
+
+            var actionResult = await controller.DownloadScenarioTreatmentsTemplate();
+
+            var value = ActionResultAssertions.OkObject(actionResult);
+            var fileInfo = value as FileInfoDTO;
+            ExcelPackageAsserts.ValidExcelPackageData(fileInfo);
+        }
+
+
+        [Fact]
+        public async Task DownloadLibraryTreatmentsTemplate_IsValidExcelFile()
+        {
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork);
+
+            var actionResult = await controller.DownloadLibraryTreatmentsTemplate();
+
+            var value = ActionResultAssertions.OkObject(actionResult);
+            var fileInfo = value as FileInfoDTO;
+            ExcelPackageAsserts.ValidExcelPackageData(fileInfo);
         }
     }
 }

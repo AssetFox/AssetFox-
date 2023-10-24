@@ -5,7 +5,7 @@
                 <v-layout>
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
-                        <v-select :items='selectPrimaryNetworkItems'
+                        <v-select id="AdminData-PrimaryNetwork-select" :items='selectPrimaryNetworkItems'
                             outline  
                             v-model='selectPrimaryNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
@@ -29,7 +29,7 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Key Field(s): </v-subheader> 
                     </v-flex>
                     <v-flex xs5>
-                        <div class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
+                        <div id="AdminData-keyFields-div" class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
                     </v-flex>                        
                     <v-btn style="margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline

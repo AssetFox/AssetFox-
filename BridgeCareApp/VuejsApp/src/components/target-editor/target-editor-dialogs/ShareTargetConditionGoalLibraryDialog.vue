@@ -10,7 +10,7 @@
           </v-btn>
       </v-card-title>
       <v-card-text>
-        <v-data-table :headers="targetConditionGoalLibraryUserGridHeaders"
+        <v-data-table id="ShareTargetConditionGoalLibraryDialog-table-vdatatable" :headers="targetConditionGoalLibraryUserGridHeaders"
                       :items="targetConditionGoalLibraryUserGridRows"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
@@ -19,11 +19,11 @@
               {{ props.item.username }}
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="props.item.isShared"
+              <v-checkbox id="ShareTargetConditionGoalLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="props.item.isShared"
                           @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox id="ShareTargetConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
             </td>
           </template>
           <v-alert :value="true"
@@ -36,8 +36,8 @@
       </v-card-text>
       <v-card-actions>
         <v-layout row justify-center>
-          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel</v-btn>
-          <v-btn @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+          <v-btn id="ShareTargetConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel</v-btn>
+          <v-btn id="ShareTargetConditionGoalLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>
         </v-layout>

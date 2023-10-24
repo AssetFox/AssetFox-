@@ -67,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var name = RandomStrings.WithPrefix("Network");
             var resolveNetworkId = networkId ?? Guid.NewGuid();
-            var attribute = AttributeTestSetup.CreateSingleTextAttribute(unitOfWork, keyAttributeId, keyAttributeName);
+            var attribute = AttributeTestSetup.CreateSingleTextAttribute(unitOfWork, keyAttributeId, keyAttributeName, Data.ConnectionType.EXCEL, keyAttributeName);
             var network = new TNetwork(maintainableAssets, resolveNetworkId, name);
             network.KeyAttributeId = attribute.Id;
             unitOfWork.NetworkRepo.CreateNetwork(network);

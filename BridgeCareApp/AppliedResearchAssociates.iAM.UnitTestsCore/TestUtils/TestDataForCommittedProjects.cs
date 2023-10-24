@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using Newtonsoft.Json;
 using OfficeOpenXml;
 
@@ -17,7 +18,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public const string NetworkName = "Primary";
         public const string Username = "pdsystbamsusr01";
-
+        public const string MaintainableAssetIdString1 = "f286b7cf-445d-4291-9167-0f225b170cae";
+        public const string MaintainableAssetIdString2 = "46f5da89-5e65-4b8a-9b36-03d9af0302f7";
+        public const string CommittedProjectIdString1 = "2e9e66df-4436-49b1-ae68-9f5c10656b1b";
+        public const string CommittedProjectIdString2 = "091001e2-c1f0-4af6-90e7-e998bbea5d00";
+        public static Guid MaintainableAssetId1 => Guid.Parse(MaintainableAssetIdString1);
+        public static Guid MaintainableAssetId2 => Guid.Parse(MaintainableAssetIdString2);
+        public static Guid CommittedProjectId1 => Guid.Parse(CommittedProjectIdString1);
+        public static Guid CommittedProjectId2 => Guid.Parse(CommittedProjectIdString2);
         public static Guid AuthorizedUser => Guid.Parse("b047f934-2a40-4cbb-b3cd-0a17c8a5af21");
 
         public static Guid UnauthorizedUser => Guid.Parse("4be6302a-e8c8-484a-a64b-67d66b3e21a8");
@@ -49,8 +57,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var result = new Dictionary<string, List<KeySegmentDatum>>();
             var dummyAttribute = new AttributeDTO() { Id = Guid.Parse("25fba698-d19e-46bf-a1a9-1b61e9560165"), Name = "ID" };
             result.Add("ID", DummyKeySegmentDatum(dummyAttribute));
-            result.Add("BRKEY_", DummyKeySegmentDatum(Attributes.Single(_ => _.Name == "BRKEY_")));
-            result.Add("BMSID", DummyKeySegmentDatum(Attributes.Single(_ => _.Name == "BMSID")));
+            result.Add(TestAttributeNames.BrKey, DummyKeySegmentDatum(Attributes.Single(_ => _.Name == TestAttributeNames.BrKey)));
+            result.Add(TestAttributeNames.BmsId, DummyKeySegmentDatum(Attributes.Single(_ => _.Name == "BMSID")));
             return result;
         }
 
@@ -112,13 +120,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             new AttributeDTO()
             {
                 Id = Guid.Parse("c31ea5bb-3d48-45bb-a68f-01ee75f17f0c"),
-                Name = "BRKEY_",
+                Name = TestAttributeNames.BrKey,
                 Type = "NUMBER"
             },
             new AttributeDTO()
             {
                 Id = Guid.Parse("cbdc2aac-f2b7-405e-8ff8-21f2785330c1"),
-                Name = "BMSID",
+                Name = TestAttributeNames.BmsId,
                 Type = "STRING"
             },
             new AttributeDTO()
@@ -166,7 +174,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             new AttributeDTO()
             {
                 Id = Guid.Parse("f7693cfe-8705-4f58-8d16-9be6e5d9a2af"),
-                Name = "CULV_DURATION_N",
+                Name = TestAttributeNames.CulvDurationN,
                 Type = "NUMBER"
             }
         };
@@ -184,7 +192,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 return new List<SectionCommittedProjectDTO>()
               {
               SomethingSectionCommittedProjectDTO(),
-              SimpleSectionCommittedProjectDTO(Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"), SimulationId, 2023, id),
+              SimpleSectionCommittedProjectDTO(CommittedProjectId2, SimulationId, 2023, id),
               SimpleSectionCommittedProjectDTO(Guid.Parse("491001e2-c1f0-4af6-90e7-e998bbea5d00"), FourYearSimulationId, 2025, id),
           };
             }
@@ -202,15 +210,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             ScenarioBudgetId = scenarioBudgetId,
             LocationKeys = new Dictionary<string, string>()
                 {
-                    { "ID", "46f5da89-5e65-4b8a-9b36-03d9af0302f7" },
-                    { "CULV_DURATION_N", "Y" },
-                    { "BRKEY_", "2" },
-                    { "BMSID", "9876543" }
+                    { "ID", MaintainableAssetIdString2 },
+                    { TestAttributeNames.CulvDurationN, "Y" },
+                    { TestAttributeNames.BrKey, "2" },
+                    { TestAttributeNames.BmsId, "9876543" }
                 }
         };
         private static SectionCommittedProjectDTO SomethingSectionCommittedProjectDTO() => new SectionCommittedProjectDTO()
         {
-            Id = Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
+            Id = CommittedProjectId1,
             Year = 2022,
             Treatment = "Something",
             ShadowForAnyTreatment = 1,
@@ -220,10 +228,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Local").Id,
             LocationKeys = new Dictionary<string, string>()
                 {
-                    { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
-                    { "CULV_DURATION_N", "Y" },
-                    { "BRKEY_", "1" },
-                    { "BMSID", "12345678" }
+                    { "ID", MaintainableAssetIdString1 },
+                    { TestAttributeNames.CulvDurationN, "Y" },
+                    { TestAttributeNames.BrKey, "1" },
+                    { TestAttributeNames.BmsId, "12345678" }
                 },
         };
 
@@ -243,8 +251,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Interstate").Id,
                 LocationKeys = new Dictionary<string, string>()
                 {
-                    { "BRKEY_", "9" },
-                    { "BMSID", "0876500" }
+                    { TestAttributeNames.BrKey, "9" },
+                    { TestAttributeNames.BmsId, "0876500" }
                 }
             });
             return returnData;
@@ -265,8 +273,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 ScenarioBudgetId = null,
                 LocationKeys = new Dictionary<string, string>()
                 {
-                    { "BRKEY_", "3" },
-                    { "BMSID", "11122233" }
+                    { TestAttributeNames.BrKey, "3" },
+                    { TestAttributeNames.BmsId, "11122233" }
                 }
             });
             return returnData;
@@ -355,13 +363,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         private static List<MaintainableAsset> CompleteMaintainableAssets => new List<MaintainableAsset>()
         {
             new MaintainableAsset(
-                Guid.Parse("f286b7cf-445d-4291-9167-0f225b170cae"),
+                MaintainableAssetId1,
                 NetworkId,
                 new SectionLocation(Guid.NewGuid(), "1"),
                 "[DECK_AREA]"
             ),
             new MaintainableAsset(
-                Guid.Parse("46f5da89-5e65-4b8a-9b36-03d9af0302f7"),
+                MaintainableAssetId2,
                 NetworkId,
                 new SectionLocation(Guid.NewGuid(), "2"),
                 "[DECK_AREA]"

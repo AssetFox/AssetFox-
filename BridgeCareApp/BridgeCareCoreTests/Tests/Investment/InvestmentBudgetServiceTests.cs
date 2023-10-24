@@ -167,7 +167,7 @@ namespace BridgeCareCoreTests.Tests
             ObjectAssertions.Equivalent(expectedUpdateAmount, updatedAmount);
         }
 
-        [Fact] // done
+        [Fact] 
         public void ImportLibraryInvestmentBudgetsFile_BudgetExists_Overwrites()
         {
             // Arrange
@@ -296,7 +296,7 @@ namespace BridgeCareCoreTests.Tests
             ObjectAssertions.Equivalent(expectedAddedJoins, addedJoins);
         }
 
-        [Fact] // done
+        [Fact] 
         public void ExportLibraryInvestmentBudgetsFile_NoBudgetAmountsReturnedFromRepo_CreatesSampleFile()
         {
             // Arrange
@@ -338,7 +338,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(budgetAmounts.All(amount => amount == decimal.Parse("5000000")));
         }
 
-        [Fact] // done
+        [Fact] 
         public void ExportLibraryInvestmentBudgetsFile_Does()
         {
             // Arrange
@@ -381,7 +381,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
 
-        [Fact] // done
+        [Fact]
         public void ImportScenarioInvestmentBudgetsFile_Does()
         {
             // Arrange
@@ -506,7 +506,7 @@ namespace BridgeCareCoreTests.Tests
             ObjectAssertions.Equivalent(expectedJoins, addedJoins);
         }
 
-        [Fact] // done
+        [Fact]
         public void ImportScenarioInvestmentBudgetsFile_BudgetExists_Overwrites()
         {
             // Arrange

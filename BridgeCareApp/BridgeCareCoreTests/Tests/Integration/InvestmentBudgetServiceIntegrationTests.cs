@@ -50,7 +50,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("zzzzz.xlsx", bytes);
+            //File.WriteAllBytes("zzzzz.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             var dictionary = new Dictionary<Guid, List<BudgetAmountDTO>>();
             TestHelper.UnitOfWork.BudgetAmountRepo.UpsertOrDeleteBudgetAmounts(dictionary, budgetLibaryId);
@@ -101,7 +101,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("zzzzz.xlsx", bytes);
+            //File.WriteAllBytes("zzzzz.xlsx", bytes);
             var budgets1 = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, new List<BudgetDTO>(), simulationId);
             var budgets2 = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);

@@ -293,6 +293,7 @@
             @submit="onEditDeficientConditionGoalCriterionLibrary"
         />
     </v-row>
+    <ConfirmDialog></ConfirmDialog>
 </template>
 
 <script setup lang="ts">
@@ -345,8 +346,11 @@ import { LibraryUser } from '@/shared/models/iAM/user';
 import { emptyShareDeficientConditionGoalLibraryDialogData, ShareDeficientConditionGoalLibraryDialogData } from '@/shared/models/modals/share-deficient-condition-goal-data';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore();
+    const confirm = useConfirm();
     const $router = useRouter();
     let stateDeficientConditionGoalLibraries = shallowRef<DeficientConditionGoalLibrary[]>(store.state.deficientConditionGoalModule.deficientConditionGoalLibraries);
     let stateSelectedDeficientConditionGoalLibrary = shallowRef<DeficientConditionGoalLibrary>(store.state.deficientConditionGoalModule.selectedDeficientConditionGoalLibrary);
@@ -965,14 +969,14 @@ import { useRouter } from 'vue-router';
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
         if (hasUnsavedChanges && unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
+
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                header: "Unsaved Changes",
+                icon: 'pi pi-question-circle',
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
             unsavedDialogAllowed = true;

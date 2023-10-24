@@ -192,6 +192,7 @@
 
         <GeneralCriterionEditorDialog :dialogData='criterionEditorDialogData'
                                       @submit='onSubmitCriterionLibraryEditorDialogResult' />
+        <ConfirmDialog></ConfirmDialog>
     </v-row>
 </template>
 
@@ -246,9 +247,12 @@
     import CreatePriorityDialog from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityDialog.vue'
     import CreatePriorityLibraryDialog  from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityLibraryDialog.vue'
     import ShareBudgetPriorityLibraryDialog  from '@/components/budget-priority-editor/budget-priority-editor-dialogs/ShareBudgetPriorityLibraryDialog.vue'
+    import { useConfirm } from 'primevue/useconfirm';
+    import ConfirmDialog from 'primevue/confirmdialog';
 
     const ObjectID = require('bson-objectid');
     let store = useStore();
+    const confirm = useConfirm();
     const $router = useRouter();
     let stateScenarioSimpleBudgetDetails = shallowRef<SimpleBudgetDetail[]>(store.state.investmentModule.scenarioSimpleBudgetDetails);
     let stateBudgetPriorityLibraries = shallowRef<BudgetPriorityLibrary[]>(store.state.budgetPriorityModule.budgetPriorityLibraries);
@@ -902,16 +906,14 @@
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
         if (hasUnsavedChanges && unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
-
-        } 
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                header: "Unsaved Changes",
+                icon: 'pi pi-question-circle',
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
+         } 
         else {
             unsavedDialogAllowed = true;
             next();

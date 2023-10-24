@@ -290,6 +290,7 @@
             :dialogData="criterionEditorDialogData"
             @submit="onEditTargetConditionGoalCriterionLibrary"
         />
+        <ConfirmDialog></ConfirmDialog>
     </v-row>
 </template>
 
@@ -346,9 +347,12 @@ import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditor
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore();
     const $router = useRouter(); 
+    const confirm = useConfirm();
 
     let stateTargetConditionGoalLibraries = ref<TargetConditionGoalLibrary[]>(store.state.targetConditionGoalModule.targetConditionGoalLibraries);
     let stateSelectedTargetConditionLibrary = ref<TargetConditionGoalLibrary>(store.state.targetConditionGoalModule.selectedTargetConditionGoalLibrary) 
@@ -948,14 +952,14 @@ import { useRouter } from 'vue-router';
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
         if (hasUnsavedChanges && unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
+            
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                header: "Unsaved Changes",
+                icon: 'pi pi-question-circle',
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
             unsavedDialogAllowed = true;

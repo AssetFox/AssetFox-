@@ -2,54 +2,61 @@
     <v-row class="Montserrat-font-family">
         <v-col cols = "12">
             <v-row column >
-                <v-col cols = "6">
-                    <v-row>
+                    
+                        <v-col>
                         <v-btn @click='OnGetTemplateClick' 
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Get Template</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant="outlined" style="margin: 10px;">Get Default Template</v-btn>
                             <input
                             id="committedProjectTemplateUpload"
                             type="file"
                             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                            ref="committedProjectTemplateInput"
                             hidden/>
-                        <v-btn @click="onUploadCommittedProjectTemplate"
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Upload Committed Project Template</v-btn>
+                            <!-- @change="handleCommittedProjectTemplateUpload" -->
+                        <v-btn @click="onUploadCommittedProjectTemplate" style="margin-right: auto;" variant="outlined"
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Change Default Template</v-btn>
+                            </v-col>
+                            <v-col>
                         <v-btn @click='showImportExportCommittedProjectsDialog = true' 
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Import Projects</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" style="margin: 5px;" variant="outlined">Import Projects</v-btn>
                         <v-btn @click='OnExportProjectsClick' 
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Export Projects</v-btn>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" style="margin: 5px;" variant="outlined">Export Projects</v-btn>
                         <v-btn @click='OnDeleteAllClick' 
-                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" variant = "outlined">Delete All</v-btn>
-                    </v-row>
-                </v-col>
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" style="margin: 5px;" variant="outlined">Delete All</v-btn>
+                        </v-col>
                 <v-col cols = "12">                   
-                    <v-row>
-                        <v-select
-                           :items= 'templateSelectItems'
-                           class='ghd-control-border ghd-control-text ghd-select'
-                           label='Select a Template'
-                           style="width: 20% !important;"
-                           v-model="templateItemSelected"
-                           outline>
-                        </v-select>
-                        <v-btn @click='onDownloadSelectedTemplate' 
-                        class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Download Selected Template</v-btn>
-                        <input
-                        id="addCommittedProjectTemplate"
-                        type="file"
-                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                        ref="committedProjectTemplateInput"
-                        @change="handleAddCommittedProjectTemplateUpload"
-                        hidden/>
-                        <v-btn @click='onAddSelectedTemplate'  
-                        class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Upload New Template</v-btn>
+                    <v-row style="padding:10px">
+                        <v-col cols= "12">
+                            <v-select
+                            :items= 'templateSelectItems'
+                            class='ghd-control-border ghd-control-text ghd-select'
+                            label='Select a Template'
+                            style="width: 20% !important;"
+                            v-model="templateItemSelected"
+                            variant="outlined"
+                            density="compact">
+                            </v-select>
+                        </v-col>
+                        <v-col>
+                            <v-btn @click='onDownloadSelectedTemplate' 
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" style="margin:0px;" variant="outlined">Download Selected Template</v-btn>
+                            <input
+                                id="addCommittedProjectTemplate"
+                                type="file"
+                                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                ref="committedProjectTemplateInput"
+                                hidden
+                            />
+                            <!--@change="handleAddCommittedProjectTemplateUpload" -->
+                            <v-btn @click='onAddSelectedTemplate'  
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" style="margin:10px;" variant="outlined">Upload New Template</v-btn>
+                        </v-col>
+                        <v-col cols = "12">
+                        <v-checkbox 
+                            id="CommittedProjectsEditor-noTreatmentsBeforeCommittedProjects-ghdcheckbox"
+                            label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
+                        </v-col>
                     </v-row>
-                </v-col>
-                <v-col cols = "12">
-                    <div style="padding:10px">
-                    <v-checkbox 
-                    id="CommittedProjectsEditor-noTreatmentsBeforeCommittedProjects-ghdcheckbox"
-                    label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
-                </div>
                 </v-col>
 
                 <v-col cols = "6" class="ghd-constant-header">
@@ -65,6 +72,7 @@
                                     single-line
                                     v-model="gridSearchTerm"
                                     variant="outlined"
+                                    density="compact"
                                     clearable
                                     @click:clear="onClearClick()"
                                     class="ghd-text-field-border ghd-text-field search-icon-general">
@@ -77,13 +85,11 @@
                         </v-col>
                     </v-row>
                 </v-col>
-                <v-col cols = "12">
                     <v-row justify-end class="px-4">
                         <p>Commited Projects: {{totalItems}}</p>
                     </v-row>
-                    
-                </v-col>       
                 <v-col>
+                    <p-card style="padding: 10px; width: auto;">
                     <DataTable
                         striped-rows
                         :rows="5"
@@ -97,24 +103,23 @@
                         selection-mode="single"
                         table-style="min-width: 50rem"
                         >
-                        <Column header="Key Attr" field="Year"></Column>
-                        <Column header="Year" field="Year"></Column>
-                        <Column header="Treatment" field="Year"></Column>
-                        <Column header="Category" field="Year"></Column>
-                        <Column header="Budget" field="Year"></Column>
-                        <Column header="Cost" field="Year"></Column>
-                        <Column header="Project Source" field="Year"></Column>
+                        <Column header="Key Attr" field="keyAttr"></Column>
+                        <Column header="Year" field="year"></Column>
+                        <Column header="Treatment" field="treatment"></Column>
+                        <Column header="Category" field="category"></Column>
+                        <Column header="Budget" field="budget"></Column>
+                        <Column header="Cost" field="cost"></Column>
+                        <Column header="Project Source" field="projectSource"></Column>
                         <Column header="Actions" field="Year"></Column>
 
                     </DataTable>
-                </v-col>
-                <!-- <v-col cols = "12">
-                    <v-row column>
+                </p-card>
+                    <!-- <v-row column>
                         <v-data-table
                         id="CommittedProjectsEditor-committedProjects-vdatatable"
                         :headers="cpGridHeaders"
                         :items="currentPage"
-                        sort-icon=$vuetify.icons.ghd-table-sort
+                        
                         item-key='id'
                         :pagination.sync="projectPagination"
                         :total-items="totalItems"
@@ -126,10 +131,9 @@
                                     <div>
                                         <v-combobox v-if="header.value === 'treatment'"
                                                     :items="treatmentSelectItems"
-                                                    append-icon=$vuetify.icons.ghd-down
                                                     class="ghd-down-small"
                                                     label="Select a Treatment"
-                                                    v-model="props.item.treatment"
+                                                    v-model="props.treatment"
                                                     :rules="[inputRules['generalRules'].valueIsNotEmpty]"
                                                     @change="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])">
                                             
@@ -233,13 +237,15 @@
                                 </td>
                             </template>
                         </v-data-table>    
-                    </v-row>
-                </v-col> -->
+                    </v-row> -->
+
+                </v-col>
                 <v-divider></v-divider>
                 <v-btn id="CommittedProjectsEditor-addCommittedProject-vbtn" 
                         @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
-                        class="ghd-white-bg ghd-blue ghd-button btn-style" variant = "outlined">Add Committed Project</v-btn> 
-
+                        class="ghd-white-bg ghd-blue ghd-button btn-style" style="margin:10px" variant = "outlined"
+                > Add Committed Project
+                </v-btn> 
                 <v-col>
                     <v-row justify="end">
                         <v-btn 
@@ -263,7 +269,6 @@
                         X
                     </v-btn>
                 </v-col>
-              
             </v-row>
         </v-col>
         <CommittedProjectsFileUploaderDialog :is="ImportExportCommittedProjectsDialog"
@@ -319,6 +324,7 @@ import { createDecipheriv } from 'crypto';
 import mitt from 'mitt';
 import Dialog from 'primevue/dialog';
 import Column from 'primevue/column';
+import TreatmentService from '@/services/treatment.service';
 
     let store = useStore();
     const $router = useRouter();    
@@ -487,9 +493,6 @@ import Column from 'primevue/column';
     ];
 
     function created() {
-        // reverseCatMap.forEach(cat => {
-        //     categorySelectItems.push({text: cat, value: cat})        
-        // });    
 
         // $emitter.on(
         //     Hub.BroadcastEventType.BroadcastImportCompletionEvent,
@@ -506,7 +509,18 @@ import Column from 'primevue/column';
         // }
     }
     onMounted(() => {
+        // TODO: remove this
         scenarioId = "26C23F48-9B5C-4AEC-BDE0-0778AA512E10";
+        
+        // this.reverseCatMap.forEach(cat => {
+        //     this.categorySelectItems.push({text: cat, value: cat})        
+        // })
+
+        // this.$statusHub.$on(
+        //     Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+        //     this.importCompleted,
+        // );
+        // this.fetchTreatmentLibrary(this.scenarioId);
 
         (async () => { 
             hasScenario = true;
@@ -556,163 +570,152 @@ import Column from 'primevue/column';
     }
 
         //Watch
-        @Watch('isNoTreatmentBefore')
-    onIsNoTreatmentBeforeChanged(){
-        this.checkHasUnsavedChanges();
-    }
+        watch(isNoTreatmentBefore, () => {
+            checkHasUnsavedChanges();
+        });
 
-    @Watch('investmentYears')
-    onInvestmentYearsChanged(){
+    watch(investmentYears, () => {
         //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/min
-        if (this.investmentYears.length > 0) {
-            this.lastYear = Math.max(...this.investmentYears);
-            this.firstYear = Math.min(...this.investmentYears);
+        if (investmentYears.value.length > 0) {
+            lastYear = Math.max(...investmentYears.value);
+            firstYear = Math.min(...investmentYears.value);
         }
-    }
+    });
 
-    @Watch('networks')
-    onStateNetworksChanged(){
-        const network = this.networks.find(o => o.id == this.networkId)
+    watch(networks, () => {
+        const net: any = networks.value.find(o => o.id == networkId)
         if(!isNil(network)){
-            this.network = network;
+            network = net? net : undefined;
         }           
-    }
+    });
 
-    @Watch('stateAttributes')
-    onStateAttributesChanged(){
-        this.attributeSelectItems = this.stateAttributes.map(
+    watch(stateAttributes, () => {
+        attributeSelectItems = stateAttributes.value.map(
             (attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name
             }),
         );
-        let keyAttr = this.stateAttributes.find(_ => _.id == this.network.keyAttribute)
+        let keyAttr = stateAttributes.value.find(_ => _.id == network.keyAttribute)
         if(!isNil(keyAttr)){
-            this.keyattr = keyAttr.name;
-            this.cpGridHeaders[0].text = this.keyattr;
+            keyattr = keyAttr.name;
+            cpGridHeaders[0].text = keyattr;
         }
-            
-    }
+    });
 
-    @Watch('selectedLibraryTreatments', {deep: true})
-    onSelectedLibraryTreatmentsChanged(){
-        this.treatmentSelectItems = this.selectedLibraryTreatments.map(
+    watch(selectedLibraryTreatments, onSelectedLibraryTreatmentsChanged)
+    function onSelectedLibraryTreatmentsChanged() {
+        treatmentSelectItems = selectedLibraryTreatments.value.map(
             (treatment: Treatment) => (treatment.name)
         );
-    }
+    };
 
-    @Watch('stateScenarioSimpleBudgetDetails')
-    onStateScenarioSimpleBudgetDetailsChanged(){
-        this.budgetSelectItems = this.stateScenarioSimpleBudgetDetails.map(
+    watch(stateScenarioSimpleBudgetDetails, () => {
+        budgetSelectItems = stateScenarioSimpleBudgetDetails.value.map(
             (budget: SimpleBudgetDetail) => ({
                 text: budget.name,
                 value: budget.name
             }),
         );
-        this.budgetSelectItems.push({
+        budgetSelectItems.push({
             text: 'None',
             value: ''
         });
-    }
+    });
 
-    @Watch('stateSectionCommittedProjects')
-        onStateSectionCommittedProjectsChanged(){
-            this.sectionCommittedProjects = clone(this.stateSectionCommittedProjects);
-            this.setCpItems();
-    }
+    watch(stateSectionCommittedProjects, () => {
+        sectionCommittedProjects.value = clone(stateSectionCommittedProjects.value);
+        setCpItems();
+    });
 
-    @Watch('sectionCommittedProjects')
-    onSectionCommittedProjectsChanged() {  
-        this.setCpItems();  
-    }
+    watch(sectionCommittedProjects, () => {
+        setCpItems();  
+    });
 
-    @Watch('selectedCpItems')
-    onSelectedCpItemsChanged(){
-        if(this.selectedCpItems.length > 1)
-            this.selectedCpItems.splice(0,1);
-        if(this.selectedCpItems.length === 1)
-            this.selectedCommittedProject = this.selectedCpItems[0].id;
-    }
+    watch(selectedCpItems, () => {
+        if(selectedCpItems.value.length > 1)
+           selectedCpItems.value.splice(0,1);
+        if(selectedCpItems.value.length === 1)
+           selectedCommittedProject.value = selectedCpItems.value[0].id;
+    });
 
-    @Watch('projectPagination')
-    async onPaginationChanged() {
-        if(this.isRunning)
+    watch(projectPagination, onPaginationChanged)
+    async function onPaginationChanged() {
+        if(isRunning)
             return;
-        this.isRunning = true
-        this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.projectPagination;
+        isRunning = true
+        checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = projectPagination.value;
 
         const request: PagingRequest<SectionCommittedProject>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
                 libraryId: null,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                rowsForDeletion: this.deletionIds,
-                addedRows: this.addedRows,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: deletionIds.value,
+                addedRows: addedRows.value,
                 isModified: false
             },           
             sortColumn: sortBy,
             isDescending: descending != null ? descending : false,
-            search: this.currentSearch
+            search: currentSearch
         };
-        if(this.scenarioId !== this.uuidNIL)
-            CommittedProjectsService.getCommittedProjectsPage(this.scenarioId, request).then(response => {
+        if(scenarioId !== uuidNIL)
+            CommittedProjectsService.getCommittedProjectsPage(scenarioId, request).then(response => {
                 if(response.data){
-                    this.isRunning = false;
+                    isRunning = false;
                     let data = response.data as PagingPage<SectionCommittedProject>;
-                    this.sectionCommittedProjects = data.items;
-                    this.rowCache = clone(this.sectionCommittedProjects)
-                    this.totalItems = data.totalItems;
-                    const row = data.items.find(scp => scp.id == this.selectedCommittedProject);
+                    sectionCommittedProjects.value = data.items;
+                    rowCache.value = clone(sectionCommittedProjects.value)
+                    totalItems = data.totalItems;
+                    const row = data.items.find(scp => scp.id == selectedCommittedProject.value);
 
                     if(isNil(row)) {
-                        this.selectedCommittedProject = '';
+                        selectedCommittedProject.value = '';
                     }
                 } 
             }); 
         else
-            this.isRunning = false;
+            isRunning = false;
     }
 
-     @Watch('deletionIds')
-    onDeletionIdsChanged(){
-        this.checkHasUnsavedChanges();
-    }
+     watch(deletionIds, () => {
+        checkHasUnsavedChanges();
+     });
 
-    @Watch('addedRows')
-    onAddedRowsChanged(){
-        this.checkHasUnsavedChanges();
-    }
+    watch(addedRows, () =>{
+        checkHasUnsavedChanges();
+    });
 
     //Events
-    onCancelClick() {
-        this.clearChanges()
-        this.selectedCommittedProject = '';
-        this.selectedCpItems = [];
-        this.isNoTreatmentBefore = this.isNoTreatmentBeforeCache
-        this.resetPage();
+    function onCancelClick() {
+        clearChanges()
+        selectedCommittedProject.value = '';
+        selectedCpItems.value = [];
+        isNoTreatmentBefore = isNoTreatmentBeforeCache
+        resetPage();
     }
 
-    OnExportProjectsClick(){
-        CommittedProjectsService.exportCommittedProjects(this.scenarioId)
+    function OnExportProjectsClick(){
+        CommittedProjectsService.exportCommittedProjects(scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;
                     FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
                 }
             });
-     }
+        }
 
-      async OnGetTemplateClick(){
+    async function OnGetTemplateClick(){
        await CommittedProjectsService.getUploadedCommittedProjectTemplate()
             .then((response: AxiosResponse) => {
                     if(response.data.toString() != ""){
                         FileDownload(convertBase64ToArrayBuffer(response.data), 'Committed Project Template', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                        this.isAdminTemplateUploaded = true;
+                        isAdminTemplateUploaded = true;
                     }
                     else{
-                         CommittedProjectsService.getCommittedProjectTemplate(this.networkId)
+                         CommittedProjectsService.getCommittedProjectTemplate(networkId)
                             .then((response: AxiosResponse) => {
                         if (hasValue(response, 'data')) {
                           const fileInfo: FileInfo = response.data as FileInfo;  
@@ -721,111 +724,110 @@ import Column from 'primevue/column';
                 });
                     }
             });
+        }
 
-    
-     }
-
-     OnAddCommittedProjectClick(){
+     function OnAddCommittedProjectClick(){
         const newRow: SectionCommittedProject = clone(emptySectionCommittedProject)
         newRow.id = getNewGuid();
         newRow.name = '';
-        newRow.locationKeys[this.keyattr] = '';
+        newRow.locationKeys[keyattr] = '';
         newRow.locationKeys['ID'] = getNewGuid();
-        newRow.simulationId = this.scenarioId;
+        newRow.simulationId = scenarioId;
         newRow.projectSource = 'None';
-        this.addedRows.push(newRow)
-        this.onPaginationChanged();   
+        addedRows.value.push(newRow)
+        onPaginationChanged();   
      }
 
-     OnSaveClick(){
+     function OnSaveClick(){
         const upsertRequest = {
                     libraryId: null,
-                    rowsForDeletion: this.deletionIds,
-                    updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: this.addedRows,
+                    rowsForDeletion: deletionIds.value,
+                    updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: addedRows.value,
                     isModified: false    
                 }
-        if(!this.committedProjectsAreChanged())
+        if(!committedProjectsAreChanged())
         {
-            this.updateNoTreatment();
+            updateNoTreatment();
         }
-        else if(this.deletionIds.length > 0){
-            CommittedProjectsService.deleteSpecificCommittedProjects(this.deletionIds).then((response: AxiosResponse) => {
+        else if(deletionIds.value.length > 0){
+            CommittedProjectsService.deleteSpecificCommittedProjects(deletionIds.value).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.deletionIds = [];
-                    this.addSuccessNotificationAction({message:'Deleted committed projects'})              
+                    deletionIds.value = [];
+                    addSuccessNotificationAction({message:'Deleted committed projects'})              
                 }
-                CommittedProjectsService.upsertCommittedProjects(this.scenarioId, upsertRequest).then((response: AxiosResponse) => {
+                CommittedProjectsService.upsertCommittedProjects(scenarioId, upsertRequest).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        this.addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
-                        this.addedRows = [];
-                        this.updatedRowsMap.clear();
+                        addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
+                        addedRows.value = [];
+                        updatedRowsMap.clear();
                     }
-                    if(this.isNoTreatmentBefore != this.isNoTreatmentBeforeCache)
-                        this.updateNoTreatment()
+                    if(isNoTreatmentBefore != isNoTreatmentBeforeCache)
+                        updateNoTreatment()
                     else
-                        this.resetPage()
-                })
-            })         
+                        resetPage()
+                });
+            });         
         }
         else
-            CommittedProjectsService.upsertCommittedProjects(this.scenarioId, upsertRequest).then((response: AxiosResponse) => {
+            CommittedProjectsService.upsertCommittedProjects(scenarioId, upsertRequest).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
-                    this.addedRows = [];
-                    this.updatedRowsMap.clear();
+                    addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
+                    addedRows.value = [];
+                    updatedRowsMap.clear();
                 }
-                if(this.isNoTreatmentBefore != this.isNoTreatmentBeforeCache)
-                        this.updateNoTreatment()
+                if(isNoTreatmentBefore != isNoTreatmentBeforeCache)
+                        updateNoTreatment()
                 else
-                    this.resetPage()
+                    resetPage()
             })   
      }
 
-    handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
-    row.treatment = treatmentName;
-    this.updateCommittedProject(row, treatmentName, 'treatment')  
-    CommittedProjectsService.FillTreatmentValues({
-        committedProjectId: row.id,
-        treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : getBlankGuid(),
-        treatmentName: treatmentName,
-        KeyAttributeValue: row.locationKeys[this.keyattr],
-        networkId: this.networkId
-    })
-    .then((response: AxiosResponse) => {
-        if (hasValue(response, 'data')) {
-            var values = response.data as CommittedProjectFillTreatmentReturnValues;
-            row.cost = values.treatmentCost;
-            row.category = values.treatmentCategory;
-            scp.cost = row.cost;
-            let cat = this.reverseCatMap.get(row.category);
-            if (!isNil(cat))
-                scp.category = cat;
-            this.updateCommittedProject(row, row.cost, 'cost')  
-            this.onPaginationChanged();
-        }
-    });
-}
+    function handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
+        row.treatment = treatmentName;
+        updateCommittedProject(row, treatmentName, 'treatment')  
+        CommittedProjectsService.FillTreatmentValues({
+            committedProjectId: row.id,
+            treatmentLibraryId: librarySelectItemValue.value ? librarySelectItemValue.value : getBlankGuid(),
+            treatmentName: treatmentName,
+            KeyAttributeValue: row.locationKeys[keyattr],
+            networkId: networkId
+        })
+        .then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                var values = response.data as CommittedProjectFillTreatmentReturnValues;
+                row.cost = values.treatmentCost;
+                row.category = values.treatmentCategory;
+                scp.cost = row.cost;
+                let cat = reverseCatMap.get(row.category);
+                if (!isNil(cat))
+                    scp.category = row.category;
+                    // scp.category = cat;
+                updateCommittedProject(row, row.cost, 'cost')  
+                onPaginationChanged();
+            }
+        });
+    }
 
-     updateNoTreatment(){
-        if(this.isNoTreatmentBefore)
-                ScenarioService.setNoTreatmentBeforeCommitted(this.scenarioId).then((response: AxiosResponse) => {
+     function updateNoTreatment(){
+        if(isNoTreatmentBefore)
+                ScenarioService.setNoTreatmentBeforeCommitted(scenarioId).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        this.isNoTreatmentBeforeCache = this.isNoTreatmentBefore
+                        isNoTreatmentBeforeCache = isNoTreatmentBefore
                     }
-                    this.resetPage()
-                })
+                    resetPage()
+                });
             else
-                ScenarioService.removeNoTreatmentBeforeCommitted(this.scenarioId).then((response: AxiosResponse) => {
+                ScenarioService.removeNoTreatmentBeforeCommitted(scenarioId).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        this.isNoTreatmentBeforeCache = this.isNoTreatmentBefore
+                        isNoTreatmentBeforeCache = isNoTreatmentBefore
                     }
-                    this.resetPage()
-                })
+                    resetPage()
+                });
      }
 
-     OnDeleteAllClick(){
-        this.alertDataForDeletingCommittedProjects = {
+     function OnDeleteAllClick(){
+        alertDataForDeletingCommittedProjects = {
             showDialog: true,
             heading: 'Are you sure?',
             message:
@@ -834,57 +836,57 @@ import Column from 'primevue/column';
         };
      }
 
-     OnDeleteClick(id: string){
-        if(isNil(this.addedRows.find(_ => _.id === id)))
-            this.deletionIds.push(id);
+     function OnDeleteClick(id: string){
+        if(isNil(addedRows.value.find(_ => _.id === id)))
+            deletionIds.value.push(id);
         else
-            this.addedRows = this.addedRows.filter((scp: SectionCommittedProject) => scp.id !== id)
+            addedRows.value = addedRows.value.filter((scp: SectionCommittedProject) => scp.id !== id)
 
-        this.onPaginationChanged();
+        onPaginationChanged();
      }
 
-      onEditCommittedProjectProperty(scp: SectionCommittedProjectTableData, property: string, value: any) {
-       let row = this.sectionCommittedProjects.find(o => o.id === scp.id)
+      function onEditCommittedProjectProperty(scp: SectionCommittedProjectTableData, property: string, value: any) {
+       let row = sectionCommittedProjects.value.find(o => o.id === scp.id)
         if(!isNil(row))
         {
             if(property === 'treatment'){
-                this.handleTreatmentChange(scp, value, row)             
+                handleTreatmentChange(scp, value, row)             
             }
             else if(property === 'keyAttr'){
-                this.handleKeyAttrChange(row, scp, value);               
+                handleKeyAttrChange(row, scp, value);               
             }
             else if(property === 'budget'){
-                this.handleBudgetChange(row, scp, value)
+                handleBudgetChange(row, scp, value)
             }
             else if(property === 'projectSource') {
-            this.handleProjectSourceChange(row, scp, value)
+                handleProjectSourceChange(row, scp, value)
             }
             else{
                 if(property === 'category')
-                    value = this.catMap.get(value);
-                this.updateCommittedProject(row, value, property)
-                this.onPaginationChanged()
+                    value = catMap.get(value);
+                updateCommittedProject(row, value, property)
+                onPaginationChanged()
             }
         }
     }
 
     //Dialog functions
-    onSubmitImportExportCommittedProjectsDialogResult(
+    function onSubmitImportExportCommittedProjectsDialogResult(
         result: ImportExportCommittedProjectsDialogResult,
     ) {
-        this.showImportExportCommittedProjectsDialog = false;
+        showImportExportCommittedProjectsDialog = false;
 
         if (hasValue(result)) {         
             if (hasValue(result.file)) {
                 CommittedProjectsService.importCommittedProjects(
                     result.file,
                     result.applyNoTreatment,
-                    this.scenarioId,
+                    scenarioId,
                 ).then((response: any) =>{
-                    this.setAlertMessageAction("Committed project import has been added to the work queue")
+                    setAlertMessageAction("Committed project import has been added to the work queue")
                 })
             } else {
-                this.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'No file selected.',
                     longMessage:
                         'No file selected to upload the committed projects.',
@@ -893,8 +895,8 @@ import Column from 'primevue/column';
         }
     }
 
-    onDeleteCommittedProjects() {
-        this.alertDataForDeletingCommittedProjects = {
+    function onDeleteCommittedProjects() {
+        alertDataForDeletingCommittedProjects = {
             showDialog: true,
             heading: 'Are you sure?',
             message:
@@ -903,103 +905,102 @@ import Column from 'primevue/column';
         };
     }
 
-    handleAddCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
+    function handleAddCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
              const file = event.target.files[0];
              CommittedProjectsService.addCommittedProjectTemplate(file).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.addSuccessNotificationAction({message:'Uploaded Template'})      
+                    addSuccessNotificationAction({message:'Uploaded Template'})      
                 }
             });
     }
 
-    onAddSelectedTemplate(){
+    function onAddSelectedTemplate(){
         document.getElementById("addCommittedProjectTemplate")?.click();
     }
     
-    onDownloadSelectedTemplate(){
-        CommittedProjectsService.getSelectedCommittedProjectTemplate(this.templateItemSelected)
+    function onDownloadSelectedTemplate(){
+        CommittedProjectsService.getSelectedCommittedProjectTemplate(templateItemSelected)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    FileDownload(convertBase64ToArrayBuffer(response.data), this.templateItemSelected, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                    this.isAdminTemplateUploaded = true;
+                    FileDownload(convertBase64ToArrayBuffer(response.data), templateItemSelected, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                    isAdminTemplateUploaded = true;
                 }
             });
     }
 
-    onDeleteCommittedProjectsSubmit(doDelete: boolean) {
-        this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
+    function onDeleteCommittedProjectsSubmit(doDelete: boolean) {
+        alertDataForDeletingCommittedProjects = { ...emptyAlertData };
 
         if (doDelete) {
-            this.deleteSimulationCommittedProjectsAction(this.scenarioId);
-            CommittedProjectsService.deleteSimulationCommittedProjects(this.scenarioId).then((response: AxiosResponse) => {
+            deleteSimulationCommittedProjectsAction(scenarioId);
+            CommittedProjectsService.deleteSimulationCommittedProjects(scenarioId).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.onCancelClick();
+                    onCancelClick();
                 }
             })
         }
     }
 
     //Subroutines
-    formatAsCurrency(value: any) {
+    function formatAsCurrency(value: any) {
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }
 
         return null;
     }
-    disableCrudButtons() {
-    const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+    function disableCrudButtons() {
+    const rowChanges = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
         (scp: SectionCommittedProject) => {
             return (
-                this.rules['generalRules'].valueIsNotEmpty(
+                rules['generalRules'].valueIsNotEmpty(
                     scp.simulationId,
                 ) === true &&
-                this.rules['generalRules'].valueIsNotEmpty(
+                rules['generalRules'].valueIsNotEmpty(
                     scp.year,
                 ) === true &&
-                this.rules['generalRules'].valueIsNotEmpty(
+                rules['generalRules'].valueIsNotEmpty(
                     scp.cost,
                 ) === true &&
-                this.rules['generalRules'].valueIsNotEmpty(
+                rules['generalRules'].valueIsNotEmpty(
                     scp.treatment
                 ) == true &&
-                this.rules['generalRules'].valueIsNotEmpty(
-                    scp.locationKeys[this.keyattr]
+                rules['generalRules'].valueIsNotEmpty(
+                    scp.locationKeys[keyattr]
                 ) == true &&
-                this.rules['generalRules'].valueIsWithinRange(
-                    scp.year, [this.firstYear, this.lastYear],
+                rules['generalRules'].valueIsWithinRange(
+                    scp.year, [firstYear, lastYear],
                 ) === true &&
                 scp.projectSource !== ""
                 
             );
-        },
-    );
-        this.disableCrudButtonsResult = !dataIsValid;
+        });
+        disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
 }
 
 
-    setCpItems(){
-        this.currentPage = this.sectionCommittedProjects.map(o => 
+    function setCpItems(){
+        currentPage.value = sectionCommittedProjects.value.map(o => 
         {          
-            const row: SectionCommittedProjectTableData = this.cpItemFactory(o);
+            const row: SectionCommittedProjectTableData = cpItemFactory(o);
             return row
         })
-        this.checkExistenceOfAssets();
-        this.checkYears();
+        checkExistenceOfAssets();
+        checkYears();
     }
 
-    cpItemFactory(scp: SectionCommittedProject): SectionCommittedProjectTableData {
+    function cpItemFactory(scp: SectionCommittedProject): SectionCommittedProjectTableData {
         const budget: SimpleBudgetDetail = find(
-            propEq('id', scp.scenarioBudgetId), this.stateScenarioSimpleBudgetDetails,
+            propEq('id', scp.scenarioBudgetId), stateScenarioSimpleBudgetDetails.value,
         ) as SimpleBudgetDetail;
-        let cat = this.reverseCatMap.get(scp.category);
+        let cat = reverseCatMap.get(scp.category);
         let value = '';
         if(!isNil(cat))
             value = cat;
         const row: SectionCommittedProjectTableData = {
-            keyAttr: scp.locationKeys[this.keyattr],
+            keyAttr: scp.locationKeys[keyattr],
             year: scp.year,
             cost: scp.cost,
             scenarioBudgetId: scp.scenarioBudgetId? scp.scenarioBudgetId : '',
@@ -1009,15 +1010,15 @@ import Column from 'primevue/column';
             id: scp.id,
             errors: [],
             yearErrors: [],
-            category: value,
+            category: scp.category,
             projectSource: projectSourceMap.get(+scp.projectSource) || scp.projectSource
         }
         return row
     }
 
-    handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, budgetName: string){
+    function handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, budgetName: string){
         const budget: SimpleBudgetDetail = find(
-            propEq('name', budgetName), this.stateScenarioSimpleBudgetDetails,
+            propEq('name', budgetName), stateScenarioSimpleBudgetDetails.value,
         ) as SimpleBudgetDetail;
         if(!isNil(budget)){
             row.scenarioBudgetId = budget.id;
@@ -1025,45 +1026,45 @@ import Column from 'primevue/column';
         }  
         else
             row.scenarioBudgetId = null;
-        this.updateCommittedProject(row, row.scenarioBudgetId, 'scenarioBudgetId') 
-        this.onPaginationChanged();       
+        updateCommittedProject(row, row.scenarioBudgetId, 'scenarioBudgetId') 
+        onPaginationChanged();       
     }
 
-    handleKeyAttrChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, keyAttr: string){
-        row.locationKeys[this.keyattr] = keyAttr;
-        this.updateCommittedProject(row, keyAttr, 'keyAttr');
-        this.onPaginationChanged();
+    function handleKeyAttrChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, keyAttr: string){
+        row.locationKeys[keyattr] = keyAttr;
+        updateCommittedProject(row, keyAttr, 'keyAttr');
+        onPaginationChanged();
     }
 
-    handleFactorChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, factor: number) {
-        this.updateCommittedProject(row, factor, 'performanceFactor');
-        this.onPaginationChanged();
+    function handleFactorChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, factor: number) {
+        updateCommittedProject(row, factor, 'performanceFactor');
+        onPaginationChanged();
     }
 
-    handleProjectSourceChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSource: string) {
+    function handleProjectSourceChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSource: string) {
         row.projectSource = projectSource;
-    this.updateCommittedProject(row, projectSource, 'projectSource');
-    this.onPaginationChanged();
+    updateCommittedProject(row, projectSource, 'projectSource');
+    onPaginationChanged();
     }
 
-    onUploadCommittedProjectTemplate(){
+    function onUploadCommittedProjectTemplate(){
       document.getElementById("committedProjectTemplateUpload")?.click();
    }
 
-    handleCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
+   function handleCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
       const file = event.target.files[0];
       CommittedProjectsService.importCommittedProjectTemplate(file).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.addSuccessNotificationAction({message:'Updated Default Template'})      
+                    addSuccessNotificationAction({message:'Updated Default Template'})      
                 }
             });
    }
 
-    checkAssetExistence(scp: SectionCommittedProjectTableData, keyAttr: string){
-        CommittedProjectsService.validateAssetExistence(this.network, keyAttr).then((response: AxiosResponse) => {
+   function checkAssetExistence(scp: SectionCommittedProjectTableData, keyAttr: string){
+        CommittedProjectsService.validateAssetExistence(network, keyAttr).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
                 if(!response.data)
-                    scp.errors = [this.keyattr + ' does not exist'];
+                    scp.errors = [keyattr + ' does not exist'];
                 else
                     scp.errors = [];
             }
@@ -1071,12 +1072,12 @@ import Column from 'primevue/column';
     }
 
     function fetchProjectSources() {
-    CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
-        if (hasValue(response, 'data')) {
-            projectSourceOptions = response.data.filter((option: string) => option !== "None");
-        }
-    });
-}
+        CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                projectSourceOptions = response.data.filter((option: string) => option !== "None");
+            }
+        });
+    }
 
     function checkExistenceOfAssets(){//todo: refine this
         const uncheckKeys = currentPage.value.map(scp => scp.keyAttr).filter(key => isNil(isKeyAttributeValidMap.get(key)))
@@ -1208,7 +1209,7 @@ import Column from 'primevue/column';
     }
 
     function resetPage(){
-        projectPagination.page = 1;
+        projectPagination.value.page = 1;
         onPaginationChanged();
     }
 
@@ -1226,7 +1227,7 @@ import Column from 'primevue/column';
     function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
         if(importComp.id === scenarioId && importComp.workType == WorkType.ImportCommittedProject){
-            projectPagination.page = 1
+            projectPagination.value.page = 1
             clearChanges();
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');
@@ -1254,13 +1255,13 @@ import Column from 'primevue/column';
     function handleLibrarySelectChange(libraryId: string) {
         selectTreatmentLibraryAction(libraryId);
         hasSelectedLibrary = true;
-    const library = stateTreatmentLibraries.value.find((o) => o.id === libraryId);
+        const library = stateTreatmentLibraries.value.find((o) => o.id === libraryId);
 
-    if (!isNil(library)) {
-      selectedLibraryTreatments.value = library.treatments;
-      onSelectedLibraryTreatmentsChanged();
-    } 
-}   
+        if (!isNil(library)) {
+          selectedLibraryTreatments.value = library.treatments;
+          onSelectedLibraryTreatmentsChanged();
+        } 
+    }   
 
     async function initializePages(){
         const request: PagingRequest<SectionCommittedProject>= {
@@ -1287,7 +1288,6 @@ import Column from 'primevue/column';
             }
         }); 
     }
-}
 </script>
 <style scoped>
 .sel-style {

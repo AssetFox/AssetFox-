@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AppliedResearchAssociates.CalculateEvaluate;
+﻿using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -64,7 +61,6 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.Equal(expectedMessage, exception.Message);
         }
 
-
         [Fact]
         public void GetTreatmentCost_CriteriaEvaluateToTrue_FindsCost()
         {
@@ -117,8 +113,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.Equal(12345, cost);
         }
 
-        //[Fact]
-        [Fact (Skip ="Fails. But corresponding actions in the UI succeed. Need to debug.")]
+        [Fact]
         public void DownloadSpreadsheet_ThenReupload_Ok()
         {
             var networkId = Guid.NewGuid();
@@ -183,28 +178,53 @@ namespace BridgeCareCoreTests.Tests.Integration
             committedProject.ShadowForAnyTreatment = 4;
             committedProject.ShadowForSameTreatment = 10;
             List<SectionCommittedProjectDTO> sectionCommittedProjects = new List<SectionCommittedProjectDTO> { committedProject };
-
-            //act
             TestHelper.UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(sectionCommittedProjects);
 
-            //assert
             var committedProjects1 = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
             var committedProjectIds = new List<Guid> { committedProject.Id };
-            TestHelper.UnitOfWork.CommittedProjectRepo.DeleteSpecificCommittedProjects(committedProjectIds);
-            var committedProjects2 = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
-            Assert.Empty(committedProjects2);
             var service = CreateCommittedProjectService();
+
+            // first act
             var fileInfo = service.ExportCommittedProjectsFile(simulationId);
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-       //     File.WriteAllBytes("zzzzz.xlsx", bytes);
+            //File.WriteAllBytes("zzzzz.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
+            TestHelper.UnitOfWork.CommittedProjectRepo.DeleteSpecificCommittedProjects(committedProjectIds);
+            var committedProjects2 = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
+            Assert.Empty(committedProjects2);
+
+            //second act
             service.ImportCommittedProjectFiles(simulationId, excelPackage, fileInfo.FileName, true);
             var committedProjects3 = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
             var id1 = committedProjects1[0].LocationKeys["ID"];
-            var id2 = committedProjects3[0].LocationKeys["ID"];
+            var id3 = committedProjects3[0].LocationKeys["ID"];
             ObjectAssertions.EquivalentExcluding(committedProjects1, committedProjects3, x => x[0].LocationKeys, x => x[0].Id);
+            Assert.NotEqual(id1, id3);
+        }
+
+        [Fact]
+        public void DownloadTemplate_IsValidExcelPackage()
+        {
+            var networkId = Guid.NewGuid();
+            var keyAttributeId = Guid.NewGuid();
+            var maintainableAssets = new List<MaintainableAsset>();
+            var assetId = Guid.NewGuid();
+            var locationIdentifier = RandomStrings.WithPrefix("Location");
+            var location = Locations.Section(locationIdentifier);
+            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+            var keyAttributeName = RandomStrings.WithPrefix("locationAttribute");
+            var keyAttribute = AttributeTestSetup.Text(keyAttributeId, keyAttributeName, ConnectionType.EXCEL);
+            maintainableAssets.Add(maintainableAsset);
+            var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
+                TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
+            AdminSettingsTestSetup.SetupBamsAdminSettings(TestHelper.UnitOfWork, network.Name, keyAttributeName, keyAttributeName);
+            var service = CreateCommittedProjectService();
+
+            var fileInfo = service.CreateCommittedProjectTemplate(network.Id);
+
+            ExcelPackageAsserts.ValidExcelPackageData(fileInfo);
         }
     }
 }

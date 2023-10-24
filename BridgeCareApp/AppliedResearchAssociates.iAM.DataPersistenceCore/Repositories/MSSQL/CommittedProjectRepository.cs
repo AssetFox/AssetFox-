@@ -70,13 +70,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void SetCommittedProjectTemplate(Stream name)
+        public void SetCommittedProjectTemplate(Stream stream)
         {
-            BinaryReader br = new BinaryReader(name);
-            var fileSize = name.Length;
+            BinaryReader br = new BinaryReader(stream);
+            var fileSize = stream.Length;
             var bytes = br.ReadBytes(Convert.ToInt32(fileSize));
             br.Close();
-            name.Close();
+            stream.Close();
 
             var existingComittedProjectTemplate = _unitOfWork.Context.CommittedProjectSettings.Where(_ => _.Key == "Committed Project Template").FirstOrDefault();
             if (existingComittedProjectTemplate == null)
@@ -166,13 +166,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return names;
         }
 
-        public void AddCommittedProjectTemplate(Stream name, string filename)
+        public void AddCommittedProjectTemplate(Stream stream, string filename)
         {
-            BinaryReader br = new BinaryReader(name);
-            var fileSize = name.Length;
+            BinaryReader br = new BinaryReader(stream);
+            var fileSize = stream.Length;
             var bytes = br.ReadBytes(Convert.ToInt32(fileSize));
             br.Close();
-            name.Close();
+            stream.Close();
 
             var existingComittedProjectTemplate = _unitOfWork.Context.CommittedProjectTemplates.Where(_ => _.Key == filename).FirstOrDefault();
             if (existingComittedProjectTemplate == null)

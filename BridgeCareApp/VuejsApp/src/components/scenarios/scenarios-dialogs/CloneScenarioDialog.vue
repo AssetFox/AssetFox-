@@ -1,6 +1,6 @@
 <template>
-    <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
-        <v-card elevation="5" variant = "outlined"
+    <v-dialog max-width="450px" persistent v-model="showDialogComputed">
+        <v-card elevation="5" 
          class="modal-pop-up-padding">
             <v-card-title>
                 <h3 class="dialog-header">
@@ -20,7 +20,7 @@
                     v-model="networkMetaData"
                     return-object
                     v-if="hasCompatibleNetworks"
-                    v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
+                    @update:modelValue="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
                     density="default"
                     variant="outlined"
                 ></v-select>
@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { ref, shallowReactive, watch } from 'vue'; 
+import Vue, { computed, ref, shallowReactive, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -73,35 +73,37 @@ import { useStore } from 'vuex';
     const props = defineProps<{dialogData: CloneScenarioDialogData}>();
     const emit = defineEmits(['submit']);
 
-    const stateUsers =  shallowReactive<User[]>(store.state.userModule.users);
-    const stateCompatibleNetworks = shallowReactive<Network[]>(store.state.networkModule.compatibleNetworks);  
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
+
+    const stateUsers =  computed<User[]>(() => store.state.userModule.users);
+    const stateCompatibleNetworks = computed<Network[]>(() => store.state.networkModule.compatibleNetworks);  
     let shared =  ref<boolean>(false);
 
     async function getCompatibleNetworksAction(payload?: any): Promise<any>{await store.dispatch('getCompatibleNetworks')}
 
     let newScenario: Scenario = { ...emptyScenario, id: getNewGuid() };
     let selectedNetworkId: string = getBlankGuid();
-    let isNetworkSelected: boolean = false;
-    let networkMetaData: Network = {...emptyNetwork}
+    let isNetworkSelected = ref(false);
+    let networkMetaData = ref<Network>({...emptyNetwork})
     let selectedNetworkName: string;
     let hasCompatibleNetworks: boolean = false;
 
-    watch(()=> props.dialogData,()=> onDialogDataChanged)
+    watch(()=> props.dialogData,()=> onDialogDataChanged())
     function onDialogDataChanged() {
         onModifyScenarioUserAccess();
     }
 
-    watch(stateCompatibleNetworks, ()=> onStateCompatibleNetworksChanged)
+    watch(stateCompatibleNetworks, ()=> onStateCompatibleNetworksChanged())
     function onStateCompatibleNetworksChanged() {
 
         selectedNetworkId = props.dialogData.scenario.networkId;
         selectedNetworkName = props.dialogData.scenario.networkName;
-        networkMetaData = stateCompatibleNetworks.find(_ => _.id == props.dialogData.scenario.networkId) || networkMetaData;
-        isNetworkSelected = true;
+         networkMetaData.value =  stateCompatibleNetworks.value.find(_ => _.id == props.dialogData.scenario.networkId) ||  networkMetaData.value;
+         isNetworkSelected.value = true;
         hasCompatibleNetworks = true;
     }
 
-    watch(shared, ()=> onSetPublic)
+    watch(shared, ()=> onSetPublic())
     function onSetPublic() {
         onModifyScenarioUserAccess();
     }
@@ -110,10 +112,10 @@ import { useStore } from 'vuex';
       selectedNetworkId = networkId;
       selectedNetworkName = networkName;
       if(networkId != '' && !isNil(networkId) && networkId != getBlankGuid()){
-        isNetworkSelected = true;
+         isNetworkSelected.value = true;
       }
       else{
-        isNetworkSelected = false;
+         isNetworkSelected.value = false;
       }
     }
 
@@ -121,7 +123,7 @@ import { useStore } from 'vuex';
         if (props.dialogData.showDialog) {
             const currentUser: User = find(
                 propEq('username', getUserName()),
-                stateUsers,
+                 stateUsers.value,
             ) as User;
             const owner: ScenarioUser = {
                 userId: currentUser.id,
@@ -136,7 +138,7 @@ import { useStore } from 'vuex';
                 users: shared
                     ? [
                           owner,
-                          ...stateUsers
+                          ... stateUsers.value
                               .filter(
                                   (user: User) =>
                                       user.username !== currentUser.username,

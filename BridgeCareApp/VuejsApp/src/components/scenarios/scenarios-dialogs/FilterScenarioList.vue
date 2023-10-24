@@ -1,6 +1,6 @@
 <template>
-    <v-dialog max-width="450px" persistent v-bind:show="showDialog">
-        <v-card elevation="5" variant = "outlined" class="modal-pop-up-padding">
+    <v-dialog max-width="450px" persistent v-model="showDialogComputed">
+        <v-card elevation="5"  class="modal-pop-up-padding">
             <v-card-title>
                 <h3 class="dialog-header">
                     Filter For Scenarios
@@ -19,7 +19,7 @@
                     item-title="name"
                     v-model="FilterCategory"
                     return-object
-                    v-on:change="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
+                    @update:modelValue="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
                     density="default"
                     variant = "outlined"
                 ></v-select>
@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { ref, watch } from 'vue'; 
+import Vue, { computed, ref, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -69,7 +69,7 @@ import { useStore } from 'vuex';
 
   const props = defineProps<{showDialog: boolean}>();
   const emit = defineEmits(['submit'])
-
+  let showDialogComputed = computed(() => props.showDialog);
     let stateUsers = ref<User[]>(store.state.userModule.users);
     let shared = ref<boolean>(false);
 
@@ -79,14 +79,14 @@ import { useStore } from 'vuex';
         "Creator",
         "Network"
     ]
-    let FilterCategory = '';
-    let FilterValue = '';
+    let FilterCategory = ref('');
+    let FilterValue = ref('');
     let isNetworkSelected: boolean = false;
 
     watch(()=> props.showDialog,()=> onShowDialogChanged)
     function onShowDialogChanged() {
-        FilterCategory = '';
-        FilterValue = '';
+         FilterCategory.value = '';
+        FilterValue.value = '';
     }
 
     watch(shared, ()=> onSetPublic)
@@ -95,10 +95,10 @@ import { useStore } from 'vuex';
         //onModifyScenarioUserAccess();
     }
 
-    function selectedFilter(FilterCategory: string, FilterValue: string){
-      FilterCategory = FilterCategory;
-      FilterValue = FilterValue;
-      if(FilterCategory != '' && !isNil(FilterCategory)){
+    function selectedFilter(localFilterCategory: string, localFilterValue: string){
+       FilterCategory.value = localFilterCategory;
+       FilterValue.value =  FilterValue.value;
+      if( FilterCategory.value != '' && !isNil( FilterCategory.value)){
         isNetworkSelected = true;
       }
       else{
@@ -108,7 +108,7 @@ import { useStore } from 'vuex';
 
     function onSubmit(submit: boolean) {
         if (submit) {
-            emit('submit', FilterCategory,FilterValue);
+            emit('submit',  FilterCategory.value, FilterValue.value);
         } else {
             emit('submit', null);
         }

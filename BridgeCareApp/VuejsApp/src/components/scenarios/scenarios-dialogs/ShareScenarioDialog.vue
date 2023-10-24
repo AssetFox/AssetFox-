@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -9,7 +9,7 @@
       <v-card-text>
         <v-data-table :headers="scenarioUserGridHeaders"
                       :items="scenarioUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
+                      sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <td>
@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount } from 'vue'; 
+import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, computed } from 'vue'; 
 
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {ScenarioUser} from '@/shared/models/iAM/scenario';
@@ -59,19 +59,19 @@ import { useStore } from 'vuex';
 
   const props = defineProps<{dialogData: ShareScenarioDialogData}>();
   const emit = defineEmits(['submit'])
+  let showDialogComputed = computed(() => props.dialogData.showDialog);
+  const stateUsers = computed<User[]>(() => store.state.userModule.users)
 
-  const stateUsers: User[] = shallowReactive(store.state.userModule.users)
-
-  let scenarioUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+  let scenarioUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  let scenarioUserGridRows: ScenarioUserGridRow[] = [];
+  let scenarioUserGridRows = ref<ScenarioUserGridRow[]>([]);
   let currentUserAndOwner: ScenarioUser[] = [];
-  let searchTerm: string = '';
+  let searchTerm = ref('');
 
-  watch(()=> props.dialogData,()=> onDialogDataChanged)
+  watch(()=> props.dialogData,()=> onDialogDataChanged())
   function onDialogDataChanged() {
     if (props.dialogData.showDialog) {
       onSetGridData();
@@ -82,7 +82,7 @@ import { useStore } from 'vuex';
   function onSetGridData() {
     const currentUser: string = getUserName();
 
-    scenarioUserGridRows = stateUsers
+     scenarioUserGridRows.value =  stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -101,14 +101,14 @@ import { useStore } from 'vuex';
     const otherUsers: ScenarioUser[] = filter(isNotCurrentUserOrOwner, props.dialogData.scenario.users) as ScenarioUser[];
 
     otherUsers.forEach((scenarioUser: ScenarioUser) => {
-      if (any(propEq('id', scenarioUser.userId), scenarioUserGridRows)) {
+      if (any(propEq('id', scenarioUser.userId),  scenarioUserGridRows.value)) {
         const scenarioUserGridRow: ScenarioUserGridRow = find(
-            propEq('id', scenarioUser.userId), scenarioUserGridRows) as ScenarioUserGridRow;
+            propEq('id', scenarioUser.userId),  scenarioUserGridRows.value) as ScenarioUserGridRow;
 
-        scenarioUserGridRows = update(
-            findIndex(propEq('id', scenarioUser.userId), scenarioUserGridRows),
+         scenarioUserGridRows.value = update(
+            findIndex(propEq('id', scenarioUser.userId),  scenarioUserGridRows.value),
             {...scenarioUserGridRow, isShared: true, canModify: scenarioUser.canModify},
-            scenarioUserGridRows
+             scenarioUserGridRows.value
         );
       }
     });
@@ -116,9 +116,9 @@ import { useStore } from 'vuex';
 
   function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      scenarioUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), scenarioUserGridRows),
-          'canModify', false, scenarioUserGridRows);
+       scenarioUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId),  scenarioUserGridRows.value),
+          'canModify', false,  scenarioUserGridRows.value);
     }
   }
 
@@ -129,11 +129,11 @@ import { useStore } from 'vuex';
       emit('submit', null);
     }
 
-    scenarioUserGridRows = [];
+     scenarioUserGridRows.value = [];
   }
 
   function getScenarioUsers() {
-    const usersSharedWith: ScenarioUser[] = scenarioUserGridRows
+    const usersSharedWith: ScenarioUser[] =  scenarioUserGridRows.value
         .filter((scenarioUserGridRow: ScenarioUserGridRow) => scenarioUserGridRow.isShared)
         .map((scenarioUserGridRow: ScenarioUserGridRow) => ({
           userId: scenarioUserGridRow.id,

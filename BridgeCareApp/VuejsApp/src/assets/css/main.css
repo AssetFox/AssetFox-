@@ -320,7 +320,7 @@ v-list-item.ghd-control-text {
     font-size: 14px !important;
     font-weight: 400 !important;
     padding-top: 6px !important;
-    min-height: 14px;
+    min-height: 20px;
 }
 
 .ghd-checkbox .v-input .v-input__control .v-input__slot .v-input--checkbox .v-input--selection-controls {

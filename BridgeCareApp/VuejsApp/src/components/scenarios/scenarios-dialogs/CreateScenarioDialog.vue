@@ -1,6 +1,6 @@
 ﻿<template>
-    <v-dialog max-width="450px" v-bind:show="showDialog">
-        <v-card elevation="5" variant = "outlined" class="modal-pop-up-padding">
+    <v-dialog max-width="450px" v-model="showDialogComputed">
+        <v-card elevation="5"  class="modal-pop-up-padding">
             <v-card-title>
                 <h3 class="dialog-header">
                     Create new scenario
@@ -19,7 +19,7 @@
                     item-title="name"
                     v-model="networkMetaData"
                     return-object
-                    v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
+                    @update:modelValue="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
                     density="default"
                     variant="outlined"
                 ></v-select>
@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { ref, shallowReactive, watch } from 'vue'; 
+import Vue, { computed, ref, shallowReactive, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -66,41 +66,43 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { useStore } from 'vuex'; 
+import { validate } from 'uuid';
 
   let store = useStore(); 
 
   const props = defineProps<{showDialog: boolean}>();
   const emit = defineEmits(['submit'])
+  let showDialogComputed = computed(() => props.showDialog);
 
-    const stateUsers: User[] = shallowReactive(store.state.userModule.users);
+    const stateUsers = computed<User[]>(() => store.state.userModule.users);
     let shared = ref<boolean>(false);
-    let stateNetworks = ref<Network[]>(store.state.networkModule.networks) ;
+    let stateNetworks = computed<Network[]>(() => store.state.networkModule.networks) ;
 
-    let newScenario: Scenario = { ...emptyScenario, id: getNewGuid() };
-    
-    let selectedNetworkId: string = getBlankGuid();
-    let isNetworkSelected: boolean = false;
-    let networkMetaData: Network = {...emptyNetwork}
+    let newScenario = ref<Scenario>({ ...emptyScenario, id: getNewGuid() });
+
+    let selectedNetworkId = ref(getBlankGuid());
+    let isNetworkSelected = ref(false);
+    let networkMetaData = ref<Network>({...emptyNetwork})
     let selectedNetworkName: string;
 
-    watch(()=> props.showDialog,()=> onShowDialogChanged)
+    watch(() => props.showDialog,()=> onShowDialogChanged())
     function onShowDialogChanged() {
         onModifyScenarioUserAccess();
     }
 
-    watch(shared, ()=> onSetPublic)
+    watch(shared, ()=> onSetPublic())
     function onSetPublic() {
         onModifyScenarioUserAccess();
     }
 
     function selectedNetwork(networkName: string, networkId: string){
-      selectedNetworkId = networkId;
+      selectedNetworkId.value = networkId;
       selectedNetworkName = networkName;
       if(networkId != '' && !isNil(networkId) && networkId != getBlankGuid()){
-        isNetworkSelected = true;
+        isNetworkSelected.value = true;
       }
       else{
-        isNetworkSelected = false;
+        isNetworkSelected.value = false;
       }
     }
 
@@ -108,7 +110,7 @@ import { useStore } from 'vuex';
         if (props.showDialog) {
             const currentUser: User = find(
                 propEq('username', getUserName()),
-                stateUsers,
+                stateUsers.value,
             ) as User;
             const owner: ScenarioUser = {
                 userId: currentUser.id,
@@ -117,13 +119,13 @@ import { useStore } from 'vuex';
                 isOwner: true,
             };
 
-            newScenario = {
-                ...newScenario,
-                networkId: selectedNetworkId,
+            newScenario.value = {
+                ...newScenario.value,
+                networkId: selectedNetworkId.value,
                 users: shared
                     ? [
                           owner,
-                          ...stateUsers
+                          ...stateUsers.value
                               .filter(
                                   (user: User) =>
                                       user.username !== currentUser.username,
@@ -142,14 +144,14 @@ import { useStore } from 'vuex';
 
     function onSubmit(submit: boolean) {
         if (submit) {
-            newScenario.networkId = selectedNetworkId;
-            newScenario.networkName = selectedNetworkName;
-            emit('submit', newScenario);
+            newScenario.value.networkId = selectedNetworkId.value;
+            newScenario.value.networkName = selectedNetworkName;
+            emit('submit', newScenario.value);
         } else {
             emit('submit', null);
         }
 
-        newScenario = { ...emptyScenario, id: getNewGuid() };
+        newScenario.value = { ...emptyScenario, id: getNewGuid() };
         shared = ref(false);
     }
 

@@ -1,5 +1,5 @@
 <template>
-    <v-dialog  width="768px" height="540px" persistent v-bind:show="showDialog">
+    <v-dialog  width="768px" height="540px" persistent v-model="showDialogComputed">
         <v-card class="div-padding">
             <v-card-title class="pa-2">
                 <v-row justify-start>
@@ -36,7 +36,7 @@
 </template>
 
 <script lang='ts' setup>
-import Vue, {  watch } from 'vue'; 
+import Vue, {  computed, watch } from 'vue'; 
 
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
 import FileSelector from '@/shared/components/FileSelector.vue';
@@ -47,7 +47,7 @@ import { useStore } from 'vuex';
     let store = useStore(); 
     const props = defineProps<{showDialog: boolean}>();
     const emit = defineEmits(['submit','delete'])
-
+    let showDialogComputed = computed(() => props.showDialog);
     async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
     async function setIsBusyAction(payload?: any): Promise<any>{await store.dispatch('setIsBusy')}
 

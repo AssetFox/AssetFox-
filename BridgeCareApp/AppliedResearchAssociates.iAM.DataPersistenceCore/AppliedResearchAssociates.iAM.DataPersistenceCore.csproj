@@ -52,7 +52,6 @@
   <ItemGroup>
     <Folder Include="Repositories\MSSQLLegacy\Mappings\" />
     <Folder Include="Repositories\MSSQL\DTOs\" />
-    <Folder Include="Repositories\MSSQL\SQLScripts\" />
   </ItemGroup>
 
   <ItemGroup>

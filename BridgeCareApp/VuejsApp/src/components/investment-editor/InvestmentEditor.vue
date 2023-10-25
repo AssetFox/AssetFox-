@@ -208,7 +208,7 @@
         <v-col v-show='hasSelectedLibrary && !hasScenario' xs12>
             <v-row justify-center>
                 <v-col>
-                    <v-subheader class="ghd-subheader ">Description</v-subheader>
+                    <v-subheader class="ghd-subheader">Description</v-subheader>
                     <v-textarea no-resize outline rows='4'
                                 v-model='selectedBudgetLibrary.description'
                                 @update:model-value="checkHasUnsavedChanges()"
@@ -438,7 +438,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     let showSetRangeForAddingBudgetYearsDialog: boolean = false;
     let showSetRangeForDeletingBudgetYearsDialog: boolean = false;
-    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
     let uuidNIL: string = getBlankGuid();
     let rules: InputValidationRules = validationRules;
     let showImportExportInvestmentBudgetsDialog: boolean = false;
@@ -446,8 +446,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let hasInvestmentPlanForScenario: boolean = false;
     let hasCreatedLibrary: boolean = false;
     let budgets: Budget[] = [];
-    let disableCrudButtonsResult: boolean = false;
-    let hasLibraryEditPermission: boolean = false;
+    let disableCrudButtonsResult = ref<boolean>(false);
+    let hasLibraryEditPermission = ref<boolean>(false);
     let showReminder: boolean = false;
     let range: number = 1;
     let parentLibraryName: string = "None";
@@ -1002,7 +1002,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function checkLibraryEditPermission() {
-        hasLibraryEditPermission = hasAdminAccess || (hasPermittedAccess && checkUserIsLibraryOwner());
+        hasLibraryEditPermission.value = hasAdminAccess || (hasPermittedAccess && checkUserIsLibraryOwner());
     }
 
     function checkUserIsLibraryOwner() {
@@ -1318,7 +1318,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onShowConfirmDeleteAlert() {
-        confirmDeleteAlertData = {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1327,7 +1327,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        confirmDeleteAlertData = clone(emptyAlertData);
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
             librarySelectItemValue.value = null;
@@ -1363,7 +1363,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             return !(allBudgetDataIsValid && allInvestmentPlanDataIsValid);
         }
 
-        disableCrudButtonsResult = !allBudgetDataIsValid;
+        disableCrudButtonsResult.value = !allBudgetDataIsValid;
         return !allBudgetDataIsValid;
     }
 

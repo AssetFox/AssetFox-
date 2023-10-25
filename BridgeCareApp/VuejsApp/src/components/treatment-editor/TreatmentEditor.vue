@@ -329,6 +329,7 @@
             @submit='onSubmitConfirmDeleteTreatmentAlertResult'
         />
     </v-row>
+    <ConfirmDialog></ConfirmDialog>
 </template>
 
 <script lang='ts' setup>
@@ -415,10 +416,13 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import { ImportNewTreatmentDialogResult } from '@/shared/models/modals/import-new-treatment-dialog-result';
 import { useRouter } from 'vue-router';
 import mitt from 'mitt';
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmDialog from 'primevue/confirmdialog';
 
     const emit = defineEmits(['submit'])    
     const $emitter = mitt()
     const $router = useRouter();
+    const confirm = useConfirm();
     let store = useStore();
     let stateTreatmentLibraries = ref<TreatmentLibrary[]>(store.state.attributeModule.attributes);
     let stateSelectedTreatmentLibrary = ref<TreatmentLibrary>(store.state.treatmentModule.selectedTreatmentLibrary);
@@ -1389,14 +1393,14 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
         if (hasUnsavedChanges && unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
+
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                header: "Unsaved Changes",
+                icon: 'pi pi-question-circle',
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
             unsavedDialogAllowed = true;

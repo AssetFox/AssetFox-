@@ -1,5 +1,5 @@
 ﻿<template>
-  <v-dialog max-width="500px" scrollable v-bind:show="dialogData.showModal">
+  <v-dialog max-width="500px" scrollable v-model="showDialogComputed">
     <v-card>
       <v-card-title primary-title>
         <v-row column>
@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted } from 'vue'; 
+import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, computed } from 'vue'; 
 
 import {ReportsDownloaderDialogData} from '@/shared/models/modals/reports-downloader-dialog-data';
 import ReportsService from '@/services/reports.service';
@@ -66,7 +66,7 @@ import { useStore } from 'vuex';
     let store = useStore(); 
 
     const props = defineProps<{dialogData: ReportsDownloaderDialogData}>();
-
+    let showDialogComputed = computed(() => props.dialogData.showModal);
     let isBusy = ref<boolean>(store.state.busyModule.isBusy);
 
     let stateSimulationReportNames: string[] = (store.state.adminDataModule.simulationReportNames)

@@ -2,8 +2,8 @@ export interface Pagination {
     descending: boolean;
     page: number;
     rowsPerPage: number;
-    sort: any[];
     totalItems: number;
+    sort: any[];
 }
 
 export const emptyPagination: Pagination = {

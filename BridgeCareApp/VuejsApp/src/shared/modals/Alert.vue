@@ -1,5 +1,5 @@
 ﻿<template>
-    <v-dialog max-width="290" persistent v-bind:show="dialogData.showDialog">
+    <v-dialog max-width="290" persistent v-model="showDialogComputed">
         <v-card>
             <v-card-title class="headline">
                 <v-row justify-center>
@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-    import Vue from 'vue';
+    import Vue, { computed } from 'vue';
     import {AlertData} from '../models/modals/alert-data';
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
     import { useStore } from 'vuex';
@@ -47,7 +47,7 @@ const emit = defineEmits(['submit'])
 const props = defineProps<{
     dialogData: AlertData
     }>()
-
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
         /**
          * Emits a boolean result to the parent component
          * @param submit

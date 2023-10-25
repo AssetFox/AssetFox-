@@ -514,7 +514,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     onMounted(() => {
-    console.log(`MOUNTED`) 
     getBudgetLibrariesAction(); 
     //beforeRouteEnter();
 
@@ -650,7 +649,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     });
 
     watch(librarySelectItemValue,() => {
-        console.log(`librarySelectItemValue watch entered: ${librarySelectItemValue.value}`);
         hasSelectedLibrary.value = true;
 
         if(hasScenario){
@@ -670,22 +668,17 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         librarySelectItemValueAllowedChanged = true;
     });
 
-    function onSelectItemValueChanged() {
-        console.log(`onSelectItemValueChanged function: ${librarySelectItemValue.value}`);
-        
+    function onSelectItemValueChanged() {      
         trueLibrarySelectItemValue = librarySelectItemValue
         selectBudgetLibraryAction(librarySelectItemValue.value);
     }
 
     watch(stateSelectedBudgetLibrary,() => {
-        console.log(`stateSelectedBudgetLibrary ENTERED`);
         selectedBudgetLibrary.value = clone(stateSelectedBudgetLibrary.value);
     });
 
-    watch(selectedBudgetLibrary,()=> {
-        
+    watch(selectedBudgetLibrary,()=> {     
         hasSelectedLibrary.value = selectedBudgetLibrary.value.id !== uuidNIL;
-        console.log(`selectedBudgetLibrary ENTERED: ${hasSelectedLibrary.value}`);
         if (hasSelectedLibrary.value) {
             checkLibraryEditPermission();
             hasCreatedLibrary = false;
@@ -938,7 +931,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onShowCreateBudgetLibraryDialog(createAsNewLibrary: boolean) {
-        console.log(`onShowCreateBudgetLibraryDialog button clicked`)
         createBudgetLibraryDialogData.value = {
             showDialog: true,
             budgets: createAsNewLibrary ? currentPage : [],

@@ -8,5 +8,6 @@
                 "PAMSPBExportReport", "BAMSInventoryLookup", "PAMSInventoryLookupSections", "PAMSInventoryLookupSegments" ],
     "agencyLogo": "",
     "productLogo": "",
+    "implementationName": "",
     "securityType": "B2C"
 }

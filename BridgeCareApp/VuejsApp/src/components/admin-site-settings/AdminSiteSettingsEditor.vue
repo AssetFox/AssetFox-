@@ -23,13 +23,13 @@
               clearable
               single-line
               outline
-              style="padding-left: 10px; width: 250%"
+              style="padding-left: 0px; width: 250%"
             >
             </v-text-field>
           </v-row>
         </v-col>
-        <v-col cols="12">
-          <v-row column>
+        <v-col cols="1">
+          <v-row column style="padding-left: 200px; margin-top: -55px;">
             <v-btn
               class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
               style="padding-left: 10px"
@@ -50,7 +50,7 @@
           </v-row>
         </v-col>
         <v-col cols="12">
-          <v-row column>
+          <v-row column style="padding-left: 200px; margin-top: -45px;" >
             <input
               id="agencyImageUpload"
               type="file"
@@ -79,7 +79,7 @@
           </v-row>
         </v-col>
         <v-col cols="12">
-          <v-row column>
+          <v-row column style="padding-left: 200px; margin-top: -35px;">
             <input
               id="implementationImageUpload"
               type="file"
@@ -111,10 +111,10 @@
   let agencyLogo = ref<string>(store.state.adminDataModule.agencyLogo);
   let implementationLogo = ref<string>(store.state.adminDataModule.implementationLogo);
   let ImplementationID:string = '';
-  async function getImplementationNameAction(payload?: any): Promise<any> {await store.dispatch('getImplementationName');}
-  async function importImplementationNameAction(implementationName:string): Promise<any> {await store.dispatch('getImplementationName');}
-  async function importAgencyLogoAction(payload?: any): Promise<any> {await store.dispatch('importAgencyLogo');}
-  async function importProductLogoAction(payload?: any): Promise<any> {await store.dispatch('importProductLogo');}
+  async function getImplementationNameAction(payload?: any): Promise<any> {await store.dispatch('getImplementationName',payload);}
+  async function importImplementationNameAction(implementationName:string): Promise<any> {await store.dispatch('getImplementationName',implementationName);}
+  async function importAgencyLogoAction(payload?: any): Promise<any> {await store.dispatch('importAgencyLogo',payload);}
+  async function importProductLogoAction(payload?: any): Promise<any> {await store.dispatch('importProductLogo',payload);}
 
   function onSaveImplementationName(){
     importImplementationNameAction(ImplementationID);
@@ -127,11 +127,11 @@
       document.getElementById("agencyImageUpload")?.click();
    }
    function handleImplementationLogoUpload(payload: any){
-    const file = payload.files[0];
+    const file = payload.files;
     importProductLogoAction(file);  
 }
   function handleAgencyLogoUpload(payload: any){
-    const file = payload.files[0];
+    const file = payload.files;
     importAgencyLogoAction(file);
   }
   </script>

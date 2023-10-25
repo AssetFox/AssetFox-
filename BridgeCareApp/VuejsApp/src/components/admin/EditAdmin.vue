@@ -12,20 +12,20 @@
                 <v-list class="ghd-navigation-list">
                     <v-list-item
                         class="settings-list ghd-control-text"
-                        :key="navigationTab.tabName"
-                        :model-value="navigationTab"
-                        v-for="navigationTab in visibleNavigationTabs()"
+                        :key="navigationTabs.tabName"
+                        :model-value="navigationTabs"
+                        v-for="navigationTabs in visibleNavigationTabs()"
                     >
-                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                        <v-list-tile :to="navigationTabs.navigation" style="border-bottom: 1px solid #CCCCCC;" @click="onNavigate(navigationTabs.navigation)">
                             <v-list-tile-action>
                                 <v-list-tile-icon class="sidebar-icon">
-                                    <AttributesSvg style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Security'"/>    
-                                    <DataSourceSvg style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'Site'"/>
-                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Data'"/>                            
-                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'RawData'"/>                            
+                                    <AttributesSvg style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTabs.tabName === 'Security'"/>    
+                                    <DataSourceSvg style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTabs.tabName === 'Site'"/>
+                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTabs.tabName === 'Data'"/>                            
+                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTabs.tabName === 'RawData'"/>                            
                                 </v-list-tile-icon>
                             </v-list-tile-action>                            
-                            <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>                            
+                            <v-list-tile-title style="text-decoration: none">{{navigationTabs.tabName}}</v-list-tile-title>                            
                         </v-list-tile>
                     </v-list-item>
                 </v-list>
@@ -34,16 +34,16 @@
                 <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
                     <router-view></router-view>
                 </v-container>
-            </v-row>
-        </v-layout>
-    </v-layout>
+            </v-col>
+        </v-row>
+    </v-row>
 </template>
 
 <script lang="ts" setup>
 import Vue from 'vue';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import { any, clone, isNil, propEq } from 'ramda';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
@@ -120,6 +120,11 @@ import { createDecipheriv } from 'crypto';
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,
         );
+    }
+    function onNavigate(route: any) {
+        if (router.currentRoute.value.path !== route.path) {
+            router.push(route).catch(() => {});
+        }
     }
 </script>
 

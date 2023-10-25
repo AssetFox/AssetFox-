@@ -18,9 +18,9 @@
                             <a href="mailto:jbruner@pa.gov">jbruner@pa.gov</a>
                         </v-card-text>
                     </v-card>
-                </v-layout>
+                </v-row>
             </v-col>
-        </v-layout>
+        </v-row>
     </v-container>
 </template>
 

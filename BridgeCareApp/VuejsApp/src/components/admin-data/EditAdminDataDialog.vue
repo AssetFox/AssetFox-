@@ -83,7 +83,6 @@ import Dialog from 'primevue/dialog';
     const { DialogData } = toRefs(props);
     //watchers
     watch(DialogData, () =>  {
-        console.log("test")
        DialogData.value.AddedItems = DialogData.value.selectedSettings.map(_ => {
             let toReturn: {value: string, networkType: string} 
             let type = "";
@@ -118,7 +117,6 @@ import Dialog from 'primevue/dialog';
         });
     })
     watch(selectedSettings,() => {
-        console.log("hello")
     }
     )
     function onDeleteSettingClick(setting:any){

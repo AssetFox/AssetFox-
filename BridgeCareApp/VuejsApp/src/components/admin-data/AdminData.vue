@@ -243,7 +243,6 @@ import { Console } from 'console';
             selectPrimaryNetworkItems.value.push({text:_.name,value:_.name})
             selectRawDataNetworkItems.value.push({text:_.name,value:_.name})
         });
-        console.log("stateNetworks")
     })
     watch(stateAttributes,() => {
         
@@ -251,14 +250,12 @@ import { Console } from 'console';
         stateAttributes.value.forEach(function (value) {
             keyFieldsForDialog.value.push(value.name);
         });
-        console.log("stateattributes")
     })
     watch(stateSimulationReportNames,() => {
         selectedSimulationReports.value = clone(stateSimulationReportNames.value);
     })
     watch(stateAvailableReportNames,() => 
     {
-        console.log("reports")
         selectedAvailableReports = clone(stateAvailableReportNames.value);
 
         const reports = ref<string[]>([])

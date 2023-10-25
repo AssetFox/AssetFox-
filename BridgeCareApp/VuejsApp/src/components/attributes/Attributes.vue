@@ -3,26 +3,29 @@
         <v-col cols="12">
             <v-col cols ="8" class="ghd-constant-header">
                 <v-row>
+                    <v-subheader class="ghd-md-gray ghd-control-label" style="margin-bottom:1%; margin-right:1%;">Attribute</v-subheader>
+                </v-row>
+                <v-row>
                     <v-row column>
-                        <v-subheader id="Attributes-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                         <v-select :items='selectAttributeItems'
                             id="Attributes-selectAttribute-vselect"
                             variant="outlined"
-                            append-icon=$vuetify.icons.ghd-down                           
+                            style="margin-left:1%;"
+                            append-icon="@/assets/icons/down.svg"
                             v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
                     </v-row>
-                    <v-btn id="Attributes-addAttribute-vbtn" style="margin-top: 20px !important; margin-left: 20px !important" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                    <v-btn id="Attributes-addAttribute-vbtn" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                         Add Attribute
                     </v-btn>
                 </v-row>
             </v-col>
         </v-col>
-        <v-divider v-if="hasSelectedAttribute" />
-        <v-col cols="12" v-if="hasSelectedAttribute" class="ghd-constant-header" >
+        <v-divider/>
+        <v-col cols="12"  class="ghd-constant-header" >
             <v-row>
                 <v-col cols="2"> 
-                    <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
+                    <v-subheader class="ghd-md-gray ghd-control-label" style="margin-left:2%;">Attribute</v-subheader>
                     <v-text-field id="Attributes-attributeName-vtextfield" outline class="ghd-text-field-border ghd-text-field"
                         placeholder="Name" v-model='selectedAttribute.name'/>
                 </v-col>
@@ -31,7 +34,6 @@
                     <v-select
                         id="Attributes-attributeDataType-vselect"
                         variant="outlined"
-                        append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='typeSelectValues'
                         v-model='selectedAttribute.type'>
@@ -44,7 +46,6 @@
                     <v-select
                         id="Attributes-attributeAggregationRule-vselect"
                         variant="outlined"
-                        append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='aggregationRuleSelectValues'
                         v-model='selectedAttribute.aggregationRuleType'>
@@ -52,7 +53,7 @@
                 </v-col>
             </v-row>
         </v-col>
-        <v-col cols="12" v-if="hasSelectedAttribute">
+        <v-col cols="12" >
             <v-col cols="10">
                 <v-row>
                     <v-col cols="2">
@@ -87,14 +88,15 @@
             </v-col>
         </v-col>
         <!-- Data source combobox -->
-        <v-col cols="12" v-if="hasSelectedAttribute">
+        <v-col cols="12">
             <v-col cols="6">
-                <v-row column>
+                <v-row>
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
+                </v-row>
+                <v-row column>
                     <v-select
                         id="Attributes-attributeDataSource-vselect"
                         variant="outlined"
-                        append-icon=$vuetify.icons.ghd-down  
                         v-model='selectDatasourceItemValue'
                         :items='selectDatasourceItems'                     
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -123,14 +125,15 @@
             </v-row>
         </v-col>
         <!-- Data source combobox -->
-        <v-col cols="12" v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'Excel'">
+        <v-col cols="12">
+            <v-row>
+                <v-subheader class="ghd-md-gray ghd-control-label" style="margin-left:1%; margin-bottom:0.75%;">Column Name</v-subheader>
+            </v-row>
             <v-col cols="6">
                 <v-row column>
-                    <v-subheader class="ghd-md-gray ghd-control-label">Column Name</v-subheader>
                     <v-select
                         id="Attributes-attributeColumnName-vselect"
                         variant="outlined"
-                        append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='selectExcelColumns'
                         v-model='selectedAttribute.command'>
@@ -139,17 +142,17 @@
             </v-col>
         </v-col>
         <!-- The Buttons  -->
-        <v-col cols="12" v-if="hasSelectedAttribute">        
+        <v-col cols="12">        
             <v-row justify-center>
-                <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
+                <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
                 </v-btn>  
-                <v-btn v-if="selectedAttribute.dataSource.type == 'SQL'" :disabled="selectedAttribute.dataSource.type != 'SQL'" 
-                    class='ghd-blue-bg text-white ghd-button-text ghd-button'
+                <v-btn
+                variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'
                     @click="CheckSqlCommand">
                     Test
                 </v-btn>
-                <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' class='ghd-blue-bg text-white ghd-button-text ghd-button'>
+                <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Save
                 </v-btn>               
             </v-row>

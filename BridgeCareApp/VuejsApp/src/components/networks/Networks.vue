@@ -1,18 +1,20 @@
 <template>
     <v-row column class="Montserrat-font-family">
         <v-col cols = "12">
-            <v-col cols = "8" class="ghd-constant-header">
+            <v-row>
+                    <v-subheader class="ghd-md-gray ghd-control-label" style="margin-bottom:1%; margin-left:1%;">Network</v-subheader>
+            </v-row>
+            <v-col cols = "8" >
                 <v-row>
-                    <v-row column>
-                        <v-subheader id="Networks-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Network</v-subheader>
-                        <v-select :items='selectNetworkItems'
+                        <v-select :items="selectNetworkItems"
                             id="Networks-selectNetwork-vselect"
                             variant="outlined"
-                            v-model='selectNetworkItemValue'                         
+                            item-title = "text"
+                            item-value = "value"
+                            v-model="selectNetworkItemValue"          
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
-                    </v-row>
-                    <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
+                    <v-btn style="margin-top: 10px !important; margin-left: 20px !important" 
                         id="Networks-addNetwork-vbtn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onAddNetworkDialog">
@@ -22,35 +24,37 @@
             </v-col>
         </v-col>
         <v-divider />
-        <v-col cols = "12" class="ghd-constant-header" v-show="hasSelectedNetwork">
+        <v-col cols = "12" class="ghd-constant-header">
+            <v-row>
+                    <v-subheader class="ghd-md-gray ghd-control-label" >Key Attribute</v-subheader>
+            </v-row>
             <v-row justify-space-between>
-                <v-col cols = "6">
+                <v-col cols = "6" sm="5">
                     <v-row column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">
-                            Key Attribute
-                        </v-subheader>
                         <v-select
                             id="Networks-KeyAttribute-vselect"
                             variant="outlined"
                             class="ghd-select ghd-text-field ghd-text-field-border"
                             :disabled="!isNewNetwork"
+                            append-icon="@/assets/icons/down.svg"
                             v-model="selectedKeyAttributeItem"
                             :items='selectKeyAttributeItems'>
                         </v-select>  
                     </v-row>                         
                 </v-col>
-                <v-col cols = "5">
-                <v-row v-show="!isNewNetwork">
+                <v-col cols = "5" style="align-items: right;">
+                    <v-row>
+                    <v-subheader class="ghd-md-gray ghd-control-label" >Data Source</v-subheader>
+                    </v-row>
+                <v-row>
                     <v-select
                         id="Networks-DataSource-vselect"
                         variant="outlined"
-                        :items="selectDataSourceItems"  
-                        style="margin-top: 18px !important;"                  
+                        :items="selectDataSourceItems"                       
                         class="ghd-select ghd-text-field ghd-text-field-border shifted-label"
-                        label="Data Source"
                         v-model="selectDataSourceId">
                     </v-select>  
-                    <v-btn style="margin-top: 20px !important;" 
+                    <v-btn style="margin-top: 10px !important; margin-left: 20px;"  
                         id="Networks-SelectAllFromSource-vbtn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="selectAllFromSource">
@@ -61,7 +65,7 @@
             </v-row>
         </v-col>
         <!-- Data source combobox -->
-        <v-col cols = "12" v-show="hasSelectedNetwork">
+        <v-col cols = "12">
             <v-row justify-space-between>
                 <v-col cols = "5" >
                     <v-row column>
@@ -70,20 +74,25 @@
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="padding-top: 14px !important">                             
                                         Spatial Weighting Equation</v-subheader>
                                 </v-col>
-                                <v-col xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
-                                    <v-btn
+                                <v-col xs1 style="height=12px;">
+                                    <!-- <v-btn
                                         id="Networks-EditSpatialWeightingEquation-vbtn"
                                         style="padding-right:20px !important;"
                                         class="edit-icon ghd-control-label"
-                                        icon
                                         :disabled="!isNewNetwork"
+                                        append-icon="ghd-blue"
                                         @click="onShowEquationEditorDialog">
-                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
-                                    </v-btn>
+                                        <v-icon class="ghd-blue">fas fa-edit</v-icon> 
+                                    </v-btn> -->
+                                    <v-row style="width: 70% !important; margin-bottom: 5px; margin-left: 1px;" >
+                                <v-text-field id="Networks-EditSpatialWeightingEquation-vtextfield" outline class="ghd-text-field-border ghd-text-field" 
+                                     v-model="spatialWeightingEquationValue.expression"/>
+                                </v-row>
                                 </v-col>
+                          
                             </v-row>
-                        <v-text-field id="Networks-EditSpatialWeightingEquation-vtextfield" outline class="ghd-text-field-border ghd-text-field" 
-                           :disabled="!isNewNetwork" v-model="spatialWeightingEquationValue.expression"/>                         
+                            
+                                                 
                     </v-row>
                     <v-row v-show="hasStartedAggregation">
                         <v-col>
@@ -108,7 +117,7 @@
                 </v-col>
                 <v-col cols = "5">
                     <v-row column>
-                        <div class='priorities-data-table' v-show="!isNewNetwork">
+                        <div class='priorities-data-table' >
                             <v-row justify-center>
                                 <v-btn id="Networks-AddAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onAddAll">
@@ -121,7 +130,7 @@
                                     Remove All
                                 </v-btn>
                             </v-row>
-                            <v-data-table id="Networks-Attributes-vdatatable" :headers='dataSourceGridHeaders' :items='attributeRows'
+                            <v-data-table id="Networks-Attributes-vdatatable" :header='dataSourceGridHeaders' :items='attributeRows'
                                 class='v-table__overflow ghd-table' item-key='id' select-all
                                 v-model="selectedAttributeRows"
                                 :must-sort='true'
@@ -147,21 +156,21 @@
             </v-row>
         </v-col>
         <!-- The Buttons  -->
-        <v-col cols = "12" v-show="hasSelectedNetwork">        
+        <v-col cols = "12">        
             <v-row justify-center style="padding-top: 30px !important">
                 <v-btn id="Networks-Cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
-                variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
+                variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
                 </v-btn>  
-                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg text-white ghd-button-text ghd-button'>
+                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Aggregate
                 </v-btn>
-                <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg text-white ghd-button-text ghd-button'>
+                <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Delete
                 </v-btn>
                 <v-btn id="Networks-Create-vbtn" @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
-                    v-show="isNewNetwork"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-button'>
+                   
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Create
                 </v-btn>            
             </v-row>
@@ -181,7 +190,7 @@ import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { SelectItem } from '@/shared/models/vue/select-item';
-import Vue, { inject, onBeforeUnmount, onMounted, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
+import Vue, { computed, DeepReadonly, inject, onBeforeUnmount, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import {
     emptyEquationEditorDialogData,
@@ -202,7 +211,7 @@ import { useStore } from 'vuex';
 import mitt from 'mitt';
 
     let store = useStore();
-    let stateNetworks: ShallowRef<Network[]> = (store.state.networkModule.networks) ;
+    let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
     let stateSelectedNetwork: ShallowRef<Network> = (store.state.networkModule.selectedNetwork) ;
     let stateAttributes: ShallowRef<Attribute[]> = (store.state.attributeModule.attributes) ;
     let stateDataSources: ShallowRef<Datasource[]> = (store.state.datasourceModule.dataSources) ;
@@ -227,15 +236,17 @@ import mitt from 'mitt';
         { text: 'Data Source', value: 'data source', align: 'left', sortable: true, class: '', width: '' },
     ];
 
-    let addNetworkDialogData: AddNetworkDialogData = clone(emptyAddNetworkDialogData);
+
+
+    const addNetworkDialogData = reactive<AddNetworkDialogData>(emptyAddNetworkDialogData);
     let pagination: Pagination = emptyPagination;
-    let selectNetworkItems: SelectItem[] = [];
-    let selectKeyAttributeItems: SelectItem[] = [];
-    let selectDataSourceItems: SelectItem[] = [];
+    const selectNetworkItems = ref<SelectItem[]>([]);
+    let selectKeyAttributeItems = ref<SelectItem[]>([]);
+    let selectDataSourceItems = ref<SelectItem[]>([]);
     let attributeRows: Attribute[] =[];
     let cleanAttributes: Attribute[] = [];
     let attributes: Attribute[] = [];
-    let selectedAttributeRows: ShallowRef<Attribute[]> = shallowRef([]);
+    let selectedAttributeRows = ref<Attribute[]>([]);
     let dataSourceSelectValues: SelectItem[] = [
         {text: 'SQL', value: 'SQL'},
         {text: 'Excel', value: 'Excel'},
@@ -248,7 +259,7 @@ import mitt from 'mitt';
     let selectedKeyAttributeItem: Ref<string> = ref('');
     let selectedKeyAttribute: Attribute = clone(emptyAttribute);
     let selectedNetwork: Ref<Network> = ref(clone(emptyNetwork));
-    let selectNetworkItemValue: Ref<string> = ref('');
+    let selectNetworkItemValue = ref<string>('');
     let selectDataSourceId: string = '';
     let hasSelectedNetwork: boolean = false;
     let isNewNetwork: boolean = false;
@@ -274,7 +285,6 @@ import mitt from 'mitt';
             getDataAggregationStatus,
         );
     }
-
     onBeforeUnmount(() => beforeDestroy)
     function beforeDestroy() {
         $emitter.off(
@@ -283,18 +293,16 @@ import mitt from 'mitt';
         );
     }
     
-    watch(stateNetworks, () => onStateNetworksChanged)
-    function onStateNetworksChanged() {
-        selectNetworkItems = stateNetworks.value.map((network: Network) => ({
-            text: network.name,
-            value: network.id,
-        }));
-    }
+    watch(stateNetworks, () =>  {
+        stateNetworks.value.forEach(_ => {
+        selectNetworkItems.value.push({text:_.name,value:_.name})
+        });
+    })
 
     watch(stateAttributes, () => onStateAttributesChanged)
     function onStateAttributesChanged() {
         attributeRows = clone(stateAttributes.value);
-        selectKeyAttributeItems = stateAttributes.value.map((attribute: Attribute) => ({
+        selectKeyAttributeItems.value = stateAttributes.value.map((attribute: Attribute) => ({
             text: attribute.name,
             value: attribute.id,
         }));
@@ -302,7 +310,7 @@ import mitt from 'mitt';
 
     watch(stateDataSources, () => onStateDataSourcesChanges)
     function onStateDataSourcesChanges() {
-        selectDataSourceItems = stateDataSources.value.map((dataSource: Datasource) => ({
+        selectDataSourceItems.value = stateDataSources.value.map((dataSource: Datasource) => ({
             text: dataSource.name,
             value: dataSource.id,
         }));
@@ -354,14 +362,12 @@ import mitt from 'mitt';
     }
 
     function onAddNetworkDialog() {
-        addNetworkDialogData = {
-            showDialog: true,
-        }
+        addNetworkDialogData.showDialog = true;
     }
 
     function addNetwork(network: Network)
     {
-        selectNetworkItems.push({
+        selectNetworkItems.value.push({
             text: network.name,
             value: network.id
         });
@@ -470,4 +476,5 @@ import mitt from 'mitt';
         font-weight: normal;
         top: 10px !important
     }
+
 </style>

@@ -23,21 +23,15 @@ const mutations = {
 };
 
 const actions = {
-    async getInventory({commit}: any, payload: any) {
-        await InventoryService.getInventory(payload)
-            .then((response: AxiosResponse<MappedInventoryItem[]>) => {
-                if (hasValue(response, 'data')) {
-                    var mappedItems: InventoryItem[] = [];
-                    var r = response.data;
-                    r.forEach(resp => {
-                        var mappedItem: InventoryItem = {keyProperties:[]};
-                        mappedItem.keyProperties = resp.keyProperties;
-                        mappedItems.push(mappedItem);
-                    });
-                    commit('inventoryItemsMutator', mappedItems);
-                }
-            });
-    },
+    async getInventory({commit}: any, keyProperties: any) {
+            const response = await InventoryService.getInventory(keyProperties);
+            if (hasValue(response, 'data')) {
+              const mappedItems = response.data.map((resp: { keyProperties: any; }) => ({
+                keyProperties: resp.keyProperties,
+              }));
+              commit('inventoryItemsMutator', mappedItems);
+            }
+        },
 
     async getStaticInventoryHTML({commit}: any, payload: any){
         await InventoryService.getStaticInventoryHTML(payload.reportType, payload.filterData)

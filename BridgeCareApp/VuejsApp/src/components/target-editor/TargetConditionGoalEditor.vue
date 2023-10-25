@@ -2,22 +2,24 @@
     <v-row column>
         <v-col cols = "12">
            <v-row justify-space-between>
-                <v-col cols = "4" class="ghd-constant-header">
-                    <v-row column>
+                <v-col cols = "6" class="ghd-constant-header">
                         <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
                         <v-select
                             id="TargetConditionGoalEditor-SelectLibrary-select"
                             class="ghd-select ghd-text-field ghd-text-field-border"
                             :items="librarySelectItems"
-                            append-icon=$vuetify.icons.ghd-down
+                            item-title="text"
+                            item-value="value"
                             v-model="librarySelectItemValue"
                             variant="outlined"
+                            density="compact"
                         >
                         </v-select>
-                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
-                    </v-row>
                 </v-col>
-                <v-col cols = "4" class="ghd-constant-header">
+                <v-col align-self="center">
+                <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
+                </v-col>
+                <v-col cols = "12" class="ghd-constant-header">
                     <v-row v-if="hasSelectedLibrary && ! hasScenario" style="padding-top: 10px; padding-left: 10px">
                         <div v-if="hasSelectedLibrary && !hasScenario" class="header-text-content owner-padding" style="padding-top: 7px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
@@ -38,8 +40,8 @@
                         </v-btn>
                     </v-row>
                 </v-col>
-                <v-col cols = "4" class="ghd-constant-header">
-                    <v-row justify-end align-end style="padding-top: 18px !important;">
+                <v-col cols = "12" class="ghd-constant-header">
+                    <v-row justify-end align-end style="padding: 10px !important;">
                         <v-spacer></v-spacer>
                         <v-btn variant = "outlined"
                             id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
@@ -60,18 +62,24 @@
                 </v-col>
            </v-row>
         </v-col>
-        <!-- </v-col> -->
-        <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
-            <div class="targets-data-table">
-                <v-data-table
+        <div class="targets-data-table" style="height: auto;">
+                <v-data-table-server
                     id="TargetConditionGoalEditor-targetConditionGoals-vdatatable"
                     :headers="targetConditionGoalGridHeaders"
                     :items="currentPage"  
                     :pagination.sync="pagination"
                     :must-sort='true'
-                    :total-items="totalItems"
+                    :items-length="totalItems"
                     :rows-per-page-items=[5,10,25]
-                    sort-icon=$vuetify.icons.ghd-table-sort                                    
+                    :items-per-page-options="[
+                                        {value: 5, title: '5'},
+                                        {value: 10, title: '10'},
+                                        {value: 25, title: '25'},
+                                    ]"
+                    :v-model:sort-by="pagination.sort"
+                    :v-model:page="pagination.page"
+                    :v-model:items="pagination.rowsPerPage"
+                    @update:options="onPaginationChanged"
                     class="elevation-1 fixed-header v-table__overflow"
                     item-key="id"
                     select-all
@@ -196,29 +204,30 @@
                             </div>
                         </td>
                     </template>
-                </v-data-table>
+                </v-data-table-server>
             </div>
-        </v-col>
-
-        <v-row justify-start align-center v-show="hasSelectedLibrary || hasScenario">
-            <v-btn variant = "flat" right
+        <v-row v-show="hasSelectedLibrary || hasScenario">
+            <v-col>
+            <v-btn flat
                 id="TargetConditionGoalEditor-deleteSelected-vbtn"
                 class="ghd-control-label ghd-blue"
                 @click="onRemoveTargetConditionGoals"> 
                 Delete Selected 
             </v-btn>
+        </v-col>
         </v-row>
-
-        <v-col v-show="hasSelectedLibrary && !hasScenario" xs12>
+        <v-row>
+        <v-col v-show="hasSelectedLibrary && !hasScenario">
             <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
             <v-textarea
                 class="ghd-control-text ghd-control-border"
-                outline
+                variant="outlined"
                 v-model="selectedTargetConditionGoalLibrary.description"
                 @update:model-value="checkHasUnsavedChanges()">
             </v-textarea>
         </v-col>
-        <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
+        <v-row style="margin: 20px;">
+        <v-col v-show="hasSelectedLibrary || hasScenario" style="padding: 20px;">
             <v-row justify-center row>
                 <v-btn variant = "outlined"
                     id="TargetConditionGoalEditor-deleteLibrary-btn"
@@ -229,14 +238,14 @@
                 >
                     Delete Library
                 </v-btn>
-                <v-btn :disabled='!hasUnsavedChanges' variant = "flat"
+                <v-btn :disabled='!hasUnsavedChanges' flat
                     @click="onDiscardChanges"
                     class="ghd-white-bg ghd-blue"
                     v-show="hasScenario"
                 >
                     Cancel
                 </v-btn>
-                <v-btn variant = "outlined"
+                <v-btn flat
                     id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
@@ -263,6 +272,8 @@
                 </v-btn>
             </v-row>
         </v-col>
+        </v-row>
+    </v-row>
     
         <ConfirmDeleteAlert :is="Alert"
             :dialogData="confirmDeleteAlertData"
@@ -293,8 +304,8 @@
     </v-row>
 </template>
 
-<script lang="ts" setup>
-import Vue, { onBeforeUnmount, ref, Ref, ShallowRef, shallowRef, watch } from 'vue'; 
+<script setup lang="ts">
+import { onBeforeUnmount, ref, computed, onMounted, watch } from 'vue'; 
 import {
     emptyTargetConditionGoal,
     emptyTargetConditionGoalLibrary,
@@ -346,111 +357,111 @@ import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditor
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
+import CloneScenarioDialog from '../scenarios/scenarios-dialogs/CloneScenarioDialog.vue';
 
     let store = useStore();
     const $router = useRouter(); 
 
-    let stateTargetConditionGoalLibraries = ref<TargetConditionGoalLibrary[]>(store.state.targetConditionGoalModule.targetConditionGoalLibraries);
-    let stateSelectedTargetConditionLibrary = ref<TargetConditionGoalLibrary>(store.state.targetConditionGoalModule.selectedTargetConditionGoalLibrary) 
-    let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributeNames);
-    let stateScenarioTargetConditionGoals = ref<TargetConditionGoal[]>(store.state.targetConditionGoalModule.scenarioTargetConditionGoals);
-    let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges); 
-    let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
-    let hasPermittedAccess = ref<boolean>(store.state.targetConditionGoalModule.hasPermittedAccess);
-    let isSharedLibrary = ref<boolean>(store.state.targetConditionGoalModule.isSharedLibrary);
+    const stateTargetConditionGoalLibraries = computed<TargetConditionGoalLibrary[]>(() =>store.state.targetConditionGoalModule.targetConditionGoalLibraries);
+    const stateSelectedTargetConditionLibrary = computed<TargetConditionGoalLibrary>(() =>store.state.targetConditionGoalModule.selectedTargetConditionGoalLibrary) 
+    const stateNumericAttributes = computed<Attribute[]>(() =>store.state.attributeModule.numericAttributeNames);
+    const stateScenarioTargetConditionGoals = computed<TargetConditionGoal[]>(() =>store.state.targetConditionGoalModule.scenarioTargetConditionGoals);
+    const hasUnsavedChanges = computed<boolean>(() =>store.state.unsavedChangesFlagModule.hasUnsavedChanges); 
+    const hasAdminAccess = computed<boolean>(() =>store.state.authenticationModule.hasAdminAccess);
+    const hasPermittedAccess = computed<boolean>(() =>store.state.targetConditionGoalModule.hasPermittedAccess);
+    const isSharedLibrary = computed<boolean>(() =>store.state.targetConditionGoalModule.isSharedLibrary);
 
-    async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedTargetConditionGoalLibrary');} 
-    async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-    async function getTargetConditionGoalLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getTargetConditionGoalLibraries');} 
-    async function selectTargetConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectTargetConditionGoalLibrary');}
-    async function upsertTargetConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertTargetConditionGoalLibrary');}
-    async function deleteTargetConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteTargetConditionGoalLibrary');}
-    async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
-    async function getScenarioTargetConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('getScenarioTargetConditionGoals');}
-    async function upsertScenarioTargetConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioTargetConditionGoals');}
-    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
-    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario');}
-    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario');}
+    async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedTargetConditionGoalLibrary',payload);} 
+    async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess',payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification',payload);}
+    async function getTargetConditionGoalLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getTargetConditionGoalLibraries',payload);} 
+    async function selectTargetConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectTargetConditionGoalLibrary',payload);}
+    async function upsertTargetConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertTargetConditionGoalLibrary',payload);}
+    async function deleteTargetConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteTargetConditionGoalLibrary',payload);}
+    async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes',payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges',payload);}
+    async function getScenarioTargetConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('getScenarioTargetConditionGoals',payload);}
+    async function upsertScenarioTargetConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioTargetConditionGoals',payload);}
+    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification',payload);}
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario',payload);}
+    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario',payload);}
 
-    function addedOrUpdatedTargetConditionGoalLibraryMutator(payload:any){store.commit('addedOrUpdatedTargetConditionGoalLibraryMutator');} 
-    function selectedTargetConditionGoalLibraryMutator(payload:any){store.commit('selectedTargetConditionGoalLibraryMutator');} 
+    function addedOrUpdatedTargetConditionGoalLibraryMutator(payload:any){store.commit('addedOrUpdatedTargetConditionGoalLibraryMutator',payload);} 
+    function selectedTargetConditionGoalLibraryMutator(payload:any){store.commit('selectedTargetConditionGoalLibraryMutator',payload);} 
    
-
     let getNumericAttributesGetter = store.getters.getNumericAttributes;
     let getUserNameByIdGetter = store.getters.getUserNameById;
 
-    let addedRows = ref<TargetConditionGoal[]>([]);
+    const addedRows = ref<TargetConditionGoal[]>([]);
     let updatedRowsMap:Map<string, [TargetConditionGoal, TargetConditionGoal]> = new Map<string, [TargetConditionGoal, TargetConditionGoal]>();//0: original value | 1: updated value
-    let deletionIds = ref<string[]>([]);
-    let rowCache = ref<TargetConditionGoal[]>([]);
+    const deletionIds = ref<string[]>([]);
+    const rowCache = ref<TargetConditionGoal[]>([]);
 
     let gridSearchTerm = '';
-    let currentSearch = '';
-    let pagination = ref<Pagination>(clone(emptyPagination));
+    let currentSearch = ref<string>('');
+    const pagination = ref<Pagination>(clone(emptyPagination));
     let isPageInit = false;
-    let totalItems = 0;
-    let currentPage = ref<TargetConditionGoal[]>([]);
+    let totalItems = ref(0);
+    const currentPage = ref<TargetConditionGoal[]>([]);
     let initializing: boolean = true;
     let dateModified: string;
 
     let unsavedDialogAllowed: boolean = true;
-    let trueLibrarySelectItemValue = shallowRef<string|null>(''); 
+    const trueLibrarySelectItemValue = ref<string|null>(''); 
     let librarySelectItemValueAllowedChanged: boolean = true;
-    let librarySelectItemValue = shallowRef<string|null>(null); 
+    const librarySelectItemValue = ref<string|null>(null); 
 
     let selectedScenarioId: string = getBlankGuid();
-    let librarySelectItems: SelectItem[] = [];
+    const librarySelectItems = ref<SelectItem[]>([]);
     let shareTargetConditionGoalLibraryDialogData: ShareTargetConditionGoalLibraryDialogData = clone(emptyShareTargetConditionGoalLibraryDialogData);
     let isShared: boolean = false;   
     let selectedTargetConditionGoalLibrary = ref<TargetConditionGoalLibrary>(clone(emptyTargetConditionGoalLibrary,));
 
-    let hasSelectedLibrary: boolean = false;
-    let targetConditionGoalGridHeaders: DataTableHeader[] = [
+    const hasSelectedLibrary = ref<boolean>(false);
+    let targetConditionGoalGridHeaders: any[] = [
         {
-            text: 'Name',
-            value: 'name',
+            title: 'Name',
+            key: 'name',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: 'Attribute',
-            value: 'attribute',
+            title: 'Attribute',
+            key: 'attribute',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: 'Target',
-            value: 'target',
+            title: 'Target',
+            key: 'target',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: 'Year',
-            value: 'year',
+            title: 'Year',
+            key: 'year',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: 'Criteria',
-            value: 'criterionLibrary',
+            title: 'Criteria',
+            key: 'criterionLibrary',
             align: 'left',
             sortable: false,
             class: '',
             width: '50%',
         },
         {
-            text: 'Actions',
-            value: 'actions',
+            title: 'Actions',
+            key: 'actions',
             align: 'left',
             sortable: false,
             class: '',
@@ -458,7 +469,7 @@ import { useRouter } from 'vue-router';
         }
     ];
     let numericAttributeNames: string[] = [];
-    let selectedGridRows= ref<TargetConditionGoal[]>([]);
+    const selectedGridRows= ref<TargetConditionGoal[]>([]);
     let selectedTargetConditionGoalIds: string[] = [];
     let selectedTargetConditionGoalForCriteriaEdit: TargetConditionGoal = clone(
         emptyTargetConditionGoal,
@@ -473,13 +484,13 @@ import { useRouter } from 'vue-router';
     let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     let rules: InputValidationRules = validationRules; 
     let uuidNIL: string = getBlankGuid();
-    let hasScenario: boolean = false;
+    const hasScenario = ref<boolean>(false);
     let currentUrl: string = window.location.href;
     let hasCreatedLibrary: boolean = false;
     let disableCrudButtonsResult: boolean = false;
-    let hasLibraryEditPermission = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);  //: boolean = false;
+    let hasLibraryEditPermission = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
     let parentLibraryId: string = "";
-    let parentLibraryName: string = "None";
+    const parentLibraryName = ref<string>("None");
     let scenarioLibraryIsModified: boolean = false;
     let loadedParentName: string = "";
     let loadedParentId: string = "";
@@ -488,57 +499,84 @@ import { useRouter } from 'vue-router';
    //beforeRouteEnter();  
     created();
     function created(){
-            librarySelectItemValue.value = null;
-            getTargetConditionGoalLibrariesAction();
-            numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
-            getHasPermittedAccessAction().then(() => {
-                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) { 
-                    //selectedScenarioId = to.query.scenarioId;
-                    selectedScenarioId = $router.currentRoute.value.query.scenarioId as string; 
+            // librarySelectItemValue.value = null;
+            // getTargetConditionGoalLibrariesAction();
+            // numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
+            // getHasPermittedAccessAction().then(() => {
+            //     if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) { 
+            //         //selectedScenarioId = to.query.scenarioId;
+            //         selectedScenarioId = $router.currentRoute.value.query.scenarioId as string; 
 
-                    if (selectedScenarioId === uuidNIL) {
-                        addErrorNotificationAction({
-                            message: 'Found no selected scenario for edit',
-                        });
-                        $router.push('/Scenarios/');
-                    }
+            //         if (selectedScenarioId === uuidNIL) {
+            //             addErrorNotificationAction({
+            //                 message: 'Found no selected scenario for edit',
+            //             });
+            //             $router.push('/Scenarios/');
+            //         }
 
-                    hasScenario = true;
-                    getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                        selectScenarioAction({ scenarioId: selectedScenarioId });        
-                        initializePages();
-                    });                                        
-                }
-            });            
+            //         hasScenario = true;
+            //         getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+            //             selectScenarioAction({ scenarioId: selectedScenarioId });        
+            //             initializePages();
+            //         });                                        
+            //     }
+            // });            
     }
 
+    onMounted(() => {
+        librarySelectItemValue.value = null;
+        getTargetConditionGoalLibrariesAction();
+        numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
+        getHasPermittedAccessAction();
+        selectedScenarioId = "26C23F48-9B5C-4AEC-BDE0-0778AA512E10";
+        hasScenario.value = true;
+        initializePages();
+        // if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) { 
+        //     //selectedScenarioId = to.query.scenarioId;
+        //     selectedScenarioId = $router.currentRoute.value.query.scenarioId as string; 
+            
+        //     if (selectedScenarioId === uuidNIL) {
+        //         addErrorNotificationAction({
+        //             message: 'Found no selected scenario for edit',
+        //         });
+        //         $router.push('/Scenarios/');
+        //     }
+
+        //     hasScenario.value = true;
+        //     getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+        //         selectScenarioAction({ scenarioId: selectedScenarioId });        
+        //         initializePages();
+        //     });                                        
+        // }
+    });            
     onBeforeUnmount(()=> beforeDestroy());
     function beforeDestroy() {
         setHasUnsavedChangesAction({ value: false });
     }
 
-    watch(stateTargetConditionGoalLibraries,()=> onStateTargetConditionGoalLibrariesChanged)
-    function onStateTargetConditionGoalLibrariesChanged() {
-        librarySelectItems = stateTargetConditionGoalLibraries.value.map(
+    watch(hasPermittedAccess, () => {
+    });
+    watch(stateTargetConditionGoalLibraries,()=> {
+        librarySelectItems.value = stateTargetConditionGoalLibraries.value.map(
             (library: TargetConditionGoalLibrary) => ({
                 text: library.name,
                 value: library.id,
             }),
         );
-    }
+    });
 
     //this is so that a user is asked wether or not to continue when switching libraries after they have made changes
     //but only when in libraries
     watch(librarySelectItemValue,()=> onLibrarySelectItemValueChangedCheckUnsaved)
     function onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(hasScenario){
+        if(hasScenario.value){
             onLibrarySelectItemValueChanged();
             unsavedDialogAllowed = false;
         }           
         else if(librarySelectItemValueAllowedChanged) {
             CheckUnsavedDialog(onLibrarySelectItemValueChanged, () => {
                 librarySelectItemValueAllowedChanged = false;
-                librarySelectItemValue = trueLibrarySelectItemValue;               
+                librarySelectItemValue.value = trueLibrarySelectItemValue.value;               
             });
         }
         parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
@@ -547,7 +585,7 @@ import { useRouter } from 'vue-router';
     }
 
     function onLibrarySelectItemValueChanged() {
-        trueLibrarySelectItemValue = librarySelectItemValue
+        trueLibrarySelectItemValue.value = librarySelectItemValue.value
         selectTargetConditionGoalLibraryAction({
             libraryId: librarySelectItemValue,
         });
@@ -560,9 +598,9 @@ import { useRouter } from 'vue-router';
 
     watch(selectedTargetConditionGoalLibrary,()=> onSelectedTargetConditionGoalLibraryChanged)
     function onSelectedTargetConditionGoalLibraryChanged() {
-        hasSelectedLibrary = selectedTargetConditionGoalLibrary.value.id !== uuidNIL;
+        hasSelectedLibrary.value = selectedTargetConditionGoalLibrary.value.id !== uuidNIL;
 
-        if (hasSelectedLibrary) {
+        if (hasSelectedLibrary.value) {
             checkLibraryEditPermission();
             hasCreatedLibrary = false;
         }
@@ -571,7 +609,7 @@ import { useRouter } from 'vue-router';
 
         clearChanges();
         initializing = false;
-        if(hasSelectedLibrary)
+        if(hasSelectedLibrary.value)
             onPaginationChanged();
     }
 
@@ -587,22 +625,20 @@ import { useRouter } from 'vue-router';
 
     watch(stateScenarioTargetConditionGoals,()=> onStateScenarioTargetConditionGoalsChanged)
     function onStateScenarioTargetConditionGoalsChanged() {
-        if (hasScenario) {
+        if (hasScenario.value) {
             currentPage.value = clone(stateScenarioTargetConditionGoals.value);
         }
     }
 
-    watch(currentPage,()=>onCurrentPageChanged)
-    function onCurrentPageChanged() {
+    watch(currentPage,()=> {
 
         // Get parent name from library id
-        librarySelectItems.forEach(library => {pagination
+        librarySelectItems.value.forEach(library => {pagination
             if (library.value === parentLibraryId) {
-                parentLibraryName = library.text;
+                parentLibraryName.value = library.text;
             }
         });
-
-    }
+    });
     
     watch(isSharedLibrary,()=> onStateSharedAccessChanged)
     function onStateSharedAccessChanged() {
@@ -614,7 +650,7 @@ import { useRouter } from 'vue-router';
         if(initializing)
             return;
         checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = pagination.value;
+        const { sort, descending, page, rowsPerPage } = pagination.value;
         const request: PagingRequest<TargetConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -624,21 +660,24 @@ import { useRouter } from 'vue-router';
                 rowsForDeletion: deletionIds.value,
                 addedRows: addedRows.value,
                 isModified: scenarioLibraryIsModified
-            },           
-            sortColumn: sortBy,
-            isDescending: descending != null ? descending : false,
-            search: currentSearch
+            },   
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
+            search: currentSearch.value        
+            // sortColumn: sortBy,
+            // isDescending: descending != null ? descending : false,
+            // search: currentSearch
         };
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
             await TargetConditionGoalService.getScenarioTargetConditionGoalPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     currentPage.value = data.items;
-                    rowCache = clone(currentPage)
+                    rowCache.value = clone(currentPage.value)
                     totalItems = data.totalItems;
                 }
             });
-        else if(hasSelectedLibrary)
+        else if(hasSelectedLibrary.value)
             await TargetConditionGoalService.getTargetLibraryDate(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '').then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
@@ -650,7 +689,7 @@ import { useRouter } from 'vue-router';
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     currentPage.value = data.items;
-                    rowCache = clone(currentPage)
+                    rowCache.value = clone(currentPage.value)
                     totalItems = data.totalItems;
                     if (!isNil(selectedTargetConditionGoalLibrary.value.id) ) {
                         getIsSharedLibraryAction(selectedTargetConditionGoalLibrary).then(() => isShared = isSharedLibrary.value);
@@ -680,7 +719,7 @@ import { useRouter } from 'vue-router';
     }
 
     function checkLibraryEditPermission() {
-        hasLibraryEditPermission = hasAdminAccess || (hasPermittedAccess && checkUserIsLibraryOwner());
+        hasLibraryEditPermission.value = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
     }
 
     function checkUserIsLibraryOwner() {
@@ -704,13 +743,13 @@ import { useRouter } from 'vue-router';
                 library: library,    
                 isNewLibrary: true,           
                  syncModel: {
-                    libraryId: library.targetConditionGoals.length == 0 || !hasSelectedLibrary ? null : selectedTargetConditionGoalLibrary.value.id,
+                    libraryId: library.targetConditionGoals.length == 0 || !hasSelectedLibrary.value ? null : selectedTargetConditionGoalLibrary.value.id,
                     rowsForDeletion: library.targetConditionGoals.length == 0 ? [] : deletionIds.value,
                     updateRows: library.targetConditionGoals.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.targetConditionGoals.length == 0 ? [] : addedRows.value,
                     isModified: false
                  },
-                 scenarioId: hasScenario ? selectedScenarioId : null
+                 scenarioId: hasScenario.value ? selectedScenarioId : null
             }
             TargetConditionGoalService.upsertTargetConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -820,12 +859,12 @@ import { useRouter } from 'vue-router';
     function onDiscardChanges() {
         librarySelectItemValue.value = null;
         setTimeout(() => {
-            if (hasScenario) {
+            if (hasScenario.value) {
                 clearChanges();
                 resetPage();
             }
         });
-        parentLibraryName = loadedParentName;
+        parentLibraryName.value = loadedParentName;
         parentLibraryId = loadedParentId;
     }
 
@@ -887,7 +926,7 @@ import { useRouter } from 'vue-router';
             },
         );
 
-        if (hasSelectedLibrary) {
+        if (hasSelectedLibrary.value) {
             return !(
                 rules['generalRules'].valueIsNotEmpty(
                     selectedTargetConditionGoalLibrary.value.name,
@@ -941,8 +980,8 @@ import { useRouter } from 'vue-router';
             deletionIds.value.length > 0 || 
             addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || 
-            (hasScenario && hasSelectedLibrary) ||
-            (hasSelectedLibrary && hasUnsavedChangesCore('', stateSelectedTargetConditionLibrary, selectedTargetConditionGoalLibrary))
+            (hasScenario.value && hasSelectedLibrary.value) ||
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', stateSelectedTargetConditionLibrary, selectedTargetConditionGoalLibrary))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -971,7 +1010,7 @@ import { useRouter } from 'vue-router';
             }
         });
         parentLibraryId = foundLibrary.id;
-        parentLibraryName = foundLibrary.name;
+        parentLibraryName.value = foundLibrary.name;
     }
 
     function initializePages(){
@@ -989,17 +1028,17 @@ import { useRouter } from 'vue-router';
             isDescending: false,
             search: ''
         };
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
             TargetConditionGoalService.getScenarioTargetConditionGoalPage(selectedScenarioId, request).then(response => {
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     currentPage.value = data.items;
-                    rowCache = clone(currentPage)
-                    totalItems = data.totalItems;
+                    rowCache.value = clone(currentPage.value)
+                    totalItems.value = data.totalItems;
                     setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
                     loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
-                    loadedParentName = parentLibraryName; //store original
+                    loadedParentName = parentLibraryName.value; //store original
                     scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
                 }
             });

@@ -98,7 +98,7 @@
                                 class="ghd-control-text ghd-control-border"
                                 @update:model-value="onSetAnalysisMethodProperty('description', $event)"
                                 no-resize
-                                outline
+                                variant="outlined"
                                 rows="6"
                                 :model-value="analysisMethod.description"
                             >
@@ -106,30 +106,30 @@
                         </v-col>
                         <v-col cols = "6">
                             <v-row style="height=12px;padding-bottom:0px;">
-                                <v-col cols = "12" style="height=12px;padding-bottom:0px">
-                                    <v-subheader class="ghd-control-label ghd-md-gray">                             
-                                        Criteria</v-subheader>
-                                </v-col>
-                                <v-col cols = "1" style="height=12px;padding-bottom:0px;padding-top:0px;">
+                                <v-col style="height=12px;padding-bottom:25px;padding-top:0px;">
                                     <v-btn
                                         id="EditAnalysisMethod-criteriaEditor-btn"
-                                        style="padding-right:20px !important;"
+                                        style="padding-right:30px !important;"
                                         @click="
                                             onShowCriterionEditorDialog
                                         "
                                         class="edit-icon ghd-control-label"
-                                        icon
+                                        flat
                                     >
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
+                                    <v-subheader class="ghd-control-label ghd-md-gray">                             
+                                        Criteria
+                                    </v-subheader>
+
                                 </v-col>
                             </v-row>
                             <v-textarea
                                 id="EditAnalysisMethod-criteria-textArea"
                                 class="ghd-control-text ghd-control-border"
-                                style="padding-bottom: 0px; height: 90px;"
+                                style="padding-bottom: 0px; height: 100px;"
                                 no-resize
-                                outline
+                                variant="outlined"
                                 readonly
                                 :rows="criteriaRows()"
                                 v-model="
@@ -138,6 +138,7 @@
                                 "
                             >
                             </v-textarea>
+                            <div style="padding-top: 20px;"></div>
                             <v-checkbox
                                 id="EditAnalysisMethod-criteria-checkbox"
                                 style="padding-top: 0px; margin-top: 4px;"

@@ -1,5 +1,8 @@
 //import '@babel/polyfill';
 import '@fortawesome/fontawesome-free/css/all.css';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faSignOutAlt, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 import Vue, { createApp, h, defineComponent, watch, reactive } from 'vue';
 import vuetify from '@/plugins/vuetify';
 import 'vuetify/dist/vuetify.min.css';
@@ -73,12 +76,17 @@ var defaultOptions = {
     allowedAttributes: false,
 };
 
+// Font awesome (free) library
+library.add(faSignInAlt);
+library.add(faSignOutAlt);
+
 app.use(VueSanitize, defaultOptions);
 app.use(ConfirmationService);
 app.component("Dialog",Dialog)
    .component("Button", Button)
    .component("DataTable", DataTable)
-   .component("ConfirmDialog", ConfirmDialog);
+   .component("ConfirmDialog", ConfirmDialog)
+   .component('font-awesome-icon', FontAwesomeIcon);
 
 app.config.globalProperties.productionTip = false;
 //app.use(VuejsDialog);

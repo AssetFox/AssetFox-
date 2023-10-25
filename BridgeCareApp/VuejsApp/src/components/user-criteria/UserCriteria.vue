@@ -51,15 +51,15 @@
           ></v-text-field>
         </div>
         <div>
-          <v-data-table
-            :headers='userCriteriaGridHeaders'
+          <!-- <v-data-table
+            :header='userCriteriaGridHeaders'
             :items='filteredUsersCriteriaFilter'
             :items-per-page='5'
             class='elevation-1'
             hide-actions
             @sort='onSort'
           >
-            <template v-slot:header="{ header, index }">
+            <template v-slot :header="{ header, index }">
               <span style='cursor: pointer'>
                 {{ header.text }}
                 <v-icon v-if='sortKey === header.value'>
@@ -143,11 +143,11 @@
                 </v-menu>
               </td>
             </template>
-          </v-data-table>
+          </v-data-table> -->
         </div>
       </v-card>
     </v-col>
-    <CriteriaFilterEditorDialog :dialogData='criteriaFilterEditorDialogData' 
+    <criteriaFilterEditorDialogData :dialogData='criteriaFilterEditorDialogData' 
                                 @submitCriteriaEditorDialogResult='onSubmitCriteria' />
 
     <Alert :dialogData='beforeDeleteAlertData' @submit='onSubmitDeleteUserResponse' />

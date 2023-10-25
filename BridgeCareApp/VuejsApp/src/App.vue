@@ -319,7 +319,7 @@ import config from '../public/config.json';
     let stateAlert = ref<boolean>(store.state.alertModule.alert);
     async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut');}
 
-    async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy');}
+    async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy', payload);}
     //async function setIsBusyAction(payload?: any) { () => store.dispatch('setIsBusy');}
 
     async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks');}

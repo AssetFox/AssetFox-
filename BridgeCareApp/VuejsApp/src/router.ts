@@ -128,13 +128,13 @@ const onHandlingUnsavedChanges = (to: any, next: any): void => {
     // @ts-ignore
     if (store.state.unsavedChangesFlagModule.hasUnsavedChanges) {
         // @ts-ignore
-        Vue.dialog
-            .confirm(
-                'You have unsaved changes. Are you sure you wish to continue?',
-                { reverse: true },
-            )
-            .then(() => next())
-            .catch(() => next(false));
+        //Vue.dialog
+       //     .confirm(
+        //        'You have unsaved changes. Are you sure you wish to continue?',
+         //       { reverse: true },
+         //   )
+         //   .then(() => next())
+        //    .catch(() => next(false));
     } else {
         next();
     }

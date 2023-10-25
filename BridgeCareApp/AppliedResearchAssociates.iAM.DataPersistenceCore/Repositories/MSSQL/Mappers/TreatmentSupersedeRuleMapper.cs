@@ -9,12 +9,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class TreatmentSupersedeRuleMapper
     {
-        public static TreatmentSupersedeRuleEntity ToTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
-            new TreatmentSupersedeRuleEntity
-            {
-                Id = domain.Id,
-                TreatmentId = treatmentId
-            };
+        // TODO update if below is in need
+        //public static TreatmentSupersedeRuleEntity ToTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
+        //    new TreatmentSupersedeRuleEntity
+        //    {
+        //        Id = domain.Id,
+        //        TreatmentId = treatmentId
+        //    };
 
         public static ScenarioTreatmentSupersedeRuleEntity ToScenarioTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId, Guid simulationId)
         {
@@ -22,8 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = domain.Id,
                 TreatmentId = treatmentId,
-                ScenarioSelectableTreatment = domain.Treatment.ToScenarioEntity(simulationId),
-
+                ScenarioSelectableTreatment = domain.Treatment.ToScenarioEntity(simulationId)
             };
 
             var criterion = domain.Criterion;

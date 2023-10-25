@@ -7,14 +7,14 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
-    public static class TestEntitiesForSelectableTreatments
+    public static class TestEntitiesForTreatmentSupersedeRules
     {
         public static List<ScenarioBudgetEntity> ScenarioBudgetEntities => new List<ScenarioBudgetEntity>()
         {
             new ScenarioBudgetEntity()
             {
-                Id = TestDataForSelectableTreatments.InterstateBudgetId,
-                Name = TestDataForSelectableTreatments.InterstateBudgetName,
+                Id = TestDataForTreatmentSupersedeRules.InterstateBudgetId,
+                Name = TestDataForTreatmentSupersedeRules.InterstateBudgetName,
                 ScenarioBudgetAmounts = new List<ScenarioBudgetAmountEntity>()
                 {
                     new ScenarioBudgetAmountEntity() { Year = 2022, Value = 10000000 },
@@ -23,8 +23,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             },
             new ScenarioBudgetEntity()
             {
-                Id = TestDataForSelectableTreatments.LocalBudgetId,
-                Name = TestDataForSelectableTreatments.LocalBudgetName,
+                Id = TestDataForTreatmentSupersedeRules.LocalBudgetId,
+                Name = TestDataForTreatmentSupersedeRules.LocalBudgetName,
                 ScenarioBudgetAmounts = new List<ScenarioBudgetAmountEntity>()
                 {
                     new ScenarioBudgetAmountEntity() { Year = 2022, Value = 5000000 },
@@ -102,39 +102,44 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public static SimulationEntity GoodTestSimulation() =>
             new SimulationEntity()
             {
-                Id = TestDataForSelectableTreatments.SimulationId,
+                Id = TestDataForTreatmentSupersedeRules.SimulationId,
                 Name = "Test",
                 InvestmentPlan = new InvestmentPlanEntity()
                 {
                     Id = Guid.Parse("ad1e1f67-486f-409a-b532-b03d7eb4b1c7"),
-                    SimulationId = TestDataForSelectableTreatments.SimulationId,
+                    SimulationId = TestDataForTreatmentSupersedeRules.SimulationId,
                     FirstYearOfAnalysisPeriod = 2022,
                     InflationRatePercentage = 3,
                     MinimumProjectCostLimit = 1000,
                     NumberOfYearsInAnalysisPeriod = 3
                 },
                 Budgets = ScenarioBudgetEntities,
-                NetworkId = TestDataForSelectableTreatments.NetworkId,
+                NetworkId = TestDataForTreatmentSupersedeRules.NetworkId,
                 Network = new NetworkEntity()
                 {
-                    Id = TestDataForSelectableTreatments.NetworkId,
-                    Name = TestDataForSelectableTreatments.NetworkName,
+                    Id = TestDataForTreatmentSupersedeRules.NetworkId,
+                    Name = TestDataForTreatmentSupersedeRules.NetworkName,
                     KeyAttributeId = Guid.Parse("c31ea5bb-3d48-45bb-a68f-01ee75f17f0c")
                 },
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>(),
                 SelectableTreatments = ScenarioTreatments
             };
 
-        public static List<ScenarioSelectableTreatmentEntity> ScenarioTreatments => new List<ScenarioSelectableTreatmentEntity> { ScenarioNoTreatment(), ScenarioTreatmentWithSupersedeRules() };
+        public static List<ScenarioSelectableTreatmentEntity> ScenarioTreatments => new List<ScenarioSelectableTreatmentEntity> { ScenarioTreatmentWithSupersedeRules(), ScenarioPreventTreatment() };
 
-        private static ScenarioSelectableTreatmentEntity ScenarioNoTreatment()
+        public static SelectableTreatmentEntity SelectablePreventTreatment()
         {
-            return ScenarioTreatment("No Treatment", TestDataForSelectableTreatments.NoTreatmentId);
+            return SelectableTreatment("Prevent Treatment", TestDataForTreatmentSupersedeRules.PreventTreatmentId);
+        }
+
+        private static ScenarioSelectableTreatmentEntity ScenarioPreventTreatment()
+        {
+            return ScenarioTreatment("Prevent Treatment", TestDataForTreatmentSupersedeRules.PreventTreatmentId);
         }
 
         private static ScenarioSelectableTreatmentEntity ScenarioTreatmentWithSupersedeRules()
         {
-            var testTreatmentWithRulesId = NewGuid;
+            var testTreatmentWithRulesId = TestDataForTreatmentSupersedeRules.TreatmentId;
             var scenarioSelectableTreatment = ScenarioTreatment("TestTreatmentWithRules", testTreatmentWithRulesId);
             var preventTreatment = ScenarioTreatment("PreventTreatment1", NewGuid);
 
@@ -167,22 +172,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var equationJoin = new ScenarioTreatmentCostEquationEntity
             {
                 Equation = equation,
-                ScenarioTreatmentCostId = TestDataForSelectableTreatments.CostId,
+                ScenarioTreatmentCostId = TestDataForTreatmentSupersedeRules.CostId,
             };
             var scenarioTreatmentCost = new ScenarioTreatmentCostEntity
             {
-                Id = TestDataForSelectableTreatments.CostId,
+                Id = TestDataForTreatmentSupersedeRules.CostId,
                 ScenarioTreatmentCostEquationJoin = equationJoin,
                 ScenarioSelectableTreatmentId = treatmentId,
             };
-            var costs = new List<ScenarioTreatmentCostEntity> { scenarioTreatmentCost };           
+            var costs = new List<ScenarioTreatmentCostEntity> { scenarioTreatmentCost };            
             var treatmentJoin = new CriterionLibraryScenarioSelectableTreatmentEntity { CriterionLibrary = CreateCriterionLibrary() };
             var entity = new ScenarioSelectableTreatmentEntity
             {
                 Id = treatmentId,                
                 Description = "Test description",
                 Name = name,
-                SimulationId = TestDataForSelectableTreatments.SimulationId,
+                SimulationId = TestDataForTreatmentSupersedeRules.SimulationId,
                 ScenarioTreatmentCosts = costs,
                 ScenarioTreatmentConsequences = new List<ScenarioConditionalTreatmentConsequenceEntity>(),
                 ScenarioSelectableTreatmentScenarioBudgetJoins = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>(),
@@ -193,32 +198,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return entity;
         }
 
-        public static SelectableTreatmentEntity Treatment(string name, Guid treatmentId)
+        public static ScenarioTreatmentSupersedeRuleEntity ScenarioTreatmentSupersedeRule(Guid treatmentId, ScenarioSelectableTreatmentEntity preventTreatment)
         {
-            var equation = new EquationEntity
-            {
-                Expression = "TestEquationExpression",
-            };
-            var equationJoin = new TreatmentCostEquationEntity
-            {
-                Equation = equation,
-                TreatmentCostId = TestDataForSelectableTreatments.CostId,
-            };
-            var scenarioTreatmentCost = new TreatmentCostEntity
-            {
-                Id = TestDataForSelectableTreatments.CostId,
-                TreatmentCostEquationJoin = equationJoin,
-                TreatmentId = treatmentId,
-            };
-            var costs = new List<TreatmentCostEntity> { scenarioTreatmentCost };
-            var consequences = new List<ConditionalTreatmentConsequenceEntity>();
             var criterionLibrary = CreateCriterionLibrary();
-            var treatmentJoin = new CriterionLibrarySelectableTreatmentEntity { CriterionLibrary = criterionLibrary };
-            
-            var rule = new TreatmentSupersedeRuleEntity
+            var entity = new ScenarioTreatmentSupersedeRuleEntity
             {
                 Id = NewGuid,
-                SelectableTreatment = new SelectableTreatmentEntity { Name = "PreventTreatment2", Id = NewGuid },
+                ScenarioSelectableTreatment = preventTreatment,
+                TreatmentId = treatmentId,
+                CriterionLibraryScenarioTreatmentSupersedeRuleJoin = new CriterionLibraryScenarioTreatmentSupersedeRuleEntity
+                {
+                    CriterionLibrary = criterionLibrary,
+                    CriterionLibraryId = criterionLibrary.Id
+                }
+            };
+
+            return entity;
+        }
+
+        public static TreatmentSupersedeRuleEntity TreatmentSupersedeRule(Guid treatmentId, SelectableTreatmentEntity preventTreatment)
+        {
+            var criterionLibrary = CreateCriterionLibrary();
+            var entity = new TreatmentSupersedeRuleEntity
+            {
+                Id = NewGuid,
+                SelectableTreatment = preventTreatment,
                 TreatmentId = treatmentId,
                 CriterionLibraryTreatmentSupersedeRuleJoin = new CriterionLibraryTreatmentSupersedeRuleEntity
                 {
@@ -226,24 +230,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     CriterionLibraryId = criterionLibrary.Id
                 }
             };
-            var entity = new SelectableTreatmentEntity
-            {
-                Id = treatmentId,
-                TreatmentCosts = costs,
-                Description = "Test description",
-                Name = name,
-                TreatmentConsequences = consequences,
-                CriterionLibrarySelectableTreatmentJoin = treatmentJoin,
-                TreatmentSupersedeRules = new List<TreatmentSupersedeRuleEntity> { rule },
-            };
 
             return entity;
         }
 
         private static CriterionLibraryEntity CreateCriterionLibrary()
-        {
-            var libraryId = NewGuid;
-            return new CriterionLibraryEntity { Id = libraryId, MergedCriteriaExpression = "TestExpression" };
+        {            
+            return new CriterionLibraryEntity { Id = NewGuid, MergedCriteriaExpression = "TestExpression" };
+        }
+
+        private static SelectableTreatmentEntity SelectableTreatment(string name, Guid treatmentId)
+        {   
+            var treatmentJoin = new CriterionLibrarySelectableTreatmentEntity { CriterionLibrary = CreateCriterionLibrary() };
+            var entity = new SelectableTreatmentEntity
+            {
+                Id = treatmentId,
+                Description = "Test description1",
+                Name = name,
+                TreatmentCosts = new List<TreatmentCostEntity>(),
+                TreatmentConsequences = new List<ConditionalTreatmentConsequenceEntity>(),
+                CriterionLibrarySelectableTreatmentJoin = treatmentJoin,
+                TreatmentPerformanceFactors = new List<TreatmentPerformanceFactorEntity>(),
+                TreatmentSupersedeRules = new List<TreatmentSupersedeRuleEntity>()
+            };
+
+            return entity;
         }
     }
 }

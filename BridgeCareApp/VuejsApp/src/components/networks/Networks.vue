@@ -297,7 +297,6 @@ import mitt from 'mitt';
         stateNetworks.value.forEach(_ => {
         selectNetworkItems.value.push({text:_.name,value:_.name})
         });
-        console.log("stateNetworks")
     })
 
     watch(stateAttributes, () => onStateAttributesChanged)

@@ -218,7 +218,6 @@ import { useStore } from 'vuex';
         getDataSourcesAction();
         getDataSourceTypesAction();
         showSqlMessage = false;
-        console.log("Please");
     }
 
     watch(excelColumns, () => onExcelColumnsChanged)
